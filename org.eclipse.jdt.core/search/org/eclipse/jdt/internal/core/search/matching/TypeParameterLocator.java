@@ -141,7 +141,7 @@ public class TypeParameterLocator extends PatternLocator {
 	public int resolveLevel(Binding binding) {
 		if (binding == null) return INACCURATE_MATCH;
 		if (!(binding instanceof TypeVariableBinding)) return IMPOSSIBLE_MATCH;
-	
+
 		return matchTypeParameter((TypeVariableBinding) binding, true);
 	}
 

@@ -34,13 +34,13 @@ public class OrPattern extends SearchPattern implements IIndexConstants {
 		super(Math.max(leftPattern.getMatchRule(), rightPattern.getMatchRule()));
 		this.kind = OR_PATTERN;
 		this.mustResolve = leftPattern.mustResolve || rightPattern.mustResolve;
-	
+
 		SearchPattern[] leftPatterns = leftPattern instanceof OrPattern ? ((OrPattern) leftPattern).patterns : null;
 		SearchPattern[] rightPatterns = rightPattern instanceof OrPattern ? ((OrPattern) rightPattern).patterns : null;
 		int leftSize = leftPatterns == null ? 1 : leftPatterns.length;
 		int rightSize = rightPatterns == null ? 1 : rightPatterns.length;
 		this.patterns = new SearchPattern[leftSize + rightSize];
-	
+
 		if (leftPatterns == null)
 			this.patterns[0] = leftPattern;
 		else
@@ -86,7 +86,7 @@ public class OrPattern extends SearchPattern implements IIndexConstants {
 
 	/**
 	 * Returns whether the pattern has one or several package declaration or not.
-	 * 
+	 *
 	 * @return <code>true</code> if one at least of the stored pattern is a package declaration
 	 * 	pattern ({@link PackageDeclarationPattern}), <code>false</code> otherwise.
 	 */

@@ -35,7 +35,7 @@ import org.eclipse.jdt.core.tests.util.Util;
 public abstract class LocalVMLauncher implements RuntimeConstants {
 
 	private static final boolean PWR_DEBUG = Boolean.getBoolean("ot.debug.pwr");
-	
+
 	static final String[] env = System.getenv().entrySet().stream()
 		.filter(e -> !"JAVA_TOOL_OPTIONS".equals(e.getKey()))
 		.map(e -> e.getKey() + "=" + e.getValue())

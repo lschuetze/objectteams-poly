@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -43,7 +43,7 @@ public class LiftingTest extends TestBase implements IOTConstants
 	public void testDeclaredLifting1()
 	{
 		createFile("MyBase","public class MyBase {}");
-		
+
 		createFile("MyTeam","public team class MyTeam { " +
 				NL + "	    protected class MyRole playedBy MyBase {" +
 				NL + "	    }" +
@@ -54,21 +54,21 @@ public class LiftingTest extends TestBase implements IOTConstants
 				NL + "      (new MyTeam()).method(new MyBase());" +
 				NL + "  }"+
 				NL + "}");
-		
+
 		compileFile("MyTeam");
-			
+
 		assertTrue(isCompilationSuccessful());
 	}
-	
+
 	/**
 	 * A test for smart lifting.
 	 */
 	public void testSmartLifting1()
 	{
 		createFile("Base2", "public class Base2 {}");
-		
+
 		createFile("Base3", "public class Base3 extends Base2{}");
-    	
+
 		createFile("MyTeam","public team class MyTeam extends org.objectteams.Team {" +
 				NL + "  public static void main(String[] args){" +
 				NL +	"       System.out.println(\"MyTeam\");" +
@@ -78,18 +78,18 @@ public class LiftingTest extends TestBase implements IOTConstants
 				NL +		"       super();" +
 				NL +		"		System.out.println(\"MyTeam.MyTeam()\");" +
 				NL +		"       System.out.println("+new String(_OT_LIFT_TO)+OT_DELIM+"Role2(this, new Base2(), 0));" +
-				NL +		"	}" +										
-				NL +		"	public class Role1 {}" +													
+				NL +		"	}" +
+				NL +		"	public class Role1 {}" +
 				NL +		"	public class Role2 extends Role1 playedBy Base2{}" +
 				NL +		"   public class Role3 extends Role2 playedBy Base3{}" +
 				NL +		"   public class Role4 extends Role3 playedBy Base3{}" +
-				NL +	"   public class Role6 extends Role4 playedBy Base3{}" +							        										
+				NL +	"   public class Role6 extends Role4 playedBy Base3{}" +
 				NL +		"   public class Role5 extends Role4 playedBy Base3{}" +
 				NL +		"}");
-		
+
 		compileFile("MyTeam");
-		
-        // TODO (SH): what problem expected? definite ambiguity 7.3(b)? 
+
+        // TODO (SH): what problem expected? definite ambiguity 7.3(b)?
         // need to replace explicit lift-invocation with some legal syntax.
 		assertFalse(isCompilationSuccessful());
 	}

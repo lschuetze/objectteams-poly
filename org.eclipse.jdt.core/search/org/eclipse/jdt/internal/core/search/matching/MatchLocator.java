@@ -117,37 +117,37 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfor
 
 /**
  * OTDT changes:
- * 
+ *
  * What: Harnessing of all compiler calls with Dependencies (throughout)
  *
  * Retrenching several mangled names/signatures:
  * ---------------------------------------------
  * What: retrench signature of callin method
  * How:  use MethodSignatureEnhancer.getSourceArguments(method);
- * 
+ *
  * What: Strip leading __OT__
- * Where: 
+ * Where:
  * 		 - createHandle(AbstractMethodDeclaration method, ...) if method is a ctor
  * 		 - reportMatching(TypeDeclaration type, ...)
  *
  * What: when matching methods:
  * 		 - filter generated methods
  * 		 - look in interface part, too
- *  
+ *
  * Handle new elements:
  * --------------------
  * What: account for a new kind of variable: TYPE_VALUE_PARAMETER.
- * 
+ *
  * What: Support matching "team package" decl as a type reference
- * 
+ *
  * What: report matching of new node kinds:
  * 	     - base class
  * 		 - method mappings
- * 
+ *
  * What: Acount for OTJavaElement
  * How:  Before casting to JavaElement check whether we should actually use OTJavaElement
- * 
- * 
+ *
+ *
  * ROFI:
  * -----
  * What: Account for role files when traversing type declarations
@@ -393,7 +393,7 @@ public MatchLocator(
 	    			this.sourceStartOfMethodToRetain  = range.getOffset();
 	    			this.sourceEndOfMethodToRetain = this.sourceStartOfMethodToRetain + range.getLength() - 1; // offset is 0 based.
 	    		} catch (JavaModelException e) {
-	    			// drop silently. 
+	    			// drop silently.
 	    		}
 	    	}
 	    }
@@ -425,7 +425,7 @@ public void accept(ICompilationUnit sourceUnit, AccessRestriction accessRestrict
 		CompilationUnitDeclaration parsedUnit = basicParser().dietParse(sourceUnit, unitResult);
 //{ObjectTeams: never try to get this unit's method bodies:
 		parsedUnit.parseMethodBodies = false;
-// SH}			
+// SH}
 		this.lookupEnvironment.buildTypeBindings(parsedUnit, accessRestriction);
 		this.lookupEnvironment.completeTypeBindings(parsedUnit, true);
 	} catch (AbortCompilationUnit e) {
@@ -562,7 +562,7 @@ protected IJavaElement createHandle(AbstractMethodDeclaration method, IJavaEleme
 //{ObjectTeams: retrench signature of callin method:
 /* orig:
 	Argument[] arguments = method.arguments;
-  :giro */	
+  :giro */
 	Argument[] arguments = MethodSignatureEnhancer.getSourceArguments(method, this.options.weavingScheme);
 // SH}
 	int argCount = arguments == null ? 0 : arguments.length;
@@ -625,12 +625,12 @@ protected IJavaElement createHandle(AbstractMethodDeclaration method, IJavaEleme
 			parameterTypeSignatures[i] = Signature.createTypeSignature(typeName, false);
 		}
 	}
-//{ObjectTeams: be sure to use correct selectors even for role constructors (with __OT__)	
+//{ObjectTeams: be sure to use correct selectors even for role constructors (with __OT__)
 	String selector = new String(method.selector);
-	if (method.isConstructor()) 
+	if (method.isConstructor())
 		selector = parent.getElementName();
 	return createMethodHandle(type, selector, parameterTypeSignatures);
-/* orig:	
+/* orig:
 	return createMethodHandle(type, new String(method.selector), parameterTypeSignatures);
   :giro */
 //jsv,gbr+SH}
@@ -741,7 +741,7 @@ protected IJavaElement createHandle(AbstractVariableDeclaration variableDeclarat
 		case AbstractVariableDeclaration.TYPE_VALUE_PARAMETER:
 			if (!(parent instanceof IType)) return parent;
 			return ((IType) parent).getField(new String(variableDeclaration.name));
-// SH}	
+// SH}
 	}
 	return null;
 }
@@ -890,15 +890,15 @@ public boolean encloses(IJavaElement element) {
 	if (element != null) {
 		if (this.scope instanceof HierarchyScope)
 			return ((HierarchyScope)this.scope).encloses(element, this.progressMonitor);
-		else 
+		else
 			return this.scope.encloses(element);
 	}
 	return false;
 }
 private boolean filterEnum(SearchMatch match) {
-	
-	// filter org.apache.commons.lang.enum package for projects above 1.5 
-	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=317264	
+
+	// filter org.apache.commons.lang.enum package for projects above 1.5
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=317264
 	IJavaElement element = (IJavaElement)match.getElement();
 	PackageFragment pkg = (PackageFragment)element.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 	if (pkg != null) {
@@ -1120,7 +1120,7 @@ private int  getMaxResult(int[][] resultsMap) {
 		for (int i = 1; i < rows; ++i) {
 			int tmp = resultsMap[i][j];
 			if (tmp < current) continue;
-			if (tmp > current)  { 
+			if (tmp > current)  {
 				current = tmp;
 				candidates.clear();
 			}
@@ -1131,7 +1131,7 @@ private int  getMaxResult(int[][] resultsMap) {
 	return candidates.get(0);
 }
 
-/** apply the function to map the parameter full name to an index 
+/** apply the function to map the parameter full name to an index
  */
 private int mapParameter(List <String> patternParameterFullName, List <String> methodParameterFullName) {
 	int patternLen = patternParameterFullName.size();
@@ -1625,7 +1625,7 @@ public void locateMatches(SearchDocument[] searchDocuments) throws CoreException
 						JavaModelManager.getLocalFile(path).toPath().toAbsolutePath().toString() :
 						pathString.split(Pattern.quote("|"))[0]; //$NON-NLS-1$
 				possibleMatch.autoModuleName = new String(AutomaticModuleNaming.determineAutomaticModuleName(s));
-			}			
+			}
 		}
 
 		// last project
@@ -1679,7 +1679,7 @@ private Openable getCloserOpenable(Openable openable, String pathString) {
 			if (jpkf.getModuleDescription() != null &&
 					CompilerOptions.versionToJdkLevel(javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true)) <
 					ClassFileConstants.JDK9) {
-				openable = this.handleFactory.createOpenable(pathString, 
+				openable = this.handleFactory.createOpenable(pathString,
 						getSubScope(JavaCore.COMPILER_COMPLIANCE, ClassFileConstants.JDK9, false));
 			}
 		}
@@ -2030,13 +2030,13 @@ protected boolean parseAndBuildBindings(PossibleMatch possibleMatch, boolean mus
 /* orig:
 	try {
 :giro */
-	try (Config config = (   mustResolve 
+	try (Config config = (   mustResolve
 						  || (this.patternLocator.mayBeGeneric && possibleMatch.nodeSet.mustResolve))
 		? Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true)
-		: null) 
+		: null)
 	{
 //SH}
-	
+
 		if (BasicSearchEngine.VERBOSE)
 			System.out.println("Parsing " + possibleMatch.openable.toStringWithAncestors()); //$NON-NLS-1$
 
@@ -2047,7 +2047,7 @@ protected boolean parseAndBuildBindings(PossibleMatch possibleMatch, boolean mus
 			if (parsedUnit.isModuleInfo()) {
 				if (mustResolve) {
 					this.lookupEnvironment.buildTypeBindings(parsedUnit, null /*no access restriction*/);
-				}				
+				}
 			} else if (!parsedUnit.isEmpty()) {
 				if (mustResolve) {
 					this.lookupEnvironment.buildTypeBindings(parsedUnit, null /*no access restriction*/);
@@ -2056,8 +2056,8 @@ protected boolean parseAndBuildBindings(PossibleMatch possibleMatch, boolean mus
 //{ObjectTeams: Note(SH):
 //   Do not use Dependencies here as not to trigger completeTypeBindings.
 //   This way we avoid triggering accept which in turn processed the CU to the point that
-//   we found "duplicate type" which then caused hasAlreadyDefinedType() above to bail out.				
-// SH}			
+//   we found "duplicate type" which then caused hasAlreadyDefinedType() above to bail out.
+// SH}
 				getMethodBodies(parsedUnit, possibleMatch.nodeSet);
 				if (this.patternLocator.mayBeGeneric && !mustResolve && possibleMatch.nodeSet.mustResolve) {
 					// special case: possible match node set force resolution although pattern does not
@@ -2151,7 +2151,7 @@ protected void process(PossibleMatch possibleMatch, boolean bindingsWereCreated)
 				unit.resolve();
  :giro */
 				Dependencies.ensureState(unit, ITranslationStates.STATE_LATE_ELEMENTS_COPIED);
-// SH,carp}	
+// SH,carp}
 			} else if (unit.isPackageInfo()) {
 				if (BasicSearchEngine.VERBOSE)
 					System.out.println("Resolving " + this.currentPossibleMatch.openable.toStringWithAncestors()); //$NON-NLS-1$
@@ -2216,7 +2216,7 @@ protected void purgeMethodStatements(TypeDeclaration type, boolean checkEachMeth
 	TypeDeclaration[] memberTypes = type.memberTypes;
 	if (memberTypes != null)
 		for (int i = 0, l = memberTypes.length; i < l; i++)
-//{ObjectTeams: don't purge role files via their containing team 
+//{ObjectTeams: don't purge role files via their containing team
 //              (need to traverse them via their own CompilationUnitDeclaration).
 		  if (!memberTypes[i].isRoleFile())
 // SH}
@@ -2655,7 +2655,7 @@ protected void reportMatching(LambdaExpression lambdaExpression,  IJavaElement p
 	ASTNode[] nodes = typeInHierarchy ? nodeSet.matchingNodes(lambdaExpression.sourceStart, lambdaExpression.sourceEnd) : null;
 	boolean report = (this.matchContainer & PatternLocator.METHOD_CONTAINER) != 0 && encloses(enclosingElement);
 	MemberDeclarationVisitor declarationVisitor = new MemberDeclarationVisitor(enclosingElement, report ? nodes : null, nodeSet, this, typeInHierarchy);
-	
+
 	if (lambdaExpression.arguments != null) {
 		int argumentsLength = lambdaExpression.arguments.length;
 		for (int i = 0; i < argumentsLength; i++)
@@ -2665,7 +2665,7 @@ protected void reportMatching(LambdaExpression lambdaExpression,  IJavaElement p
 	if (lambdaExpression.body != null) {
 		lambdaExpression.body.traverse(declarationVisitor, (BlockScope) null);
 	}
-	
+
 	// Report all nodes and remove them
 	if (nodes != null) {
 		int length = nodes.length;
@@ -2889,8 +2889,8 @@ private void reportMatching(Annotation[][] annotationsList, IJavaElement enclosi
 	if (annotationsList != null) {
 		for (int i = 0, length = annotationsList.length; i < length; ++i) {
 			Annotation[] annotations = annotationsList[i];
-			if (annotations != null) 
-				reportMatching(annotations, enclosingElement, null, binding, nodeSet, matchedClassContainer, encloses(enclosingElement));	
+			if (annotations != null)
+				reportMatching(annotations, enclosingElement, null, binding, nodeSet, matchedClassContainer, encloses(enclosingElement));
 		}
 	}
 }
@@ -2994,13 +2994,13 @@ protected void reportMatching(CompilationUnitDeclaration unit, boolean mustResol
 				}
 			}
 		}
-//{ObjectTeams: ROFI: special node: the package declaration interpreted as a type reference 		
+//{ObjectTeams: ROFI: special node: the package declaration interpreted as a type reference
 		if (pkg != null  && (pkg.modifiers & ExtraCompilerModifiers.AccTeam) != 0) {
 			Integer level = (Integer) nodeSet.matchingNodes.removeKey(pkg);
 			if (level != null)
 				this.patternLocator.matchReportImportRef(pkg, null/*no binding*/, createImportHandle(pkg), level.intValue(), this);
 		}
-// SH}		
+// SH}
 	}
 
 	TypeDeclaration[] types = unit.types;
@@ -3279,8 +3279,8 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 	//           in case, role splitting had not taken place:
 	String typeName = new String(type.name);
 	boolean isRole = false;
-	if (   type.isRole() 
-		&& !type.isInterface() 
+	if (   type.isRole()
+		&& !type.isInterface()
 		&& typeName.startsWith(IOTConstants.OT_DELIM))
 	{
 		typeName = typeName.substring(IOTConstants.OT_DELIM_LEN);
@@ -3291,13 +3291,13 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 		enclosingElement = createTypeHandle(new String(type.name));
 	} else if (enclosingElement instanceof IType) {
 		enclosingElement = ((IType) parent).getType(new String(type.name));
- :giro */	
+ :giro */
 	if (enclosingElement == null) {
 		enclosingElement = createTypeHandle(typeName);
 	} else if (enclosingElement instanceof IType) {
-		if (isRole) 
+		if (isRole)
 	        enclosingElement = TypeHelper.findRoleType((IType)parent, typeName); // FIXME(SH): avoid heavy weight operation here!
-		else 
+		else
 		    enclosingElement = ((IType) parent).getType(new String(type.name));
 // jsv,gbr,SH}
 	} else if (enclosingElement instanceof IMember) {
@@ -3311,7 +3311,7 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 				if ((type.bits & ASTNode.IsAnonymousType) != 0) {
 					if (fileName != null) {
 						if (fileName.endsWith("jar") || fileName.endsWith(SuffixConstants.SUFFIX_STRING_class)) { //$NON-NLS-1$
-							IOrdinaryClassFile classFile= binaryType.getPackageFragment().getOrdinaryClassFile(binaryType.getTypeQualifiedName() + 
+							IOrdinaryClassFile classFile= binaryType.getPackageFragment().getOrdinaryClassFile(binaryType.getTypeQualifiedName() +
 									"$" + Integer.toString(occurrenceCount) + SuffixConstants.SUFFIX_STRING_class);//$NON-NLS-1$
 							anonType =  classFile.getType();
 						}
@@ -3381,7 +3381,7 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 			for (int i = 0, length = superClass.annotations == null ? 0 : superClass.annotations.length; i < length; i++) {
 				Annotation[] annotations = superClass.annotations[i];
 				if (annotations == null) continue;
-				reportMatching(annotations, enclosingElement, null, type.binding, nodeSet, matchedClassContainer, enclosesElement);	
+				reportMatching(annotations, enclosingElement, null, type.binding, nodeSet, matchedClassContainer, enclosesElement);
 			}
 		}
 		TypeReference[] superInterfaces = type.superInterfaces;
@@ -3393,9 +3393,9 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 				if (annotations != null) {
 					for (int j = 0, length = annotations.length; j < length; j++) {
 						if (annotations[j] == null) continue;
-						reportMatching(annotations[j], enclosingElement, null, type.binding, nodeSet, matchedClassContainer, enclosesElement);	
+						reportMatching(annotations[j], enclosingElement, null, type.binding, nodeSet, matchedClassContainer, enclosesElement);
 					}
-				}			
+				}
 			}
 		}
 	}
@@ -3416,12 +3416,12 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 				if (nameRef == null) continue;
 				Integer level = (Integer) nodeSet.matchingNodes.removeKey(nameRef);
 				if (level != null && matchedClassContainer)
-					this.patternLocator.matchReportReference(nameRef, enclosingElement, type.binding, level.intValue(), this);					
+					this.patternLocator.matchReportReference(nameRef, enclosingElement, type.binding, level.intValue(), this);
 			}
 		}
 	}
-//jsv,gbr}	
-	
+//jsv,gbr}
+
 	// filter out element not in hierarchy scope
 	boolean typeInHierarchy = type.binding == null || typeInHierarchy(type.binding);
 	matchedClassContainer = matchedClassContainer && typeInHierarchy;
@@ -3436,12 +3436,12 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 		for (int i = 0; i < length; i++) {
 			FieldDeclaration field = fields[i];
 //{ObjectTeams: filter all generated fields
-			if (field.copyInheritanceSrc != null || 
+			if (field.copyInheritanceSrc != null ||
 			        Flags.isSynthetic(field.modifiers))
 			{
 			    continue;
 			}
-//jsv,gbr}				
+//jsv,gbr}
 			boolean last = field.endPart2Position == 0 || field.declarationEnd == field.endPart2Position;
 			// Store first index of multiple field declaration
 			if (!last) {
@@ -3482,14 +3482,14 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 		if (nodeSet.matchingNodes.elementSize == 0) return;	// end as all matching nodes were reported
 		for (int i = 0, l = methods.length; i < l; i++) {
 			AbstractMethodDeclaration method = methods[i];
-//{ObjectTeams: filter generated methods:			
+//{ObjectTeams: filter generated methods:
 		  if (isRelevantMethod(method)) {
 // orig:
 			Integer level = (Integer) nodeSet.matchingNodes.removeKey(method);
-// :giro				
+// :giro
 			// if method was not found in nodeSet also check its interface part
 			// (yet reporting the class part method):
-			if (level == null && method.interfacePartMethod != null) 
+			if (level == null && method.interfacePartMethod != null)
 				level = (Integer) nodeSet.matchingNodes.removeKey(method.interfacePartMethod);
 // orig:
 			int value = (level != null && matchedClassContainer) ? level.intValue() : -1;
@@ -3513,11 +3513,11 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 		    AbstractMethodMappingDeclaration mapping = mappings[idx];
 		    Integer level = (Integer) nodeSet.matchingNodes.removeKey(mapping);
 		    int value = (level != null && matchedClassContainer) ? level.intValue() : -1;
-		    reportMatching(mappings[idx], enclosingElement, mapping.binding, value, typeInHierarchy, nodeSet);		    
+		    reportMatching(mappings[idx], enclosingElement, mapping.binding, value, typeInHierarchy, nodeSet);
         }
 	}
 //gbr}
-	
+
 	// Visit types
 	TypeDeclaration[] memberTypes = type.memberTypes;
 	if (memberTypes != null) {
@@ -3533,7 +3533,7 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 			}
 			if (memberType.isRoleFile())
 				continue; // role files are traversed from their CUD, not as member of the team
-//jsv,gbr}			
+//jsv,gbr}
 			Integer level = (Integer) nodeSet.matchingNodes.removeKey(memberType);
 			int value = (level != null && matchedClassContainer) ? level.intValue() : -1;
 			reportMatching(memberType, enclosingElement, value, nodeSet, 1);
@@ -3541,7 +3541,7 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 	}
 }
 
-//{ObjectTeams: report method mapping declaration or references in this method mapping declaration             
+//{ObjectTeams: report method mapping declaration or references in this method mapping declaration
 /**
  * Visit the given method mapping declaration and report the nodes in its range that match exactly the
  * search pattern (i.e. the ones in the matching nodes set)
@@ -3552,31 +3552,31 @@ protected void reportMatching(
         Binding binding,
         int accuracy,
         boolean typeInHierarchy,
-        MatchingNodeSet nodeSet) throws CoreException 
+        MatchingNodeSet nodeSet) throws CoreException
 {
     IJavaElement enclosingElement = createHandle(methodMapping, parent);
 
     if (accuracy > -1)
     {
         System.out.println("FIXME: MatchLocator.reportMatching(): accuracy: " + accuracy);
-        //TODO(gbr,jsv) handle declaration of method mapping if it is searched 
+        //TODO(gbr,jsv) handle declaration of method mapping if it is searched
 	}
-    
+
 //    boolean matchedMethodContainer = (this.matchContainer & PatternLocator.METHOD_CONTAINER) != 0;
 //    //TODO(gbr) The role method spec in a callout binding is always a declaration.
 //    //The following code always returns a reference match for a method spec, even if
 //    //declarations of a method are searched. The reason is that a "MethodSpec" doesn' t contain
 //    //the information, if it is a reference (message send) or a (method) declaration.
 //    if (methodMapping instanceof CalloutMappingDeclaration)
-//    {    
+//    {
 //        MethodSpec roleMethodSpec = methodMapping.roleMethodSpec;
 //        Integer level = (Integer) nodeSet.matchingNodes.removeKey(roleMethodSpec);
 //	    int value = (level != null && matchedMethodContainer) ? level.intValue() : -1;
-//        
+//
 //        if (value > -1) {
 //    		enclosingElement = createHandle(roleMethodSpec, parent);
 //    		if (enclosingElement != null) { // skip if unable to find method
-//    			// compute source positions of the selector 
+//    			// compute source positions of the selector
 //    			Scanner scanner = parser.scanner;
 //    			int nameSourceStart = roleMethodSpec.sourceStart;
 //    			scanner.setSource(this.currentPossibleMatch.getContents());
@@ -3591,10 +3591,10 @@ protected void reportMatching(
 //    				SearchMatch match = newDeclarationMatch(enclosingElement, accuracy, nameSourceStart, length);
 //    				report(match);
 //    			}
-//    		}        
+//    		}
 //        }
 //    }
-    
+
 	if (typeInHierarchy) {
 		int start = methodMapping.declarationSourceStart;
 		int end = methodMapping.declarationSourceEnd;
@@ -3608,8 +3608,8 @@ protected void reportMatching(
 						for (int i=0; i<roleArgs.length; i++) {
 							TypeReference argType = roleArgs[i].type;
 							if (   argType.resolvedType != null
-								&& argType.resolvedType.isRole() 
-								&& methodMapping.roleMethodSpec.argNeedsTranslation(i)) 
+								&& argType.resolvedType.isRole()
+								&& methodMapping.roleMethodSpec.argNeedsTranslation(i))
 							{
 								Integer level = (Integer) nodeSet.matchingNodes.removeKey(argType);
 								if (level != null)
@@ -3628,7 +3628,7 @@ protected void reportMatching(
 					{
 						Integer level = (Integer) nodeSet.matchingNodes.removeKey(returnType);
 						if (level != null)
-							this.patternLocator.matchReportReference(returnType, enclosingElement, binding, level.intValue()|SearchMatch.A_CHECKED, this);						
+							this.patternLocator.matchReportReference(returnType, enclosingElement, binding, level.intValue()|SearchMatch.A_CHECKED, this);
 					}
 				}
 			}
@@ -3660,36 +3660,36 @@ protected void reportMatching(
 
 //{ObjectTeams: filter all generated methods
 private boolean isRelevantMethod(AbstractMethodDeclaration method) {
-	if (   method.isCopied 
+	if (   method.isCopied
 		|| Flags.isSynthetic(method.modifiers))
 	{
 	    return false;
 	}
-	if (method.isGenerated) 
+	if (method.isGenerated)
 		return method.isReusingSourceMethod; // callout or guard: generated but declaration is present in src
 	return true;
 }
-//jsv,gbr moved by SH}				
+//jsv,gbr moved by SH}
 
 //{ObjectTeams: new method
 /**
- * Creates an IJavaElement from the given method mapping declaration and type. 
+ * Creates an IJavaElement from the given method mapping declaration and type.
  */
 protected IJavaElement createHandle(
         AbstractMethodMappingDeclaration mappingDecl,
         IJavaElement parent) throws JavaModelException
-{   
+{
     if (!(parent instanceof IType))
     {
         return parent;
     }
-    
+
     IType parentType = (IType) parent;
 //    if (!parentType.exists()) // if necessary, create elementInfo FIXME (carp)
 //        return null;
-    
+
     RoleType roleType = (RoleType)OTModelManager.getOTElement(parentType);
-    
+
     if (roleType != null)
     {
 	    if (mappingDecl instanceof CalloutMappingDeclaration)
@@ -3747,7 +3747,7 @@ protected void reportMatching(TypeParameter[] typeParameters, IJavaElement enclo
 			}
 			boolean matchedClassContainer = (this.matchContainer & PatternLocator.ALL_CONTAINER) != 0;
 			if (typeParameter.annotations != null) {
-				reportMatching(typeParameter.annotations, enclosingElement, null, typeParameter.binding, nodeSet, matchedClassContainer, encloses(enclosingElement));	
+				reportMatching(typeParameter.annotations, enclosingElement, null, typeParameter.binding, nodeSet, matchedClassContainer, encloses(enclosingElement));
 			}
 			if (typeParameter.type != null) {
 				reportMatching(typeParameter.type.annotations, enclosingElement, typeParameter.binding, nodeSet, matchedClassContainer);

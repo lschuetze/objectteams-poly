@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2013 GK Software AG, Germany,
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -49,7 +49,7 @@ public class OTSearchHelper {
 	 * @param key
 	 * @param value
 	 */
-	public static <M extends IMember> void addToMapOfSets(final Map<IMember, Set<M>> mapOfSets, IMember key, M value) 
+	public static <M extends IMember> void addToMapOfSets(final Map<IMember, Set<M>> mapOfSets, IMember key, M value)
 	{
 		Set<M> setForType = mapOfSets.get(key);
 		if (setForType == null)
@@ -59,8 +59,8 @@ public class OTSearchHelper {
 
 	/**
 	 * Find all playedBy bindings within a given set of projects refering to one of baseTypes as its baseclass.
-	 * 
-	 * @param baseTypes 
+	 *
+	 * @param baseTypes
 	 * @param projects
 	 * @param monitor
 	 * @return a map indexed by base types containing sets of role types bound to the given base type.
@@ -72,14 +72,14 @@ public class OTSearchHelper {
 			monitor.done();
 	        return null;
 	    }
-	    
+
 	    OTSearchEngine engine = new OTSearchEngine();
 	    IJavaSearchScope searchScope = OTSearchEngine.createOTSearchScope(projects, false);
 	    final Map<IMember, Set<IType>> resultMap = new HashMap<IMember, Set<IType>>();
-	
+
 	    try {
 	        monitor.beginTask(Messages.OTSearchHelper_progress_searchRoleTypes, baseTypes.size());
-	        
+
 	        for (final IType baseType : baseTypes)
 	        {
 	        	if (monitor.isCanceled()) return null;
@@ -89,14 +89,14 @@ public class OTSearchHelper {
 		            if (!baseType.exists()) // ensure it's 'open'
 		                continue;
 		            if (baseType.isEnum() || baseType.isAnnotation())
-		            	continue; // no callin-to-enum/annot 
+		            	continue; // no callin-to-enum/annot
 			        SearchPattern pattern = SearchPattern.createPattern(baseType, IJavaSearchConstants.PLAYEDBY_REFERENCES);
 			        if (pattern == null)
 			            JavaCore.getJavaCore().getLog().log(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, "Error creating pattern")); //$NON-NLS-1$
 			        else
 			        	engine.search(
-	                        pattern, 
-	                        searchScope, 
+	                        pattern,
+	                        searchScope,
 	                        new SearchRequestor() {
 			                    @Override
 								public void acceptSearchMatch(SearchMatch match)
@@ -118,7 +118,7 @@ public class OTSearchHelper {
 	    finally {
 	        monitor.done();
 	    }
-	    
+
 	    return resultMap;
 	}
 

@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -65,12 +65,12 @@ public class TSuperMessageSendTest extends FileBasedDOMTest
 	{
 		super(name);
 	}
-	
+
 	public static Test suite()
 	{
 		return new Suite(TSuperMessageSendTest.class);
 	}
-	
+
 	public void setUpSuite() throws Exception
 	{
 		setTestProjectDir(TEST_PROJECT);
@@ -84,8 +84,8 @@ public class TSuperMessageSendTest extends FileBasedDOMTest
 		parser.setProject( getJavaProject(TEST_PROJECT) );
 		parser.setSource(_teamClass);
         parser.setResolveBindings(true);
-        
-		ASTNode root = parser.createAST( new NullProgressMonitor() );        
+
+		ASTNode root = parser.createAST( new NullProgressMonitor() );
         CompilationUnit compUnit = (CompilationUnit) root;
         _typeDecl = (TypeDeclaration)compUnit.types().get(0);
         _role = _typeDecl.getTypes()[0];
@@ -93,19 +93,19 @@ public class TSuperMessageSendTest extends FileBasedDOMTest
         _roleMethod1 = _role.getMethods()[3];
 	}
 
-	protected void setUp() throws Exception 
+	protected void setUp() throws Exception
 	{
 		super.setUp();
 	}
 
-    
+
     public void testInstanceType1()
     {
         ExpressionStatement exprStatement =
             (ExpressionStatement)_roleMethod0.getBody().statements().get(0);
 
         Expression testObj = exprStatement.getExpression();
-        
+
         assertTrue("tsuper call not an instance of TSuperMessageSend",
                    testObj instanceof TSuperMessageSend);
     }
@@ -116,7 +116,7 @@ public class TSuperMessageSendTest extends FileBasedDOMTest
             (ExpressionStatement)_roleMethod1.getBody().statements().get(0);
 
         Expression testObj = exprStatement.getExpression();
-        
+
         assertTrue("tsuper call not an instance of TSuperMessageSend",
                    testObj instanceof TSuperMessageSend);
     }
@@ -126,9 +126,9 @@ public class TSuperMessageSendTest extends FileBasedDOMTest
         ExpressionStatement exprStatement =
             (ExpressionStatement)_roleMethod0.getBody().statements().get(0);
         _testObj = (TSuperMessageSend)exprStatement.getExpression();
-        
+
         int actual = _testObj.getNodeType();
-        
+
         assertEquals("tsuper call has wrong node type",
                      ASTNode.TSUPER_MESSAGE_SEND,
                      actual);
@@ -141,20 +141,20 @@ public class TSuperMessageSendTest extends FileBasedDOMTest
         _testObj = (TSuperMessageSend)exprStatement.getExpression();
 
         String actual = _testObj.getName().getIdentifier();
-        
+
         assertEquals("tsuper call has wrong name ",
                      "method0",
                      actual);
     }
-   
+
     public void testGetArguments2_TwoArgs()
     {
         ExpressionStatement exprStatement =
             (ExpressionStatement)_roleMethod1.getBody().statements().get(0);
         _testObj = (TSuperMessageSend)exprStatement.getExpression();
-        
+
         List actual = _testObj.getArguments();
-        
+
         assertEquals("tsuper call has wrong number of arguments",
                      2,
                      actual.size());
@@ -165,9 +165,9 @@ public class TSuperMessageSendTest extends FileBasedDOMTest
         ExpressionStatement exprStatement =
             (ExpressionStatement)_roleMethod0.getBody().statements().get(0);
         _testObj = (TSuperMessageSend)exprStatement.getExpression();
-        
+
         List actual = _testObj.getArguments();
-        
+
         assertEquals("tsuper call has wrong number of arguments",
                      0,
                      actual.size());
@@ -178,10 +178,10 @@ public class TSuperMessageSendTest extends FileBasedDOMTest
         ExpressionStatement exprStatement =
             (ExpressionStatement)_roleMethod1.getBody().statements().get(0);
         _testObj = (TSuperMessageSend)exprStatement.getExpression();
-        
+
         List childNodes = _testObj.getArguments();
 
-        for (Iterator iter = childNodes.iterator(); iter.hasNext();) 
+        for (Iterator iter = childNodes.iterator(); iter.hasNext();)
         {
             Expression curChild = (Expression) iter.next();
             assertEquals("tsuper call arguments have wrong parent node",
@@ -190,15 +190,15 @@ public class TSuperMessageSendTest extends FileBasedDOMTest
         }
 
     }
-     
+
     public void testChidlNodeHaveCorrectParrent2()
     {
         ExpressionStatement exprStatement =
             (ExpressionStatement)_roleMethod1.getBody().statements().get(0);
         _testObj = (TSuperMessageSend)exprStatement.getExpression();
-        
+
         SimpleName childNode = _testObj.getName();
-        
+
         assertEquals("tsuper call selector has wrong parent",
                      _testObj,
                      childNode.getParent());
@@ -209,11 +209,11 @@ public class TSuperMessageSendTest extends FileBasedDOMTest
         ExpressionStatement exprStatement =
             (ExpressionStatement)_roleMethod1.getBody().statements().get(0);
         _testObj = (TSuperMessageSend)exprStatement.getExpression();
-        
+
         boolean actual = _testObj.subtreeMatch(new ASTMatcher(), _testObj);
 
         assertTrue("tsuper call message sends don't match", actual);
- 
+
     }
 
     public void testToString1()
@@ -221,21 +221,21 @@ public class TSuperMessageSendTest extends FileBasedDOMTest
         ExpressionStatement exprStatement =
             (ExpressionStatement)_roleMethod1.getBody().statements().get(0);
         _testObj = (TSuperMessageSend)exprStatement.getExpression();
-        
+
         String actual = _testObj.toString();
         String expected = "tsuper.method1(arg0, arg1)";
-        
+
         assertEquals("tsuper call message send: wrong naive flat string representation",
                       expected, actual);
     }
-    
+
     public void testResolveBinding()
     {
         ExpressionStatement exprStatement =
             (ExpressionStatement)_roleMethod1.getBody().statements().get(0);
-        
+
         _testObj = (TSuperMessageSend)exprStatement.getExpression();
-        
+
         ITypeBinding itb = _typeDecl.resolveBinding();
         IMethodBinding expected = null;
 		// don't access method via index since bindings are sorted by the compiler
@@ -247,17 +247,17 @@ public class TSuperMessageSendTest extends FileBasedDOMTest
         	}
         }
         assertNotNull("tsuper Role not found", tsuperRoleClass);
-		for (IMethodBinding tSuperMethod: tsuperRoleClass.getDeclaredMethods()) 
+		for (IMethodBinding tSuperMethod: tsuperRoleClass.getDeclaredMethods())
         {
         	if (tSuperMethod.getName().equals("method1")) {
         		expected = tSuperMethod;
         		break;
-        	}        		
+        	}
         }
-        
+
         IMethodBinding actual = _testObj.resolveMethodBinding();
-        
+
         assertEquals(expected, actual);
     }
-    
+
 }

@@ -160,7 +160,7 @@ public class LiftingEnvironment
            		ReflectionGenerator.createRoleQueryMethods(this._teamType, weavingScheme);
             return;
         }
-        
+
         if (lateRole == null)
 			TeamMethodGenerator.addFakedTeamRegistrationMethods(this._teamType.binding);
 
@@ -198,7 +198,7 @@ public class LiftingEnvironment
     		}
         }
     }
-    
+
 	/**
 	 * @param lifting
      * @param node representing the role to generate for
@@ -329,14 +329,14 @@ public class LiftingEnvironment
 	    // Somehow, this doesn't happen automagically.
 	    // But by declaring the caches public the issue is completely avoided,
 	    // hoping, that no-one maliciously accesses the cache.
-	    
+
 	    // if base is generic, we refer to it via the raw type, suppress that warning:
 //	    if (usingRawType) {
 //		    field.annotations = new Annotation[] {
-//		    	gen.singleStringsMemberAnnotation(TypeConstants.JAVA_LANG_SUPPRESSWARNINGS, new char[][]{"rawtypes".toCharArray()}) //$NON-NLS-1$ 
+//		    	gen.singleStringsMemberAnnotation(TypeConstants.JAVA_LANG_SUPPRESSWARNINGS, new char[][]{"rawtypes".toCharArray()}) //$NON-NLS-1$
 //		    };
 //	    }
-	    
+
 	    AstEdit.addField(teamDecl, field, true, false/*typeProblem*/, false);
 		teamDecl.getTeamModel().addCache(field);
 	}
@@ -358,7 +358,7 @@ public class LiftingEnvironment
     	{
     		AstGenerator gen = new AstGenerator(teamType.sourceStart, teamType.sourceEnd);
     		gen.shiftPosition(); // don't let @SuppressWarnings interfere with non-generated code.
-    		
+
     		initMethod = gen.method(
     			teamType.compilationResult,
 				ClassFileConstants.AccPrivate, // no overriding!!
@@ -367,7 +367,7 @@ public class LiftingEnvironment
 				null);
     		initMethod.statements = new Statement[0]; // to be filled by fillInitCaches()
     		initMethod.annotations = new Annotation[] { // in case base type is a raw type
-    			gen.singleStringsMemberAnnotation(TypeConstants.JAVA_LANG_SUPPRESSWARNINGS, new char[][]{"all".toCharArray()}) //$NON-NLS-1$	
+    			gen.singleStringsMemberAnnotation(TypeConstants.JAVA_LANG_SUPPRESSWARNINGS, new char[][]{"all".toCharArray()}) //$NON-NLS-1$
     		};
     		AstEdit.addMethod(teamType, initMethod);
     		initMethod.modifiers |= ExtraCompilerModifiers.AccLocallyUsed; // prevent 'unused' warning
@@ -386,7 +386,7 @@ public class LiftingEnvironment
     		}
 
     		// Serialization: generate restore methods to initialize caches/register roles:
-    		SerializationGenerator.generateRestoreMethods(teamType, gen);    		
+    		SerializationGenerator.generateRestoreMethods(teamType, gen);
     	}
 
     	return initMethod;

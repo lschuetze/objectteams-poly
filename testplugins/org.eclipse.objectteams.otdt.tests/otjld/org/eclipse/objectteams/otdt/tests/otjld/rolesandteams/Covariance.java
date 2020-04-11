@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -24,11 +24,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 import junit.framework.Test;
 
 public class Covariance extends AbstractOTJLDTest {
-	
+
 	public Covariance(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -36,7 +36,7 @@ public class Covariance extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -48,7 +48,7 @@ public class Covariance extends AbstractOTJLDTest {
     // a method uses a redefined role as a parameter
     // 6.3.1-otjld-redefined-role-as-paramerer-1
     public void test631_redefinedRoleAsParamerer1() {
-       
+
        runConformTest(
             new String[] {
 		"T631rrap1Main.java",
@@ -98,7 +98,7 @@ public class Covariance extends AbstractOTJLDTest {
     // a method uses a redefined role as a parameter
     // 6.3.1-otjld-redefined-role-as-paramerer-2
     public void test631_redefinedRoleAsParamerer2() {
-       
+
        runConformTest(
             new String[] {
 		"T631rrap2Main.java",
@@ -147,7 +147,7 @@ public class Covariance extends AbstractOTJLDTest {
     // a method uses a redefined role as a parameter
     // 6.3.1-otjld-redefined-role-as-paramerer-3
     public void test631_redefinedRoleAsParamerer3() {
-       
+
        runConformTest(
             new String[] {
 		"T631rrap3Main.java",
@@ -196,7 +196,7 @@ public class Covariance extends AbstractOTJLDTest {
     // a method uses a redefined role as a parameter
     // 6.3.1-otjld-redefined-role-as-paramerer-4
     public void test631_redefinedRoleAsParamerer4() {
-       
+
        runConformTest(
             new String[] {
 		"T631rrap4Main.java",
@@ -249,7 +249,7 @@ public class Covariance extends AbstractOTJLDTest {
     // a method uses a redefined role as a parameter
     // 6.3.1-otjld-redefined-role-as-paramerer-5
     public void test631_redefinedRoleAsParamerer5() {
-       
+
        runConformTest(
             new String[] {
 		"T631rrap5Main.java",
@@ -298,7 +298,7 @@ public class Covariance extends AbstractOTJLDTest {
     // a method uses a redefined role as a parameter
     // 6.3.1-otjld-redefined-role-as-paramerer-6
     public void test631_redefinedRoleAsParamerer6() {
-       
+
        runConformTest(
             new String[] {
 		"T631rrap6Main.java",
@@ -343,7 +343,7 @@ public class Covariance extends AbstractOTJLDTest {
     // a method uses a redefined role as a return type
     // 6.3.2-otjld-redefined-role-as-return-type-1
     public void test632_redefinedRoleAsReturnType1() {
-       
+
        runConformTest(
             new String[] {
 		"Team632rrart1_2.java",
@@ -387,7 +387,7 @@ public class Covariance extends AbstractOTJLDTest {
     // a method uses a sub role as a return type
     // 6.3.2-otjld-redefined-role-as-return-type-2
     public void test632_redefinedRoleAsReturnType2() {
-       
+
        runConformTest(
             new String[] {
 		"Team632rrart2_2.java",

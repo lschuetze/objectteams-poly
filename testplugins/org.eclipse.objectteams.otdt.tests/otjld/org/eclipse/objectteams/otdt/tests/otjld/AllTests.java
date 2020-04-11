@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -76,7 +76,7 @@ public class AllTests {
 
 	public static Test suite() {
 		TestSuite suite = new TestSuite("All OTJLD Tests");
-		
+
 		// 1. rolesandteams
 		/*1.1*/addComplianceSuite(suite, RoleObjectContainment.testClass());
 		/*1.1.10-*/addComplianceSuite(suite, TeamNesting.testClass());
@@ -85,53 +85,53 @@ public class AllTests {
 		/*1.4*/addComplianceSuite(suite, RegularRoleInheritance.testClass());
 		/*1.5*/addComplianceSuite(suite, FileStructure.testClass());
 		/*1.6*/addComplianceSuite(suite, ExternalizedRoles.testClass());
-		
+
 		/*6.2*/addComplianceSuite(suite, OldExternalizedRoles.testClass());
-		
+
 		/*1.7*/addComplianceSuite(suite, Confinement.testClass());
 		/*1.8*/addComplianceSuite(suite, RelevantRole.testClass());
 		/*1.9*/addComplianceSuite(suite, ValueParameters.testClass());
-		
+
 		/*0.c*/addComplianceSuite(suite, ImplicitInheritance.testClass());
 		/*6.3*/addComplianceSuite(suite, Covariance.testClass());
-		
+
 		// 2. roleplaying
 		/*2.1*/addComplianceSuite(suite, PlayedByRelation.testClass());
 		/*2.2*/addComplianceSuite(suite, LiftingAndLowering.testClass());
 		/*2.3*/addComplianceSuite(suite, ExplicitRoleCreation.testClass());
 		/*2.4*/addComplianceSuite(suite, BaseClassVisibility.testClass());
 		/*2.5*/addComplianceSuite(suite, GC.testClass());
-		
+
 		// 3. calloutbinding
 		/*3.1*/addComplianceSuite(suite, CalloutMethodBinding.testClass()); // includes a few from 7.2.1
 		/*3.2*/addComplianceSuite(suite, CalloutParameterBinding_LiftingAndLowering.testClass());
 		/*3.3*/addComplianceSuite(suite, CalloutToField.testClass());
-		
+
 		/*7.4*/addComplianceSuite(suite, OverridingAccessRestrictions.testClass());
-		
+
 		// 4. callinbinding
 		/*4.1*/addComplianceSuite(suite, CallinMethodBinding.testClass()); // includes a few from 7.2.[45]
 		/*4.3*/addComplianceSuite(suite, CallinParameterMapping_LiftingAndLowering.testClass());
 		/*4.4*/addComplianceSuite(suite, CallinWithTranslation.testClass());
 		/*4.5*/addComplianceSuite(suite, BaseCalls.testClass());
-		
+
 		// 5. teamactivation
 		/*5.2*/addComplianceSuite(suite, ExplicitTeamActivation.testClass());
 		/*5.3*/addComplianceSuite(suite, ImplicitTeamActivation.testClass());
 		/*5.4*/addComplianceSuite(suite, Predicates.testClass());
-		
+
 		// 6.[14] liftlower
 		/*6.1*/addComplianceSuite(suite, DeclaredLifting.testClass());
 		//6.4: see below
-		
+
 		// 7. see below
 
 		// 8. syntax
 		/*8.1*/addComplianceSuite(suite, Syntax.testClass());
-		
+
 		// api:
 		/*9.2*/addComplianceSuite(suite, Reflection.testClass());
-		
+
 		// other:
 		/*0.a*/addComplianceSuite(suite, AccessModifiers.testClass());
 		/*7.1*/addComplianceSuite(suite, Modifiers.testClass());
@@ -141,12 +141,12 @@ public class AllTests {
 		/*---*/addComplianceSuite(suite, Java8.testClass(), AbstractCompilerTest.F_1_8);
 		/*---*/addComplianceSuite(suite, OTNullTypeAnnotationTest.testClass(), AbstractCompilerTest.F_1_8);
 		/*0.m*/addComplianceSuite(suite, Misc.testClass());
-		
+
 		// regression:
 		/*B.1*/addComplianceSuite(suite, ReportedBugs.testClass());
 		/*B.2*/addComplianceSuite(suite, CompilationOrder.testClass());
 		/*X.2*/addComplianceSuite(suite, DevelopmentExamples.testClass());
-		
+
 		addComplianceSuite(suite, ComplexStructures.testClass());
 
 		/*7.3*/suite.addTest(AllBindingAmbiguitiesTests.suite());
@@ -164,7 +164,7 @@ public class AllTests {
 		TestCase.TESTS_NUMBERS= null;
 		TestCase.TESTS_RANGE = null;
 		TestCase.RUN_ONLY_ID = null;
-		
+
 		suite.addTest(AbstractCompilerTest.buildMinimalComplianceTestSuite(testClass, compliance));
 	}
 }

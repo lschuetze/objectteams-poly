@@ -20,10 +20,10 @@ package org.eclipse.objectteams.otdt.core.compiler;
 
 /**
  * Simple pair structure.
- * 
+ *
  * @author stephan
  * @since 0.9.27
- * 
+ *
  * @param <T1> type of the first element
  * @param <T2> type of the second element
  */

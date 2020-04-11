@@ -93,7 +93,7 @@ public void addPossibleMatch(ASTNode node) {
 	// see http://bugs.eclipse.org/bugs/show_bug.cgi?id=29366)
 	long key = (((long) node.sourceStart) << 32) + node.sourceEnd;
 	ASTNode existing = (ASTNode) this.possibleMatchingNodesKeys.get(key);
-//{ObjectTeams: also expect a type reference to replace a name reference when a type anchor 
+//{ObjectTeams: also expect a type reference to replace a name reference when a type anchor
 // 				is converted to a type annotation (see Parser#convertTypeAnchor()):
 /* orig:
 	if (existing != null && existing.getClass().equals(node.getClass()))
@@ -108,7 +108,7 @@ public void addPossibleMatch(ASTNode node) {
 }
 public void addTrustedMatch(ASTNode node, boolean isExact) {
 	addTrustedMatch(node, isExact ? EXACT_MATCH : POTENTIAL_MATCH);
-	
+
 }
 void addTrustedMatch(ASTNode node, Integer level) {
 	// remove existing node at same position from set
@@ -118,7 +118,7 @@ void addTrustedMatch(ASTNode node, Integer level) {
 	ASTNode existing = (ASTNode) this.matchingNodesKeys.get(key);
 	if (existing != null && existing.getClass().equals(node.getClass()))
 		this.matchingNodes.removeKey(existing);
-	
+
 	// map node to its accuracy level
 	this.matchingNodes.put(node, level);
 	this.matchingNodesKeys.put(key, node);

@@ -167,7 +167,7 @@ public class LineBreaksPreparator extends ASTVisitor {
 			indent(node.getGuardPredicate());
 			indent(node.getGuardPredicate());
 			this.tm.firstTokenAfter(node.getGuardPredicate(), TokenNameLBRACE).breakBefore();
-		}			
+		}
 // SH}
 		handleBodyDeclarations(node.bodyDeclarations());
 
@@ -812,7 +812,7 @@ public class LineBreaksPreparator extends ASTVisitor {
 	private void handleBracedCode(ASTNode node, ASTNode nodeBeforeOpenBrace, String bracePosition, boolean indentBody) {
 		handleBracedCode(node, nodeBeforeOpenBrace, bracePosition, indentBody, 0, 0);
 	}
-	
+
 	private void handleBracedCode(ASTNode node, ASTNode nodeBeforeOpenBrace, String bracePosition, boolean indentBody,
 			int blankLinesAfterOpeningBrace, int blankLinesBeforeClosingBrace) {
 		int openBraceIndex = nodeBeforeOpenBrace == null

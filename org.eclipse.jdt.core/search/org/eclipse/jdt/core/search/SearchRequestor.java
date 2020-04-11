@@ -16,7 +16,7 @@ package org.eclipse.jdt.core.search;
 import org.eclipse.core.runtime.CoreException;
 
 /**
- * Collects the results from a search engine query. 
+ * Collects the results from a search engine query.
  * Clients implement a subclass to pass to <code>SearchEngine.search</code>
  * and implement the {@link #acceptSearchMatch(SearchMatch)} method, and
  * possibly override other life cycle methods.
@@ -75,7 +75,7 @@ public abstract class SearchRequestor {
 	 * The default implementation of this method does nothing. Subclasses
 	 * may override.
 	 * </p>
-	 * 
+	 *
 	 * @param participant the participant that is starting to contribute
 	 */
 	public void enterParticipant(SearchParticipant participant) {
@@ -89,7 +89,7 @@ public abstract class SearchRequestor {
 	 * The default implementation of this method does nothing. Subclasses
 	 * may override.
 	 * </p>
-	 * 
+	 *
 	 * @param participant the participant that finished contributing
 	 */
 	public void exitParticipant(SearchParticipant participant) {

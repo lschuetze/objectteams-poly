@@ -39,7 +39,7 @@ public class ArrayLifting extends ArrayTranslations {
 			BlockScope  scope,
 			Expression  teamExpr,
 			Expression  expression,
-			TypeBinding providedType, 
+			TypeBinding providedType,
 			TypeBinding requiredType)
 	{
 		this._teamExpr = teamExpr;

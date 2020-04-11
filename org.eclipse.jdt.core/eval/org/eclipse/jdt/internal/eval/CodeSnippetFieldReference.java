@@ -15,7 +15,7 @@
  *								Bug 458396 - NPE in CodeStream.invoke()
  *******************************************************************************/
 package org.eclipse.jdt.internal.eval;
- 
+
 import org.eclipse.jdt.internal.compiler.ast.Assignment;
 import org.eclipse.jdt.internal.compiler.ast.CompoundAssignment;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
@@ -158,10 +158,10 @@ public void generateCompoundAssignment(BlockScope currentScope, CodeStream codeS
 				codeStream.generateImplicitConversion(this.implicitConversion);
 				// generate the increment value (will by itself  be promoted to the operation value)
 				if (expression == IntLiteral.One){ // prefix operation
-					codeStream.generateConstant(expression.constant, this.implicitConversion);			
+					codeStream.generateConstant(expression.constant, this.implicitConversion);
 				} else {
 					expression.generateCode(currentScope, codeStream, true);
-				}		
+				}
 				// perform the operation
 				codeStream.sendOperator(operator, operationTypeID);
 				// cast the value back to the array reference type
@@ -195,10 +195,10 @@ public void generateCompoundAssignment(BlockScope currentScope, CodeStream codeS
 			codeStream.generateImplicitConversion(this.implicitConversion);
 			// generate the increment value (will by itself  be promoted to the operation value)
 			if (expression == IntLiteral.One){ // prefix operation
-				codeStream.generateConstant(expression.constant, this.implicitConversion);			
+				codeStream.generateConstant(expression.constant, this.implicitConversion);
 			} else {
 				expression.generateCode(currentScope, codeStream, true);
-			}		
+			}
 			// perform the operation
 			codeStream.sendOperator(operator, operationTypeID);
 			// cast the value back to the array reference type
@@ -214,7 +214,7 @@ public void generateCompoundAssignment(BlockScope currentScope, CodeStream codeS
 			}
 		}
 		// current stack is:
-		// value field receiver value				
+		// value field receiver value
 		codeStream.generateEmulatedWriteAccessForField(codegenBinding);
 	}
 }
@@ -294,9 +294,9 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 public TypeBinding resolveType(BlockScope scope) {
 	// Answer the signature type of the field.
 	// constants are propaged when the field is final
-	// and initialized with a (compile time) constant 
+	// and initialized with a (compile time) constant
 
-	// regular receiver reference 
+	// regular receiver reference
 	this.actualReceiverType = this.receiver.resolveType(scope);
 	if (this.actualReceiverType == null){
 		this.constant = Constant.NotAConstant;

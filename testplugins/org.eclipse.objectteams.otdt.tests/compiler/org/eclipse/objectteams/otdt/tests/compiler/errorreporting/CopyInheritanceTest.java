@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -36,16 +36,16 @@ public class CopyInheritanceTest extends TestBase {
 	}
 
 	/**
-	 * Test copy inheritance for string-array-references 
+	 * Test copy inheritance for string-array-references
 	 */
-	public void testCopyStringArrayReferences() 
+	public void testCopyStringArrayReferences()
 	{
 
-     
+
 		createFile("MySuperTeam","public team class MySuperTeam " +
-			  NL + "{ " +	
+			  NL + "{ " +
 			  NL + "	public class MyRole" +
-			  NL + "    { " +	
+			  NL + "    { " +
 			  NL + "	    String[] strArray;" +
 			  NL + "	    public  void roleMethod()" +
 		      NL + "	    {" +
@@ -56,25 +56,25 @@ public class CopyInheritanceTest extends TestBase {
 			  NL + "}");
 
 		createFile("MyTeam","public team class MyTeam extends MySuperTeam" +
-			  NL + "{ " +	
+			  NL + "{ " +
 			  NL + "}");
-		  		
+
 		compileFile("MyTeam");
-	
+
 		assertTrue(isCompilationSuccessful());
 	}
-	
+
 	/**
-	 * Test copy inheritance for role-array-references 
+	 * Test copy inheritance for role-array-references
 	 */
-	public void testCopyRoleArrayReferences() 
+	public void testCopyRoleArrayReferences()
 	{
 
-     
+
 		createFile("MySuperTeam","public team class MySuperTeam " +
-			  NL + "{ " +	
+			  NL + "{ " +
 			  NL + "	public class MyRole" +
-			  NL + "    { " +	
+			  NL + "    { " +
 			  NL + "	    MyRole[] roleArray;" +
 			  NL + "	    public  void roleMethod()" +
 			  NL + "	    {" +
@@ -85,25 +85,25 @@ public class CopyInheritanceTest extends TestBase {
 			  NL + "}");
 
 		createFile("MyTeam","public team class MyTeam extends MySuperTeam" +
-			  NL + "{ " +	
+			  NL + "{ " +
 			  NL + "}");
-		  		
+
 		compileFile("MyTeam");
-	
+
 		assertTrue(isCompilationSuccessful());
 	}
-	
+
 	/**
-	 * Test copy inheritance for int-array-references 
+	 * Test copy inheritance for int-array-references
 	 */
-	public void testCopyIntArrayReferences() 
+	public void testCopyIntArrayReferences()
 	{
 
-     
+
 		createFile("MySuperTeam","public team class MySuperTeam " +
-			  NL + "{ " +	
+			  NL + "{ " +
 			  NL + "	public class MyRole" +
-			  NL + "    { " +	
+			  NL + "    { " +
 			  NL + "	    int[] intArray;" +
 			  NL + "	    public  void roleMethod()" +
 			  NL + "	    {" +
@@ -114,24 +114,24 @@ public class CopyInheritanceTest extends TestBase {
 			  NL + "}");
 
 		createFile("MyTeam","public team class MyTeam extends MySuperTeam" +
-			  NL + "{ " +	
+			  NL + "{ " +
 			  NL + "}");
-		  		
+
 		compileFile("MyTeam");
-	
+
 		assertTrue(isCompilationSuccessful());
-	}	
+	}
 
 	/**
-	 * Test copy inheritance for array-length-field access 
+	 * Test copy inheritance for array-length-field access
 	 */
-	public void testCopyIntArrayLengthFieldAccess() 
+	public void testCopyIntArrayLengthFieldAccess()
 	{
 
 		createFile("MySuperTeam","public team class MySuperTeam " +
-			  NL + "{ " +	
+			  NL + "{ " +
 			  NL + "	public class MyRole" +
-			  NL + "    { " +	
+			  NL + "    { " +
 			  NL + "	    int[] intArray;" +
 			  NL + "	    public  void roleMethod()" +
 			  NL + "	    {" +
@@ -142,51 +142,51 @@ public class CopyInheritanceTest extends TestBase {
 			  NL + "}");
 
 		createFile("MyTeam","public team class MyTeam extends MySuperTeam" +
-			  NL + "{ " +	
+			  NL + "{ " +
 			  NL + "}");
-		  		
+
 		compileFile("MyTeam");
-	
+
 		assertTrue(isCompilationSuccessful());
-	}	
+	}
 
 
 	/**
-	 * Test copy inheritance with missing import in subclass 
+	 * Test copy inheritance with missing import in subclass
 	 */
-	public void testMissingImport1() 
+	public void testMissingImport1()
 	{
 		createFile("MySuperTeam","" +
 			  NL + "public team class MySuperTeam " +
-			  NL + "{ " +	
+			  NL + "{ " +
 			  NL + "	public class MyRole {}" +
 			  NL + "}");
 
 		createFile("MyTeam","" +
 			  NL + "public team class MyTeam extends MySuperTeam" +
-			  NL + "{ " +	
+			  NL + "{ " +
 			  NL + "	public class MyRole" +
-			  NL + "    { " +	
+			  NL + "    { " +
 			  NL + "	    BigDecimal roleMethod()" +
 			  NL + "	    {" +
 			  NL + "	    	return null;" +
 			  NL + "	    }" +
-			  NL + "    } " +			  
+			  NL + "    } " +
 			  NL + "}");
-		  		
+
 		compileFile("MyTeam");
-	
+
 		assertFalse(isCompilationSuccessful());
-	}	
+	}
 
 	/**
-	 * Test copy inheritance with missing import in subclass 
+	 * Test copy inheritance with missing import in subclass
 	 */
-	public void testMissingImport2() 
+	public void testMissingImport2()
 	{
 		createFile("MySuperTeam","" +
 			  NL + "public team class MySuperTeam " +
-			  NL + "{ " +	
+			  NL + "{ " +
 			  NL + "	public class MyRole {" +
 			  //NL + "       public void method(){}" +
 			  NL + "    }" +
@@ -194,9 +194,9 @@ public class CopyInheritanceTest extends TestBase {
 
 		createFile("MyTeam","" +
 			  NL + "public team class MyTeam extends MySuperTeam" +
-			  NL + "{ " +	
+			  NL + "{ " +
 			  NL + "	public class MyRole" +
-			  NL + "    { " +	
+			  NL + "    { " +
 			  NL + "	    BigDecimal roleMethod()" +
 			  NL + "	    {" +
 			  NL + "	    	return null;" +
@@ -206,12 +206,12 @@ public class CopyInheritanceTest extends TestBase {
 			  NL + "	    	return null;" +
 			  NL + "	    }" +
 
-			  NL + "    } " +			  
+			  NL + "    } " +
 			  NL + "}");
-		  		
+
 		compileFile("MyTeam");
-	
+
 		assertFalse(isCompilationSuccessful());
-	}	
+	}
 
 }

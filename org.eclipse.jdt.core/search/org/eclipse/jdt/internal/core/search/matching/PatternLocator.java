@@ -83,16 +83,16 @@ public static final int CLASS_CONTAINER = 2;
 public static final int METHOD_CONTAINER = 4;
 public static final int FIELD_CONTAINER = 8;
 //ObjectTeams: to increase the search performance we need an own match container for method mappings
-// - contains method specs and parameter mappings 
-//TODO(jsv): do we need a separate container for methodSpecs and parameter mappings? 
+// - contains method specs and parameter mappings
+//TODO(jsv): do we need a separate container for methodSpecs and parameter mappings?
 public static final int METHOD_MAPPING_CONTAINER = 16;
 //jsv}
 public static final int ALL_CONTAINER =
 	COMPILATION_UNIT_CONTAINER | CLASS_CONTAINER | METHOD_CONTAINER | FIELD_CONTAINER
 //ObjectTeams: add method mapping container to "ALL_CONTAINER"
-	| METHOD_MAPPING_CONTAINER ;	
-//jsv}	
-	
+	| METHOD_MAPPING_CONTAINER ;
+//jsv}
+
 
 /* match rule */
 public static final int RAW_MASK = SearchPattern.R_EQUIVALENT_MATCH | SearchPattern.R_ERASURE_MATCH;
@@ -129,7 +129,7 @@ public static PatternLocator patternLocator(SearchPattern pattern) {
 		    return new TeamDeclarationLocator((TeamTypePattern) pattern);
 		case IIndexConstants.ROLE_DECL_PATTERN :
 		    return new RoleDeclarationLocator((RoleTypePattern) pattern);
-		case IIndexConstants.REF_TO_TEAMPACKAGE_PATTERN : 
+		case IIndexConstants.REF_TO_TEAMPACKAGE_PATTERN :
 		    return new ReferenceToTeamLocator((ReferenceToTeamPackagePattern) pattern);
 //carp}
 		case IIndexConstants.MODULE_PATTERN:
@@ -214,7 +214,7 @@ protected TypeBinding getTypeNameBinding(int index) {
 }
 /**
  * Initializes this search pattern so that polymorphic search can be performed.
- */ 
+ */
 public void initializePolymorphicSearch(MatchLocator locator) {
 	// default is to do nothing
 }
@@ -271,7 +271,7 @@ public int match(CallinMappingDeclaration callinMappingDeclaration, MatchingNode
 public int match(ParameterMapping paramMapping, MatchingNodeSet nodeSet)
 {
     // each subtype should override if needed
-    return IMPOSSIBLE_MATCH;    
+    return IMPOSSIBLE_MATCH;
 }
 public int match(MethodSpec methodSpec, MatchingNodeSet nodeSet)
 {
@@ -344,7 +344,7 @@ protected boolean matchesName(char[] pattern, char[] name) {
 /**
  * Return how the given name matches the given pattern.
  * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=79866"
- * 
+ *
  * @param pattern
  * @param name
  * @return Possible values are:
@@ -459,9 +459,9 @@ protected void matchLevelAndReportImportRef(ImportReference importRef, Binding b
 	int level = resolveLevel(binding);
 	if (level >= INACCURATE_MATCH) {
 		matchReportImportRef(
-			importRef, 
-			binding, 
-			locator.createImportHandle(importRef), 
+			importRef,
+			binding,
+			locator.createImportHandle(importRef),
 			level == ACCURATE_MATCH
 				? SearchMatch.A_ACCURATE
 				: SearchMatch.A_INACCURATE,
@@ -543,7 +543,7 @@ public int resolveLevel(ASTNode possibleMatchingNode) {
  * Set the flavors for which the locator has to be focused on.
  * If not set, the locator will accept all matches with or without flavors.
  * When set, the locator will only accept match having the corresponding flavors.
- * 
+ *
  * @param flavors Bits mask specifying the flavors to be accepted or
  * 	<code>0</code> to ignore the flavors while accepting matches.
  */
@@ -571,7 +571,7 @@ protected void updateMatch(ParameterizedTypeBinding parameterizedBinding, char[]
 	if (isRaw && !this.match.isRaw()) {
 		this.match.setRaw(isRaw);
 	}
-	
+
 	// Update match
 	if (!endPattern && patternTypeArguments != null) {
 		// verify if this is a reference to the generic type itself
@@ -589,7 +589,7 @@ protected void updateMatch(ParameterizedTypeBinding parameterizedBinding, char[]
 			}
 			if (needUpdate) {
 				char[][] patternArguments =  patternTypeArguments[depth];
-				updateMatch(argumentsBindings, locator, patternArguments, patternHasTypeParameters);	
+				updateMatch(argumentsBindings, locator, patternArguments, patternHasTypeParameters);
 			}
 		} else {
 			char[][] patternArguments =  patternTypeArguments[depth];
@@ -626,7 +626,7 @@ protected void updateMatch(TypeBinding[] argumentsBinding, MatchLocator locator,
 	if (hasTypeParameters) {
 		matchRule = SearchPattern.R_ERASURE_MATCH;
 	}
-	
+
 	// Compare arguments lengthes
 	if (patternTypeArgsLength == typeArgumentsLength) {
 		if (!this.match.isRaw() && hasTypeParameters) {
@@ -687,7 +687,7 @@ protected void updateMatch(TypeBinding[] argumentsBinding, MatchLocator locator,
 			}
 			patternTypeName = Signature.toCharArray(patternTypeName);
 			TypeBinding patternBinding = locator.getType(patternTypeArgument, patternTypeName);
-			
+
 			// If have no binding for pattern arg, then we won't be able to refine accuracy
 			if (patternBinding == null) {
 				if (argumentBinding.isWildcard()) {
@@ -731,7 +731,7 @@ protected void updateMatch(TypeBinding[] argumentsBinding, MatchLocator locator,
 								continue;
 						}
 					} else if (argumentBinding.isCompatibleWith(patternBinding)) {
-						// valid when arg is a subclass of pattern 
+						// valid when arg is a subclass of pattern
 						matchRule &= ~SearchPattern.R_FULL_MATCH;
 						continue;
 					}
@@ -791,7 +791,7 @@ protected void updateMatch(TypeBinding[] argumentsBinding, MatchLocator locator,
 						continue;
 					break;
 			}
-			
+
 			// Argument does not match => erasure match will be the only possible one
 			this.match.setRule(SearchPattern.R_ERASURE_MATCH);
 			return;
@@ -813,7 +813,7 @@ public int resolveLevel(Binding binding) {
 	return INACCURATE_MATCH;
 }
 /**
- * Returns whether the given type binding matches the given simple name pattern 
+ * Returns whether the given type binding matches the given simple name pattern
  * and qualification pattern.
  * Note that from since 3.1, this method resolve to accurate member or local types
  * even if they are not fully qualified (i.e. X.Member instead of p.X.Member).
@@ -887,7 +887,7 @@ protected int resolveLevelForType(char[] qualifiedPattern, TypeBinding type) {
 		IntersectionTypeBinding18 i18 = (IntersectionTypeBinding18) type;
 		for (ReferenceBinding ref : i18.intersectingTypes) {
 			result = resolveLevelForType(qualifiedPattern, ref);
-			if (result == ACCURATE_MATCH) return result; 
+			if (result == ACCURATE_MATCH) return result;
 			if (result == IMPOSSIBLE_MATCH) continue;
 			if (prev == IMPOSSIBLE_MATCH) prev = result;
 		}
@@ -918,7 +918,7 @@ protected int resolveLevelForType (char[] simpleNamePattern,
 	if (type == null || patternTypeArguments == null || patternTypeArguments.length == 0 || depth >= patternTypeArguments.length) {
 		return level;
 	}
-	
+
 	// if pattern is erasure match (see bug 79790), commute impossible to erasure
 	int impossible = this.isErasureMatch ? ERASURE_MATCH : IMPOSSIBLE_MATCH;
 
@@ -945,7 +945,7 @@ protected int resolveLevelForType (char[] simpleNamePattern,
 	// raw type always match
 	if (type.isRawType()) {
 		return level;
-	} 
+	}
 
 	// Standard types (i.e. neither generic nor parameterized nor raw types)
 	// cannot match pattern with type parameters or arguments
@@ -1015,7 +1015,7 @@ protected int resolveLevelForType (char[] simpleNamePattern,
 
 				// If pattern is not exact then match fails
 				if (patternTypeArgHasAnyChars) return impossible;
-					
+
 				// Look for bound name in type argument superclasses
 				boundBinding = boundBinding.superclass();
 				while (boundBinding != null) {
@@ -1032,7 +1032,7 @@ protected int resolveLevelForType (char[] simpleNamePattern,
 				}
 				return impossible;
 			}
-			
+
 			// See if names match
 			if (CharOperation.match(patternTypeArgument, argTypeBinding.shortReadableName(), this.isCaseSensitive) ||
 				CharOperation.match(patternTypeArgument, argTypeBinding.readableName(), this.isCaseSensitive)) {
@@ -1065,7 +1065,7 @@ protected int resolveLevelForType (char[] simpleNamePattern,
 			return impossible;
 		}
 	}
-	
+
 	// Recurse on enclosing type
 	TypeBinding enclosingType = paramTypeBinding.enclosingType();
 	if (enclosingType != null && enclosingType.isParameterizedType() && depth < patternTypeArguments.length && qualificationPattern != null) {

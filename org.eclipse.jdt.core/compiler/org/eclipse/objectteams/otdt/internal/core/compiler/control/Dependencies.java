@@ -282,7 +282,7 @@ public class Dependencies implements ITranslationStates {
 		boolean done = true;
 		if (StateHelper.unitHasState(unit, state))
 			return new Pair<Boolean,Success>(done, Success.OK);
-		
+
 		if (environment == null) {
 			if (unit.scope != null && unit.scope.environment != null)
 				environment = unit.scope.environment;
@@ -384,7 +384,7 @@ public class Dependencies implements ITranslationStates {
 			e.logWarning("Processing CU "+String.valueOf(unit.getFileName())+" failed"); //$NON-NLS-1$ //$NON-NLS-2$
 			success = Success.Fail;
 		}
-		
+
 		return new Pair<Boolean,Success>(done, success);
 	}
 
@@ -1537,7 +1537,7 @@ public class Dependencies implements ITranslationStates {
 			faultInRoleImports(roleType);
 		}
 	}
-	
+
 //        	if (teamDecl.isRole()) {
 //        		ensureRoleState(teamDecl.getRoleModel(), STATE_TYPES_ADJUSTED);
 //        	}
@@ -1560,7 +1560,7 @@ public class Dependencies implements ITranslationStates {
 	 * For team:
 	 * 1. copy synthetic access methods
 	 * For role:
-	 * 0. Binary roles: bindings for methods to be created by the OTRE 
+	 * 0. Binary roles: bindings for methods to be created by the OTRE
 	 * 1. creation methods
      * 2. getTeam methods
 	 * 3. add method from non-role superclasses to the interface part.
@@ -1663,13 +1663,13 @@ public class Dependencies implements ITranslationStates {
 
         // 5. special case roles which need an abstract _OT$getBase() method:
 		StandardElementGenerator.createGetBaseForUnboundLowerable(clazz);
-        
+
 		// 6. resolve method mappings and create callout methods:
 		MethodMappingResolver resolver = resolveCalloutMappings(clazz);
 		CalloutImplementor.transformCallouts(clazz);
 		if (resolver != null)
 			resolver.resolve(false/*doCallout*/); // callins last so all methods incl. callout are already in place
-		
+
 		if (subRoleDecl != null)
 			checkMissingMethods(subRole, subRoleDecl);
 
@@ -1678,7 +1678,7 @@ public class Dependencies implements ITranslationStates {
     }
 
     // detail of STATE_METHODS_CREATED (binary case):
-	private static void createCreators(RoleModel clazz, TypeDeclaration teamType, ReferenceBinding subRole, SourceTypeBinding subTeam) 
+	private static void createCreators(RoleModel clazz, TypeDeclaration teamType, ReferenceBinding subRole, SourceTypeBinding subTeam)
 	{
 		boolean needMethodBodies = needMethodBodies(teamType);
 		MethodBinding[] methodBindings = subRole.methods();
@@ -1706,7 +1706,7 @@ public class Dependencies implements ITranslationStates {
 	}
 
 	// detail of STATE_METHODS_CREATED (AST case):
-	private static void createCtorsAndCreators(RoleModel clazz, TypeDeclaration teamType, TypeDeclaration subRoleDecl, SourceTypeBinding subTeam) 
+	private static void createCtorsAndCreators(RoleModel clazz, TypeDeclaration teamType, TypeDeclaration subRoleDecl, SourceTypeBinding subTeam)
 	{
 		// ensure we have all constructors from tsuper (incl. default ctor)
 		for (ReferenceBinding tsuperRole : clazz.getTSuperRoleBindings())
@@ -1720,8 +1720,8 @@ public class Dependencies implements ITranslationStates {
 		if (methodDeclarations != null)
 		    for (int i=0; i<methodDeclarations.length; i++)
 		    	if (methodDeclarations[i].isConstructor() && !TSuperHelper.isTSuper(methodDeclarations[i].binding)) {
-		    		hasConstructor = true; 
-		    		break; 
+		    		hasConstructor = true;
+		    		break;
 		    	}
 		if (!hasConstructor) {
 			ConstructorDeclaration defCtor = subRoleDecl.createDefaultConstructor(needMethodBodies, false);
@@ -1756,7 +1756,7 @@ public class Dependencies implements ITranslationStates {
 	}
 
 	// detail of STATE_METHODS_CREATED:
-	private static MethodMappingResolver resolveCalloutMappings(RoleModel role) 
+	private static MethodMappingResolver resolveCalloutMappings(RoleModel role)
 	{
 		ReferenceBinding roleBinding = role.getBinding();
 
@@ -1765,7 +1765,7 @@ public class Dependencies implements ITranslationStates {
 			&& Config.getConfig().verifyMethods)
 		{
 			boolean hasBaseclassProblem = role.hasBaseclassProblem();
-			
+
 			if (!hasBaseclassProblem) {
 				ReferenceBinding baseclass = role.getBaseTypeBinding();
 				if (baseclass != null && !role._playedByEnclosing)
@@ -1784,7 +1784,7 @@ public class Dependencies implements ITranslationStates {
 
 			// make sure tsuper wrappers are copied to current role:
 			CopyInheritance.copyGeneratedFeatures(role);
-			
+
 			// actually need to proceed even with no base class, because
 			// method mappings without baseclass are reported within resolve() below:
 			MethodMappingResolver resolver = new MethodMappingResolver(role, !hasBaseclassProblem && needMethodBodies(roleDecl));
@@ -1802,12 +1802,12 @@ public class Dependencies implements ITranslationStates {
 				return;
 			ClassScope scope = roleDecl.scope;
 			boolean missing = false;
-			MethodBinding equals = roleBinding.getExactMethod(TypeConstants.EQUALS, 
+			MethodBinding equals = roleBinding.getExactMethod(TypeConstants.EQUALS,
 															  new TypeBinding[] {scope.getJavaLangObject()}, scope.compilationUnitScope());
 			if (equals == null || !equals.isValidBinding() || TypeBinding.notEquals(equals.declaringClass, roleBinding)) {
 				missing = true;
 			} else {
-				MethodBinding hashCode = roleBinding.getExactMethod(TypeConstants.HASHCODE, 
+				MethodBinding hashCode = roleBinding.getExactMethod(TypeConstants.HASHCODE,
 						  										  	Binding.NO_PARAMETERS, scope.compilationUnitScope());
 				if (hashCode == null || !hashCode.isValidBinding() || TypeBinding.notEquals(hashCode.declaringClass, roleBinding))
 					missing = true;
@@ -1816,7 +1816,7 @@ public class Dependencies implements ITranslationStates {
 				scope.problemReporter().missingEqualsHashCodeWithInstantation(scope.referenceContext, instantiationPolicy);
 			}
 		}
-		// copied abstract methods are not yet checked for callout inference (which is normally triggered from checkMethods()) 
+		// copied abstract methods are not yet checked for callout inference (which is normally triggered from checkMethods())
 		if (roleBinding.isClass() && roleDecl.methods != null) {
 			for (AbstractMethodDeclaration method : roleDecl.methods) {
 				if (((method.modifiers & ClassFileConstants.AccAbstract) != 0) && method.isCopied) {
@@ -1865,7 +1865,7 @@ public class Dependencies implements ITranslationStates {
 	        }
 
 	        CopyInheritance.weakenTeamMethodSignatures(teamDecl);
-	        
+
 		}
 		teamModel.setState(STATE_TYPES_ADJUSTED);
 		return true;
@@ -2001,7 +2001,7 @@ public class Dependencies implements ITranslationStates {
         TypeDeclaration roleDecl = role.getAst();
         WeavingScheme weavingScheme = role.getWeavingScheme(); // always trigger initialization
 		if (Config.getConfig().verifyMethods)
-        { 
+        {
 			if (roleDecl == null) {
 				TeamModel teamModel = role.getTeamModel();
 				if (teamModel != null && teamModel.getAst() != null) {

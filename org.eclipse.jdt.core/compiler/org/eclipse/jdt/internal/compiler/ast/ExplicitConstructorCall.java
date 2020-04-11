@@ -178,7 +178,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 				if ((this.bits & ASTNode.Unchecked) != 0 && this.genericTypeArguments == null) {
 					// https://bugs.eclipse.org/bugs/show_bug.cgi?id=277643, align with javac on JLS 15.12.2.6
 					thrownExceptions = currentScope.environment().convertToRawTypes(this.binding.thrownExceptions, true, true);
-				}				
+				}
 				// check exceptions
 				flowContext.checkExceptionHandlers(
 					thrownExceptions,
@@ -654,7 +654,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 					this.binding       = tsuperMethod;
 					argumentTypes = tsuperArgs;
 				}
-				
+
 				// perform any adjustments needed for declared lifting in team constructors:
 				if (this.binding.problemId() == ProblemReasons.NotFound) {
 					argumentTypes = checkLiftingTeamCtor(scope, argumentTypes, (ConstructorDeclaration)methodDeclaration);
@@ -865,7 +865,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 	public void setFieldIndex(int depth) {
 		// ignore for here
 	}
-	
+
 	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
 		if (visitor.visit(this, scope)) {
@@ -895,17 +895,17 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 	public void registerInferenceContext(ParameterizedGenericMethodBinding method, InferenceContext18 infCtx18) {
 		// Nothing to do.
 	}
-	
+
 	@Override
 	public void registerResult(TypeBinding targetType, MethodBinding method) {
 		// Nothing to do.
 	}
-	
+
 	@Override
 	public InferenceContext18 getInferenceContext(ParameterizedMethodBinding method) {
 		return null;
 	}
-	
+
 	@Override
 	public void cleanUpInferenceContexts() {
 		// Nothing to do.

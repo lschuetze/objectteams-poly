@@ -74,7 +74,7 @@ public class Misc extends AbstractOTJLDTest {
      // an abstract team instantiates an abstract role
      // 0.m.1-otjld-abstract-relevant-role-instantiated-2
      public void test0m1_abstractRelevantRoleInstantiated2() {
-        
+
         runConformTest(
              new String[] {
  		"Team0m1arri2_2.java",
@@ -106,7 +106,7 @@ public class Misc extends AbstractOTJLDTest {
      // an abstract team instantiates an abstract role
      // 0.m.1-otjld-abstract-relevant-role-instantiated-3
      public void test0m1_abstractRelevantRoleInstantiated3() {
-        
+
         runConformTest(
              new String[] {
  		"Team0m1arri3_2.java",
@@ -164,10 +164,10 @@ public class Misc extends AbstractOTJLDTest {
              "OTJLD 2.5(b)");
      }
 
-     // 
+     //
      // 0.m.2-otjld-string-constant-limit-1
      public void test0m2_stringConstantLimit1() {
-        
+
         runConformTest(
              new String[] {
  		"Team0m2scl1_2.java",
@@ -206,7 +206,7 @@ public class Misc extends AbstractOTJLDTest {
      // an integer constant must remain within the range of short constant pool indices - read from bytecode
      // 0.m.2-otjld-string-constant-limit-2
      public void test0m2_stringConstantLimit2() {
-        
+
         runConformTest(
              new String[] {
  		"Team0m2scl2_2.java",
@@ -248,7 +248,7 @@ public class Misc extends AbstractOTJLDTest {
      // an integer constant must remain within the range of short constant pool indices - compile in one go (RoleModel lost its AST, still enable copying)
      // 0.m.2-otjld-string-constant-limit-3
      public void test0m2_stringConstantLimit3() {
-        
+
         runConformTest(
              new String[] {
  		"Team0m2scl3_2.java",
@@ -290,7 +290,7 @@ public class Misc extends AbstractOTJLDTest {
      // a long constant must remain within the range of short constant pool indices - read from bytecode
      // 0.m.2-otjld-string-constant-limit-4
      public void test0m2_stringConstantLimit4() {
-        
+
         runConformTest(
              new String[] {
  		"Team0m2scl4_2.java",
@@ -332,7 +332,7 @@ public class Misc extends AbstractOTJLDTest {
      // a float constant must remain within the range of short constant pool indices - compile in one go
      // 0.m.2-otjld-string-constant-limit-5
      public void test0m2_stringConstantLimit5() {
-        
+
         runConformTest(
              new String[] {
  		"Team0m2scl5_2.java",
@@ -371,7 +371,7 @@ public class Misc extends AbstractOTJLDTest {
              "OK6.7");
      }
 
-     // 
+     //
      // 0.m.3-otjld-mismatching-filename-1
      public void test0m3_mismatchingFilename1() {
          runNegativeTestMatching(
@@ -428,7 +428,7 @@ public class Misc extends AbstractOTJLDTest {
     	 	customOptions,
     	 	null/*requestor*/);
      }
-     
+
      String[] getClassLibraries() {
  		if (this.verifier != null)
  			this.verifier.shutDown();
@@ -457,60 +457,60 @@ public class Misc extends AbstractOTJLDTest {
     	 runConformTest(
     		new String[] {
     			"potj/Main.java",
-    			"package potj;\n" + 
-    			"import p4.SubSubBase;\n" + 
-    			"public class Main {\n" + 
-    			"	public static void main(String[] args) {\n" + 
-    			"		new SubTeam().activate();\n" + 
-    			"		new Team3().activate();\n" + 
-    			"		new SubSubBase().foo();\n" + 
-    			"	}\n" + 
+    			"package potj;\n" +
+    			"import p4.SubSubBase;\n" +
+    			"public class Main {\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		new SubTeam().activate();\n" +
+    			"		new Team3().activate();\n" +
+    			"		new SubSubBase().foo();\n" +
+    			"	}\n" +
     			"}\n",
     			"potj/SuperTeam.java",
-    			"package potj;\n" + 
-    			"\n" + 
-    			"import base p1.AbstractSuperBase;\n" + 
-    			"public team class SuperTeam {\n" + 
+    			"package potj;\n" +
+    			"\n" +
+    			"import base p1.AbstractSuperBase;\n" +
+    			"public team class SuperTeam {\n" +
     			"	protected class R0 playedBy AbstractSuperBase {\n" + // weaving into a 1.5 class file (using ldc for class literal)
-    			"		ci <- replace foo;\n" + 
-    			"\n" + 
-    			"		callin void ci() {\n" + 
-    			"			System.out.println(\"SuperTeam$R.ci()\");\n" + 
-    			"			base.ci();\n" + 
-    			"		}\n" + 
-    			"	}\n" + 
+    			"		ci <- replace foo;\n" +
+    			"\n" +
+    			"		callin void ci() {\n" +
+    			"			System.out.println(\"SuperTeam$R.ci()\");\n" +
+    			"			base.ci();\n" +
+    			"		}\n" +
+    			"	}\n" +
     			"}",
     			"potj/SubTeam.java",
-    			"package potj;\n" + 
-    			"\n" + 
-    			"import base p4.SubBase;\n" + 
-    			"public team class SubTeam extends SuperTeam {\n" + 
+    			"package potj;\n" +
+    			"\n" +
+    			"import base p4.SubBase;\n" +
+    			"public team class SubTeam extends SuperTeam {\n" +
     			"	protected class R1 extends R0 playedBy SubBase {\n" + // weaving into a 1.4 class file (needs manual management using Class.forName())
-    			"		\n" + 
-    			"	}\n" + 
+    			"		\n" +
+    			"	}\n" +
     			"}\n",
     			"potj/Team3.java",
-    			"package potj;\n" + 
-    			"\n" + 
-    			"import base p4.SubSubBase;\n" + 
-    			"public team class Team3 {\n" + 
-    			"	protected class R3 playedBy SubSubBase {\n" + 
-    			"		rm <-after foo;\n" + 
-    			"\n" + 
-    			"		private void rm() {\n" + 
-    			"			System.out.println(\"R3.rm\");\n" + 
-    			"		}\n" + 
-    			"	}\n" + 
+    			"package potj;\n" +
+    			"\n" +
+    			"import base p4.SubSubBase;\n" +
+    			"public team class Team3 {\n" +
+    			"	protected class R3 playedBy SubSubBase {\n" +
+    			"		rm <-after foo;\n" +
+    			"\n" +
+    			"		private void rm() {\n" +
+    			"			System.out.println(\"R3.rm\");\n" +
+    			"		}\n" +
+    			"	}\n" +
     			"}\n",
     		},
-    		"SuperTeam$R.ci()\n" + 
-			"SuperBase.foo()\n" + 
+    		"SuperTeam$R.ci()\n" +
+			"SuperBase.foo()\n" +
 			"R3.rm",
             getClassLibraries(),
             false/*shouldFlushOutputDirectory*/,
             null/*vmArguments*/);
      }
-     
+
      // reading a base class compiled with a different weaving scheme is *no* problem
      public void testMixedClassFileFormats2() {
     	 WeavingScheme scheme = this.weavingScheme;
@@ -525,7 +525,7 @@ public class Misc extends AbstractOTJLDTest {
 	    			"public class Base {" +
 	    			"	public static void main(String[] args) {}\n" +
 	    			"}\n"
-	    		}, 
+	    		},
 	    		"", null, false, new String[] {"-Dotre2", "-Dotre.suppress.classformaterror.stderr=true"}, options, null); // force starting a new vm
 	    	 options.put(JavaCore.COMPILER_OPT_WEAVING_SCHEME, WeavingScheme.OTDRE.name());
 	    	 this.weavingScheme = WeavingScheme.OTDRE;
@@ -538,13 +538,13 @@ public class Misc extends AbstractOTJLDTest {
 	    			"	}\n" +
 	    			"	public static void main(String[] args) {}\n" +
 	    			"}\n"
-	    		}, 
+	    		},
 	    		"", null, false, new String[] {"-Dotdre2"}, options, null);
     	 } finally {
     		 this.weavingScheme = scheme;
     	 }
      }
-     
+
      // reading a team class compiled with a different weaving scheme *is* a problem
      public void testMixedClassFileFormats3() {
     	 WeavingScheme scheme = this.weavingScheme;
@@ -559,7 +559,7 @@ public class Misc extends AbstractOTJLDTest {
 	    			"public team class Team1 {\n" +
 	    			"	public static void main(String[] args) {}\n" +
 	    			"}\n"
-	    		}, 
+	    		},
 	    		"", null, false, new String[] {"-Dotre3", "-Dotre.suppress.classformaterror.stderr=true"}, options, null);
 	    	 options.put(JavaCore.COMPILER_OPT_WEAVING_SCHEME, WeavingScheme.OTDRE.name());
 	    	 this.weavingScheme = WeavingScheme.OTDRE;
@@ -572,11 +572,11 @@ public class Misc extends AbstractOTJLDTest {
 	    			"	}\n" +
 	    			"}\n"
 	    		},
-	    		"----------\n" + 
-				"1. ERROR in mcff3\\Team2.java (at line 1)\n" + 
-				"	package mcff3;\n" + 
-				"	^\n" + 
-				"Class file "+OUTPUT_DIR+"/mcff3/Team1.class has been compiled for incompatible weaving target \'OTRE\', please consider a full build of the declaring project.\n" + 
+	    		"----------\n" +
+				"1. ERROR in mcff3\\Team2.java (at line 1)\n" +
+				"	package mcff3;\n" +
+				"	^\n" +
+				"Class file "+OUTPUT_DIR+"/mcff3/Team1.class has been compiled for incompatible weaving target \'OTRE\', please consider a full build of the declaring project.\n" +
 				"----------\n",
 				null,
 	    		false,
@@ -600,7 +600,7 @@ public class Misc extends AbstractOTJLDTest {
 	    			"public team class Team1 {\n" +
 	    			"	public static void main(String[] args) {}\n" +
 	    			"}\n"
-	    		}, 
+	    		},
 	    		"", null, false, new String[] {"-Dotdre4"}, options, null);
 	    	 options.put(JavaCore.COMPILER_OPT_WEAVING_SCHEME, WeavingScheme.OTRE.name());
 	    	 this.weavingScheme = WeavingScheme.OTRE;
@@ -612,11 +612,11 @@ public class Misc extends AbstractOTJLDTest {
 	    			"	protected class R {}\n" +
 	    			"}\n"
 	    		},
-	    		"----------\n" + 
-				"1. ERROR in mcff4\\Team2.java (at line 1)\n" + 
-				"	package mcff4;\n" + 
-				"	^\n" + 
-				"Class file "+OUTPUT_DIR+"/mcff4/Team1.class has been compiled for incompatible weaving target \'OTDRE\', please consider a full build of the declaring project.\n" + 
+	    		"----------\n" +
+				"1. ERROR in mcff4\\Team2.java (at line 1)\n" +
+				"	package mcff4;\n" +
+				"	^\n" +
+				"Class file "+OUTPUT_DIR+"/mcff4/Team1.class has been compiled for incompatible weaving target \'OTDRE\', please consider a full build of the declaring project.\n" +
 				"----------\n",
 				null,
 	    		false,
@@ -632,120 +632,120 @@ public class Misc extends AbstractOTJLDTest {
     	 runConformTest(
     		new String[] {
     			"TeamSerializationMain.java",
-    				"import java.io.ByteArrayInputStream;\n" + 
-    				"import java.io.ByteArrayOutputStream;\n" + 
-    				"import java.io.IOException;\n" + 
-    				"import java.io.ObjectInputStream;\n" + 
-    				"import java.io.ObjectOutputStream;\n" + 
-    				"\n" + 
-    				"import org.objectteams.Team;\n" + 
-    				"\n" + 
-    				"import teampack.PersistentTeam;\n" + 
-    				"import basepack.PersistentBase;\n" + 
-    				"\n" + 
-    				"\n" + 
-    				"public class TeamSerializationMain {\n" + 
-    				"	public static void main(String[] args) throws IOException, ClassNotFoundException {\n" + 
-    				"		PersistentTeam t = new PersistentTeam();\n" + 
-    				"		t.activate(Team.ALL_THREADS);\n" + 
-    				"		PersistentBase basel = new PersistentBase(\"b1\");\n" + 
-    				"		t.name(basel, \"R1\");\n" + 
-    				"		basel.hello();\n" + 
-    				"\n" + 
-    				"		// store, deactivate and forget it:\n" + 
-    				"		ByteArrayOutputStream baos = new ByteArrayOutputStream();\n" + 
-    				"		ObjectOutputStream oos = new ObjectOutputStream(baos);\n" + 
-    				"		oos.writeObject(t);\n" + 
-    				"		t.deactivate(Team.ALL_THREADS);\n" + 
-    				"		t = null;\n" + 
-    				"		basel = null;\n" + 
-    				"		\n" + 
-    				"		// no team active now:\n" + 
-    				"		new PersistentBase(\"interm\").hello();\n" + 
-    				"\n" + 
-    				"		// restore:\n" + 
-    				"		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));\n" + 
-    				"		Object o = ois.readObject();\n" + 
-    				"		basel = (PersistentBase) ((PersistentTeam)o).getBase();\n" + 
-    				"		\n" + 
-    				"		// trigger from old and new objects:\n" + 
-    				"		basel.hello();\n" + 
-    				"		new PersistentBase(\"finale\").hello();\n" + 
-    				"	}\n" + 
+    				"import java.io.ByteArrayInputStream;\n" +
+    				"import java.io.ByteArrayOutputStream;\n" +
+    				"import java.io.IOException;\n" +
+    				"import java.io.ObjectInputStream;\n" +
+    				"import java.io.ObjectOutputStream;\n" +
+    				"\n" +
+    				"import org.objectteams.Team;\n" +
+    				"\n" +
+    				"import teampack.PersistentTeam;\n" +
+    				"import basepack.PersistentBase;\n" +
+    				"\n" +
+    				"\n" +
+    				"public class TeamSerializationMain {\n" +
+    				"	public static void main(String[] args) throws IOException, ClassNotFoundException {\n" +
+    				"		PersistentTeam t = new PersistentTeam();\n" +
+    				"		t.activate(Team.ALL_THREADS);\n" +
+    				"		PersistentBase basel = new PersistentBase(\"b1\");\n" +
+    				"		t.name(basel, \"R1\");\n" +
+    				"		basel.hello();\n" +
+    				"\n" +
+    				"		// store, deactivate and forget it:\n" +
+    				"		ByteArrayOutputStream baos = new ByteArrayOutputStream();\n" +
+    				"		ObjectOutputStream oos = new ObjectOutputStream(baos);\n" +
+    				"		oos.writeObject(t);\n" +
+    				"		t.deactivate(Team.ALL_THREADS);\n" +
+    				"		t = null;\n" +
+    				"		basel = null;\n" +
+    				"		\n" +
+    				"		// no team active now:\n" +
+    				"		new PersistentBase(\"interm\").hello();\n" +
+    				"\n" +
+    				"		// restore:\n" +
+    				"		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));\n" +
+    				"		Object o = ois.readObject();\n" +
+    				"		basel = (PersistentBase) ((PersistentTeam)o).getBase();\n" +
+    				"		\n" +
+    				"		// trigger from old and new objects:\n" +
+    				"		basel.hello();\n" +
+    				"		new PersistentBase(\"finale\").hello();\n" +
+    				"	}\n" +
     				"}\n",
     			"teampack/PersistentTeam.java",
-    				"package teampack;\n" + 
-    				"\n" + 
-    				"import java.io.IOException;\n" + 
-    				"import java.io.Serializable;\n" + 
-    				"\n" + 
-    				"import base basepack.PersistentBase;\n" + 
-    				"\n" + 
-    				"public team class PersistentTeam implements Serializable {\n" + 
-    				"\n" + 
-    				"	private void writeObject(java.io.ObjectOutputStream out)\n" + 
-    				"            throws IOException\n" + 
-    				"    {\n" + 
-    				"        out.defaultWriteObject();\n" + 
-    				"        writeGlobalActivationState(out);\n" + 
-    				"        Object[] allRoles = getAllRoles();\n" + 
-    				"        out.writeInt(allRoles.length);\n" + 
-    				"		 for (Object o : allRoles)\n" + 
-    				"        	out.writeObject(o);\n" + 
-    				"    }\n" + 
-    				"    private void readObject(java.io.ObjectInputStream in)\n" + 
-    				"            throws IOException, ClassNotFoundException\n" + 
-    				"    {\n" + 
-    				"        in.defaultReadObject();\n" + 
-    				"        readGlobalActivationState(in);\n" + 
-    				"        restore();\n" + 
-    				"        int numRoles = in.readInt();\n" + 
-    				"        for (int i = 0; i < numRoles; i++)\n" + 
-    				"			restoreRole(R.class, in.readObject());\n" + 
-    				"    }\n" + 
-    				"    \n" + 
-    				"    protected class R implements Serializable, ILowerable playedBy PersistentBase {\n" + 
-    				"    	protected String roleName;\n" + 
-    				"\n" + 
-    				"		void hello() <- after void hello();\n" + 
-    				"    	\n" + 
-    				"		private void hello() {\n" + 
-    				"			System.out.println(\"Says \"+this.roleName);\n" + 
-    				"		}    	\n" + 
-    				"    }\n" + 
-    				"\n" + 
-    				"	public void name(PersistentBase as R r, String name) {\n" + 
-    				"		r.roleName = name;\n" + 
-    				"	}\n" + 
-    				"	\n" + 
-    				"	public Object getBase() {\n" + 
-    				"		R[] rs = getAllRoles(R.class);\n" + 
-    				"		return rs[0].lower();\n" + 
-    				"	}\n" + 
+    				"package teampack;\n" +
+    				"\n" +
+    				"import java.io.IOException;\n" +
+    				"import java.io.Serializable;\n" +
+    				"\n" +
+    				"import base basepack.PersistentBase;\n" +
+    				"\n" +
+    				"public team class PersistentTeam implements Serializable {\n" +
+    				"\n" +
+    				"	private void writeObject(java.io.ObjectOutputStream out)\n" +
+    				"            throws IOException\n" +
+    				"    {\n" +
+    				"        out.defaultWriteObject();\n" +
+    				"        writeGlobalActivationState(out);\n" +
+    				"        Object[] allRoles = getAllRoles();\n" +
+    				"        out.writeInt(allRoles.length);\n" +
+    				"		 for (Object o : allRoles)\n" +
+    				"        	out.writeObject(o);\n" +
+    				"    }\n" +
+    				"    private void readObject(java.io.ObjectInputStream in)\n" +
+    				"            throws IOException, ClassNotFoundException\n" +
+    				"    {\n" +
+    				"        in.defaultReadObject();\n" +
+    				"        readGlobalActivationState(in);\n" +
+    				"        restore();\n" +
+    				"        int numRoles = in.readInt();\n" +
+    				"        for (int i = 0; i < numRoles; i++)\n" +
+    				"			restoreRole(R.class, in.readObject());\n" +
+    				"    }\n" +
+    				"    \n" +
+    				"    protected class R implements Serializable, ILowerable playedBy PersistentBase {\n" +
+    				"    	protected String roleName;\n" +
+    				"\n" +
+    				"		void hello() <- after void hello();\n" +
+    				"    	\n" +
+    				"		private void hello() {\n" +
+    				"			System.out.println(\"Says \"+this.roleName);\n" +
+    				"		}    	\n" +
+    				"    }\n" +
+    				"\n" +
+    				"	public void name(PersistentBase as R r, String name) {\n" +
+    				"		r.roleName = name;\n" +
+    				"	}\n" +
+    				"	\n" +
+    				"	public Object getBase() {\n" +
+    				"		R[] rs = getAllRoles(R.class);\n" +
+    				"		return rs[0].lower();\n" +
+    				"	}\n" +
     				"}\n",
     			"packbase/PersistentBase.java",
-	    			"package basepack;\n" + 
-	    			"\n" + 
-	    			"import java.io.Serializable;\n" + 
-	    			"\n" + 
-	    			"public class PersistentBase implements Serializable {\n" + 
-	    			"	String name;\n" + 
-	    			"\n" + 
-	    			"	public PersistentBase(String name) {\n" + 
-	    			"		this.name = name;\n" + 
-	    			"	}\n" + 
-	    			"\n" + 
-	    			"	public void hello() {\n" + 
-	    			"		System.out.println(\"Hello \"+this.name);\n" + 
-	    			"	}\n" + 
+	    			"package basepack;\n" +
+	    			"\n" +
+	    			"import java.io.Serializable;\n" +
+	    			"\n" +
+	    			"public class PersistentBase implements Serializable {\n" +
+	    			"	String name;\n" +
+	    			"\n" +
+	    			"	public PersistentBase(String name) {\n" +
+	    			"		this.name = name;\n" +
+	    			"	}\n" +
+	    			"\n" +
+	    			"	public void hello() {\n" +
+	    			"		System.out.println(\"Hello \"+this.name);\n" +
+	    			"	}\n" +
 	    			"}\n"
-    		}, 
-    		"Hello b1\n" + 
-			"Says R1\n" + 
-			"Hello interm\n" + 
-			"Hello b1\n" + 
-			"Says R1\n" + 
-			"Hello finale\n" + 
+    		},
+    		"Hello b1\n" +
+			"Says R1\n" +
+			"Hello interm\n" +
+			"Hello b1\n" +
+			"Says R1\n" +
+			"Hello finale\n" +
 			"Says null");
      }
 }

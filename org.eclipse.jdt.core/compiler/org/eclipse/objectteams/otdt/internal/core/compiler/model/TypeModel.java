@@ -124,7 +124,7 @@ public class TypeModel extends ModelElement {
 	 * Version number of the compiler that created a (binary) type;
 	 */
 	public int _compilerVersion;
-	
+
 	WeavingScheme weavingScheme;
 
 	public void setCompilerVersion(int version, WeavingScheme weavingScheme) {
@@ -166,7 +166,7 @@ public class TypeModel extends ModelElement {
         		|| this._binding.kind() == Binding.INTERSECTION_TYPE
         		|| this._binding.kind() == Binding.INTERSECTION_TYPE18)
         		return new TypeModel[0]; // has no members
-        	
+
         	if (this._binding.isUnresolvedType())
         		return new TypeModel[0]; // members unknown and cannot resolve here :(
 
@@ -547,7 +547,7 @@ public class TypeModel extends ModelElement {
 	        this._lineNumberProvider = new LineNumberProvider(this._binding, this._maxLineNumber);
 	    return this._lineNumberProvider;
 	}
-	
+
 	public static LineNumberProvider getLineNumberProvider(TypeDeclaration type) {
 		if (type.isRole())
 			return type.getRoleModel().getLineNumberProvider();

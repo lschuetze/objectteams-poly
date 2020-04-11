@@ -34,12 +34,12 @@ private boolean allowModuleRegex = false; // enable to try experimental Module R
 public boolean moduleGraph = false;
 /* package */ char[][] moduleGraphElements = null;
 
-// set to CLASS_SUFFIX for only matching classes 
+// set to CLASS_SUFFIX for only matching classes
 // set to INTERFACE_SUFFIX for only matching interfaces
 // set to ENUM_SUFFIX for only matching enums
 // set to ANNOTATION_TYPE_SUFFIX for only matching annotation types
 // set to TYPE_SUFFIX for matching both classes and interfaces
-public char typeSuffix; 
+public char typeSuffix;
 public int modifiers;
 public boolean secondary = false;
 
@@ -186,7 +186,7 @@ protected void addModuleNames(char[] modNames) {
 	final String explicit_unnamed = new String(IJavaSearchConstants.ALL_UNNAMED);
 	String[] names = new String(modNames).split(String.valueOf(CharOperation.COMMA_SEPARATOR));
 	int len = names.length;
-	if (this.allowModuleRegex && len > 0 && names[0] != null && names[0].length() > 0 
+	if (this.allowModuleRegex && len > 0 && names[0] != null && names[0].length() > 0
 			&& names[0].charAt(0) == IIndexConstants.ZERO_CHAR) { //pattern
 		names[0] = names[0].substring(1);
 		this.modulePatterns = new Pattern[len];
@@ -280,7 +280,7 @@ public char[][] getIndexCategories() {
 @Override
 public boolean matchesDecodedKey(SearchPattern decodedPattern) {
 	TypeDeclarationPattern pattern = (TypeDeclarationPattern) decodedPattern;
-	
+
 	// check type suffix
 	if (this.typeSuffix != pattern.typeSuffix && this.typeSuffix != TYPE_SUFFIX) {
 		if (!matchDifferentTypeSuffixes(this.typeSuffix, pattern.typeSuffix)) {

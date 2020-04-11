@@ -523,7 +523,7 @@ public abstract class ASTVisitor {
 		// do nothing by default
 	}
 	public void endVisit(ReferenceExpression referenceExpression, BlockScope blockScope) {
-		// do nothing by default	
+		// do nothing by default
 	}
 	public void endVisit(IntersectionCastTypeReference intersectionCastTypeReference, ClassScope scope) {
 		// do nothing by default
@@ -573,7 +573,7 @@ public abstract class ASTVisitor {
 		// do nothing by default
 	}
 	public void endVisit(PrecedenceDeclaration precedenceDeclaration, BlockScope scope) {
-		// do nothing by default	
+		// do nothing by default
 	}
 // SH et al}
 	public boolean visit(

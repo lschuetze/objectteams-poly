@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2015 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -29,7 +29,7 @@ import junit.framework.Test;
 
 /**
  * Former jacks tests from section file-structure (1.5.*)
- * @author stephan 
+ * @author stephan
  */
 @SuppressWarnings("unchecked")
 public class FileStructure extends AbstractOTJLDTest {
@@ -37,7 +37,7 @@ public class FileStructure extends AbstractOTJLDTest {
 	public FileStructure(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -45,7 +45,7 @@ public class FileStructure extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -64,7 +64,7 @@ public class FileStructure extends AbstractOTJLDTest {
 	// an externally stored role class uses a feature of its team class
     // 1.5.1-otjld-access-from-external-role
     public void test151_accessFromExternalRole() {
-       
+
        runConformTest(
             new String[] {
 		"T151aferMain.java",
@@ -107,7 +107,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // an externally stored role class uses a 'friendly' feature of a class in the same package as its team class
     // 1.5.2-otjld-access-from-external-role-1
     public void test152_accessFromExternalRole1() {
-       
+
        runConformTest(
             new String[] {
 		"T152afer1Main.java",
@@ -459,7 +459,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // a role file contains an interface
     // 1.5.8-otjld-interface-role-file-1
     public void test158_interfaceRoleFile1() {
-       
+
        runConformTest(
             new String[] {
 		"Team158irf1.java",
@@ -542,7 +542,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // a role file contains an interface, class is inline
     // 1.5.8-otjld-interface-role-file-2
     public void test158_interfaceRoleFile2() {
-       
+
        runConformTest(
             new String[] {
 		"Team158irf2.java",
@@ -744,12 +744,12 @@ public class FileStructure extends AbstractOTJLDTest {
 			    "    boolean addAll(Collection c) -> boolean addAll(Collection c);\n" +
 			    "}\n"
             },
-            "----------\n" + 
-    		"1. WARNING in Team1511rfi2\\R1511rfi2.java (at line 5)\n" + 
-    		"	public class R1511rfi2 playedBy LinkedList {\n" + 
-    		"	                                ^^^^^^^^^^\n" + 
-    		"Base class java.util.LinkedList appears to be a system class, which means that load time weaving could possibly fail\n" + 
-    		"if this class is loaded from rt.jar/the bootstrap classpath.\n" + 
+            "----------\n" +
+    		"1. WARNING in Team1511rfi2\\R1511rfi2.java (at line 5)\n" +
+    		"	public class R1511rfi2 playedBy LinkedList {\n" +
+    		"	                                ^^^^^^^^^^\n" +
+    		"Base class java.util.LinkedList appears to be a system class, which means that load time weaving could possibly fail\n" +
+    		"if this class is loaded from rt.jar/the bootstrap classpath.\n" +
     		"----------\n",
             false);
     }
@@ -835,16 +835,16 @@ public class FileStructure extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team1511rfi5\\R1511rfi5.java (at line 3)\n" + 
-    		"	import base pbase.T1511rfi5;\n" + 
-    		"	            ^^^^^^^^^^^^^^^\n" + 
-    		"\"base\" import is not allowed in a role file (OTJLD 2.1.2(d)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team1511rfi5\\R1511rfi5.java (at line 4)\n" + 
-    		"	protected class R1511rfi5 playedBy T1511rfi5 {}\n" + 
-    		"	                                   ^^^^^^^^^\n" + 
-    		"T1511rfi5 cannot be resolved to a type\n" + 
+            "----------\n" +
+    		"1. ERROR in Team1511rfi5\\R1511rfi5.java (at line 3)\n" +
+    		"	import base pbase.T1511rfi5;\n" +
+    		"	            ^^^^^^^^^^^^^^^\n" +
+    		"\"base\" import is not allowed in a role file (OTJLD 2.1.2(d)).\n" +
+    		"----------\n" +
+    		"2. ERROR in Team1511rfi5\\R1511rfi5.java (at line 4)\n" +
+    		"	protected class R1511rfi5 playedBy T1511rfi5 {}\n" +
+    		"	                                   ^^^^^^^^^\n" +
+    		"T1511rfi5 cannot be resolved to a type\n" +
     		"----------\n");
     }
 
@@ -896,23 +896,23 @@ public class FileStructure extends AbstractOTJLDTest {
 			    "protected class R1511rfi7 {}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team1511rfi7.java (at line 4)\n" + 
-    		"	LinkedList<R1511rfi7> roles = new LinkedList<R1511rfi7>();\n" + 
-    		"	^^^^^^^^^^\n" + 
-    		"LinkedList cannot be resolved to a type\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team1511rfi7.java (at line 4)\n" + 
-    		"	LinkedList<R1511rfi7> roles = new LinkedList<R1511rfi7>();\n" + 
-    		"	                                  ^^^^^^^^^^\n" + 
-    		"LinkedList cannot be resolved to a type\n" + 
+            "----------\n" +
+    		"1. ERROR in Team1511rfi7.java (at line 4)\n" +
+    		"	LinkedList<R1511rfi7> roles = new LinkedList<R1511rfi7>();\n" +
+    		"	^^^^^^^^^^\n" +
+    		"LinkedList cannot be resolved to a type\n" +
+    		"----------\n" +
+    		"2. ERROR in Team1511rfi7.java (at line 4)\n" +
+    		"	LinkedList<R1511rfi7> roles = new LinkedList<R1511rfi7>();\n" +
+    		"	                                  ^^^^^^^^^^\n" +
+    		"LinkedList cannot be resolved to a type\n" +
     		"----------\n");
     }
 
     // role files are compiled indirectly
     // 1.5.12-otjld-role-file-compile-order-1
     public void test1512_roleFileCompileOrder1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1512rfco1.java",
@@ -959,7 +959,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // role files are compiled indirectly - extending each other
     // 1.5.12-otjld-role-file-compile-order-2
     public void test1512_roleFileCompileOrder2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1512rfco2.java",
@@ -1005,7 +1005,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // role files (unbound) are compiled indirectly - extending each other
     // 1.5.12-otjld-role-file-compile-order-3
     public void test1512_roleFileCompileOrder3() {
-       
+
        runConformTest(
             new String[] {
 		"Team1512rfco3.java",
@@ -1064,7 +1064,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // a role file imports its base class which is not visible to the team
     // 1.5.14-otjld-role-file-scope-1
     public void test1514_roleFileScope1() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team1514rfs1.java",
@@ -1110,7 +1110,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // a role file defines a callin - one compilation
     // 1.5.15-otjld-callin-into-rolefile-1
     public void test1515_callinIntoRolefile1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1515cir1.java",
@@ -1148,7 +1148,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // a role file defines a callin - one compilation role driven
     // 1.5.15-otjld-callin-into-rolefile-2
     public void test1515_callinIntoRolefile2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1515cir2.java",
@@ -1185,7 +1185,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // a role file defines a callin - separate compilation
     // 1.5.15-otjld-callin-into-rolefile-3
     public void test1515_callinIntoRolefile3() {
-       
+
        runConformTest(
             new String[] {
 		"Team1515cir3.java",
@@ -1222,7 +1222,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // a role file defines a callin and a base predicate - separate compilation - witness for TPX-428
     // 1.5.15-otjld-callin-into-rolefile-4
     public void test1515_callinIntoRolefile4() {
-       
+
        runConformTest(
             new String[] {
 		"Team1515cir4.java",
@@ -1265,7 +1265,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // two role files define a callin and a base predicate - team driven compilation - witness for TPX-428 part 2
     // 1.5.15-otjld-callin-into-rolefile-5
     public void test1515_callinIntoRolefile5() {
-       
+
        runConformTest(
             new String[] {
 		"Team1515cir5.java",
@@ -1321,7 +1321,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // a role file defines a callin - team driven compilation reusing binary role
     // 1.5.15-otjld_postponed_callin-into-rolefile-6
     public void _postponed_test1515_callinIntoRolefile6() {
-       
+
        runConformTest(
             new String[] {
 		"Team1515cir6.java",
@@ -1364,7 +1364,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // a role file defines a static replace callin - team driven compilation reusing binary role
     // 1.5.15-otjld_postponed_callin-into-rolefile-7
     public void _postponed_test1515_callinIntoRolefile7() {
-       
+
        runConformTest(
             new String[] {
 		"Team1515cir7.java",
@@ -1408,7 +1408,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // a nested team is implicitly inherited (phantom) and contains a role file
     // 1.5.16-otjld_postponed_role-file-of-phantom-nested-team-1
     public void _postponed_test1516_roleFileOfPhantomNestedTeam1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1516rfopnt1_2.java",
@@ -1491,7 +1491,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // a nested role is in a role file, direct enclosing is not
     // 1.5.17-otjld-nested-role-file-2
     public void test1517_nestedRoleFile2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1517nrf2.java",
@@ -1622,25 +1622,25 @@ public class FileStructure extends AbstractOTJLDTest {
 			    "protected class R1517nrf5 {}\n" +
 			    "    \n"
             },
-			"----------\n" + 
-			"1. ERROR in p\\Team1517nrf5\\Mid1517nrf5.java (at line 3)\n" + 
-			"	public team class Mid1517nrf5 {}\n" + 
-			"    \n" + 
-			"	                            ^^^^^^^^^\n" + 
-			"Type mismatch: cannot convert from Team1517nrf5.__OT__Mid1517nrf5.R1517nrf5 to Team1517nrf5.__OT__Mid1517nrf5.R1517nrf5\n" + 
-			"----------\n" + 
-			"----------\n" + 
-			"1. ERROR in "+convertedOutputPath+"p\\Team1517nrf5\\Mid1517nrf5\\R1517nrf5.java (at line 3)\n" + 
-			"	protected class R1517nrf5 {}\n" + 
-			"	                ^^^^^^^^^\n" + 
-			"Duplicate nested type R1517nrf5\n" + 
-			"----------\n" + 
+			"----------\n" +
+			"1. ERROR in p\\Team1517nrf5\\Mid1517nrf5.java (at line 3)\n" +
+			"	public team class Mid1517nrf5 {}\n" +
+			"    \n" +
+			"	                            ^^^^^^^^^\n" +
+			"Type mismatch: cannot convert from Team1517nrf5.__OT__Mid1517nrf5.R1517nrf5 to Team1517nrf5.__OT__Mid1517nrf5.R1517nrf5\n" +
+			"----------\n" +
+			"----------\n" +
+			"1. ERROR in "+convertedOutputPath+"p\\Team1517nrf5\\Mid1517nrf5\\R1517nrf5.java (at line 3)\n" +
+			"	protected class R1517nrf5 {}\n" +
+			"	                ^^^^^^^^^\n" +
+			"Duplicate nested type R1517nrf5\n" +
+			"----------\n" +
             // this is the main error message, the others are mostly caused by compilation order issues:
-			"----------\n" + 
-			"1. ERROR in p\\Team1517nrf5\\Mid1517nrf5\\R1517nrf5\\Deep1517nrf5.java (at line 3)\n" + 
-			"	protected class Deep1517nrf5 {}\n" + 
-			"	                ^^^^^^^^^^^^\n" + 
-			"Member types not allowed in regular roles. Mark class p.Team1517nrf5.Mid1517nrf5.R1517nrf5 as a team if Deep1517nrf5 should be its role (OTJLD 1.5(a,b)). \n" + 
+			"----------\n" +
+			"1. ERROR in p\\Team1517nrf5\\Mid1517nrf5\\R1517nrf5\\Deep1517nrf5.java (at line 3)\n" +
+			"	protected class Deep1517nrf5 {}\n" +
+			"	                ^^^^^^^^^^^^\n" +
+			"Member types not allowed in regular roles. Mark class p.Team1517nrf5.Mid1517nrf5.R1517nrf5 as a team if Deep1517nrf5 should be its role (OTJLD 1.5(a,b)). \n" +
 			"----------\n");
     }
 
@@ -1648,7 +1648,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // 1.5.17-otjld-nested-role-file-6
     public void test1517_nestedRoleFile6() {
     	this.compileOrder = new String[][] {
-    			{"p/Team1517nrf6.java"}, 
+    			{"p/Team1517nrf6.java"},
     			{"p/Team1517nrf6/Mid1517nrf6.java"},
     			{"p/Team1517nrf6/Mid1517nrf6/R1517nrf6.java"},
     			{"p/Team1517nrf6/Mid1517nrf6/R1517nrf6/Deep1517nrf6.java"}};
@@ -1680,7 +1680,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // a phantom role is a tsub of a role file
     // 1.5.18-otjld-implicitly-inherit-role-file-1
     public void test1518_implicitlyInheritRoleFile1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1518iirf1_3.java",
@@ -1759,7 +1759,7 @@ public class FileStructure extends AbstractOTJLDTest {
     // 1.5.18-otjld-implicitly-inherit-role-file-2
     public void test1518_implicitlyInheritRoleFile2() {
        Map customOptions = getCompilerOptions();
-       
+
        runConformTest(
             new String[] {
 		"Team1518iirf2_3.java",
@@ -1850,11 +1850,11 @@ public class FileStructure extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team1520rfwt1\\R1520rfwt1.java (at line 2)\n" + 
-    		"	team package Team1520rfwt1;\n" + 
-    		"	             ^^^^^^^^^^^^^\n" + 
-    		"Enclosing team Team1520rfwt1 not found for role file R1520rfwt1 (OTJLD 1.2.5(c)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team1520rfwt1\\R1520rfwt1.java (at line 2)\n" +
+    		"	team package Team1520rfwt1;\n" +
+    		"	             ^^^^^^^^^^^^^\n" +
+    		"Enclosing team Team1520rfwt1 not found for role file R1520rfwt1 (OTJLD 1.2.5(c)).\n" +
     		"----------\n");
     }
 
@@ -1954,11 +1954,11 @@ public class FileStructure extends AbstractOTJLDTest {
 			    "protected class R1522rtij2_2 {}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. WARNING in Team1522rtij2.java (at line 6)\n" + 
-    		"	public team class Team1522rtij2 {\n" + 
-    		"	                  ^^^^^^^^^^^^^\n" + 
-    		"Javadoc: Missing tag for role file R1522rtij2_2 (OTJLD 1.2.5(d)).\n" + 
+            "----------\n" +
+    		"1. WARNING in Team1522rtij2.java (at line 6)\n" +
+    		"	public team class Team1522rtij2 {\n" +
+    		"	                  ^^^^^^^^^^^^^\n" +
+    		"Javadoc: Missing tag for role file R1522rtij2_2 (OTJLD 1.2.5(d)).\n" +
     		"----------\n",
             customOptions);
     }
@@ -1992,11 +1992,11 @@ public class FileStructure extends AbstractOTJLDTest {
 			    "protected class R1522rtij3_1 {}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. WARNING in Team1522rtij3.java (at line 5)\n" + 
-    		"	* @role R1522rtij3_2 this role is inline\n" + 
-    		"	        ^^^^^^^^^^^^\n" + 
-    		"Javadoc: R1522rtij3_2 is an inline role, whereas the @role tag should only be used for role files (OTJLD 1.2.5(d)).\n" + 
+            "----------\n" +
+    		"1. WARNING in Team1522rtij3.java (at line 5)\n" +
+    		"	* @role R1522rtij3_2 this role is inline\n" +
+    		"	        ^^^^^^^^^^^^\n" +
+    		"Javadoc: R1522rtij3_2 is an inline role, whereas the @role tag should only be used for role files (OTJLD 1.2.5(d)).\n" +
     		"----------\n",
             customOptions);
     }
@@ -2030,11 +2030,11 @@ public class FileStructure extends AbstractOTJLDTest {
 			    "protected class R1522rtij4_1 {}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. WARNING in Team1522rtij4.java (at line 5)\n" + 
-    		"	* @role String\n" + 
-    		"	        ^^^^^^\n" + 
-    		"Javadoc: String cannot be resolved to a role of this team (OTJLD 1.2.5(d)).\n" + 
+            "----------\n" +
+    		"1. WARNING in Team1522rtij4.java (at line 5)\n" +
+    		"	* @role String\n" +
+    		"	        ^^^^^^\n" +
+    		"Javadoc: String cannot be resolved to a role of this team (OTJLD 1.2.5(d)).\n" +
     		"----------\n",
             customOptions);
     }
@@ -2068,11 +2068,11 @@ public class FileStructure extends AbstractOTJLDTest {
 			    "protected class R1522rtij5_1 {}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. WARNING in Team1522rtij5.java (at line 4)\n" + 
-    		"	* @role\n" + 
-    		"	   ^^^^\n" + 
-    		"Javadoc: Missing identifier\n" + 
+            "----------\n" +
+    		"1. WARNING in Team1522rtij5.java (at line 4)\n" +
+    		"	* @role\n" +
+    		"	   ^^^^\n" +
+    		"Javadoc: Missing identifier\n" +
     		"----------\n",
             customOptions);
     }
@@ -2106,11 +2106,11 @@ public class FileStructure extends AbstractOTJLDTest {
 			    "protected class R1522rtij6_1 {}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. WARNING in Team1522rtij6.java (at line 5)\n" + 
-    		"	* @role Wrong\n" + 
-    		"	        ^^^^^\n" + 
-    		"Javadoc: Wrong cannot be resolved to a role of this team (OTJLD 1.2.5(d)).\n" + 
+            "----------\n" +
+    		"1. WARNING in Team1522rtij6.java (at line 5)\n" +
+    		"	* @role Wrong\n" +
+    		"	        ^^^^^\n" +
+    		"Javadoc: Wrong cannot be resolved to a role of this team (OTJLD 1.2.5(d)).\n" +
     		"----------\n",
             customOptions);
     }
@@ -2138,11 +2138,11 @@ public class FileStructure extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. WARNING in T1522rtij7.java (at line 4)\n" + 
-    		"	* @role R1522rtij7_1\n" + 
-    		"	        ^^^^^^^^^^^^\n" + 
-    		"Javadoc: Illegal @role tag, type T1522rtij7 is not a team (OTJLD 1.2.5(d)).\n" + 
+            "----------\n" +
+    		"1. WARNING in T1522rtij7.java (at line 4)\n" +
+    		"	* @role R1522rtij7_1\n" +
+    		"	        ^^^^^^^^^^^^\n" +
+    		"Javadoc: Illegal @role tag, type T1522rtij7 is not a team (OTJLD 1.2.5(d)).\n" +
     		"----------\n",
            customOptions);
     }
@@ -2164,7 +2164,7 @@ public class FileStructure extends AbstractOTJLDTest {
             },
             "1.2.5(b)");
     }
-    
+
     // a compilation unit contains a secondary toplevel team class
     public void test1524_secondaryTeam1() {
     	runConformTest(
@@ -2180,7 +2180,7 @@ public class FileStructure extends AbstractOTJLDTest {
     		"		new T0().test();\n" +
     		"   }\n" +
     		"}\n"
-    		}, 
+    		},
     		"OK");
     }
 
@@ -2235,10 +2235,10 @@ public class FileStructure extends AbstractOTJLDTest {
             null/*classLibraries*/,
             false/*shouldFlushOutputFolder*/,
             null/*vmArguments*/,
-            customOptions, 
+            customOptions,
             null/*customRequestor*/);
     }
-    
+
     // a role file holds a nested team which extends a non-team role file
     public void test1526_rofiTeamExtendsNonTeam1() {
         Map customOptions = getCompilerOptions();
@@ -2265,7 +2265,7 @@ public class FileStructure extends AbstractOTJLDTest {
             customOptions,
             null/*no custom requestor*/);
     }
-    
+
     // Bug 460525 - Evaluating PlayedBy attribute may cause bad processing order
     public void testBug460525() {
     	compileOrder = new String[][] {

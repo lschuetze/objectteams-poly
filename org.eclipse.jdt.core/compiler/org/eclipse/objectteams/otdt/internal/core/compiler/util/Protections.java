@@ -282,7 +282,7 @@ public class Protections implements ClassFileConstants, ExtraCompilerModifiers {
 			if (invocationType.roleModel.hasTSuperRole(declaringClass))
 				return true;
 		}
-		
+
 		if (binding.isProtected()) {
 			// answer true if the invocationType is the declaringClass or they are in the same package
 			// OR the invocationType is a subclass of the declaringClass

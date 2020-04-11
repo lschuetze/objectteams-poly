@@ -74,11 +74,11 @@ public abstract class AbstractOTReferenceBinding extends TypeBinding
 
 	// allow to see this as a ReferenceBinding:
 	protected abstract ReferenceBinding _this();
-	
+
 	public AbstractOTReferenceBinding(ReferenceBinding prototype) {
 		super(prototype);
 	}
-	
+
 	protected AbstractOTReferenceBinding() {
 		super();
 	}

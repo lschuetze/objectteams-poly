@@ -131,7 +131,7 @@ public abstract class ASTNode {
 	/*
 	 * ATTENTION: When doing anything to the ASTNode hierarchy, do not try to
 	 * reinvent the wheel.
-	 * 
+	 *
 	 * Look out for precedents with
 	 * - the same structural property type
 	 * - for child node properties: the same optionality (can be null / lazy initialization blurbs and impl.)
@@ -139,9 +139,9 @@ public abstract class ASTNode {
 	 * - a similar history (added in JLSx API, below JLSx only, replaced by {@link #xx})
 	 * ..., and copy what was done there. Most of the code and
 	 * Javadoc in this package should look like it was created by a code generator.
-	 * 
+	 *
 	 * In subclasses of ASTNode, order properties by order of occurrence in source.
-	 * In general classes that list all AST node types, order alphabetically.  
+	 * In general classes that list all AST node types, order alphabetically.
 	 */
 
 	/*
@@ -181,27 +181,27 @@ public abstract class ASTNode {
 
 	/*
 	 * INSTRUCTIONS FOR ADDING A NEW PROPERTY TO AN AST NODE TYPE
-	 * 
+	 *
 	 * For concrete node types, use e.g. properties of SimpleName or ClassInstanceCreation
 	 * as templates:
-	 * 
+	 *
 	 * 1. Copy/paste the field, property descriptor, and getter/setter.
-	 * 
+	 *
 	 * 2. Adjust everything to the new property name and type. In the field's
 	 * Javadoc, properly document default value, initialization, and applicable
 	 * API levels.
-	 * 
+	 *
 	 * 3. Add/remove @since tags as necessary.
-	 * 
+	 *
 	 * 4. Search for references to the members in the template, and add similar
 	 * references in corresponding places for the new property.
-	 * 
-	 * 
+	 *
+	 *
 	 * For abstract node types, use AbstractTypeDeclaration as a template:
-	 * 
+	 *
 	 * 1. Same steps as above, but take extra care to copy and adjust the
-	 * *internal*() methods as well. 
-	 * 
+	 * *internal*() methods as well.
+	 *
 	 * 2. Search for references to the members in the template, and add similar
 	 * references in corresponding places for the new property (e.g. property
 	 * descriptor in each leaf type).
@@ -209,17 +209,17 @@ public abstract class ASTNode {
 
 	/*
 	 * INSTRUCTIONS FOR REPLACING/DEPRECATING A PROPERTY OF AN AST NODE
-	 * 
+	 *
 	 * To replace a simple property with a child list property, see e.g. how
 	 * SingleVariableDeclaration replaced MODIFIERS_PROPERTY with
 	 * MODIFIERS2_PROPERTY.
-	 * 
+	 *
 	 * 1. Reuse the old property id.
-	 * 
+	 *
 	 * 2. Deprecate all references to the old property, except for the old
 	 * getter, which should compute the value from the new property in
 	 * later API levels.
-	 * 
+	 *
 	 * To completely replace a property, see how ClassInstanceCreation replaced
 	 * NAME_PROPERTY with TYPE_PROPERTY.
 	 */
@@ -915,7 +915,7 @@ public abstract class ASTNode {
 	 * @since 3.14
 	 */
 	public static final int REQUIRES_DIRECTIVE = 94;
-	
+
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>ExportsDirective</code>.
@@ -931,7 +931,7 @@ public abstract class ASTNode {
 	 * @since 3.14
 	 */
 	public static final int OPENS_DIRECTIVE = 96;
-	
+
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>UsesDirective</code>.
@@ -955,7 +955,7 @@ public abstract class ASTNode {
 	 * @since 3.14
 	 */
 	public static final int MODULE_MODIFIER = 99;
-	
+
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>SwitchExpression</code>.
@@ -963,7 +963,7 @@ public abstract class ASTNode {
 	 * @since 3.18
 	 */
 	public static final int SWITCH_EXPRESSION = 100;
-	
+
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>YieldStatement</code>.
@@ -971,7 +971,7 @@ public abstract class ASTNode {
 	 * @since 3.20
 	 */
 	public static final int YIELD_STATEMENT = 101;
-	
+
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>TextBlock</code>.
@@ -979,7 +979,7 @@ public abstract class ASTNode {
 	 * @since 3.20
 	 */
 	public static final int TEXT_BLOCK = 102;
-	
+
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>RecordDeclaration</code>.
@@ -987,7 +987,7 @@ public abstract class ASTNode {
 	 * @since 3.22
 	 */
 	public static final int RECORD_DECLARATION = 103;
-	
+
 
 //{ObjectTeams: required OT specific node type constants added
 	private static final int LAST_JDT = 103;
@@ -2103,7 +2103,7 @@ public abstract class ASTNode {
 	 */
 	abstract List internalStructuralPropertiesForType(int apiLevel);
 
-		
+
 	/**
 	 * Returns a list of property descriptors for this node type.
 	 * Clients must not modify the result. This abstract method
@@ -2123,7 +2123,7 @@ public abstract class ASTNode {
 	List internalStructuralPropertiesForType(int apiLevel, boolean previewEnabled) {
 		return internalStructuralPropertiesForType(apiLevel);
 	}
-	
+
 	/**
 	 * Internal helper method that starts the building a list of
 	 * property descriptors for the given node type.
@@ -2175,7 +2175,7 @@ public abstract class ASTNode {
      * <p>
      * Use this method to prevent access to new properties that have been added in JLS3.
      * </p>
-     * 
+     *
 	 * @exception UnsupportedOperationException if this operation is used in a JLS2 AST
 	 * @since 3.0
      */
@@ -2191,7 +2191,7 @@ public abstract class ASTNode {
      * <p>
      * Use this method to prevent access to new properties that have been added in JLS4.
      * </p>
-     * 
+     *
 	 * @exception UnsupportedOperationException if this operation is used in a JLS2 or JLS3 AST
 	 * @since 3.7
 	 */
@@ -2200,14 +2200,14 @@ public abstract class ASTNode {
 			throw new UnsupportedOperationException("Operation only supported in JLS4 and later AST"); //$NON-NLS-1$
 		}
 	}
-	
+
 	/**
      * Checks that this AST operation is not used when
      * building JLS2 or JLS3 or JLS4 level ASTs.
      * <p>
      * Use this method to prevent access to new properties that have been added in JLS8.
      * </p>
-     * 
+     *
 	 * @exception UnsupportedOperationException if this operation is used below JLS8
 	 * @since 3.10
 	 */
@@ -2255,14 +2255,14 @@ public abstract class ASTNode {
      * </p>
      *
 	 * @exception UnsupportedOperationException if this operation is used below JLS11
-	 * @since 3.14 
+	 * @since 3.14
 	 */
 	final void unsupportedBelow11() {
 		if (this.ast.apiLevel < AST.JLS11_INTERNAL) {
 			throw new UnsupportedOperationException("Operation only supported in ASTs with level JLS11 and above"); //$NON-NLS-1$
 		}
 	}
-	
+
 	/**
      * Checks that this AST operation is not used when
      * building JLS2, JLS3, JLS4, JLS8, JLS9,JLS10 or JLS11 level ASTs.
@@ -2272,14 +2272,14 @@ public abstract class ASTNode {
      *
 	 * @exception UnsupportedOperationException if this operation is used below JLS12
 	 * @deprecated
-	 * @since 3.16 
+	 * @since 3.16
 	 */
 	final void unsupportedBelow12() {
 		if (this.ast.apiLevel < AST.JLS12_INTERNAL) {
 			throw new UnsupportedOperationException("Operation only supported in ASTs with level JLS12 and above"); //$NON-NLS-1$
 		}
 	}
-	
+
 	/**
      * Checks that this AST operation is not used when
      * building JLS2, JLS3, JLS4, JLS8, JLS9, JLS10, JLS11, JLS12 or JSL13 level ASTs.
@@ -2295,8 +2295,8 @@ public abstract class ASTNode {
 			throw new UnsupportedOperationException("Operation only supported in ASTs with level JLS14 and above"); //$NON-NLS-1$
 		}
 	}
-	
-	
+
+
 	/**
      * Checks that this AST operation is not used when
      * building ASTs without previewEnabled flag.
@@ -2312,7 +2312,7 @@ public abstract class ASTNode {
 			throw new UnsupportedOperationException("Operation only supported in ASTs with previewEnabled flag as true"); //$NON-NLS-1$
 		}
 	}
-	
+
 	/**
      * Checks that this AST operation is only used when
      * building JLS2 level ASTs.
@@ -2336,7 +2336,7 @@ public abstract class ASTNode {
      * <p>
      * Use this method to prevent access to deprecated properties (deprecated in JLS8).
      * </p>
-     * 
+     *
 	 * @exception UnsupportedOperationException if this operation is used in an AST later than JLS4
      * @since 3.10
      */
@@ -2346,7 +2346,7 @@ public abstract class ASTNode {
 	  	throw new UnsupportedOperationException("Operation only supported in JLS2, JLS3 and JLS4 ASTs"); //$NON-NLS-1$
 	  }
 	}
-	
+
 	/**
      * Checks that this AST operation is only used when
      * building JLS12 level ASTs.
@@ -2363,7 +2363,7 @@ public abstract class ASTNode {
 	  	throw new UnsupportedOperationException("Operation only supported in JLS12 AST"); //$NON-NLS-1$
 	  }
 	}
-	
+
 	/**
  	 * Checks that this AST operation is only used when
      * building JLS13 level ASTs.
@@ -2379,7 +2379,7 @@ public abstract class ASTNode {
 			throw new UnsupportedOperationException("Operation only supported in JLS13 AST"); //$NON-NLS-1$
 		}
 	}
-	
+
 	/**
  	 * Checks that this AST operation is only used when
      * building JLS13 level ASTs.

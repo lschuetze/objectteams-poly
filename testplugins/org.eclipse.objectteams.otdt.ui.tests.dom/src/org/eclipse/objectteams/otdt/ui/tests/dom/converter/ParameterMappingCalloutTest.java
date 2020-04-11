@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -45,9 +45,9 @@ import org.eclipse.objectteams.otdt.ui.tests.dom.FileBasedDOMTest;
  * @author ike
  *
  * Tests the DOM-astNode parameterMapping.
- * 
+ *
  */
-public class ParameterMappingCalloutTest extends FileBasedDOMTest 
+public class ParameterMappingCalloutTest extends FileBasedDOMTest
 {
     public static final String TEST_PROJECT = "DOM_AST";
 	private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS4;
@@ -56,8 +56,8 @@ public class ParameterMappingCalloutTest extends FileBasedDOMTest
 	private ICompilationUnit _simpleTeam;
 	private TypeDeclaration _typeDecl;
     private TypeDeclaration _role;
-	
-	public ParameterMappingCalloutTest(String name) 
+
+	public ParameterMappingCalloutTest(String name)
 	{
 		super(name);
 	}
@@ -66,14 +66,14 @@ public class ParameterMappingCalloutTest extends FileBasedDOMTest
 	{
 		return new Suite(ParameterMappingCalloutTest.class);
 	}
-	
+
 	public void setUpSuite() throws Exception
 	{
 		setTestProjectDir(TEST_PROJECT);
 		super.setUpSuite();
 	}
 
-	protected void setUp() throws Exception 
+	protected void setUp() throws Exception
 	{
 		super.setUp();
 		_simpleTeam = getCompilationUnit(
@@ -81,17 +81,17 @@ public class ParameterMappingCalloutTest extends FileBasedDOMTest
 	            "src",
 	            "parameterMapping.teampkg",
 	            "MyTeam.java");
-		
+
 		_parser = ASTParser.newParser(JAVA_LANGUAGE_SPEC_LEVEL);
 		_parser.setProject(super.getJavaProject(TEST_PROJECT));
 		_parser.setSource(_simpleTeam);
-		
+
 		ASTNode root = _parser.createAST( new NullProgressMonitor() );
 		CompilationUnit compUnit = (CompilationUnit) root;
 		_typeDecl = (TypeDeclaration)compUnit.types().get(0);
         _role = _typeDecl.getTypes()[0];
 	}
-	
+
 	//test is for first calloutMapping in Testdata (Role)
 	public void testGetParameterMappings_notEmpty()
 	{
@@ -99,34 +99,34 @@ public class ParameterMappingCalloutTest extends FileBasedDOMTest
 		CalloutMappingDeclaration calloutDecl = (CalloutMappingDeclaration)_role.bodyDeclarations().get(4);
 
 		List mappings = calloutDecl.getParameterMappings();
-		
+
 		assertNotNull("ParametermappingList should be not empty", mappings);
 		assertFalse(mappings.isEmpty());
-	}		
-	
+	}
+
 	//test is for first calloutMapping in Testdata (Role)
 	public void testGetDirection()
 	{
 		CalloutMappingDeclaration calloutDecl = (CalloutMappingDeclaration)_role.bodyDeclarations().get(4);
 		List parameterMappings = calloutDecl.getParameterMappings();
-        
+
 		ParameterMapping testObj = (ParameterMapping)parameterMappings.get(0);
 		String actual = testObj.getDirection();
 		String expected = "->";
-		
+
 		assertEquals("Wrong direction", expected, actual);
 	}
-	
+
 	//test is for first calloutMapping in Testdata (Role)
 	public void testGetIdentifier()
 	{
 		CalloutMappingDeclaration calloutDecl = (CalloutMappingDeclaration)_role.bodyDeclarations().get(4);
 		List parameterMappings = calloutDecl.getParameterMappings();
-        
+
 		ParameterMapping testObj = (ParameterMapping)parameterMappings.get(0);
 		String actual = testObj.getIdentifier().getIdentifier();
 		String expected = "val";
-		
+
 		assertEquals("Identifier is wrong", expected, actual);
 	}
 
@@ -135,43 +135,43 @@ public class ParameterMappingCalloutTest extends FileBasedDOMTest
 	{
 		CalloutMappingDeclaration calloutDecl = (CalloutMappingDeclaration)_role.bodyDeclarations().get(4);
 		List parameterMappings = calloutDecl.getParameterMappings();
-        
+
         ParameterMapping testObj = (ParameterMapping)parameterMappings.get(0);
 		Expression actual = (Expression)testObj.getExpression();
-		
+
 		assertTrue(
-            "Wrong Type of given expression, type is " + actual.getClass(), 
+            "Wrong Type of given expression, type is " + actual.getClass(),
             actual instanceof MethodInvocation);
-	}	
-	
+	}
+
 	//test is for second calloutMapping in Testdata (Role)
 	public void testGetExpression_InstanceType2()
 	{
 		CalloutMappingDeclaration calloutDecl = (CalloutMappingDeclaration)_role.bodyDeclarations().get(5);
 		List parameterMappings = calloutDecl.getParameterMappings();
-        
+
 		ParameterMapping testObj = (ParameterMapping)parameterMappings.get(0);
 		Expression actual = (Expression)testObj.getExpression();
-		
+
 		assertTrue(
-            "Wrong Type of given expression, type is " + actual.getClass(), 
+            "Wrong Type of given expression, type is " + actual.getClass(),
             actual instanceof ClassInstanceCreation);
-	}	
+	}
 
 	//test is for fourth calloutMapping in Testdata (Role)
 	public void testGetExpression_InstanceType3()
 	{
 		CalloutMappingDeclaration calloutDecl = (CalloutMappingDeclaration)_role.bodyDeclarations().get(7);
 		List parameterMappings = calloutDecl.getParameterMappings();
-	
+
         ParameterMapping testObj = (ParameterMapping)parameterMappings.get(0);
         Expression actual = (Expression)testObj.getExpression();
-		
+
 		assertTrue(
-            "Wrong Type of given expression, type is  " + actual.getClass(), 
+            "Wrong Type of given expression, type is  " + actual.getClass(),
             actual instanceof SimpleName);
-	}	
-	
+	}
+
 	//test is for third calloutMapping in Testdata (Role)
 	public void testValidMappingListSize()
 	{
@@ -187,10 +187,10 @@ public class ParameterMappingCalloutTest extends FileBasedDOMTest
     {
         CalloutMappingDeclaration calloutDecl = (CalloutMappingDeclaration)_role.bodyDeclarations().get(4);
         List parameterMappings = calloutDecl.getParameterMappings();
-        
+
         ParameterMapping testObj = (ParameterMapping)parameterMappings.get(0);
         boolean actual = testObj.hasResultFlag();
-        
+
         assertFalse("Mapping is a not a result mapping", actual);
     }
 
@@ -199,11 +199,11 @@ public class ParameterMappingCalloutTest extends FileBasedDOMTest
 	{
 		CalloutMappingDeclaration calloutDecl = (CalloutMappingDeclaration)_role.bodyDeclarations().get(6);
 		List parameterMappings = calloutDecl.getParameterMappings();
-		
+
 		//test the second parameterMapping of this CalloutMappingDeclaration
 		ParameterMapping testObj = (ParameterMapping)parameterMappings.get(1);
 		boolean actual = testObj.hasResultFlag();
-		
+
 		assertTrue("Mapping is a result mapping, but was not detected", actual);
 	}
 
@@ -212,13 +212,13 @@ public class ParameterMappingCalloutTest extends FileBasedDOMTest
     {
         CalloutMappingDeclaration calloutDecl = (CalloutMappingDeclaration)_role.bodyDeclarations().get(7);
         List parameterMappings = calloutDecl.getParameterMappings();
-        
+
         //test the third parameterMapping of this CalloutMappingDeclaration
         ParameterMapping testObj = (ParameterMapping)parameterMappings.get(2);
         boolean actual = testObj.hasResultFlag();
-        
+
         assertTrue("Mapping is a result mapping, but was not detected", actual);
-    }       
+    }
 	//test is for fourth calloutMapping in Testdata (Role)
 	public void testValidMappingListSize1()
 	{
@@ -227,19 +227,19 @@ public class ParameterMappingCalloutTest extends FileBasedDOMTest
 		int expected = 3;
 
 		assertEquals("ParameterMappingList has wrong size", expected, actual);
-	}	
-    
+	}
+
     //test is for fourth calloutMapping in Testdata (Role)
     public void testSubTreeMatch()
     {
         CalloutMappingDeclaration calloutDecl = (CalloutMappingDeclaration)_role.bodyDeclarations().get(7);
         List parameterMappings = calloutDecl.getParameterMappings();
         ParameterMapping testObj = (ParameterMapping)parameterMappings.get(2);
-        
+
         boolean actual = testObj.subtreeMatch(new ASTMatcher(), testObj);
 
         assertTrue("Both nodes are equal, even the same.", actual);
-    } 
+    }
 
 	public void testCopySubtree()
 	{
@@ -247,7 +247,7 @@ public class ParameterMappingCalloutTest extends FileBasedDOMTest
         List parameterMappings = calloutDecl.getParameterMappings();
         ParameterMapping testObj = (ParameterMapping)parameterMappings.get(2);
 
-	    ParameterMapping clonedTestObject = 
+	    ParameterMapping clonedTestObject =
 			(ParameterMapping)ASTNode.copySubtree(AST.newAST(AST.JLS4), testObj);
 		boolean actual = testObj.subtreeMatch(new ASTMatcher(), clonedTestObject);
 

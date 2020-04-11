@@ -122,7 +122,7 @@ public class BaseCallMessageSend extends Expression implements Invocation
 	public ChildListPropertyDescriptor getArgumentsProperty() {
 		return ARGUMENTS_PROPERTY;
 	}
-	
+
 	@Override
 	final List internalStructuralPropertiesForType(int apiLevel)
 	{

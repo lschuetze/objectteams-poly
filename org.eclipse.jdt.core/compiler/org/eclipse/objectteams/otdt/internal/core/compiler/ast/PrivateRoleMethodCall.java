@@ -1,18 +1,18 @@
-/** 
+/**
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2014 GK Software AG
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
- * Contributors: 
+ *
+ * Contributors:
  * 		Stephan Herrmann - Initial API and implementation
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.ast;
@@ -33,7 +33,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 /**
  * A message send to a private role method requiring redirection via a pair of bridge methods.
  * Directly hooks into generateCode to achieve the necessary modifications.
- * 
+ *
  * (Before 3.7 (OT 2.0) this was an anonymous class inside CalloutImplementor).
  * @author stephan
  * @since 3.7 OT 2.0
@@ -41,7 +41,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 public class PrivateRoleMethodCall extends MessageSend {
 	private boolean isCalloutToField;
 	private AstGenerator gen;
-	
+
 	public PrivateRoleMethodCall(Expression receiver, char[] selector, Expression[] arguments, boolean isCalloutToField,
 								 Scope scope, ReferenceBinding targetClass, MethodBinding targetMethod, AstGenerator gen)
 	{
@@ -67,7 +67,7 @@ public class PrivateRoleMethodCall extends MessageSend {
 			ITeamAnchor teamAnchor = ((RoleTypeBinding)this.actualReceiverType)._teamAnchor;
 			TypeAnchorReference syntheticReceiver = this.gen.typeAnchorReference(teamAnchor);
 			syntheticReceiver.isExpression = true;
-			receiverReference = syntheticReceiver;			
+			receiverReference = syntheticReceiver;
 		} else {
 			isCallinAccess = true;
 			// call from inside a otre-dyn callin wrapper: receiver is the current team:
@@ -82,12 +82,12 @@ public class PrivateRoleMethodCall extends MessageSend {
 			// for method callout or callin to private *add* the team instance to the front of pushes
 			// original role instance receiver will become the first implicit argument
 			receiverReference.generateCode(currentScope, codeStream, true/*valueRequired*/);
-		
+
 		if (isCallinAccess) {
 			// might need more synthetic args:
 			if (this.binding.isStatic()) {
 				codeStream.aconst_null();	// first arg in role bridge: (null) role
-				codeStream.iconst_0(); 		// enclosingTeamInstance: dummy value 
+				codeStream.iconst_0(); 		// enclosingTeamInstance: dummy value
 				codeStream.aload_0();		// enclosingTeamInstance: team instance
 			}
 		}

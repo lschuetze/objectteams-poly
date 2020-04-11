@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -50,7 +50,7 @@ public class ParserTest extends TestBase
 			+ NL + "    public static void main(String[] args)"
 			+ NL + "    {"
 			+ NL + "        MyClass baseObj      = new MyClass();"
-			+ NL + "        MyTeam  teamInstance = new MyTeam();"    	
+			+ NL + "        MyTeam  teamInstance = new MyTeam();"
 			+ NL + "        within(teamInstance)"
 			+ NL + "    	   {"
 			+ NL + "            System.out.println();"
@@ -59,20 +59,20 @@ public class ParserTest extends TestBase
 			+ NL + "        }"
 			+ NL + "    }"
 			+ NL + "}");
-						
+
 		createFile("MyClass",
 			"public class MyClass	"
 		    + NL + "{"
 		    + NL + "    public void say(String msg)"
 		    + NL + "    {"
 		    + NL + "        System.out.println(\" MyBase says : \" + msg);"
-		    + NL + "    }"    
+		    + NL + "    }"
 		    + NL + "    public void whisper(String msg)"
 		    + NL + "    {"
 		    + NL + "        System.out.println(\" MyBase whispers : \" + msg);"
 		    + NL + "    }"
-		    + NL + "}");						
-				
+		    + NL + "}");
+
 		createFile("MyTeam",
 			"public team class MyTeam"
 		    + NL + "{"
@@ -97,12 +97,12 @@ public class ParserTest extends TestBase
 		    + NL + "        role.whisper(msg);"
 		    + NL + "    }"
 		    + NL + "}");
-		
+
 		compileFile("Main");
 
 		assertTrue(isCompilationSuccessful());
 	}
-    
+
     public void testScopedKeywordJavadoc()
 	{
 		createFile("Main",
@@ -116,9 +116,9 @@ public class ParserTest extends TestBase
 			+ NL + "        System.out.println(base);"
 			+ NL + "    }"
 			+ NL + "}");
-						
 
-		
+
+
 		compileFile("Main");
 
 		assertTrue(isCompilationSuccessful());

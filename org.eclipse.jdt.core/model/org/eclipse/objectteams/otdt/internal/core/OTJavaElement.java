@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2012 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany, and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -42,7 +42,7 @@ import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 
 /**
  * OTJavaElement implementation.
- * 
+ *
  * @author jwloka
  * @version $Id: OTJavaElement.java 23416 2010-02-03 19:59:31Z stephan $
  */
@@ -61,7 +61,7 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 	private int          type;
 	private List<IJavaElement>         children;
 	private IJavaElement correspondingJavaElem;
-	
+
 	public OTJavaElement(int type, IJavaElement correspondingJavaElem, IJavaElement parent)
 	{
 		this(type, correspondingJavaElem, parent, true);
@@ -86,7 +86,7 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 	{
 	    return this.children.size() > 0;
 	}
-	
+
 	@Override
 	public IJavaElement[] getChildren()
 	{
@@ -100,26 +100,26 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 			return this.children.toArray( new IJavaElement[this.children.size()] );
 		}
 	}
-	
+
 	public void addChild(IOTJavaElement child)
 	{
 		if (child != null)
 			this.children.add(child);
 	}
-	
+
 	@Override
 	public IJavaElement getParent()
 	{
 //{OTModelUpdate : if null return the parent of the wrapped java element
 //orig:		return _parent;
 	    IJavaElement result = this.parent;
-	    
+
 	    if (result == null)
 	        result = getCorrespondingJavaElement().getParent();
-	    
+
 	    return result;
-//jwl}	    
-	}	
+//jwl}
+	}
 
 	@Override
 	public String getElementName()
@@ -132,15 +132,15 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 	{
 		return this.type;
 	}
-	
+
 	/**
 	 * Assumes instanceof check is done in subclasses!
 	 */
 	@Override
 	public boolean equals(Object obj)
 	{
-		if (this == obj) 
-		{ 
+		if (this == obj)
+		{
 		    return true;
 		}
 		if(obj == null)
@@ -149,12 +149,12 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 		}
 
 		OTJavaElement other = (OTJavaElement)obj;
-		
+
 		return getParent().equals(other.getParent())
                 && (this.type == other.type)
                 && getCorrespondingJavaElement().equals(other.getCorrespondingJavaElement());
 	}
-	
+
 
 	/**
 	 * COPIED basically from JavaElement
@@ -174,15 +174,15 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 	@SuppressWarnings("nls")
 	public String toString()
 	{
-		return "OTJavaElement " + getElementName();	
+		return "OTJavaElement " + getElementName();
 	}
-	
+
     @Override
 	public IJavaElement getCorrespondingJavaElement()
     {
         return this.correspondingJavaElem;
     }
-    
+
 	@Override
 	public OTJavaElement resolved(Binding binding) {
 		return this;
@@ -205,7 +205,7 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
     	super.close();
     	((JavaElement) this.correspondingJavaElem).close();
     }
-    
+
     @Override
 	public IJavaElement getAncestor(int ancestorType)
     {
@@ -292,17 +292,17 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
     {
         return this.correspondingJavaElem.isStructureKnown();
     }
-    
+
     @Override
     public <T> T getAdapter(Class<T> adapter)
     {
     	T result = super.getAdapter(adapter);
     	if (result == null)
     		result = this.correspondingJavaElem.getAdapter(adapter);
-    	
+
     	return result;
     }
-	
+
 	@Override
 	public void toString(int tab, StringBuffer buffer) {
 		for (int i = tab; i > 0; i--)

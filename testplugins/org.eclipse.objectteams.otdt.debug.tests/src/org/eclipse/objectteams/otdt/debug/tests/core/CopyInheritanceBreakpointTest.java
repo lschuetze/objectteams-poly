@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -39,7 +39,7 @@ public class CopyInheritanceBreakpointTest extends AbstractOTDTDebugTest {
 	public CopyInheritanceBreakpointTest(String name) {
 		super(name);
 	}
-	
+
 	public void testBreakInPhantomRoleMethod() throws Exception {
 		// set breakpoint in this type:
 		String breakTeamName  = "copyinheritancetests.SuperTeam";
@@ -49,9 +49,9 @@ public class CopyInheritanceBreakpointTest extends AbstractOTDTDebugTest {
 		String breakTypeName  = "copyinheritancetests.SubTeam$__OT__R";
 		// expect this source file to be found via SMAP:
 		String sourceFile     = "SuperTeam.java";
-		
+
 		createLineBreakpoint(6, breakTeamName); // sysout within roleMethod1
-		
+
 		IJavaThread thread= null;
 		try {
 			waitForBuild();
@@ -59,16 +59,16 @@ public class CopyInheritanceBreakpointTest extends AbstractOTDTDebugTest {
 
 			thread= launchToBreakpoint(launchTypeName);
 			assertNotNull("Breakpoint not hit within timeout period", thread);
-			
+
 			IJavaReferenceType type = ((IJavaStackFrame)thread.getTopStackFrame()).getReferenceType();
 			assertEquals("Stopped in wrong type", breakTypeName, type.getName());
-			
+
 			String methodName = ((IJavaStackFrame)thread.getTopStackFrame()).getMethodName();
 			assertEquals("Stopped in wrong method", "roleMethod1", methodName);
-			
+
 			String sourceName = ((IJavaStackFrame)thread.getTopStackFrame()).getSourceName(ISMAPConstants.OTJ_STRATUM_NAME);
 			assertEquals("Lookup gave wrong source name", sourceFile, sourceName);
-			
+
 		} catch (AssertionFailedError fail) {
 			if (thread != null) {
 				IConsole console = DebugUITools.getConsole(thread.getLaunch().getProcesses()[0]);
@@ -84,9 +84,9 @@ public class CopyInheritanceBreakpointTest extends AbstractOTDTDebugTest {
 		} finally {
 			terminateAndRemove(thread);
 			removeAllBreakpoints();
-		}		
+		}
 	}
-	
+
 	public void testBreakInRoleMethod() throws Exception {
 		// set breakpoint in this type:
 		String breakTeamName  = "copyinheritancetests.SuperTeam";
@@ -96,26 +96,26 @@ public class CopyInheritanceBreakpointTest extends AbstractOTDTDebugTest {
 		String breakTypeName  = "copyinheritancetests.SubTeam2$__OT__R";
 		// expect this source file to be found via SMAP:
 		String sourceFile     = "SuperTeam.java";
-		
+
 		createLineBreakpoint(6, breakTeamName); // sysout with roleMethod1
-		
+
 		IJavaThread thread= null;
 		try {
 			waitForBuild();
 			expectNoErrors("DebugTests");
-			
+
 			thread= launchToBreakpoint(launchTypeName);
 			assertNotNull("Breakpoint not hit within timeout period", thread);
-			
+
 			IJavaReferenceType type = ((IJavaStackFrame)thread.getTopStackFrame()).getReferenceType();
 			assertEquals("Stopped in wrong type", breakTypeName, type.getName());
-			
+
 			String methodName = ((IJavaStackFrame)thread.getTopStackFrame()).getMethodName();
 			assertEquals("Stopped in wrong method", "roleMethod1", methodName);
-			
+
 			String sourceName = ((IJavaStackFrame)thread.getTopStackFrame()).getSourceName(ISMAPConstants.OTJ_STRATUM_NAME);
 			assertEquals("Lookup gave wrong source name", sourceFile, sourceName);
-			
+
 		} catch (AssertionFailedError fail) {
 			if (thread != null) {
 				IConsole console = DebugUITools.getConsole(thread.getLaunch().getProcesses()[0]);
@@ -131,7 +131,7 @@ public class CopyInheritanceBreakpointTest extends AbstractOTDTDebugTest {
 		} finally {
 			terminateAndRemove(thread);
 			removeAllBreakpoints();
-		}		
+		}
 	}
 
 	public void testBreakInRoleFileMethod() throws Exception {
@@ -143,9 +143,9 @@ public class CopyInheritanceBreakpointTest extends AbstractOTDTDebugTest {
 		String breakTypeName  = "copyinheritancetests.SubTeam3$__OT__R";
 		// expect this source file to be found via SMAP:
 		String sourceFile     = "R.java";
-		
+
 		createLineBreakpoint(4, breakRoleName); // sysout within roleMethod1
-		
+
 		IJavaThread thread= null;
 		try {
 			waitForBuild();
@@ -153,16 +153,16 @@ public class CopyInheritanceBreakpointTest extends AbstractOTDTDebugTest {
 
 			thread= launchToBreakpoint(launchTypeName);
 			assertNotNull("Breakpoint not hit within timeout period", thread);
-			
+
 			IJavaReferenceType type = ((IJavaStackFrame)thread.getTopStackFrame()).getReferenceType();
 			assertEquals("Stopped in wrong type", breakTypeName, type.getName());
-			
+
 			String methodName = ((IJavaStackFrame)thread.getTopStackFrame()).getMethodName();
 			assertEquals("Stopped in wrong method", "roleMethod1", methodName);
-			
+
 			String sourceName = ((IJavaStackFrame)thread.getTopStackFrame()).getSourceName(ISMAPConstants.OTJ_STRATUM_NAME);
 			assertEquals("Lookup gave wrong source name", sourceFile, sourceName);
-			
+
 		} catch (AssertionFailedError fail) {
 			if (thread != null) {
 				IConsole console = DebugUITools.getConsole(thread.getLaunch().getProcesses()[0]);
@@ -178,7 +178,7 @@ public class CopyInheritanceBreakpointTest extends AbstractOTDTDebugTest {
 		} finally {
 			terminateAndRemove(thread);
 			removeAllBreakpoints();
-		}		
+		}
 	}
 
 	void expectNoErrors(String projectName) {

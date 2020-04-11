@@ -97,7 +97,7 @@ public class LineNumberProvider
     {
     	if (!this._sourceToLineInfos.containsKey(copySrc))
     		this._sourceToLineInfos.put(copySrc, new Vector<LineInfo>());
-    	
+
     	List <LineInfo>lineInfos = this._sourceToLineInfos.get(copySrc);
 
     	int outputStartLine;

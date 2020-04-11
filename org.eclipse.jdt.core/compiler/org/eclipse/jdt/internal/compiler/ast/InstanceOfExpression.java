@@ -166,7 +166,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 	}
 // SH}
 	initializePatternVariables(currentScope, codeStream);
-	
+
 	int pc = codeStream.position;
 	this.expression.generateCode(currentScope, codeStream, true);
 	codeStream.instance_of(this.type, this.type.resolvedType);

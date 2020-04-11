@@ -29,7 +29,7 @@ public class OTNullAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 	public OTNullAnnotationTest(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which do not belong to the class are skipped...
 	static {
@@ -45,7 +45,7 @@ public class OTNullAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 	public static Class testClass() {
 		return OTNullAnnotationTest.class;
 	}
-	
+
 	public void testNullableBase() {
 		runNegativeTestWithLibs(
 			new String[] {
@@ -60,21 +60,21 @@ public class OTNullAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 				"bug443299a/MyBase.java",
 				"package bug443299a;\n" +
 				"public class MyBase {}\n"
-			}, 
+			},
 			getCompilerOptions(),
-			"----------\n" + 
-			"1. WARNING in bug443299a\\MyTeam.java (at line 5)\n" + 
-			"	new MyRole(null);\n" + 
-			"	^^^^^^^^^^^^^^^^\n" + 
-			"Argument to lifting constructor MyRole(MyBase) is not a freshly created base object (of type bug443299a.MyBase); may cause a DuplicateRoleException at runtime (OTJLD 2.4.1(c)).\n" + 
-			"----------\n" + 
-			"2. ERROR in bug443299a\\MyTeam.java (at line 5)\n" + 
-			"	new MyRole(null);\n" + 
-			"	           ^^^^\n" + 
-			"Null type mismatch: required \'@NonNull MyBase\' but the provided value is null\n" + 
+			"----------\n" +
+			"1. WARNING in bug443299a\\MyTeam.java (at line 5)\n" +
+			"	new MyRole(null);\n" +
+			"	^^^^^^^^^^^^^^^^\n" +
+			"Argument to lifting constructor MyRole(MyBase) is not a freshly created base object (of type bug443299a.MyBase); may cause a DuplicateRoleException at runtime (OTJLD 2.4.1(c)).\n" +
+			"----------\n" +
+			"2. ERROR in bug443299a\\MyTeam.java (at line 5)\n" +
+			"	new MyRole(null);\n" +
+			"	           ^^^^\n" +
+			"Null type mismatch: required \'@NonNull MyBase\' but the provided value is null\n" +
 			"----------\n");
 	}
-	
+
 	public void testBug444231() {
 		if (this.complianceLevel >= ClassFileConstants.JDK1_8) return; // not ready for type annotations, yet
 		Map<String,String> options = getCompilerOptions();
@@ -113,14 +113,14 @@ public class OTNullAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 				"}\n"
 			},
 			getCompilerOptions(),
-			"----------\n" + 
-			"1. ERROR in p\\Team444231SubSub.java (at line 6)\n" + 
-			"	new R(val);\n" + 
-			"	      ^^^\n" + 
-			"Null type mismatch: required '@NonNull String' but the provided value is null\n" + 
+			"----------\n" +
+			"1. ERROR in p\\Team444231SubSub.java (at line 6)\n" +
+			"	new R(val);\n" +
+			"	      ^^^\n" +
+			"Null type mismatch: required '@NonNull String' but the provided value is null\n" +
 			"----------\n");
 	}
-	
+
 	public void testBug444231_ambiguous() {
 		if (this.complianceLevel >= ClassFileConstants.JDK1_8) return; // not ready for type annotations, yet
 		runNegativeTestWithLibs(
@@ -146,11 +146,11 @@ public class OTNullAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 				"}\n"
 			},
 			getCompilerOptions(),
-			"----------\n" + 
-			"1. ERROR in p\\Team444231Sub.java (at line 4)\n" + 
-			"	new R(null);\n" + 
-			"	^^^^^^^^^^^\n" + 
-			"The constructor Team444231Sub.R(null) is ambiguous\n" + 
+			"----------\n" +
+			"1. ERROR in p\\Team444231Sub.java (at line 4)\n" +
+			"	new R(null);\n" +
+			"	^^^^^^^^^^^\n" +
+			"The constructor Team444231Sub.R(null) is ambiguous\n" +
 			"----------\n");
 	}
 }

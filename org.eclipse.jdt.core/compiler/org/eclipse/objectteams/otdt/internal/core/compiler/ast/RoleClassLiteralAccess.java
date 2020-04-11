@@ -87,13 +87,13 @@ public class RoleClassLiteralAccess extends ClassLiteralAccess {
 		generateMessageSend(expressionType);
 	}
 
-	/** 
+	/**
 	 * Constructor for use by the Parser.
      */
 	public RoleClassLiteralAccess(SingleTypeReference typeRef) {
 		super(typeRef.sourceEnd, typeRef);
 	}
-	
+
 	private void generateMessageSend(TypeBinding expressionType) {
 		AstGenerator gen = new AstGenerator(this.type.sourceStart, this.sourceEnd);
 		ReferenceBinding roleBinding = (ReferenceBinding)this.type.resolvedType;
@@ -151,7 +151,7 @@ public class RoleClassLiteralAccess extends ClassLiteralAccess {
 		if (this.type instanceof ParameterizedSingleTypeReference) {
 			// directly created from parsing R<@t>.class
 			this.constant = Constant.NotAConstant;
-			
+
 			ParameterizedSingleTypeReference typeRef = (ParameterizedSingleTypeReference)this.type;
 			if (typeRef.token == null) {
 				// syntax error, however, we can still check the type anchor:
@@ -161,7 +161,7 @@ public class RoleClassLiteralAccess extends ClassLiteralAccess {
 				return null;
 			}
 			TypeBinding roleType = this.type.resolveType(scope);
-			if (roleType != null && roleType.isValidBinding()) 
+			if (roleType != null && roleType.isValidBinding())
 				generateMessageSend(roleType);
 		}
 		// clients might still use this (obsolete) field?
@@ -200,7 +200,7 @@ public class RoleClassLiteralAccess extends ClassLiteralAccess {
 	}
 
 	private static TypeBinding ensureGetClassMethodPart(TypeDeclaration teamDecl, ReferenceBinding teamBinding,
-													    TypeDeclaration roleDecl, ReferenceBinding roleBinding, char[] selector) 
+													    TypeDeclaration roleDecl, ReferenceBinding roleBinding, char[] selector)
 	{
 		MethodBinding[] existingMethods = teamBinding.getMethods(selector);
 		if (existingMethods != NO_METHODS)

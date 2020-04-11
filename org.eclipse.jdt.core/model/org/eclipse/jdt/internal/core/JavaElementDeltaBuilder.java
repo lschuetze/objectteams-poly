@@ -319,7 +319,7 @@ private void findContentChange(JavaElementInfo oldInfo, JavaElementInfo newInfo,
 			char[] oldName = oldMappingInfo.getCallinName();
 			char[] newName = newMappingInfo.getCallinName();
 			if (   oldMappingInfo.isCallin()
-				&& !(oldName[0] == '<' && newName[0] == '<') // if both are generated don't bother to compare 
+				&& !(oldName[0] == '<' && newName[0] == '<') // if both are generated don't bother to compare
 				&& !CharOperation.equals(oldName, newName))
 				this.delta.changed(newElement, IJavaElementDelta.F_CONTENT);
 			if (!oldMappingInfo.signaturesEqual(newMappingInfo))

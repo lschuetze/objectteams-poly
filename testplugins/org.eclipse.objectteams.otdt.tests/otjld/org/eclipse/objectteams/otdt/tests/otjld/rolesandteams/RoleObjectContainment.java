@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -26,14 +26,14 @@ import junit.framework.Test;
 
 /**
  * Former jacks tests from section role-object-containment (1.1.*)
- * @author stephan 
+ * @author stephan
  */
 public class RoleObjectContainment extends AbstractOTJLDTest {
 
 	public RoleObjectContainment(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -41,7 +41,7 @@ public class RoleObjectContainment extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -50,7 +50,7 @@ public class RoleObjectContainment extends AbstractOTJLDTest {
 		return RoleObjectContainment.class;
 	}
 
-	// 1.1.1-otjld-team-method-invocation-1 
+	// 1.1.1-otjld-team-method-invocation-1
 	// role invokes method of enclosing team using the unqualified name
 	public void testTeamMethodInvocation1() {
 		runConformTest(
@@ -81,7 +81,7 @@ public class RoleObjectContainment extends AbstractOTJLDTest {
 				"        }\n" +
 				"    }\n" +
 				"}",
-			}, 
+			},
 			"OK");
 	}
     // role invokes method of enclosing team using the unqualified name
@@ -1128,11 +1128,11 @@ public class RoleObjectContainment extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team116qta.java (at line 5)\n" + 
-    		"	Team116qta.this = new Team116qta();\n" + 
-    		"	^^^^^^^^^^^^^^^\n" + 
-    		"The left-hand side of an assignment must be a variable\n" + 
+            "----------\n" +
+    		"1. ERROR in Team116qta.java (at line 5)\n" +
+    		"	Team116qta.this = new Team116qta();\n" +
+    		"	^^^^^^^^^^^^^^^\n" +
+    		"The left-hand side of an assignment must be a variable\n" +
     		"----------\n");
     }
 
@@ -1284,5 +1284,5 @@ public class RoleObjectContainment extends AbstractOTJLDTest {
 			    "    \n"
             },
             "OTJLD 1.2.1");
-    }	
+    }
 }

@@ -5,7 +5,7 @@
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * Copyright 2010 Stephan Herrmann
  *
  * This program and the accompanying materials
@@ -30,7 +30,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDecl
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
 /**
- * 
+ *
  * @author stephan
  */
 public class SelectionOnCallinMapping extends CallinMappingDeclaration {

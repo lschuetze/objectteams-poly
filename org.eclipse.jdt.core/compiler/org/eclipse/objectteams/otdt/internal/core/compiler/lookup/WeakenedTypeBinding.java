@@ -84,7 +84,7 @@ public class WeakenedTypeBinding extends DependentTypeBinding {
 		return   this.type.isCompatibleWith(otherStrong)
 			  && otherWeak.isCompatibleWith(this.weakenedType);
 	}
-	
+
 	// ----- BYTE CODE VIEW -----
 	@Override
 	public char[] constantPoolName() {
@@ -139,17 +139,17 @@ public class WeakenedTypeBinding extends DependentTypeBinding {
 	public boolean isSignificantlyWeakened() {
 		return TypeBinding.notEquals(this.weakenedType, this.type.getRealType());
 	}
-	
+
 	@Override
 	public boolean isRoleType() {
 		return this.type.isRoleType();
 	}
-	
+
 	@Override
 	public boolean isPlainDependentType() {
 		return this.type.isPlainDependentType();
 	}
-	
+
 	/**
      * Weakening implies that the interfaces are used to ensure compatibility,
      * so never use the signature of a class part.

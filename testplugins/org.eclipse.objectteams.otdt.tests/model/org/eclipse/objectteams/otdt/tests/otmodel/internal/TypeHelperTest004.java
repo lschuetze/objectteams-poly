@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -59,7 +59,7 @@ public class TypeHelperTest004 extends FileBasedModelTest
     {
         return new Suite(TypeHelperTest004.class);
     }
-    
+
     /**
      * Creates a team hierarchy with implicit role type inheritance.
      */
@@ -67,14 +67,14 @@ public class TypeHelperTest004 extends FileBasedModelTest
     {
         setTestProjectDir("Hierarchy");
         super.setUpSuite();
-                
+
         _t1r1 =
             getRole(getTestProjectDir(),
                 "analysis",
                 "rolehierarchy3",
                 "T1",
                 "R1");
-        
+
         _t2r1 =
             getRole(getTestProjectDir(),
                 "analysis",
@@ -88,14 +88,14 @@ public class TypeHelperTest004 extends FileBasedModelTest
                 "rolehierarchy3",
                 "T2",
                 "R2");
-        
+
         _t3r1 =
             getRole(getTestProjectDir(),
                 "analysis",
                 "rolehierarchy3",
                 "T3",
                 "R1");
-        
+
         _t3r2 =
             getRole(getTestProjectDir(),
                 "analysis",
@@ -108,19 +108,19 @@ public class TypeHelperTest004 extends FileBasedModelTest
                 "analysis",
                 "rolehierarchy3",
                 "C1");
-        
+
         _c1m1 = _c1.getMethods()[0];
         _c1m2 = _c1.getMethods()[1];
         _t1r1m3 = _t1r1.getMethods()[0];
         _t2r1m1 = _t2r1.getMethods()[0];
         _t2r2m3 = _t2r2.getMethods()[0];
     }
-        
+
     protected void setUp() throws Exception
     {
         super.setUp();
     }
-    
+
     public void testExists_T3R2()
     	throws JavaModelException
 	{
@@ -141,17 +141,17 @@ public class TypeHelperTest004 extends FileBasedModelTest
     {
         IMethod[] expected = new IMethod[] {_t2r1m1, _t1r1m3, _c1m2 };
         IMethod[] actual = TypeHelper.getRoleMethodsComplete(_t3r1);
-        
+
         assertTrue( compareMethods(expected, actual) );
     }
-    
+
     public void testGetInheritedRoleMethods_MixedHierarchy2() throws JavaModelException
     {
         IMethod[] expected = new IMethod[] {_t2r1m1, _t2r2m3, _c1m2};
         IMethod[] actual = TypeHelper.getRoleMethodsComplete(_t3r2);
-        
+
         assertTrue( compareMethods(expected, actual) );
     }
-    
-        
+
+
 }

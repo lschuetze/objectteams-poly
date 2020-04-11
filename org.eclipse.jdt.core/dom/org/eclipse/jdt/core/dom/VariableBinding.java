@@ -336,7 +336,7 @@ class VariableBinding implements IVariableBinding {
 				return ((LiftingTypeReference)decl.type).fakedArgument.binding.id;
 			}
 		}
-		return getVariableId(); 
+		return getVariableId();
 	}
 // SH}
 

@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2016 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -29,11 +29,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 @SuppressWarnings("unchecked")
 public class CalloutMethodBinding extends AbstractOTJLDTest {
-	
+
 	public CalloutMethodBinding(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -41,7 +41,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -52,7 +52,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // an abstract role method is callout-bound via -> to a method in the direct base class
     // 3.1.1-otjld-abstract-callout-binding-1
     public void test311_abstractCalloutBinding1() {
-       
+
        runConformTest(
             new String[] {
 		"T311acb1Main.java",
@@ -138,7 +138,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // an abstract role method is callout-bound via -> to a method in the base class of the implicit superclass
     // 3.1.1-otjld-abstract-callout-binding-2
     public void test311_abstractCalloutBinding2() {
-       
+
        runConformTest(
             new String[] {
 		"T311acb2Main.java",
@@ -192,7 +192,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // an abstract role method is callout-bound via -> to a method in the base class of the explicit superclass
     // 3.1.1-otjld-abstract-callout-binding-3
     public void test311_abstractCalloutBinding3() {
-       
+
        runConformTest(
             new String[] {
 		"T311acb3Main.java",
@@ -237,7 +237,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // an abstract role method is callout-bound via -> to a method in the indirect base class of the explicit superclass
     // 3.1.1-otjld-abstract-callout-binding-4
     public void test311_abstractCalloutBinding4() {
-       
+
        runConformTest(
             new String[] {
 		"T311acb4Main.java",
@@ -291,7 +291,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // an abstract role method is callout-bound (via -> and the name only) to a base method with an assignment-compatible return type
     // 3.1.1-otjld-abstract-callout-binding-5
     public void test311_abstractCalloutBinding5() {
-       
+
        runConformTest(
             new String[] {
 		"T311acb5Main.java",
@@ -334,7 +334,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // an abstract role method is callout-bound (via -> and the name only) to a base method with an assignment-compatible signature
     // 3.1.1-otjld-abstract-callout-binding-6
     public void test311_abstractCalloutBinding6() {
-       
+
        runConformTest(
             new String[] {
 		"T311acb6Main.java",
@@ -377,7 +377,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // a role class callout-binds a role method via -> to a base method that has a signature that is compatible via lowering
     // 3.1.1-otjld-abstract-callout-binding-7
     public void test311_abstractCalloutBinding7() {
-       
+
        runConformTest(
             new String[] {
 		"T311acb7Main.java",
@@ -432,7 +432,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     }
     // Bug 355314 - abstract method error may be masked by callout binding
     public void test311_abstractCalloutBinding8() {
-        
+
         runNegativeTest(
              new String[] {
  		"T311acb8Main.java",
@@ -480,16 +480,16 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
  			    "\n" +
  			    "}\n",
              },
-            "----------\n" + 
-			"1. ERROR in Team311acb8_2.java (at line 4)\n" + 
-			"	public class Role311acb8 playedBy T311acb8_1 {\n" + 
-			"	             ^^^^^^^^^^^\n" + 
-			"Inherited abstract method getValueInternal() is implicitly bound as an inferred callout (OTJLD 3.1(j)).\n" + 
+            "----------\n" +
+			"1. ERROR in Team311acb8_2.java (at line 4)\n" +
+			"	public class Role311acb8 playedBy T311acb8_1 {\n" +
+			"	             ^^^^^^^^^^^\n" +
+			"Inherited abstract method getValueInternal() is implicitly bound as an inferred callout (OTJLD 3.1(j)).\n" +
 			"----------\n");
      }
     // Bug 355314 - abstract method error may be masked by callout binding
     public void test311_abstractCalloutBinding8a() {
-        
+
         runNegativeTest(
              new String[] {
  		"T311acb8aMain.java",
@@ -534,16 +534,16 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
  			    "\n" +
  			    "}\n",
              },
-            "----------\n" + 
-			"1. ERROR in Team311acb8a_2.java (at line 4)\n" + 
-			"	public class Role311acb8a playedBy T311acb8a_1 {\n" + 
-			"	             ^^^^^^^^^^^^\n" + 
-			"The abstract method getValueInternal in type Role311acb8a can only be defined by an abstract class\n" + 
+            "----------\n" +
+			"1. ERROR in Team311acb8a_2.java (at line 4)\n" +
+			"	public class Role311acb8a playedBy T311acb8a_1 {\n" +
+			"	             ^^^^^^^^^^^^\n" +
+			"The abstract method getValueInternal in type Role311acb8a can only be defined by an abstract class\n" +
 			"----------\n" +
-			"2. ERROR in Team311acb8a_2.java (at line 4)\n" + 
-			"	public class Role311acb8a playedBy T311acb8a_1 {\n" + 
-			"	             ^^^^^^^^^^^^\n" + 
-			"The type Team311acb8a_2.Role311acb8a must implement the inherited abstract method Team311acb8a_2.Role311acb8a.getValueInternal()\n" + 
+			"2. ERROR in Team311acb8a_2.java (at line 4)\n" +
+			"	public class Role311acb8a playedBy T311acb8a_1 {\n" +
+			"	             ^^^^^^^^^^^^\n" +
+			"The type Team311acb8a_2.Role311acb8a must implement the inherited abstract method Team311acb8a_2.Role311acb8a.getValueInternal()\n" +
 			"----------\n");
      }
 
@@ -600,7 +600,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // a concrete role method is callout-bound via => to a method in the direct base class
     // 3.1.3-otjld-concrete-callout-binding-1
     public void test313_concreteCalloutBinding1() {
-       
+
        runConformTest(
             new String[] {
 		"T313ccb1Main.java",
@@ -680,7 +680,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // a concrete role method is callout-bound via => to a method in the implicit base class
     // 3.1.3-otjld-concrete-callout-binding-2
     public void test313_concreteCalloutBinding2() {
-       
+
        runConformTest(
             new String[] {
 		"T313ccb2Main.java",
@@ -737,7 +737,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // a concrete role method is callout-bound via => to a method in the base class of the explicit superclass
     // 3.1.3-otjld-concrete-callout-binding-3
     public void test313_concreteCalloutBinding3() {
-       
+
        runConformTest(
             new String[] {
 		"T313ccb3Main.java",
@@ -795,7 +795,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // a concrete role method is callout-bound via => to a method in the indirect base class of the explicit superclass
     // 3.1.3-otjld-concrete-callout-binding-4
     public void test313_concreteCalloutBinding4() {
-       
+
        runConformTest(
             new String[] {
 		"T313ccb4Main.java",
@@ -852,7 +852,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // a concrete role method is callout-bound via => to a method in the direct base class - overriding protected native clone
     // 3.1.3-otjld-concrete-callout-binding-5
     public void test313_concreteCalloutBinding5() {
-       
+
        runConformTest(
             new String[] {
 		"T313ccb5Main.java",
@@ -953,7 +953,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // a role class overwrites an inherited callout binding from its implicit superrole via => to a different base method
     // 3.1.5-otjld-overwritten-callout-binding-1
     public void test315_overwrittenCalloutBinding1() {
-       
+
        runConformTest(
             new String[] {
 		"T315ocb1Main.java",
@@ -1007,7 +1007,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // a role class overwrites an inherited callout binding from its explicit superrole via => to the overwritten base method in a subclass
     // 3.1.5-otjld-overwritten-callout-binding-2
     public void test315_overwrittenCalloutBinding2() {
-       
+
        runConformTest(
             new String[] {
 		"T315ocb2Main.java",
@@ -1090,11 +1090,11 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team316icrmb_2.java (at line 6)\n" + 
-    		"	test -> test;\n" + 
-    		"	^^^^\n" + 
-    		"A non-abstract role method exists for this callout-binding. Use callout-override (\'=>\') if you want to override it (OTJLD 3.1(e)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team316icrmb_2.java (at line 6)\n" +
+    		"	test -> test;\n" +
+    		"	^^^^\n" +
+    		"A non-abstract role method exists for this callout-binding. Use callout-override (\'=>\') if you want to override it (OTJLD 3.1(e)).\n" +
     		"----------\n");
     }
 
@@ -1122,11 +1122,11 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team317iarmb.java (at line 8)\n" + 
-    		"	test => test;\n" + 
-    		"	^^^^\n" + 
-    		"Trying to bind an abstract method as callout override (OTJLD 3.1(e)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team317iarmb.java (at line 8)\n" +
+    		"	test => test;\n" +
+    		"	^^^^\n" +
+    		"Trying to bind an abstract method as callout override (OTJLD 3.1(e)).\n" +
     		"----------\n");
     }
 
@@ -1221,7 +1221,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // a role class callout-binds a role method via -> to a base method that has a return type (corrected version)
     // 3.1.9-otjld-nonexisting-base-method-3
     public void test319_nonexistingBaseMethod3() {
-       
+
        runConformTest(
             new String[] {
 		"T319nbm3Main.java",
@@ -1492,7 +1492,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // a role class callout-binds a role method via -> to a base method that has a result that is compatible via lifting
     // 3.1.9-otjld-nonexisting-base-method-11
     public void test319_nonexistingBaseMethod11() {
-       
+
        runConformTest(
             new String[] {
 		"Team319nbm11.java",
@@ -1595,7 +1595,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // a role class callout-binds a role method via => to a base method that has an argument that is compatible via lowering
     // 3.1.9-otjld-nonexisting-base-method-13
     public void test319_nonexistingBaseMethod13() {
-       
+
        runConformTest(
             new String[] {
 		"T319nbm13Main.java",
@@ -1857,11 +1857,11 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team3111ioib1.java (at line 10)\n" + 
-    		"	String getValue() -> String getValue2();\n" + 
-    		"	^^^^^^^^^^^^^^^^^\n" + 
-    		"Callout binding conflicts with inherited callout binding from class Team3111ioib1.Role3111ioib1_1. Use \'=>\' if you want to override it (OTJLD 3.1(f)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team3111ioib1.java (at line 10)\n" +
+    		"	String getValue() -> String getValue2();\n" +
+    		"	^^^^^^^^^^^^^^^^^\n" +
+    		"Callout binding conflicts with inherited callout binding from class Team3111ioib1.Role3111ioib1_1. Use \'=>\' if you want to override it (OTJLD 3.1(f)).\n" +
     		"----------\n");
     }
 
@@ -1895,11 +1895,11 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team3111ioib2_2.java (at line 5)\n" + 
-    		"	test1 -> test2;\n" + 
-    		"	^^^^^\n" + 
-    		"Callout binding conflicts with inherited callout binding from class Team3111ioib2_1.Role3111ioib2. Use \'=>\' if you want to override it (OTJLD 3.1(f)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team3111ioib2_2.java (at line 5)\n" +
+    		"	test1 -> test2;\n" +
+    		"	^^^^^\n" +
+    		"Callout binding conflicts with inherited callout binding from class Team3111ioib2_1.Role3111ioib2. Use \'=>\' if you want to override it (OTJLD 3.1(f)).\n" +
     		"----------\n");
     }
 
@@ -1931,11 +1931,11 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team3111ioib3_2.java (at line 4)\n" + 
-    		"	test -> test;\n" + 
-    		"	^^^^\n" + 
-    		"Callout binding conflicts with inherited callout binding from class Team3111ioib3_1.Role3111ioib3_1. Use \'=>\' if you want to override it (OTJLD 3.1(f)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team3111ioib3_2.java (at line 4)\n" +
+    		"	test -> test;\n" +
+    		"	^^^^\n" +
+    		"Callout binding conflicts with inherited callout binding from class Team3111ioib3_1.Role3111ioib3_1. Use \'=>\' if you want to override it (OTJLD 3.1(f)).\n" +
     		"----------\n");
     }
 
@@ -2035,7 +2035,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // a static base method is bound via callout
     // 3.1.13-otjld-callout-to-static-1
     public void test3113_calloutToStatic1() {
-       
+
        runConformTest(
             new String[] {
 		"T3113cts1Main.java",
@@ -2070,7 +2070,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
             },
             "OK");
     }
-    
+
     // missing abstract modifier for role with abstract static method
     public void test3113_calloutToStatic2() {
         runNegativeTest(
@@ -2086,21 +2086,21 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
  			    "	}\n" +
  			    "}\n"
              },
-             "----------\n" + 
-     		 "1. ERROR in Team3113cts2.java (at line 3)\n" + 
-     		 "	protected class R3113cts2 {\n" + 
-     		 "	                ^^^^^^^^^\n" + 
-     		 "The type R3113cts2 must be an abstract class to define abstract methods\n" + 
-             "----------\n" + 
-     		 "2. ERROR in Team3113cts2.java (at line 4)\n" + 
-     		 "	protected abstract static String getV();\n" + 
-     		 "	                                 ^^^^^^\n" + 
-     		 "The abstract method getV in type R3113cts2 can only be defined by an abstract class\n" + 
+             "----------\n" +
+     		 "1. ERROR in Team3113cts2.java (at line 3)\n" +
+     		 "	protected class R3113cts2 {\n" +
+     		 "	                ^^^^^^^^^\n" +
+     		 "The type R3113cts2 must be an abstract class to define abstract methods\n" +
+             "----------\n" +
+     		 "2. ERROR in Team3113cts2.java (at line 4)\n" +
+     		 "	protected abstract static String getV();\n" +
+     		 "	                                 ^^^^^^\n" +
+     		 "The abstract method getV in type R3113cts2 can only be defined by an abstract class\n" +
      		 "----------\n");
      }
-    
+
     // abstract static method bound by callout in implicit sub-role
-    // Bug 336394 - [compiler] ClassFormatError caused by abstract static method 
+    // Bug 336394 - [compiler] ClassFormatError caused by abstract static method
     public void test3113_calloutToStatic3() {
         runConformTest(
              new String[] {
@@ -2141,9 +2141,9 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
              },
              "OK");
      }
-    
+
     // abstract static method bound by callout in implicit sub-role
-    // Bug 336394 - [compiler] ClassFormatError caused by abstract static method 
+    // Bug 336394 - [compiler] ClassFormatError caused by abstract static method
     public void test3113_calloutToStatic4() {
         runConformTest(
              new String[] {
@@ -2234,7 +2234,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     			"    void test() {\n" +
     			"        R.test();\n" +
     			"    }\n" +
-    			"    public static void main(String[] args) {\n" + 
+    			"    public static void main(String[] args) {\n" +
     			"        Team3113cts6_2 t = new Team3113cts6_2();" +
     			"        t.other.val = \"OK\";\n" +
     			"        t.test();\n" +
@@ -2259,7 +2259,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // A callout binding creates a role method
     // 3.1.14-otjld-callout-without-role-method-1
     public void test3114_calloutWithoutRoleMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"Team3114cwrm1.java",
@@ -2291,7 +2291,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // public callout method in protected role - should not report warning
     // 3.1.14-otjld-callout-without-role-method-2
     public void test3114_calloutWithoutRoleMethod2() {
-       
+
        runConformTest(
             new String[] {
 		"Team3114cwrm2.java",
@@ -2322,7 +2322,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // a local class calls a callout of the enclosing role
     // 3.1.15-otjld-callout-called-within-localtype-1
     public void test3115_calloutCalledWithinLocaltype1() {
-       
+
        runConformTest(
             new String[] {
 		"Team3115ccwl1.java",
@@ -2394,11 +2394,11 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team3115ccwl2.java (at line 8)\n" + 
-    		"	void broken() -> void inexistent();\n" + 
-    		"	                 ^^^^^^^^^^^^^^^^^\n" + 
-    		"No method inexistent() found in type T3115ccwl2 to resolve method designator (OTJLD 3.1(c)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team3115ccwl2.java (at line 8)\n" +
+    		"	void broken() -> void inexistent();\n" +
+    		"	                 ^^^^^^^^^^^^^^^^^\n" +
+    		"No method inexistent() found in type T3115ccwl2 to resolve method designator (OTJLD 3.1(c)).\n" +
     		"----------\n",
             null/*classLibraries*/,
             true/*shouldFlushOutputDirectory*/,
@@ -2435,7 +2435,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     public void test3117_inferredCallout1() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3117ic1.java",
@@ -2480,7 +2480,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     public void test3117_inferredCallout2() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3117ic2.java",
@@ -2526,7 +2526,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     public void test3117_inferredCallout3() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3117ic3.java",
@@ -2569,7 +2569,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     public void test3117_inferredCallout4() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.IGNORE);
-       
+
        runConformTest(
             new String[] {
 		"Team3117ic4.java",
@@ -2617,7 +2617,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     public void test3117_inferredCallout5() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3117ic5.java",
@@ -2743,33 +2743,33 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
 			    "    \n"
             },
             true/*expectingCompilerErrors*/,
-            "----------\n" + 
-            "1. ERROR in Team3117ic7.java (at line 7)\n" + 
-            "	secret();\n" + 
-            "	^^^^^^^^\n" + 
-            "The private base feature secret() from type T3117ic7_1 is not available via the base type T3117ic7_2 (OTJLD 3.4(d)). \n" + 
-            "----------\n" + 
-            "2. ERROR in Team3117ic7.java (at line 7)\n" + 
-            "	secret();\n" + 
-            "	^^^^^^\n" + 
-            "The method secret() is undefined for the type Team3117ic7.R\n" + 
+            "----------\n" +
+            "1. ERROR in Team3117ic7.java (at line 7)\n" +
+            "	secret();\n" +
+            "	^^^^^^^^\n" +
+            "The private base feature secret() from type T3117ic7_1 is not available via the base type T3117ic7_2 (OTJLD 3.4(d)). \n" +
+            "----------\n" +
+            "2. ERROR in Team3117ic7.java (at line 7)\n" +
+            "	secret();\n" +
+            "	^^^^^^\n" +
+            "The method secret() is undefined for the type Team3117ic7.R\n" +
             "----------\n",
             ""/*expectedOutputString*/,
-            "java.lang.Error: Unresolved compilation problems: \n" + 
-    		"	The private base feature secret() from type T3117ic7_1 is not available via the base type T3117ic7_2 (OTJLD 3.4(d)). \n" + 
-    		"	The method secret() is undefined for the type Team3117ic7.R\n" + 
-    		"\n" + 
-    		"	at Team3117ic7$__OT__R.thief(Team3117ic7.java:7)\n" + 
-    		"	at Team3117ic7.<init>(Team3117ic7.java:12)\n" + 
-    		"	at Team3117ic7.main(Team3117ic7.java:15)\n" + 
-//    		"	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n" + 
-//    		"	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)\n" + 
-//    		"	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)\n" + 
-//    		"	at java.lang.reflect.Method.invoke(Method.java:597)\n" + 
+            "java.lang.Error: Unresolved compilation problems: \n" +
+    		"	The private base feature secret() from type T3117ic7_1 is not available via the base type T3117ic7_2 (OTJLD 3.4(d)). \n" +
+    		"	The method secret() is undefined for the type Team3117ic7.R\n" +
+    		"\n" +
+    		"	at Team3117ic7$__OT__R.thief(Team3117ic7.java:7)\n" +
+    		"	at Team3117ic7.<init>(Team3117ic7.java:12)\n" +
+    		"	at Team3117ic7.main(Team3117ic7.java:15)\n" +
+//    		"	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n" +
+//    		"	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)\n" +
+//    		"	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)\n" +
+//    		"	at java.lang.reflect.Method.invoke(Method.java:597)\n" +
     		"	at"/*expectedErrorString*/,
             true/*forceExecution*/,
             null/*classLibraries*/,
-            true/*shouldFlushOutputDirectory*/,     		
+            true/*shouldFlushOutputDirectory*/,
             null/*vmArguments*/,
             customOptions,
             null/*no custom requestor*/,
@@ -2781,7 +2781,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     public void test3117_inferredCallout8() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.IGNORE);
-       
+
        runConformTest(
             new String[] {
 		"Team3117ic8.java",
@@ -2843,26 +2843,26 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-			"1. WARNING in Team3117ic9.java (at line 5)\n" + 
-			"	System.out.print(aField);\n" + 
-			"	                 ^^^^^^\n" + 
-			"Reference double aField implicitly uses callout getter to base field \'double aField\' (OTJLD 3.5(h)).\n" + 
-			"----------\n" + 
-			"2. WARNING in Team3117ic9.java (at line 6)\n" + 
-			"	System.out.print(aField);\n" + 
-			"	                 ^^^^^^\n" + 
-			"Reference double aField implicitly uses callout getter to base field \'double aField\' (OTJLD 3.5(h)).\n" + 
-			"----------\n" + 
-			"3. WARNING in Team3117ic9.java (at line 7)\n" + 
-			"	System.out.print(aMethod(13));\n" + 
-			"	                 ^^^^^^^^^^^\n" + 
-			"Unresolved self call aMethod(int) is implicitly bound by an inferred callout (OTJLD 3.1(j)).\n" + 
-			"----------\n" + 
-			"4. WARNING in Team3117ic9.java (at line 8)\n" + 
-			"	System.out.print(aMethod(14));\n" + 
-			"	                 ^^^^^^^^^^^\n" + 
-			"Unresolved self call aMethod(int) is implicitly bound by an inferred callout (OTJLD 3.1(j)).\n" + 
+            "----------\n" +
+			"1. WARNING in Team3117ic9.java (at line 5)\n" +
+			"	System.out.print(aField);\n" +
+			"	                 ^^^^^^\n" +
+			"Reference double aField implicitly uses callout getter to base field \'double aField\' (OTJLD 3.5(h)).\n" +
+			"----------\n" +
+			"2. WARNING in Team3117ic9.java (at line 6)\n" +
+			"	System.out.print(aField);\n" +
+			"	                 ^^^^^^\n" +
+			"Reference double aField implicitly uses callout getter to base field \'double aField\' (OTJLD 3.5(h)).\n" +
+			"----------\n" +
+			"3. WARNING in Team3117ic9.java (at line 7)\n" +
+			"	System.out.print(aMethod(13));\n" +
+			"	                 ^^^^^^^^^^^\n" +
+			"Unresolved self call aMethod(int) is implicitly bound by an inferred callout (OTJLD 3.1(j)).\n" +
+			"----------\n" +
+			"4. WARNING in Team3117ic9.java (at line 8)\n" +
+			"	System.out.print(aMethod(14));\n" +
+			"	                 ^^^^^^^^^^^\n" +
+			"Unresolved self call aMethod(int) is implicitly bound by an inferred callout (OTJLD 3.1(j)).\n" +
 			"----------\n",
             customOptions);
     }
@@ -2875,30 +2875,30 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     	runConformTest(
     		new String[]{
     	"Team3117ic10.java",
-    			"public team class Team3117ic10 {\n" + 
-				"\n" + 
-				"	protected class R playedBy T3117ic10 {\n" + 
-				"\n" + 
-				"		String foo(String s, int i) <- replace String foo(String s, int i);\n" + 
-				"\n" + 
-				"		@SuppressWarnings({ \"inferredcallout\", \"basecall\" })\n" + 
-				"		callin String foo(String s, int i) {\n" + 
-				"			return foo(s+\"(\"+i+\")\");\n" + 
-				"		}\n" + 
-				"	}\n" + 
-				"	public static void main(String[] args) {\n" + 
-				"		new Team3117ic10().activate();\n" + 
-				"		System.out.println(new T3117ic10().foo(\"OK\", 23));\n" + 
-				"	}\n" + 
+    			"public team class Team3117ic10 {\n" +
+				"\n" +
+				"	protected class R playedBy T3117ic10 {\n" +
+				"\n" +
+				"		String foo(String s, int i) <- replace String foo(String s, int i);\n" +
+				"\n" +
+				"		@SuppressWarnings({ \"inferredcallout\", \"basecall\" })\n" +
+				"		callin String foo(String s, int i) {\n" +
+				"			return foo(s+\"(\"+i+\")\");\n" +
+				"		}\n" +
+				"	}\n" +
+				"	public static void main(String[] args) {\n" +
+				"		new Team3117ic10().activate();\n" +
+				"		System.out.println(new T3117ic10().foo(\"OK\", 23));\n" +
+				"	}\n" +
 				"}\n",
     	"T3117ic10.java",
-    			"public class T3117ic10 {\n" + 
-    			"	String foo(String s, int i) {\n" + 
-    			"		return s+\":\"+i;\n" + 
-    			"	}\n" + 
-    			"	String foo(String s) {\n" + 
-    			"		return s;\n" + 
-    			"	}\n" + 
+    			"public class T3117ic10 {\n" +
+    			"	String foo(String s, int i) {\n" +
+    			"		return s+\":\"+i;\n" +
+    			"	}\n" +
+    			"	String foo(String s) {\n" +
+    			"		return s;\n" +
+    			"	}\n" +
     			"}\n",
     		}, "OK(23)",
             null/*classLibraries*/,
@@ -2912,7 +2912,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     public void test3117_inferredCallout11() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3117ic11.java",
@@ -2953,7 +2953,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     public void test3117_inferredCallout12() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3117ic12_2.java",
@@ -3000,35 +3000,35 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     public void test3117_inferredCallout13() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"b/IBase.java",
 			    "\n" +
-			    "package b;\n" + 
-			    "\n" + 
-			    "public interface IBase {\n" + 
-			    "\n" + 
-			    "	void setS(String s);\n" + 
+			    "package b;\n" +
 			    "\n" +
-			    "	void setL(java.util.List<String> l);\n" + 
+			    "public interface IBase {\n" +
+			    "\n" +
+			    "	void setS(String s);\n" +
+			    "\n" +
+			    "	void setL(java.util.List<String> l);\n" +
 			    "}\n",
 		"b/BaseClass.java",
-			    "package b;\n" + 
-			    "\n" + 
-			    "public class BaseClass implements IBase {\n" + 
-			    "\n" + 
-			    "	String s;\n" + 
-			    "	java.util.List<String> l;\n" + 
-			    "\n" + 
-			    "	public void setS(String s) {\n" + 
-			    "		this.s = s;\n" + 
-			    "	}\n" + 
-			    "\n" + 
-			    "	public void setL(java.util.List<String> l) {\n" + 
-			    "		this.l = l;\n" + 
-			    "	}\n" + 
-			    "}\n" + 
+			    "package b;\n" +
+			    "\n" +
+			    "public class BaseClass implements IBase {\n" +
+			    "\n" +
+			    "	String s;\n" +
+			    "	java.util.List<String> l;\n" +
+			    "\n" +
+			    "	public void setS(String s) {\n" +
+			    "		this.s = s;\n" +
+			    "	}\n" +
+			    "\n" +
+			    "	public void setL(java.util.List<String> l) {\n" +
+			    "		this.l = l;\n" +
+			    "	}\n" +
+			    "}\n" +
 			    "\n"
             },
             "",
@@ -3040,22 +3040,22 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
        runConformTest(
                new String[] {
 		"t/Team3117ic13.java",
-			    "package t;\n" + 
-			    "\n" + 
-			    "import b.IBase;\n" + 
-			    "\n" + 
-			    "import base b.BaseClass;\n" + 
-			    "\n" + 
-			    "/**\n" + 
-			    " * @author stephan\n" + 
-			    " *\n" + 
-			    " */\n" + 
-			    "public team class Team3117ic13 {\n" + 
-			    "\n" + 
-			    "	@SuppressWarnings(\"inferredcallout\")\n" + 
-			    "	protected class Role1 implements IBase playedBy BaseClass {\n" + 
-			    "		String extra;\n" + 
-			    "	}\n" + 
+			    "package t;\n" +
+			    "\n" +
+			    "import b.IBase;\n" +
+			    "\n" +
+			    "import base b.BaseClass;\n" +
+			    "\n" +
+			    "/**\n" +
+			    " * @author stephan\n" +
+			    " *\n" +
+			    " */\n" +
+			    "public team class Team3117ic13 {\n" +
+			    "\n" +
+			    "	@SuppressWarnings(\"inferredcallout\")\n" +
+			    "	protected class Role1 implements IBase playedBy BaseClass {\n" +
+			    "		String extra;\n" +
+			    "	}\n" +
 			    "}\n"
             },
             "",
@@ -3071,35 +3071,35 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     public void test3117_inferredCallout14() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"b/IBase.java",
 			    "\n" +
-			    "package b;\n" + 
-			    "\n" + 
-			    "public interface IBase {\n" + 
-			    "\n" + 
-			    "	void setS(String s);\n" + 
+			    "package b;\n" +
 			    "\n" +
-			    "	void setL(java.util.List<String> l);\n" + 
+			    "public interface IBase {\n" +
+			    "\n" +
+			    "	void setS(String s);\n" +
+			    "\n" +
+			    "	void setL(java.util.List<String> l);\n" +
 			    "}\n",
 		"b/BaseClass.java",
-			    "package b;\n" + 
-			    "\n" + 
-			    "public class BaseClass implements IBase {\n" + 
-			    "\n" + 
-			    "	String s;\n" + 
-			    "	java.util.List<String> l;\n" + 
-			    "\n" + 
-			    "	public void setS(String s) {\n" + 
-			    "		this.s = s;\n" + 
-			    "	}\n" + 
-			    "\n" + 
-			    "	public void setL(java.util.List<String> l) {\n" + 
-			    "		this.l = l;\n" + 
-			    "	}\n" + 
-			    "}\n" + 
+			    "package b;\n" +
+			    "\n" +
+			    "public class BaseClass implements IBase {\n" +
+			    "\n" +
+			    "	String s;\n" +
+			    "	java.util.List<String> l;\n" +
+			    "\n" +
+			    "	public void setS(String s) {\n" +
+			    "		this.s = s;\n" +
+			    "	}\n" +
+			    "\n" +
+			    "	public void setL(java.util.List<String> l) {\n" +
+			    "		this.l = l;\n" +
+			    "	}\n" +
+			    "}\n" +
 			    "\n"
             },
             "",
@@ -3111,57 +3111,57 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
        runNegativeTest(
                new String[] {
 		"t/Team3117ic14_2.java",
-			    "package t;\n" + 
-			    "\n" + 
-			    "import b.IBase;\n" + 
-			    "\n" + 
-			    "public team class Team3117ic14_2 extends Team3117ic14_1 {\n" + 
-			    "   @Override\n" + 
+			    "package t;\n" +
+			    "\n" +
+			    "import b.IBase;\n" +
+			    "\n" +
+			    "public team class Team3117ic14_2 extends Team3117ic14_1 {\n" +
+			    "   @Override\n" +
 			    "	protected class Role1 {\n" +
-			    "       @Override public String toString() { return \"R\"; }\n" + 
-			    "		Zork extra2;\n" + 
-			    "	}\n" + 
+			    "       @Override public String toString() { return \"R\"; }\n" +
+			    "		Zork extra2;\n" +
+			    "	}\n" +
 			    "}\n",
 		"t/Team3117ic14_1.java",
-			    "package t;\n" + 
-			    "\n" + 
-			    "import b.IBase;\n" + 
-			    "\n" + 
-			    "import base b.BaseClass;\n" + 
-			    "\n" + 
-			    "public team class Team3117ic14_1 {\n" + 
-			    "\n" + 
-			    "	@SuppressWarnings(\"inferredcallout\")\n" + 
+			    "package t;\n" +
+			    "\n" +
+			    "import b.IBase;\n" +
+			    "\n" +
+			    "import base b.BaseClass;\n" +
+			    "\n" +
+			    "public team class Team3117ic14_1 {\n" +
+			    "\n" +
+			    "	@SuppressWarnings(\"inferredcallout\")\n" +
 			    "	protected class Role1 implements IBase playedBy BaseClass {\n" +
-			    "		String extra;\n" + 
-			    "	}\n" + 
+			    "		String extra;\n" +
+			    "	}\n" +
 			    "}\n",
             },
             (this.weavingScheme == WeavingScheme.OTDRE || this.complianceLevel < ClassFileConstants.JDK1_8
             ?
-            "----------\n" + 
-            "1. ERROR in t\\Team3117ic14_2.java (at line 9)\n" + 
-            "	Zork extra2;\n" + 
-            "	^^^^\n" + 
-            "Zork cannot be resolved to a type\n" + 
+            "----------\n" +
+            "1. ERROR in t\\Team3117ic14_2.java (at line 9)\n" +
+            "	Zork extra2;\n" +
+            "	^^^^\n" +
+            "Zork cannot be resolved to a type\n" +
             "----------\n"
             :
-        	"----------\n" + 
-        	"1. WARNING in t\\Team3117ic14_1.java (at line 10)\n" + 
-        	"	protected class Role1 implements IBase playedBy BaseClass {\n" + 
-        	"	                                                ^^^^^^^^^\n" + 
-        	"Base class b.BaseClass has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
         	"----------\n" +
-    		"----------\n" + 
-    		"1. WARNING in t\\Team3117ic14_2.java (at line 7)\n" + 
-    		"	protected class Role1 {\n" + 
-    		"	                ^^^^^\n" + 
-    		"Base class b.BaseClass has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
-    		"----------\n" + 
-    		"2. ERROR in t\\Team3117ic14_2.java (at line 9)\n" + 
-    		"	Zork extra2;\n" + 
-    		"	^^^^\n" + 
-    		"Zork cannot be resolved to a type\n" + 
+        	"1. WARNING in t\\Team3117ic14_1.java (at line 10)\n" +
+        	"	protected class Role1 implements IBase playedBy BaseClass {\n" +
+        	"	                                                ^^^^^^^^^\n" +
+        	"Base class b.BaseClass has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" +
+        	"----------\n" +
+    		"----------\n" +
+    		"1. WARNING in t\\Team3117ic14_2.java (at line 7)\n" +
+    		"	protected class Role1 {\n" +
+    		"	                ^^^^^\n" +
+    		"Base class b.BaseClass has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" +
+    		"----------\n" +
+    		"2. ERROR in t\\Team3117ic14_2.java (at line 9)\n" +
+    		"	Zork extra2;\n" +
+    		"	^^^^\n" +
+    		"Zork cannot be resolved to a type\n" +
     		"----------\n"
     		),
             null,//libs
@@ -3175,39 +3175,39 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     public void test3117_inferredCallout14b() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"b/IBase.java",
 			    "\n" +
-			    "package b;\n" + 
-			    "\n" + 
-			    "public interface IBase {\n" + 
-			    "\n" + 
-			    "	void setS(String s);\n" + 
+			    "package b;\n" +
 			    "\n" +
-			    "	void setL(java.util.List<String> l);\n" + 
+			    "public interface IBase {\n" +
+			    "\n" +
+			    "	void setS(String s);\n" +
+			    "\n" +
+			    "	void setL(java.util.List<String> l);\n" +
 			    "}\n",
 		"b/BaseClass.java",
-			    "package b;\n" + 
-			    "\n" + 
-			    "public class BaseClass implements IBase {\n" + 
-			    "\n" + 
-			    "	String s = \"OK\";\n" + 
-			    "	java.util.List<String> l;\n" + 
-			    "\n" + 
-			    "	public void setS(String s) {\n" + 
-			    "		this.s = s;\n" + 
-			    "	}\n" + 
-			    "\n" + 
-			    "	public void setL(java.util.List<String> l) {\n" + 
-			    "		this.l = l;\n" + 
+			    "package b;\n" +
+			    "\n" +
+			    "public class BaseClass implements IBase {\n" +
+			    "\n" +
+			    "	String s = \"OK\";\n" +
+			    "	java.util.List<String> l;\n" +
+			    "\n" +
+			    "	public void setS(String s) {\n" +
+			    "		this.s = s;\n" +
+			    "	}\n" +
+			    "\n" +
+			    "	public void setL(java.util.List<String> l) {\n" +
+			    "		this.l = l;\n" +
 			    "	}\n" +
 			    "	public void print() {\n" +
 			    "		System.out.print(s);\n" +
 			    "		System.out.print(l.size());\n" +
-			    "	}\n" + 
-			    "}\n" + 
+			    "	}\n" +
+			    "}\n" +
 			    "\n"
             },
             "",
@@ -3227,34 +3227,34 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
         		"	}\n" +
         		"}\n",
 		"t/Team3117ic14_2.java",
-			    "package t;\n" + 
-			    "\n" + 
-			    "import base b.BaseClass;\n" + 
-			    "\n" + 
-			    "public team class Team3117ic14_2 extends Team3117ic14_1 {\n" + 
-			    "   @Override\n" + 
+			    "package t;\n" +
+			    "\n" +
+			    "import base b.BaseClass;\n" +
+			    "\n" +
+			    "public team class Team3117ic14_2 extends Team3117ic14_1 {\n" +
+			    "   @Override\n" +
 			    "	protected class Role1 {\n" +
-			    "       @Override public String toString() { return \"R\"; }\n" + 
+			    "       @Override public String toString() { return \"R\"; }\n" +
 			    "	}\n" +
 			    "	public void test(BaseClass as Role1 r) {\n" +
 			    "		r.setS(\"NOK\");\n" +
 			    "		r.setL(new java.util.ArrayList<String>());\n" +
-			    "	}\n" + 
+			    "	}\n" +
 			    "}\n",
 		"t/Team3117ic14_1.java",
-			    "package t;\n" + 
-			    "\n" + 
-			    "import b.IBase;\n" + 
-			    "\n" + 
-			    "import base b.BaseClass;\n" + 
-			    "\n" + 
-			    "public team class Team3117ic14_1 {\n" + 
-			    "\n" + 
-			    "	@SuppressWarnings(\"inferredcallout\")\n" + 
+			    "package t;\n" +
+			    "\n" +
+			    "import b.IBase;\n" +
+			    "\n" +
+			    "import base b.BaseClass;\n" +
+			    "\n" +
+			    "public team class Team3117ic14_1 {\n" +
+			    "\n" +
+			    "	@SuppressWarnings(\"inferredcallout\")\n" +
 			    "	protected class Role1 implements IBase playedBy BaseClass {\n" +
-			    "		public void setS(String s){}\n" + 
-			    "		String extra;\n" + 
-			    "	}\n" + 
+			    "		public void setS(String s){}\n" +
+			    "		String extra;\n" +
+			    "	}\n" +
 			    "}\n",
             },
             "OK0",
@@ -3284,11 +3284,11 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
 			    "public class T3118icb1 {}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team3118icb1.java (at line 5)\n" + 
-    		"	test -> ;\n" + 
-    		"	     ^^\n" + 
-    		"Syntax error on token \"->\", MethodSpecShort expected after this token\n" + 
+            "----------\n" +
+    		"1. ERROR in Team3118icb1.java (at line 5)\n" +
+    		"	test -> ;\n" +
+    		"	     ^^\n" +
+    		"Syntax error on token \"->\", MethodSpecShort expected after this token\n" +
     		"----------\n");
     }
 
@@ -3310,16 +3310,16 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
 			    "public class T3118icb2 {}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team3118icb2.java (at line 4)\n" + 
-    		"	void test() -> test();\n" + 
-    		"	               ^^^^^^\n" + 
-    		"Syntax error: missing return type for method designator (OTJLD A.3.2). \n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team3118icb2.java (at line 4)\n" + 
-    		"	void test() -> test();\n" + 
-    		"	               ^^^^^^\n" + 
-    		"No method test() found in type T3118icb2 to resolve method designator (OTJLD 3.1(c)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team3118icb2.java (at line 4)\n" +
+    		"	void test() -> test();\n" +
+    		"	               ^^^^^^\n" +
+    		"Syntax error: missing return type for method designator (OTJLD A.3.2). \n" +
+    		"----------\n" +
+    		"2. ERROR in Team3118icb2.java (at line 4)\n" +
+    		"	void test() -> test();\n" +
+    		"	               ^^^^^^\n" +
+    		"No method test() found in type T3118icb2 to resolve method designator (OTJLD 3.1(c)).\n" +
     		"----------\n");
     }
 
@@ -3341,11 +3341,11 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
 			    "public class T3118icb3 {}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team3118icb3.java (at line 4)\n" + 
-    		"	void test() -> void t\n" + 
-    		"	^^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Syntax error on token(s), misplaced construct(s)\n" + 
+            "----------\n" +
+    		"1. ERROR in Team3118icb3.java (at line 4)\n" +
+    		"	void test() -> void t\n" +
+    		"	^^^^^^^^^^^^^^^^^^^^^\n" +
+    		"Syntax error on token(s), misplaced construct(s)\n" +
     		"----------\n");
     }
 
@@ -3367,23 +3367,23 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
 			    "public class T3118icb4 {}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team3118icb4.java (at line 4)\n" + 
-    		"	void test() -> \n" + 
-    		"	            ^^\n" + 
-    		"Syntax error, insert \"CallloutFieldSpec\" to complete CalloutHeader\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team3118icb4.java (at line 4)\n" + 
-    		"	void test() -> \n" + 
-    		"	            ^^\n" + 
-    		"Syntax error, insert \"EmptyParameterMappings\" to complete ClassBodyDeclarations\n" + 
+            "----------\n" +
+    		"1. ERROR in Team3118icb4.java (at line 4)\n" +
+    		"	void test() -> \n" +
+    		"	            ^^\n" +
+    		"Syntax error, insert \"CallloutFieldSpec\" to complete CalloutHeader\n" +
+    		"----------\n" +
+    		"2. ERROR in Team3118icb4.java (at line 4)\n" +
+    		"	void test() -> \n" +
+    		"	            ^^\n" +
+    		"Syntax error, insert \"EmptyParameterMappings\" to complete ClassBodyDeclarations\n" +
     		"----------\n");
     }
 
     // a callout binding has to select between overloaded base methods
     // 3.1.19-otjld-callout-with-overloading-1
     public void test3119_calloutWithOverloading1() {
-       
+
        runConformTest(
             new String[] {
 		"Team3119cwo1.java",
@@ -3421,13 +3421,13 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
             },
             "42");
     }
-    
+
     // ==== from binding-of-abstract-and-concrete-methods: ====
-    
+
     // a callout binding to an abstract role method is invoked
     // 7.2.1-otjld-callout-bound-abstract-method-invocation-1
     public void test721_calloutBoundAbstractMethodInvocation1() {
-       
+
        runConformTest(
             new String[] {
 		"T721cbami1Main.java",
@@ -3474,7 +3474,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     // a callout binding to an abstract role method is invoked
     // 7.2.1-otjld-callout-bound-abstract-method-invocation-2
     public void test721_calloutBoundAbstractMethodInvocation2() {
-       
+
        runConformTest(
             new String[] {
 		"T721cbami2Main.java",
@@ -3584,21 +3584,21 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     			"	}\n" +
     			"}\n"
     		},
-    		"----------\n" + 
-			"1. ERROR in p2\\Team2.java (at line 19)\n" + 
-			"	return getF1() +\n" + 
-			"	       ^^^^^\n" + 
-			"The method getF1() from the role type Team2.R is not visible (OTJLD 1.2.1(e)).\n" + 
-			"----------\n" + 
-			"2. ERROR in p2\\Team2.java (at line 20)\n" + 
-			"	getF2() +\n" + 
-			"	^^^^^\n" + 
-			"The method getF2() from the role type Team2.R is not visible (OTJLD 1.2.1(e)).\n" + 
-			"----------\n" + 
-			"3. ERROR in p2\\Team2.java (at line 25)\n" + 
-			"	m2() +\n" + 
-			"	^^\n" + 
-			"The method m2() from the role type Team2.R is not visible (OTJLD 1.2.1(e)).\n" + 
+    		"----------\n" +
+			"1. ERROR in p2\\Team2.java (at line 19)\n" +
+			"	return getF1() +\n" +
+			"	       ^^^^^\n" +
+			"The method getF1() from the role type Team2.R is not visible (OTJLD 1.2.1(e)).\n" +
+			"----------\n" +
+			"2. ERROR in p2\\Team2.java (at line 20)\n" +
+			"	getF2() +\n" +
+			"	^^^^^\n" +
+			"The method getF2() from the role type Team2.R is not visible (OTJLD 1.2.1(e)).\n" +
+			"----------\n" +
+			"3. ERROR in p2\\Team2.java (at line 25)\n" +
+			"	m2() +\n" +
+			"	^^\n" +
+			"The method m2() from the role type Team2.R is not visible (OTJLD 1.2.1(e)).\n" +
 			"----------\n");
     }
 }

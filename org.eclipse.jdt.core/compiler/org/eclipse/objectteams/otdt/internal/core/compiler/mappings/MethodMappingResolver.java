@@ -101,7 +101,7 @@ public class MethodMappingResolver
 				} else if (methodMapping.isCallin() && this._role.getBinding().baseclass().isInterface()) {
 					this._roleScope.problemReporter().callinBindingToInterface(methodMapping, this._role.getBinding().baseclass());
 					methodMapping.tagAsHavingErrors();
-					this.resolveBaseMethods = false;					
+					this.resolveBaseMethods = false;
 				}
 			}
 
@@ -131,7 +131,7 @@ public class MethodMappingResolver
 				result &= checkForDuplicateMethodMappings(roleMethodKey);
 			}
 		}
-		
+
 		return result;
 	}
 
@@ -187,11 +187,11 @@ public class MethodMappingResolver
 		calloutMappingDeclaration.binding._roleMethodBinding = roleMethodBinding;
 		if (this.resolveBaseMethods) {
 			MethodSpec baseMethodSpec = calloutMappingDeclaration.baseMethodSpec;
-			if ( baseMethodSpec != null) {				
+			if ( baseMethodSpec != null) {
 				if (baseMethodSpec.resolvedMethod != null) {
 					calloutMappingDeclaration.binding._baseMethods = new MethodBinding[]{baseMethodSpec.resolvedMethod};
 				} else if (   baseMethodSpec instanceof FieldAccessSpec
-						   && ((FieldAccessSpec)baseMethodSpec).resolvedField != null) 
+						   && ((FieldAccessSpec)baseMethodSpec).resolvedField != null)
 				{
 					calloutMappingDeclaration.binding._baseField = ((FieldAccessSpec)baseMethodSpec).resolvedField;
 				} else {
@@ -200,11 +200,11 @@ public class MethodMappingResolver
 				}
 			}
 		}
-		if (   roleMethodBinding != null 
+		if (   roleMethodBinding != null
 		    && (roleMethodBinding.isValidBinding()
 			   || (roleMethodBinding.problemId() == ProblemReasons.NotFound && calloutMappingDeclaration.hasSignature))) // short-hand, method will be generated
 		{
-			// store the methodMapping in a map indexed by the role method's name&signature 
+			// store the methodMapping in a map indexed by the role method's name&signature
 			// for later duplication check.
 			String methodKey = String.valueOf(CharOperation.concat(roleMethodBinding.selector, roleMethodBinding.signature()));
 			List<CalloutMappingDeclaration> mappings = this._foundRoleMethods.get(methodKey);

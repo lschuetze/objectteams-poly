@@ -50,7 +50,7 @@ public class ExceptionHandlingFlowContext extends FlowContext {
 	int[] isReached;
 	int[] isNeeded;
 	// WARNING: This is an array that maps to catch blocks, not caught exceptions (which could be more than catch blocks in a multi-catch block)
-	UnconditionalFlowInfo[] initsOnExceptions; 
+	UnconditionalFlowInfo[] initsOnExceptions;
 	ObjectCache indexes = new ObjectCache();
 	boolean isMethodContext;
 
@@ -82,7 +82,7 @@ public ExceptionHandlingFlowContext(
 		FlowContext initializationParent,
 		BlockScope scope,
 		FlowInfo flowInfo) {
-	this(parent, tryStatement, handledExceptions, exceptionToCatchBlockMap, 
+	this(parent, tryStatement, handledExceptions, exceptionToCatchBlockMap,
 			tryStatement.catchArguments, initializationParent, scope, flowInfo.unconditionalInits());
 	UnconditionalFlowInfo unconditionalCopy = flowInfo.unconditionalCopy();
 	unconditionalCopy.iNBit = -1L;
@@ -193,7 +193,7 @@ public void complainIfUnusedExceptionHandlers(BlockScope scope,TryStatement tryS
 	}
 }
 
-private ASTNode getExceptionType(int index) {	
+private ASTNode getExceptionType(int index) {
 	if (this.exceptionToCatchBlockMap == null) {
 		return this.catchArguments[index].type;
 	}
@@ -204,8 +204,8 @@ private ASTNode getExceptionType(int index) {
 		for (int i = 0, len = typeRefs.length; i < len; i++) {
 			TypeReference typeRef = typeRefs[i];
 			if (TypeBinding.equalsEquals(typeRef.resolvedType, this.handledExceptions[index])) return typeRef;
-		}	
-	} 
+		}
+	}
 	return node;
 }
 

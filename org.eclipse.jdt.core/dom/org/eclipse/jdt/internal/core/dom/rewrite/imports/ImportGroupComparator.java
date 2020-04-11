@@ -73,7 +73,7 @@ final class ImportGroupComparator implements Comparator<ImportName>{
 			this.staticImportGroupByName = staticImportGroupsByName;
   giro: */
 		final NavigableMap<String, ImportGroup> baseImportGroupByName; // OT
-		
+
 		IndexedImportGroups(
 				NavigableMap<String, ImportGroup> typeImportGroupsByName,
 				NavigableMap<String, ImportGroup> staticImportGroupsByName,
@@ -105,7 +105,7 @@ final class ImportGroupComparator implements Comparator<ImportName>{
 		if (!needsTypeMatchAll && !needsStaticMatchAll) {
   :giro */
 		boolean needsBaseMatchAll = !importOrder.contains(BASE_MATCH_ALL);
-		
+
 		if (!needsTypeMatchAll && !needsStaticMatchAll) {
 // SH}
 			return importOrder;

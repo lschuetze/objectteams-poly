@@ -413,9 +413,9 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 				throw new InternalCompilerError("synthetic method "+new String(name)+" has unexpected signature"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (   isSynthMethodName(name)
-			|| SyntheticBaseCallSurrogate.isBaseCallSurrogateName(name)) 
+			|| SyntheticBaseCallSurrogate.isBaseCallSurrogateName(name))
 		{
-			// for normal access methods class_rb should not be a BinaryTypeBinding, 
+			// for normal access methods class_rb should not be a BinaryTypeBinding,
 			// because in that case the above loop should have found the method
 			// (access$n are stored like normal methods).
 			if (class_rb.isBinaryBinding()) {
@@ -489,7 +489,7 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 	}
 
 	boolean isSynthMethodName(char[] name) {
-		return 
+		return
 			CharOperation.prefixEquals(TypeConstants.SYNTHETIC_ACCESS_METHOD_PREFIX, name)
 			|| CharOperation.prefixEquals(TypeConstants.SYNTHETIC_SWITCH_ENUM_TABLE, name)
 			|| CharOperation.equals(CalloutImplementorDyn.OT_ACCESS, name)

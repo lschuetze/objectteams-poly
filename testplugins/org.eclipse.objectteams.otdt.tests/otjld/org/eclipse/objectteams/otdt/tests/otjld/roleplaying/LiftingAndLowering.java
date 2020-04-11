@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2020 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -30,11 +30,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 @SuppressWarnings("unchecked")
 public class LiftingAndLowering extends AbstractOTJLDTest {
-	
+
 	public LiftingAndLowering(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -42,7 +42,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -54,7 +54,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role is lowered to the base class that it is played by
     // 2.2.1-otjld-lowering-to-baseclass-1
     public void test221_loweringToBaseclass1() {
-       
+
        runConformTest(
             new String[] {
 		"T221ltb1Main.java",
@@ -101,7 +101,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role is lowered to the base class that it is played by
     // 2.2.1-otjld-lowering-to-baseclass-2
     public void test221_loweringToBaseclass2() {
-       
+
        runConformTest(
             new String[] {
 		"T221ltb2Main.java",
@@ -148,7 +148,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role is lowered to the base class that it is played by
     // 2.2.1-otjld-lowering-to-baseclass-3
     public void test221_loweringToBaseclass3() {
-       
+
        runConformTest(
             new String[] {
 		"T221ltb3Main.java",
@@ -197,7 +197,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role is lowered to the base class that it is played by
     // 2.2.1-otjld-lowering-to-baseclass-4
     public void test221_loweringToBaseclass4() {
-       
+
        runConformTest(
             new String[] {
 		"T221ltb4Main.java",
@@ -253,7 +253,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role is lowered via a field to the base class of its explicit superrole
     // 2.2.1-otjld-lowering-to-baseclass-5
     public void test221_loweringToBaseclass5() {
-       
+
        runConformTest(
             new String[] {
 		"T221ltb5Main.java",
@@ -306,7 +306,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role is lowered in a return statement to the base class that it is played by
     // 2.2.1-otjld-lowering-to-baseclass-6
     public void test221_loweringToBaseclass6() {
-       
+
        runConformTest(
             new String[] {
 		"T221ltb6Main.java",
@@ -358,7 +358,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role is lowered in a return statement to the base class that it is played by - call returns null!
     // 2.2.1-otjld-lowering-to-baseclass-7
     public void test221_loweringToBaseclass7() {
-       
+
        runConformTest(
             new String[] {
 		"T221ltb7Main.java",
@@ -395,7 +395,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role is lowered in a return statement to the base class that it is played by - call returns null!
     // 2.2.1-otjld-lowering-to-baseclass-8
     public void test221_loweringToBaseclass8() {
-       
+
        runConformTest(
             new String[] {
 		"T221ltb8Main.java",
@@ -435,7 +435,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role is lowered in a return statement to the base class that it is played by - call returns null!
     // 2.2.1-otjld-lowering-to-baseclass-9
     public void test221_loweringToBaseclass9() {
-       
+
        runConformTest(
             new String[] {
 		"T221ltb9Main.java",
@@ -475,7 +475,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role is lowered in a return statement to the base class that it is played by - call returns null!
     // 2.2.1-otjld-lowering-to-baseclass-10
     public void test221_loweringToBaseclass10() {
-       
+
        runConformTest(
             new String[] {
 		"T221ltb10Main.java",
@@ -515,7 +515,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role is lowered in a return statement to the base class that it is played by - bound super-role exists
     // 2.2.1-otjld-lowering-to-baseclass-11
     public void test221_loweringToBaseclass11() {
-       
+
        runConformTest(
             new String[] {
 		"T221ltb11Main.java",
@@ -575,7 +575,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // the enclosing nested team is lowered
     // 2.2.1-otjld-lowering-to-baseclass-12
     public void test221_loweringToBaseclass12() {
-       
+
        runConformTest(
             new String[] {
 		"Team221ltb12.java",
@@ -615,7 +615,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // the enclosing nested team is lowered - via assignment
     // 2.2.1-otjld-lowering-to-baseclass-13
     public void test221_loweringToBaseclass13() {
-       
+
        runConformTest(
             new String[] {
 		"Team221ltb13.java",
@@ -652,7 +652,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
             },
             "OK");
     }
-    
+
     // a foreach loop over an iterable needs to lower elements
     public void test221_loweringToBaseclass14() {
     	runConformTest(
@@ -682,7 +682,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     		},
     		"OK");
     }
-    
+
     // a foreach loop over an array needs to lower elements
     public void test221_loweringToBaseclass15() {
     	runConformTest(
@@ -711,7 +711,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     		},
     		"OK");
     }
-    
+
     // a foreach loop over an iterable needs to lower elements (role-of-role)
     public void test221_loweringToBaseclass16() {
     	runConformTest(
@@ -745,61 +745,61 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     		},
     		"OK");
     }
-    
+
     // Bug 335628 - [compiler] lowering in array initializer
     public void test221_loweringToBaseclass17 () {
     	runConformTest(
     		new String[] {
     	"Team221ltb17.java",
-    			"public team class Team221ltb17 {\n" + 
-    			"	protected class R playedBy T221ltb17 {\n" + 
-    			"		protected R() { base(); }\n" + 
-    			"	}\n" + 
-    			"	void test() {\n" + 
-    			"		R r = new R();\n" + 
-    			"		T221ltb17[] bases = new T221ltb17[] { r };\n" + 
-    			"		for (int i = 0; i < bases.length; i++) {\n" + 
-    			"			bases[i].print();\n" + 
-    			"		}\n" + 
-    			"	}\n" + 
-    			"	public static void main(String[] args) {\n" + 
-    			"		new Team221ltb17().test();\n" + 
-    			"	}\n" + 
+    			"public team class Team221ltb17 {\n" +
+    			"	protected class R playedBy T221ltb17 {\n" +
+    			"		protected R() { base(); }\n" +
+    			"	}\n" +
+    			"	void test() {\n" +
+    			"		R r = new R();\n" +
+    			"		T221ltb17[] bases = new T221ltb17[] { r };\n" +
+    			"		for (int i = 0; i < bases.length; i++) {\n" +
+    			"			bases[i].print();\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		new Team221ltb17().test();\n" +
+    			"	}\n" +
     			"}\n",
     	"T221ltb17.java",
-		    	"public class T221ltb17 {\n" + 
-		    	"	public void print() {\n" + 
-		    	"		System.out.println(\"OK\");\n" + 
+		    	"public class T221ltb17 {\n" +
+		    	"	public void print() {\n" +
+		    	"		System.out.println(\"OK\");\n" +
 		    	"	}\n" +
 		    	"}\n"
     		},
     		"OK");
     }
-    
+
     // Bug 335628 - [compiler] lowering in array initializer
     public void test221_loweringToBaseclass18 () {
     	runConformTest(
     		new String[] {
     	"Team221ltb18.java",
-    			"public team class Team221ltb18 {\n" + 
-    			"	protected class R playedBy T221ltb18 {\n" + 
-    			"		protected R() { base(); }\n" + 
-    			"	}\n" + 
-    			"	void test() {\n" + 
-    			"		R r = new R();\n" + 
-    			"		T221ltb18[][] bases = new T221ltb18[][] { { r } };\n" + 
-    			"		for (int i = 0; i < bases.length; i++)\n" + 
-    			"			for (int k = 0; k < bases[i].length; k++)\n" + 
-    			"				bases[i][k].print();\n" + 
-    			"	}\n" + 
-    			"	public static void main(String[] args) {\n" + 
-    			"		new Team221ltb18().test();\n" + 
-    			"	}\n" + 
+    			"public team class Team221ltb18 {\n" +
+    			"	protected class R playedBy T221ltb18 {\n" +
+    			"		protected R() { base(); }\n" +
+    			"	}\n" +
+    			"	void test() {\n" +
+    			"		R r = new R();\n" +
+    			"		T221ltb18[][] bases = new T221ltb18[][] { { r } };\n" +
+    			"		for (int i = 0; i < bases.length; i++)\n" +
+    			"			for (int k = 0; k < bases[i].length; k++)\n" +
+    			"				bases[i][k].print();\n" +
+    			"	}\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		new Team221ltb18().test();\n" +
+    			"	}\n" +
     			"}\n",
     	"T221ltb18.java",
-		    	"public class T221ltb18 {\n" + 
-		    	"	public void print() {\n" + 
-		    	"		System.out.println(\"OK\");\n" + 
+		    	"public class T221ltb18 {\n" +
+		    	"	public void print() {\n" +
+		    	"		System.out.println(\"OK\");\n" +
 		    	"	}\n" +
 		    	"}\n"
     		},
@@ -815,25 +815,25 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     		true /* flushOutputDir*/,
     		new String[] {
     	"Team221ltb19.java",
-    			"public team class Team221ltb19 {\n" + 
-    			"	protected class R playedBy T221ltb19 {\n" + 
+    			"public team class Team221ltb19 {\n" +
+    			"	protected class R playedBy T221ltb19 {\n" +
     			"		protected R() { base(); }\n" +
     			"       protected void test() {\n" +
     			"           T221ltb19.accept(this);\n" +
-    			"       }\n" + 
-    			"	}\n" + 
-    			"	T221ltb19 aBase;\n" + 
-    			"	void test() {\n" + 
-    			"		new R().test();\n" + 
-    			"	}\n" + 
-    			"	public static void main(String[] args) {\n" + 
-    			"		new Team221ltb19().test();\n" + 
-    			"	}\n" + 
+    			"       }\n" +
+    			"	}\n" +
+    			"	T221ltb19 aBase;\n" +
+    			"	void test() {\n" +
+    			"		new R().test();\n" +
+    			"	}\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		new Team221ltb19().test();\n" +
+    			"	}\n" +
     			"}\n",
     	"T221ltb19.java",
-		    	"public class T221ltb19 {\n" + 
-		    	"	public static void accept(T221ltb19 inst) {\n" + 
-		    	"		System.out.println(\"OK\");\n" + 
+		    	"public class T221ltb19 {\n" +
+		    	"	public static void accept(T221ltb19 inst) {\n" +
+		    	"		System.out.println(\"OK\");\n" +
 		    	"	}\n" +
 		    	"}\n"
     		},
@@ -854,26 +854,26 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     		true /* flushOutputDir*/,
     		new String[] {
     	"Team221ltb20.java",
-    			"public team class Team221ltb20 {\n" + 
-    			"	protected class R playedBy T221ltb20 {\n" + 
+    			"public team class Team221ltb20 {\n" +
+    			"	protected class R playedBy T221ltb20 {\n" +
     			"		protected R() { base(); }\n" +
     			"       protected void test() {\n" +
     			"           R r = this;" +
     			"           T221ltb20.accept(r);\n" +
-    			"       }\n" + 
-    			"	}\n" + 
-    			"	T221ltb20 aBase;\n" + 
-    			"	void test() {\n" + 
-    			"		new R().test();\n" + 
-    			"	}\n" + 
-    			"	public static void main(String[] args) {\n" + 
-    			"		new Team221ltb20().test();\n" + 
-    			"	}\n" + 
+    			"       }\n" +
+    			"	}\n" +
+    			"	T221ltb20 aBase;\n" +
+    			"	void test() {\n" +
+    			"		new R().test();\n" +
+    			"	}\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		new Team221ltb20().test();\n" +
+    			"	}\n" +
     			"}\n",
     	"T221ltb20.java",
-		    	"public class T221ltb20 {\n" + 
-		    	"	public static void accept(T221ltb20 inst) {\n" + 
-		    	"		System.out.println(\"OK\");\n" + 
+		    	"public class T221ltb20 {\n" +
+		    	"	public static void accept(T221ltb20 inst) {\n" +
+		    	"		System.out.println(\"OK\");\n" +
 		    	"	}\n" +
 		    	"}\n"
     		},
@@ -944,7 +944,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // lowering of a role object for the same base object produces the same base class object
     // 2.2.3-otjld-lowering-produces-same-object-1
     public void test223_loweringProducesSameObject1() {
-       
+
        runConformTest(
             new String[] {
 		"T223lpso1Main.java",
@@ -995,7 +995,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // lowering of a role object for the same base object produces the same base class object
     // 2.2.3-otjld-lowering-produces-same-object-2
     public void test223_loweringProducesSameObject2() {
-       
+
        runConformTest(
             new String[] {
 		"T223lpso2Main.java",
@@ -1129,7 +1129,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role is not equal to its lowered self
     // 2.2.4-otjld-role-not-equal-to-baseobject-2
     public void test224_roleNotEqualToBaseobject2() {
-       
+
        runConformTest(
             new String[] {
 		"T224rnetb2Main.java",
@@ -1174,7 +1174,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role is not equal to its lowered self
     // 2.2.4-otjld-role-not-equal-to-baseobject-3
     public void test224_roleNotEqualToBaseobject3() {
-       
+
        runConformTest(
             new String[] {
 		"T224rnetb3Main.java",
@@ -1230,7 +1230,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // the type of a lowering assignment expression is the base class
     // 2.2.5-otjld-type-of-lowering-assignment-1
     public void test225_typeOfLoweringAssignment1() {
-       
+
        runConformTest(
             new String[] {
 		"T225tola1Main.java",
@@ -1274,7 +1274,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // the type of a lowering assignment expression is the base class
     // 2.2.5-otjld-type-of-lowering-assignment-2
     public void test225_typeOfLoweringAssignment2() {
-       
+
        runConformTest(
             new String[] {
 		"T225tola2Main.java",
@@ -1330,7 +1330,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a base class object is lifted to a role via a method parameter
     // 2.2.6-otjld-lifting-1
     public void test226_lifting1() {
-       
+
        runConformTest(
             new String[] {
 		"T226l1Main.java",
@@ -1375,7 +1375,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a base class object is lifted to a role via a final method parameter
     // 2.2.6-otjld-lifting-2
     public void test226_lifting2() {
-       
+
        runConformTest(
             new String[] {
 		"T226l2Main.java",
@@ -1428,7 +1428,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a base class object is lifted to a role via a return statement
     // 2.2.6-otjld-lifting-3
     public void test226_lifting3() {
-       
+
        runConformTest(
             new String[] {
 		"T226l3Main.java",
@@ -1535,7 +1535,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // subsequent lifting of the same base class object produces the same role object
     // 2.2.8-otjld-lifting-produces-same-role-1
     public void test228_liftingProducesSameRole1() {
-       
+
        runConformTest(
             new String[] {
 		"T228lpsr1Main.java",
@@ -1589,7 +1589,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // subsequent lifting of the same base class object produces the same role object
     // 2.2.8-otjld-lifting-produces-same-role-2
     public void test228_liftingProducesSameRole2() {
-       
+
        runConformTest(
             new String[] {
 		"T228lpsr2Main.java",
@@ -1656,7 +1656,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // lifting of the same base class object to roles related by implicit inheritance does produce different role objcts (as of their hashCode)
     // 2.2.9-otjld-different-context-lifting-1
     public void test229_differentContextLifting1() {
-       
+
        runConformTest(
             new String[] {
 		"T229dcl1Main.java",
@@ -1708,7 +1708,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // lifting of the same base class object to unrelated roles produces different role objcts
     // 2.2.9-otjld-different-context-lifting-2
     public void test229_differentContextLifting2() {
-       
+
        runConformTest(
             new String[] {
 		"T229lpsr2Main.java",
@@ -1762,7 +1762,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // lifting of the same base class object to related roles produces the same role objct
     // 2.2.9-otjld-different-context-lifting-3
     public void test229_differentContextLifting3() {
-       
+
        runConformTest(
             new String[] {
 		"T229lpsr3Main.java",
@@ -1816,7 +1816,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // compare instances of different teams
     // 2.2.9-otjld-different-context-lifting-5
     public void test229_differentContextLifting5() {
-       
+
        runConformTest(
             new String[] {
 		"T229lpsr1Main.java",
@@ -1868,7 +1868,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a base object is not equal to its lifted self
     // 2.2.10-otjld-baseobject-not-equal-to-roleobject-1
     public void test2210_baseobjectNotEqualToRoleobject1() {
-       
+
        runConformTest(
             new String[] {
 		"T2210bnetr1Main.java",
@@ -1916,7 +1916,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a base object is not equal to its lifted self
     // 2.2.10-otjld-baseobject-not-equal-to-roleobject-2
     public void test2210_baseobjectNotEqualToRoleobject2() {
-       
+
        runConformTest(
             new String[] {
 		"T2210bnetr2Main.java",
@@ -1965,7 +1965,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a base object is not equal to its lifted self
     // 2.2.10-otjld-baseobject-not-equal-to-roleobject-3
     public void test2210_baseobjectNotEqualToRoleobject3() {
-       
+
        runConformTest(
             new String[] {
 		"T2210bnetr3Main.java",
@@ -2062,7 +2062,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of role objects is lowered to an array of the base class that it is played by
     // 2.2.12-otjld-array-lowering-to-baseclass-1a
     public void test2212_arrayLoweringToBaseclass1a() {
-       
+
        runConformTest(
             new String[] {
 		"T2212altb1aMain.java",
@@ -2110,7 +2110,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of role objects is lowered to an array of the base class that it is played by
     // 2.2.12-otjld-array-lowering-to-baseclass-1
     public void test2212_arrayLoweringToBaseclass1() {
-       
+
        runConformTest(
             new String[] {
 		"T2212altb1Main.java",
@@ -2157,7 +2157,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of role objects is lowered to an array of the base class that it is played by
     // 2.2.12-otjld-array-lowering-to-baseclass-2
     public void test2212_arrayLoweringToBaseclass2() {
-       
+
        runConformTest(
             new String[] {
 		"T2212tb2Main.java",
@@ -2204,7 +2204,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of role objects is lowered to an array of the base class that it is played by
     // 2.2.12-otjld-array-lowering-to-baseclass-3
     public void test2212_arrayLoweringToBaseclass3() {
-       
+
        runConformTest(
             new String[] {
 		"T2212tb3Main.java",
@@ -2264,7 +2264,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of role objects is lowered to an array of the base class that it is played by
     // 2.2.12-otjld-array-lowering-to-baseclass-4
     public void test2212_arrayLoweringToBaseclass4() {
-       
+
        runConformTest(
             new String[] {
 		"T2212tb4Main.java",
@@ -2318,7 +2318,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of role objects is lowered to an array of the base class that it is played by
     // 2.2.12-otjld-array-lowering-to-baseclass-5
     public void test2212_arrayLoweringToBaseclass5() {
-       
+
        runConformTest(
             new String[] {
 		"T2212tb5Main.java",
@@ -2374,7 +2374,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of role objects is lowered to an array of the base class that it is played by
     // 2.2.12-otjld-array-lowering-to-baseclass-6
     public void test2212_arrayLoweringToBaseclass6() {
-       
+
        runConformTest(
             new String[] {
 		"T2212tb6Main.java",
@@ -2423,7 +2423,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of role objects is lowered to an array of the base class that it is played by -- base call
     // 2.2.12-otjld-array-lowering-to-baseclass-7
     public void test2212_arrayLoweringToBaseclass7() {
-       
+
        runConformTest(
             new String[] {
 		"Team2212altb7.java",
@@ -2493,7 +2493,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
             		"}\n"
                 });
     }
-    
+
     public void test2212_arrayLoweringToBaseclass9() {
     	runConformTest(
     		new String[] {
@@ -2520,7 +2520,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     		},
     		"T2214altb9");
     }
-    
+
     public void test2212_arrayLowering_inConditionalExpression1() {
     	runConformTest(
     		new String[] {
@@ -2547,11 +2547,11 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     		},
     		"T2214alice1");
     }
-    
+
     // lowering of a role object array for the same base objects produces the an equal object array
     // 2.2.14-otjld-array-lowering-produces-equal-object-1
     public void test2214_arrayLoweringProducesEqualObject1() {
-       
+
        runConformTest(
             new String[] {
 		"T2214alpeo1Main.java",
@@ -2602,7 +2602,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // lowering of a role object array for the same base objects produces an equal object array
     // 2.2.14-otjld-array-lowering-produces-equal-object-2
     public void test2214_arrayLoweringProducesEqualObject2() {
-       
+
        runConformTest(
             new String[] {
 		"T2214alpeo2Main.java",
@@ -2664,7 +2664,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of base class objects is lifted to a role array
     // 2.2.15-otjld-array-lifting-1
     public void test2215_arrayLifting1() {
-       
+
        runConformTest(
             new String[] {
 		"T2215al1Main.java",
@@ -2709,7 +2709,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of base class objects is lifted to a role array
     // 2.2.15-otjld-array-lifting-2
     public void test2215_arrayLifting2() {
-       
+
        runConformTest(
             new String[] {
 		"T2215al2Main.java",
@@ -2760,7 +2760,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of base class objects is lifted to a role array
     // 2.2.15-otjld-array-lifting-3
     public void test2215_arrayLifting3() {
-       
+
        runConformTest(
             new String[] {
 		"T2215al3Main.java",
@@ -2810,7 +2810,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of base class objects (inner class) is lifted to a role array
     // 2.2.15-otjld-array-lifting-4
     public void test2215_arrayLifting4() {
-       
+
        runConformTest(
             new String[] {
 		"T2215al4Main.java",
@@ -2854,11 +2854,11 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
             },
             "OK");
     }
-    
+
 
     // an array of base class objects is lifted to an array of nested roles
     public void test2215_arrayLifting5() {
-       
+
        runConformTest(
             new String[] {
 		"T2215al5Main.java",
@@ -2904,7 +2904,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of base class objects is lifted to an array of nested roles - location: callout return
     // witness for broken bytecode: ifc-part of array lifter was not found, but silently generated a problem method for the caller
     public void test2215_arrayLifting6() {
-       
+
        runConformTest(
             new String[] {
 		"T2215al6Main.java",
@@ -2954,7 +2954,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 
     // an array of base class objects is lifted to an array of nested roles - location: callin return
     public void test2215_arrayLifting7() {
-       
+
        runConformTest(
             new String[] {
 		"T2215al7Main.java",
@@ -3054,7 +3054,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // the lifting of an array of base objects produces equal role object arrays (but not the same)
     // 2.2.17-otjld-array-lifting-produces-equal-object-1
     public void test2217_arrayLiftingProducesEqualObject1() {
-       
+
        runConformTest(
             new String[] {
 		"T2217alpeo1Main.java",
@@ -3119,7 +3119,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // the lifting of an array of base objects produces equal role object arrays (but not the same)
     // 2.2.17-otjld-array-lifting-produces-equal-object-2
     public void test2217_arrayLiftingProducesEqualObject2() {
-       
+
        runConformTest(
             new String[] {
 		"T2217alpeo2Main.java",
@@ -3181,7 +3181,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of base objects is not equal to its lifted self
     // 2.2.18-otjld-basearray-not-equal-to-rolearray-1
     public void test2218_basearrayNotEqualToRolearray1() {
-       
+
        runConformTest(
             new String[] {
 		"T2218bnetr1Main.java",
@@ -3236,7 +3236,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of base objects is not equal to its lifted self
     // 2.2.18-otjld-basearray-not-equal-to-rolearray-2
     public void test2218_basearrayNotEqualToRolearray2() {
-       
+
        runConformTest(
             new String[] {
 		"T2218bnetr2Main.java",
@@ -3299,7 +3299,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of role objects is not equal to its lowered self
     // 2.2.19-otjld-rolearray-equal-to-lowered-1
     public void test2219_rolearrayEqualToLowered1() {
-       
+
        runConformTest(
             new String[] {
 		"T2219bnetr1Main.java",
@@ -3352,7 +3352,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of role objects is not equal to its lowered self
     // 2.2.19-otjld-rolearray-equal-to-lowered-2
     public void test2219_rolearrayEqualToLowered2() {
-       
+
        runConformTest(
             new String[] {
 		"T2219bnetr2Main.java",
@@ -3416,7 +3416,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role class has an initializeRole method with a signature that is not as required 2.2h
     // 2.2.20-otjld_obsolete-initializeRole-with-different-signature-1
     public void _obsolete_test2220_initializeRoleWithDifferentSignature1() {
-       
+
        runConformTest(
             new String[] {
 		"T2220iwds1Main.java",
@@ -3466,7 +3466,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role class has an initializeRole method with a signature that is not as required 2.2h
     // 2.2.20-otjld_obsolete-initializeRole-with-different-signature-2
     public void _obsolete_test2220_initializeRoleWithDifferentSignature2() {
-       
+
        runConformTest(
             new String[] {
 		"T2220iwds2Main.java",
@@ -3516,7 +3516,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role class has an initializeRole method with a signature that is not as required 2.2h
     // 2.2.20-otjld_obsolete-initializeRole-with-different-signature-3
     public void _obsolete_test2220_initializeRoleWithDifferentSignature3() {
-       
+
        runConformTest(
             new String[] {
 		"T2220iwds3Main.java",
@@ -3566,7 +3566,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role class has an initializeRole method with a signature that is not as required 2.2h
     // 2.2.20-otjld_obsolete-initializeRole-with-different-signature-4
     public void _obsolete_test2220_initializeRoleWithDifferentSignature4() {
-       
+
        runConformTest(
             new String[] {
 		"T2220iwds4Main.java",
@@ -3617,7 +3617,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role class has an initializeRole method with a signature that is not as required 2.2h
     // 2.2.20-otjld_obsolete-initializeRole-with-different-signature-5
     public void _obsolete_test2220_initializeRoleWithDifferentSignature5() {
-       
+
        runConformTest(
             new String[] {
 		"T2220iwds5Main.java",
@@ -3667,7 +3667,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role class has an initializeRole method that is called exactly once during subsequent lifting of the same base object in the same team
     // 2.2.22-otjld-role-with-initializeRole-method-1
     public void test2222_roleWithInitializeRoleMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"T2222rwim1Main.java",
@@ -3725,7 +3725,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role class has an initializeRole method that is called twice during subsequent lifting of the same base object to different roles in the same team
     // 2.2.22-otjld-role-with-initializeRole-method-2
     public void test2222_roleWithInitializeRoleMethod2() {
-       
+
        runConformTest(
             new String[] {
 		"T2222rwim2Main.java",
@@ -3793,7 +3793,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // each class in a role hierarchy has its own default constructor, all of which are invoked
     // 2.2.23-otjld-role-hierarchy-with-initializeRole-methods
     public void test2223_roleHierarchyWithInitializeRoleMethods() {
-       
+
        runConformTest(
             new String[] {
 		"T2223rhwimMain.java",
@@ -3859,7 +3859,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role hierarchy with initializeRole methods containing super-calls
     // 2.2.24-otjld-role-hierarchy-with-initializeRole-methods
     public void test2224_roleHierarchyWithInitializeRoleMethods() {
-       
+
        runConformTest(
             new String[] {
 		"T2224rhwimMain.java",
@@ -3978,7 +3978,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role class inherited the initializeRole method which is called exactly once during lifting
     // 2.2.25-otjld-inherited-initializeRole-method
     public void test2225_inheritedInitializeRoleMethod() {
-       
+
        runConformTest(
             new String[] {
 		"T2225iimMain.java",
@@ -4036,7 +4036,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of base class objects is lifted to a role array, and for each lifted base object the initializeRole method is called
     // 2.2.27-otjld-array-lifting-calls-initializeRole-1
     public void test2227_arrayLiftingCallsInitializeRole1() {
-       
+
        runConformTest(
             new String[] {
 		"T2227alci1Main.java",
@@ -4090,7 +4090,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an array of base class objects is lifted to a role array, and for each lifted base object the initializeRole method is called
     // 2.2.27-otjld-array-lifting-calls-initializeRole-2
     public void test2227_arrayLiftingCallsInitializeRole2() {
-       
+
        runConformTest(
             new String[] {
 		"T2227alci2Main.java",
@@ -4145,7 +4145,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a constructor declares a parameter with lifting
     // 2.2.28-otjld-declared-lifting-in-construtor-1
     public void test2228_declaredLiftingInConstrutor1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2228dlic1.java",
@@ -4180,7 +4180,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a constructor declares a parameter with lifting
     // 2.2.28-otjld-declared-lifting-in-construtor-2
     public void test2228_declaredLiftingInConstrutor2() {
-       
+
        runConformTest(
             new String[] {
 		"Team2228dlic2_2.java",
@@ -4224,7 +4224,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a constructor declares a parameter with lifting - invoking super with role type
     // 2.2.28-otjld-declared-lifting-in-construtor-3
     public void test2228_declaredLiftingInConstrutor3() {
-       
+
        runConformTest(
             new String[] {
 		"Team2228dlic3_2.java",
@@ -4265,7 +4265,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
             "OK");
     }
 
-    // a constructor uses a parameter with declared lifting, but the base type is invalid 
+    // a constructor uses a parameter with declared lifting, but the base type is invalid
     // WITNESS for error reported in TPX-204 (fixed somewhere between 0.7.5 and 0.7.11)
     // 2.2.28-otjld-declared-lifting-in-construtor-4
     public void test2228_declaredLiftingInConstrutor4() {
@@ -4286,9 +4286,9 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 
     // a constructor with declared lifting calls super with a role across several levels
     // 2.2.28-otjld-declared-lifting-in-constructor-5
-    // Bug 326052 [compiler] problems with team ctors with declared lifting in specific inheritance situations 
+    // Bug 326052 [compiler] problems with team ctors with declared lifting in specific inheritance situations
     public void test2228_declaredLiftingInConstructor5() {
-       
+
        runConformTest(
             new String[] {
 		"Team2228dlic5_3.java",
@@ -4405,7 +4405,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a constructor with declared lifting calls super with a role across several levels - compiling in one go should not trigger compiler limitation (can't find super call)
     // 2.2.28-otjld-declared-lifting-in-constructor-5g
     public void test2228_declaredLiftingInConstructor5g() {
-       
+
        runConformTest(
             new String[] {
 		"Team2228dlic5g_3.java",
@@ -4454,7 +4454,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 
     // a constructor with declared lifting calls super with a role across several levels -- unsupported data flow
     // 2.2.28-otjld-declared-lifting-in-constructor-6
-    // Bug 326052 [compiler] problems with team ctors with declared lifting in specific inheritance situations 
+    // Bug 326052 [compiler] problems with team ctors with declared lifting in specific inheritance situations
     public void _test2228_declaredLiftingInConstructor6() {
         runConformTest(
             new String[] {
@@ -4555,30 +4555,30 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
             },
             (this.weavingScheme == WeavingScheme.OTDRE || this.complianceLevel < ClassFileConstants.JDK1_8
             ?
-            "----------\n" + 
-    		"1. ERROR in Team2228dlic6l_3.java (at line 4)\n" + 
-    		"	public Team2228dlic6l_3(T2228dlic6l as R2 r) {\n" + 
-    		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Compiler limitation: This constructor seems to request lifting of an argument. However, the self call in Team2228dlic6l_2(R) of class Team2228dlic6l_2 passes its arguments in an unexpected way. Cannot perform required transitive byte-code translation.\n" + 
+            "----------\n" +
+    		"1. ERROR in Team2228dlic6l_3.java (at line 4)\n" +
+    		"	public Team2228dlic6l_3(T2228dlic6l as R2 r) {\n" +
+    		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+    		"Compiler limitation: This constructor seems to request lifting of an argument. However, the self call in Team2228dlic6l_2(R) of class Team2228dlic6l_2 passes its arguments in an unexpected way. Cannot perform required transitive byte-code translation.\n" +
     		"----------\n"
     		:
-            "----------\n" + 
-    		"1. WARNING in Team2228dlic6l_3.java (at line 3)\n" + 
-    		"	public class R2 extends R playedBy T2228dlic6l {}\n" + 
-    		"	                                   ^^^^^^^^^^^\n" + 
-    		"Base class T2228dlic6l has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
-            "----------\n" + 
-    		"2. ERROR in Team2228dlic6l_3.java (at line 4)\n" + 
-    		"	public Team2228dlic6l_3(T2228dlic6l as R2 r) {\n" + 
-    		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Compiler limitation: This constructor seems to request lifting of an argument. However, the self call in Team2228dlic6l_2(R) of class Team2228dlic6l_2 passes its arguments in an unexpected way. Cannot perform required transitive byte-code translation.\n" + 
+            "----------\n" +
+    		"1. WARNING in Team2228dlic6l_3.java (at line 3)\n" +
+    		"	public class R2 extends R playedBy T2228dlic6l {}\n" +
+    		"	                                   ^^^^^^^^^^^\n" +
+    		"Base class T2228dlic6l has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" +
+            "----------\n" +
+    		"2. ERROR in Team2228dlic6l_3.java (at line 4)\n" +
+    		"	public Team2228dlic6l_3(T2228dlic6l as R2 r) {\n" +
+    		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+    		"Compiler limitation: This constructor seems to request lifting of an argument. However, the self call in Team2228dlic6l_2(R) of class Team2228dlic6l_2 passes its arguments in an unexpected way. Cannot perform required transitive byte-code translation.\n" +
     		"----------\n"
             ),
         	null/*classLibraries*/,
         	false/*shouldFlushOutputDirectory*/);
     }
 
-    // a constructor with declared lifting calls super with a role across several levels -- 
+    // a constructor with declared lifting calls super with a role across several levels --
     // this version generated ICE("Binary method has no code attribute")
     // 2.2.28-otjld-declared-lifting-in-constructor-6f
     public void test2228_declaredLiftingInConstructor6f() {
@@ -4625,23 +4625,23 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team2228dlic6f_1.java (at line 7)\n" + 
-    		"	r.test(); // not visible \n" + 
-    		"	  ^^^^\n" + 
-    		"The method test() from the role type Team2228dlic6f_1.R is not visible (OTJLD 1.2.1(e)).\n" + 
-    		"----------\n" + 
-    		"----------\n" + 
-    		"1. ERROR in Team2228dlic6f_2.java (at line 12)\n" + 
-    		"	super(r.id()); // not visible\n" + 
-    		"	        ^^\n" + 
-    		"The method id() from the role type Team2228dlic6f_2.R is not visible (OTJLD 1.2.1(e)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team2228dlic6f_1.java (at line 7)\n" +
+    		"	r.test(); // not visible \n" +
+    		"	  ^^^^\n" +
+    		"The method test() from the role type Team2228dlic6f_1.R is not visible (OTJLD 1.2.1(e)).\n" +
+    		"----------\n" +
+    		"----------\n" +
+    		"1. ERROR in Team2228dlic6f_2.java (at line 12)\n" +
+    		"	super(r.id()); // not visible\n" +
+    		"	        ^^\n" +
+    		"The method id() from the role type Team2228dlic6f_2.R is not visible (OTJLD 1.2.1(e)).\n" +
     		"----------\n");
     }
 
     // a constructor with declared lifting calls super with a role across several levels  -- unsupported data flow
     // 2.2.28-otjld-declared-lifting-in-constructor-7
-    // Bug 326052 [compiler] problems with team ctors with declared lifting in specific inheritance situations 
+    // Bug 326052 [compiler] problems with team ctors with declared lifting in specific inheritance situations
     public void _test2228_declaredLiftingInConstructor7() {
         runConformTest(
             new String[] {
@@ -4690,7 +4690,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
             },
             "OK");
     }
-    
+
     // a constructor with declared lifting calls super with a role across several levels  -- unsupported data flow
     // 2.2.28-otjld-declared-lifting-in-constructor-7l
     public void test2228_declaredLiftingInConstructor7l() {
@@ -4732,7 +4732,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
             null/*classLibraries*/,
             false/*shouldFlushOutputDirectory*/,
             null/*vmArguments*/);
-        
+
         runNegativeTest(
             new String[] {
 		"Team2228dlic7l_3.java",
@@ -4750,22 +4750,22 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
             },
             (this.weavingScheme == WeavingScheme.OTDRE || this.complianceLevel < ClassFileConstants.JDK1_8
             ?
-            "----------\n" + 
-    		"1. ERROR in Team2228dlic7l_3.java (at line 4)\n" + 
-    		"	public Team2228dlic7l_3(T2228dlic7l as R2 r) {\n" + 
-    		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Compiler limitation: This constructor seems to request lifting of an argument. However, the self call in Team2228dlic7l_2(R) of class Team2228dlic7l_2 passes its arguments in an unexpected way. Cannot perform required transitive byte-code translation.\n" + 
+            "----------\n" +
+    		"1. ERROR in Team2228dlic7l_3.java (at line 4)\n" +
+    		"	public Team2228dlic7l_3(T2228dlic7l as R2 r) {\n" +
+    		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+    		"Compiler limitation: This constructor seems to request lifting of an argument. However, the self call in Team2228dlic7l_2(R) of class Team2228dlic7l_2 passes its arguments in an unexpected way. Cannot perform required transitive byte-code translation.\n" +
     		"----------\n"
     		:
-    		"1. WARNING in Team2228dlic7l_3.java (at line 3)\n" + 
-    		"	public class R2 extends R playedBy T2228dlic7l {}\n" + 
-    		"	                                   ^^^^^^^^^^^\n" + 
-    		"Base class T2228dlic7l has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
-            "----------\n" + 
-    		"2. ERROR in Team2228dlic7l_3.java (at line 4)\n" + 
-    		"	public Team2228dlic7l_3(T2228dlic7l as R2 r) {\n" + 
-    		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Compiler limitation: This constructor seems to request lifting of an argument. However, the self call in Team2228dlic7l_2(R) of class Team2228dlic7l_2 passes its arguments in an unexpected way. Cannot perform required transitive byte-code translation.\n" + 
+    		"1. WARNING in Team2228dlic7l_3.java (at line 3)\n" +
+    		"	public class R2 extends R playedBy T2228dlic7l {}\n" +
+    		"	                                   ^^^^^^^^^^^\n" +
+    		"Base class T2228dlic7l has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" +
+            "----------\n" +
+    		"2. ERROR in Team2228dlic7l_3.java (at line 4)\n" +
+    		"	public Team2228dlic7l_3(T2228dlic7l as R2 r) {\n" +
+    		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+    		"Compiler limitation: This constructor seems to request lifting of an argument. However, the self call in Team2228dlic7l_2(R) of class Team2228dlic7l_2 passes its arguments in an unexpected way. Cannot perform required transitive byte-code translation.\n" +
     		"----------\n"
         	),
             null/*classLibraries*/,
@@ -4774,7 +4774,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // two roles are lifted, witness for a former AIOOBE in AnchorMapping
     // 2.2.28-otjld-declared-lifting-in-constructor-8
     public void test2228_declaredLiftingInConstructor8() {
-       
+
        runConformTest(
             new String[] {
 		"Team2228dlic8_2.java",
@@ -4836,7 +4836,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role is explicitly lowered
     // 2.2.29-otjld-explicit-lowering-1
     public void test2229_explicitLowering1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2229el1.java",
@@ -4869,7 +4869,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // explicit lowering has the type of the bound base class
     // 2.2.29-otjld-explicit-lowering-2
     public void test2229_explicitLowering2() {
-       
+
        runConformTest(
             new String[] {
 		"Team2229el2.java",
@@ -4919,7 +4919,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an abstract bound role implements ILowerable
     // 2.2.29-otjld-explicit-lowering-3
     public void test2229_explicitLowering3() {
-       
+
        runConformTest(
             new String[] {
 		"Team2229el3.java",
@@ -5027,18 +5027,18 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 			    "}	\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team2230dlism.java (at line 4)\n" + 
-    		"	static void erroneous(T2230dlism as R o) {}\n" + 
-    		"	                      ^^^^^^^^^^^^^^^\n" + 
-    		"Illegal type for argument o: declared lifting not allowed in static methods (OTJLD 2.3.2(a)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team2230dlism.java (at line 4)\n" +
+    		"	static void erroneous(T2230dlism as R o) {}\n" +
+    		"	                      ^^^^^^^^^^^^^^^\n" +
+    		"Illegal type for argument o: declared lifting not allowed in static methods (OTJLD 2.3.2(a)).\n" +
     		"----------\n");
     }
 
     // a base object should be lifting before its ctor has finished (was TPX-487)
     // 2.2.31-otjld-lifting-uninitialized-object-1
     public void test2231_liftingUninitializedObject1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2231luo1.java",
@@ -5079,7 +5079,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a base object should be lifting before its ctor has finished - replace
     // 2.2.31-otjld-lifting-uninitialized-object-2
     public void test2231_liftingUninitializedObject2() {
-       
+
        runConformTest(
             new String[] {
 		"Team2231luo2.java",
@@ -5121,7 +5121,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // an abstract role class is bound to an abstract base class
     // 2.2.32-otjld-lifting-to-abstract-role-1
     public void test2232_liftingToAbstractRole1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2232ltar1.java",
@@ -5161,7 +5161,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a role is explicitly created to a class that could not be produced by smart lifting, subsequent lifting callin fails
     // 2.2.33-otjld-explicit-creation-breaks-lifting-1
     public void test2233_explicitCreationBreaksLifting1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2233ecbl1.java",
@@ -5205,7 +5205,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a nested team uses declared lifting, regular base class
     // 2.2.34-otjld-declared-lifting-in-nested-team-1
     public void test2234_declaredLiftingInNestedTeam1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2234dlint1.java",
@@ -5242,7 +5242,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a nested team uses declared lifting, base class is role of outer team
     // 2.2.34-otjld-declared-lifting-in-nested-team-2
     public void test2234_declaredLiftingInNestedTeam2() {
-       
+
        runConformTest(
             new String[] {
 		"Team2234dlint2.java",
@@ -5276,7 +5276,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // a method call could be resolved both with and without lowering - role type is more specific than lowered base
     // 2.2.35-otjld-ambiguous-lowering-1
     public void test2235_ambiguousLowering1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2235al1.java",
@@ -5491,7 +5491,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 				"        t.test(b);\n" +
 				"        System.out.print(t.getAllRoles().length);\n" +
 				"    }\n" +
-				"}\n",  
+				"}\n",
     	"T2237ip1.java",
     			"public class T2237ip1 {\n" +
     			"    void test() { System.out.print(\"OK\"); }\n" +
@@ -5524,7 +5524,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 				"        t.test(b);\n" +
 				"        System.out.print(t.getAllRoles().length);\n" +
 				"    }\n" +
-				"}\n",  
+				"}\n",
     	"T2237ip2.java",
     			"public class T2237ip2 {\n" +
     			"    void test() { System.out.print(\"OK\"); }\n" +
@@ -5546,16 +5546,16 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 				"    @Instantiation(ONDEMAND)\n" +
 				"    protected class R {\n" +
 				"    }\n" +
-				"}\n",  
+				"}\n",
     		},
-    		"----------\n" + 
-    		"1. ERROR in NotATeam2237ip3.java (at line 4)\n" + 
-    		"	@Instantiation(ONDEMAND)\n" + 
-    		"	^^^^^^^^^^^^^^\n" + 
-    		"Annotation \'@Instantiation\' can only be applied to role classes (OTJLD 2.3.1(d)).\n" + 
+    		"----------\n" +
+    		"1. ERROR in NotATeam2237ip3.java (at line 4)\n" +
+    		"	@Instantiation(ONDEMAND)\n" +
+    		"	^^^^^^^^^^^^^^\n" +
+    		"Annotation \'@Instantiation\' can only be applied to role classes (OTJLD 2.3.1(d)).\n" +
     		"----------\n");
     }
-    
+
     public void test2237_instantiationPolicy4() {
     	runNegativeTest(
     		new String[] {
@@ -5567,18 +5567,18 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 				"    protected class R {\n" +
 				"        int val = 0;\n" +
 				"    }\n" +
-				"}\n",  
+				"}\n",
     		},
-    		"----------\n" + 
-    		"1. WARNING in Team2237ip4.java (at line 5)\n" + 
-    		"	protected class R {\n" + 
-    		"	                ^\n" + 
-    		"Roles with InstantiationPolicy \'ALWAYS\' should define equals() and hashCode() methods (OTJLD 2.3.1(d)).\n" + 
-    		"----------\n" + 
-    		"2. WARNING in Team2237ip4.java (at line 6)\n" + 
-    		"	int val = 0;\n" + 
-    		"	    ^^^\n" + 
-    		"Fields are discouraged in roles with InstantiationPolicy \'ALWAYS\' (OTJLD 2.3.1(d)).\n" + 
+    		"----------\n" +
+    		"1. WARNING in Team2237ip4.java (at line 5)\n" +
+    		"	protected class R {\n" +
+    		"	                ^\n" +
+    		"Roles with InstantiationPolicy \'ALWAYS\' should define equals() and hashCode() methods (OTJLD 2.3.1(d)).\n" +
+    		"----------\n" +
+    		"2. WARNING in Team2237ip4.java (at line 6)\n" +
+    		"	int val = 0;\n" +
+    		"	    ^^^\n" +
+    		"Fields are discouraged in roles with InstantiationPolicy \'ALWAYS\' (OTJLD 2.3.1(d)).\n" +
     		"----------\n");
     }
 
@@ -5587,34 +5587,34 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     	runConformTest(
     		new String[] {
     			"to/TOuter.java",
-    			"package to;\n" + 
-    			"\n" + 
-    			"\n" + 
-    			"import base tb.TB1;\n" + 
-    			"import base tb.TB2;\n" + 
-    			"\n" + 
-    			"public team class TOuter {\n" + 
-    			"	public team class T1 playedBy TB1 {\n" + 
-    			"		protected class R playedBy B<@base> { }\n" + 
-    			"		/* added method */\n" + 
-    			"		public void test() {\n" + 
-    			"			new R(new B<@base>()); // works!\n" + 
-    			"		}\n" + 
-    			"	}\n" + 
-    			"	public team class T2 extends T1  playedBy TB2 {\n" + 
+    			"package to;\n" +
+    			"\n" +
+    			"\n" +
+    			"import base tb.TB1;\n" +
+    			"import base tb.TB2;\n" +
+    			"\n" +
+    			"public team class TOuter {\n" +
+    			"	public team class T1 playedBy TB1 {\n" +
+    			"		protected class R playedBy B<@base> { }\n" +
+    			"		/* added method */\n" +
+    			"		public void test() {\n" +
+    			"			new R(new B<@base>()); // works!\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	public team class T2 extends T1  playedBy TB2 {\n" +
     			"		@Override\n" +
-    			"		protected class R playedBy B<@base> { }\n" + 
-    			"		@Override\n" + 
-    			"		public void test() {\n" + 
-    			"			new R(new B<@base>());  // error!\n" + 
-    			"		}\n" + 
+    			"		protected class R playedBy B<@base> { }\n" +
+    			"		@Override\n" +
+    			"		public void test() {\n" +
+    			"			new R(new B<@base>());  // error!\n" +
+    			"		}\n" +
     			"	}\n" +
     			"	void test(TB2 as T2 t2) {\n" +
     			"		t2.test();\n" +
     			"	}\n" +
     			"	public static void main(String... args) {\n" +
     			"		new TOuter().test(new tb.TB2());\n" +
-    			"	}\n" + 
+    			"	}\n" +
     			"}\n",
     			"tb/TB2.java",
     			"package tb;\n" +

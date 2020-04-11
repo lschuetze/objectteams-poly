@@ -153,8 +153,8 @@ public class FieldModel extends ModelElement {
 		AnchorUsageRanksAttribute attr = (AnchorUsageRanksAttribute) getAttribute(ANCHOR_USAGE_RANKS);
 		attr.addUsageRank(rank);
 	}
-	
-	/** Create a faked method binding for a getAccessor to a given base field. 
+
+	/** Create a faked method binding for a getAccessor to a given base field.
 	 * @param isGetter select getter or setter
 	 */
 	public static MethodBinding getDecapsulatingFieldAccessor(Scope scope,
@@ -167,11 +167,11 @@ public class FieldModel extends ModelElement {
 		MethodBinding accessor = isGetter ? model._decapsulatingGetter : model._decapsulatingSetter;
 		if (accessor != null)
 			return accessor;
-		
+
 		if (strategy == ImplementationStrategy.DYN_ACCESS) {
 			accessor = CalloutImplementorDyn.ensureAccessor(scope, baseType, resolvedField.isStatic());
 		} else {
-			TypeBinding[] argTypes = resolvedField.isStatic() 
+			TypeBinding[] argTypes = resolvedField.isStatic()
 										? (isGetter
 												? new TypeBinding[0]
 												: new TypeBinding[]{resolvedField.type})
@@ -188,7 +188,7 @@ public class FieldModel extends ModelElement {
 			baseType.addMethod(accessor);
 		}
 		MethodModel.getModel(accessor)._fakeKind = FakeKind.BASE_FIELD_ACCESSOR;
-		if (isGetter) 
+		if (isGetter)
 			model._decapsulatingGetter = accessor;
 		else
 			model._decapsulatingSetter = accessor;

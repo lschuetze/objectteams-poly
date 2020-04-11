@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010 Stephan Herrmann.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -67,7 +67,7 @@ public class PrecedenceQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
@@ -90,7 +90,7 @@ public class PrecedenceQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
 	// QuickFix adds a binding-level "precedence after" declaration
 	@Test
 	public void testAddAfterBindingPrecedence() throws Exception {
@@ -114,7 +114,7 @@ public class PrecedenceQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
@@ -137,7 +137,7 @@ public class PrecedenceQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
 	// QuickFix adds a role-level precedence declaration
 	@Test
 	public void testAddAfterRolePrecedence() throws Exception {
@@ -163,7 +163,7 @@ public class PrecedenceQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);

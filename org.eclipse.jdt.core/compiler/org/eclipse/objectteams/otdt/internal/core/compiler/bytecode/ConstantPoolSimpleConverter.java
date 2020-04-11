@@ -74,7 +74,7 @@ public class ConstantPoolSimpleConverter extends ClassFileStruct {
 		this.dest = destBytes;
 		this.dstClassFile = dstClassFile;
 	}
-	
+
 	public ConstantPoolSimpleConverter(byte[] bytes, int[] constantPoolOffsets, int methodOffset, byte[] destBytes, ClassFile dstClassFile) {
 		super(bytes, constantPoolOffsets, 0);
 		this.srcOffset = methodOffset;

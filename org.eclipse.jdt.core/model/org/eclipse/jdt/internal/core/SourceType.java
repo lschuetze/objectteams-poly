@@ -210,7 +210,7 @@ public IType createType(String contents, IJavaElement sibling, boolean force, IP
 @Override
 public boolean equals(Object o) {
 	if (!(o instanceof SourceType)) return false;
-	if (((SourceType) o).isLambda()) 
+	if (((SourceType) o).isLambda())
 		return false;
 	return super.equals(o);
 }
@@ -392,7 +392,7 @@ public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento,
 			}
 //{ObjectTeams: method mappings:
 		case OTJavaElement.OTEM_METHODMAPPING:
-			
+
 			// kind and flags:
 			int kind = 0;
 			int callinKind = 0;
@@ -400,7 +400,7 @@ public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento,
 			boolean isOverride = false;
 			boolean isSetter = false;
 			{
-				String bindingKind = memento.nextToken(); 
+				String bindingKind = memento.nextToken();
 				switch(bindingKind.charAt(0)) {
 					case 'a': kind = IOTJavaElement.CALLIN_MAPPING; callinKind = ICallinMapping.KIND_AFTER; break;
 					case 'b': kind = IOTJavaElement.CALLIN_MAPPING; callinKind = ICallinMapping.KIND_BEFORE; break;
@@ -415,7 +415,7 @@ public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento,
 				hasSign = bindingKind.charAt(1) == 'l'; // long?
 				memento.nextToken(); // skip separator
 			}
-			
+
 			// name (callin only):
 			String bindingName = null;
 			if (kind == IOTJavaElement.CALLIN_MAPPING) {
@@ -433,10 +433,10 @@ public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento,
 					memento.nextToken(); // consume separator OTEM_METHODMAPPING
 				}
 			}
-			
+
 			// role method:
 			MethodData roleMethod = MethodMapping.createMethodData(memento, memento.nextToken());
-			
+
 			// base methods:
 			List<MethodData> baseMethods = new ArrayList<MethodData>();
 			if (kind != IOTJavaElement.CALLOUT_TO_FIELD_MAPPING) {
@@ -446,7 +446,7 @@ public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento,
 					tok = memento.nextToken();
 				}
 			}
-			
+
 			// assemble:
 			IRoleType ottype = (IRoleType) OTModelManager.getOTElement(this);
 			IMethod corrJavaMethod = getMethod(roleMethod.getSelector(), roleMethod.getArgumentTypes());
@@ -938,7 +938,7 @@ public ITypeHierarchy newTypeHierarchy(IJavaProject project, WorkingCopyOwner ow
 @Override
 public ITypeHierarchy newTypeHierarchy(IProgressMonitor monitor) throws JavaModelException {
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=228845, The new type hierarchy should consider changes in primary
-	// working copy. 
+	// working copy.
 	return newTypeHierarchy(DefaultWorkingCopyOwner.PRIMARY, monitor);
 }
 

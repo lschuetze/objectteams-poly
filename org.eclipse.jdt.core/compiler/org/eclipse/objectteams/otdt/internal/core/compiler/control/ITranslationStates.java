@@ -46,7 +46,7 @@ public interface ITranslationStates {
 	public static final int STATE_LENV_DONE_FIELDS_AND_METHODS= 7;//LookupEnvironment & Deps.
 	public static final int STATE_ROLES_LINKED            =  8;//LookupEnvironment & RoleSplitter
 	public static final int STATE_METHODS_PARSED          =  9;//Compiler
-// removed state:	
+// removed state:
 //	public static final int STATE_ROLE_INIT_METHODS       = 10;//RoleInitializationMethod
 //
     public static final int STATE_ROLE_HIERARCHY_ANALYZED = 10;//Lifting

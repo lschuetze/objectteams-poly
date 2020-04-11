@@ -57,7 +57,7 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
 		name.indexOf(" - JLS");
 		this.API_LEVEL = Integer.parseInt(name.substring(name.indexOf(" - JLS") + 6));
 	}
-	
+
 	public ASTStructuralPropertyTest(String name, int apiLevel) {
 		super(name);
 		this.API_LEVEL = apiLevel;
@@ -154,7 +154,7 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
 				assertEquals("Wrong number of visited node classes", 67, nodeClasses.size());
 				assertEquals("Wrong number of visited properties", 81, visitedProperties.size());
 //{ObjectTeams: 2 new simple properties in TypeDeclaration: TEAM_PROPERTY and ROLE_PROPERTY:
-/* orig:				
+/* orig:
 				assertEquals("Wrong number of simple properties", 26, simpleProperties.size());
   :giro */
 				assertEquals("Wrong number of simple properties", 28, simpleProperties.size());
@@ -176,7 +176,7 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
 				assertEquals("Wrong number of visited properties", 103, visitedProperties.size());
 //{ObjectTeams: 2 new simple properties in TypeDeclaration: TEAM_PROPERTY and ROLE_PROPERTY:
 //				1 new property   in ImportDeclaration: BASE_PROPERTY
-/* orig:				
+/* orig:
 				assertEquals("Wrong number of simple properties", 23, simpleProperties.size());
   :giro */
 				assertEquals("Wrong number of simple properties", 26, simpleProperties.size());
@@ -185,8 +185,8 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
 				assertEquals("Wrong number of child properties", 115, childProperties.size());
   :giro */
 				assertEquals("Wrong number of child properties", 117, childProperties.size());
-				
-			 // 2 new child list properties: TypeDeclaration.PRECEDENCES_PROPERTY, PackageDeclaration.MODIFIERS_PROPERTY  
+
+			 // 2 new child list properties: TypeDeclaration.PRECEDENCES_PROPERTY, PackageDeclaration.MODIFIERS_PROPERTY
 /* orig:
 				assertEquals("Wrong number of child list properties", 52, childListProperties.size());
   :giro */
@@ -198,7 +198,7 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
 				assertEquals("Wrong number of visited properties", 103, visitedProperties.size());
 //{ObjectTeams: 2 new simple properties in TypeDeclaration: TEAM_PROPERTY and ROLE_PROPERTY:
 //				1 new property   in ImportDeclaration: BASE_PROPERTY
-/* orig:				
+/* orig:
 				assertEquals("Wrong number of simple properties", 23, simpleProperties.size());
   :giro */
 				assertEquals("Wrong number of simple properties", 26, simpleProperties.size());
@@ -207,20 +207,20 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
 				assertEquals("Wrong number of child properties", 115, childProperties.size());
   :giro */
 				assertEquals("Wrong number of child properties", 117, childProperties.size());
-				
-			 // 2 new child list properties: TypeDeclaration.PRECEDENCES_PROPERTY, PackageDeclaration.MODIFIERS_PROPERTY  
+
+			 // 2 new child list properties: TypeDeclaration.PRECEDENCES_PROPERTY, PackageDeclaration.MODIFIERS_PROPERTY
 /* orig:
 				assertEquals("Wrong number of child list properties", 54, childListProperties.size());
   :giro */
 				assertEquals("Wrong number of child list properties", 56, childListProperties.size());
-// SH}			
+// SH}
 				break;
 			case AST.JLS8 :
 				assertEquals("Wrong number of visited node classes", 84, nodeClasses.size());
 				assertEquals("Wrong number of visited properties", 106, visitedProperties.size());
 //{ObjectTeams: 2 new simple properties in TypeDeclaration: TEAM_PROPERTY and ROLE_PROPERTY:
 //				1 new property   in ImportDeclaration: BASE_PROPERTY
-/* orig:				
+/* orig:
 				assertEquals("Wrong number of simple properties", 21, simpleProperties.size());
   :giro */
 				assertEquals("Wrong number of simple properties", 24, simpleProperties.size());
@@ -229,13 +229,13 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
 				assertEquals("Wrong number of child properties", 118, childProperties.size());
   :giro */
 				assertEquals("Wrong number of child properties", 120, childProperties.size());
-				
-			 // 2 new child list properties: TypeDeclaration.PRECEDENCES_PROPERTY, PackageDeclaration.MODIFIERS_PROPERTY  
+
+			 // 2 new child list properties: TypeDeclaration.PRECEDENCES_PROPERTY, PackageDeclaration.MODIFIERS_PROPERTY
 /* orig:
 				assertEquals("Wrong number of child list properties", 66, childListProperties.size());
   :giro */
 				assertEquals("Wrong number of child list properties", 68, childListProperties.size());
-// SH}			
+// SH}
 				break;
 			default :
 				fail();
@@ -445,12 +445,12 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
 				// oops - guess that's not valid
 			}
 		}
-// {ObjectTeams: adapted for OT specific ASTNodes		
+// {ObjectTeams: adapted for OT specific ASTNodes
 /* orig:
 		assertEquals("Wrong last known type", 103, hi); // last known one
   :giro */
 		assertEquals("Wrong last known type", 119, hi); // last known one
-// jwl}		
+// jwl}
 		assertEquals("Wrong number of distinct types",  hi, classes.size()); // all classes are distinct
 	}
 }

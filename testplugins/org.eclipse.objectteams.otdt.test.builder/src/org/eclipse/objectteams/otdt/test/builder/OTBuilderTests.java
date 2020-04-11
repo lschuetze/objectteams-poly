@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -45,7 +45,7 @@ public class OTBuilderTests extends BuilderTests {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		
+
 		this.otenv = new OTTestingEnvironment();
 		this.otenv.activate();
 		env = new TestingEnvironment() {
@@ -59,7 +59,7 @@ public class OTBuilderTests extends BuilderTests {
 					// don't know why this warning is getting reported against perfectly valid files, ignore it for now:
 					if (allProblems[i].getMessage().equals(PDECoreMessages.Builders_Manifest_useless_file))
 						continue;
-					// some plugin.xml have a deprecated 'action' extension, just ignore those: 
+					// some plugin.xml have a deprecated 'action' extension, just ignore those:
 					if (allProblems[i].getMessage().contains("deprecated"))
 						continue;
 					if (allProblems[i].getMessage().startsWith("The compiler compliance specified is")) // new warning from bug 533880
@@ -73,7 +73,7 @@ public class OTBuilderTests extends BuilderTests {
 		};
 		env.openEmptyWorkspace();
 		env.resetWorkspace();
-	
+
 		BuildManager.DEBUG = 2;
 	}
 
@@ -89,7 +89,7 @@ public class OTBuilderTests extends BuilderTests {
 	protected void expectingProblemsFor(IPath expected) {
 		if (DEBUG)
 			printProblemsFor(expected);
-	
+
 		/* get the leaf problems for this type */
 		Problem[] problems = env.getProblemsFor(expected);
 		assertTrue("missing expected problem with " + expected.toString(), problems.length > 0); //$NON-NLS-1$

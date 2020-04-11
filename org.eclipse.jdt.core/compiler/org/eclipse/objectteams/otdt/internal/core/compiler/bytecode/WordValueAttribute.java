@@ -94,7 +94,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  * Only used by the compiler:
  * - CALLIN_FLAG_DEFINITELY_MISSING_BASECALL:	For base call flow analysis including super calls
  * - CALLIN_FLAG_POTENTIALLY_MISSING_BASECALL: 	For base call flow analysis including super calls
- * - CALLIN_FLAG_BASE_SUPER_CALL: 				Is the base call targeting the base's super? 
+ * - CALLIN_FLAG_BASE_SUPER_CALL: 				Is the base call targeting the base's super?
  * 		OTRE part is handled via OTSpecialAccess attribute (kind SUPER_METHOD_ACCESS).
  * - bits 9-12 (CALLIN_RETURN_MASK):			Encoding of original non-reference return type.
  *
@@ -239,7 +239,7 @@ public class WordValueAttribute
 		switch (weavingScheme) {
 			case OTRE:
 				break; // is the default
-			case OTDRE: 
+			case OTDRE:
 				this._value |= OTDRE_FLAG;
 				break;
 		}
@@ -359,11 +359,11 @@ public class WordValueAttribute
         			&& !environment.globalOptions.isPureJava)
         	{
 				switch (environment.globalOptions.weavingScheme) {
-	        		case OTRE: 
+	        		case OTRE:
 	        			if ((this._value & OTDRE_FLAG) != 0)
 	        				environment.problemReporter.incompatibleWeavingScheme(type, WeavingScheme.OTDRE);
 	        			break;
-	        		case OTDRE: 
+	        		case OTDRE:
 	        			if ((this._value & OTDRE_FLAG) == 0)
 	        				environment.problemReporter.incompatibleWeavingScheme(type, WeavingScheme.OTRE);
 	        			break;

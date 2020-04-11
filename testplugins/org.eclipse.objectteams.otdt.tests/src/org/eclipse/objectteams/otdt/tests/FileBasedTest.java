@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -55,14 +55,14 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
     private static final String LINE_SEPARATOR = System
                                                    .getProperty("line.separator");
     private static final String WORKSPACE_DIR  = "workspace";
-    
+
     private String              _projectDir;
 	protected IJavaProject      javaProject;
 
     public FileBasedTest(String name)
     {
         super(name);
-        
+
         if (getTestSetting() != null)
         	setUsePerformanceMeter(false);
     }
@@ -71,7 +71,7 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
     {
         return TestDataHandler.getTestSetting(getClass());
     }
-    
+
     public String getSourceWorkspacePath()
     {
         return getPluginDirectoryPath()
@@ -82,7 +82,7 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
     public void setUpSuite() throws Exception
     {
         super.setUpSuite();
-        
+
         // ensure autobuilding is turned off
         IWorkspaceDescription description = getWorkspace().getDescription();
         if (description.isAutoBuilding())
@@ -91,7 +91,7 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
             getWorkspace().setDescription(description);
         }
         if (_projectDir != null)
-        	this.javaProject = setUpJavaProject(_projectDir); 
+        	this.javaProject = setUpJavaProject(_projectDir);
     }
 
     public void tearDownSuite() throws Exception
@@ -119,7 +119,7 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
         }
         return null;
     }
-    
+
     protected abstract String getPluginID();
 
     protected String getResource(String packageName, String resourceName)
@@ -148,17 +148,17 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
         }
         return result;
     }
-    
+
     protected void setTestProjectDir(String dirName)
     {
         _projectDir = dirName;
     }
-    
+
     protected String getTestProjectDir()
     {
         return _projectDir;
     }
-    
+
     public boolean isRole(IType type)
     {
         IOTType otType =
@@ -167,56 +167,56 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
         	&& (otType.exists())
         	&& (otType instanceof IRoleType);
     }
-    
+
     public IRoleType getRole(String project, String srcFolder, String pkg, String aTeam, String role)
     	throws JavaModelException
 	{
-	    ICompilationUnit teamUnit = 
-	        getCompilationUnit(project, srcFolder, pkg, aTeam + ".java"); 
+	    ICompilationUnit teamUnit =
+	        getCompilationUnit(project, srcFolder, pkg, aTeam + ".java");
 	    assertNotNull(teamUnit);
 	    assertTrue(teamUnit.exists());
-	    
+
 	    IType teamType = teamUnit.getType(aTeam);
 	    assertNotNull(teamType);
 	    assertTrue(teamType.exists());
-	    
+
 	    IType javaModelRole = teamType.getType(role);
 	    assertNotNull(javaModelRole);
 	    assertTrue(javaModelRole.exists());
-	    
-        IOTJavaElement roleType = 
+
+        IOTJavaElement roleType =
             OTModelManager.getOTElement(javaModelRole);
         return (IRoleType)roleType;
-	
+
 	}
-    
+
     public IType getRole(IType aTeam, String role)
     {
         return TypeHelper.findNestedRoleType(aTeam, role);
     }
-    
+
     public IType getMemberType(String project, String srcFolder, String pkg, String enclosingTypeName, String member)
 		throws JavaModelException
 	{
-	    ICompilationUnit declaringUnit = 
-	        getCompilationUnit(project, srcFolder, pkg, enclosingTypeName + ".java"); 
+	    ICompilationUnit declaringUnit =
+	        getCompilationUnit(project, srcFolder, pkg, enclosingTypeName + ".java");
 	    assertTrue(declaringUnit.exists());
-	    
+
 	    IType enclosingType = declaringUnit.getType(enclosingTypeName);
 	    assertTrue(enclosingType.exists());
-	    
+
 	    IType memberType = enclosingType.getType(member);
 	    assertTrue(memberType.exists());
-	
+
 	    return memberType;
 	}
-    
+
     public IType getType(String projectName, String srcFolder, String pkg, String typeName)
     	throws JavaModelException
 	{
-	    ICompilationUnit declaringUnit = 
-	        getCompilationUnit(projectName, srcFolder, pkg, typeName + ".java"); 
-	    
+	    ICompilationUnit declaringUnit =
+	        getCompilationUnit(projectName, srcFolder, pkg, typeName + ".java");
+
 	    IType type = declaringUnit != null ? declaringUnit.getType(typeName) : null;
 	    if(type == null)
 	    {
@@ -224,30 +224,30 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
 	    }
 	    assertNotNull(type);
 	    assertTrue(type.exists());
-	    
+
 	    return type;
 	}
 
-    
+
     public IType getRoleJavaElem(
-            String project, 
-            String srcFolder, 
-            String pkg, 
-            String aTeam, 
+            String project,
+            String srcFolder,
+            String pkg,
+            String aTeam,
             String role)
     	throws JavaModelException
     {
         return getMemberType(
-                project, 
+                project,
                 srcFolder,
                 pkg,
                 aTeam,
                 role);
     }
-    
+
     public boolean containsAllRequiredTypes(IType[] actual, List expected)
     {
-        if(actual == null 
+        if(actual == null
             || expected == null
             || actual.length != expected.size())
         {
@@ -272,8 +272,8 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
         }
         return result;
     }
-    
-    
+
+
     /**
      * Fully qualified name-based comparison of typelists, without respect to the order
      * @param expected types that have been expected
@@ -281,7 +281,7 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
      */
     public boolean compareTypes(IType[] expected, IType[] actual)
     {
-        if(actual == null 
+        if(actual == null
                 || expected == null
                 || actual.length != expected.length)
         {
@@ -289,7 +289,7 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
         						" but got "+(actual == null ? "null" : actual.length));
             return false;
         }
-        
+
         boolean result = true;
         for (int expIdx = 0; expIdx < expected.length; expIdx++)
         {
@@ -310,7 +310,7 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
         }
         return result;
     }
-    
+
     /**
      * Name-based comparison of methodlists, without respect to the order
      * @param expected methods that have been expected
@@ -318,13 +318,13 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
      */
     public boolean compareMethods(IMethod[] expected, IMethod[] actual)
     {
-        if(actual == null 
+        if(actual == null
                 || expected == null
                 || actual.length != expected.length)
         {
             return false;
         }
-        
+
         boolean result = true;
         for (int expIdx = 0; expIdx < expected.length; expIdx++)
         {
@@ -343,7 +343,7 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
         }
         return result;
     }
-    
+
     /**
      * Fully qualified name-based comparison of two types
      */
@@ -353,10 +353,10 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
         {
             return false;
         }
-        
+
         String name1 = type1.getFullyQualifiedName();
         String name2 = type2.getFullyQualifiedName();
-        
+
         return name1.equals(name2);
     }
 
@@ -367,12 +367,12 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
         assertTrue(jlo.exists());
         return jlo;
     }
-    
+
 // Println output disabled
 //	/**
 //	 * enriches the super-method with print-statements
 //	 */
-//	public void runBare() throws Throwable 
+//	public void runBare() throws Throwable
 //	{
 //	    System.out.println("\nsetUp");
 //		setUp();
@@ -383,5 +383,5 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
 //		finally {
 //			tearDown();
 //		}
-//	}    
+//	}
 }

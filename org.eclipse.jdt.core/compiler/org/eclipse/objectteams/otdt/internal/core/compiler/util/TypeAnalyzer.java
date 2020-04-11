@@ -164,7 +164,7 @@ public class TypeAnalyzer  {
     public static boolean isSameType(ReferenceBinding site, TypeBinding t1, TypeBinding t2)
     {
         if (TypeBinding.equalsEquals(t1, t2)) return true;
-        if (t1 == null || t2 == null) 
+        if (t1 == null || t2 == null)
         	return false;
         if (t1.isArrayType()) {
             if (   !t2.isArrayType()
@@ -270,7 +270,7 @@ public class TypeAnalyzer  {
 
             char[][] tname1 = compoundNameOfReferenceType((ReferenceBinding)tsuperType, true, true);
             char[][] tname2 = compoundNameOfReferenceType((ReferenceBinding)currentType, true, true);
-            if (CharOperation.equals(tname1, tname2)) { 
+            if (CharOperation.equals(tname1, tname2)) {
             	if (TypeBinding.notEquals(tsuperType, currentType) && tsuperType.isValidBinding()) // don't complain about different missing types
                 	throw new InternalCompilerError("different bindings for the same type??"+currentType+':'+tsuperType); //$NON-NLS-1$
             	return true;
@@ -548,7 +548,7 @@ public class TypeAnalyzer  {
 			}
 			if (!allowOuter)
 				return null;
-			isStaticScope = type.isStatic(); 
+			isStaticScope = type.isStatic();
 			type = type.enclosingType();
 		}
 		return null;
@@ -606,7 +606,7 @@ public class TypeAnalyzer  {
 				@Override public int sourceEnd() { return 0; }
 				@Override public void setFieldIndex(int depth) { /* nop */ }
 				@Override public void setDepth(int depth) { /* nop */ }
-				
+
 				@Override public void setActualReceiverType(ReferenceBinding receiverType) { /* nop */ }
 				@Override public boolean receiverIsImplicitThis() { return false; }
 				@Override public boolean isTypeAccess() { return false; }
@@ -614,17 +614,17 @@ public class TypeAnalyzer  {
 				@Override public boolean isQualifiedSuper() { return false; }
 				@Override public boolean checkingPotentialCompatibility() { return false; }
 				@Override public void acceptPotentiallyCompatibleMethods(MethodBinding[] methods) { /* nop */ }
-				
+
 				@Override
 				public TypeBinding invocationTargetType() {
 					return scope.getJavaLangObject();
 				}
-				
+
 				@Override
 				public ExpressionContext getExpressionContext() {
 					return ExpressionContext.ASSIGNMENT_CONTEXT;
 				}
-				
+
 				@Override
 				public TypeBinding[] genericTypeArguments() {
 					return null;

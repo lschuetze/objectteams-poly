@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2008 Technical University Berlin, Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Technical University Berlin - Initial API and implementation
  **********************************************************************/
@@ -24,9 +24,9 @@ import org.eclipse.jdt.internal.core.builder.JavaBuilder;
 import org.eclipse.jdt.internal.core.builder.SourceFile;
 
 /**
- * Specialize the IncrementalImageBuilder to include teams of role files in 
+ * Specialize the IncrementalImageBuilder to include teams of role files in
  * the incremental compilation process.
- * 
+ *
  * @author stephan
  * @version $Id: OTJIncrementalImageBuilder.java 23401 2010-02-02 23:56:05Z stephan $
  */
@@ -36,7 +36,7 @@ public class OTJIncrementalImageBuilder extends IncrementalImageBuilder {
 	public OTJIncrementalImageBuilder(JavaBuilder javaBuilder) {
 		super(javaBuilder);
 	}
-	
+
 	/**
 	 * For each affected source file, guess whether it could be a role
 	 * file and include its team in the compilation process.
@@ -52,7 +52,7 @@ public class OTJIncrementalImageBuilder extends IncrementalImageBuilder {
 			}
 		}
 	}
-		
+
 	private void checkAddTeamFile(SourceFile file) {
 		IPath path = file.getPath();
 		// TODO (SH): should we try more than one level?

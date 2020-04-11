@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2013 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany, and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -43,7 +43,7 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 	private IMethod    baseMethod;
 	private MethodData baseMethodHandle; // Note: may be null!
 	private int		   declaredModifiers;
-	
+
     public CalloutMapping(int        declarationSourceStart,
     					  int        sourceStart,
     					  int        sourceEnd,
@@ -108,14 +108,14 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 	public boolean isOverride() {
     	return this.isOverride;
     }
-    
+
 	@Override
 	@SuppressWarnings("nls")
 	public String getElementName()
 	{
 		StringBuffer name = new StringBuffer(super.getElementName());
 		name.append(" -> ");
-	    
+
 		if (this.baseMethodHandle == null)
 		{
 			name.append("(unknown)");
@@ -131,7 +131,7 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 				name.append(this.baseMethodHandle.getSelector());
 			}
 		}
-	    
+
 	    return name.toString();
 	}
 
@@ -139,8 +139,8 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 	public int getMappingKind()
 	{
 		return CALLOUT_MAPPING;
-	}	
-		
+	}
+
 	@Override
 	public int getDeclaredModifiers() {
 		return this.declaredModifiers;
@@ -159,7 +159,7 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 		{
             this.baseMethod = findBaseMethod();
 		}
-		
+
 		return this.baseMethod;
 	}
 
@@ -173,7 +173,7 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 
 		return super.equals(obj);
     }
-	
+
     @Override
 	@SuppressWarnings("nls")
 	public String toString()
@@ -188,14 +188,14 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
     {
     	if (this.baseMethodHandle == null)
     		return null;
-    	
+
     	IRoleType roleClass = getDeclaringRole();
     	IType   baseClass   = roleClass.getBaseClass();
 		IType[] typeParents = TypeHelper.getSuperTypes(baseClass);
-    	    	
+
     	return findMethod(typeParents, this.baseMethodHandle);
     }
-    
+
 	// added for the SourceTypeConverter
     @Override
 	public IMethodSpec getBaseMethodHandle()
@@ -215,26 +215,26 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
     		getMethodForHandle(this.baseMethodHandle, buff);
     }
     // ====
-    	
+
 	// implementation and alternate API of resolved(Binding)
 	@Override
 	public OTJavaElement resolved(char[] uniqueKey) {
-		ResolvedCalloutMapping resolvedHandle = 
+		ResolvedCalloutMapping resolvedHandle =
 			new ResolvedCalloutMapping(
 					getDeclarationSourceStart(),
 					getSourceStart(),
 					getSourceEnd(),
 			    	getDeclarationSourceEnd(),
 			    	getElementType(),
-			        (IType) getParent(), 
+			        (IType) getParent(),
 			    	getIMethod(),
 			        getRoleMethodHandle(),
-			        this.baseMethodHandle, 
-			        hasSignature(), 
+			        this.baseMethodHandle,
+			        hasSignature(),
 			        isOverride(),
 			        getDeclaredModifiers(),
 					new String(uniqueKey));
-		
+
 		return resolvedHandle;
 	}
 

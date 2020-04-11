@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -48,7 +48,7 @@ public class BindingAmbiguities3 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.3-otjld_g-ambiguous-binding-1
      public void _g_test733_ambiguousBinding1() {
-        
+
         runConformTest(
              new String[] {
  		"T733ab1Main.java",
@@ -160,7 +160,7 @@ public class BindingAmbiguities3 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.3-otjld_g-ambiguous-binding-2
      public void _g_test733_ambiguousBinding2() {
-        
+
         runConformTest(
              new String[] {
  		"T733ab2Main.java",
@@ -272,7 +272,7 @@ public class BindingAmbiguities3 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.3-otjld_g-ambiguous-binding-3
      public void _g_test733_ambiguousBinding3() {
-        
+
         runConformTest(
              new String[] {
  		"T733ab3Main.java",
@@ -389,7 +389,7 @@ public class BindingAmbiguities3 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.3-otjld_g-ambiguous-binding-4
      public void _g_test733_ambiguousBinding4() {
-        
+
         runConformTest(
              new String[] {
  		"T733ab4Main.java",

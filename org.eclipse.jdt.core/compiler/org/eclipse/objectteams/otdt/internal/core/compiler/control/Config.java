@@ -55,7 +55,7 @@ import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
  * We don't use ThreadLocal, since we do cleanup manually using release().
  */
 public class Config implements ConfigHelper.IConfig, Comparable<Config> {
-	
+
 	@SuppressWarnings("serial")
 	public static class NotConfiguredException extends RuntimeException {
 		public NotConfiguredException(String string) {
@@ -63,7 +63,7 @@ public class Config implements ConfigHelper.IConfig, Comparable<Config> {
 		}
 		public void logWarning(String msg) {
 			try {
-				JavaCore.getJavaCore().getLog().log(new Status(IStatus.WARNING, JavaCore.PLUGIN_ID, msg, this)); 
+				JavaCore.getJavaCore().getLog().log(new Status(IStatus.WARNING, JavaCore.PLUGIN_ID, msg, this));
 			} catch (NoClassDefFoundError ncdfe) {
 				System.err.println("Warning: "+msg); //$NON-NLS-1$
 				this.printStackTrace(System.err);
@@ -293,7 +293,7 @@ public class Config implements ConfigHelper.IConfig, Comparable<Config> {
 			return false;
 		return config.client.get() == client;
 	}
-	
+
 	static Config getOrCreateMatchingConfig(Object client, Parser parser, LookupEnvironment environment) {
 		Config config = safeGetConfig();
 		if (configMatchesRequest(config, client, parser, environment)) {
@@ -302,7 +302,7 @@ public class Config implements ConfigHelper.IConfig, Comparable<Config> {
 			return config;
 		}
 		boolean shouldCleanUp = false;
-		criticalSection: synchronized (configsByClient) {			
+		criticalSection: synchronized (configsByClient) {
 			if (parser == null || environment == null) {
 				config = configsByClient.get(client);
 				if (configMatchesRequest(config, client, parser, environment)) {
@@ -338,7 +338,7 @@ public class Config implements ConfigHelper.IConfig, Comparable<Config> {
 						System.out.println("Client "+key.getClass()); //$NON-NLS-1$
 				}
 			}
-			synchronized (configsByClient) {				
+			synchronized (configsByClient) {
 				Object[] keys = Collections.synchronizedMap(configsByClient).values().toArray();
 				Arrays.sort(keys);
 				int threshold = keys.length-LOWER_THRESHOLD;
@@ -398,7 +398,7 @@ public class Config implements ConfigHelper.IConfig, Comparable<Config> {
     	    }
 		}
 	}
-	
+
 	static boolean getVerifyMethods() {
 		return getConfig().verifyMethods;
 	}
@@ -439,10 +439,10 @@ public class Config implements ConfigHelper.IConfig, Comparable<Config> {
 	}
 
 	public static void setLoweringPossible(boolean val) {
-		getConfig().loweringPossible = val;		
+		getConfig().loweringPossible = val;
 	}
 
-	/** 
+	/**
 	 * Has type checking detected that lowering is possible but not required due to expected type java.lang.Object?
 	 * (see OTJLD 2.2(f))
 	 */

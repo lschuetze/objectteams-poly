@@ -131,7 +131,7 @@ public class ASTParser {
 	 * Kind constant used to request that the source be parsed
 	 * as a parameter mapping.
 	 */
-	public static final int K_PARAMETER_MAPPING = 0x10;	
+	public static final int K_PARAMETER_MAPPING = 0x10;
 // SH}
 
 	/**
@@ -160,7 +160,7 @@ public class ASTParser {
 	 * Compiler options. Defaults to JavaCore.getOptions().
 	 */
 	private Map<String, String> compilerOptions;
-	
+
     /**
 	 * The focal point for a partial AST request.
      * Only used when <code>partial</code> is <code>true</code>.
@@ -812,8 +812,8 @@ public class ASTParser {
 	 * A successful call to this method returns all settings to their
 	 * default values so the object is ready to be reused.
 	 * </p>
-	 * <p>For identifying a module-info.java file as a special file instead of an ordinary 
-	 * Java file (Since Java 9), a call to this should be preceded by a call to 
+	 * <p>For identifying a module-info.java file as a special file instead of an ordinary
+	 * Java file (Since Java 9), a call to this should be preceded by a call to
 	 * {@link #setUnitName(String)} that sets the unit name as module-info.java</p>
 	 *
 	 * @param monitor the progress monitor used to report progress and request cancellation,

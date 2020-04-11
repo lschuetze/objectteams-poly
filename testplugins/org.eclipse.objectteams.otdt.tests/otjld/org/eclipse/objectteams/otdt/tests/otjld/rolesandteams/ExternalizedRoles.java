@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010, 2013 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -22,11 +22,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 import junit.framework.Test;
 
 public class ExternalizedRoles extends AbstractOTJLDTest {
-	
+
 	public ExternalizedRoles(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -34,7 +34,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -45,7 +45,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a type of a field is anchored to a simple field reference
     // 1.6.1-otjld-simple-anchored-type-1
     public void test161_simpleAnchoredType1() {
-       
+
        runConformTest(
             new String[] {
 		"T161sat1Main.java",
@@ -79,7 +79,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a type of a field is anchored to a simple field reference - otherwise unused private field
     // 1.6.1-otjld-simple-anchored-type-1a
     public void test161_simpleAnchoredType1a() {
-       
+
        runConformTest(
             new String[] {
 		"T161sat1aMain.java",
@@ -118,7 +118,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a type of a field is anchored to a simple field reference - overloading plus varargs plus ambiguous lowering confuses AnchorMapping
     // 1.6.1-otjld-simple-anchored-type-1f
     public void test161_simpleAnchoredType1f() {
-       
+
        runConformTest(
             new String[] {
 		"T161sat1fMain.java",
@@ -166,7 +166,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a type of a local variable is anchored to a simple field reference
     // 1.6.1-otjld-simple-anchored-type-2
     public void test161_simpleAnchoredType2() {
-       
+
        runConformTest(
             new String[] {
 		"T161sat2Main.java",
@@ -200,7 +200,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a type of a parameter is anchored to a simple field reference
     // 1.6.1-otjld-simple-anchored-type-3
     public void test161_simpleAnchoredType3() {
-       
+
        runConformTest(
             new String[] {
 		"T161sat3Main.java",
@@ -233,7 +233,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // qualified field reference has type of externalized role
     // 1.6.1-otjld-simple-anchored-type-4
     public void test161_simpleAnchoredType4() {
-       
+
        runConformTest(
             new String[] {
 		"Team161sat4_2.java",
@@ -274,7 +274,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a type of an array field is anchored to a simple field reference
     // 1.6.2-otjld-anchored-array-type-1
     public void test162_anchoredArrayType1() {
-       
+
        runConformTest(
             new String[] {
 		"T162aat1Main.java",
@@ -308,7 +308,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a type of a local array variable is anchored to a simple field reference
     // 1.6.2-otjld-anchored-array-type-2
     public void test162_anchoredArrayType2() {
-       
+
        runConformTest(
             new String[] {
 		"T162aat2Main.java",
@@ -342,7 +342,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a type of a array parameter is anchored to a simple field reference
     // 1.6.2-otjld-anchored-array-type-3
     public void test162_anchoredArrayType3() {
-       
+
        runConformTest(
             new String[] {
 		"T162aat3Main.java",
@@ -375,7 +375,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a type of an array field is anchored to a simple field reference, reading array element
     // 1.6.2-otjld-anchored-array-type-4
     public void test162_anchoredArrayType4() {
-       
+
        runConformTest(
             new String[] {
 		"T162aat4Main.java",
@@ -443,7 +443,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a type of an array field is anchored to a simple field reference, assigning array element
     // 1.6.2-otjld-anchored-array-type-5
     public void test162_anchoredArrayType5() {
-       
+
        runConformTest(
             new String[] {
 		"T162aat5Main.java",
@@ -513,7 +513,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role type is anchored to a static variable given by its qualified name
     // 1.6.3-otjld-type-anchored-to-qualified-static-1
     public void test163_typeAnchoredToQualifiedStatic1() {
-       
+
        runConformTest(
             new String[] {
 		"T163tatqs1Main.java",
@@ -547,7 +547,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role array type is anchored to a static variable given by its qualified name
     // 1.6.3-otjld-type-anchored-to-qualified-static-2
     public void test163_typeAnchoredToQualifiedStatic2() {
-       
+
        runConformTest(
             new String[] {
 		"T163tatqs2Main.java",
@@ -581,7 +581,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a type anchor is assigned in its initialization
     // 1.6.4-otjld-type-anchor-initialization-1
     public void test164_typeAnchorInitialization1() {
-       
+
        runConformTest(
             new String[] {
 		"T164tai1Main.java",
@@ -642,7 +642,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a type anchor is assigned
     // 1.6.5-otjld-type-anchor-assignment-1
     public void test165_typeAnchorAssignment1() {
-       
+
        runConformTest(
             new String[] {
 		"T165taa1Main.java",
@@ -704,7 +704,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a type anchor is a 3 element path
     // 1.6.6-otjld-type-anchor-is-path-1
     public void test166_typeAnchorIsPath1() {
-       
+
        runConformTest(
             new String[] {
 		"T166taia1Main.java",
@@ -787,21 +787,21 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in T166taia1fMain.java (at line 5)\n" + 
-    		"	R<@t.a1.a2> r = t.a1.a2.getR();\n" + 
-    		"	  ^^^^^^^^\n" + 
-    		"Anchor T166taia1f_1.a1 for the role type R is not final (OTJLD 1.2.2(c)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in T166taia1fMain.java (at line 5)\n" + 
-    		"	R<@t.a1.a2> r = t.a1.a2.getR();\n" + 
-    		"	                ^^^^\n" + 
-    		"Anchor t.a1 for the role type R<@tthis[Team166taia1f]> is not final (OTJLD 1.2.2(c)).\n" + 
-    		"----------\n" + 
-    		"3. ERROR in T166taia1fMain.java (at line 5)\n" + 
-    		"	R<@t.a1.a2> r = t.a1.a2.getR();\n" + 
-    		"	                ^^^^^^^^^^^^^^\n" + 
-    		"Type mismatch: cannot convert from R<@tthis[Team166taia1f]> to R<@t.a1.a2> because type anchors could not be proven to be the same instance (OTJLD 1.2.2(e)).\n" + 
+            "----------\n" +
+    		"1. ERROR in T166taia1fMain.java (at line 5)\n" +
+    		"	R<@t.a1.a2> r = t.a1.a2.getR();\n" +
+    		"	  ^^^^^^^^\n" +
+    		"Anchor T166taia1f_1.a1 for the role type R is not final (OTJLD 1.2.2(c)).\n" +
+    		"----------\n" +
+    		"2. ERROR in T166taia1fMain.java (at line 5)\n" +
+    		"	R<@t.a1.a2> r = t.a1.a2.getR();\n" +
+    		"	                ^^^^\n" +
+    		"Anchor t.a1 for the role type R<@tthis[Team166taia1f]> is not final (OTJLD 1.2.2(c)).\n" +
+    		"----------\n" +
+    		"3. ERROR in T166taia1fMain.java (at line 5)\n" +
+    		"	R<@t.a1.a2> r = t.a1.a2.getR();\n" +
+    		"	                ^^^^^^^^^^^^^^\n" +
+    		"Type mismatch: cannot convert from R<@tthis[Team166taia1f]> to R<@t.a1.a2> because type anchors could not be proven to be the same instance (OTJLD 1.2.2(e)).\n" +
     		"----------\n");
     }
 
@@ -853,7 +853,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a type anchor is a 3 element path - trying to implicitly use enclosing instance
     // 1.6.6-otjld-type-anchor-is-path-3
     public void test166_typeAnchorIsPath3() {
-       
+
        runConformTest(
             new String[] {
 		"T166taia3Main.java",
@@ -899,7 +899,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a type anchor is a 3 element path - role is accessed by a field
     // 1.6.6-otjld-type-anchor-is-path-4
     public void test166_typeAnchorIsPath4() {
-       
+
        runConformTest(
             new String[] {
 		"T166taia4Main.java",
@@ -978,16 +978,16 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in T166taia4fMain.java (at line 5)\n" + 
-    		"	R<@t.a1.a2> r = t.a1.a2.myR;\n" + 
-    		"	  ^^^^^^^^\n" + 
-    		"Anchor T166taia4f_1.a1 for the role type R is not final (OTJLD 1.2.2(c)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in T166taia4fMain.java (at line 5)\n" + 
-    		"	R<@t.a1.a2> r = t.a1.a2.myR;\n" + 
-    		"	                ^^^^\n" + 
-    		"Anchor t.a1 for the role type R<@tthis[Team166taia4f]> is not final (OTJLD 1.2.2(c)).\n" + 
+            "----------\n" +
+    		"1. ERROR in T166taia4fMain.java (at line 5)\n" +
+    		"	R<@t.a1.a2> r = t.a1.a2.myR;\n" +
+    		"	  ^^^^^^^^\n" +
+    		"Anchor T166taia4f_1.a1 for the role type R is not final (OTJLD 1.2.2(c)).\n" +
+    		"----------\n" +
+    		"2. ERROR in T166taia4fMain.java (at line 5)\n" +
+    		"	R<@t.a1.a2> r = t.a1.a2.myR;\n" +
+    		"	                ^^^^\n" +
+    		"Anchor t.a1 for the role type R<@tthis[Team166taia4f]> is not final (OTJLD 1.2.2(c)).\n" +
     		"----------\n");
     }
 
@@ -1174,18 +1174,18 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     		new String[] {
     	"p166taip9/Main.java",
     			"package p166taip9;\n" +
-    			"public team class Main {\n" + 
-    			"	private final Display display;\n" + 
-    			"\n" + 
-    			"	public Main(Display display) {\n" + 
-    			"		this.display = display;\n" + 
-    			"	}\n" + 
-    			"	protected class C playedBy Connect<@display> {\n" + 
-    			"		final Shapes sw = display.a;\n" + 
-    			"		protected void test() {\n" + 
-    			"			sw.new Connection(getNode().getShape());\n" + 
-    			"		}\n" + 
-    			"		Node<@display> getNode() -> Node<@display> getNode();\n" + 
+    			"public team class Main {\n" +
+    			"	private final Display display;\n" +
+    			"\n" +
+    			"	public Main(Display display) {\n" +
+    			"		this.display = display;\n" +
+    			"	}\n" +
+    			"	protected class C playedBy Connect<@display> {\n" +
+    			"		final Shapes sw = display.a;\n" +
+    			"		protected void test() {\n" +
+    			"			sw.new Connection(getNode().getShape());\n" +
+    			"		}\n" +
+    			"		Node<@display> getNode() -> Node<@display> getNode();\n" +
     			"	}\n" +
     			"   void test2(Connect<@display> as C c) {\n" +
     			"       c.test();\n" +
@@ -1196,36 +1196,36 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     			"   public static void main(String[] args) {\n" +
     			"		final Display d = new Display();\n" +
     			"       new Main(d).test();\n" +
-    			"   }\n" + 
+    			"   }\n" +
     			"}",
     	"p166taip9/Shapes.java",
     			"package p166taip9;\n" +
-    			"public team class Shapes {\n" + 
+    			"public team class Shapes {\n" +
     			"	public class Shape {\n" +
     			"		protected void print() {\n" +
     			"			System.out.print(\"OK\");\n" +
     			"		}\n" +
-    			"	}\n" + 
-    			"	public class Connection {\n" + 
+    			"	}\n" +
+    			"	public class Connection {\n" +
     			"		public Connection(Shape s) {" +
     			"			s.print();\n" +
-    			"		}\n" + 
-    			"	}\n" + 
+    			"		}\n" +
+    			"	}\n" +
     			"}\n",
     	"p166taip9/Display.java",
     			"package p166taip9;\n" +
-    			"public team class Display {\n" + 
-    			"	public final Shapes a = new Shapes();\n" + 
-    			"	public class Connect {\n" + 
-    			"		public Node getNode() {\n" + 
-    			"			return new Node();\n" + 
-    			"		}\n" + 
-    			"	}\n" + 
-    			"	public class Node {\n" + 
-    			"		public Shape<@a> getShape() {\n" + 
-    			"			return a.new Shape();\n" + 
-    			"		}\n" + 
-    			"	}\n" + 
+    			"public team class Display {\n" +
+    			"	public final Shapes a = new Shapes();\n" +
+    			"	public class Connect {\n" +
+    			"		public Node getNode() {\n" +
+    			"			return new Node();\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	public class Node {\n" +
+    			"		public Shape<@a> getShape() {\n" +
+    			"			return a.new Shape();\n" +
+    			"		}\n" +
+    			"	}\n" +
     			"}\n"
     		},
     		"OK");
@@ -1234,7 +1234,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role is externalized relative to the base reference
     // 1.6.7-otjld-role-anchored-to-base-1
     public void test167_roleAnchoredToBase1() {
-       
+
        runConformTest(
             new String[] {
 		"Team167ratb1_2.java",
@@ -1280,7 +1280,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role is externalized relative to the base reference - passed as parameter
     // 1.6.7-otjld-role-anchored-to-base-2
     public void test167_roleAnchoredToBase2() {
-       
+
        runConformTest(
             new String[] {
 		"Team167ratb2_2.java",
@@ -1329,7 +1329,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role is externalized relative to the base reference and used in the playedBy clause of a nested role!
     // 1.6.7-otjld-role-anchored-to-base-3
     public void test167_roleAnchoredToBase3() {
-       
+
        runConformTest(
             new String[] {
 		"Team167ratb3_2.java",
@@ -1378,7 +1378,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role array is externalized relative to the base reference
     // 1.6.7-otjld-role-anchored-to-base-4
     public void test167_roleAnchoredToBase4() {
-       
+
        runConformTest(
             new String[] {
 		"Team167ratb4_2.java",
@@ -1425,7 +1425,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role is externalized relative to the base reference, used in a callout signature
     // 1.6.7-otjld-role-anchored-to-base-5
     public void test167_roleAnchoredToBase5() {
-       
+
        runConformTest(
             new String[] {
 		"Team167ratb5_2.java",
@@ -1610,7 +1610,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role is externalized relative to the base reference - used in callin signature
     // 1.6.7-otjld-role-anchored-to-base-6
     public void test167_roleAnchoredToBase6() {
-       
+
        runConformTest(
             new String[] {
 		"Team167ratb6_2.java",
@@ -1670,7 +1670,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // an anchored type is read from a class file , navigate along MessageSend-receiver
     // 1.6.8-otjld-anchored-type-from-classfile-1
     public void test168_anchoredTypeFromClassfile1() {
-       
+
        runConformTest(
             new String[] {
 		"T168atfc1_2.java",
@@ -1708,7 +1708,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // an anchored type is read from a class file , navigate along outer of MessageSend-receiver
     // 1.6.8-otjld-anchored-type-from-classfile-2
     public void test168_anchoredTypeFromClassfile2() {
-       
+
        runConformTest(
             new String[] {
 		"T168atfc2_2.java",
@@ -1749,7 +1749,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // an anchored type is read from a class file , navigate along field
     // 1.6.8-otjld-anchored-type-from-classfile-3
     public void test168_anchoredTypeFromClassfile3() {
-       
+
        runConformTest(
             new String[] {
 		"T168atfc3_2.java",
@@ -1787,7 +1787,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // an anchored type is read from a class file, navigate along field - compile two files in one go
     // 1.6.8-otjld-anchored-type-from-classfile-3a
     public void test168_anchoredTypeFromClassfile3a() {
-       
+
        runConformTest(
             new String[] {
 		"T168atfc3a_2.java",
@@ -1825,7 +1825,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a callout binding has an arg that is anchored to another argument
     // 1.6.9-otjld-callout-with-anchored-type-1
     public void test169_calloutWithAnchoredType1() {
-       
+
        runConformTest(
             new String[] {
 		"Team169cwat1.java",
@@ -1869,7 +1869,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a callout binding has an arg that is anchored to another argument
     // 1.6.9-otjld-callout-with-anchored-type-2
     public void test169_calloutWithAnchoredType2() {
-       
+
        runConformTest(
             new String[] {
 		"Team169cwat2.java",
@@ -2004,18 +2004,18 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team1610mria4.java (at line 5)\n" + 
-    		"	public R<@t.f> test() {\n" + 
-    		"	            ^\n" + 
-    		"Parameter \'f\' cannot be resolved (OTJLD 9.2.1).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team1610mria4.java (at line 5)\n" +
+    		"	public R<@t.f> test() {\n" +
+    		"	            ^\n" +
+    		"Parameter \'f\' cannot be resolved (OTJLD 9.2.1).\n" +
     		"----------\n");
     }
 
     // a parameter type is defined relative to tthis, in a message send this is updated to the team of the receiver - a role
     // 1.6.11-otjld-parameter-type-anchored-updated-to-receiver-1
     public void test1611_parameterTypeAnchoredUpdatedToReceiver1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1611ptautr1.java",
@@ -2048,7 +2048,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a parameter type is defined relative to tthis, in a message send this is updated to the receiver - a array-reference of role
     // 1.6.11-otjld-parameter-type-anchored-updated-to-receiver-2
     public void test1611_parameterTypeAnchoredUpdatedToReceiver2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1611ptautr2.java",
@@ -2081,7 +2081,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // an externalized role via static anchor is used as receiver and argument
     // 1.6.11-otjld-parameter-type-anchored-updated-to-receiver-3
     public void test1611_parameterTypeAnchoredUpdatedToReceiver3() {
-       
+
        runConformTest(
             new String[] {
 		"T1611ptautr3Main.java",
@@ -2117,7 +2117,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // on an anchor path, an implitly reachable shortcut is taken, which is dropped from the path
     // 1.6.12-otjld-path-drops-implicitly-reachable-1
     public void test1612_pathDropsImplicitlyReachable1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1612pdir1_2.java",
@@ -2172,7 +2172,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // on an anchor path, an implitly reachable shortcut is taken, which is dropped from the path - tested in team method
     // 1.6.12-otjld-path-drops-implicitly-reachable-2
     public void test1612_pathDropsImplicitlyReachable2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1612pdir2_2.java",
@@ -2227,7 +2227,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // on an anchor path, an implitly reachable shortcut is taken, which is dropped from the path - same team
     // 1.6.12-otjld-path-drops-implicitly-reachable-3
     public void test1612_pathDropsImplicitlyReachable3() {
-       
+
        runConformTest(
             new String[] {
 		"Team1612pdir3.java",
@@ -2274,7 +2274,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a field is accessed qualified with a interface name, WITNESS for TPX-256 (fixed between 0.8.1 and 0.8.2)
     // 1.6.13-otjld-static-field-accessed-qualified
     public void test1613_staticFieldAccessedQualified() {
-       
+
        runConformTest(
             new String[] {
 		"T1613.java",
@@ -2369,7 +2369,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
 			    "        protected void test() {" +
 			    "            t.test(new R<@t>());\n" + // verify error was observed here
 			    "        }\n" +
-			    "        protected void print() { System.out.print(\"OK\"); }\n" + 
+			    "        protected void print() { System.out.print(\"OK\"); }\n" +
 			    "    }\n" +
 			    "    public void test(R r) {" +
 			    "        r.print();\n" +
@@ -2397,7 +2397,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
 			    "        protected void test() {" +
 			    "            t.test(new R<@t>());\n" + // verify error was observed here
 			    "        }\n" +
-			    "        protected void print() { System.out.print(\"OK\"); }\n" + 
+			    "        protected void print() { System.out.print(\"OK\"); }\n" +
 			    "    }\n" +
 			    "    public void test(R r) {" +
 			    "        r.print();\n" +
@@ -2413,7 +2413,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role is casted to its externalized type
     // 1.6.16-otjld-casting-to-externalized-1
     public void test1616_castingToExternalized1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1616cte1.java",
@@ -2439,7 +2439,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role is casted to its externalized type - array type
     // 1.6.16-otjld-casting-to-externalized-1a
     public void test1616_castingToExternalized1a() {
-       
+
        runConformTest(
             new String[] {
 		"Team1616cte1a.java",
@@ -2465,7 +2465,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role is casted to its externalized type - array type , cast error
     // 1.6.16-otjld-casting-to-externalized-1f
     public void test1616_castingToExternalized1f() {
-       
+
        runConformTest(
             new String[] {
 		"Team1616cte1f.java",
@@ -2497,7 +2497,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role is casted to its externalized type - array type , team instance mismatch
     // 1.6.16-otjld-casting-to-externalized-1g
     public void test1616_castingToExternalized1g() {
-       
+
        runConformTest(
             new String[] {
 		"Team1616cte1g.java",
@@ -2528,7 +2528,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role is casted to its externalized type, wrong team instance
     // 1.6.16-otjld-casting-to-externalized-2
     public void test1616_castingToExternalized2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1616cte2.java",
@@ -2559,7 +2559,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role is casted to its externalized type - wrong role type
     // 1.6.16-otjld-casting-to-externalized-3
     public void test1616_castingToExternalized3() {
-       
+
        runConformTest(
             new String[] {
 		"Team1616cte3.java",
@@ -2590,7 +2590,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role type return is anchored to a parameter of the same method
     // 1.6.17-otjld-return-anchored-to-parameter-1
     public void test1617_returnAnchoredToParameter1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1617ratp1.java",
@@ -2626,7 +2626,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role type return is anchored to a parameter of the same method
     // 1.6.17-otjld-return-anchored-to-parameter-2
     public void test1617_returnAnchoredToParameter2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1617ratp2.java",
@@ -2663,7 +2663,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role type return (array) is anchored to a parameter of the same method
     // 1.6.17-otjld-return-anchored-to-parameter-3
     public void test1617_returnAnchoredToParameter3() {
-       
+
        runConformTest(
             new String[] {
 		"Team1617ratp3.java",
@@ -2699,7 +2699,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a role type return is anchored indirectly to a parameter of the same method
     // 1.6.17-otjld-return-anchored-to-parameter-4
     public void test1617_returnAnchoredToParameter4() {
-       
+
        runConformTest(
             new String[] {
 		"Team1617ratp4.java",
@@ -2736,7 +2736,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // an anchor needs a static qualifier to disambiguate
     // 1.6.18-otjld-anchor-problems-1
     public void test1618_anchorProblems1() {
-       
+
        runConformTest(
             new String[] {
 		"T1618ap1.java",
@@ -2813,7 +2813,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // an anchor needs a static qualifier to disambiguate - misinterpretation leads to recursion
     // 1.6.18-otjld-anchor-problems-3
     public void test1618_anchorProblems3() {
-       
+
        runConformTest(
             new String[] {
 		"T1618ap3.java",
@@ -2926,7 +2926,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // the argument of a constructor is anchored
     // 1.6.19-otjld-anchored-constructor-arg-1
     public void test1619_anchoredConstructorArg1() {
-       
+
        runConformTest(
             new String[] {
 		"T1619Main.java",
@@ -2958,7 +2958,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // the example from the otjld 1.2.2
     // 1.6.20-otjld-doc-example-1
     public void test1620_docExample1() {
-       
+
        runConformTest(
             new String[] {
 		"T1620de1.java",
@@ -3013,10 +3013,10 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
             "no longer showing subscr with -1 credits");
     }
 
-    // 
+    //
     // 1.6.21-otjld-constructor-receives-externalized-role-1
     public void test1621_constructorReceivesExternalizedRole1() {
-       
+
        runConformTest(
             new String[] {
 		"T1621crer1Main.java",
@@ -3089,7 +3089,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a shorthand defined callout method is called on an externalized role
     // 1.6.22-otjld-call-to-callout-of-externalized-1
     public void test1622_callToCalloutOfExternalized1() {
-       
+
        runConformTest(
             new String[] {
 		"T1622ctcoe1Main.java",
@@ -3129,7 +3129,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a method parameter has a type anchored to another paramter
     // 1.6.23-otjld-type-anchored-to-parameter-1
     public void test1623_typeAnchoredToParameter1() {
-       
+
        runConformTest(
             new String[] {
 		"T1623tatp1Main.java",
@@ -3277,7 +3277,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a team method returns a role type - the caller is not allowed to see the role type but uses Object
     // 1.6.25-otjld-return-is-non-externalizable-role-1
     public void test1625_returnIsNonExternalizableRole1() {
-       
+
        runConformTest(
             new String[] {
 		"T1625riner1Main.java",

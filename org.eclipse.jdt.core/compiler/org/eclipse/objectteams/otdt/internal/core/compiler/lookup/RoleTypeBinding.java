@@ -155,13 +155,13 @@ public class RoleTypeBinding extends DependentTypeBinding
 
 
     // ============= CREATION AND INSTANCE REGISTRY: ===================
-    public RoleTypeBinding(ReferenceBinding genericType, TypeBinding[] typeArguments, ITeamAnchor teamAnchor, ReferenceBinding enclosingType, LookupEnvironment lookupEnvironment) 
+    public RoleTypeBinding(ReferenceBinding genericType, TypeBinding[] typeArguments, ITeamAnchor teamAnchor, ReferenceBinding enclosingType, LookupEnvironment lookupEnvironment)
     {
 		super(genericType.getRealType(), typeArguments, teamAnchor, enclosingType, lookupEnvironment);
 		initialize(genericType, teamAnchor);
 	}
 
-    private void initialize(ReferenceBinding roleType, ITeamAnchor teamAnchor) 
+    private void initialize(ReferenceBinding roleType, ITeamAnchor teamAnchor)
     {
     	// FIXME(SH): is it OK to strip ParameterizedFields?
     	if (teamAnchor instanceof ParameterizedFieldBinding)
@@ -216,7 +216,7 @@ public class RoleTypeBinding extends DependentTypeBinding
 	        this._staticallyKnownRoleClass = transferTypeArguments(this._staticallyKnownRoleClass);
         }
         this._staticallyKnownRoleType = transferTypeArguments(this._staticallyKnownRoleType);
-        
+
         this._declaredRoleType = this._staticallyKnownRoleType;
 		// keep these consistent with _declaredRoleType:
         this.roleModel        = this._declaredRoleType.roleModel;
@@ -239,7 +239,7 @@ public class RoleTypeBinding extends DependentTypeBinding
 		// record as known role type at teamAnchor and in our own cache
         registerAnchor();
     }
-    
+
     @Override
 	public TypeBinding clone(TypeBinding outerType) {
     	RoleTypeBinding clone = new RoleTypeBinding(this.type, typeArguments(), this._teamAnchor, (ReferenceBinding) outerType, this.environment);
@@ -257,10 +257,10 @@ public class RoleTypeBinding extends DependentTypeBinding
     @Override
 	public ReferenceBinding weakenFrom(ReferenceBinding other) {
     	if (other instanceof RoleTypeBinding) {
-    		if (this.weakenedTypes == null) 
+    		if (this.weakenedTypes == null)
     			this.weakenedTypes = new HashMap<ReferenceBinding, DependentTypeBinding>();
     		ReferenceBinding knownWeakened = this.weakenedTypes.get(other);
-    		if (knownWeakened != null) 
+    		if (knownWeakened != null)
     			return knownWeakened;
     		RoleTypeBinding otherRTB = (RoleTypeBinding)other;
    			DependentTypeBinding newWeakened = new WeakenedTypeBinding(this, otherRTB._declaredRoleType, this.environment);
@@ -338,7 +338,7 @@ public class RoleTypeBinding extends DependentTypeBinding
     public boolean isRoleType() {
     	return true;
     }
-    
+
     @Override
     public boolean isPlainDependentType() {
     	return false;
@@ -386,7 +386,7 @@ public class RoleTypeBinding extends DependentTypeBinding
 			return false;
 		return !((DependentTypeBinding)type).hasExplicitAnchor();
 	}
-	
+
 	@Override
 	public DependentTypeBinding asPlainDependentType() {
 		return null;
@@ -444,7 +444,7 @@ public class RoleTypeBinding extends DependentTypeBinding
 	public TypeBinding erasure() {
     	return this.type.erasure();
     }
-    
+
     @Override
     public ReferenceBinding genericType() {
     	// check if any regular genericity is involved:
@@ -518,7 +518,7 @@ public class RoleTypeBinding extends DependentTypeBinding
     		return this.type.getMethods(selector);
     	return super.getMethods(selector);
     }
-    
+
     @Override
 	public MethodBinding[] availableMethods() {
         return this._staticallyKnownRoleType.availableMethods();
@@ -694,7 +694,7 @@ public class RoleTypeBinding extends DependentTypeBinding
 
         return null;
     }
-    
+
     @Override
     public boolean isHierarchyConnected() {
     	return this.type.isHierarchyConnected();
@@ -851,7 +851,7 @@ public class RoleTypeBinding extends DependentTypeBinding
 	    					rightTeam))
 	    			{
 	    				rightRole = (RoleTypeBinding)this._teamAnchor.getMemberTypeOfType(rightRole.internalName());
-	
+
 	    			} else {
 	    				return false;
 	    			}

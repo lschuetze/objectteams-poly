@@ -90,7 +90,7 @@ public SearchPattern getBlankPattern() {
 @Override
 public boolean matchesDecodedKey(SearchPattern decodedPattern) {
 	QualifiedTypeDeclarationPattern pattern = (QualifiedTypeDeclarationPattern) decodedPattern;
-	
+
 	// check type suffix
 	if (this.typeSuffix != pattern.typeSuffix && this.typeSuffix != TYPE_SUFFIX) {
 		if (!matchDifferentTypeSuffixes(this.typeSuffix, pattern.typeSuffix)) {
@@ -130,7 +130,7 @@ protected StringBuffer print(StringBuffer output) {
 			output.append("TypeDeclarationPattern: qualification<"); //$NON-NLS-1$
 			break;
 	}
-	if (this.qualification != null) 
+	if (this.qualification != null)
 		output.append(this.qualification);
 	else
 		output.append("*"); //$NON-NLS-1$

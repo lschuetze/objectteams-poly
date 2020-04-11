@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2011 GK Software AG
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -56,7 +56,7 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
 
 	@Override
 	protected IJavaProject setUpJavaProject(String projectName)
-			throws CoreException, IOException 
+			throws CoreException, IOException
 	{
 		IJavaProject javaProject = super.setUpJavaProject(projectName);
 		addLibraryEntry(javaProject, getLibPath(), true);
@@ -68,13 +68,13 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
 		String absProjectPath = targetWorkspacePath + '/' + getTestProjectDir() ;
 		return absProjectPath+"/lib/booking.jar";
 	}
-	
+
 	@Override
 	protected String[] getDefaultClassPaths() throws IOException {
 		String[] defaultClassPaths = super.getDefaultClassPaths();
 		int len = defaultClassPaths.length;
-		System.arraycopy(defaultClassPaths, 0, 
-						 defaultClassPaths = new String[len+1], 1, 
+		System.arraycopy(defaultClassPaths, 0,
+						 defaultClassPaths = new String[len+1], 1,
 						 len);
 		defaultClassPaths[0] = getLibPath();
 		return defaultClassPaths;
@@ -117,12 +117,12 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
     	lineInfo6.setRepeatCount(5);
     	LineInfo lineInfo7 = new LineInfo(33, 48); // method "initializeMessage"
     	lineInfo7.setRepeatCount(2);
-    	
+
     	fileInfoTSuper.addLineInfo(lineInfo4);
     	fileInfoTSuper.addLineInfo(lineInfo5);
     	fileInfoTSuper.addLineInfo(lineInfo6);
     	fileInfoTSuper.addLineInfo(lineInfo7);
-    	
+
         LineInfo lineInfo1 = new LineInfo(15,15);
         lineInfo1.setRepeatCount(26);
         LineInfo lineInfo2 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
@@ -131,13 +131,13 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
         fileInfo.addLineInfo(lineInfo1);
         fileInfo.addLineInfo(lineInfo2);
         fileInfo.addLineInfo(lineInfo3);
-        
-        
+
+
         stratum_role1.optimize();
-        
+
         List<SmapStratum> strata_role1 = new ArrayList<SmapStratum>();
         strata_role1.add(stratum_role1);
-        
+
         expectedStrata.put(TYPENAME, strata_role1);
 
         try
@@ -172,12 +172,12 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
         fileInfo1.addLineInfo(lineInfo1);
         fileInfo1.addLineInfo(lineInfo2);
         fileInfo1.addLineInfo(lineInfo3);
-        
+
         stratum_role1.optimize();
-        
+
         List<SmapStratum> strata_role1 = new ArrayList<SmapStratum>();
         strata_role1.add(stratum_role1);
-        
+
         expectedStrata.put(TYPENAME, strata_role1);
 
         try
@@ -205,10 +205,10 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
     	FileInfo fileInfo2 = stratum_role1.getOrCreateFileInfo("Subscriber.java", "org/eclipse/objectteams/example/fbapplication/FlightBonus/Subscriber.java");
     	LineInfo lineInfo4 = new LineInfo(7,75);  // class header: position for liftTo method
     	LineInfo lineInfo5 = new LineInfo(12,76); // callin binding
-    	
+
     	fileInfo2.addLineInfo(lineInfo4);
     	fileInfo2.addLineInfo(lineInfo5);
-    	
+
         FileInfo fileInfo1 = stratum_role1.getOrCreateFileInfo("FlightBonus.java", "org/eclipse/objectteams/example/fbapplication/FlightBonus.java");
         LineInfo lineInfo1 = new LineInfo(1,1);	// all lines of class FlightBonus
         lineInfo1.setRepeatCount(74);
@@ -220,10 +220,10 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
         fileInfo1.addLineInfo(lineInfo3);
 
         stratum_role1.optimize();
-        
+
         List<SmapStratum> strata_role1 = new ArrayList<SmapStratum>();
         strata_role1.add(stratum_role1);
-        
+
         expectedStrata.put(TYPENAME, strata_role1);
 
         try
@@ -247,12 +247,12 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
         _enclosingTypename = "FlightBonus";
 
     	SmapStratum stratum_role1 = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
-        
+
     	FileInfo fileInfo1 = stratum_role1.getOrCreateFileInfo("Subscriber.java", "org/eclipse/objectteams/example/fbapplication/FlightBonus/Subscriber.java");
 
     	// copy-inherited methods
         FileInfo fileInfo2 = stratum_role1.getOrCreateFileInfo("Bonus.java", "org/eclipse/objectteams/example/bonussystem/Bonus.java");
-        
+
         LineInfo lineInfo4 = new LineInfo(39,21); // class header (e.g., _OT$getTeam())
         LineInfo lineInfo6 = new LineInfo(44,30); // method getCollectedCredits
         LineInfo lineInfo7 = new LineInfo(49,28); // method collectCredits
@@ -274,12 +274,12 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
         fileInfo1.addLineInfo(lineInfo1);
         fileInfo1.addLineInfo(lineInfo2);
         fileInfo1.addLineInfo(lineInfo3);
-        
+
         stratum_role1.optimize();
-        
+
         List<SmapStratum> strata_role1 = new ArrayList<SmapStratum>();
         strata_role1.add(stratum_role1);
-        
+
         expectedStrata.put(TYPENAME, strata_role1);
 
         try
@@ -298,7 +298,7 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
 			super.callback(cuDecl);
 		} else {
 		    TypeDeclaration typeDecl = cuDecl.types[0];
-		    
+
 		    assertNotNull("TypeDeclaration should not be null.", typeDecl);
 
 		    String typeName = new String(typeDecl.name);

@@ -100,12 +100,12 @@ MethodPattern(int matchRule) {
 	super(METHOD_PATTERN, matchRule);
 }
 public MethodPattern(
-	char[] selector, 
+	char[] selector,
 	char[] declaringQualification,
-	char[] declaringSimpleName,	
-	char[] returnQualification, 
+	char[] declaringSimpleName,
+	char[] returnQualification,
 	char[] returnSimpleName,
-	char[][] parameterQualifications, 
+	char[][] parameterQualifications,
 	char[][] parameterSimpleNames,
 	IType declaringType,
 	int limitTo,
@@ -155,30 +155,30 @@ public MethodPattern(
  * Instanciate a method pattern with signatures for generics search
  */
 public MethodPattern(
-	char[] selector, 
+	char[] selector,
 	char[] declaringQualification,
-	char[] declaringSimpleName,	
-	char[] returnQualification, 
+	char[] declaringSimpleName,
+	char[] returnQualification,
 	char[] returnSimpleName,
 	String returnSignature,
-	char[][] parameterQualifications, 
+	char[][] parameterQualifications,
 	char[][] parameterSimpleNames,
 	String[] parameterSignatures,
 	IMethod method,
 	int limitTo,
 	int matchRule) {
 
-	this(selector, 
+	this(selector,
 		declaringQualification,
-		declaringSimpleName,	
-		returnQualification, 
+		declaringSimpleName,
+		returnQualification,
 		returnSimpleName,
-		parameterQualifications, 
+		parameterQualifications,
 		parameterSimpleNames,
 		method.getDeclaringType(),
 		limitTo,
 		matchRule);
-	
+
 	// Set flags
 	try {
 		this.varargs = (method.getFlags() & Flags.AccVarargs) != 0;
@@ -226,35 +226,35 @@ public MethodPattern(
 	this.methodArguments = extractMethodArguments(method);
 	if (hasMethodArguments())  this.mustResolve = true;
 //{ObjectTeams: constrain the direction of this pattern?
-	if (findingCallers.get() != null) 
+	if (findingCallers.get() != null)
 		this.constrainToCallerDirection = true;
 //SH}
-	
+
 }
 /*
  * Instanciate a method pattern with signatures for generics search
  */
 public MethodPattern(
-	char[] selector, 
+	char[] selector,
 	char[] declaringQualification,
-	char[] declaringSimpleName,	
+	char[] declaringSimpleName,
 	String declaringSignature,
-	char[] returnQualification, 
+	char[] returnQualification,
 	char[] returnSimpleName,
 	String returnSignature,
-	char[][] parameterQualifications, 
+	char[][] parameterQualifications,
 	char[][] parameterSimpleNames,
 	String[] parameterSignatures,
 	char[][] arguments,
 	int limitTo,
 	int matchRule) {
 
-	this(selector, 
+	this(selector,
 		declaringQualification,
-		declaringSimpleName,	
-		returnQualification, 
+		declaringSimpleName,
+		returnQualification,
 		returnSimpleName,
-		parameterQualifications, 
+		parameterQualifications,
 		parameterSimpleNames,
 		null,
 		limitTo,
@@ -333,15 +333,15 @@ public boolean isPolymorphicSearch() {
 public boolean matchesDecodedKey(SearchPattern decodedPattern) {
 	MethodPattern pattern = (MethodPattern) decodedPattern;
 
-	return (this.parameterCount == pattern.parameterCount || this.parameterCount == -1 
-//{ObjectTeams: return true even if paramCount = Integer.MAX_VALUE  		
+	return (this.parameterCount == pattern.parameterCount || this.parameterCount == -1
+//{ObjectTeams: return true even if paramCount = Integer.MAX_VALUE
 		|| 	pattern.parameterCount == Integer.MAX_VALUE
-//jsv}		
+//jsv}
 		|| this.varargs)
 		&& matchesName(this.selector, pattern.selector);
 }
 /**
- * Returns whether a method declaration or message send must be resolved to 
+ * Returns whether a method declaration or message send must be resolved to
  * find out if this method pattern matches it.
  */
 protected boolean mustResolve() {
@@ -365,7 +365,7 @@ public EntryResult[] queryIn(Index index) throws IOException {
 //{ObjectTeams: we may need a second key to query methodspecs without signature (param count unknown)
 	char[] key2 = null;
 //jsv}
-	
+
 	int matchRule = getMatchRule();
 
 	switch(getMatchMode()) {
@@ -393,7 +393,7 @@ public EntryResult[] queryIn(Index index) throws IOException {
 //{ObjectTeam: generate second key
 				key2 = createIndexKey(this.selector == null ? ONE_STAR : this.selector, Integer.MAX_VALUE);
 //jsv}
-			}				
+			}
 			else if (this.selector != null && this.selector[this.selector.length - 1] != '*')
 				key = CharOperation.concat(this.selector, ONE_STAR, SEPARATOR);
 			// else do a pattern query with just the selector
@@ -409,18 +409,18 @@ public EntryResult[] queryIn(Index index) throws IOException {
 //{ObjectTeams: combine results for both queries
 	EntryResult[] key1Result = index.query(getIndexCategories(), key, matchRule); // match rule is irrelevant when the key is null
 	EntryResult[] key2Result = key2 == null ? null : index.query(getIndexCategories(), key2, matchRule);
-	
+
 	// no merging if one or both are null:
 	if (key1Result == null)
 		return key2Result;
 	if (key2Result == null)
 		return key1Result;
 	// beyond this point: both results are non-null, merge them:
-	
+
 	EntryResult[] result = new EntryResult[key1Result.length + key2Result.length];
 	System.arraycopy(key1Result, 0,result, 0, key1Result.length);
 	System.arraycopy(key2Result, 0, result, key1Result.length, key2Result.length);
-	
+
 	return result;
 	// orig
 	// return index.query(getIndexCategories(), key, matchRule); // match rule is irrelevant when the key is null
@@ -481,7 +481,7 @@ public void setDeclaringRoleClass(IType declaringClass) {
 public int resolveLevelForType(String typeName, int declaringLevel) {
 	if (this.declaringRoleClass == null || typeName.equals(this.declaringRoleClass.getFullyQualifiedName('.')))
 		return declaringLevel;
-	
+
 	if (this.cachedRoleHierarchy != null) {
 		IType superType = this.cachedRoleHierarchy.getSuperclass(this.declaringRoleClass); // OTTypeHierarchies will ensure that tsupers are traversed, too.
 		while (superType != null && OTModelManager.isRole(superType)) {

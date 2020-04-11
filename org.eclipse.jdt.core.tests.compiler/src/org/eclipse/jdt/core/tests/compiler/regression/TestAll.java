@@ -53,11 +53,11 @@ public static Test suite() {
 	standardTests.add(BooleanTest.class);
 	standardTests.add(CastTest.class);
 	standardTests.add(ClassFileComparatorTest.class);
-//{ObjectTeams: the underlying rule has changed for OT/J:	
+//{ObjectTeams: the underlying rule has changed for OT/J:
 /* orig:
 	standardTests.add(CollisionCase.class);
   :giro */
-// SH}	
+// SH}
 	standardTests.add(ConstantTest.class);
 	standardTests.add(DeprecatedTest.class);
 	standardTests.add(LocalVariableTest.class);
@@ -127,7 +127,7 @@ public static Test suite() {
 	ArrayList since_1_6 = new ArrayList();
 	since_1_6.add(StackMapAttributeTest.class);
 	since_1_6.add(Compliance_1_6.class);
-	
+
 	ArrayList since_1_7 = new ArrayList();
 	since_1_7.add(AssignmentTest_1_7.class);
 	since_1_7.add(BinaryLiteralTest.class);
@@ -138,7 +138,7 @@ public static Test suite() {
 	since_1_7.add(PolymorphicSignatureTest.class);
 	since_1_7.add(Compliance_1_7.class);
 	since_1_7.add(MethodHandleTest.class);
-	
+
 	ArrayList since_1_8 = new ArrayList();
 	since_1_8.add(NegativeTypeAnnotationTest.class);
 	since_1_8.add(NullTypeAnnotationTest.class);
@@ -178,7 +178,7 @@ public static Test suite() {
 	ArrayList since_10 = new ArrayList();
 	since_10.add(JEP286Test.class);
 	since_10.add(Unicode10Test.class);
-	
+
 	// add 11 specific test here (check duplicates)
 	ArrayList since_11 = new ArrayList();
 	 since_11.add(JEP323VarLambdaParamsTest.class);

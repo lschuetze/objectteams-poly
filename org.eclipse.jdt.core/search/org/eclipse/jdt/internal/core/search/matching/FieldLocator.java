@@ -96,7 +96,7 @@ public int match(FieldDeclaration node, MatchingNodeSet nodeSet) {
 public int match(MethodSpec node, MatchingNodeSet nodeSet)
 {
     int level = IMPOSSIBLE_MATCH;
-    
+
     if (node instanceof FieldAccessSpec)
     {
     	FieldAccessSpec fieldSpec = (FieldAccessSpec)node;
@@ -187,7 +187,7 @@ protected void matchReportReference(ASTNode reference, IJavaElement element, IJa
 		if (accuracy != SearchMatch.A_ACCURATE) return;
 
 		// element that references the field must be included in the enclosing element
-		DeclarationOfAccessedFieldsPattern declPattern = (DeclarationOfAccessedFieldsPattern) this.pattern; 
+		DeclarationOfAccessedFieldsPattern declPattern = (DeclarationOfAccessedFieldsPattern) this.pattern;
 		while (element != null && !declPattern.enclosingElement.equals(element))
 			element = element.getParent();
 		if (element != null) {
@@ -306,7 +306,7 @@ protected void updateMatch(ParameterizedTypeBinding parameterizedBinding, char[]
 protected void reportDeclaration(FieldBinding fieldBinding, MatchLocator locator, SimpleSet knownFields) throws CoreException {
 	// ignore length field
 	if (fieldBinding == ArrayBinding.ArrayLength) return;
-	
+
 	ReferenceBinding declaringClass = fieldBinding.declaringClass;
 	IType type = locator.lookupType(declaringClass);
 	if (type == null) return; // case of a secondary type
@@ -337,7 +337,7 @@ protected void reportDeclaration(FieldBinding fieldBinding, MatchLocator locator
 					fieldDecl = fieldDecls[i];
 					break;
 				}
-			} 
+			}
 			if (fieldDecl != null) {
 				int offset = fieldDecl.sourceStart;
 				this.match = new FieldDeclarationMatch(((JavaElement) field).resolved(fieldBinding), SearchMatch.A_ACCURATE, offset, fieldDecl.sourceEnd-offset+1, locator.getParticipant(), resource);
@@ -362,7 +362,7 @@ public int resolveLevel(ASTNode possiblelMatchingNode) {
         {
             return resolveLevel(((FieldAccessSpec)possiblelMatchingNode).resolvedField);
         }
-//gbr}			
+//gbr}
 	}
 	if (possiblelMatchingNode instanceof FieldDeclaration)
 		return matchField(((FieldDeclaration) possiblelMatchingNode).binding, true);
@@ -375,7 +375,7 @@ public int resolveLevel(Binding binding) {
 		// for matching the component in constructor of a record
 		if ( ((LocalVariableBinding)binding).declaringScope.referenceContext() instanceof CompactConstructorDeclaration) {
 			return matchLocal((LocalVariableBinding) binding, true);
-		}	
+		}
 	}
 	if (!(binding instanceof FieldBinding)) return IMPOSSIBLE_MATCH;
 
@@ -398,7 +398,7 @@ protected int resolveLevel(NameReference nameRef) {
 			int level = matchField(fieldBinding, false);
 			if (level != IMPOSSIBLE_MATCH) return level;
 		}
-	} 
+	}
 	int otherMax = qNameRef.otherBindings == null ? 0 : qNameRef.otherBindings.length;
 	for (int i = 0; i < otherMax; i++) {
 		char[] token = qNameRef.tokens[i + qNameRef.indexOfFirstFieldBinding];

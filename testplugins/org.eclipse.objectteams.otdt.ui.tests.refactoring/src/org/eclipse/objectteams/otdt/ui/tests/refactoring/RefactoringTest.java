@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2013 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -419,7 +419,7 @@ public abstract class RefactoringTest extends TestCase
 
     protected ICompilationUnit[] createCUs(String[] cuNames) throws Exception {
 		ICompilationUnit[] cus = new ICompilationUnit[cuNames.length];
-	
+
 		for (int idx = 0; idx < cuNames.length; idx++) {
 			Assert.isNotNull(cuNames[idx]);
 			cus[idx] = createCUfromTestFile(getPackageP(), cuNames[idx]);
@@ -576,7 +576,7 @@ public abstract class RefactoringTest extends TestCase
     	return getMethods(type, names, signatures, null, false);
     }
     public static IMethod[] getMethods(IType type, String[] names, String[][] signatures,
-    									boolean[] flags, boolean flag) 
+    									boolean[] flags, boolean flag)
             		throws JavaModelException
     {
         if (names == null || signatures == null)

@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.core.search.indexing.IndexManager;
  * mechanism, permitting combined search actions which will involve all required
  * participants.
  * <p>
- * A search participant is involved in the indexing phase and in the search phase. 
+ * A search participant is involved in the indexing phase and in the search phase.
  * The indexing phase consists in taking one or more search documents, parse them, and
  * add index entries in an index chosen by the participant. An index is identified by a
  * path on disk.
@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.core.search.indexing.IndexManager;
  * finally the search participant is asked to locate the matches precisely in these search documents.
  * </p>
  * <p>
- * This class is intended to be subclassed by clients. During the indexing phase, 
+ * This class is intended to be subclassed by clients. During the indexing phase,
  * a subclass will be called with the following requests in order:
  * <ul>
  * <li>{@link #scheduleDocumentIndexing(SearchDocument, IPath)}</li>
@@ -62,7 +62,7 @@ public abstract class SearchParticipant {
 	protected SearchParticipant() {
 		// do nothing
 	}
-	
+
 	/**
 	 * Notification that this participant's help is needed in a search.
 	 * <p>
@@ -103,10 +103,10 @@ public abstract class SearchParticipant {
 	 * The given document path is a string that uniquely identifies the document.
 	 * Most of the time it is a workspace-relative path, but it can also be a file system path, or a path inside a zip file.
 	 * <p>
-	 * Implementors of this method can either create an instance of their own subclass of 
+	 * Implementors of this method can either create an instance of their own subclass of
 	 * {@link SearchDocument} or return an existing instance of such a subclass.
 	 * </p>
-	 * 
+	 *
 	 * @param documentPath the path of the document.
 	 * @return a search document
 	 */
@@ -114,14 +114,14 @@ public abstract class SearchParticipant {
 
 	/**
 	 * Indexes the given document in the given index. A search participant
-	 * asked to index a document should parse it and call 
+	 * asked to index a document should parse it and call
 	 * {@link SearchDocument#addIndexEntry(char[], char[])} as many times as
 	 * needed to add index entries to the index. If delegating to another
 	 * participant, it should use the original index location (and not the
 	 * delegatee's one). In the particular case of delegating to the default
 	 * search participant (see {@link SearchEngine#getDefaultSearchParticipant()}),
-	 * the provided document's path must be a path ending with one of the 
-	 * {@link org.eclipse.jdt.core.JavaCore#getJavaLikeExtensions() Java-like extensions} 
+	 * the provided document's path must be a path ending with one of the
+	 * {@link org.eclipse.jdt.core.JavaCore#getJavaLikeExtensions() Java-like extensions}
 	 * or with '.class'.
 	 * <p>
 	 * The given index location must represent a path in the file system to a file that
@@ -130,7 +130,7 @@ public abstract class SearchParticipant {
 	 * </p><p>
 	 * Clients are not expected to call this method.
 	 * </p>
-	 * 
+	 *
 	 * @param document the document to index
 	 * @param indexLocation the location in the file system to the index
 	 */
@@ -158,7 +158,7 @@ public abstract class SearchParticipant {
 	 *
 	 * @param document the document to index
 	 * @param indexLocation the location in the file system to the index
-	 * 
+	 *
 	 * @since 3.10
 	 */
 	public void indexResolvedDocument(SearchDocument document, IPath indexLocation) {
@@ -179,10 +179,10 @@ public abstract class SearchParticipant {
 	 * </p><p>
 	 * Implementors of this method should check the progress monitor
 	 * for cancelation when it is safe and appropriate to do so.  The cancelation
-	 * request should be propagated to the caller by throwing 
+	 * request should be propagated to the caller by throwing
 	 * <code>OperationCanceledException</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param documents the documents to locate matches in
 	 * @param pattern the search pattern to use when locating matches
 	 * @param scope the scope to limit the search to
@@ -194,7 +194,7 @@ public abstract class SearchParticipant {
 	public abstract void locateMatches(SearchDocument[] documents, SearchPattern pattern, IJavaSearchScope scope, SearchRequestor requestor, IProgressMonitor monitor) throws CoreException;
 
 	/**
-	 * Removes the index for a given path. 
+	 * Removes the index for a given path.
 	 * <p>
 	 * The given index location must represent a path in the file system to a file that
 	 * already exists and must be an index file, otherwise nothing will be done.
@@ -202,7 +202,7 @@ public abstract class SearchParticipant {
 	 * It is strongly recommended to use this method instead of deleting file directly
 	 * otherwise cached index will not be removed.
 	 * </p>
-	 * 
+	 *
 	 * @param indexLocation the location in the file system to the index
 	 * @since 3.2
 	 */
@@ -212,7 +212,7 @@ public abstract class SearchParticipant {
 	}
 
 	/**
-	 * Resolves the given document. A search participant asked to resolve a document should parse it and 
+	 * Resolves the given document. A search participant asked to resolve a document should parse it and
 	 * resolve the types and preserve enough state to be able to tend to a indexResolvedDocument call
 	 * subsequently. This API is invoked without holding any index related locks or monitors.
 	 * <p>
@@ -227,10 +227,10 @@ public abstract class SearchParticipant {
 	public void resolveDocument(SearchDocument document) {
 		// do nothing, subtypes should do the "appropriate thing"
 	}
-	
+
 	/**
 	 * Schedules the indexing of the given document.
-	 * Once the document is ready to be indexed, 
+	 * Once the document is ready to be indexed,
 	 * {@link #indexDocument(SearchDocument, IPath) indexDocument(document, indexPath)}
 	 * will be called in a different thread than the caller's thread.
 	 * <p>
@@ -241,7 +241,7 @@ public abstract class SearchParticipant {
 	 * When the index is no longer needed, clients should use {@link #removeIndex(IPath) }
 	 * to discard it.
 	 * </p>
-	 * 
+	 *
 	 * @param document the document to index
 	 * @param indexPath the location on the file system of the index
 	 */
@@ -271,11 +271,11 @@ public abstract class SearchParticipant {
 	 * given search query in the given scope. The search engine calls this
 	 * method before locating matches.
 	 * <p>
-	 * An index location represents a path in the file system to a file that holds index information. 
+	 * An index location represents a path in the file system to a file that holds index information.
 	 * </p><p>
 	 * Clients are not expected to call this method.
 	 * </p>
-	 * 
+	 *
 	 * @param query the search pattern to consider
 	 * @param scope the given search scope
 	 * @return the collection of index paths to consider

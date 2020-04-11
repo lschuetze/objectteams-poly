@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -25,11 +25,11 @@ import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 public class Syntax extends AbstractOTJLDTest {
-	
+
 	public Syntax(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -37,7 +37,7 @@ public class Syntax extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -553,11 +553,11 @@ public class Syntax extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-    		"----------\n" + 
-    		"1. ERROR in Team861pis1.java (at line 7)\n" + 
-    		"	this -> other;\n" + 
-    		"	             ^\n" + 
-    		"Syntax error on token \";\", , expected\n" + 
+    		"----------\n" +
+    		"1. ERROR in Team861pis1.java (at line 7)\n" +
+    		"	this -> other;\n" +
+    		"	             ^\n" +
+    		"Syntax error on token \";\", , expected\n" +
     		"----------\n");
     }
 
@@ -688,18 +688,18 @@ public class Syntax extends AbstractOTJLDTest {
 			    "public class T871buid4 {}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team871buid4.java (at line 5)\n" + 
-    		"	i;\n" + 
-    		"	^\n" + 
-    		"Syntax error, insert \"Identifier (\" to complete MethodHeaderName\n" + 
+            "----------\n" +
+    		"1. ERROR in Team871buid4.java (at line 5)\n" +
+    		"	i;\n" +
+    		"	^\n" +
+    		"Syntax error, insert \"Identifier (\" to complete MethodHeaderName\n" +
     		"----------\n");
     }
 
     // a "base" package is imported regularly from a team
     // 8.7.1-otjld-base-used-in-declaration-5
     public void test871_baseUsedInDeclaration5() {
-       
+
        runConformTest(
             new String[] {
 		"Team871buid5.java",
@@ -727,7 +727,7 @@ public class Syntax extends AbstractOTJLDTest {
     // a "base" package is imported regularly from a role file
     // 8.7.1-otjld-base-used-in-declaration-6
     public void test871_baseUsedInDeclaration6() {
-       
+
        runConformTest(
             new String[] {
 		"Team871buid6.java",
@@ -827,11 +827,11 @@ public class Syntax extends AbstractOTJLDTest {
 			    "}    \n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team881br1.java (at line 39)\n" + 
-    		"	public class R3 played // { lbrace is assumed by the parser\n" + 
-    		"	                ^^^^^^\n" + 
-    		"Syntax error on token \"played\", { expected\n" + 
+            "----------\n" +
+    		"1. ERROR in Team881br1.java (at line 39)\n" +
+    		"	public class R3 played // { lbrace is assumed by the parser\n" +
+    		"	                ^^^^^^\n" +
+    		"Syntax error on token \"played\", { expected\n" +
     		"----------\n");
     }
 
@@ -859,41 +859,41 @@ public class Syntax extends AbstractOTJLDTest {
 			    "}	\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team881br2.java (at line 6)\n" + 
-    		"	with { result <- result.intValue() };\n" + 
-    		"	      ^\n" + 
-    		"Syntax error on token \";\", & expected before this token\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team881br2.java (at line 6)\n" + 
-    		"	with { result <- result.intValue() };\n" + 
-    		"	                       ^\n" + 
-    		"Syntax error on token \".\", delete this token\n" + 
-    		"----------\n" + 
-    		"3. ERROR in Team881br2.java (at line 6)\n" + 
-    		"	with { result <- result.intValue() };\n" + 
-    		"	                                 ^\n" + 
-    		"Syntax error on token \")\", { expected after this token\n" + 
-    		"----------\n" + 
-    		"4. ERROR in Team881br2.java (at line 8)\n" + 
-    		"	abstract int wrong(noTypeGiven);\n" + 
-    		"	             ^^^^^^\n" + 
-    		"Abstract methods do not specify a body\n" + 
-    		"----------\n" + 
-    		"5. ERROR in Team881br2.java (at line 8)\n" + 
-    		"	abstract int wrong(noTypeGiven);\n" + 
-    		"	                   ^^^^^^^^^^^\n" + 
-    		"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameterList\n" + 
-    		"----------\n" + 
-    		"6. ERROR in Team881br2.java (at line 9)\n" + 
-    		"	}\n" + 
-    		"	^\n" + 
-    		"Syntax error on token \"}\", delete this token\n" + 
-    		"----------\n" + 
-    		"7. ERROR in Team881br2.java (at line 10)\n" + 
-    		"	}	\n" + 
-    		"	^\n" + 
-    		"Syntax error, insert \"}\" to complete ClassBody\n" + 
+            "----------\n" +
+    		"1. ERROR in Team881br2.java (at line 6)\n" +
+    		"	with { result <- result.intValue() };\n" +
+    		"	      ^\n" +
+    		"Syntax error on token \";\", & expected before this token\n" +
+    		"----------\n" +
+    		"2. ERROR in Team881br2.java (at line 6)\n" +
+    		"	with { result <- result.intValue() };\n" +
+    		"	                       ^\n" +
+    		"Syntax error on token \".\", delete this token\n" +
+    		"----------\n" +
+    		"3. ERROR in Team881br2.java (at line 6)\n" +
+    		"	with { result <- result.intValue() };\n" +
+    		"	                                 ^\n" +
+    		"Syntax error on token \")\", { expected after this token\n" +
+    		"----------\n" +
+    		"4. ERROR in Team881br2.java (at line 8)\n" +
+    		"	abstract int wrong(noTypeGiven);\n" +
+    		"	             ^^^^^^\n" +
+    		"Abstract methods do not specify a body\n" +
+    		"----------\n" +
+    		"5. ERROR in Team881br2.java (at line 8)\n" +
+    		"	abstract int wrong(noTypeGiven);\n" +
+    		"	                   ^^^^^^^^^^^\n" +
+    		"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameterList\n" +
+    		"----------\n" +
+    		"6. ERROR in Team881br2.java (at line 9)\n" +
+    		"	}\n" +
+    		"	^\n" +
+    		"Syntax error on token \"}\", delete this token\n" +
+    		"----------\n" +
+    		"7. ERROR in Team881br2.java (at line 10)\n" +
+    		"	}	\n" +
+    		"	^\n" +
+    		"Syntax error, insert \"}\" to complete ClassBody\n" +
     		"----------\n");
     }
 
@@ -927,47 +927,47 @@ public class Syntax extends AbstractOTJLDTest {
 			    "}	\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team881br3.java (at line 7)\n" + 
-    		"	with { result <- result.intValue() };\n" + 
-    		"	      ^\n" + 
-    		"Syntax error on token \";\", & expected before this token\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team881br3.java (at line 7)\n" + 
-    		"	with { result <- result.intValue() };\n" + 
-    		"	                       ^\n" + 
-    		"Syntax error on token \".\", delete this token\n" + 
-    		"----------\n" + 
-    		"3. ERROR in Team881br3.java (at line 7)\n" + 
-    		"	with { result <- result.intValue() };\n" + 
-    		"	                                 ^\n" + 
-    		"Syntax error on token \")\", { expected after this token\n" + 
-    		"----------\n" + 
-    		"4. ERROR in Team881br3.java (at line 11)\n" + 
-    		"	result -> result\n" + 
-    		"			}\n" + 
-    		"	^^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Syntax error on tokens, delete these tokens\n" + 
-    		"----------\n" + 
-    		"5. ERROR in Team881br3.java (at line 14)\n" + 
-    		"	abstract int wrong(noTypeGiven);\n" + 
-    		"	             ^^^^^^\n" + 
-    		"Abstract methods do not specify a body\n" + 
-    		"----------\n" + 
-    		"6. ERROR in Team881br3.java (at line 14)\n" + 
-    		"	abstract int wrong(noTypeGiven);\n" + 
-    		"	                   ^^^^^^^^^^^\n" + 
-    		"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameterList\n" + 
-    		"----------\n" + 
-    		"7. ERROR in Team881br3.java (at line 15)\n" + 
-    		"	}\n" + 
-    		"	^\n" + 
-    		"Syntax error on token \"}\", delete this token\n" + 
-    		"----------\n" + 
-    		"8. ERROR in Team881br3.java (at line 16)\n" + 
-    		"	}	\n" + 
-    		"	^\n" + 
-    		"Syntax error, insert \"}\" to complete ClassBody\n" + 
+            "----------\n" +
+    		"1. ERROR in Team881br3.java (at line 7)\n" +
+    		"	with { result <- result.intValue() };\n" +
+    		"	      ^\n" +
+    		"Syntax error on token \";\", & expected before this token\n" +
+    		"----------\n" +
+    		"2. ERROR in Team881br3.java (at line 7)\n" +
+    		"	with { result <- result.intValue() };\n" +
+    		"	                       ^\n" +
+    		"Syntax error on token \".\", delete this token\n" +
+    		"----------\n" +
+    		"3. ERROR in Team881br3.java (at line 7)\n" +
+    		"	with { result <- result.intValue() };\n" +
+    		"	                                 ^\n" +
+    		"Syntax error on token \")\", { expected after this token\n" +
+    		"----------\n" +
+    		"4. ERROR in Team881br3.java (at line 11)\n" +
+    		"	result -> result\n" +
+    		"			}\n" +
+    		"	^^^^^^^^^^^^^^^^^^^^^\n" +
+    		"Syntax error on tokens, delete these tokens\n" +
+    		"----------\n" +
+    		"5. ERROR in Team881br3.java (at line 14)\n" +
+    		"	abstract int wrong(noTypeGiven);\n" +
+    		"	             ^^^^^^\n" +
+    		"Abstract methods do not specify a body\n" +
+    		"----------\n" +
+    		"6. ERROR in Team881br3.java (at line 14)\n" +
+    		"	abstract int wrong(noTypeGiven);\n" +
+    		"	                   ^^^^^^^^^^^\n" +
+    		"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameterList\n" +
+    		"----------\n" +
+    		"7. ERROR in Team881br3.java (at line 15)\n" +
+    		"	}\n" +
+    		"	^\n" +
+    		"Syntax error on token \"}\", delete this token\n" +
+    		"----------\n" +
+    		"8. ERROR in Team881br3.java (at line 16)\n" +
+    		"	}	\n" +
+    		"	^\n" +
+    		"Syntax error, insert \"}\" to complete ClassBody\n" +
     		"----------\n");
     }
 
@@ -1064,14 +1064,14 @@ public class Syntax extends AbstractOTJLDTest {
 			    "}    \n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team8101bsc1.java (at line 4)\n" + 
-    		"	setVal(String v) -> set String val;\n" + 
-    		"	^^^^^^^^^^^^^^^^\n" + 
-    		"Syntax error: missing return type for method designator (OTJLD A.3.2). \n" + 
+            "----------\n" +
+    		"1. ERROR in Team8101bsc1.java (at line 4)\n" +
+    		"	setVal(String v) -> set String val;\n" +
+    		"	^^^^^^^^^^^^^^^^\n" +
+    		"Syntax error: missing return type for method designator (OTJLD A.3.2). \n" +
     		"----------\n");
     }
-    
+
     String[] getClassLibraries() {
 		if (this.verifier != null)
 			this.verifier.shutDown();
@@ -1173,11 +1173,11 @@ public class Syntax extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team8112dlse1.java (at line 6)\n" + 
-    		"	void run(Object as R)  {\n" + 
-    		"	                   ^\n" + 
-    		"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameterList\n" + 
+            "----------\n" +
+    		"1. ERROR in Team8112dlse1.java (at line 6)\n" +
+    		"	void run(Object as R)  {\n" +
+    		"	                   ^\n" +
+    		"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameterList\n" +
     		"----------\n");
     }
 
@@ -1202,21 +1202,21 @@ public class Syntax extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team8112dlse2.java (at line 7)\n" + 
-    		"	callin void run(Object as R)  {\n" + 
-    		"	                          ^\n" + 
-    		"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameterList\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team8112dlse2.java (at line 10)\n" + 
-    		"	}\n" + 
-    		"	^\n" + 
-    		"Syntax error on token \"}\", delete this token\n" + 
-    		"----------\n" + 
-    		"3. ERROR in Team8112dlse2.java (at line 11)\n" + 
-    		"	}\n" + 
-    		"	^\n" + 
-    		"Syntax error, insert \"}\" to complete ClassBody\n" + 
+            "----------\n" +
+    		"1. ERROR in Team8112dlse2.java (at line 7)\n" +
+    		"	callin void run(Object as R)  {\n" +
+    		"	                          ^\n" +
+    		"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameterList\n" +
+    		"----------\n" +
+    		"2. ERROR in Team8112dlse2.java (at line 10)\n" +
+    		"	}\n" +
+    		"	^\n" +
+    		"Syntax error on token \"}\", delete this token\n" +
+    		"----------\n" +
+    		"3. ERROR in Team8112dlse2.java (at line 11)\n" +
+    		"	}\n" +
+    		"	^\n" +
+    		"Syntax error, insert \"}\" to complete ClassBody\n" +
     		"----------\n");
     }
 
@@ -1252,18 +1252,18 @@ public class Syntax extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team8112dlse3.java (at line 7)\n" + 
-    		"	callin void m(T8112dlse3_2 as R) {\n" + 
-    		"	                              ^\n" + 
-    		"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameterList\n" + 
+            "----------\n" +
+    		"1. ERROR in Team8112dlse3.java (at line 7)\n" +
+    		"	callin void m(T8112dlse3_2 as R) {\n" +
+    		"	                              ^\n" +
+    		"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameterList\n" +
     		"----------\n");
     }
 
     // Fixed: a declared lifting lacks an argument name, callin method of nested team
     // 8.11.2-otjld-declared-lifting-syntax-error-4
     public void test8112_declaredLiftingSyntaxError4() {
-       
+
        runConformTest(
             new String[] {
 		"Team8112dlse4.java",
@@ -1312,7 +1312,7 @@ public class Syntax extends AbstractOTJLDTest {
     // team is used in a package name
     // 8.12.1-otjld-scoped-keyword-1
     public void test8121_scopedKeyword1() {
-       
+
        runConformTest(
             new String[] {
 		"T8121sk1Main.java",
@@ -1393,19 +1393,19 @@ public class Syntax extends AbstractOTJLDTest {
 			    "public class T8131bg2 {}\n" +
 			    "  \n"
             },
-            "----------\n" + 
-    		"1. WARNING in Team8131bg2.java (at line 4)\n" + 
+            "----------\n" +
+    		"1. WARNING in Team8131bg2.java (at line 4)\n" +
     		"	toString <- after toString base when;\n" +
-    		"	^^^^^^^^\n" + 
-    		"Callin after binding cannot return a value to the base caller, role method return value of type java.lang.String will be ignored (OTJLD 4.4(a)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team8131bg2.java (at line 4)\n" + 
-    		"	toString <- after toString base when;\n" + 
-    		"	                           ^^^^^^^^^\n" + 
-    		"Syntax error on token(s), misplaced construct(s)\n" + 
+    		"	^^^^^^^^\n" +
+    		"Callin after binding cannot return a value to the base caller, role method return value of type java.lang.String will be ignored (OTJLD 4.4(a)).\n" +
+    		"----------\n" +
+    		"2. ERROR in Team8131bg2.java (at line 4)\n" +
+    		"	toString <- after toString base when;\n" +
+    		"	                           ^^^^^^^^^\n" +
+    		"Syntax error on token(s), misplaced construct(s)\n" +
     		"----------\n");
     }
-    
+
     // illegal use of "readonly" on field declaration
     public void test8132_illegalModifier1() {
     	runNegativeTest(
@@ -1415,7 +1415,7 @@ public class Syntax extends AbstractOTJLDTest {
     			"	public readonly String val = \"V\";\n" +
     			"}\n"
     		},
-    		"----------\n" + 
+    		"----------\n" +
 			"1. ERROR in Team8132im1.java (at line 2)\n" +
 			"	public readonly String val = \"V\";\n" +
 			"	       ^^^^^^^^\n" +
@@ -1427,7 +1427,7 @@ public class Syntax extends AbstractOTJLDTest {
 			"Syntax error on token \"val\", delete this token\n" +
 			"----------\n");
     }
-    
+
     // illegal order of callin label and annotation (long)
     public void test8133_callinWithNameAndAnnotation1() {
     	runNegativeTest(
@@ -1443,11 +1443,11 @@ public class Syntax extends AbstractOTJLDTest {
     	"T8133cwnaa1.java",
     			"public class T8133cwnaa1 { void bar() {} }\n"
     		},
-    		"----------\n" + 
-			"1. ERROR in Team8133cwnaa1.java (at line 3)\n" + 
-			"	@SuppressWarnings(\"unused\")\n" + 
-			"	^^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error: callin annotations must be specified after the callin name (OTJLD A.3.3).\n" + 
+    		"----------\n" +
+			"1. ERROR in Team8133cwnaa1.java (at line 3)\n" +
+			"	@SuppressWarnings(\"unused\")\n" +
+			"	^^^^^^^^^^^^^^^^^\n" +
+			"Syntax error: callin annotations must be specified after the callin name (OTJLD A.3.3).\n" +
 			"----------\n");
     }
 
@@ -1466,14 +1466,14 @@ public class Syntax extends AbstractOTJLDTest {
     	"T8133cwnaa2.java",
     			"public class T8133cwnaa2 { void bar() {} }\n"
     		},
-    		"----------\n" + 
-			"1. ERROR in Team8133cwnaa2.java (at line 3)\n" + 
-			"	@SuppressWarnings(\"unused\")\n" + 
-			"	^^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error: callin annotations must be specified after the callin name (OTJLD A.3.3).\n" + 
+    		"----------\n" +
+			"1. ERROR in Team8133cwnaa2.java (at line 3)\n" +
+			"	@SuppressWarnings(\"unused\")\n" +
+			"	^^^^^^^^^^^^^^^^^\n" +
+			"Syntax error: callin annotations must be specified after the callin name (OTJLD A.3.3).\n" +
 			"----------\n");
     }
-    
+
     // correct order of callin label and annotation (long)
     public void test8133_callinWithNameAndAnnotation3() {
     	runConformTest(
@@ -1520,11 +1520,11 @@ public class Syntax extends AbstractOTJLDTest {
     			"    protected class R playedBy java.util.List<@Ann> {}\n" +
 				"}\n"
     		},
-    		"----------\n" + 
-			"1. ERROR in X.java (at line 2)\n" + 
-			"	protected class R playedBy java.util.List<@Ann> {}\n" + 
-			"	                                          ^^^^\n" + 
-			"Illegal position for value parameter @Ann: must be a parameter of a single name type reference(OTJLD A.9(a)).\n" + 
+    		"----------\n" +
+			"1. ERROR in X.java (at line 2)\n" +
+			"	protected class R playedBy java.util.List<@Ann> {}\n" +
+			"	                                          ^^^^\n" +
+			"Illegal position for value parameter @Ann: must be a parameter of a single name type reference(OTJLD A.9(a)).\n" +
 			"----------\n");
     }
 
@@ -1535,11 +1535,11 @@ public class Syntax extends AbstractOTJLDTest {
     			"public team class X extends java.util.List<@Ann> {\n" +
 				"}\n"
     		},
-    		"----------\n" + 
-			"1. ERROR in X.java (at line 1)\n" + 
-			"	public team class X extends java.util.List<@Ann> {\n" + 
-			"	                                           ^^^^\n" + 
-			"Illegal position for value parameter @Ann: must be a parameter of a single name type reference(OTJLD A.9(a)).\n" + 
+    		"----------\n" +
+			"1. ERROR in X.java (at line 1)\n" +
+			"	public team class X extends java.util.List<@Ann> {\n" +
+			"	                                           ^^^^\n" +
+			"Illegal position for value parameter @Ann: must be a parameter of a single name type reference(OTJLD A.9(a)).\n" +
 			"----------\n");
     }
 }

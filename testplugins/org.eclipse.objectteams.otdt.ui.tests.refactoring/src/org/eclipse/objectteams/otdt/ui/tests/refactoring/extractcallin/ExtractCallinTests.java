@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -37,7 +37,7 @@ import org.eclipse.objectteams.otdt.ui.tests.refactoring.RefactoringTest;
 
 /**
  * @author Johannes Gebauer
- * 
+ *
  */
 @SuppressWarnings("restriction")
 public class ExtractCallinTests extends RefactoringTest {
@@ -80,9 +80,9 @@ public class ExtractCallinTests extends RefactoringTest {
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 
 			ref.setDeleteBaseMethod(deleteRoleMethod);
-	
+
 			ref.setCopyBaseMethod(copyBaseMethod);
-			
+
 			RefactoringStatus checkInputResult = ref.checkFinalConditions(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
 			performChange(ref, false);
@@ -104,27 +104,27 @@ public class ExtractCallinTests extends RefactoringTest {
 	/******* tests ******************/
 
 	/* Extract Callin Tests */
-	
+
 	public void testExtractSimpleBeforeCallin() throws Exception {
 		performPullUp_pass(new String[] { "B", "T" }, "m", new String[0], CallinMapping.KIND_BEFORE, false, "B", "R", false);
 	}
-	
+
 	public void testExtractSimpleReplaceCallin1() throws Exception {
 		performPullUp_pass(new String[] { "B", "T" }, "m", new String[0], CallinMapping.KIND_REPLACE, false, "B", "R", true);
 	}
-	
+
 	public void testExtractSimpleAfterCallin() throws Exception {
 		performPullUp_pass(new String[] { "B", "T" }, "m", new String[0], CallinMapping.KIND_AFTER, false, "B", "R", false);
 	}
-	
+
 	public void testExtractSimpleReplaceCallin2() throws Exception {
 		performPullUp_pass(new String[] { "B", "T" }, "m", new String[0], CallinMapping.KIND_REPLACE, false, "B", "R", false);
 	}
-	
+
 	public void testExtractCallinWithParameter() throws Exception {
 		performPullUp_pass(new String[] { "B", "T" }, "m", new String[] { "I" }, CallinMapping.KIND_BEFORE, false, "B", "R", false);
 	}
-	
+
 	public void testExtractCallinWithParameterMapping() throws Exception {
 		performPullUp_pass(new String[] { "B", "T" }, "m", new String[] { "I", "I" }, CallinMapping.KIND_BEFORE, false, "B", "R", false);
 	}

@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2005, 2009 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id: ReferenceToTeamPackagePattern.java 23417 2010-02-03 20:13:55Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -33,15 +33,15 @@ import org.eclipse.jdt.internal.core.search.matching.PatternLocator;
  * NEW for OTDT.
  * <br>
  * This pattern is used to find role files of a given team.
- * 
+ *
  * Searching uses the team package declaration of the role files.
  * These declarations are indexed as {@link IIndexConstants#REF_TO_TEAMPACKAGE}.
- * The match locator calls {@link ReferenceToTeamPackagePattern#matches(ImportReference)} for stage 1 matching, 
+ * The match locator calls {@link ReferenceToTeamPackagePattern#matches(ImportReference)} for stage 1 matching,
  * conclusive matching is performed by the {@link ReferenceToTeamLocator}.
  * <br>
  * This pattern can be used to either search all role files of a given team or only
  * one specific role given by it's name.
- * 
+ *
  * @author haebor
  *
  * 14.06.2005
@@ -52,7 +52,7 @@ public class ReferenceToTeamPackagePattern extends JavaSearchPattern
     protected char[] teamQualifiedName;
     protected char[] roleName;
     protected char[] _indexKey;
-     
+
     /**
      * qualifiedTeamName/roleSimpleName
      */
@@ -61,8 +61,8 @@ public class ReferenceToTeamPackagePattern extends JavaSearchPattern
         char[] result = CharOperation.concat(teamName, roleName, '/');
         assert(result != null);
         return result;
-    }    
-    
+    }
+
     /**
      * Create a pattern for finding all role files of a given team.
      * @param teamName	the name of the team to start at
@@ -72,11 +72,11 @@ public class ReferenceToTeamPackagePattern extends JavaSearchPattern
     {
     	this(teamName, null, matchRule);
      }
-    
+
     /**
      * Create a pattern for finding a specific role file of a given team.
      * @param teamQualifiedName	the name of the team to start at
-     * @param roleName  name of the role in the role file to search, 
+     * @param roleName  name of the role in the role file to search,
      * 					if null is passed all role files of the given team will be found.
      * @param matchRule bitset of constants defined in {@link SearchPattern}
      */
@@ -84,16 +84,16 @@ public class ReferenceToTeamPackagePattern extends JavaSearchPattern
     {
         super(IIndexConstants.REF_TO_TEAMPACKAGE_PATTERN, matchRule | R_EXACT_MATCH | R_CASE_SENSITIVE);
         this.mustResolve = false;
-        
+
         if (teamQualifiedName == null)
             throw new NullPointerException("teamQualifiedName must not be null"); //$NON-NLS-1$
 
-        this.teamQualifiedName = teamQualifiedName; 
+        this.teamQualifiedName = teamQualifiedName;
     	this.roleName = roleName;
-    	
+
     	createIndexKey();
      }
-    
+
     /**
      * @param patternKind
      * @param matchRule
@@ -105,7 +105,7 @@ public class ReferenceToTeamPackagePattern extends JavaSearchPattern
     }
 
     @Override
-	public SearchPattern getBlankPattern() 
+	public SearchPattern getBlankPattern()
     {
     	return new ReferenceToTeamPackagePattern(IIndexConstants.REF_TO_TEAMPACKAGE_PATTERN, R_EXACT_MATCH | R_CASE_SENSITIVE);
     }
@@ -115,7 +115,7 @@ public class ReferenceToTeamPackagePattern extends JavaSearchPattern
     {
     	return CATEGORIES;
     }
-    
+
 	@Override
 	public boolean matchesDecodedKey(SearchPattern decodedPattern)
 	{
@@ -123,10 +123,10 @@ public class ReferenceToTeamPackagePattern extends JavaSearchPattern
 		boolean teamMatches = matchesName(this.teamQualifiedName, pattern.teamQualifiedName);
 		if (!teamMatches)
 		    return false;
-		
+
 	    return matchesName(this.roleName, pattern.roleName);
 	}
-	    
+
     public int matches(ImportReference importRef) {
 		// note: _roleName is not compared at this stage, deferred to handling by the ReferenceToTeamLocator
 		if (matchesName(this.teamQualifiedName, CharOperation.concatWith(importRef.tokens, '.')))
@@ -147,10 +147,10 @@ public class ReferenceToTeamPackagePattern extends JavaSearchPattern
     {
         // If this assertion ever fails, then decodeIndexKey() probably needs to call createIndexKey().
         assert(this._indexKey != null);
-        
+
         return this._indexKey;
     }
-    
+
     @Override
 	public void decodeIndexKey(char[] key)
     {

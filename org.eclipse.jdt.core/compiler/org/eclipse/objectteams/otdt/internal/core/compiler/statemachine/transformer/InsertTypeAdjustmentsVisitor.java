@@ -155,8 +155,8 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
 			if (syntheticAccessors != null) {
     			for (int i = 0; i < syntheticAccessors.length; i++) {
     				MethodBinding accessor = syntheticAccessors[i];
-					if (accessor instanceof SyntheticMethodBinding 
-							&& ((SyntheticMethodBinding)accessor).purpose == SyntheticMethodBinding.InferredCalloutToField) 
+					if (accessor instanceof SyntheticMethodBinding
+							&& ((SyntheticMethodBinding)accessor).purpose == SyntheticMethodBinding.InferredCalloutToField)
 						return; // already redirecting to base, prevent double-lowering
 				}
     		}
@@ -200,7 +200,7 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
     		TypeBinding leafType = arrayInitializer.binding.elementsType();
     		for (int i = 0; i < expressions.length; i++)
 				expressions[i] = maybeWrap(scope, expressions[i], leafType);
-    	}    	
+    	}
     }
 
     @Override

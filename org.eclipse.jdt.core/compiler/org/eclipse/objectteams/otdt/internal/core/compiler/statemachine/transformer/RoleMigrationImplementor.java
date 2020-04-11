@@ -321,7 +321,7 @@ public class RoleMigrationImplementor
 		codeStream.aload_0();														// this
 		codeStream.fieldAccess(Opcodes.OPC_getfield,
 							   enclosingInstanceField(roleBinding), 				// this.this$n
-							   roleBinding);					
+							   roleBinding);
 		codeStream.fieldAccess(Opcodes.OPC_getfield,
 							   roleBinding.enclosingType().getField(cacheName, true),// this.this$n._OT$cache$R
 							   roleBinding.enclosingType());
@@ -355,7 +355,7 @@ public class RoleMigrationImplementor
 
 		codeStream.return_();
 	}
-	
+
 	static MethodBinding getMethod(ReferenceBinding declaringClass, char[] selector, int numParams) {
 		MethodBinding[] methods = declaringClass.getMethods(selector);
 		MethodBinding found = null;
@@ -378,20 +378,20 @@ public class RoleMigrationImplementor
 		switch (scope.compilerOptions().weavingScheme) {
 			case OTDRE:
 				// _OT$addOrRemoveRole(role, isAdding)
-				if (isAdding) 
+				if (isAdding)
 					codeStream.iconst_1();  // isAdding=true
 				else
-					codeStream.iconst_0(); 	// isAdding=false	
+					codeStream.iconst_0(); 	// isAdding=false
 				codeStream.invoke(Opcodes.OPC_invokeinterface,
 							  iboundBase.getMethod(scope, IOTConstants.ADD_REMOVE_ROLE),
 							  iboundBase);
 				break;
 			case OTRE:
 				// _OT$addRole(role) or _OT$removeRole(role):
-				codeStream.invoke(Opcodes.OPC_invokeinterface, 
-								  isAdding 
-								  		? iboundBase.getMethod(scope, IOTConstants.ADD_ROLE) 
-								  		: iboundBase.getMethod(scope, IOTConstants.REMOVE_ROLE), 
+				codeStream.invoke(Opcodes.OPC_invokeinterface,
+								  isAdding
+								  		? iboundBase.getMethod(scope, IOTConstants.ADD_ROLE)
+								  		: iboundBase.getMethod(scope, IOTConstants.REMOVE_ROLE),
 								  iboundBase);
 		}
 	}

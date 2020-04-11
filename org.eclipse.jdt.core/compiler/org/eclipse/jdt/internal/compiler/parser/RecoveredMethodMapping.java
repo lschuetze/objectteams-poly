@@ -341,7 +341,7 @@ public RecoveredElement updateOnClosingBrace(int braceStart, int braceEnd) {
 		// recover missing base method spec:
 		MethodSpec baseSpec = null;
 		if (   this.methodMappingDeclaration.isCallin()
-			|| (((CalloutMappingDeclaration)this.methodMappingDeclaration).baseMethodSpec == null)) 
+			|| (((CalloutMappingDeclaration)this.methodMappingDeclaration).baseMethodSpec == null))
 		{
 			if (this.methodMappingDeclaration.hasSignature) {
 				if (parser.identifierPtr > 0) {

@@ -20,25 +20,25 @@ package org.eclipse.objectteams.otdt.core.compiler;
 
 /**
  * Kinds to differentiate inferred callouts.
- * 
+ *
  * @author stephan
  * @since 1.3.2
  */
-public enum InferenceKind { 
+public enum InferenceKind {
 	/** Not an inferred callout */
 	NONE,
 	/** Callout inferred from a declared super interface. */
 	INTERFACE,
 	/** Callout inferred from a self call. */
-	SELFCALL, 
+	SELFCALL,
 	/** Callout inferred from a reading field access (via 'this'). */
-	FIELDGET, 
+	FIELDGET,
 	/** Callout inferred from a writing field access (via 'this'). */
 	FIELDSET;
 
-	/** 
+	/**
 	 * Some inferred callouts generate private methods that are not advertised in the interface,
-	 * Answer if this callout binding is advertised in the interface. 
+	 * Answer if this callout binding is advertised in the interface.
 	 */
 	public boolean isAdvertisedInInterface() {
 		if (this == NONE || this == INTERFACE)

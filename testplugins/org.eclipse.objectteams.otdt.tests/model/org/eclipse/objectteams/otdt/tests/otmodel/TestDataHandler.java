@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -32,12 +32,12 @@ public class TestDataHandler
 {
     private static TestDataHandler _singleton;
     private Map<String, TestSetting> _mapping = new HashMap<String, TestSetting>(); // test case::test setting
-     
+
     private TestDataHandler()
     {
         _singleton = this;
     }
-    
+
     /**
      * Assigns a <code>FileBasedTest</code>-test case to a specific <code>TestSetting</code>.
      */
@@ -48,12 +48,12 @@ public class TestDataHandler
             getMapping().put(testCase.getName(), ts);
         }
     }
-    
+
     public static TestSetting getTestSetting(Class testClass)
     {
         return (TestSetting)getMapping().get(testClass.getName());
     }
-    
+
     private static Map<String,TestSetting> getMapping()
     {
         if (_singleton == null)

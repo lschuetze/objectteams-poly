@@ -89,9 +89,9 @@ public class CompilationUnitScope extends Scope {
 
 	HashtableOfType constantPoolNameUsage;
 	private int captureID = 1;
-	
+
 	private ImportBinding[] tempImports;	// to keep a record of resolved imports while traversing all in faultInImports()
-	
+
 	/**
 	 * Skips import caching if unresolved imports were
 	 * found last time.
@@ -146,7 +146,7 @@ void buildFieldsAndMethods() {
 //{ObjectTeams: extract from the above:
 public void connectBaseclass() {
 	for (int i = 0, length = this.topLevelTypes.length; i < length; i++)
-		this.topLevelTypes[i].scope.connectBaseclassRecurse();	
+		this.topLevelTypes[i].scope.connectBaseclassRecurse();
 }
 // SH}
 void buildTypeBindings(AccessRestriction accessRestriction) {
@@ -291,8 +291,8 @@ void buildTypeBindings(AccessRestriction accessRestriction) {
 //{ObjectTeams: role files: (a) classes never match the name of the unit: prepended __OT__!
 //                          (b) always check for matching file name (also protected), except for purely copied role files
 		boolean isRole = typeDecl.isRole() ;
-		if (   (typeDecl.modifiers & ClassFileConstants.AccPublic) != 0 
-			|| typeDecl.isRole()) // (b) check independently of publicness 
+		if (   (typeDecl.modifiers & ClassFileConstants.AccPublic) != 0
+			|| typeDecl.isRole()) // (b) check independently of publicness
 		{
 			char[] mainTypeName;
 /* orig:
@@ -306,7 +306,7 @@ void buildTypeBindings(AccessRestriction accessRestriction) {
 				&& !(isRole && !typeDecl.isInterface()) // (a): ignore role classes
 				&& !typeDecl.isPurelyCopied)            //      (has no file)
 			{
-			  if (typeDecl.isRole()) // (b) : more specific message 
+			  if (typeDecl.isRole()) // (b) : more specific message
 				problemReporter().roleFileMismatchingName(this.referenceContext, typeDecl);
 			  else
 // SH}
@@ -769,7 +769,7 @@ void faultInImports() {
 					}
 				}
 			}
-			// all the code here which checks for valid bindings have been moved to the method 
+			// all the code here which checks for valid bindings have been moved to the method
 			// checkAndRecordImportBinding() since bug 361327
 			if(checkAndRecordImportBinding(importBinding, typesBySimpleNames, importReference, compoundName) == -1)
 				continue nextImport;
@@ -779,7 +779,7 @@ void faultInImports() {
 				// So if a type is found, no fields and methods are available anyway
 				// similarly when method is found, type may be available but no field available for sure
 				if (importBinding.kind() == Binding.FIELD) {
-					checkMoreStaticBindings(compoundName, typesBySimpleNames, Binding.TYPE | Binding.METHOD, importReference);		
+					checkMoreStaticBindings(compoundName, typesBySimpleNames, Binding.TYPE | Binding.METHOD, importReference);
 				} else if (importBinding.kind() == Binding.METHOD) {
 					checkMoreStaticBindings(compoundName, typesBySimpleNames, Binding.TYPE, importReference);
 				}
@@ -1269,7 +1269,7 @@ private void recordImportBinding(ImportBinding bindingToAdd) {
 	this.tempImports[this.importPtr++] = bindingToAdd;
 }
 /**
- * Checks additional bindings (methods or types) imported from a single static import. 
+ * Checks additional bindings (methods or types) imported from a single static import.
  * Method is tried first, followed by type. If found, records them.
  * If in the process, import is flagged as duplicate, -1 is returned.
  * @param compoundName
@@ -1278,8 +1278,8 @@ private void recordImportBinding(ImportBinding bindingToAdd) {
  * @param importReference
  */
 private void checkMoreStaticBindings(
-		char[][] compoundName, 
-		HashtableOfType typesBySimpleNames, 
+		char[][] compoundName,
+		HashtableOfType typesBySimpleNames,
 		int mask,
 		ImportReference importReference) {
 	Binding importBinding = findSingleStaticImport(compoundName, mask);
@@ -1312,8 +1312,8 @@ private void checkMoreStaticBindings(
  * @return -1 when this import is flagged as duplicate, importPtr otherwise.
  */
 private int checkAndRecordImportBinding(
-		Binding importBinding, 
-		HashtableOfType typesBySimpleNames, 
+		Binding importBinding,
+		HashtableOfType typesBySimpleNames,
 		ImportReference importReference,
 		char[][] compoundName) {
 	ReferenceBinding conflictingType = null;

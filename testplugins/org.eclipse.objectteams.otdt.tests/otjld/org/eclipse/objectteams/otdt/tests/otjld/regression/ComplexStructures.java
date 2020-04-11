@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2013 GK Software AG.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -22,7 +22,7 @@ import junit.framework.Test;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 public class ComplexStructures extends AbstractOTJLDTest {
-	
+
 	public ComplexStructures(String name) {
 		super(name);
 	}
@@ -42,46 +42,46 @@ public class ComplexStructures extends AbstractOTJLDTest {
 	public static Class testClass() {
 		return ComplexStructures.class;
 	}
-	
+
 	public void testRoleCtor01() {
 		runConformTest(
 			new String[] {
 				"SomeTeam.java",
-				"public team class SomeTeam {\n" + 
-				"\n" + 
-				"	public class BGraph {\n" + 
-				"		public BGraph() { }\n" + 
-				"	}\n" + 
-				"\n" + 
-				"\n" + 
-				"	public void test() {\n" + 
-				"		final Features f = new Features();\n" + 
-				"		BasicGraph<@f> g3 = f.newBasicGraphException();\n" + 
-				"		g3.print();\n" + 
-				"	}\n" + 
-				"\n" + 
-				"	public team class Features {\n" + 
-				"		protected BasicGraph newBasicGraphException() {\n" + 
-				"			return new BasicGraph();\n" + 
-				"		}\n" + 
-				"\n" + 
-				"		public team class BasicGraph playedBy BGraph {\n" + 
-				"			public BasicGraph() { base(); }\n" + 
-				"\n" + 
-				"			public void print() {\n" + 
-				"				System.out.println(\"I am a basic graph ...\");\n" + 
-				"			}\n" + 
-				"		}\n" + 
-				"	}\n" + 
-				"\n" + 
-				"	public static void main(String[] args) {\n" + 
-				"		new SomeTeam().test();\n" + 
-				"	}\n" + 
+				"public team class SomeTeam {\n" +
+				"\n" +
+				"	public class BGraph {\n" +
+				"		public BGraph() { }\n" +
+				"	}\n" +
+				"\n" +
+				"\n" +
+				"	public void test() {\n" +
+				"		final Features f = new Features();\n" +
+				"		BasicGraph<@f> g3 = f.newBasicGraphException();\n" +
+				"		g3.print();\n" +
+				"	}\n" +
+				"\n" +
+				"	public team class Features {\n" +
+				"		protected BasicGraph newBasicGraphException() {\n" +
+				"			return new BasicGraph();\n" +
+				"		}\n" +
+				"\n" +
+				"		public team class BasicGraph playedBy BGraph {\n" +
+				"			public BasicGraph() { base(); }\n" +
+				"\n" +
+				"			public void print() {\n" +
+				"				System.out.println(\"I am a basic graph ...\");\n" +
+				"			}\n" +
+				"		}\n" +
+				"	}\n" +
+				"\n" +
+				"	public static void main(String[] args) {\n" +
+				"		new SomeTeam().test();\n" +
+				"	}\n" +
 				"}\n"
 			},
 			"I am a basic graph ...");
 	}
-	
+
 	public void testMultiLevelSuper1() {
 		runConformTest(
 			new String[] {

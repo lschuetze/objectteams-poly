@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -38,7 +38,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SmapStratum;
 
 /**
  * @author ike
- *  
+ *
  */
 public class OTJStratumGenerationTest007 extends AbstractSourceMapGeneratorTest
 {
@@ -74,14 +74,14 @@ public class OTJStratumGenerationTest007 extends AbstractSourceMapGeneratorTest
         _packagePath = "callin_after_before";
 
         _teamA = getCompilationUnit(
-                getTestProjectDir(), 
+                getTestProjectDir(),
                 "src",
                 _packagePath,
                 "TeamA.java");
 
         _teamB = getCompilationUnit(
-                getTestProjectDir(), 
-                "src", 
+                getTestProjectDir(),
+                "src",
                 _packagePath,
                 "TeamB.java");
 
@@ -108,7 +108,7 @@ public class OTJStratumGenerationTest007 extends AbstractSourceMapGeneratorTest
         LineInfo lineInfo1_role2 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
         LineInfo lineInfo1_role3 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
 
-        
+
         fileInfo_role1.addLineInfo(lineInfo1_role1);
         fileInfo_role1.addLineInfo(lineInfo1_role2);
         fileInfo_role1.addLineInfo(lineInfo1_role3);
@@ -117,7 +117,7 @@ public class OTJStratumGenerationTest007 extends AbstractSourceMapGeneratorTest
         strata_role1.add(stratum_role1);
 
         stratum_role1.optimize();
-        
+
         expectedStrata.put(TYPENAME, strata_role1);
 
         try
@@ -159,14 +159,14 @@ public class OTJStratumGenerationTest007 extends AbstractSourceMapGeneratorTest
             fail(e.getMessage());
         }
     }
-    
+
     public void testSmapGeneration3() throws JavaModelException
     {
         TYPENAME = "__OT__RoleB";
         _enclosingTypename = "TeamB";
         String enclTypeSourceName = _enclosingTypename + ".java";
         _buildPartially = false;
-        
+
         SmapStratum stratum_role1 = new SmapStratum(
                 ISMAPConstants.OTJ_STRATUM_NAME);
         FileInfo fileInfo_role1 = stratum_role1.getOrCreateFileInfo(
@@ -181,7 +181,7 @@ public class OTJStratumGenerationTest007 extends AbstractSourceMapGeneratorTest
         fileInfo_role1.addLineInfo(lineInfo1_role3);
 
         stratum_role1.optimize();
-        
+
         List<SmapStratum> strata_role1 = new ArrayList<SmapStratum>();
         strata_role1.add(stratum_role1);
 
@@ -198,14 +198,14 @@ public class OTJStratumGenerationTest007 extends AbstractSourceMapGeneratorTest
         }
     }
 
-    
+
     public void testSmapGeneration4() throws JavaModelException
     {
         TYPENAME = "__OT__RoleB";
         _enclosingTypename = "TeamB";
         String enclTypeSourceName = _enclosingTypename + ".java";
         _buildPartially = true;
-        
+
         SmapStratum stratum_role1 = new SmapStratum(
                 ISMAPConstants.OTJ_STRATUM_NAME);
         FileInfo fileInfo_role1 = stratum_role1.getOrCreateFileInfo(
@@ -227,7 +227,7 @@ public class OTJStratumGenerationTest007 extends AbstractSourceMapGeneratorTest
             fail(e.getMessage());
         }
     }
-    
+
     public void callback(CompilationUnitDeclaration cuDecl)
     {
         String cuDeclName = String.valueOf(cuDecl.getMainTypeName());
@@ -262,7 +262,7 @@ public class OTJStratumGenerationTest007 extends AbstractSourceMapGeneratorTest
                     rolefileSmapGenerator.addStratum("OTJ");
                     rolefileSmapGenerator.generate();
                 }
-                
+
                 List actualStrata = rolefileSmapGenerator.getStrata();
 
                 assertEquals("Strata of type \"" + typeName

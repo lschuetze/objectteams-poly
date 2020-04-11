@@ -41,7 +41,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
  *  - direct
  *  - using a role reference as the implicit receiver
  * Used to wrap RHS expressions in callin parameter mappings.
- * 
+ *
  * @author stephan
  * @since 1.3.1
  */
@@ -50,9 +50,9 @@ public class PotentialRoleReceiverExpression extends Expression {
 	Expression expression;
 	char[] roleVarName;
 	TypeReference roleClassRef;
-	
+
 	private Expression altExpression;
-	
+
 	public PotentialRoleReceiverExpression(Expression expression, char[] roleName, TypeReference roleClassRef) {
 		super();
 		this.expression = expression;
@@ -84,20 +84,20 @@ public class PotentialRoleReceiverExpression extends Expression {
 		else
 			this.expression.generateCode(currentScope, codeStream, valueRequired);
 	}
-	
+
 	@Override
 	public TypeBinding resolveType(BlockScope scope) {
 		ReferenceContext referenceContext = scope.referenceContext();
 		CompilationResult compilationResult = referenceContext.compilationResult();
 		CheckPoint cp = compilationResult.getCheckPoint(referenceContext);
-		
+
 		// try normal:
 		this.resolvedType = this.expression.resolveType(scope);
 		if (this.resolvedType != null && this.resolvedType.isValidBinding()) {
 			this.constant = this.expression.constant;
 			return this.resolvedType;
 		}
-		
+
 		// try alternative:
 		TypeBinding altResult = null;
 		AstGenerator gen = new AstGenerator(this.expression);
@@ -106,7 +106,7 @@ public class PotentialRoleReceiverExpression extends Expression {
 		if (this.expression instanceof SingleNameReference) {
 			this.altExpression = gen.fieldReference(
 										gen.castExpression(
-												gen.singleNameReference(this.roleVarName), 
+												gen.singleNameReference(this.roleVarName),
 												this.roleClassRef,
 												CastExpression.NEED_CLASS),
 										((SingleNameReference)this.expression).token);
@@ -126,7 +126,7 @@ public class PotentialRoleReceiverExpression extends Expression {
 				((MessageSend)this.expression).actualReceiverType = ((MessageSend)this.altExpression).actualReceiverType;
 			}
 		}
-		
+
 		// evaluate results:
 		if (altResult != null && altResult.isValidBinding()) {
 			compilationResult.rollBack(cp);
@@ -137,7 +137,7 @@ public class PotentialRoleReceiverExpression extends Expression {
 		this.constant = this.expression.constant;
 		return this.resolvedType;
 	}
-	
+
 	@Override
 	public StringBuffer printExpression(int indent, StringBuffer output) {
 		return this.expression.printExpression(indent, output);

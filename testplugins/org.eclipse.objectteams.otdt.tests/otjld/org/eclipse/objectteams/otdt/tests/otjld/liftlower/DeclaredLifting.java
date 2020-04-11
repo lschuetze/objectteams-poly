@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -29,11 +29,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 @SuppressWarnings("unchecked")
 public class DeclaredLifting extends AbstractOTJLDTest {
-	
+
 	public DeclaredLifting(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -42,7 +42,7 @@ public class DeclaredLifting extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -54,7 +54,7 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     // access to a feature of a role object that has been created using declared lifting
     // 6.1.1-otjld-lifted-role-feature-access-1
     public void test611_liftedRoleFeatureAccess1() {
-       
+
        runConformTest(
             new String[] {
 		"T611lrfa1Main.java",
@@ -129,7 +129,7 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     // access to a feature of a role object that has been created using declared lifting
     // 6.1.1-otjld-lifted-role-feature-access-3
     public void test611_liftedRoleFeatureAccess3() {
-       
+
        runConformTest(
             new String[] {
 		"T611lrfa3Main.java",
@@ -176,7 +176,7 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     public void test611_liftedRoleFeatureAccess4() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInvalidJavadoc, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"T611lrfa4Main.java",
@@ -285,7 +285,7 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     // a team implements a method of an interface using declared lifting for the parameter
     // 6.1.3-otjld-interface-implementation-with-declared-lifting
     public void test613_interfaceImplementationWithDeclaredLifting() {
-       
+
        runConformTest(
             new String[] {
 		"T613iiwdlMain.java",
@@ -684,7 +684,7 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     // a nested team has a method with declared lifting
     // 6.1.7-otjld-declared-lifting-in-nested-team-1
     public void test617_declaredLiftingInNestedTeam1() {
-       
+
        runConformTest(
             new String[] {
 		"Team617dlint1.java",
@@ -727,7 +727,7 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     // a nested team has a method with declared lifting -- base type anchored to "base"
     // 6.1.7-otjld-declared-lifting-in-nested-team-2
     public void test617_declaredLiftingInNestedTeam2() {
-       
+
        runConformTest(
             new String[] {
 		"Team617dlint2_2.java",
@@ -777,7 +777,7 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     // A catch clause uses declared lifting
     // 6.1.8-otjld-exception-lifting-1
     public void test618_exceptionLifting1() {
-       
+
        runConformTest(
             new String[] {
 		"Team618el1.java",
@@ -828,7 +828,7 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     // A catch clause uses declared lifting, rethrowing
     // 6.1.8-otjld-exception-lifting-2
     public void test618_exceptionLifting2() {
-       
+
        runConformTest(
             new String[] {
 		"Team618el2.java",
@@ -886,7 +886,7 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     // A catch clause within a role uses declared lifting
     // 6.1.8-otjld-exception-lifting-3
     public void test618_exceptionLifting3() {
-       
+
        runConformTest(
             new String[] {
 		"Team618el3.java",
@@ -962,7 +962,7 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     // a team ctor used both declared lifting and a role anchored to another argument
     // 6.1.9-otjld-declared-lifting-and-externalized-role-1
     public void test619_declaredLiftingAndExternalizedRole1() {
-       
+
        runConformTest(
             new String[] {
 		"Team619dlaer1_2.java",
@@ -1011,7 +1011,7 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     // bogus source positions if these coincide: role file, declared lifting, method requires bridge for visibility
     // 6.1.10-otjld-declared-lifting-in-nested-1
     public void test6110_declaredLiftingInNested1() {
-       
+
        runConformTest(
             new String[] {
 		"Team6110dlin1.java",
@@ -1056,7 +1056,7 @@ public class DeclaredLifting extends AbstractOTJLDTest {
             },
             "OK");
     }
-    
+
     // Lifting to an unbound super role
     // Bug 339801 - [compiler] declared lifting cannot resolve base imported base type
     public void test6111_declaredLiftingToSuper1() {
@@ -1194,16 +1194,16 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     	"T6112dlic3.java",
     			"public class T6112dlic3 {}\n",
     	"Team6112dlic3_0.java",
-    			"public team class Team6112dlic3_0 {\n" + 
-    			"    R[] f;\n" + 
-    			"    Team6112dlic3_0(R[] roles){ this.f = roles; }\n" + 
-    			"    protected class R {}\n" + 
+    			"public team class Team6112dlic3_0 {\n" +
+    			"    R[] f;\n" +
+    			"    Team6112dlic3_0(R[] roles){ this.f = roles; }\n" +
+    			"    protected class R {}\n" +
     			"}\n",
     	"Team6112dlic3_1.java",
-    			"public team class Team6112dlic3_1 extends Team6112dlic3_0 {\n" + 
-    			"    Team6112dlic3_1(T6112dlic3[] as R[] roles) { super(roles); }\n" + 
+    			"public team class Team6112dlic3_1 extends Team6112dlic3_0 {\n" +
+    			"    Team6112dlic3_1(T6112dlic3[] as R[] roles) { super(roles); }\n" +
     			"    @Override\n" +
-    			"    protected class R playedBy T6112dlic3 {}\n" + 
+    			"    protected class R playedBy T6112dlic3 {}\n" +
     			"}\n"
     		});
     }
@@ -1214,8 +1214,8 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     	runConformTest(
     		new String[] {
     	"Team6112dlic4_1.java",
-    			"public team class Team6112dlic4_1 extends Team6112dlic4_0 {\n" + 
-    			"    Team6112dlic4_1(T6112dlic4[] as R[] roles) { super(roles); }\n" + 
+    			"public team class Team6112dlic4_1 extends Team6112dlic4_0 {\n" +
+    			"    Team6112dlic4_1(T6112dlic4[] as R[] roles) { super(roles); }\n" +
     			"    @Override\n" +
     			"    protected class R playedBy T6112dlic4 {\n" +
     			"        test -> OK;\n" +
@@ -1223,21 +1223,21 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     			"    public static void main(String[] args) {\n" +
     			"        T6112dlic4 b = new T6112dlic4();\n" +
     			"        new Team6112dlic4_1(new T6112dlic4[]{b});\n" +
-    			"    }\n" + 
+    			"    }\n" +
     			"}\n",
     	"T6112dlic4.java",
     			"public class T6112dlic4 {\n" +
     			"    void OK() { System.out.print(\"OK\"); }\n" +
     			"}\n",
     	"Team6112dlic4_0.java",
-    			"public abstract team class Team6112dlic4_0 {\n" + 
-    			"    R[] f;\n" + 
-    			"    Team6112dlic4_0(){ System.out.print(\"wrong\"); }\n" + 
+    			"public abstract team class Team6112dlic4_0 {\n" +
+    			"    R[] f;\n" +
+    			"    Team6112dlic4_0(){ System.out.print(\"wrong\"); }\n" +
     			"    Team6112dlic4_0(R[] roles){\n" +
     			"        this.f = roles;\n" +
     			"        this.f[0].test();" +
-    			"    }\n" + 
-    			"    protected abstract class R { protected abstract void test(); }\n" + 
+    			"    }\n" +
+    			"    protected abstract class R { protected abstract void test(); }\n" +
     			"}\n",
     		},
     		"OK");
@@ -1249,31 +1249,31 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     	runConformTest(
     		new String[] {
 		"Team6112dlic5_1.java",
-				"public team class Team6112dlic5_1 extends Team6112dlic5_0 {\n" + 
+				"public team class Team6112dlic5_1 extends Team6112dlic5_0 {\n" +
 				"    Team6112dlic5_1() { super(new R[0]); }\n" +
 				"    public void test() {\n" +
 				"        new R().test(this.f.length);\n" +
-				"    }\n" + 
+				"    }\n" +
 				"    @Override\n" +
 				"    protected class R playedBy T6112dlic5 {\n" +
 				"        protected R() { base(); }\n" +
     			"        test -> OK;\n" +
-				"    }\n" + 
+				"    }\n" +
     			"    public static void main(String[] args) {\n" +
     			"        new Team6112dlic5_1().test();\n" +
-    			"    }\n" + 
+    			"    }\n" +
 				"}\n",
     	"T6112dlic5.java",
     			"public class T6112dlic5 {\n" +
     			"    void OK(int x) { System.out.print(\"OK\"+x); }\n" +
     			"}\n",
     	"Team6112dlic5_0.java",
-    			"public abstract team class Team6112dlic5_0 {\n" + 
-    			"    R[] f;\n" + 
+    			"public abstract team class Team6112dlic5_0 {\n" +
+    			"    R[] f;\n" +
     			"    Team6112dlic5_0(R[] roles){\n" +
     			"        this.f = roles;\n" +
     			"    }\n" +
-    			"    protected abstract class R { protected abstract void test(int l); }\n" + 
+    			"    protected abstract class R { protected abstract void test(int l); }\n" +
     			"}\n",
     		},
     		"OK0");
@@ -1284,37 +1284,37 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     	runConformTest(
     		new String[] {
 		"Team6112dlic6_2.java",
-				"public team class Team6112dlic6_2 extends Team6112dlic6_1 {\n" + 
+				"public team class Team6112dlic6_2 extends Team6112dlic6_1 {\n" +
 				"    Team6112dlic6_2(T6112dlic6 as R r) { super(r); }\n" +
 				"    @Override\n" +
 				"    protected class R playedBy T6112dlic6 {\n" +
     			"        test -> OK;\n" +
-				"    }\n" + 
+				"    }\n" +
     			"    public static void main(String[] args) {\n" +
     			"        new Team6112dlic6_2(new T6112dlic6()).test();\n" +
-    			"    }\n" + 
+    			"    }\n" +
 				"}\n",
 		"Team6112dlic6_1.java",
 				"public team class Team6112dlic6_1 extends Team6112dlic6_0 {\n" +
-				"    R r;" + 
+				"    R r;" +
 				"    protected Team6112dlic6_1(R r) { this.r = r; }\n" +
 				"    public void test() {\n" +
 				"        this.r.test(2);\n" +
-				"    }\n" + 
+				"    }\n" +
 				"}\n",
     	"T6112dlic6.java",
     			"public class T6112dlic6 {\n" +
     			"    void OK(int x) { System.out.print(\"OK\"+x); }\n" +
     			"}\n",
     	"Team6112dlic6_0.java",
-    			"public abstract team class Team6112dlic6_0 {\n" + 
+    			"public abstract team class Team6112dlic6_0 {\n" +
     			"    Team6112dlic6_0(){}\n" +
-    			"    protected abstract class R { protected abstract void test(int l); }\n" + 
+    			"    protected abstract class R { protected abstract void test(int l); }\n" +
     			"}\n",
     		},
     		"OK2");
     }
-    
+
     public void test6113_declaredLiftingOfExternalizedRole1() {
     	runConformTest(new String[] {
     		"Team6113dloer1_2.java",
@@ -1400,7 +1400,7 @@ public class DeclaredLifting extends AbstractOTJLDTest {
 				"@Target(ElementType.TYPE_USE) public @interface NonNullR {}\n"
              },
              "OK");
-    	
+
     }
 
 }

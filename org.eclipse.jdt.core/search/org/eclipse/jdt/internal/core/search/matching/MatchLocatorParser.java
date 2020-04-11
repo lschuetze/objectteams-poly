@@ -128,7 +128,7 @@ public class ClassButNoMethodDeclarationVisitor extends ASTVisitor {
 	    MatchLocatorParser.this.patternLocator.match(paramMapping, MatchLocatorParser.this.nodeSet);
 	    return true;
 	}
-	
+
 	@Override
 	public boolean visit(MethodSpec methodSpec, BlockScope scope)
 	{
@@ -681,7 +681,7 @@ protected void consumeParameterMappingOut()
 protected void consumeCallinBindingLeft(boolean hasSignature) {
 	super.consumeCallinBindingLeft(hasSignature);
 	// role args can cause lifting -> interpret as class instance creation:
-	if (hasSignature && (this.patternFineGrain & IJavaSearchConstants.CLASS_INSTANCE_CREATION_TYPE_REFERENCE) != 0) 
+	if (hasSignature && (this.patternFineGrain & IJavaSearchConstants.CLASS_INSTANCE_CREATION_TYPE_REFERENCE) != 0)
 	{
 		CallinMappingDeclaration callinDecl = (CallinMappingDeclaration) this.astStack[this.astPtr];
 		Argument[] roleArgs = callinDecl.roleMethodSpec.arguments;
@@ -694,7 +694,7 @@ protected void consumeCallinBindingLeft(boolean hasSignature) {
 protected void consumeCalloutBindingLeft(boolean hasSignature) {
 	super.consumeCalloutBindingLeft(hasSignature);
 	// role return can cause lifting -> interpret as class instance creation:
-	if (hasSignature && (this.patternFineGrain & IJavaSearchConstants.CLASS_INSTANCE_CREATION_TYPE_REFERENCE) != 0) 
+	if (hasSignature && (this.patternFineGrain & IJavaSearchConstants.CLASS_INSTANCE_CREATION_TYPE_REFERENCE) != 0)
 	{
 		CalloutMappingDeclaration callinDecl = (CalloutMappingDeclaration) this.astStack[this.astPtr];
 		this.patternLocator.match(callinDecl.roleMethodSpec.returnType, this.nodeSet);
@@ -793,7 +793,7 @@ protected void consumeReferenceExpression(ReferenceExpression referenceExpressio
 	} else if (referenceExpression.lhs instanceof QualifiedNameReference || referenceExpression.lhs instanceof QualifiedTypeReference) {
 		if ((this.patternFineGrain & IJavaSearchConstants.QUALIFIED_REFERENCE) != 0) {
 			this.patternLocator.match(referenceExpression, this.nodeSet);
-		} 
+		}
 	}
 }
 
@@ -1083,7 +1083,7 @@ protected TypeReference augmentTypeWithAdditionalDimensions(TypeReference typeRe
 @Override
 protected TypeReference getTypeReference(int dim) {
 //{ObjectTeams: wrap to introduce 2nd parameter
-	return getTypeReference(dim, false);  
+	return getTypeReference(dim, false);
 }
 @Override
 protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
@@ -1155,9 +1155,9 @@ public void parseBodies(CompilationUnitDeclaration unit) {
 		this.patternLocator.match(type, this.nodeSet);
 		this.parseBodies(type, unit);
 	}
-//{ObjectTeams: prevent duplicate parsing:	
+//{ObjectTeams: prevent duplicate parsing:
 	unit.bits |= ASTNode.HasAllMethodBodies;
-// SH}		
+// SH}
 }
 /**
  * Parses the member bodies in the given type.
@@ -1182,7 +1182,7 @@ protected void parseBodies(TypeDeclaration type, CompilationUnitDeclaration unit
 	       AbstractMethodMappingDeclaration mapping = mappings[i];
 	       mapping.parseParamMappings(this, unit);
 	       mapping.traverse(this.localDeclarationVisitor, (ClassScope) null);
-	   } 
+	   }
 	}
 //carp}
 
@@ -1213,15 +1213,15 @@ protected void parseBodies(TypeDeclaration type, CompilationUnitDeclaration unit
 		}
 	}
 
-	//TODO(jwl): Do we need to support anonymous inner types in method mapping, i.e. actually 
+	//TODO(jwl): Do we need to support anonymous inner types in method mapping, i.e. actually
     //			 contained within a block of the parameter mapping?
-	
+
 	TypeDeclaration[] memberTypes = type.memberTypes;
 	if (memberTypes != null) {
 		for (int i = 0; i < memberTypes.length; i++) {
 			TypeDeclaration memberType = memberTypes[i];
 //{ObjectTeams: don't consider role files:
-// MatchLocator.getMethodBodies() calls scanner.setSource() with the original, 
+// MatchLocator.getMethodBodies() calls scanner.setSource() with the original,
 // untransformed source of the Compilation_Unit_, which contains no RoleFiles anyway.
 // Skipping them prevents an ArrayIndexOutOfBoundsException in the Scanner, later.
 // Role files are handled through their own CompilationUnit.
@@ -1233,7 +1233,7 @@ protected void parseBodies(TypeDeclaration type, CompilationUnitDeclaration unit
 	// and right after that, traversing it a second time through memberType.traverse().
 	// Some hints(SH):
 	// + parseBodies is needed to do the parsing ;-)
-	// + memberType.traverse(..) is needed to visit the memberType itself 
+	// + memberType.traverse(..) is needed to visit the memberType itself
 	//   which is not part of the recursive parseBodies.
 	//   Also the localDeclarationVisitor might only process a very limited set of ast nodes.
 	// So, the calls do have different effect, how much redundancy remains, I can't definitely say.

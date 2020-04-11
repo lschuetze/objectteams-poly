@@ -347,7 +347,7 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 				|| weavingScheme == WeavingScheme.OTDRE) // under OTREDyn base is passed as IBoundBase => always need to cast.
 			{
 				result= gen.castExpression(result, gen.baseTypeReference(roleType.baseclass()), CastExpression.RAW);
-			}	
+			}
 		}
 		return result;
 	}

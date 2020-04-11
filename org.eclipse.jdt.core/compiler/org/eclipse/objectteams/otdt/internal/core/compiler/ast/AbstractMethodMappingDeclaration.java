@@ -183,7 +183,7 @@ public abstract class AbstractMethodMappingDeclaration
 	{
 		this.ignoreFurtherInvestigation = true;
 	}
-	
+
 	@Override
 	public void tagAsHavingIgnoredMandatoryErrors(int problemId) {
 		// nothing here
@@ -363,9 +363,9 @@ public abstract class AbstractMethodMappingDeclaration
 		    		try {
 						for (int i = 0; i < baseMethodSpecs.length; i++) {
 							MethodSpec methodSpec = baseMethodSpecs[i];
-		
+
 							methodSpec.resolveFeatureWithArgMapping(baseType, this.scope, /*isBaseSide*/true, /*callinExpected*/false, /*allowEnclosing*/false);
-		
+
 							if (!methodSpec.isValid()) {
 								if (   methodSpec.problemId() == ProblemReasons.NotVisible
 									&& canAccessInvisibleBase())
@@ -601,7 +601,7 @@ public abstract class AbstractMethodMappingDeclaration
 			for (ParameterMapping mapping : this.mappings)
 				if (mapping.direction == TerminalTokens.TokenNameBINDIN) // ident <- expr
 					mapping.expression.traverse(new BaseScopeMarker(), this.scope);
-			
+
 			// check 4.4(c) - sentence 2:
 			if (isCallin() && !isReplaceCallin())
 				for (ParameterMapping mapping : this.mappings)

@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -32,7 +32,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
 	public AcquisitionAndInheritanceOfRoleClasses(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -40,7 +40,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -52,7 +52,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a team accesses a public feature of an unbound role class defined in it
     // 1.3.1-otjld-role-feature-access-1
     public void test131_roleFeatureAccess1() {
-       
+
        runConformTest(
             new String[] {
 		"T131rfa1Main.java",
@@ -87,7 +87,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a team accesses a friendly feature of a bound role class defined in it
     // 1.3.1-otjld-role-feature-access-2
     public void test131_roleFeatureAccess2() {
-       
+
        runConformTest(
             new String[] {
 		"T131rfa2Main.java",
@@ -131,7 +131,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a team accesses a protected feature of an unbound role inherited from an indirect super team
     // 1.3.1-otjld-role-feature-access-3
     public void test131_roleFeatureAccess3() {
-       
+
        runConformTest(
             new String[] {
 		"T131rfa3Main.java",
@@ -173,7 +173,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a team accesses a static protected feature of a bound role inherited from a direct super team - callout
     // 1.3.1-otjld-role-feature-access-4
     public void test131_roleFeatureAccess4() {
-       
+
        runConformTest(
             new String[] {
 		"T131rfa4Main.java",
@@ -220,7 +220,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a team accesses a static protected feature of a bound role inherited from a direct super team - shorthand callout
     // 1.3.1-otjld-role-feature-access-4s
     public void test131_roleFeatureAccess4s() {
-       
+
        runConformTest(
             new String[] {
 		"T131rfa4sMain.java",
@@ -266,7 +266,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a team accesses a static protected feature of a unbound role inherited from a direct super team - regular method
     // 1.3.1-otjld-role-feature-access-5
     public void test131_roleFeatureAccess5() {
-       
+
        runConformTest(
             new String[] {
 		"T131rfa5Main.java",
@@ -306,7 +306,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // role feature accessed via function in the team, overridden (challenging weakening
     // 1.3.1-otjld-role-feature-access-6
     public void test131_roleFeatureAccess6() {
-       
+
        runConformTest(
             new String[] {
 		"Team131rfa6_2.java",
@@ -342,7 +342,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a role class accesses a feature inherited from its implicit super role
     // 1.3.2-otjld-role-inherited-feature-access-1
     public void test132_roleInheritedFeatureAccess1() {
-       
+
        runConformTest(
             new String[] {
 		"T132rfa1Main.java",
@@ -386,7 +386,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a role class accesses an overwritten feature that it indirectly inherited from its implicit super role - default visibility
     // 1.3.2-otjld-role-inherited-feature-access-2
     public void test132_roleInheritedFeatureAccess2() {
-       
+
        runConformTest(
             new String[] {
 		"T132rfa2Main.java",
@@ -437,7 +437,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a role class accesses an overwritten feature that it indirectly inherited from its implicit super role
     // 1.3.2-otjld-role-inherited-feature-access-2a
     public void test132_roleInheritedFeatureAccess2a() {
-       
+
        runConformTest(
             new String[] {
 		"T132rfa2aMain.java",
@@ -488,7 +488,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a role class accesses an overwritten feature that it indirectly inherited from its implicit super role
     // challenge tsuper from private
     public void _test132_roleInheritedFeatureAccess2b() {
-       
+
        runConformTest(
             new String[] {
 		"T132rfa2bMain.java",
@@ -539,7 +539,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a role class accesses a feature inherited from its direct explicit super role
     // 1.3.2-otjld-role-inherited-feature-access-3
     public void test132_roleInheritedFeatureAccess3() {
-       
+
        runConformTest(
             new String[] {
 		"T132rfa3Main.java",
@@ -586,7 +586,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a role class accesses an overwritten feature inherited from an indirectly explicit super role
     // 1.3.2-otjld-role-inherited-feature-access-4
     public void test132_roleInheritedFeatureAccess4() {
-       
+
        runConformTest(
             new String[] {
 		"T132rfa4Main.java",
@@ -639,7 +639,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // an implicitly inherited role class is not the subtype (as of Java) of its super role
     // 1.3.3-otjld-role-not-subtype-of-superrole-1
     public void test133_roleNotSubtypeOfSuperrole1() {
-       
+
        runConformTest(
             new String[] {
 		"T133rnsos1Main.java",
@@ -674,7 +674,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // an implicitly inherited role class is not the subtype (as of Java) of its super role, cast fails
     // 1.3.3-otjld-role-not-subtype-of-superrole-1a
     public void test133_roleNotSubtypeOfSuperrole1a() {
-       
+
        runConformTest(
             new String[] {
 		"T133rnsos1aMain.java",
@@ -714,7 +714,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // an implicitly inherited role class is not the subtype (as of Java) of its super role -- cast to unqualified role type
     // 1.3.3-otjld-role-not-subtype-of-superrole-1c
     public void test133_roleNotSubtypeOfSuperrole1c() {
-       
+
        runConformTest(
             new String[] {
 		"Team133rnsos1c_2.java",
@@ -750,7 +750,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // an implicitly inherited role class is not the subtype (as of Java) of its super role -- unqualified role type expands to "tthis.R"
     // 1.3.3-otjld-role-not-subtype-of-superrole-1e
     public void test133_roleNotSubtypeOfSuperrole1e() {
-       
+
        runConformTest(
             new String[] {
 		"Team133rnsos1e_2.java",
@@ -783,7 +783,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // an implicitly inherited role class is not the subtype (as of Java) of its super role - anchors are fields
     // 1.3.3-otjld-role-not-subtype-of-superrole-1f
     public void test133_roleNotSubtypeOfSuperrole1f() {
-       
+
        runConformTest(
             new String[] {
 		"T133rnsos1fMain.java",
@@ -817,7 +817,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a role class is not the subtype (as of Java) of its implicit super role
     // 1.3.3-otjld-role-not-subtype-of-superrole-2
     public void test133_roleNotSubtypeOfSuperrole2() {
-       
+
        runConformTest(
             new String[] {
 		"T133rnsos2Main.java",
@@ -857,7 +857,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a role class is a subtype (as of Java) of its explicit super role
     // 1.3.3-otjld-role-not-subtype-of-superrole-3
     public void test133_roleNotSubtypeOfSuperrole3() {
-       
+
        runConformTest(
             new String[] {
 		"T133rnsos3Main.java",
@@ -963,7 +963,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a subteam redefines an implicitly inherited role class including one of the role class's features
     // 1.3.5-otjld-redefining-role-feature
     public void test135_redefiningRoleFeature() {
-       
+
        runConformTest(
             new String[] {
 		"T135rrfMain.java",
@@ -1004,7 +1004,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a subteam redefines an implicitly inherited role class that is used via an anchored type in a feature of another role of the superteam
     // 1.3.6-otjld-redefined-anchored-type-1
     public void test136_redefinedAnchoredType1() {
-       
+
        runConformTest(
             new String[] {
 		"T136rat1Main.java",
@@ -1055,7 +1055,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a subteam redefines an implicitly inherited role class that is used via an anchored type in an inner class of another role of the superteam
     // 1.3.6-otjld-redefined-anchored-type-2
     public void test136_redefinedAnchoredType2() {
-       
+
        runConformTest(
             new String[] {
 		"T136rat2Main.java",
@@ -1111,7 +1111,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a subteam redefines an implicitly inherited role class that is used via an anchored type in a local class of another role of the superteam
     // 1.3.6-otjld-redefined-anchored-type-3
     public void test136_redefinedAnchoredType3() {
-       
+
        runConformTest(
             new String[] {
 		"T136rat3Main.java",
@@ -1167,7 +1167,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a role class accesses a feature of its explicit super role via super
     // 1.3.7-otjld-access-to-explicit-superrole-1
     public void test137_accessToExplicitSuperrole1() {
-       
+
        runConformTest(
             new String[] {
 		"T137ates1Main.java",
@@ -1208,7 +1208,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a role class accesses a feature of its explicit super role via super in an inner class
     // 1.3.7-otjld-access-to-explicit-superrole-2
     public void test137_accessToExplicitSuperrole2() {
-       
+
        runConformTest(
             new String[] {
 		"T137ates2Main.java",
@@ -1266,7 +1266,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a role class accesses a feature defined in a super role of its explicit super role via super in a local class
     // 1.3.7-otjld-access-to-explicit-superrole-3
     public void test137_accessToExplicitSuperrole3() {
-       
+
        runConformTest(
             new String[] {
 		"T137ates3Main.java",
@@ -1324,7 +1324,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a role class accesses a method of its implicit super role via tsuper
     // 1.3.8-otjld-access-to-superrole-1
     public void test138_accessToSuperrole1() {
-       
+
        runConformTest(
             new String[] {
 		"T138ats1Main.java",
@@ -1367,7 +1367,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a role class accesses a method defined in a super role of its implicit super role via tsuper from an anonymous class
     // 1.3.8-otjld-access-to-superrole-2
     public void test138_accessToSuperrole2() {
-       
+
        runConformTest(
             new String[] {
 		"T138ats2Main.java",
@@ -1485,7 +1485,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a role class accesses a field of its implicit super role via tsuper
     // 1.3.8-otjld-access-to-superrole-4
     public void test138_accessToSuperrole4() {
-       
+
        runConformTest(
             new String[] {
 		"T138ats4Main.java",
@@ -1634,11 +1634,11 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team138ats7.java (at line 13)\n" + 
-    		"	Team138ats7.tsuper.foo();\n" + 
-    		"	^^^^^^^^^^^^^^^^^^\n" + 
-    		"Invalid qualified \'tsuper\': type org.objectteams.Team contains no role corresponding to Team138ats7.Mid2.R (OTJLD 1.3.1(f)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team138ats7.java (at line 13)\n" +
+    		"	Team138ats7.tsuper.foo();\n" +
+    		"	^^^^^^^^^^^^^^^^^^\n" +
+    		"Invalid qualified \'tsuper\': type org.objectteams.Team contains no role corresponding to Team138ats7.Mid2.R (OTJLD 1.3.1(f)).\n" +
     		"----------\n");
     }
 
@@ -1824,7 +1824,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
             },
             "1.3.1(f)");
     }
-    
+
     // a tsuper call is unresolved (requires specific error reporting, setting tsuperMethod to a ProblemMethodBinding)
     public void test139_illegalTsuperAccess6() {
         runNegativeTestMatching(
@@ -1848,14 +1848,14 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team139ita6_2.java (at line 6)\n" + 
-    		"	return tsuper.getValue(arg);\n" + 
-    		"	              ^^^^^^^^\n" + 
-    		"The method getValue(String) is undefined for the type Team139ita6_1.Role139ita6\n" + 
+            "----------\n" +
+    		"1. ERROR in Team139ita6_2.java (at line 6)\n" +
+    		"	return tsuper.getValue(arg);\n" +
+    		"	              ^^^^^^^^\n" +
+    		"The method getValue(String) is undefined for the type Team139ita6_1.Role139ita6\n" +
     		"----------\n");
     }
-    
+
     // Bug 343079 - [compiler] internal compiler error when trying to invoke an abstract method as tsuper
     public void test139_illegalTsuperAccess7() {
     	runNegativeTest(
@@ -1877,11 +1877,11 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     			"    }\n" +
     			"}\n",
     		},
-    		"----------\n" + 
-    		"1. ERROR in Team139ita7_2.java (at line 6)\n" + 
-    		"	tsuper.rm();\n" + 
-    		"	^^^^^^^^^^^\n" + 
-    		"Cannot directly invoke the abstract method rm() for the type Team139ita7_1.R\n" + 
+    		"----------\n" +
+    		"1. ERROR in Team139ita7_2.java (at line 6)\n" +
+    		"	tsuper.rm();\n" +
+    		"	^^^^^^^^^^^\n" +
+    		"Cannot directly invoke the abstract method rm() for the type Team139ita7_1.R\n" +
     		"----------\n");
     }
 
@@ -2215,10 +2215,10 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
             "2.3.1(b)");
     }
 
-    // 
+    //
     // 1.3.17-otjld-multilevel-role-overriding-1
     public void test1317_multilevelRoleOverriding1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1317mro1_3.java",
@@ -2259,7 +2259,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a object of static non-role type is checked instanceof wrt a role type, witness for NPE reported by woll
     // 1.3.18-otjld-instanceof-non-role-to-role-1
     public void test1318_instanceofNonRoleToRole1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1318inrtr1_2.java",
@@ -2325,7 +2325,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a role declares a constant which is imported
     // 1.3.19-otjld-role-import-2
     public void test1319_roleImport2() {
-       
+
        runConformTest(
             new String[] {
 		"T1319ri2Main.java",
@@ -2353,7 +2353,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // EXPERIMENTAL, method arg
     // 1.3.20-otjld-tournament-polymorphism-1
     public void test1320_tournamentPolymorphism1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1320tp1_3.java",
@@ -2400,7 +2400,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // EXPERIMENTAL, assignment
     // 1.3.20-otjld-tournament-polymorphism-2
     public void test1320_tournamentPolymorphism2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1320tp2_3.java",
@@ -2447,7 +2447,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     public void test1320_tournamentPolymorphism3() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportOverrideFinalRole, CompilerOptions.IGNORE);
-       
+
        runConformTest(
             new String[] {
 		"Team1320tp3_4.java",
@@ -2506,7 +2506,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     public void test1320_tournamentPolymorphism4() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportOverrideFinalRole, CompilerOptions.IGNORE);
-       
+
        runConformTest(
             new String[] {
 		"Team1320tp4_4.java",
@@ -2582,11 +2582,11 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team1321tm1.java (at line 9)\n" + 
-    		"	r.migrateToTeam(other);\n" + 
-    		"	                ^^^^^\n" + 
-    		"The special method R.migrateToTeam(Team1321tm1) is not applicable for the arguments (org.objectteams.Team).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team1321tm1.java (at line 9)\n" +
+    		"	r.migrateToTeam(other);\n" +
+    		"	                ^^^^^\n" +
+    		"The special method R.migrateToTeam(Team1321tm1) is not applicable for the arguments (org.objectteams.Team).\n" +
     		"----------\n");
     }
 
@@ -2611,23 +2611,23 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team1321tm2.java (at line 4)\n" + 
-    		"	public class R implements ITeamMigratable {\n" + 
-    		"	                          ^^^^^^^^^^^^^^^\n" + 
-    		"Team migration not possible because enclosing team class Team1321tm2 is not final (OT/J experimental feature). \n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team1321tm2.java (at line 8)\n" + 
-    		"	r.migrateToTeam(other);\n" + 
-    		"	  ^^^^^^^^^^^^^\n" + 
-    		"The method migrateToTeam(Team1321tm2) is undefined for the type R<@tthis[Team1321tm2]>\n" + 
+            "----------\n" +
+    		"1. ERROR in Team1321tm2.java (at line 4)\n" +
+    		"	public class R implements ITeamMigratable {\n" +
+    		"	                          ^^^^^^^^^^^^^^^\n" +
+    		"Team migration not possible because enclosing team class Team1321tm2 is not final (OT/J experimental feature). \n" +
+    		"----------\n" +
+    		"2. ERROR in Team1321tm2.java (at line 8)\n" +
+    		"	r.migrateToTeam(other);\n" +
+    		"	  ^^^^^^^^^^^^^\n" +
+    		"The method migrateToTeam(Team1321tm2) is undefined for the type R<@tthis[Team1321tm2]>\n" +
     		"----------\n");
     }
 
     // a role migrates to a different team, null team
     // 1.3.21-otjld-team-migration-3
     public void test1321_teamMigration3() {
-       
+
        runConformTest(
             new String[] {
 		"Team1321tm3.java",
@@ -2691,16 +2691,16 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in T1321tm5.java (at line 2)\n" + 
-    		"	public class T1321tm5 implements org.objectteams.ITeamMigratable {\n" + 
-    		"	                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Type T1321tm5 does not support team migration, only applicable for roles (OT/J experimental feature).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in T1321tm5.java (at line 4)\n" + 
-    		"	this.migrateToTeam(aTeam);\n" + 
-    		"	     ^^^^^^^^^^^^^\n" + 
-    		"The method migrateToTeam(Team) is undefined for the type T1321tm5\n" + 
+            "----------\n" +
+    		"1. ERROR in T1321tm5.java (at line 2)\n" +
+    		"	public class T1321tm5 implements org.objectteams.ITeamMigratable {\n" +
+    		"	                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+    		"Type T1321tm5 does not support team migration, only applicable for roles (OT/J experimental feature).\n" +
+    		"----------\n" +
+    		"2. ERROR in T1321tm5.java (at line 4)\n" +
+    		"	this.migrateToTeam(aTeam);\n" +
+    		"	     ^^^^^^^^^^^^^\n" +
+    		"The method migrateToTeam(Team) is undefined for the type T1321tm5\n" +
     		"----------\n");
     }
 

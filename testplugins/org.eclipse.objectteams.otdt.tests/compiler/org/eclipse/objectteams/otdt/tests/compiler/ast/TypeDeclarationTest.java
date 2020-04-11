@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -33,7 +33,7 @@ import org.eclipse.objectteams.otdt.tests.compiler.SourceElementRequestorTest;
  */
 public class TypeDeclarationTest extends SourceElementRequestorTest
 {
-    
+
     private boolean _testFlag;
 
     public TypeDeclarationTest(String testName)
@@ -51,7 +51,7 @@ public class TypeDeclarationTest extends SourceElementRequestorTest
             .getName());
         return suite;
     }
-    
+
     public void setUpSuite() throws Exception
     {
         this.PROJECT_DIR = "ExternalDefinedRole";
@@ -62,11 +62,11 @@ public class TypeDeclarationTest extends SourceElementRequestorTest
     {
         super.setUp();
     }
-	
+
 	public void enterType(TypeInfo typeInfo) {
         _testFlag = typeInfo.isRoleFile;
 	}
- 
+
     public void testRoleInterface_RolefileFlag() throws JavaModelException
     {
         org.eclipse.jdt.core.ICompilationUnit unit = getCompilationUnit(
@@ -74,13 +74,13 @@ public class TypeDeclarationTest extends SourceElementRequestorTest
                 "unbound",
                 "unbound.teampkg.Team_5a",
                 "SampleRole.java");
-        
+
         String    src = unit.getSource();
-        
+
 	    String fileName = unit.getCorrespondingResource().toString();
 
 	    fullParse(src, fileName);
-	    
+
 	    assertTrue(_testFlag);
     }
 
@@ -91,15 +91,15 @@ public class TypeDeclarationTest extends SourceElementRequestorTest
                 "unbound",
                 "unbound.teampkg.Team_5b",
                 "SampleRole.java");
-        
+
         String    src = unit.getSource();
-        IResource res = unit.getCorrespondingResource();        
-                    
+        IResource res = unit.getCorrespondingResource();
+
 	    String fileName = res.toString();
 	    fullParse(src, fileName);
-	    
+
 	    assertTrue(_testFlag);
     }
 
-    
+
 }

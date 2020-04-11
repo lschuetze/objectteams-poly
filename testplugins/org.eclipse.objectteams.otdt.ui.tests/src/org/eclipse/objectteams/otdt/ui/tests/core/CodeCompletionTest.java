@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -87,9 +87,9 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * Tests for code completion including the UI part 
- * i.e., testing the actual rewriting and also selections. 
- * 
+ * Tests for code completion including the UI part
+ * i.e., testing the actual rewriting and also selections.
+ *
  * @author stephan
  * @since 1.1.8
  */
@@ -156,7 +156,7 @@ public class CodeCompletionTest extends CoreTests {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "//TODO\n${body_statement}", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.GETTERCOMMENT_ID, "/**\n * @return the ${bare_field_name}\n */", fJProject1);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.SETTERCOMMENT_ID, "/**\n * @param ${param} the ${bare_field_name} to set\n */", fJProject1);
-		
+
 		fBeforeImports= "";
 		fAfterImports= "";
 		fMembers= "";
@@ -173,14 +173,14 @@ public class CodeCompletionTest extends CoreTests {
 		closeAllEditors();
 		JavaProjectHelper.delete(fJProject1);
 	}
-	
+
 	public static void closeEditor(IEditorPart editor) {
 		IWorkbenchPartSite site;
 		IWorkbenchPage page;
 		if (editor != null && (site= editor.getSite()) != null && (page= site.getPage()) != null)
 			page.closeEditor(editor, false);
 	}
-	
+
 	public static void closeAllEditors() {
 		IWorkbenchWindow[] windows= PlatformUI.getWorkbench().getWorkbenchWindows();
 		for (int i= 0; i < windows.length; i++) {
@@ -208,7 +208,7 @@ public class CodeCompletionTest extends CoreTests {
 		String contents= buf.toString();
 
 		pack1.createCompilationUnit("B.java", contents, false, null);
-		
+
 		// create team class:
 		IPackageFragment pack2= sourceFolder.createPackageFragment("test2", false, null);
 		buf= new StringBuffer();
@@ -222,7 +222,7 @@ public class CodeCompletionTest extends CoreTests {
 		contents= buf.toString();
 
 		ICompilationUnit cuT= pack2.createCompilationUnit("T.java", contents, false, null);
-		
+
 		fEditor= (JavaEditor)JavaUI.openInEditor(cuT);
 
 		String str= "        fo";
@@ -245,7 +245,7 @@ public class CodeCompletionTest extends CoreTests {
 		assertNotNull("expected proposal", selected);
 
 		IDocument doc= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-		selected.apply(doc);	
+		selected.apply(doc);
 
 		buf= new StringBuffer();
 		buf.append("package test2;\n" +
@@ -275,15 +275,15 @@ public class CodeCompletionTest extends CoreTests {
 		ISourceViewer viewer= editor.getViewer();
 		return new JavaContentAssistInvocationContext(viewer, offset, editor);
 	}
-	
+
 	// ==== START REAL TESTS: ====
-	
+
 	/** At the empty space within a role one could create a constructor. */
 	public void testCreateRoleConstructor() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
-				"        |", 
-				"R(", 
+				"        |",
+				"R(",
 				"        /**\n" +
 				"         * Constructor.\n" +
 				"         */\n" +
@@ -291,14 +291,14 @@ public class CodeCompletionTest extends CoreTests {
 				"            //TODO\n" +
 				"\n" +
 				"        }",
-				INTERESTING_CALLIN_CALLOUT_PROPOSAL);		
+				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
 
 	public void testCreateCallout1() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
-				"        fo|", 
-				"foo(", 
+				"        fo|",
+				"foo(",
 				        "\n" + // TODO(SH): initial newline is not intended?
 				"        /* (non-Javadoc)\n" +
 				"         * @see test1.B#foo()\n" +
@@ -312,8 +312,8 @@ public class CodeCompletionTest extends CoreTests {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
 				"	 	 abstract void foo();\n"+
-				"        fo|", 
-				"foo(", 
+				"        fo|",
+				"foo(",
 				"	 	 abstract void foo();\n"+
 				        "\n" + // TODO(SH): initial newline is not intended?
 				"        /* (non-Javadoc)\n" +
@@ -328,8 +328,8 @@ public class CodeCompletionTest extends CoreTests {
 	public void testCreateCallout2() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertROFIBodyProposal(
-				"    fo|", 
-				"foo(", 
+				"    fo|",
+				"foo(",
 				        "\n" + // TODO(SH): initial newline is not intended?
 				"    /* (non-Javadoc)\n" +
 				"     * @see test1.B#foo()\n" +
@@ -338,26 +338,26 @@ public class CodeCompletionTest extends CoreTests {
 				"    ",
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
-	
+
 	public void testCreateCalloutOverride1() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
-		pkg.createCompilationUnit("SuperTeam.java", 
+		pkg.createCompilationUnit("SuperTeam.java",
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
 				"	public class MyRole {\n" +
 				"		String blub(int i) { return \"\"; }\n" +
-				"	}\n" + 
+				"	}\n" +
 				"}\n",
 				true, null);
-		
-		pkg.createCompilationUnit("ABase.java", 
+
+		pkg.createCompilationUnit("ABase.java",
 				"package test1.p1;\n" +
 				"public class ABase {\n" +
 				"	String blub(int k) { return null; }\n" +
-				"}\n", 
+				"}\n",
 				true, null);
-		
-		StringBuffer subTeamContent = new StringBuffer(); 
+
+		StringBuffer subTeamContent = new StringBuffer();
 		subTeamContent.append("package test1;\n");
 		subTeamContent.append("import test1.p1.SuperTeam;\n");
 		subTeamContent.append("\n");
@@ -367,8 +367,8 @@ public class CodeCompletionTest extends CoreTests {
 		subTeamContent.append("		\n");
 		subTeamContent.append("    }\n");
 		subTeamContent.append("}");
-		
-		StringBuffer expectedContent = new StringBuffer(); 
+
+		StringBuffer expectedContent = new StringBuffer();
 		expectedContent.append("package test1;\n");
 		expectedContent.append("import test1.p1.SuperTeam;\n");
 		expectedContent.append("\n");
@@ -387,32 +387,32 @@ public class CodeCompletionTest extends CoreTests {
 		String completeAfter = "		";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
 		int posAfter = expectedContent.indexOf("String");
-		
+
 		// discriminate from overriding "blub(int i)":
-		assertProposal("blub(int k", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, "String".length()), 0); 
+		assertProposal("blub(int k", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, "String".length()), 0);
 	}
-	
-	
+
+
 	// callout override to field
 	public void testCreateCalloutOverride2() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
-		pkg.createCompilationUnit("SuperTeam.java", 
+		pkg.createCompilationUnit("SuperTeam.java",
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
 				"	public class MyRole {\n" +
 				"		void setBlub(int i) { }\n" +
-				"	}\n" + 
+				"	}\n" +
 				"}\n",
 				true, null);
-		
-		pkg.createCompilationUnit("ABase.java", 
+
+		pkg.createCompilationUnit("ABase.java",
 				"package test1.p1;\n" +
 				"public class ABase {\n" +
 				"	int blub;\n" +
-				"}\n", 
+				"}\n",
 				true, null);
-		
-		StringBuffer subTeamContent = new StringBuffer(); 
+
+		StringBuffer subTeamContent = new StringBuffer();
 		subTeamContent.append("package test1;\n");
 		subTeamContent.append("import test1.p1.SuperTeam;\n");
 		subTeamContent.append("import base test1.p1.ABase;\n");
@@ -421,8 +421,8 @@ public class CodeCompletionTest extends CoreTests {
 		subTeamContent.append("		set\n");
 		subTeamContent.append("    }\n");
 		subTeamContent.append("}");
-		
-		StringBuffer expectedContent = new StringBuffer(); 
+
+		StringBuffer expectedContent = new StringBuffer();
 		expectedContent.append("package test1;\n");
 		expectedContent.append("import test1.p1.SuperTeam;\n");
 		expectedContent.append("import base test1.p1.ABase;\n");
@@ -440,24 +440,24 @@ public class CodeCompletionTest extends CoreTests {
 		String completeAfter = "		set";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
 		int posAfter = expectedContent.indexOf("		");
-		
+
 		// discriminate from overriding "setBlub(int i)":
-		assertProposal("setBlub(int)", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter+2, 0), 0);  
+		assertProposal("setBlub(int)", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter+2, 0), 0);
 	}
-	
-	
+
+
 	// Bug 374840 - [assist] callout completion after parameter mapping garbles the code
 	public void testCreateCalloutOverride3() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
-		
-		pkg.createCompilationUnit("ABase.java", 
+
+		pkg.createCompilationUnit("ABase.java",
 				"package test1.p1;\n" +
 				"public class ABase {\n" +
 				"	Object blub;\n" +
-				"}\n", 
+				"}\n",
 				true, null);
-		
-		StringBuffer subTeamContent = new StringBuffer(); 
+
+		StringBuffer subTeamContent = new StringBuffer();
 		subTeamContent.append("package test1;\n");
 		subTeamContent.append("import base test1.p1.ABase;\n");
 		subTeamContent.append("public team class Completion_testCreateCalloutOverride3 {\n");
@@ -467,8 +467,8 @@ public class CodeCompletionTest extends CoreTests {
 		subTeamContent.append("		toStr\n");
 		subTeamContent.append("    }\n");
 		subTeamContent.append("}");
-		
-		StringBuffer expectedContent = new StringBuffer(); 
+
+		StringBuffer expectedContent = new StringBuffer();
 		expectedContent.append("package test1;\n");
 		expectedContent.append("import base test1.p1.ABase;\n");
 		expectedContent.append("public team class Completion_testCreateCalloutOverride3 {\n");
@@ -487,17 +487,17 @@ public class CodeCompletionTest extends CoreTests {
 		String completeAfter = "		toStr";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
 		int posAfter = expectedContent.indexOf("String toString");
-		
+
 		// discriminate from method override:
-		assertProposal("toString()  String", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, "String".length()), 0); 
+		assertProposal("toString()  String", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, "String".length()), 0);
 	}
-	
+
 
 	public void testCompleteCallout1() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
-				"        void foo() ->|", 
-				"foo(", 
+				"        void foo() ->|",
+				"foo(",
 				"        void foo() ->| void foo();|" + // SH: why selected?
 				"",
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
@@ -506,9 +506,9 @@ public class CodeCompletionTest extends CoreTests {
 	public void testCompleteCallout2() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
-				"        foo -> |", 
-				"foo(", 
-				"        foo -> foo; |" + // SH: trailing space? 
+				"        foo -> |",
+				"foo(",
+				"        foo -> foo; |" + // SH: trailing space?
 				"",
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
@@ -520,8 +520,8 @@ public class CodeCompletionTest extends CoreTests {
 				"        callin void bar() {}\n"+
 				"        void foo() ->|\n" +             // no leading space, inserted below (good)
 				"        bar <- replace clone;\n",
-				"foo(", 
-				"        callin void bar() {}\n" + 
+				"foo(",
+				"        callin void bar() {}\n" +
 				"        void foo() ->| void foo();|\n" +
 				"        bar <- replace clone;\n" +
 				"",
@@ -532,8 +532,8 @@ public class CodeCompletionTest extends CoreTests {
 	public void testCompleteCallout4() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
-				"        foo -> f|", 
-				"foo(", 
+				"        foo -> f|",
+				"foo(",
 				"        foo -> |foo;|",
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
@@ -541,28 +541,28 @@ public class CodeCompletionTest extends CoreTests {
 	public void testCompleteCallout5() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
-				"		|", 
+				"		|",
 				"foo(",
 				"\n"+
 		        "        /* (non-Javadoc)\n" +
 		        "         * @see test1.B#foo()\n" +
 		        "         */\n" +
 				"        void |foo|() -> void foo();\n" +
-				"		", 
+				"		",
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
 
 	public void testCompleteCallout6() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertROFIBodyProposal(
-				"	|", 
+				"	|",
 				"foo(",
 				"\n"+
 		        "    /* (non-Javadoc)\n" +
 		        "     * @see test1.B#foo()\n" +
 		        "     */\n" +
 				"    void |foo|() -> void foo();\n" +
-				"	", 
+				"	",
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
 
@@ -570,14 +570,14 @@ public class CodeCompletionTest extends CoreTests {
 	public void testCompleteCallout7() throws Exception {
 		createBaseClass("    public static void foo() {}\n");
 		assertROFIBodyProposal(
-				"	|", 
+				"	|",
 				"foo(",
 				"\n"+
 		        "    /* (non-Javadoc)\n" +
 		        "     * @see test1.B#foo()\n" +
 		        "     */\n" +
 				"    void |foo|() -> void foo();\n" +
-				"	", 
+				"	",
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
 
@@ -586,7 +586,7 @@ public class CodeCompletionTest extends CoreTests {
 		createBaseClass("    java.util.List<String> names;\n");
 		assertNosuchTypeBodyProposal(
 				"        String setName(int i, String n) -> set java.util.List<String> names\n" +
-				"            with { n -> base.| }", 
+				"            with { n -> base.| }",
 				"names",
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
@@ -596,8 +596,8 @@ public class CodeCompletionTest extends CoreTests {
 		createBaseClass("    java.util.List<String> names;\n");
 		assertTypeBodyProposal(
 				"        String getName(int i) -> get java.util.List<String> names\n" +
-				"            with { result <- base.| }", 
-				"names", 
+				"            with { result <- base.| }",
+				"names",
 				"        String getName(int i) -> get java.util.List<String> names\n" +
 				"            with { result <- base.names|| }",
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
@@ -619,15 +619,15 @@ public class CodeCompletionTest extends CoreTests {
 		String contents= buf.toString();
 		IPackageFragment basePkg = CompletionTestSetup.getAbsoluteTestPackage(this.fJProject1, "test1");
 		basePkg.createCompilationUnit("B.java", contents, true, null);
-		
+
 		fAfterImports = "\n" +
 				"import test1.b1.B1;\n" +
 				"import test1.b1.B1.Inner;\n" +
 				"import test1.b2.B2;\n";
-	
+
 		assertTypeBodyProposal(
-				"        |", 
-				"foo(", 
+				"        |",
+				"foo(",
 				        "\n" +
 				"        /* (non-Javadoc)\n" +
 				"         * @see test1.B#foo(test1.b1.B1, test1.b1.B1.Inner, test1.b2.B2)\n" +
@@ -647,8 +647,8 @@ public class CodeCompletionTest extends CoreTests {
 	            "        String toString() => |String toString();|",
 	            INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
-	
-		
+
+
 	/** A base method spec without return type and beginning of the selector is searched. */
 	public void testCompletionMethodSpecLong2() throws Exception {
 		createBaseClass("");
@@ -658,7 +658,7 @@ public class CodeCompletionTest extends CoreTests {
 	            "        String toString() => |String toString();|",
 	            INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
-		
+
 	/** A base method spec with return type and no selector is searched. */
 	public void testCompletionMethodSpecLong3() throws Exception {
 		createBaseClass("");
@@ -668,7 +668,7 @@ public class CodeCompletionTest extends CoreTests {
 	            "        String toString() => String toString(); |", // trailing space?
 	            INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
-		
+
 	/* short, no callinModifier, follows: method */
 	public void testCompleteCallin1() throws Exception {
 		createBaseClass("    public void foo() {}\n");
@@ -676,8 +676,8 @@ public class CodeCompletionTest extends CoreTests {
 				"        void bar() {}\n"+
 				"        bar <-|\n" +                    // no space, inserted below (good)
 				"        void zork() {}\n",
-				"foo(", 
-				"        void bar() {}\n" + 
+				"foo(",
+				"        void bar() {}\n" +
 				"        bar <- |before| foo;\n" +
 				"        void zork() {}\n" +
 				"",
@@ -688,8 +688,8 @@ public class CodeCompletionTest extends CoreTests {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
 				"	 	 void foo() {}\n"+
-				"        fo|", 
-				"foo(", 
+				"        fo|",
+				"foo(",
 				"	 	 void foo() {}\n"+
 				        "\n" + // TODO(SH): initial newline is not intended?
 				"        /* (non-Javadoc)\n" +
@@ -705,8 +705,8 @@ public class CodeCompletionTest extends CoreTests {
 	public void _testCreateCallin2() throws Exception {
 		createBaseClass("    public String foo() {}\n");
 		assertTypeBodyProposal(
-				"        fo|", 
-				"foo(", 
+				"        fo|",
+				"foo(",
 				        "\n" + // TODO(SH): initial newline is not intended?
 				"        /* (non-Javadoc)\n" +
 				"         * @see test1.B#foo()\n" +
@@ -721,32 +721,32 @@ public class CodeCompletionTest extends CoreTests {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
 				"        void bar() {}\n"+
-				"        bar <- after |\n" + 
+				"        bar <- after |\n" +
 				"        void foo() -> void foo();\n",
-				"foo(", 
-				"        void bar() {}\n" + 
+				"foo(",
+				"        void bar() {}\n" +
 				"        bar <- after foo; |\n" +        // SH: trailing space?
 				"        void foo() -> void foo();\n" +
 				"",
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
-	
-	
+
+
 	/* short, with callinModifier, follows: callout binding, non-keyword return type. */
 	public void testCompleteCallin2a() throws Exception {
 		createBaseClass("    public String foo() { return null; }\n");
 		assertTypeBodyProposal(
 				"        String bar() { return \"\"; }\n"+
-				"        bar <- after |\n" + 
+				"        bar <- after |\n" +
 				"        String foo() -> String foo();\n",
-				"foo(", 
-				"        String bar() { return \"\"; }\n" + 
+				"foo(",
+				"        String bar() { return \"\"; }\n" +
 				"        bar <- after foo; |\n" +        // SH: trailing space?
 				"        String foo() -> String foo();\n" +
 				"",
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
-	
+
 	/* long, with callinModifier, follows: field. */
 	public void testCompleteCallin3() throws Exception {
 		createBaseClass("    public void foo() {}\n");
@@ -754,29 +754,29 @@ public class CodeCompletionTest extends CoreTests {
 				"        void bar() {}\n"+
 				"        void bar() <-after |\n" + // cannot insert space before modifier (OK)
 				"        int i;\n",
-				"foo(", 
-				"        void bar() {}\n" + 
-				"        void bar() <-after void foo(); |\n" + 
+				"foo(",
+				"        void bar() {}\n" +
+				"        void bar() <-after void foo(); |\n" +
 				"        int i;\n" +
 				"",
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
-	
+
 	/* long, no callinModifier, callin-method, follows: field. */
 	public void testCompleteCallin4() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
 				"        callin void bar() {}\n"+
-				"        void bar() <- |\n" + 
+				"        void bar() <- |\n" +
 				"        int i;\n",
-				"foo(", 
-				"        callin void bar() {}\n" + 
+				"foo(",
+				"        callin void bar() {}\n" +
 				"        void bar() <- |replace| void foo(); \n" +
 				"        int i;\n" +
 				"",
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
-	
+
 	/* long, no callinModifier, callin-method, follows: method. */
 	public void testCompleteCallin5() throws Exception {
 		createBaseClass("    public void foo() {}\n");
@@ -784,14 +784,14 @@ public class CodeCompletionTest extends CoreTests {
 				"        callin void bar() {}\n"+
 				"        void bar() <-|\n" +               // no leading space, inserted below (good)
 				"        int zork() {}\n",
-				"foo(", 
-				"        callin void bar() {}\n" + 
+				"foo(",
+				"        callin void bar() {}\n" +
 				"        void bar() <- |replace| void foo();\n" +
 				"        int zork() {}\n" +
 				"",
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
-	
+
 	/* long, no callinModifier, callin-method, follows: short callin. */
 	public void testCompleteCallin6() throws Exception {
 		createBaseClass("    public void foo() {}\n");
@@ -799,8 +799,8 @@ public class CodeCompletionTest extends CoreTests {
 				"        callin void bar() {}\n"+
 				"        void bar() <-|\n" +               // no leading space, inserted below (good)
 				"        bar <- replace clone;\n",
-				"foo(", 
-				"        callin void bar() {}\n" + 
+				"foo(",
+				"        callin void bar() {}\n" +
 				"        void bar() <- |replace| void foo();\n" +
 				"        bar <- replace clone;\n" +
 				"",
@@ -812,31 +812,31 @@ public class CodeCompletionTest extends CoreTests {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
 				"        callin void bar() {}\n"+
-				"        bar <- replace |\n" + 
+				"        bar <- replace |\n" +
 				"        bar <- replace clone;\n",
-				"foo", 
-				"        callin void bar() {}\n" + 
+				"foo",
+				"        callin void bar() {}\n" +
 				"        bar <- replace foo; |\n" +    // SH: trailing space?
 				"        bar <- replace clone;\n" +
 				"",
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
-	
+
 	/* short, prefix typed, with callinModifier, follows: callout binding. */
 	public void testCompleteCallin8() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
 				"        void bar() {}\n"+
-				"        bar <- after f|\n" + 
+				"        bar <- after f|\n" +
 				"        void foo() -> void foo();\n",
-				"foo(", 
-				"        void bar() {}\n" + 
-				"        bar <- after |foo;|\n" +    
+				"foo(",
+				"        void bar() {}\n" +
+				"        bar <- after |foo;|\n" +
 				"        void foo() -> void foo();\n" +
 				"",
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
-	
+
 	public void testCompleteBasecall1() throws Exception {
 		createBaseClass("    public String getBaseText(Object object) {return null;}\n");
 		assertTypeBodyProposal(
@@ -852,7 +852,7 @@ public class CodeCompletionTest extends CoreTests {
 				"",
 				0); // should only have one proposal, so accept any to see if there are others
 	}
-	
+
 	// static case, result ignored - see https://bugs.eclipse.org/bugs/show_bug.cgi?id=331669
 	public void testCompleteBasecall2() throws Exception {
 		createBaseClass("    public static String getBaseText(Object object) {return null;}\n");
@@ -926,7 +926,7 @@ public class CodeCompletionTest extends CoreTests {
 		String str= "//here";
 
 		int offset= contents.indexOf(str);
-		
+
 		fEditor= (JavaEditor) EditorUtility.openInEditor(cu1);
 		ICompletionProposal proposal= findNonNullProposal("", cu1, new Region(offset, 0), 0);
 		String expectedContents= "package test1;\n" +
@@ -978,7 +978,7 @@ public class CodeCompletionTest extends CoreTests {
 		codeComplete(cu1, offset, collector);
 
 		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
-		
+
 		// strictly expect one method only.
 		assertEquals(1, proposals.length);
 		assertAppliedProposal(contents, proposals[0], "foomethod();"); // arguments are not inserted by this method :(
@@ -1006,7 +1006,7 @@ public class CodeCompletionTest extends CoreTests {
 		// this is the interesting check: choices??
 		assertChoices(proposal, new String[][]{new String[]{"i", "idx", "0"}});
 	}
-	
+
 	/* Full c-t-f declaration */
 	public void testCalloutToField1() throws Exception {
 		createBaseClass("public int myField;\n");
@@ -1102,13 +1102,13 @@ public class CodeCompletionTest extends CoreTests {
 	public void testPlayedBy1() throws Exception {
 		createBaseClass("test2", "MyBase", "");
 		fBeforeImports= "";
-		fAfterImports= "\nimport base test2.MyBase;\n"; 
+		fAfterImports= "\nimport base test2.MyBase;\n";
 		assertTypeBodyProposal(
 				"protected class R playedBy MyBa| {\n" +
-				"}\n", 
+				"}\n",
 				"MyBase",
 				"protected class R playedBy MyBase| {\n" +
-				"}\n", 
+				"}\n",
 				0, false);
 	}
 
@@ -1119,13 +1119,13 @@ public class CodeCompletionTest extends CoreTests {
 		fAfterImports= "\n" +
 						"import java.util.Map;\n" +
 						"\n" +
-						"import base test2.AClass;\n"; 
+						"import base test2.AClass;\n";
 		assertTypeBodyProposal(
 				"protected class AClass playedBy A| {\n" +
-				"}\n", 
-				"ACl", 
+				"}\n",
+				"ACl",
 				"protected class AClass playedBy AClass| {\n" +
-				"}\n", 
+				"}\n",
 				0, false);
 	}
 
@@ -1133,9 +1133,9 @@ public class CodeCompletionTest extends CoreTests {
 	// base import for other role already exists, correctly sort in.
 	public void testPlayedBy3() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "test3");
-		pkg.createCompilationUnit("OtherBase.java", 
+		pkg.createCompilationUnit("OtherBase.java",
 				"package test3;\n" +
-				"public class OtherBase {}\n", 
+				"public class OtherBase {}\n",
 				true, null);
 
 		createBaseClass("test2", "MyBase", "");
@@ -1147,19 +1147,19 @@ public class CodeCompletionTest extends CoreTests {
 						"import java.util.Map;\n" +
 						"\n" +
 						"import base test2.MyBase;\n" +
-						"import base test3.OtherBase;\n"; 
+						"import base test3.OtherBase;\n";
 		assertTypeBodyProposal(
 				"protected class R playedBy MyBa| {\n" +
 				"}\n" +
 				"protected class R2 playedBy OtherBase {\n" +
 				"	Map<String,String> f;\n" +
-				"}\n", 
+				"}\n",
 				"MyBase",
 				"protected class R playedBy MyBase| {\n" +
 				"}\n" +
 				"protected class R2 playedBy OtherBase {\n" +
 				"	Map<String,String> f;\n" +
-				"}\n", 
+				"}\n",
 				0, false);
 	}
 
@@ -1179,7 +1179,7 @@ public class CodeCompletionTest extends CoreTests {
 				"}\n",
 				0, false);
 	}
-	
+
 	public void testBaseGuard2() throws Exception {
 		createBaseClass("test2", "AClass", "");
 		assertTypeBodyProposal(
@@ -1256,7 +1256,7 @@ public class CodeCompletionTest extends CoreTests {
 				"}\n",
 				0, false);
 	}
-	
+
 	// inside base guard of short method binding, field reference
 	// Bug 340083 - [assist] cannot complete inside a binding guard
 	public void testGuard7() throws Exception {
@@ -1297,19 +1297,19 @@ public class CodeCompletionTest extends CoreTests {
 
 	public void testRoleTag1() throws Exception {
 		IPackageFragment teamPkg = CompletionTestSetup.getTestPackage(this.fJProject1, "MyTeam");
-		teamPkg.createCompilationUnit("MyRole.java", 
+		teamPkg.createCompilationUnit("MyRole.java",
 				"team package test1.MyTeam;\n" +
-				"public class MyRole {}\n", 
+				"public class MyRole {}\n",
 				true, null);
-		StringBuffer teamContent = new StringBuffer(); 
+		StringBuffer teamContent = new StringBuffer();
 		teamContent.append("package test1;\n");
 		teamContent.append("/** @role My */\n");
 		teamContent.append("public team class MyTeam {\n");
 		teamContent.append("    MyRole roleField;\n"); // trigger loading
 		teamContent.append("    protected class MyOtherRole {}\n");
 		teamContent.append("}");
-		
-		StringBuffer expectedContent = new StringBuffer(); 
+
+		StringBuffer expectedContent = new StringBuffer();
 		expectedContent.append("package test1;\n");
 		expectedContent.append("/** @role MyRole */\n");
 		expectedContent.append("public team class MyTeam {\n");
@@ -1319,25 +1319,25 @@ public class CodeCompletionTest extends CoreTests {
 
 		String completeAfter = "@role My";
 		int pos = teamContent.indexOf(completeAfter)+completeAfter.length();
-		
+
 		assertProposal("My", null, null, teamContent, new Region(pos, 0), expectedContent, new Region(pos+4, 0), 0); // 4: len(MyRole)-len(My)
 	}
-	
+
 	public void testRoleTag2() throws Exception {
 		IPackageFragment teamPkg = CompletionTestSetup.getTestPackage(this.fJProject1, "MyTeam");
-		teamPkg.createCompilationUnit("MyRole.java", 
+		teamPkg.createCompilationUnit("MyRole.java",
 				"team package test1.MyTeam;\n" +
-				"public class MyRole {}\n", 
+				"public class MyRole {}\n",
 				true, null);
-		StringBuffer teamContent = new StringBuffer(); 
+		StringBuffer teamContent = new StringBuffer();
 		teamContent.append("package test1;\n");
 		teamContent.append("/** @role  */\n");
 		teamContent.append("public team class MyTeam {\n");
 		teamContent.append("    MyRole roleField;\n"); // trigger loading
 		teamContent.append("    protected class MyOtherRole {}\n");
 		teamContent.append("}");
-		
-		StringBuffer expectedContent = new StringBuffer(); 
+
+		StringBuffer expectedContent = new StringBuffer();
 		expectedContent.append("package test1;\n");
 		expectedContent.append("/** @role MyRole */\n");
 		expectedContent.append("public team class MyTeam {\n");
@@ -1347,23 +1347,23 @@ public class CodeCompletionTest extends CoreTests {
 
 		String completeAfter = "@role ";
 		int pos = teamContent.indexOf(completeAfter)+completeAfter.length();
-		
-		assertProposal("", null, null, teamContent, new Region(pos, 0), expectedContent, new Region(pos+6, 0), 0); // 6: len(MyRole) 
+
+		assertProposal("", null, null, teamContent, new Region(pos, 0), expectedContent, new Region(pos+6, 0), 0); // 6: len(MyRole)
 	}
-	
-	
+
+
 	public void testCreateMethod1() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
-		pkg.createCompilationUnit("SuperTeam.java", 
+		pkg.createCompilationUnit("SuperTeam.java",
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
 				"	public class MyRole {\n" +
 				"		String blub(int i) { return \"\"; }\n" +
-				"	}\n" + 
+				"	}\n" +
 				"}\n",
 				true, null);
-		
-		StringBuffer subTeamContent = new StringBuffer(); 
+
+		StringBuffer subTeamContent = new StringBuffer();
 		subTeamContent.append("package test1;\n");
 		subTeamContent.append("import test1.p1.SuperTeam;\n");
 		subTeamContent.append("public team class Completion_testCreateMethod1 extends SuperTeam {\n");
@@ -1371,8 +1371,8 @@ public class CodeCompletionTest extends CoreTests {
 		subTeamContent.append("        blu\n");
 		subTeamContent.append("    }\n");
 		subTeamContent.append("}");
-		
-		StringBuffer expectedContent = new StringBuffer(); 
+
+		StringBuffer expectedContent = new StringBuffer();
 		expectedContent.append("package test1;\n");
 		expectedContent.append("import test1.p1.SuperTeam;\n");
 		expectedContent.append("public team class Completion_testCreateMethod1 extends SuperTeam {\n");
@@ -1391,21 +1391,21 @@ public class CodeCompletionTest extends CoreTests {
 		String completeAfter = "blu";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
 		int posAfter = expectedContent.indexOf("}")+1;
-		
-		assertProposal("", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0); 
+
+		assertProposal("", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
 	}
 
 	// Bug 362003 - [assist] completion is broken after <B base R> after a base guard
 	public void testCreateMethod2() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
-		pkg.createCompilationUnit("BaseClass.java", 
+		pkg.createCompilationUnit("BaseClass.java",
 				"package test1.p1;\n" +
 				"public class BaseClass {\n" +
 				"    public void blub() {}\n" +
 				"}\n",
 				true, null);
-		
-		StringBuffer subTeamContent = new StringBuffer(); 
+
+		StringBuffer subTeamContent = new StringBuffer();
 		subTeamContent.append("package test1;\n");
 		subTeamContent.append("import base test1.p1.BaseClass;\n");
 		subTeamContent.append("public team class Completion_testCreateMethod2 {\n");
@@ -1426,8 +1426,8 @@ public class CodeCompletionTest extends CoreTests {
 		subTeamContent.append("        System.out.print(o);\n");
 		subTeamContent.append("    }\n");
 		subTeamContent.append("}");
-		
-		StringBuffer expectedContent = new StringBuffer(); 
+
+		StringBuffer expectedContent = new StringBuffer();
 		expectedContent.append("package test1;\n");
 		expectedContent.append("import base test1.p1.BaseClass;\n");
 		expectedContent.append("public team class Completion_testCreateMethod2 {\n");
@@ -1460,29 +1460,29 @@ public class CodeCompletionTest extends CoreTests {
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
 		int posAfter = expectedContent.indexOf("super.foo()");
 		posAfter = expectedContent.indexOf("}", posAfter)+1;
-		
-		assertProposal("foo", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0); 
+
+		assertProposal("foo", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
 	}
 
 	// override role, simple case
 	public void testOverrideRole1() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
-		pkg.createCompilationUnit("SuperTeam.java", 
+		pkg.createCompilationUnit("SuperTeam.java",
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
 				"	public class MyRole {\n" +
-				"	}\n" + 
+				"	}\n" +
 				"}\n",
 				true, null);
-		
-		StringBuffer subTeamContent = new StringBuffer(); 
+
+		StringBuffer subTeamContent = new StringBuffer();
 		subTeamContent.append("package test1;\n");
 		subTeamContent.append("import test1.p1.SuperTeam;\n");
 		subTeamContent.append("public team class Completion_testOverrideRole1 extends SuperTeam {\n");
 		subTeamContent.append("    \n");
 		subTeamContent.append("}");
-		
-		StringBuffer expectedContent = new StringBuffer(); 
+
+		StringBuffer expectedContent = new StringBuffer();
 		expectedContent.append("package test1;\n");
 		expectedContent.append("import test1.p1.SuperTeam;\n");
 		expectedContent.append("public team class Completion_testOverrideRole1 extends SuperTeam {\n");
@@ -1494,33 +1494,33 @@ public class CodeCompletionTest extends CoreTests {
 		String completeAfter = "    ";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
 		int posAfter = expectedContent.indexOf("}")+1;
-		
-		assertProposal("MyRole - Override", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0); 
+
+		assertProposal("MyRole - Override", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
 	}
-	
+
 	// override role, role file with mentioning in the team
 	public void testOverrideRole2() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
-		pkg.createCompilationUnit("SuperTeam.java", 
+		pkg.createCompilationUnit("SuperTeam.java",
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
 				"	RoleFile field\n;" + // help the compiler to find the role file
 				"}\n",
 				true, null);
 		IPackageFragment rolePack = CompletionTestSetup.getTestPackage(this.fJProject1, "p1.SuperTeam");
-		rolePack.createCompilationUnit("RoleFile.java", 
+		rolePack.createCompilationUnit("RoleFile.java",
 				"team package test1.p1.SuperTeam;\n" +
-				"protected class RoleFile { }\n", 
+				"protected class RoleFile { }\n",
 				true, null);
-		
-		StringBuffer subTeamContent = new StringBuffer(); 
+
+		StringBuffer subTeamContent = new StringBuffer();
 		subTeamContent.append("package test1;\n");
 		subTeamContent.append("import test1.p1.SuperTeam;\n");
 		subTeamContent.append("public team class Completion_testOverrideRole1 extends SuperTeam {\n");
 		subTeamContent.append("    \n");
 		subTeamContent.append("}");
-		
-		StringBuffer expectedContent = new StringBuffer(); 
+
+		StringBuffer expectedContent = new StringBuffer();
 		expectedContent.append("package test1;\n");
 		expectedContent.append("import test1.p1.SuperTeam;\n");
 		expectedContent.append("public team class Completion_testOverrideRole1 extends SuperTeam {\n");
@@ -1532,32 +1532,32 @@ public class CodeCompletionTest extends CoreTests {
 		String completeAfter = "    ";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
 		int posAfter = expectedContent.indexOf("}")+1;
-		
-		assertProposal("RoleFile - Override", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0); 
-	}	
-	
+
+		assertProposal("RoleFile - Override", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
+	}
+
 	// override role, role file, without mentioning in the team (requires search engine help)
 	public void testOverrideRole3() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
-		pkg.createCompilationUnit("SuperTeam.java", 
+		pkg.createCompilationUnit("SuperTeam.java",
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" + // no mentioning of RoleFile
 				"}\n",
 				true, null);
 		IPackageFragment rolePack = CompletionTestSetup.getTestPackage(this.fJProject1, "p1.SuperTeam");
-		rolePack.createCompilationUnit("RoleFile.java", 
+		rolePack.createCompilationUnit("RoleFile.java",
 				"team package test1.p1.SuperTeam;\n" +
-				"protected class RoleFile { }\n", 
+				"protected class RoleFile { }\n",
 				true, null);
-		
-		StringBuffer subTeamContent = new StringBuffer(); 
+
+		StringBuffer subTeamContent = new StringBuffer();
 		subTeamContent.append("package test1;\n");
 		subTeamContent.append("import test1.p1.SuperTeam;\n");
 		subTeamContent.append("public team class Completion_testOverrideRole1 extends SuperTeam {\n");
 		subTeamContent.append("    \n");
 		subTeamContent.append("}");
-		
-		StringBuffer expectedContent = new StringBuffer(); 
+
+		StringBuffer expectedContent = new StringBuffer();
 		expectedContent.append("package test1;\n");
 		expectedContent.append("import test1.p1.SuperTeam;\n");
 		expectedContent.append("public team class Completion_testOverrideRole1 extends SuperTeam {\n");
@@ -1569,30 +1569,30 @@ public class CodeCompletionTest extends CoreTests {
 		String completeAfter = "    ";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
 		int posAfter = expectedContent.indexOf("}")+1;
-		
-		assertProposal("RoleFile - Override", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0); 
-	}	
+
+		assertProposal("RoleFile - Override", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
+	}
 
 	// Bug 355255 - [assist] NPE during completion if team contains an enum
 	public void testOverrideRole4() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
-		pkg.createCompilationUnit("SuperTeam.java", 
+		pkg.createCompilationUnit("SuperTeam.java",
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
 				"	public class MyRole {\n" +
-				"	}\n" + 
+				"	}\n" +
 				"}\n",
 				true, null);
-		
-		StringBuffer subTeamContent = new StringBuffer(); 
+
+		StringBuffer subTeamContent = new StringBuffer();
 		subTeamContent.append("package test1;\n");
 		subTeamContent.append("import test1.p1.SuperTeam;\n");
 		subTeamContent.append("public team class Completion_testOverrideRole1 extends SuperTeam {\n");
 		subTeamContent.append("    enum Aufzaehlung { EINS, ZWEI }\n");
 		subTeamContent.append("    \n");
 		subTeamContent.append("}");
-		
-		StringBuffer expectedContent = new StringBuffer(); 
+
+		StringBuffer expectedContent = new StringBuffer();
 		expectedContent.append("package test1;\n");
 		expectedContent.append("import test1.p1.SuperTeam;\n");
 		expectedContent.append("public team class Completion_testOverrideRole1 extends SuperTeam {\n");
@@ -1605,8 +1605,8 @@ public class CodeCompletionTest extends CoreTests {
 		String completeAfter = "}\n    ";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
 		int posAfter = expectedContent.indexOf("    }")+5;
-		
-		assertProposal("MyRole - Override", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0); 
+
+		assertProposal("MyRole - Override", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
 	}
 
 	// propose creating a team instance:
@@ -1674,9 +1674,9 @@ public class CodeCompletionTest extends CoreTests {
 				"import testutil.MyColl;\n" +
 				"\n" +
 				"import base test2.AClass;\n";
-		createBaseClass("testutil", "MyColl", "<T> implements java.util.Collection<T>", 
-				"	public void addAll(Collection<? extends E> other) {}\n" + 
-				"	public E[] toArray() { return null; }\n" + 
+		createBaseClass("testutil", "MyColl", "<T> implements java.util.Collection<T>",
+				"	public void addAll(Collection<? extends E> other) {}\n" +
+				"	public E[] toArray() { return null; }\n" +
 				"	public int size() { return 1; }\n");
 		createBaseClass("test2", "AClass", "public boolean check() { return false; }");
 		assertTypeBodyProposal(
@@ -1698,7 +1698,7 @@ public class CodeCompletionTest extends CoreTests {
 	// propose methods invoked via a phantom role, simple case
 	public void testMethodInvocation1() throws CoreException {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
-		pkg.createCompilationUnit("SuperTeam.java", 
+		pkg.createCompilationUnit("SuperTeam.java",
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
 				"	 protected class R {\n" +
@@ -1707,8 +1707,8 @@ public class CodeCompletionTest extends CoreTests {
 				"    }\n" +
 				"}\n",
 				true, null);
-		
-		StringBuffer subTeamContent = new StringBuffer(); 
+
+		StringBuffer subTeamContent = new StringBuffer();
 		subTeamContent.append("package test1;\n");
 		subTeamContent.append("import test1.p1.SuperTeam;\n");
 		subTeamContent.append("public team class Completion_testMethodInvocation1 extends SuperTeam {\n");
@@ -1716,8 +1716,8 @@ public class CodeCompletionTest extends CoreTests {
 		subTeamContent.append("        r.\n");
 		subTeamContent.append("    }\n");
 		subTeamContent.append("}");
-		
-		StringBuffer expectedContent = new StringBuffer(); 
+
+		StringBuffer expectedContent = new StringBuffer();
 		expectedContent.append("package test1;\n");
 		expectedContent.append("import test1.p1.SuperTeam;\n");
 		expectedContent.append("public team class Completion_testMethodInvocation1 extends SuperTeam {\n");
@@ -1725,13 +1725,13 @@ public class CodeCompletionTest extends CoreTests {
 		expectedContent.append("        r.foo();\n");
 		expectedContent.append("    }\n");
 		expectedContent.append("}");
-		
+
 		String expectedInfo = ">Doc of foo() </body></html>";
 
 		String completeAfter = "r.";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
 		int posAfter = expectedContent.indexOf("foo();")+6;
-		
+
 		ICompletionProposal proposal = assertProposal("foo", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
 		assertTrue("Unexpected additional info", proposal.getAdditionalProposalInfo().endsWith(expectedInfo));
 	}
@@ -1739,7 +1739,7 @@ public class CodeCompletionTest extends CoreTests {
 	// propose methods invoked via a phantom role, two direct tsuper roles both have the method, pick the nearest version
 	public void testMethodInvocation2() throws CoreException {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
-		pkg.createCompilationUnit("SuperTeam.java", 
+		pkg.createCompilationUnit("SuperTeam.java",
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
 				"  protected team class Mid1 {\n" +
@@ -1756,8 +1756,8 @@ public class CodeCompletionTest extends CoreTests {
 				"  }\n" +
 				"}\n",
 				true, null);
-		
-		StringBuffer subTeamContent = new StringBuffer(); 
+
+		StringBuffer subTeamContent = new StringBuffer();
 		subTeamContent.append("package test1;\n");
 		subTeamContent.append("import test1.p1.SuperTeam;\n");
 		subTeamContent.append("public team class Completion_testMethodInvocation2 extends SuperTeam {\n");
@@ -1773,8 +1773,8 @@ public class CodeCompletionTest extends CoreTests {
 		subTeamContent.append("    }\n");
 		subTeamContent.append("  }\n");
 		subTeamContent.append("}");
-		
-		StringBuffer expectedContent = new StringBuffer(); 
+
+		StringBuffer expectedContent = new StringBuffer();
 		expectedContent.append("package test1;\n");
 		expectedContent.append("import test1.p1.SuperTeam;\n");
 		expectedContent.append("public team class Completion_testMethodInvocation2 extends SuperTeam {\n");
@@ -1790,7 +1790,7 @@ public class CodeCompletionTest extends CoreTests {
 		expectedContent.append("    }\n");
 		expectedContent.append("  }\n");
 		expectedContent.append("}");
-		
+
 		String superMid1R = "%E2%98%82=OTTestProject1/src%3Ctest1.p1%7BSuperTeam.java%E2%98%83SuperTeam%E2%98%83Mid1%E2%98%83R";
 		String expectedInfo = ">foo in SuperMid2 " +
 							  "<div><b>Overrides:</b> " +
@@ -1800,7 +1800,7 @@ public class CodeCompletionTest extends CoreTests {
 		String completeAfter = "r.";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
 		int posAfter = expectedContent.indexOf("r.foo();")+8;
-		
+
 		ICompletionProposal proposal = assertProposal("foo", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
 		assertTrue("Unexpected additional info", proposal.getAdditionalProposalInfo().endsWith(expectedInfo));
 	}
@@ -1808,7 +1808,7 @@ public class CodeCompletionTest extends CoreTests {
 	// propose methods invoked via a phantom role, two direct tsuper roles, only more distant one has the method
 	public void testMethodInvocation3() throws CoreException {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
-		pkg.createCompilationUnit("SuperTeam.java", 
+		pkg.createCompilationUnit("SuperTeam.java",
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
 				"  protected team class Mid1 {\n" +
@@ -1823,8 +1823,8 @@ public class CodeCompletionTest extends CoreTests {
 				"  }\n" +
 				"}\n",
 				true, null);
-		
-		StringBuffer subTeamContent = new StringBuffer(); 
+
+		StringBuffer subTeamContent = new StringBuffer();
 		subTeamContent.append("package test1;\n");
 		subTeamContent.append("import test1.p1.SuperTeam;\n");
 		subTeamContent.append("public team class Completion_testMethodInvocation3 extends SuperTeam {\n");
@@ -1840,8 +1840,8 @@ public class CodeCompletionTest extends CoreTests {
 		subTeamContent.append("    }\n");
 		subTeamContent.append("  }\n");
 		subTeamContent.append("}");
-		
-		StringBuffer expectedContent = new StringBuffer(); 
+
+		StringBuffer expectedContent = new StringBuffer();
 		expectedContent.append("package test1;\n");
 		expectedContent.append("import test1.p1.SuperTeam;\n");
 		expectedContent.append("public team class Completion_testMethodInvocation3 extends SuperTeam {\n");
@@ -1857,7 +1857,7 @@ public class CodeCompletionTest extends CoreTests {
 		expectedContent.append("    }\n");
 		expectedContent.append("  }\n");
 		expectedContent.append("}");
-		
+
 		String superMid1R = "%E2%98%82=OTTestProject1/src%3Ctest1.p1%7BSuperTeam.java%E2%98%83SuperTeam%E2%98%83Mid1%E2%98%83R";
 		String expectedInfo = ">foo in SubMid1 " +
 							  "<div><b>Overrides:</b> " +
@@ -1867,17 +1867,17 @@ public class CodeCompletionTest extends CoreTests {
 		String completeAfter = "r.";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
 		int posAfter = expectedContent.indexOf("r.foo();")+8;
-		
+
 		ICompletionProposal proposal = assertProposal("foo", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
 		assertTrue("Unexpected additional info", proposal.getAdditionalProposalInfo().endsWith(expectedInfo));
 	}
-	
+
 
 	// propose methods invoked via a phantom role, simple nested case
 	public void testMethodInvocation4() throws CoreException {
-	
-		
-		StringBuffer subTeamContent = new StringBuffer(); 
+
+
+		StringBuffer subTeamContent = new StringBuffer();
 		subTeamContent.append("package test1;\n");
 		subTeamContent.append("public team class Completion_testMethodInvocation4 {\n");
 		subTeamContent.append("  protected team class Mid1 {\n");
@@ -1893,8 +1893,8 @@ public class CodeCompletionTest extends CoreTests {
 		subTeamContent.append("    }\n");
 		subTeamContent.append("  }\n");
 		subTeamContent.append("}");
-		
-		StringBuffer expectedContent = new StringBuffer(); 
+
+		StringBuffer expectedContent = new StringBuffer();
 		expectedContent.append("package test1;\n");
 		expectedContent.append("public team class Completion_testMethodInvocation4 {\n");
 		expectedContent.append("  protected team class Mid1 {\n");
@@ -1910,23 +1910,23 @@ public class CodeCompletionTest extends CoreTests {
 		expectedContent.append("    }\n");
 		expectedContent.append("  }\n");
 		expectedContent.append("}");
-		
+
 		String expectedInfo = ">foo in Mid1 </body></html>";
 
 		String completeAfter = "r.";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
 		int posAfter = expectedContent.indexOf("r.foo();")+8;
-		
+
 		ICompletionProposal proposal = assertProposal("foo", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
 		assertTrue("Unexpected additional info", proposal.getAdditionalProposalInfo().endsWith(expectedInfo));
 	}
 
 	// propose methods invoked via a phantom role, simple nested case
 	public void testMethodInvocation5() throws CoreException {
-	
+
 		createBaseClass("test1", "B", "public boolean check() { return false; }");
 
-		StringBuffer subTeamContent = new StringBuffer(); 
+		StringBuffer subTeamContent = new StringBuffer();
 		subTeamContent.append("package test1;\n");
 		subTeamContent.append("public team class Completion_testMethodInvocation5 {\n");
 		subTeamContent.append("    protected class R playedBy B {\n");
@@ -1938,8 +1938,8 @@ public class CodeCompletionTest extends CoreTests {
 		subTeamContent.append("    }\n");
 		subTeamContent.append("  }\n");
 		subTeamContent.append("}");
-		
-		StringBuffer expectedContent = new StringBuffer(); 
+
+		StringBuffer expectedContent = new StringBuffer();
 		expectedContent.append("package test1;\n");
 		expectedContent.append("public team class Completion_testMethodInvocation5 {\n");
 		expectedContent.append("    protected class R playedBy B {\n");
@@ -1951,12 +1951,12 @@ public class CodeCompletionTest extends CoreTests {
 		expectedContent.append("    }\n");
 		expectedContent.append("  }\n");
 		expectedContent.append("}");
-		
+
 
 		String completeAfter = "roles.";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
 		int posAfter = expectedContent.indexOf("roles.add(arg0)")+10; // at start of argument
-		
+
 		ICompletionProposal proposal = assertProposal("add", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 4), 0);
 		assertTrue("Should be a parameter guessing proposal", proposal instanceof ParameterGuessingProposal);
 		assertChoices(proposal, new String[][]{new String[]{"arg0", "rarg", "null"}}); // <- this is key: expect "rarg" next to "arg0"!
@@ -2000,25 +2000,25 @@ public class CodeCompletionTest extends CoreTests {
 				"}\n");
 
 		int posAfter = expectedContent.indexOf("new R()") + "new R()".length();
-		
+
 		ICompletionProposal proposal = assertProposal("R()", null, null, teamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
 		assertTrue("Should be a java method proposal", proposal instanceof JavaMethodCompletionProposal);
 	}
 
 	// == Below: Helper methods/fields. ==
-	
-	private void createBaseClass(String classBody) 
-			throws JavaModelException, CoreException 
+
+	private void createBaseClass(String classBody)
+			throws JavaModelException, CoreException
 	{
 		createBaseClass("test1", "B", classBody);
 	}
-	private void createBaseClass(String basePackage, String className, String classBody) 
-			throws JavaModelException, CoreException 
+	private void createBaseClass(String basePackage, String className, String classBody)
+			throws JavaModelException, CoreException
 	{
 		createBaseClass(basePackage, className, "", classBody);
 	}
-	private void createBaseClass(String basePackage, String className, String classHeaderDetails, String classBody) 
-			throws JavaModelException, CoreException 
+	private void createBaseClass(String basePackage, String className, String classHeaderDetails, String classBody)
+			throws JavaModelException, CoreException
 	{
 		// create a base class:
 		StringBuffer buf= new StringBuffer();
@@ -2044,7 +2044,7 @@ public class CodeCompletionTest extends CoreTests {
 	private String fLocals;
 	private char fTrigger;
 	private boolean fWaitBeforeCompleting;
-	
+
 	protected void assertChoices(ICompletionProposal proposal, String[][] expected) {
 		assertTrue("Not a ParameterGuessingProposal", proposal instanceof ParameterGuessingProposal);
 		ParameterGuessingProposal pgProposal = (ParameterGuessingProposal)proposal;
@@ -2057,48 +2057,48 @@ public class CodeCompletionTest extends CoreTests {
 			}
 		}
 	}
-	
-	protected ICompletionProposal assertTypeBodyProposal(String before, String selector, String expected, int requiredRelevance) 
-			throws CoreException 
+
+	protected ICompletionProposal assertTypeBodyProposal(String before, String selector, String expected, int requiredRelevance)
+			throws CoreException
 	{
 		return assertTypeBodyProposal(before, selector, expected, requiredRelevance, true);
 	}
-	protected ICompletionProposal assertTypeBodyProposal(String before, String selector, String expected, int requiredRelevance, boolean addRole) 
-			throws CoreException 
+	protected ICompletionProposal assertTypeBodyProposal(String before, String selector, String expected, int requiredRelevance, boolean addRole)
+			throws CoreException
 	{
 		StringBuffer contents= new StringBuffer();
 		IRegion preSelection= assembleClassBodyTestCUExtractSelection(contents, before, fBeforeImports, addRole);
 		StringBuffer result= new StringBuffer();
 		IRegion expectedSelection= assembleClassBodyTestCUExtractSelection(result, expected, fAfterImports, addRole);
-		
+
 		return assertProposal(selector, null, null, contents, preSelection, result, expectedSelection, requiredRelevance);
 	}
 
-	protected ICompletionProposal assertROFIBodyProposal(String before, String selector, String expected, int requiredRelevance) 
-			throws CoreException 
+	protected ICompletionProposal assertROFIBodyProposal(String before, String selector, String expected, int requiredRelevance)
+			throws CoreException
 	{
 		IPackageFragment testPkg = CompletionTestSetup.getTestPackage(this.fJProject1, null);
 		String teamName = "Completion_" + getName();
-		testPkg.createCompilationUnit(teamName + ".java", 
+		testPkg.createCompilationUnit(teamName + ".java",
 				"package test1;\n" +
 				"/** @role RoFiRole */\n" +
-				"public team class Completion_"+getName()+" {}\n", 
+				"public team class Completion_"+getName()+" {}\n",
 				true, null);
-		
+
 		StringBuffer contents= new StringBuffer();
 		IRegion preSelection= assembleROFIBodyTestCUExtractSelection(contents, before, fBeforeImports);
 		StringBuffer result= new StringBuffer();
 		IRegion expectedSelection= assembleROFIBodyTestCUExtractSelection(result, expected, fAfterImports);
-		
+
 		return assertProposal(selector, teamName, "RoFiRole", contents, preSelection, result, expectedSelection, requiredRelevance);
 	}
 
-	protected void assertNosuchTypeBodyProposal(String before, String selector, int requiredRelevance) 
-			throws CoreException 
+	protected void assertNosuchTypeBodyProposal(String before, String selector, int requiredRelevance)
+			throws CoreException
 	{
 		StringBuffer contents= new StringBuffer();
 		IRegion preSelection= assembleClassBodyTestCUExtractSelection(contents, before, fBeforeImports, true);
-		
+
 		assertNosuchProposal(selector, contents, preSelection, requiredRelevance);
 	}
 
@@ -2172,7 +2172,7 @@ public class CodeCompletionTest extends CoreTests {
 	private ICompletionProposal assertProposal(String selector, String relativePackage, String typeName, StringBuffer contents, IRegion preSelection, StringBuffer result, IRegion expectedSelection, int requiredRelevance) throws CoreException {
 //{ObjectTeams: made package and file name configurable via new arguments `relativePackage'/`typeName':
 		IPackageFragment pkg = (relativePackage == null) ? CompletionTestSetup.getAnonymousTestPackage(this.fJProject1) : CompletionTestSetup.getTestPackage(this.fJProject1, relativePackage);
-		fCU= (typeName == null) ? createCU(pkg, contents.toString()) : pkg.createCompilationUnit(typeName + ".java", contents.toString(), false, null); 
+		fCU= (typeName == null) ? createCU(pkg, contents.toString()) : pkg.createCompilationUnit(typeName + ".java", contents.toString(), false, null);
 // SH}
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
 		IDocument doc;
@@ -2197,8 +2197,8 @@ public class CodeCompletionTest extends CoreTests {
 		return proposal;
 	}
 
-	private void assertNosuchProposal(String selector, StringBuffer contents, IRegion preSelection, int requiredRelevance) 
-			throws CoreException 
+	private void assertNosuchProposal(String selector, StringBuffer contents, IRegion preSelection, int requiredRelevance)
+			throws CoreException
 	{
 		fCU= createCU(CompletionTestSetup.getAnonymousTestPackage(this.fJProject1), contents.toString());
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
@@ -2209,7 +2209,7 @@ public class CodeCompletionTest extends CoreTests {
 			closeEditor(fEditor);
 		}
 	}
-	
+
 	// from 3.4 CodeCompletionTest
 	private void assertAppliedProposal(String contents, IJavaCompletionProposal proposal, String completion) {
 		IDocument doc= new Document(contents);
@@ -2238,10 +2238,10 @@ public class CodeCompletionTest extends CoreTests {
 
 	private ICompletionProposal findNamedProposal(String prefix, ICompilationUnit cu, IRegion selection, int requiredRelevance) throws JavaModelException, PartInitException {
 		ICompletionProposal[] proposals= collectProposals(cu, selection);
-		
+
 		ICompletionProposal found= null;
 		for (int i= 0; i < proposals.length; i++) {
-			if (proposals[i] instanceof IJavaCompletionProposal) 
+			if (proposals[i] instanceof IJavaCompletionProposal)
 				if (((IJavaCompletionProposal)proposals[i]).getRelevance() < requiredRelevance)
 					continue;
 			String displayString= proposals[i].getDisplayString();
@@ -2267,7 +2267,7 @@ public class CodeCompletionTest extends CoreTests {
 	 * Invokes {@link Thread#sleep(long)} if {@link #waitBeforeCompleting(boolean)} was set to
 	 * <code>true</code> or camel case completions are enabled. For some reasons, inner types and
 	 * camel case matches don't show up otherwise.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	private void waitBeforeCoreCompletion() {
@@ -2299,5 +2299,5 @@ public class CodeCompletionTest extends CoreTests {
 		} else {
 			proposal.apply(doc);
 		}
-	}	
+	}
 }

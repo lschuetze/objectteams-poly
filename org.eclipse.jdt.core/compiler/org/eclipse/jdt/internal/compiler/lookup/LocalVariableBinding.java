@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -84,7 +84,7 @@ public class LocalVariableBinding extends VariableBinding {
 		this(declaration.name, type, modifiers, isArgument);
 		this.declaration = declaration;
 	}
-	
+
 	// argument
 	public LocalVariableBinding(LocalDeclaration declaration, TypeBinding type, int modifiers, MethodScope declaringScope) {
 
@@ -333,7 +333,7 @@ public class LocalVariableBinding extends VariableBinding {
 	public boolean isParameter() {
 		return ((this.tagBits & TagBits.IsArgument) != 0);
 	}
-	
+
 	public boolean isCatchParameter() {
 		return false;
 	}
@@ -351,7 +351,7 @@ public class LocalVariableBinding extends VariableBinding {
 		}
 		return null;
 	}
-	
+
 	public void markInitialized() {
 		// Signals that the type is correctly set now - This is for extension in subclasses
 	}

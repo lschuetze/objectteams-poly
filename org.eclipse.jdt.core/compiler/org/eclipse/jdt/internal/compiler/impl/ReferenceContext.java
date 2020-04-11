@@ -36,7 +36,7 @@ public interface ReferenceContext {
 	boolean hasErrors();
 
 	void tagAsHavingErrors();
-	
+
 	void tagAsHavingIgnoredMandatoryErrors(int problemId);
 
 //{ObjectTeams: some errors will have to be removed

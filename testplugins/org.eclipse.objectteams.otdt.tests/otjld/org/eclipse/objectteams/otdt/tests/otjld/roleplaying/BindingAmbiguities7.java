@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -48,7 +48,7 @@ public class BindingAmbiguities7 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.7-otjld_g-ambiguous-binding-1
      public void _g_test737_ambiguousBinding1() {
-        
+
         runConformTest(
              new String[] {
  		"T737ab1Main.java",
@@ -160,7 +160,7 @@ public class BindingAmbiguities7 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.7-otjld_g-ambiguous-binding-2
      public void _g_test737_ambiguousBinding2() {
-        
+
         runConformTest(
              new String[] {
  		"T737ab2Main.java",
@@ -272,7 +272,7 @@ public class BindingAmbiguities7 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.7-otjld_g-ambiguous-binding-3
      public void _g_test737_ambiguousBinding3() {
-        
+
         runConformTest(
              new String[] {
  		"T737ab3Main.java",
@@ -384,7 +384,7 @@ public class BindingAmbiguities7 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.7-otjld_g-ambiguous-binding-4
      public void _g_test737_ambiguousBinding4() {
-        
+
         runConformTest(
              new String[] {
  		"T737ab4Main.java",
@@ -496,7 +496,7 @@ public class BindingAmbiguities7 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.7-otjld_g-ambiguous-binding-5
      public void _g_test737_ambiguousBinding5() {
-        
+
         runConformTest(
              new String[] {
  		"T737ab5Main.java",
@@ -608,7 +608,7 @@ public class BindingAmbiguities7 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.7-otjld_g-ambiguous-binding-6
      public void _g_test737_ambiguousBinding6() {
-        
+
         runConformTest(
              new String[] {
  		"T737ab6Main.java",

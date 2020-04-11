@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -64,34 +64,34 @@ import org.junit.runners.Suite;
 public class OTQuickFixTest extends QuickFixTest {
 
 	protected IJavaProject fJProject1;
-	
+
 	protected IPackageFragmentRoot fSourceFolder;
 
 	public static final String OT_RUNTIME_PATH;
 	public static final String OTRE_JAR_PATH;
 	static {
 		OT_RUNTIME_PATH = JavaCore.getClasspathVariable(OTDTPlugin.OTDT_INSTALLDIR).toOSString();
-		OTRE_JAR_PATH = OT_RUNTIME_PATH 
+		OTRE_JAR_PATH = OT_RUNTIME_PATH
 						+ File.separator
 						+ "lib" //$NON-NLS-1$
 						+ File.separator
 						+ "otre.jar"; //$NON-NLS-1$
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	protected void addOptions(Hashtable options) {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
-		options.put(JavaCore.COMPILER_PB_STATIC_ACCESS_RECEIVER, JavaCore.ERROR);		
+		options.put(JavaCore.COMPILER_PB_STATIC_ACCESS_RECEIVER, JavaCore.ERROR);
 	}
 
 	@Before
 	public void setUp() throws Exception {
 		Hashtable<String,String> options= TestOptions.getDefaultOptions();
 		addOptions(options);
-		
-		JavaCore.setOptions(options);			
-		
+
+		JavaCore.setOptions(options);
+
 		fJProject1= ProjectTestSetup.getProject();
 		if (!OTJavaNature.hasOTJavaNature(fJProject1.getProject())) {
 			IProjectDescription description = fJProject1.getProject().getDescription();
@@ -99,7 +99,7 @@ public class OTQuickFixTest extends QuickFixTest {
 			fJProject1.getProject().setDescription(description, null);
 			OTREContainer.initializeOTJProject(fJProject1.getProject());
 		}
-		
+
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
@@ -107,11 +107,11 @@ public class OTQuickFixTest extends QuickFixTest {
 	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
-	
+
 	protected void assertChoices(ICompletionProposal proposal, String linkedGroup, String[] expected) {
 		assertTrue("Not a LinkedCorrectionProposal", proposal instanceof LinkedCorrectionProposal);
 		LinkedCorrectionProposal linkedProposal = (LinkedCorrectionProposal)proposal;
-		
+
 		LinkedProposalModel linkedProposalModel = new ProposalAdaptor().getLinkedProposalModel(linkedProposal);
 		LinkedProposalPositionGroup positionGroup = linkedProposalModel.getPositionGroup(linkedGroup, false);
 		Proposal[] choices = positionGroup.getProposals();

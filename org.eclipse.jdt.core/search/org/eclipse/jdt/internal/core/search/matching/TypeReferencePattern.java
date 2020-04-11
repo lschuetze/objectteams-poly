@@ -20,17 +20,17 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.core.util.Util;
 
 public class TypeReferencePattern extends IntersectingPattern {
-	
+
 	protected char[] qualification;
 	protected char[] simpleName;
-		
+
 	protected char[] currentCategory;
-	
+
 	/* Optimization: case where simpleName == null */
 	public int segmentsSize;
 	protected char[][] segments;
 	protected int currentSegment;
-	
+
 	private final static char[][]
 		CATEGORIES = { REF, ANNOTATION_REF },
 		CATEGORIES_ANNOT_REF = { ANNOTATION_REF };
@@ -39,15 +39,15 @@ public class TypeReferencePattern extends IntersectingPattern {
 
 	public TypeReferencePattern(char[] qualification, char[] simpleName, int matchRule) {
 		this(matchRule);
-	
+
 		this.qualification = this.isCaseSensitive ? qualification : CharOperation.toLowerCase(qualification);
 		this.simpleName = (this.isCaseSensitive || this.isCamelCase) ? simpleName : CharOperation.toLowerCase(simpleName);
-	
+
 		if (simpleName == null)
 			this.segments = this.qualification == null ? ONE_STAR_CHAR : CharOperation.splitOn('.', this.qualification);
 		else
 			this.segments = null;
-		
+
 		if (this.segments == null)
 			if (this.qualification == null)
 				this.segmentsSize =  0;
@@ -55,7 +55,7 @@ public class TypeReferencePattern extends IntersectingPattern {
 				this.segmentsSize =  CharOperation.occurencesOf('.', this.qualification) + 1;
 		else
 			this.segmentsSize = this.segments.length;
-	
+
 		this.mustResolve = true; // always resolve (in case of a simple name reference being a potential match)
 	}
 	/*
@@ -123,9 +123,9 @@ public class TypeReferencePattern extends IntersectingPattern {
 	public char[] getIndexKey() {
 		if (this.simpleName != null)
 			return this.simpleName;
-	
+
 		// Optimization, e.g. type reference is 'org.eclipse.jdt.core.*'
-		if (this.currentSegment >= 0) 
+		if (this.currentSegment >= 0)
 			return this.segments[this.currentSegment];
 		return null;
 	}
@@ -136,7 +136,7 @@ public class TypeReferencePattern extends IntersectingPattern {
 	@Override
 	protected boolean hasNextQuery() {
 		if (this.segments == null) return false;
-	
+
 		// Optimization, e.g. type reference is 'org.eclipse.jdt.core.*'
 		// if package has at least 4 segments, don't look at the first 2 since they are mostly
 		// redundant (e.g. in 'org.eclipse.jdt.core.*' 'org.eclipse' is used all the time)

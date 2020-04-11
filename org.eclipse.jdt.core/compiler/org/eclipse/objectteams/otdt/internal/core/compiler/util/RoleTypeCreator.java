@@ -135,7 +135,7 @@ public class RoleTypeCreator implements TagBits {
             TypeBinding      originalType,
             final ASTNode    typedNode,
             ReferenceBinding refBinding,
-            int				 dimensions) 
+            int				 dimensions)
     {
     	ReferenceBinding site = scope.enclosingSourceType();
         assert( ! (site == null));
@@ -187,13 +187,13 @@ public class RoleTypeCreator implements TagBits {
         boolean decapsulationAllowed = false;
         if (typedNode instanceof Expression)
         	decapsulationAllowed = ((Expression)typedNode).getBaseclassDecapsulation().isAllowed();
-        	
+
         if (   (variableBinding instanceof VariableBinding)
-			&& (((VariableBinding)variableBinding).otBits & IOTConstants.IsFreshTeamInstance) != 0) 
+			&& (((VariableBinding)variableBinding).otBits & IOTConstants.IsFreshTeamInstance) != 0)
         {
         	if (!refBinding.isRoleType())
         		return variableBinding.getDependentTypeBinding(refBinding, -1, null, dimensions);
-        	return 
+        	return
         		originalType;
     	} else if (variableBinding == null)  {
             if (needAnchor)
@@ -317,18 +317,18 @@ public class RoleTypeCreator implements TagBits {
 		    		// anchored to argument, instantiate directly:
 		    		Expression anchorExpr = send.arguments[roleReturn._argumentPosition];
 		    		TypeBinding anchorType = anchorExpr.resolvedType;
-		    		
+
 		    		ITeamAnchor anchor = null;
 		    		if (anchorType.isRole() && ((ReferenceBinding)anchorType).isCompatibleViaLowering(roleEnclosing)) {
 		    			// see 1.1.31-otjld-stacked-teams-1 f.
 		    			if (anchorExpr.isThis())
 		    				anchor = ((ReferenceBinding)anchorType).getField(IOTConstants._OT_BASE, true);
 		    			else
-		    				return returnType; // cannot improve, error will be reported upstream		    			
+		    				return returnType; // cannot improve, error will be reported upstream
 		    		} else {
 		    			if (anchorType.isRole())
 		    				anchorType = ((ReferenceBinding)anchorType).getRealClass(); // ignore role-ness of team anchor
-		    			if (!anchorType.isCompatibleWith(roleEnclosing)) 
+		    			if (!anchorType.isCompatibleWith(roleEnclosing))
 			    			return returnType; // cannot improve, anchor doesn't match expected team.
 			    		anchor = (ITeamAnchor)((NameReference)anchorExpr).binding;
 		    		}
@@ -547,16 +547,16 @@ public class RoleTypeCreator implements TagBits {
 	        // consider arrays:
 	        int dimensions = typeToWrap.dimensions();
 			typeToWrap     = typeToWrap.leafComponentType();
-			
+
 			// consider parameterized:
 			TypeBinding[] arguments = null;
-			if (typeToWrap.isParameterizedType()) 
+			if (typeToWrap.isParameterizedType())
 				arguments = ((ParameterizedTypeBinding)typeToWrap).arguments;
 
 			// easy problems first:
 	        if (!(typeToWrap instanceof ReferenceBinding) || typeToWrap.isEnum())
 	            return originalType;
-	        
+
 	        if (typeToWrap instanceof UnresolvedReferenceBinding) {
 	        	// defer wrapping until resolve():
 	        	return ((UnresolvedReferenceBinding) typeToWrap).deferredWrappableType(scope, site, typedNode, problemReporter);
@@ -716,14 +716,14 @@ public class RoleTypeCreator implements TagBits {
 
 	/* Wraps either relative to defaultAnchor or unqualified. */
 	private static TypeBinding maybeWrapSignatureType(TypeBinding type, MethodScope scope, ASTNode typedNode, ITeamAnchor defaultAnchor) {
-		if (   defaultAnchor != null 
+		if (   defaultAnchor != null
 			&& !type.leafComponentType().isBaseType()
 			&& defaultAnchor.isTeamContainingRole((ReferenceBinding) type.leafComponentType()))
 		{
 			return defaultAnchor.getDependentTypeBinding(
-						(ReferenceBinding) type.leafComponentType(), 
-						0, // typeParamPosition 
-						Binding.NO_PARAMETERS, 
+						(ReferenceBinding) type.leafComponentType(),
+						0, // typeParamPosition
+						Binding.NO_PARAMETERS,
 						type.dimensions());
 		} else {
 			return maybeWrapUnqualifiedRoleType(type, scope, typedNode);
@@ -922,7 +922,7 @@ public class RoleTypeCreator implements TagBits {
 		    		return cannotWrapType(roleType, problemReporter, typedNode);
 		    	}
 		    }
-		    else if (anchorExpr instanceof AllocationExpression) 
+		    else if (anchorExpr instanceof AllocationExpression)
 		    {
 		    	// this anchor matches nothing
 		    	String displayName = "fresh-instance-of-"+((AllocationExpression)anchorExpr).type.toString(); //$NON-NLS-1$
@@ -1630,10 +1630,10 @@ public class RoleTypeCreator implements TagBits {
 		return false;
 	}
 
-	/** 
+	/**
 	 * Decompose a given type into atomic types (taking into account arrays and type arguments)
-	 * perform a given type substitution for each atomic type and 
-	 * re-assemble to a type of the same shape as the given type. 
+	 * perform a given type substitution for each atomic type and
+	 * re-assemble to a type of the same shape as the given type.
 	 * @param original      the given type to be substituted
 	 * @param environment   for creation of parameterized types and array types
 	 * @param substitution  what to perform on each atomic dependent type
@@ -1643,7 +1643,7 @@ public class RoleTypeCreator implements TagBits {
 	   TypeBinding type = original;
 	   int dimensions = type.dimensions();
 	   type = type.leafComponentType();
-	   
+
 	   TypeBinding[] typeArguments = null;
 	   boolean hasInstantiated = false;
 	   if (type.isParameterizedType()) {
@@ -1666,7 +1666,7 @@ public class RoleTypeCreator implements TagBits {
 	   }
 
        if (type instanceof DependentTypeBinding) {
-    	   TypeBinding substituted = substitution.substitute((DependentTypeBinding) type, typeArguments, dimensions); 
+    	   TypeBinding substituted = substitution.substitute((DependentTypeBinding) type, typeArguments, dimensions);
            if (substituted != type) // includes substituted == null //$IDENTITY-COMPARISON$
         	   return substituted;
        }

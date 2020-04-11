@@ -336,7 +336,7 @@ public final class JavaConventions {
 				IStatus status = validateIdentifier(id, sourceLevel, complianceLevel);
 				return status;
 			} finally {
-				SCANNER.parsePureJavaOnly = old;				
+				SCANNER.parsePureJavaOnly = old;
 			}
 		}
 	}
@@ -408,9 +408,9 @@ public final class JavaConventions {
 
 	/**
 	 * Validate the given Java type name, either simple or qualified, for the given source and compliance levels.
-	 * 
+	 *
 	 * <p>For example, <code>"java.lang.Object"</code>, or <code>"Object"</code>.</p>
-	 * 
+	 *
 	 * <p>The source level and compliance level values should be taken from the constant defined inside
 	 * {@link JavaCore} class. The constants are named <code>JavaCore#VERSION_1_x</code>, x being set
 	 * between '1' and '8'.

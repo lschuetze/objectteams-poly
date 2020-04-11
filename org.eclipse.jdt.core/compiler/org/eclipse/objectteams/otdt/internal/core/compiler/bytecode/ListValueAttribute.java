@@ -70,7 +70,7 @@ public abstract class ListValueAttribute
         // this code is mainly stolen from ClassFile.addAttributes().
         super.write(classFile);
 
-        int attributeSize  = getAttributeSize(); 
+        int attributeSize  = getAttributeSize();
         if (this._contentsOffset + 6 + attributeSize >= this._contents.length) {
         	this._contents = classFile.getResizedContents(6 + attributeSize);
         }

@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2011, 2015 GK Software AG and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  *		Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -38,7 +38,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 /**
  * This class only contains those parts of callout generation that for
  * dynamic weaving deviated from the normal strategy.
- * 
+ *
  * @author stephan
  */
 public class CalloutImplementorDyn {
@@ -46,11 +46,11 @@ public class CalloutImplementorDyn {
 	// wrapper methods for decapsulating callout
 	public static final char[] OT_ACCESS = "_OT$access".toCharArray(); //$NON-NLS-1$
 	public static final char[] OT_ACCESS_STATIC = "_OT$accessStatic".toCharArray(); //$NON-NLS-1$
-	
 
-	public static Expression baseAccessExpression(Scope scope, RoleModel roleModel, ReferenceBinding baseType, 
+
+	public static Expression baseAccessExpression(Scope scope, RoleModel roleModel, ReferenceBinding baseType,
 												  Expression receiver, MethodSpec baseSpec, Expression[] arguments,
-												  AstGenerator gen) 
+												  AstGenerator gen)
 	{
 		char[] selector = ensureAccessor(scope, baseType, baseSpec.isStatic()).selector;
 		TeamModel teamModel = roleModel.getTeamModel();

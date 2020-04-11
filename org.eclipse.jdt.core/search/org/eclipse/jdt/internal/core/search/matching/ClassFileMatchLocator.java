@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.core.search.indexing.IIndexConstants;
 
 public class ClassFileMatchLocator implements IIndexConstants {
 
-private static final long TARGET_ANNOTATION_BITS = 
+private static final long TARGET_ANNOTATION_BITS =
 	TagBits.AnnotationForType |
 	TagBits.AnnotationForParameter |
 	TagBits.AnnotationForPackage |
@@ -192,7 +192,7 @@ public void locateMatches(MatchLocator locator, ClassFile classFile, IBinaryType
 	int bFieldsLength = binaryFields == null ? 0 : binaryFields.length;
 	IBinaryField[] unresolvedFields = null;
 	boolean hasUnresolvedFields = false;
-	
+
 	// Report as many accurate matches as possible
 	int accuracy = SearchMatch.A_ACCURATE;
 	boolean mustResolve = pattern.mustResolve;
@@ -371,7 +371,7 @@ private void matchAnnotations(SearchPattern pattern, MatchLocator locator, Class
 			}
 		}
 	}
-	
+
 	// Look for references in fields annotations
 	IBinaryField[] fields = binaryType.getFields();
 	if (fields != null) {

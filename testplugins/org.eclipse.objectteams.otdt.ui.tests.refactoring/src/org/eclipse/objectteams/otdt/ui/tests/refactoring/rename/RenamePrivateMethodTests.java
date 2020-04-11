@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
  * The tests in this class have been inspired by the test class
  * <code>RenamePrivateMethodTests</code> in the test suite
  *<code>org.eclipse.jdt.ui.tests.refactoring</code> provided by Eclipse JDT.
- *  
+ *
  * @author brcan
  */
 @SuppressWarnings("restriction")
@@ -63,12 +63,12 @@ public class RenamePrivateMethodTests extends RefactoringTest
 	{
 		return new MySetup(test);
 	}
-	
+
 	protected String getRefactoringPath()
 	{
 		return REFACTORING_PATH;
 	}
-	
+
     private RenameRefactoring createRefactoring(RenameMethodProcessor processor)
     {
         return new RenameRefactoring(processor);
@@ -82,7 +82,7 @@ public class RenamePrivateMethodTests extends RefactoringTest
 	private void performRenameRefactoring_failing(
 	        String methodName,
 	        String newMethodName,
-	        String[] signatures) 
+	        String[] signatures)
 		throws Exception
     {
 		IType classA = getType(createCUfromTestFile(getPackageP(), "A"), "A");
@@ -93,14 +93,14 @@ public class RenamePrivateMethodTests extends RefactoringTest
 		RefactoringStatus result= performRefactoring(refactoring);
 		assertNotNull("precondition was supposed to fail", result);
 	}
-	
+
 	private void performRenaming_passing(
 	        String cuNames[],
 	        String declaringTypeName) throws Exception
 	{
 		performRenamingMtoK_passing(cuNames, declaringTypeName, true);
 	}
-	
+
 	private void performRenamingMtoK_passing(
 	        String cuNames[],
 	        String declaringTypeName,
@@ -110,7 +110,7 @@ public class RenamePrivateMethodTests extends RefactoringTest
 		performRenameRefactoring_passing(
 		        cuNames, declaringTypeName, "m", "k", new String[0], updateReferences);
 	}
-	
+
 	private void performRenameRefactoring_passing(
 	        String[] cuNames,
 	        String declaringTypeName,
@@ -133,7 +133,7 @@ public class RenamePrivateMethodTests extends RefactoringTest
     		assertEqualLines("invalid renaming!",
     				getFileContents(createOutputTestFileName(cus, idx)), cus[idx].getSource());
 		}
-				
+
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager()
 				.anythingToUndo());
 		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager()
@@ -146,7 +146,7 @@ public class RenamePrivateMethodTests extends RefactoringTest
     		assertEqualLines("invalid undo",
     				getFileContents(createInputTestFileName(cus, idx)), cus[idx].getSource());
         }
-        
+
 		assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager()
 				.anythingToUndo());
 		assertTrue("anythingToRedo", RefactoringCore.getUndoManager()
@@ -162,18 +162,18 @@ public class RenamePrivateMethodTests extends RefactoringTest
 	}
 
     /******* tests ******************/
-	
+
     public void testUpdateReferenceInCalloutBinding1() throws Exception
     {
         performRenaming_passing(new String[]{"B", "T"}, "B");
-    } 
-	
+    }
+
     public void testUpdateReferenceInCalloutBinding2() throws Exception
     {
         performRenameRefactoring_passing(
                 new String[]{"B", "T"}, "B", "getAmount", "getQuantity", null, true);
     }
-	
+
     public void testUpdateReferenceInCallinBinding1() throws Exception
     {
         performRenaming_passing(new String[]{"B", "T"}, "B");
@@ -189,12 +189,12 @@ public class RenamePrivateMethodTests extends RefactoringTest
     {
         performRenaming_passing(new String[]{"T"}, "T");
     }
-    
+
     public void testUpdatePrivateTeamMethodInvocation1() throws Exception
     {
         performRenaming_passing(new String[]{"T"}, "T");
     }
-    
+
     public void testUpdatePrivateTeamMethodInvocation2() throws Exception
     {
         performRenameRefactoring_passing(new String[]{"T", "B1"}, "T", "m1", "k1", null, true);

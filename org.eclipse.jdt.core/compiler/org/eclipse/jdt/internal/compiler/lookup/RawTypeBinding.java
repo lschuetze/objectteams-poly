@@ -92,7 +92,7 @@ public class RawTypeBinding extends ParameterizedTypeBinding {
 		sig.getChars(0, sigLength, uniqueKey, 0);
 		return uniqueKey;
    	}
-	
+
 	@Override
 	public TypeBinding clone(TypeBinding outerType) {
 		return new RawTypeBinding(this.actualType(), (ReferenceBinding) outerType, this.environment);
@@ -239,17 +239,17 @@ public class RawTypeBinding extends ParameterizedTypeBinding {
 		}
 		this.arguments = typeArguments;
 	}
-	
+
 	@Override
 	public ParameterizedTypeBinding capture(Scope scope, int start, int end) {
 		return this;
 	}
 
-	@Override 
+	@Override
 	public TypeBinding uncapture(Scope scope) {
 		return this;
 	}
-	
+
 	@Override
 //{ObjectTeams:
 	protected
@@ -272,7 +272,7 @@ public class RawTypeBinding extends ParameterizedTypeBinding {
 		MethodBinding theAbstractMethod = genericType.getSingleAbstractMethod(scope, replaceWildcards);
 		if (theAbstractMethod == null || !theAbstractMethod.isValidBinding())
 			return this.singleAbstractMethod[index] = theAbstractMethod;
-		
+
 		ReferenceBinding declaringType = (ReferenceBinding) scope.environment().convertToRawType(genericType, true);
 		declaringType = (ReferenceBinding) declaringType.findSuperTypeOriginatingFrom(theAbstractMethod.declaringClass);
 		MethodBinding [] choices = declaringType.getMethods(theAbstractMethod.selector);
@@ -315,7 +315,7 @@ public class RawTypeBinding extends ParameterizedTypeBinding {
 		}
 		return shortReadableName;
 	}
-	
+
 //{ObjectTeams:
 	@Override
 	protected
@@ -333,11 +333,11 @@ public class RawTypeBinding extends ParameterizedTypeBinding {
 	public ReferenceBinding downwardsProjection(Scope scope, TypeBinding[] mentionedTypeVariables) {
 		return this;
 	}
-	
+
 	@Override
 	public ReferenceBinding enclosingType() {
 		// ParameterizedTypeBinding earlier always had a resolved enclosed type, but now it does on-demand resolving.
-		// Behaviour for RawTypeBinding should be unchanged. 
+		// Behaviour for RawTypeBinding should be unchanged.
 	    return this.enclosingType;
 	}
 }

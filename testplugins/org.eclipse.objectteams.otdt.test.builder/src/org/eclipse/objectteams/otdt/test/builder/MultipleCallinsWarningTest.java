@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2011, 2014 GK Software AG
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -46,11 +46,11 @@ public class MultipleCallinsWarningTest extends OTBuilderTests {
 	private char NL = '\n';
 	private IPath root;
 	private IPath projectPath;
-	
+
 	public MultipleCallinsWarningTest(String testName) {
 		super(testName);
 	}
-	
+
 
 	public static Test suite() {
 		return buildTestSuite(MultipleCallinsWarningTest.class);
@@ -59,24 +59,24 @@ public class MultipleCallinsWarningTest extends OTBuilderTests {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		this.projectPath = env.addProject("MultipleCallinsProject", "1.5"); 
+		this.projectPath = env.addProject("MultipleCallinsProject", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, ClasspathUtil.getOTREPath(this.weavingScheme));
-		
+
 		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, "");
-		
+
 		this.root = env.addPackageFragmentRoot(projectPath, "src");
 		env.setOutputFolder(projectPath, "bin");
 	}
-	
+
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		this.root = null;
 		this.projectPath = null;
 	}
-	
+
 	public Problem[] getProblemsFor(IJavaElement element, String additionalMarkerType){
 		IResource resource= env.getWorkspace().getRoot();
 		try {
@@ -117,7 +117,7 @@ public class MultipleCallinsWarningTest extends OTBuilderTests {
 		return new Problem[0];
 	}
 
-	public void testMultipleCallinsDifferentTeams1() throws JavaModelException 
+	public void testMultipleCallinsDifferentTeams1() throws JavaModelException
 	{
 		System.out.println("***** testMultipleCallinsDifferentTeams1() *****");
 
@@ -127,43 +127,43 @@ public class MultipleCallinsWarningTest extends OTBuilderTests {
 			  NL + "{ " +
 			  NL + "    public void baseMethod(){}" +
 			  NL + "} ");
-	      
+
 	    env.addClass(this.root, "p1", "MyTeam1",
 	    		   "package p1;" +
 	          NL + "import base p.MyBase;\n" +
 	    	  NL + "public team class MyTeam1 " +
-			  NL + "{ " +	
+			  NL + "{ " +
 			  NL + "	protected class MyRole playedBy MyBase " +
-			  NL + "    { " +	
+			  NL + "    { " +
 			  NL + "	    public void role1Method() {}" +
 			  NL + "        role1Method <- after baseMethod; " +
 			  NL + "    } "+
 			  NL + "}");
-		
+
 	    env.addClass(this.root, "p2", "MyTeam2",
 	    		   "package p2;" +
 	          NL + "import base p.MyBase;\n" +
 	    	  NL + "public team class MyTeam2 " +
-			  NL + "{ " +	
+			  NL + "{ " +
 			  NL + "	protected class MyRole playedBy MyBase " +
-			  NL + "    { " +	
+			  NL + "    { " +
 			  NL + "	    public void role2Method() {}" +
 			  NL + "        role2Method <- after baseMethod; " +
 			  NL + "    } "+
 			  NL + "}");
-		
+
 		fullBuild(projectPath);
-	    
+
 		expectingProblemsFor(pathToBase);
-		Problem expectedProblem = new Problem("", 
-											  "Multiple callin bindings are affecting method baseMethod() (perform full build to recompute).", 
+		Problem expectedProblem = new Problem("",
+											  "Multiple callin bindings are affecting method baseMethod() (perform full build to recompute).",
 											  pathToBase, 51, 61, -1/*category*/, IMarker.SEVERITY_WARNING);
-		expectingSpecificProblemFor(pathToBase, 
+		expectingSpecificProblemFor(pathToBase,
 									expectedProblem);
 	}
-	
+
 	// Bug 355321 - Avoid warning for multiple callins from the same team
-	public void testMultipleCallinsDifferentTeams2() throws JavaModelException 
+	public void testMultipleCallinsDifferentTeams2() throws JavaModelException
 	{
 		System.out.println("***** testMultipleCallinsDifferentTeams2() *****");
 
@@ -171,40 +171,40 @@ public class MultipleCallinsWarningTest extends OTBuilderTests {
 	    		   "package p1;" +
 	          NL + "import base java.util.ArrayList;\n" +
 	    	  NL + "public team class MyTeam1 " +
-			  NL + "{ " +	
+			  NL + "{ " +
 			  NL + "	protected class MyRole playedBy ArrayList " +
-			  NL + "    { " +	
+			  NL + "    { " +
 			  NL + "	    public void role1Method() {}" +
 			  NL + "        role1Method <- after size; " +
 			  NL + "    } "+
 			  NL + "}");
-		
+
 	    env.addClass(this.root, "p2", "MyTeam2",
 	    		   "package p2;" +
 	          NL + "import base java.util.ArrayList;\n" +
 	    	  NL + "public team class MyTeam2 " +
-			  NL + "{ " +	
+			  NL + "{ " +
 			  NL + "	protected class MyRole playedBy ArrayList " +
-			  NL + "    { " +	
+			  NL + "    { " +
 			  NL + "	    public void role2Method() {}" +
 			  NL + "        role2Method <- after size; " +
 			  NL + "    } "+
 			  NL + "}");
-		
+
 		fullBuild(projectPath);
 
 		String expectedWarningMessage = "Multiple callin bindings are affecting method size() (perform full build to recompute).";
 
-		IJavaElement baseElement = env.getJavaProject("MultipleCallinsProject").findElement(new Path("java/util/ArrayList.class")); 
+		IJavaElement baseElement = env.getJavaProject("MultipleCallinsProject").findElement(new Path("java/util/ArrayList.class"));
 		Problem[] problems = getProblemsFor(baseElement, null); // IMarkableJavaElement.GLOBAL_PROBLEM_ID is subtype of JAVA_MODEL_PROBLEM_MARKER
-		
+
 		assertEquals("unexpected number of problems", 1, problems.length);
 
 		assertEquals("wrong problem message", expectedWarningMessage, problems[0].getMessage());
 		assertEquals("wrong problem severity", IMarker.SEVERITY_WARNING, problems[0].getSeverity());
 	}
 
-	public void testMultipleCallinsSameTeam() throws JavaModelException 
+	public void testMultipleCallinsSameTeam() throws JavaModelException
 	{
 		System.out.println("***** testMultipleCallinsSameTeam() *****");
 
@@ -214,7 +214,7 @@ public class MultipleCallinsWarningTest extends OTBuilderTests {
 			  NL + "{ " +
 			  NL + "    public void baseMethod(){}" +
 			  NL + "} ");
-	      
+
 	    env.addClass(root, "p1", "MyTeam1",
 	    		   "package p1;" +
 	          NL + "import base p.MyBase;\n" +
@@ -222,19 +222,19 @@ public class MultipleCallinsWarningTest extends OTBuilderTests {
 			  NL + "{ " +
 			  NL + "    precedence MyRole1, MyRole2;" +
 			  NL + "	protected class MyRole1 playedBy MyBase " +
-			  NL + "    { " +	
+			  NL + "    { " +
 			  NL + "	    public void role1Method() {}" +
 			  NL + "        role1Method <- after baseMethod; " +
 			  NL + "    } "+
 			  NL + "	protected class MyRole2 playedBy MyBase " +
-			  NL + "    { " +	
+			  NL + "    { " +
 			  NL + "	    public void role2Method() {}" +
 			  NL + "        role2Method <- after baseMethod; " +
 			  NL + "    } "+
 			  NL + "}");
-		
+
 		fullBuild(projectPath);
-	    
+
 		expectingNoProblemsFor(pathToBase);
 	}
 }

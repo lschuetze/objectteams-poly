@@ -177,11 +177,11 @@ public class RoleSplitter
 					if (((abstractMethod.modifiers) & AccPrivate) == 0) {
 						final MethodDeclaration newmethod = AstConverter.genRoleIfcMethod(teamDecl, method);
 						AstEdit.addMethod(roleIfcDecl, newmethod);
-						roleIfcDecl.getRoleModel()._state.addJob(ITranslationStates.STATE_ROLE_HIERARCHY_ANALYZED, // calls methods(); 
+						roleIfcDecl.getRoleModel()._state.addJob(ITranslationStates.STATE_ROLE_HIERARCHY_ANALYZED, // calls methods();
 							new Runnable() { @Override
 							public void run() {
-								if (   method.binding != null 
-									&& (method.binding.modifiers & ClassFileConstants.AccDeprecated) != 0 
+								if (   method.binding != null
+									&& (method.binding.modifiers & ClassFileConstants.AccDeprecated) != 0
 									&& newmethod.binding != null)
 								{
 									newmethod.binding.modifiers |= ClassFileConstants.AccDeprecated;
@@ -402,7 +402,7 @@ public class RoleSplitter
 
     }
 
-    /** 
+    /**
      * API for LookupEnvironment:
      * Establish necessary links between ifc- and class-part of each role in the given unit.
      */
@@ -420,7 +420,7 @@ public class RoleSplitter
 		}
 		if (type.memberTypes != null)
 			for (TypeDeclaration member : type.memberTypes)
-				linkRoles(member);		
+				linkRoles(member);
 	}
 
 	/**

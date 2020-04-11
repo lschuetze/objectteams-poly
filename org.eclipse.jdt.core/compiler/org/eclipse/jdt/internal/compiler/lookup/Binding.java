@@ -54,8 +54,8 @@ public abstract class Binding {
 	public static final int TYPE_USE = TYPE | ASTNode.Bit15;
 	public static final int INTERSECTION_TYPE18 = TYPE | ASTNode.Bit16;
 	public static final int POLY_TYPE = TYPE | ASTNode.Bit17;
-	
-	// In the unlikely event you add a new type binding, remember to update TypeBindingVisitor and Scope.substitute methods. 
+
+	// In the unlikely event you add a new type binding, remember to update TypeBindingVisitor and Scope.substitute methods.
 
 //{ObjectTeams
 	public static final int BINDING = ASTNode.Bit16; //callin/callout-Binding
@@ -83,7 +83,7 @@ public abstract class Binding {
 	public static final CallinCalloutBinding[] NO_CALLIN_CALLOUT_BINDINGS = new CallinCalloutBinding[0];
 	public static final SyntheticArgumentBinding[] NO_SYNTH_ARGUMENTS = new SyntheticArgumentBinding[0];
 //Markus Witte}
-	
+
 	public static final FieldBinding[] UNINITIALIZED_FIELDS = new FieldBinding[0];
 	public static final MethodBinding[] UNINITIALIZED_METHODS = new MethodBinding[0];
 	public static final ReferenceBinding[] UNINITIALIZED_REFERENCE_TYPES = new ReferenceBinding[0];
@@ -131,7 +131,7 @@ public abstract class Binding {
 
 	public static final int DefaultLocationsForTrueValue = DefaultLocationParameter | DefaultLocationReturnType | DefaultLocationField;
 
-	public static final int NullnessDefaultMASK = 
+	public static final int NullnessDefaultMASK =
 			NULL_UNSPECIFIED_BY_DEFAULT | // included to terminate search up the parent chain
 			DefaultLocationParameter | DefaultLocationReturnType | DefaultLocationField |
 			DefaultLocationTypeArgument | DefaultLocationTypeParameter | DefaultLocationTypeBound | DefaultLocationArrayContents;
@@ -160,7 +160,7 @@ public abstract class Binding {
 	/**
 	 * Compute the tagbits for standard annotations. For source types, these could require
 	 * lazily resolving corresponding annotation nodes, in case of forward references.
-	 * For type use bindings, this method still returns the tagbits corresponding to the type 
+	 * For type use bindings, this method still returns the tagbits corresponding to the type
 	 * declaration binding.
 	 * @see org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding#getAnnotationTagBits()
 	 */
@@ -180,7 +180,7 @@ public abstract class Binding {
 	public boolean isAnnotationType() {
 		return false;
 	}
-	
+
 	/* API
 	* Answer true if the receiver is not a problem binding
 	*/

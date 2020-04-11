@@ -29,9 +29,9 @@ public interface IDependentTypeSubstitution {
 	 * @param original 		the atomic type to substitute
 	 * @param typeArguments type arguments to re-apply during/after substitution
 	 * @param dimensions    array dimensions to re-apply during/after substitution
-	 * @return null signals an error has been reported, 
+	 * @return null signals an error has been reported,
 	 *    returning original signals no substitutions were needed,
-	 *    otherwise a substituted type is return. 
+	 *    otherwise a substituted type is return.
 	 */
 	TypeBinding substitute(DependentTypeBinding original, TypeBinding[] typeArguments, int dimensions);
 }

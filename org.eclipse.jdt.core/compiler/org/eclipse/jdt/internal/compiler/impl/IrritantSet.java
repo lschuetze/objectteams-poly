@@ -89,7 +89,7 @@ public class IrritantSet {
 
 	public static final IrritantSet JAVADOC = new IrritantSet(CompilerOptions.InvalidJavadoc);
 	public static final IrritantSet PREVIEW = new IrritantSet(CompilerOptions.PreviewFeatureUsed);
-	public static final IrritantSet COMPILER_DEFAULT_ERRORS = new IrritantSet(0); // no optional error by default	
+	public static final IrritantSet COMPILER_DEFAULT_ERRORS = new IrritantSet(0); // no optional error by default
 	public static final IrritantSet COMPILER_DEFAULT_WARNINGS = new IrritantSet(0); // see static initializer below
 	public static final IrritantSet COMPILER_DEFAULT_INFOS = new IrritantSet(0); // see static initializer below
 //{ObjectTeams: new irritants:
@@ -145,7 +145,7 @@ public class IrritantSet {
 			CompilerOptions.UnlikelyEqualsArgumentType
 			| CompilerOptions.SuppressWarningsNotAnalysed
 			| CompilerOptions.AnnotatedTypeArgumentToUnannotated);
-		
+
 		COMPILER_DEFAULT_WARNINGS
 //{ObjectTeams: default to warning (group 3):
 			.set(CompilerOptions.BindingConventions
@@ -264,7 +264,7 @@ public class IrritantSet {
 		if (suppressRawWhenUnchecked != null && "true".equalsIgnoreCase(suppressRawWhenUnchecked)) { //$NON-NLS-1$
 			UNCHECKED.set(CompilerOptions.RawTypeReference);
 		}
-		
+
 		JAVADOC
 			.set(CompilerOptions.MissingJavadocComments)
 			.set(CompilerOptions.MissingJavadocTags);

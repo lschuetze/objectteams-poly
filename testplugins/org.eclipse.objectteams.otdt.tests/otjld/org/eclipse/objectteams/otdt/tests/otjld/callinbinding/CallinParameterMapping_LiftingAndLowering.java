@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -26,11 +26,11 @@ import junit.framework.Test;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest {
-	
+
 	public CallinParameterMapping_LiftingAndLowering(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -38,7 +38,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -50,7 +50,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method is callin-bound as 'before' with a parameter mapping
     // 4.3.1-otjld-parameter-mapping-1
     public void test431_parameterMapping1() {
-       
+
        runConformTest(
             new String[] {
 		"T431pm1Main.java",
@@ -102,7 +102,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method is callin-bound as 'after' with a parameter mapping
     // 4.3.1-otjld-parameter-mapping-2
     public void test431_parameterMapping2() {
-       
+
        runConformTest(
             new String[] {
 		"T431pm2Main.java",
@@ -154,7 +154,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method is callin-bound as 'before' with a parameter mapping
     // 4.3.1-otjld-parameter-mapping-3
     public void test431_parameterMapping3() {
-       
+
        runConformTest(
             new String[] {
 		"T431pm3Main.java",
@@ -206,7 +206,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method is callin-bound as 'after' with a parameter mapping
     // 4.3.1-otjld-parameter-mapping-4
     public void test431_parameterMapping4() {
-       
+
        runConformTest(
             new String[] {
 		"T431pm4Main.java",
@@ -258,7 +258,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method is callin-bound as 'before' with a parameter mapping
     // 4.3.1-otjld-parameter-mapping-5
     public void test431_parameterMapping5() {
-       
+
        runConformTest(
             new String[] {
 		"T431pm5Main.java",
@@ -310,7 +310,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method is callin-bound as 'after' with a parameter mapping
     // 4.3.1-otjld-parameter-mapping-6
     public void test431_parameterMapping6() {
-       
+
        runConformTest(
             new String[] {
 		"T431pm6Main.java",
@@ -363,7 +363,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method is callin-bound as 'before' with a parameter mapping
     // 4.3.1-otjld-parameter-mapping-7
     public void test431_parameterMapping7() {
-       
+
        runConformTest(
             new String[] {
 		"T431pm7Main.java",
@@ -416,7 +416,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method is callin-bound as 'after' with a parameter mapping
     // 4.3.1-otjld-parameter-mapping-8
     public void test431_parameterMapping8() {
-       
+
        runConformTest(
             new String[] {
 		"T431pm8Main.java",
@@ -476,7 +476,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method is callin-bound as 'before' with a parameter mapping
     // 4.3.1-otjld-parameter-mapping-9
     public void test431_parameterMapping9() {
-       
+
        runConformTest(
             new String[] {
 		"T431pm9Main.java",
@@ -536,7 +536,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method is callin-bound as 'replace' with a parameter mapping
     // 4.3.1-otjld-parameter-mapping-10
     public void test431_parameterMapping10() {
-       
+
        runConformTest(
             new String[] {
 		"T431pm10Main.java",
@@ -652,7 +652,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method is callin-bound as 'replace' with a parameter mapping
     // 4.3.1-otjld-parameter-mapping-11a
     public void test431_parameterMapping11a() {
-       
+
        runConformTest(
             new String[] {
 		"T431pm11aMain.java",
@@ -719,7 +719,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method is callin-bound as 'replace' with a reordered parameter mapping
     // 4.3.1-otjld-parameter-mapping-12
     public void test431_parameterMapping12() {
-       
+
        runConformTest(
             new String[] {
 		"T431pm12Main.java",
@@ -766,7 +766,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a parameter mapping is declared in a super team - has to be inherited to the subteam!
     // 4.3.1-otjld-parameter-mapping-13
     public void test431_parameterMapping13() {
-       
+
        runConformTest(
             new String[] {
 		"T431pm13Main.java",
@@ -817,7 +817,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // witness for Trac #285 - could not resolve role field in parameter mapping (RHS)
     // 4.3.1-otjld-parameter-mapping-14
     public void test431_parameterMapping14() {
-       
+
        runConformTest(
             new String[] {
 		"Team431pm14.java",
@@ -854,7 +854,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // witness for Trac #285 - could not resolve role method in parameter mapping (RHS)
     // 4.3.1-otjld-parameter-mapping-15
     public void test431_parameterMapping15() {
-       
+
        runConformTest(
             new String[] {
 		"Team431pm15.java",
@@ -891,7 +891,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // scoping of field vs. argument, see Trac #294
     // 4.3.1-otjld-parameter-mapping-16
     public void test431_parameterMapping16() {
-       
+
        runConformTest(
             new String[] {
 		"Team431pm16.java",
@@ -952,7 +952,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method callin-bound as 'replace' has a result mapping with an expression
     // 4.3.2-otjld-expression-in-replace-parameter-mapping-1
     public void test432_expressionInReplaceParameterMapping1() {
-       
+
        runConformTest(
             new String[] {
 		"Team432eirpm1.java",
@@ -985,7 +985,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method callin-bound as 'replace' tunnels the base result
     // 4.3.2-otjld-expression-in-replace-parameter-mapping-1b
     public void test432_expressionInReplaceParameterMapping1b() {
-       
+
        runConformTest(
             new String[] {
 		"Team432eirpm1b.java",
@@ -1016,7 +1016,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method callin-bound as 'replace' has a legal result mapping with an expression (result to provided by role method)
     // 4.3.2-otjld-expression-in-replace-parameter-mapping-2
     public void test432_expressionInReplaceParameterMapping2() {
-       
+
        runConformTest(
             new String[] {
 		"Team432eirpm2.java",
@@ -1176,7 +1176,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method callin-bound as 'replace' has a parameter mapping with an expression
     // 4.3.2-otjld-expression-in-replace-parameter-mapping-6
     public void test432_expressionInReplaceParameterMapping6() {
-       
+
        runConformTest(
             new String[] {
 		"Team432eirpm6.java",
@@ -1238,7 +1238,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method callin-bound as 'replace' has a result mapping with an expression - legal case
     // 4.3.2-otjld-expression-in-replace-parameter-mapping-8
     public void test432_expressionInReplaceParameterMapping8() {
-       
+
        runConformTest(
             new String[] {
 		"Team432eirpm8.java",
@@ -1272,7 +1272,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method callin-bound as 'replace' has no result mapping, value is tunneled from base call
     // 4.3.2-otjld-expression-in-replace-parameter-mapping-9
     public void test432_expressionInReplaceParameterMapping9() {
-       
+
        runConformTest(
             new String[] {
 		"Team432eirpm9.java",
@@ -1306,7 +1306,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method callin-bound as 'replace' has a parameter mapping with a cast
     // 4.3.2-otjld-expression-in-replace-parameter-mapping-10
     public void test432_expressionInReplaceParameterMapping10() {
-       
+
        runConformTest(
             new String[] {
 		"Team432eirpm10.java",
@@ -1341,7 +1341,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method callin-bound as 'replace' has a parameter mapping with a cast, cast is guarded
     // 4.3.2-otjld-expression-in-replace-parameter-mapping-11
     public void test432_expressionInReplaceParameterMapping11() {
-       
+
        runConformTest(
             new String[] {
 		"Team432eirpm11.java",
@@ -1389,7 +1389,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method with return type is callin-bound as 'before' and the return value is calculated
     // 4.3.3-otjld-result-of-binding-is-calculated-1
     public void test433_resultOfBindingIsCalculated1() {
-       
+
        runConformTest(
             new String[] {
 		"T433robic1Main.java",
@@ -1440,7 +1440,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method with return type is callin-bound as 'after' and the return value is calculated
     // 4.3.3-otjld-result-of-binding-is-calculated-2
     public void test433_resultOfBindingIsCalculated2() {
-       
+
        runConformTest(
             new String[] {
 		"T433robic2Main.java",
@@ -1520,7 +1520,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a role method is callin-bound as 'after' and the result of the base method is used
     // 4.3.5-otjld-result-in-parameter-mapping
     public void test435_resultInParameterMapping() {
-       
+
        runConformTest(
             new String[] {
 		"T435ripmMain.java",
@@ -1630,7 +1630,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // callin parameter mapping uses base to denote the base instance
     // 4.3.8-otjld-base-in-parameter-mapping-1
     public void test438_baseInParameterMapping1() {
-       
+
        runConformTest(
             new String[] {
 		"Team438bipm1.java",
@@ -1665,7 +1665,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a base expression is used to retrieve a sibling role
     // 4.3.8-otjld-base-in-parameter-mapping-2
     public void test438_baseInParameterMapping2() {
-       
+
        runConformTest(
             new String[] {
 		"Team438bipm2.java",
@@ -1701,7 +1701,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a callin binding with multiple base methods defines a parameter mapping
     // 4.3.9-otjld-param-map-multiple-basemethods-1
     public void test439_paramMapMultipleBasemethods1() {
-       
+
        runConformTest(
             new String[] {
 		"Team439pmmb1.java",
@@ -1740,7 +1740,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a callin binding with multiple base methods defines a parameter mapping
     // 4.3.9-otjld-param-map-multiple-basemethods-2
     public void test439_paramMapMultipleBasemethods2() {
-       
+
        runConformTest(
             new String[] {
 		"Team439pmmb2.java",
@@ -1780,7 +1780,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // 4.3.10-otjld-maximum-parameter-tweeking-1
     public void test4310_maximumParameterTweeking1() {
        Map customOptions = getCompilerOptions();
-       
+
        runConformTest(
             new String[] {
 		"T4310mpt1Main.java",
@@ -1858,7 +1858,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a callin parameter is mapped and requires lifting (and lowering in base-call)
     // 4.3.11-otjld-translating-mapped-parameter-1
     public void test4311_translatingMappedParameter1() {
-       
+
        runConformTest(
             new String[] {
 		"Team4311tmp1.java",
@@ -1896,7 +1896,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a callin parameter is mapped from a "new" expression and requires lifting (no lowering in base-call)
     // 4.3.11-otjld-translating-mapped-parameter-2
     public void test4311_translatingMappedParameter2() {
-       
+
        runConformTest(
             new String[] {
 		"Team4311tmp2.java",
@@ -1938,7 +1938,7 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
     // a callin parameter is mapped and requires lifting (and lowering in base-call)
     // 4.3.11-otjld-translating-mapped-parameter-3
     public void test4311_translatingMappedParameter3() {
-       
+
        runConformTest(
             new String[] {
 		"Team4311tmp3.java",

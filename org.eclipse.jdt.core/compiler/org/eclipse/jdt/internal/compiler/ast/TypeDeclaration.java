@@ -701,7 +701,7 @@ public ConstructorDeclaration createDefaultConstructor(	boolean needExplicitCons
 	// if roleModel != null assume were called later than during parsing:
 	//  - from CopyInheritance.copyMethod(OTConfined)
 	//  - crom Dependencies.establishMethodsCreated(RoleModel)
-	if (this.isDirectRole() && this.roleModel == null) 
+	if (this.isDirectRole() && this.roleModel == null)
 		return null;
 // SH}
 
@@ -806,11 +806,11 @@ public MethodBinding createDefaultConstructorWithBinding(MethodBinding inherited
 	constructor.binding.tagBits |= (inheritedConstructorBinding.tagBits & TagBits.HasMissingType);
 	constructor.binding.modifiers |= ExtraCompilerModifiers.AccIsDefaultConstructor;
 	if (inheritedConstructorBinding.parameterNonNullness != null // this implies that annotation based null analysis is enabled
-			&& argumentsLength > 0) 
+			&& argumentsLength > 0)
 	{
 		// copy nullness info from inherited constructor to the new constructor:
 		int len = inheritedConstructorBinding.parameterNonNullness.length;
-		System.arraycopy(inheritedConstructorBinding.parameterNonNullness, 0, 
+		System.arraycopy(inheritedConstructorBinding.parameterNonNullness, 0,
 				constructor.binding.parameterNonNullness = new Boolean[len], 0, len);
 	}
 	// TODO(stephan): do argument types already carry sufficient info about type annotations?
@@ -1090,7 +1090,7 @@ public void generateCode(ClassFile enclosingClassFile) {
 //{ObjectTeams: mark as done:
 	finally {
 		if (this.isTeam())
-			this.teamModel.setState(ITranslationStates.STATE_BYTE_CODE_GENERATED);			
+			this.teamModel.setState(ITranslationStates.STATE_BYTE_CODE_GENERATED);
 	}
 // SH}
 }
@@ -1152,7 +1152,7 @@ protected AbstractSmapGenerator createSmapGenerator()
         return new TeamSmapGenerator(this);
 
     // NOTE: currently no special treatment for nested team (team&role)
-    
+
     return null;
 }
 //ike}
@@ -1233,9 +1233,9 @@ private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
 			this.scope.problemReporter().unusedPrivateType(this);
 		}
 	}
-	
+
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=385780
-	if (this.typeParameters != null && 
+	if (this.typeParameters != null &&
 			!this.scope.referenceCompilationUnit().compilationResult.hasSyntaxError) {
 		for (int i = 0, length = this.typeParameters.length; i < length; ++i) {
 			TypeParameter typeParameter = this.typeParameters[i];
@@ -1243,11 +1243,11 @@ private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
 		  if (!(typeParameter instanceof TypeValueParameter))
 // SH}
 			if ((typeParameter.binding.modifiers & ExtraCompilerModifiers.AccLocallyUsed) == 0) {
-				this.scope.problemReporter().unusedTypeParameter(typeParameter);			
+				this.scope.problemReporter().unusedTypeParameter(typeParameter);
 			}
 		}
 	}
-	
+
 	// for local classes we use the flowContext as our parent, but never use an initialization context for this purpose
 	// see Bug 360328 - [compiler][null] detect null problems in nested code (local class inside a loop)
 	FlowContext parentContext = (flowContext instanceof InitializationFlowContext) ? null : flowContext;
@@ -2066,7 +2066,7 @@ public void resolve() {
 		}
         StateMemento.methodResolveStart(this.binding);
         // any role types found during field resolve? If so, catch up now:
-    	if (this.memberTypes != null && this.memberTypes.length > resolvedMemberCount 
+    	if (this.memberTypes != null && this.memberTypes.length > resolvedMemberCount
     			&& this.teamModel != null)
     	{
     		Dependencies.lateRolesCatchup(this.teamModel);
@@ -2153,7 +2153,7 @@ checkOuterScope:while (outerScope != null) {
 						}
 					} else if (existing2 instanceof ReferenceBinding
 							&& existing2.isValidBinding()
-							&& outerScope.isDefinedInType((ReferenceBinding) existing2)) { 
+							&& outerScope.isDefinedInType((ReferenceBinding) existing2)) {
 							blockScope.problemReporter().typeCollidesWithEnclosingType(this);
 							break checkOuterScope;
 					} else if (existing2 == null) {

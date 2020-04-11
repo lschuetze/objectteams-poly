@@ -386,7 +386,7 @@ public class CallinImplementor extends MethodMappingImplementor
 		newMethod.isMappingWrapper = WrapperKind.CALLIN;
 		newMethod.returnType.setBaseclassDecapsulation(DecapsulationState.REPORTED);
 		newMethod.typeParameters= typeParams;
-		
+
 		gen.maybeAddTypeParametersToMethod(baseTypeBinding, newMethod);
 
 		int iProblem = teamDecl.getTeamModel().canLiftingFail(this._role.getBinding());
@@ -435,7 +435,7 @@ public class CallinImplementor extends MethodMappingImplementor
 	/** Declare to throw LiftingFailedException and report problem for each role in callinBindingDeclaration#rolesWithBindingAmbiguity */
 	protected void declareLiftingFailedException(CallinMappingDeclaration callinBindingDeclaration,
 												 MethodDeclaration wrapperMethod,
-												 AstGenerator gen) 
+												 AstGenerator gen)
 	{
 		TypeReference liftingFailed = gen.qualifiedTypeReference(IOTConstants.O_O_LIFTING_FAILED_EXCEPTION);
 		AstEdit.addException(wrapperMethod, liftingFailed, false/*resolve*/);
@@ -462,7 +462,7 @@ public class CallinImplementor extends MethodMappingImplementor
 
 		if (this._role.isRoleFile()) {
 			this.synthGen = MethodModel.setupSourcePositionMapping(callinWrapperDecl,
-																   this._role.getTeamModel().getAst(), 
+																   this._role.getTeamModel().getAst(),
 													   			   this._role,
 													   			   null);
 			if (this.synthGen != null)
@@ -507,7 +507,7 @@ public class CallinImplementor extends MethodMappingImplementor
 		// from here on all statements go into the try block - with "finally { resetFlag(); }"
         ArrayList<Statement> tryStatements = new ArrayList<Statement>();
 
-		
+
 		// -------------- call receiver & arguments --------------
 		//_OT$role.myRoleMethod(_OT$param0, ...);
 		// or:
@@ -549,7 +549,7 @@ public class CallinImplementor extends MethodMappingImplementor
 			} else {
 				receiver = gen.singleNameReference(ROLE_VAR_NAME);
 				needRoleVar = true;
-	
+
 				// receiver for private method (doesn't exist in ifc-part) needs to be casted to the class.
 				// Scope.findMethod() takes care of visibility if isMethodMappingWrapper() is detected.
 				if (roleMethodBinding.isPrivate())
@@ -563,7 +563,7 @@ public class CallinImplementor extends MethodMappingImplementor
 					// with CastExpression.RAW a RawTypeBinding might occur that is not recognized by Scope.findMethod()
 					// see testA12_genericRoleFeature16f() which reports bogus visibility problem is RAW is used.
 			}
-	
+
 			//MyRole _OT$role = _OT$liftToMyRole(_OT$base_arg);
 			if (needRoleVar)
 				tryStatements.add(createLiftedRoleVar(callinBindingDeclaration, roleModel, baseTypeBinding, otBaseArg, gen));
@@ -633,11 +633,11 @@ public class CallinImplementor extends MethodMappingImplementor
 			//   $endif
 
 			Expression roleMessageSendExpression = roleMessageSend;
-			
+
 			if (roleMethodBinding.returnType.isArrayType()) {
 				// if return from role method requires array-lowering, we must determine how to access the team (receiver of lowering-method):
 				TypeBinding returnLeaf = roleMethodBinding.returnType.leafComponentType();
-				findEnclosingTeam: 
+				findEnclosingTeam:
 				if (returnLeaf.isRole()) {
 					ReferenceBinding returnEnclosing = returnLeaf.enclosingType(); // the team type containing the returned role
 					ReferenceBinding currentType = roleModel.getBinding();
@@ -655,7 +655,7 @@ public class CallinImplementor extends MethodMappingImplementor
 			tryStatements.add(gen.assignment(
 									gen.singleNameReference(IOTConstants.OT_RESULT),
 									roleMessageSendExpression));
-			
+
 			// ResultNotProvidedException?
 			if (isReturnBoxed && !callinBindingDeclaration.isResultMapped)
 			{
@@ -677,7 +677,7 @@ public class CallinImplementor extends MethodMappingImplementor
 				tryStatements.add(
 						stepOverGen.returnStatement(stepOverGen.singleNameReference(IOTConstants.OT_RESULT)));
 			}
-			
+
 			TryStatement tryFinally = gen.tryFinally(
 								tryStatements.toArray(new Statement[tryStatements.size()]),
 								new Statement[] {resetFlag});
@@ -755,11 +755,11 @@ public class CallinImplementor extends MethodMappingImplementor
 				IOTConstants.SET_EXECUTING_CALLIN,
 				new Expression[] { stepOverGen.singleNameReference(OLD_IS_EXECUTING)} );
 	}
-	private Statement createLiftedRoleVar(CallinMappingDeclaration 	callinBindingDeclaration, 
+	private Statement createLiftedRoleVar(CallinMappingDeclaration 	callinBindingDeclaration,
 										  RoleModel 				roleModel,
-										  ReferenceBinding 			baseTypeBinding, 
-										  char[] 					otBaseArg, 
-										  AstGenerator 				gen) 
+										  ReferenceBinding 			baseTypeBinding,
+										  char[] 					otBaseArg,
+										  AstGenerator 				gen)
 	{
 		MessageSend liftCall = Lifting.liftCall(
 				callinBindingDeclaration.scope,
@@ -1099,7 +1099,7 @@ public class CallinImplementor extends MethodMappingImplementor
 				public void run() {
 					if (srcPos != -1)
 						sourceMethodSpec.argNeedsTranslation[srcPos] = true;
-					implementationMethodSpec.argNeedsTranslation[srcIdx] = true; 
+					implementationMethodSpec.argNeedsTranslation[srcIdx] = true;
 				}});
 			}
 

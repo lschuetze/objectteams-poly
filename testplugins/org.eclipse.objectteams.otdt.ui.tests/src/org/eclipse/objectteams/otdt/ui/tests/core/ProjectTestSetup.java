@@ -6,7 +6,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -76,12 +76,12 @@ public class ProjectTestSetup extends TestSetup {
 
 		fAutobuilding = CoreUtility.setAutoBuilding(false);
 //{ObjectTeams: create an OT project and keep otre.jar (don't overwrite with setRawClasspath)
-/* orig: 
+/* orig:
 		fJProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		fJProject.setRawClasspath(getDefaultClasspath(), null);
   :giro */
         fJProject = org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper.createOTJavaProject(PROJECT_NAME, "bin");
-        JavaProjectHelper.addRTJar(fJProject);        
+        JavaProjectHelper.addRTJar(fJProject);
 //gbr}
 
 		TestOptions.initializeProjectOptions(fJProject);

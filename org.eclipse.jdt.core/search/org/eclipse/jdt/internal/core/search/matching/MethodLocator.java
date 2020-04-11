@@ -13,7 +13,7 @@
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *     Samrat Dhillon samrat.dhillon@gmail.com - Search for method references is
- *               returning methods as overriden even if the superclass's method is 
+ *               returning methods as overriden even if the superclass's method is
  *               only package-visible - https://bugs.eclipse.org/357547
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.search.matching;
@@ -68,15 +68,15 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfor
  * <dl>
  * <dt>What:<dd> Consider private role methods as virtual, too.
  * <dt>Why:<dd>  Implicit inheritance causes dynamic dispatch for private methods.
- * 
+ *
  * <dt>What:<dd> retrench callin method signatures.
- * 
+ *
  * <dt>What:<dd> add matching for MethodSpec and tsuper calls.
- * 
+ *
  * <dt>What:<dd> beautify type name with <code>sourceName()</code>
- * 
+ *
  * <dt>What:<dd> resilience if encountering a <code>ProblemMethodBinding</code>
- * 
+ *
  * <dt>What:<dd> for role methods use <code>copyInheritanceSrc</code> for precise information.
  * </dl>
  */
@@ -91,7 +91,7 @@ public char[][][] allSuperDeclaringTypeNames;
 
 // This is set only if focus is null. In these cases
 // it will be hard to determine if the super class is of the same package
-// at a latter point. Hence, this array is created with all the super class 
+// at a latter point. Hence, this array is created with all the super class
 // names of the same package name as of the matching class name.
 // See https://bugs.eclipse.org/bugs/show_bug.cgi?id=357547
 private char[][][] samePkgSuperDeclaringTypeNames;
@@ -166,7 +166,7 @@ public void initializePolymorphicSearch(MatchLocator locator) {
 		start = System.currentTimeMillis();
 	}
 	try {
-		SuperTypeNamesCollector namesCollector = 
+		SuperTypeNamesCollector namesCollector =
 			new SuperTypeNamesCollector(
 				this.pattern,
 				this.pattern.declaringSimpleName,
@@ -176,7 +176,7 @@ public void initializePolymorphicSearch(MatchLocator locator) {
 				locator.progressMonitor);
 		this.allSuperDeclaringTypeNames = namesCollector.collect();
 		this.samePkgSuperDeclaringTypeNames = namesCollector.getSamePackageSuperTypeNames();
-		this.matchLocator = locator;	
+		this.matchLocator = locator;
 	} catch (JavaModelException e) {
 		// inaccurate matches will be found
 	}
@@ -202,26 +202,26 @@ private boolean isTypeInSuperDeclaringTypeNames(char[][] typeName) {
  * this message send or not.
  * {ObjectTeams:
  * 		Also private methods in roles invoked via 'this' are virtual message sends in a sense.
- *  SH} 
+ *  SH}
  */
 protected boolean isVirtualInvoke(MethodBinding method, MessageSend messageSend) {
-	return !method.isStatic() && 
+	return !method.isStatic() &&
 //{ObjectTeams: private role methods are visible in the implicit sub roles (OTJLD 1.2.1. (e))
 			(
 // orig:
 			    !method.isPrivate()
-// :giro	
+// :giro
 		     || (method.declaringClass.isRole() && messageSend.receiver.isImplicitThis()))
 		    && !(messageSend instanceof TSuperMessageSend) // similar to "super" but for codegen it's a "this"
 //jsv}
 			&& !messageSend.isSuperAccess()
-			&& !(method.isDefault() && this.pattern.focus != null 
+			&& !(method.isDefault() && this.pattern.focus != null
 			&& !CharOperation.equals(this.pattern.declaringPackageName, method.declaringClass.qualifiedPackageName()));
 }
 protected ReferenceBinding checkMethodRef(MethodBinding method, ReferenceExpression referenceExpression) {
 	boolean result = (!method.isStatic() && !method.isPrivate()
-		&&	referenceExpression.isMethodReference()  
-		&& !(method.isDefault() && this.pattern.focus != null 
+		&&	referenceExpression.isMethodReference()
+		&& !(method.isDefault() && this.pattern.focus != null
 		&& !CharOperation.equals(this.pattern.declaringPackageName, method.declaringClass.qualifiedPackageName())));
 	if (result) {
 		Expression lhs = referenceExpression.lhs;
@@ -231,7 +231,7 @@ protected ReferenceBinding checkMethodRef(MethodBinding method, ReferenceExpress
 				return (ReferenceBinding) binding;
 		}
 	}
-	
+
 	return null;
 }
 @Override
@@ -283,7 +283,7 @@ public int match(MethodDeclaration node, MatchingNodeSet nodeSet) {
 		ASTNode[] args = node.arguments;
   :giro */
 		ASTNode[] args = MethodSignatureEnhancer.getSourceArguments(node);
-// SH}		
+// SH}
 		int argsLength = args == null ? 0 : args.length;
 		if (length != argsLength) return IMPOSSIBLE_MATCH;
 		for (int i = 0; i < argsLength; i++) {
@@ -324,14 +324,14 @@ public int match(MemberValuePair node, MatchingNodeSet nodeSet) {
 // public int match(CalloutMappingDeclaration node, MatchingNodeSet nodeSet) - SKIP IT
 // public int match(CallinMappingDeclaration node, MatchingNodeSet nodeSet) - SKIP IT
 @Override
-public int match(MethodSpec methodSpec, MatchingNodeSet nodeSet) 
+public int match(MethodSpec methodSpec, MatchingNodeSet nodeSet)
 {
     if (!matchesName(this.pattern.selector, methodSpec.selector)) return IMPOSSIBLE_MATCH;
-    
+
 	// a signature-less methodSpec is a possible match -- parameters won't match in any case
     if (!methodSpec.hasSignature)
         return nodeSet.addMatch(methodSpec, this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
-    
+
     if (this.pattern.parameterSimpleNames != null)
     {
 		int length = this.pattern.parameterSimpleNames.length;
@@ -346,11 +346,11 @@ public int match(MethodSpec methodSpec, MatchingNodeSet nodeSet)
 		{
 			if (!matchesTypeReference(this.pattern.parameterSimpleNames[i], args[i].type))
 			{
-			    return IMPOSSIBLE_MATCH;		    
+			    return IMPOSSIBLE_MATCH;
 			}
 		}
 	}
-    
+
     return nodeSet.addMatch(methodSpec, this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
 }
 @Override
@@ -453,12 +453,12 @@ protected int matchMethod(MethodBinding method, boolean skipImpossibleArg) {
 		// global verification
 		if (method.parameters == null) return INACCURATE_MATCH;
 //{ObjectTeams: for callin methods use retrenched parameters
-/* orig: 
+/* orig:
 		if (parameterCount != method.parameters.length) return IMPOSSIBLE_MATCH;
   :giro */
   		if (parameterCount != method.getSourceParamLength()) return IMPOSSIBLE_MATCH;
-  		TypeBinding[] methodParamters = method.getSourceParameters(); 
-// SH}  				
+  		TypeBinding[] methodParamters = method.getSourceParameters();
+// SH}
 		if (!method.isValidBinding() && ((ProblemMethodBinding)method).problemId() == ProblemReasons.Ambiguous) {
 			// return inaccurate match for ambiguous call (bug 80890)
 			return INACCURATE_MATCH;
@@ -470,9 +470,9 @@ protected int matchMethod(MethodBinding method, boolean skipImpossibleArg) {
 		// verify each parameter
 		for (int i = 0; i < parameterCount; i++) {
 //{ObjectTeams: callin method?
-/* orig:			
+/* orig:
 			TypeBinding argType = method.parameters[i];
-  :giro */			
+  :giro */
 			TypeBinding argType = methodParamters[i];
 // SH}
 			int newLevel = IMPOSSIBLE_MATCH;
@@ -485,7 +485,7 @@ protected int matchMethod(MethodBinding method, boolean skipImpossibleArg) {
 				if (focusMethodBinding != null) {// textual comparison insufficient
 					TypeBinding[] parameters = focusMethodBinding.parameters;
 					if (parameters.length >= parameterCount) {
-						newLevel = (isBinary ? argType.erasure().isEquivalentTo((parameters[i].erasure())) :argType.isEquivalentTo((parameters[i]))) ? 
+						newLevel = (isBinary ? argType.erasure().isEquivalentTo((parameters[i].erasure())) :argType.isEquivalentTo((parameters[i]))) ?
 								ACCURATE_MATCH : IMPOSSIBLE_MATCH;
 						foundLevel = true;
 					}
@@ -515,7 +515,7 @@ protected int matchMethod(MethodBinding method, boolean skipImpossibleArg) {
 		}
 		if (foundTypeVariable) {
 			if (!method.isStatic() && !method.isPrivate()) {
-				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=123836, No point in textually comparing type variables, captures etc with concrete types. 
+				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=123836, No point in textually comparing type variables, captures etc with concrete types.
 				if (!checkedFocus)
 					focusMethodBinding = this.matchLocator.getMethodBinding(this.pattern);
 				if (focusMethodBinding != null) {
@@ -523,7 +523,7 @@ protected int matchMethod(MethodBinding method, boolean skipImpossibleArg) {
 						return ACCURATE_MATCH;
 					}
 				}
-			} 
+			}
 			return IMPOSSIBLE_MATCH;
 		}
 	}
@@ -621,26 +621,26 @@ protected void matchReportReference(ASTNode reference, IJavaElement element, IJa
 //{ObjectTeams: use method sourceName() instead of field sourceName:
 /* orig:
 					if (isPrivate && !CharOperation.equals(methodBinding.declaringClass.sourceName, focus.getParent().getElementName().toCharArray())) {
-  :giro */					
+  :giro */
 					ReferenceBinding mDeclaringClass = methodBinding.declaringClass;
 					// for anon classes sourceName() is not usable here:
-					char[] declaringClassName = mDeclaringClass.isAnonymousType() ? mDeclaringClass.sourceName : mDeclaringClass.sourceName(); 
+					char[] declaringClassName = mDeclaringClass.isAnonymousType() ? mDeclaringClass.sourceName : mDeclaringClass.sourceName();
 					if (isPrivate && !CharOperation.equals(declaringClassName, focus.getParent().getElementName().toCharArray())) {
-// SH}						
+// SH}
 						return; // finally the match was not possible
 					}
 				}
 			}
 			matchReportReference((MessageSend)reference, locator, accuracy, ((MessageSend)reference).binding);
 //ObjectTeams: calculate source range for selection of method spec (method reference)
-		} else if (this.pattern.findReferences && reference instanceof MethodSpec) 
+		} else if (this.pattern.findReferences && reference instanceof MethodSpec)
 		{
 		    MethodSpec methodSpec= (MethodSpec)reference;
 		    int offset = methodSpec.sourceStart ;
-			SearchMatch newMatch = locator.newMethodReferenceMatch(element, elementBinding, accuracy, offset, 
+			SearchMatch newMatch = locator.newMethodReferenceMatch(element, elementBinding, accuracy, offset,
 					methodSpec.declarationSourceEnd - offset + 1, false/*not constructor*/, false/*not synthetic*/, reference);
 			locator.report(newMatch);
-//jsv}	
+//jsv}
 		} else {
 			if (reference instanceof SingleMemberAnnotation) {
 				reference = ((SingleMemberAnnotation)reference).memberValuePairs()[0];
@@ -755,7 +755,7 @@ private boolean methodParametersEqualsPattern(MethodBinding method) {
 	TypeBinding[] methodParameters = method.parameters;
   :giro */
 	TypeBinding[] methodParameters = method.getSourceParameters();
-// SH}	
+// SH}
 
 	int length = methodParameters.length;
 	if (length != this.pattern.parameterSimpleNames.length) return false;
@@ -816,11 +816,11 @@ protected void reportDeclaration(MethodBinding methodBinding, MatchLocator locat
 	if (type.isBinary()) {
 		IMethod method = null;
 //{ObjectTeams: for callin methods use the retrenched parameters:
-/* orig: 
+/* orig:
 		TypeBinding[] parameters = methodBinding.original().parameters;
   :giro */
 		TypeBinding[] parameters = methodBinding.original().getSourceParameters();
-// SH}	
+// SH}
 		int parameterLength = parameters.length;
 		char[][] parameterTypes = new char[parameterLength][];
 		for (int i = 0; i<parameterLength; i++) {
@@ -832,7 +832,7 @@ protected void reportDeclaration(MethodBinding methodBinding, MatchLocator locat
 		}
 		method = locator.createBinaryMethodHandle(type, methodBinding.selector, parameterTypes);
 		if (method == null || knownMethods.addIfNotIncluded(method) == null) return;
-	
+
 		IResource resource = type.getResource();
 		if (resource == null)
 			resource = type.getJavaProject().getProject();
@@ -930,7 +930,7 @@ public int resolveLevel(Binding binding) {
 //	            used. Otherwise an exact match will not be found, because the
 //	            parameter count of the search pattern will differ from the
 //	            parameter count in the method binding (see also method
-//	            matchMethod(MethodBinding) in this class). 
+//	            matchMethod(MethodBinding) in this class).
 	if (method.parameters != null)
 	{
 	    TypeBinding[] paramTypes = method.parameters;
@@ -949,7 +949,7 @@ public int resolveLevel(Binding binding) {
 	        }
         }
 	}
-//gbr}	
+//gbr}
 	boolean skipVerif = this.pattern.findDeclarations && this.mayBeGeneric;
 	int methodLevel = matchMethod(method, skipVerif);
 	if (methodLevel == IMPOSSIBLE_MATCH) {
@@ -1094,7 +1094,7 @@ protected int resolveLevelAsSubtype(char[] simplePattern, char[] qualifiedPatter
 	if (type == null) return INACCURATE_MATCH;
 
 	int level = resolveLevelForType(simplePattern, qualifiedPattern, type);
-//{ObjectTeams: perform deferred checking of tsub/tsuper:	
+//{ObjectTeams: perform deferred checking of tsub/tsuper:
 	if (level != IMPOSSIBLE_MATCH) {
 		char[] typeName= type.getRealType().readableName();
 		level= this.pattern.resolveLevelForType(new String(typeName), level);
@@ -1134,19 +1134,19 @@ protected int resolveLevelAsSubtype(char[] simplePattern, char[] qualifiedPatter
 	}
 
 //{ObjectTeams: matches implicit supertypes:
-	RoleModel roleModel = type.roleModel; 
+	RoleModel roleModel = type.roleModel;
 	if (type.roleModel != null) {
 		ReferenceBinding[] tsuperTypes = roleModel.getTSuperRoleBindings();
 		for (int t = tsuperTypes.length-1; t>=0; t--) { // check highest prio first (which comes last in the array)
 			level = resolveLevelAsSubtype(simplePattern, qualifiedPattern, tsuperTypes[t], methodName, argumentTypes, packageName, isDefault);
-  // OT_COPY_PASTE from above "matches superclass":			
+  // OT_COPY_PASTE from above "matches superclass":
 			if (level != IMPOSSIBLE_MATCH) {
 				if (argumentTypes != null) {
 					// need to verify if method may be overridden
 					MethodBinding[] methods = type.getMethods(this.pattern.selector);
 					for (int i=0, length=methods.length; i<length; i++) {
 						MethodBinding method = methods[i];
-     //{OT: if method is copied don't consider it as overriding: 						
+     //{OT: if method is copied don't consider it as overriding:
 						if (method.copyInheritanceSrc != null)
 							continue;
      // SH}
@@ -1177,8 +1177,8 @@ protected int resolveLevelAsSubtype(char[] simplePattern, char[] qualifiedPatter
   //
 		}
 	}
-// SH}	
-	
+// SH}
+
 	// matches interfaces
 	ReferenceBinding[] interfaces = type.superInterfaces();
 	if (interfaces == null) return INACCURATE_MATCH;

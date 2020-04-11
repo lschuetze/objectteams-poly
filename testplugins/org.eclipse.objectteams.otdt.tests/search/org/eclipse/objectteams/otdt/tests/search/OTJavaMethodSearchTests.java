@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -45,7 +45,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		super(name);
 	}
-	
+
 	public static Test suite()
 	{
 /*
@@ -54,14 +54,14 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 		suite.addTest(new OTJavaMethodSearchTests("test031b"));
 		return suite;
 /*/
-	    
+
 		return new Suite(OTJavaMethodSearchTests.class);
 //*/
 	}
 
 	/**
 	 * Search for:<br>
-	 *	- method references<br> 
+	 *	- method references<br>
 	 * Search pattern:<br>
 	 *	- fully qualified name<br>
 	 * Searched element:<br>
@@ -75,17 +75,17 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p.Team1.Role1.roleMethod()", 
-				METHOD, 
+				"p.Team1.Role1.roleMethod()",
+				METHOD,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p"), 
+				getJavaSearchScopeFromPackage("p"),
 				resultCollector);
-		
-		assertSearchResults("src/p/Team1.java void p.Team1$Role1.testMethod() [roleMethod()]\n" + 
+
+		assertSearchResults("src/p/Team1.java void p.Team1$Role1.testMethod() [roleMethod()]\n" +
 							"src/p/Team1.java p.Team1$Role1 roleMethod -> baseMethod [roleMethod]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 * 	- method references<br>
@@ -102,17 +102,17 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"roleMethod()", 
-				METHOD, 
+				"roleMethod()",
+				METHOD,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p"), 
+				getJavaSearchScopeFromPackage("p"),
 				resultCollector);
-		
+
 		assertSearchResults("src/p/Team1.java void p.Team1$Role1.testMethod() [roleMethod()]\n" +
 							"src/p/Team1.java p.Team1$Role1 roleMethod -> baseMethod [roleMethod]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method declarations<br>
@@ -128,16 +128,16 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p.Team1.Role1.roleMethod()", 
-				METHOD, 
+				"p.Team1.Role1.roleMethod()",
+				METHOD,
 				DECLARATIONS,
-				getJavaSearchScopeFromPackage("p"), 
+				getJavaSearchScopeFromPackage("p"),
 				resultCollector);
-		
+
 		assertSearchResults("src/p/Team1.java void p.Team1$Role1.roleMethod() [roleMethod]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method declarations<br>
@@ -153,16 +153,16 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"roleMethod()", 
-				METHOD, 
+				"roleMethod()",
+				METHOD,
 				DECLARATIONS,
 				getJavaSearchScopeFromPackage("p"),
 				resultCollector);
-		
+
 		assertSearchResults("src/p/Team1.java void p.Team1$Role1.roleMethod() [roleMethod]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method references<br>
@@ -175,7 +175,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	 * Expected search result:<br>
 	 *	Declarations in<br>
 	 *		- role<br>
-	 *  References in<br> 
+	 *  References in<br>
 	 *		- role method (testMethod)<br>
 	 *		- role method spec in a callout without signature (abstract method decl in the same role)<br>
 	 *see TPX-293(fixed)<br>
@@ -184,18 +184,18 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p.Team1.Role1.roleMethod()", 
-				METHOD, 
+				"p.Team1.Role1.roleMethod()",
+				METHOD,
 				ALL_OCCURRENCES,
 				getJavaSearchScopeFromPackage("p"),
 				resultCollector);
-		
-		assertSearchResults("src/p/Team1.java void p.Team1$Role1.roleMethod() [roleMethod]\n" + 
-							"src/p/Team1.java void p.Team1$Role1.testMethod() [roleMethod()]\n" + 
+
+		assertSearchResults("src/p/Team1.java void p.Team1$Role1.roleMethod() [roleMethod]\n" +
+							"src/p/Team1.java void p.Team1$Role1.testMethod() [roleMethod()]\n" +
 							"src/p/Team1.java p.Team1$Role1 roleMethod -> baseMethod [roleMethod]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method references<br>
@@ -216,18 +216,18 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"roleMethod()", 
-				METHOD, 
+				"roleMethod()",
+				METHOD,
 				ALL_OCCURRENCES,
-				getJavaSearchScopeFromPackage("p"), 
+				getJavaSearchScopeFromPackage("p"),
 				resultCollector);
-		
-		assertSearchResults("src/p/Team1.java void p.Team1$Role1.roleMethod() [roleMethod]\n" + 
+
+		assertSearchResults("src/p/Team1.java void p.Team1$Role1.roleMethod() [roleMethod]\n" +
 							"src/p/Team1.java void p.Team1$Role1.testMethod() [roleMethod()]\n" +
 							"src/p/Team1.java p.Team1$Role1 roleMethod -> baseMethod [roleMethod]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *  - method declarations<br>
@@ -243,16 +243,16 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p.Team1.Role2.role2Method()", 
-				METHOD, 
+				"p.Team1.Role2.role2Method()",
+				METHOD,
 				DECLARATIONS,
-				getJavaSearchScopeFromPackage("p"), 
+				getJavaSearchScopeFromPackage("p"),
 				resultCollector);
-		
+
 		assertSearchResults("src/p/Team1.java void p.Team1$Role2.role2Method() [role2Method]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *  - method declarations<br>
@@ -268,16 +268,16 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"role2Method()", 
-				METHOD, 
+				"role2Method()",
+				METHOD,
 				DECLARATIONS,
-				getJavaSearchScopeFromPackage("p"), 
+				getJavaSearchScopeFromPackage("p"),
 				resultCollector);
-		
+
 		assertSearchResults("src/p/Team1.java void p.Team1$Role2.role2Method() [role2Method]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *  - method declarations<br>
@@ -299,19 +299,19 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p.Team1.Role2.role2Method()", 
-				METHOD, 
+				"p.Team1.Role2.role2Method()",
+				METHOD,
 				ALL_OCCURRENCES,
-				getJavaSearchScopeFromPackage("p"), 
+				getJavaSearchScopeFromPackage("p"),
 				resultCollector);
-		
-		assertSearchResults("src/p/Team1.java void p.Team1$Role2.role2Method() [role2Method]\n" + 
-							"src/p/Team1.java void p.Team1$Role2.testMethod() [role2Method()]\n" + 
+
+		assertSearchResults("src/p/Team1.java void p.Team1$Role2.role2Method() [role2Method]\n" +
+							"src/p/Team1.java void p.Team1$Role2.testMethod() [role2Method()]\n" +
 							"src/p/Team1.java p.Team1$Role2 role2Method <- baseMethod [role2Method]",
 				resultCollector);
 	}
-	
-	/** 
+
+	/**
 	 * Search for:<br>
 	 *  - method declarations<br>
 	 *	- method references<br>
@@ -331,18 +331,18 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"role2Method()", 
-				METHOD, 
+				"role2Method()",
+				METHOD,
 				ALL_OCCURRENCES,
-				getJavaSearchScopeFromPackage("p"), 
+				getJavaSearchScopeFromPackage("p"),
 				resultCollector);
-		
-		assertSearchResults("src/p/Team1.java void p.Team1$Role2.role2Method() [role2Method]\n" + 
+
+		assertSearchResults("src/p/Team1.java void p.Team1$Role2.role2Method() [role2Method]\n" +
 							"src/p/Team1.java void p.Team1$Role2.testMethod() [role2Method()]\n" +
 							"src/p/Team1.java p.Team1$Role2 role2Method <- baseMethod [role2Method]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method references<br>
@@ -359,17 +359,17 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"role2Method()", 
-				METHOD, 
+				"role2Method()",
+				METHOD,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p"), 
+				getJavaSearchScopeFromPackage("p"),
 				resultCollector);
-		
+
 		assertSearchResults("src/p/Team1.java void p.Team1$Role2.testMethod() [role2Method()]\n" +
 							"src/p/Team1.java p.Team1$Role2 role2Method <- baseMethod [role2Method]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method references<br>
@@ -386,17 +386,17 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p.Team1.Role2.role2Method()", 
-				METHOD, 
+				"p.Team1.Role2.role2Method()",
+				METHOD,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p"), 
+				getJavaSearchScopeFromPackage("p"),
 				resultCollector);
-		
-		assertSearchResults("src/p/Team1.java void p.Team1$Role2.testMethod() [role2Method()]\n" + 
+
+		assertSearchResults("src/p/Team1.java void p.Team1$Role2.testMethod() [role2Method()]\n" +
 							"src/p/Team1.java p.Team1$Role2 role2Method <- baseMethod [role2Method]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method references<br>
@@ -413,17 +413,17 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_long_methodspecs.Team1.Role1.roleMethodWithAbstractDecl", 
-				METHOD, 
+				"p_long_methodspecs.Team1.Role1.roleMethodWithAbstractDecl",
+				METHOD,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p_long_methodspecs"), 
+				getJavaSearchScopeFromPackage("p_long_methodspecs"),
 				resultCollector);
-		
-		assertSearchResults("src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role1.testMethod() [roleMethodWithAbstractDecl()]\n" + 
+
+		assertSearchResults("src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role1.testMethod() [roleMethodWithAbstractDecl()]\n" +
 							"src/p_long_methodspecs/Team1.java p_long_methodspecs.Team1$Role1 roleMethodWithAbstractDecl() -> baseMethod() [roleMethodWithAbstractDecl()]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:
 	 *	- method references
@@ -440,17 +440,17 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_long_methodspecs.Team1.Role1.roleMethodWithoutAbstractDecl", 
-				METHOD, 
+				"p_long_methodspecs.Team1.Role1.roleMethodWithoutAbstractDecl",
+				METHOD,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p_long_methodspecs"), 
+				getJavaSearchScopeFromPackage("p_long_methodspecs"),
 				resultCollector);
 		//TODO(jsv) the role method spec in a callout is reported as reference. after improvement resolved change expected test result
-		assertSearchResults("src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role1.testMethod() [roleMethodWithoutAbstractDecl()]\n" + 
+		assertSearchResults("src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role1.testMethod() [roleMethodWithoutAbstractDecl()]\n" +
 							"src/p_long_methodspecs/Team1.java p_long_methodspecs.Team1$Role1 roleMethodWithoutAbstractDecl() -> baseMethod() [roleMethodWithoutAbstractDecl()]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method references<br>
@@ -467,17 +467,17 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"roleMethodWithAbstractDecl()", 
-				METHOD, 
+				"roleMethodWithAbstractDecl()",
+				METHOD,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p_long_methodspecs"), 
+				getJavaSearchScopeFromPackage("p_long_methodspecs"),
 				resultCollector);
-		
+
 		assertSearchResults("src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role1.testMethod() [roleMethodWithAbstractDecl()]\n" +
 							"src/p_long_methodspecs/Team1.java p_long_methodspecs.Team1$Role1 roleMethodWithAbstractDecl() -> baseMethod() [roleMethodWithAbstractDecl()]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method references<br>
@@ -494,24 +494,24 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"roleMethodWithoutAbstractDecl()", 
-				METHOD, 
+				"roleMethodWithoutAbstractDecl()",
+				METHOD,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p_long_methodspecs"), 
+				getJavaSearchScopeFromPackage("p_long_methodspecs"),
 				resultCollector);
 		//TODO(jsv) the role method spec in a callout is reported as reference. after improvement resolved change expected test result
 		assertSearchResults("src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role1.testMethod() [roleMethodWithoutAbstractDecl()]\n" +
 							"src/p_long_methodspecs/Team1.java p_long_methodspecs.Team1$Role1 roleMethodWithoutAbstractDecl() -> baseMethod() [roleMethodWithoutAbstractDecl()]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method declaration<br>
 	 * Search pattern:<br>
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- "method declaration" in callout binding<br> 
+	 * 	- "method declaration" in callout binding<br>
 	 * Expected search result:<br>
 	 *  Declaration in<br>
 	 *		- none<br>
@@ -520,23 +520,23 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_long_methodspecs.Team1.Role1.roleMethodWithoutAbstractDecl()", 
-				METHOD, 
+				"p_long_methodspecs.Team1.Role1.roleMethodWithoutAbstractDecl()",
+				METHOD,
 				DECLARATIONS,
-				getJavaSearchScopeFromPackage("p_long_methodspecs"), 
+				getJavaSearchScopeFromPackage("p_long_methodspecs"),
 				resultCollector);
-		//TODO(jsv) the role method spec in a callout is reported as reference. after improvement resolved change expected test result		
+		//TODO(jsv) the role method spec in a callout is reported as reference. after improvement resolved change expected test result
 		assertSearchResults("",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method declaration<br>
 	 * Search pattern:<br>
 	 * 	- simple name<br>
 	 * Searched element:<br>
-	 * 	- "method declaration" in callout binding<br> 
+	 * 	- "method declaration" in callout binding<br>
 	 * Expected search result:<br>
 	 *  Declaration in<br>
 	 *		- none<br>
@@ -545,8 +545,8 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"roleMethodWithoutAbstractDecl()", 
-				METHOD, 
+				"roleMethodWithoutAbstractDecl()",
+				METHOD,
 				DECLARATIONS,
 				getJavaSearchScopeFromPackage("p_long_methodspecs"),
 				resultCollector);
@@ -554,7 +554,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 		assertSearchResults("",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method declaration<br>
@@ -575,18 +575,18 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_long_methodspecs.Team1.Role1.roleMethodWithAbstractDecl()", 
-				METHOD, 
+				"p_long_methodspecs.Team1.Role1.roleMethodWithAbstractDecl()",
+				METHOD,
 				ALL_OCCURRENCES,
 				getJavaSearchScopeFromPackage("p_long_methodspecs"),
 				resultCollector);
-		
-		assertSearchResults("src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role1.roleMethodWithAbstractDecl() [roleMethodWithAbstractDecl]\n" + 
-							"src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role1.testMethod() [roleMethodWithAbstractDecl()]\n" + 
+
+		assertSearchResults("src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role1.roleMethodWithAbstractDecl() [roleMethodWithAbstractDecl]\n" +
+							"src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role1.testMethod() [roleMethodWithAbstractDecl()]\n" +
 							"src/p_long_methodspecs/Team1.java p_long_methodspecs.Team1$Role1 roleMethodWithAbstractDecl() -> baseMethod() [roleMethodWithAbstractDecl()]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method declaration<br>
@@ -595,7 +595,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	 * 	- fully qualified name<br>
 	 *	- combined pattern<br>
 	 * Searched element:<br>
-	 * 	- "method declaration" in callout binding<br> 
+	 * 	- "method declaration" in callout binding<br>
 	 * Expected search result:<br>
 	 * 	Declaration in<br>
 	 *		- none<br>
@@ -607,17 +607,17 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_long_methodspecs.Team1.Role1.roleMethodWithoutAbstractDecl()", 
-				METHOD, 
+				"p_long_methodspecs.Team1.Role1.roleMethodWithoutAbstractDecl()",
+				METHOD,
 				ALL_OCCURRENCES,
 				getJavaSearchScopeFromPackage("p_long_methodspecs"),
 				resultCollector);
 		//TODO(jsv) the role method spec in a callout is reported as reference. after improvement resolved change expected test result
-		assertSearchResults("src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role1.testMethod() [roleMethodWithoutAbstractDecl()]\n" + 
+		assertSearchResults("src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role1.testMethod() [roleMethodWithoutAbstractDecl()]\n" +
 							"src/p_long_methodspecs/Team1.java p_long_methodspecs.Team1$Role1 roleMethodWithoutAbstractDecl() -> baseMethod() [roleMethodWithoutAbstractDecl()]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method declaration<br>
@@ -625,7 +625,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	 * Search pattern:<br>
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- role method<br> 
+	 * 	- role method<br>
 	 * Expected search result:<br>
 	 *  Declaration in<br>
 	 *		- role<br>
@@ -633,23 +633,23 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	 *		- role method<br>
 	 *		- role method spec in callin binding with signature<br>
 	 */
-	
+
 	public void test021() throws CoreException
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_long_methodspecs.Team1.Role2.role2Method()", 
-				METHOD, 
+				"p_long_methodspecs.Team1.Role2.role2Method()",
+				METHOD,
 				ALL_OCCURRENCES,
-				getJavaSearchScopeFromPackage("p_long_methodspecs"), 
+				getJavaSearchScopeFromPackage("p_long_methodspecs"),
 				resultCollector);
-		
-		assertSearchResults("src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role2.role2Method() [role2Method]\n" + 
-							"src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role2.testMethod() [role2Method()]\n" + 
+
+		assertSearchResults("src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role2.role2Method() [role2Method]\n" +
+							"src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role2.testMethod() [role2Method()]\n" +
 							"src/p_long_methodspecs/Team1.java p_long_methodspecs.Team1$Role2 role2Method() <- baseMethod() [role2Method()]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method declaration<br>
@@ -657,7 +657,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	 * Search pattern:<br>
 	 * 	- simple name<br>
 	 * Searched element:<br>
-	 * 	- role method<br> 
+	 * 	- role method<br>
 	 * Expected search result:<br>
 	 *  Declaration in<br>
 	 *		- role<br>
@@ -669,25 +669,25 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"role2Method()", 
-				METHOD, 
+				"role2Method()",
+				METHOD,
 				ALL_OCCURRENCES,
-				getJavaSearchScopeFromPackage("p_long_methodspecs"), 
+				getJavaSearchScopeFromPackage("p_long_methodspecs"),
 				resultCollector);
-		
-		assertSearchResults("src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role2.role2Method() [role2Method]\n" + 
+
+		assertSearchResults("src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role2.role2Method() [role2Method]\n" +
 							"src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role2.testMethod() [role2Method()]\n" +
 							"src/p_long_methodspecs/Team1.java p_long_methodspecs.Team1$Role2 role2Method() <- baseMethod() [role2Method()]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method references<br>
 	 * Search pattern:<br>
 	 * 	- simple name<br>
 	 * Searched element:<br>
-	 * 	- role method<br> 
+	 * 	- role method<br>
 	 * Expected search result:<br>
 	 *	References in<br>
 	 *		- role method<br>
@@ -697,24 +697,24 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"role2Method()", 
-				METHOD, 
+				"role2Method()",
+				METHOD,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p_long_methodspecs"), 
+				getJavaSearchScopeFromPackage("p_long_methodspecs"),
 				resultCollector);
-		
+
 		assertSearchResults("src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role2.testMethod() [role2Method()]\n" +
 							"src/p_long_methodspecs/Team1.java p_long_methodspecs.Team1$Role2 role2Method() <- baseMethod() [role2Method()]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method references<br>
 	 * Search pattern:<br>
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- role method<br> 
+	 * 	- role method<br>
 	 * Expected search result:<br>
 	 *	References in<br>
 	 *		- role method<br>
@@ -724,24 +724,24 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_long_methodspecs.Team1.Role2.role2Method()", 
-				METHOD, 
+				"p_long_methodspecs.Team1.Role2.role2Method()",
+				METHOD,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p_long_methodspecs"), 
+				getJavaSearchScopeFromPackage("p_long_methodspecs"),
 				resultCollector);
-		
-		assertSearchResults("src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role2.testMethod() [role2Method()]\n" + 
+
+		assertSearchResults("src/p_long_methodspecs/Team1.java void p_long_methodspecs.Team1$Role2.testMethod() [role2Method()]\n" +
 							"src/p_long_methodspecs/Team1.java p_long_methodspecs.Team1$Role2 role2Method() <- baseMethod() [role2Method()]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method declarations (in hierarchy) -> decl & fully qualified name<br>
 	 * Search pattern:<br>
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- base method<br> 
+	 * 	- base method<br>
 	 * Expected search result:<br>
 	 *	Declarations in<br>
 	 *		- base class AA <br>
@@ -752,52 +752,52 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p2.AA.mm1()", 
-				METHOD, 
+				"p2.AA.mm1()",
+				METHOD,
 				DECLARATIONS,
-				getJavaSearchScopeFromPackage("p2"), 
+				getJavaSearchScopeFromPackage("p2"),
 				resultCollector);
-		
-		assertSearchResults("src/p2/A.java void p2.A.mm1() [mm1]\n" + 
+
+		assertSearchResults("src/p2/A.java void p2.A.mm1() [mm1]\n" +
 							"src/p2/AA.java void p2.AA.mm1() [mm1]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method references<br>
 	 * Search pattern:<br>
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- base method<br> 
+	 * 	- base method<br>
 	 * Expected search result:<br>
-	 *	References in 
+	 *	References in
 	 *		<li> base method spec in callout mapping with signature. corresponding abstract declaration of role method is inherited from super role<br>
 	 */
 	public void test026() throws CoreException
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p.Base1.baseMethod()", 
-				METHOD, 
+				"p.Base1.baseMethod()",
+				METHOD,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p"), 
+				getJavaSearchScopeFromPackage("p"),
 				resultCollector);
-		
+
 		assertSearchResults("src/p/Team1.java p.Team1$Role1 roleMethod -> baseMethod [baseMethod]\n" +
 							"src/p/Team1.java p.Team1$Role1 roleMethod3 -> baseMethod [baseMethod]\n" +
 							"src/p/Team1.java p.Team1$Role2 role2Method <- baseMethod [baseMethod]"
 							,
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method declarations (in hierarchy) -> decl & fully qualified name<br>
 	 * Search pattern:<br>
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- role method<br> 
+	 * 	- role method<br>
 	 * Expected search result:<br>
 	 *	Declarations in<br>
 	 *		- role class TestTeam1.TestRole1 <br>
@@ -807,24 +807,24 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_implicit_inheritance.TestTeam1.TestRole1.roleMethod()", 
-				METHOD, 
+				"p_implicit_inheritance.TestTeam1.TestRole1.roleMethod()",
+				METHOD,
 				DECLARATIONS,
-				getJavaSearchScopeFromPackage("p_implicit_inheritance"), 
+				getJavaSearchScopeFromPackage("p_implicit_inheritance"),
 				resultCollector);
-		
-		assertSearchResults("src/p_implicit_inheritance/TestTeam1.java void p_implicit_inheritance.TestTeam1$TestRole1.roleMethod() [roleMethod]\n" + 
+
+		assertSearchResults("src/p_implicit_inheritance/TestTeam1.java void p_implicit_inheritance.TestTeam1$TestRole1.roleMethod() [roleMethod]\n" +
 							"src/p_implicit_inheritance/TestTeam2.java void p_implicit_inheritance.TestTeam2$TestRole1.roleMethod() [roleMethod]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method reference<br>
 	 * Search pattern:<br>
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- private role method<br> 
+	 * 	- private role method<br>
 	 * Expected search result:<br>
 	 *	References in<br>
 	 *		- ref in TestTeam1.TestRole1.roleMethod() <br>
@@ -834,25 +834,25 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_implicit_inheritance.TestTeam1.TestRole1.privateRoleMethod()", 
-				METHOD, 
+				"p_implicit_inheritance.TestTeam1.TestRole1.privateRoleMethod()",
+				METHOD,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p_implicit_inheritance"), 
+				getJavaSearchScopeFromPackage("p_implicit_inheritance"),
 				resultCollector);
-		
+
 		assertSearchResults("Search for references of private role method, fully qualified name",
 							"src/p_implicit_inheritance/TestTeam1.java void p_implicit_inheritance.TestTeam1$TestRole1.roleMethod() [privateRoleMethod()]\n" +
 							"src/p_implicit_inheritance/TestTeam2.java void p_implicit_inheritance.TestTeam2$TestRole1.foo() [privateRoleMethod()]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method declaration<br>
 	 * Search pattern:<br>
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- declaration of a role method which overrides an implicit inherited role method<br> 
+	 * 	- declaration of a role method which overrides an implicit inherited role method<br>
 	 * Expected search result:<br>
 	 *	Declaration in<br>
 	 *		- Declaration in TestTeam2.TestRole1<br>
@@ -861,24 +861,24 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_implicit_inheritance.TestTeam2.TestRole1.roleMethod()", 
-				METHOD, 
+				"p_implicit_inheritance.TestTeam2.TestRole1.roleMethod()",
+				METHOD,
 				DECLARATIONS,
-				getJavaSearchScopeFromPackage("p_implicit_inheritance"), 
+				getJavaSearchScopeFromPackage("p_implicit_inheritance"),
 				resultCollector);
-		
+
 		assertSearchResults("Search for role method decl which overrides an implicit inherited method. fq name",
 				"src/p_implicit_inheritance/TestTeam2.java void p_implicit_inheritance.TestTeam2$TestRole1.roleMethod() [roleMethod]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method declaration<br>
 	 * Search pattern:<br>
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- declaration of a role method which does not override an implicit inherited role method<br> 
+	 * 	- declaration of a role method which does not override an implicit inherited role method<br>
 	 * Expected search result:<br>
 	 *	Declaration in<br>
 	 *		- Declaration in TestTeam2.TestRole1<br>
@@ -887,17 +887,17 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_implicit_inheritance.TestTeam2.TestRole1.roleMethod2()", 
-				METHOD, 
+				"p_implicit_inheritance.TestTeam2.TestRole1.roleMethod2()",
+				METHOD,
 				DECLARATIONS,
-				getJavaSearchScopeFromPackage("p_implicit_inheritance"), 
+				getJavaSearchScopeFromPackage("p_implicit_inheritance"),
 				resultCollector);
-		
+
 		assertSearchResults("Search for role method decl which does not override an implicit inherited method. fq name",
 				"src/p_implicit_inheritance/TestTeam2.java void p_implicit_inheritance.TestTeam2$TestRole1.roleMethod2() [roleMethod2]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method declaration<br>
@@ -906,7 +906,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	 *  - combined method pattern
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- all occurences of a role method which overrides an implicit inherited role method<br> 
+	 * 	- all occurences of a role method which overrides an implicit inherited role method<br>
 	 * Expected search result:<br>
 	 *	Declaration in<br>
 	 *		- Declaration in TestTeam2.TestRole1<br>
@@ -917,17 +917,17 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_implicit_inheritance.TestTeam2.TestRole1.roleMethod()", 
-				METHOD, 
+				"p_implicit_inheritance.TestTeam2.TestRole1.roleMethod()",
+				METHOD,
 				ALL_OCCURRENCES,
-				getJavaSearchScopeFromPackage("p_implicit_inheritance"), 
+				getJavaSearchScopeFromPackage("p_implicit_inheritance"),
 				resultCollector);
-		
+
 		assertSearchResults("Search for role method decl which overrides an implicit inherited method. fq name",
 				"src/p_implicit_inheritance/TestTeam2.java void p_implicit_inheritance.TestTeam2$TestRole1.roleMethod() [roleMethod]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *  - method references<br>
@@ -935,7 +935,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	 *  - combined method pattern
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- all references to a role method which is overridden in a tsub role<br> 
+	 * 	- all references to a role method which is overridden in a tsub role<br>
 	 * Expected search result:<br>
 	 *	- reference:
 	 *		TSuperMessageSend in body of method TestTeam2.TestRole1.roleMethod()<br>
@@ -945,12 +945,12 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_implicit_inheritance.TestTeam1.TestRole1.roleMethod()", 
-				METHOD, 
+				"p_implicit_inheritance.TestTeam1.TestRole1.roleMethod()",
+				METHOD,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p_implicit_inheritance"), 
+				getJavaSearchScopeFromPackage("p_implicit_inheritance"),
 				resultCollector);
-		
+
 		assertSearchResults("Search for role method decl which is overridden in a tsub role. fq name",
 				"src/p_implicit_inheritance/TestTeam2.java void p_implicit_inheritance.TestTeam2$TestRole1.roleMethod() [roleMethod()]",
 				resultCollector);
@@ -963,7 +963,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	 *  - combined method pattern
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- all references to a role method which is overridden in a tsub role<br> 
+	 * 	- all references to a role method which is overridden in a tsub role<br>
 	 * Expected search result:<br>
 	 *	- reference:
 	 *		TSuperMessageSend in body of method TestTeam2.TestRole1.roleMethod()<br>
@@ -976,12 +976,12 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 		IType roleType = this.javaProject.findType("p_implicit_inheritance.TestTeam1.TestRole1");
 		IMethod roleMethod = roleType.getMethod("roleMethod", new String[0]);
 		search(
-				roleMethod, 
-				REFERENCES, 
+				roleMethod,
+				REFERENCES,
 				SearchPattern.R_EXACT_MATCH|SearchPattern.R_CASE_SENSITIVE,
-				getJavaSearchScopeFromPackage("p_implicit_inheritance"), 
+				getJavaSearchScopeFromPackage("p_implicit_inheritance"),
 				resultCollector);
-		
+
 		assertSearchResults("Search for role method decl which is overridden in a tsub role. fq name",
 				"src/p_implicit_inheritance/TestTeam2.java void p_implicit_inheritance.TestTeam2$TestRole1.roleMethod() [roleMethod()]",
 				resultCollector);
@@ -994,7 +994,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	 *  - combined method pattern
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- all references to a role method which overriddes in a tsuper method<br> 
+	 * 	- all references to a role method which overriddes in a tsuper method<br>
 	 * Expected search result:<br>
 	 *	- reference:
 	 *		Nothing, specifically *not* the TSuperMessageSend in it's own body<br>
@@ -1006,17 +1006,17 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 		IType roleType = this.javaProject.findType("p_implicit_inheritance.TestTeam2.TestRole1");
 		IMethod roleMethod = roleType.getMethod("roleMethod", new String[0]);
 		search(
-				roleMethod, 
-				REFERENCES, 
+				roleMethod,
+				REFERENCES,
 				SearchPattern.R_EXACT_MATCH|SearchPattern.R_CASE_SENSITIVE,
-				getJavaSearchScopeFromPackage("p_implicit_inheritance"), 
+				getJavaSearchScopeFromPackage("p_implicit_inheritance"),
 				resultCollector);
-		
+
 		assertSearchResults("Search for role method decl which overrides an implicit inherited method. fq name",
 				"",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method declaration<br>
@@ -1025,7 +1025,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	 *  - combined method pattern
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- declaration of a role method which does not override an implicit inherited role method<br> 
+	 * 	- declaration of a role method which does not override an implicit inherited role method<br>
 	 * Expected search result:<br>
 	 *	Declaration in<br>
 	 *		- Declaration in TestTeam2.TestRole1<br>
@@ -1035,25 +1035,25 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_implicit_inheritance.TestTeam2.TestRole1.roleMethod2()", 
-				METHOD, 
+				"p_implicit_inheritance.TestTeam2.TestRole1.roleMethod2()",
+				METHOD,
 				ALL_OCCURRENCES,
-				getJavaSearchScopeFromPackage("p_implicit_inheritance"), 
+				getJavaSearchScopeFromPackage("p_implicit_inheritance"),
 				resultCollector);
-		
+
 		assertSearchResults("Search for role method decl which does not override an implicit inherited method. fq name",
 				"src/p_implicit_inheritance/TestTeam2.java void p_implicit_inheritance.TestTeam2$TestRole1.roleMethod2() [roleMethod2]",
 				resultCollector);
 	}
-	
-	
+
+
 	/**
 	 * Search for:<br>
 	 *  - method references<br>
 	 * Search pattern:<br>
 	 *  - use IMethod<br>
 	 * Searched element:<br>
-	 * 	- method zork overridden in TestTeam2.TestRole1<br> 
+	 * 	- method zork overridden in TestTeam2.TestRole1<br>
 	 * Expected search result:<br>
 	 *	Declaration in<br>
 	 *		- Reference in TestTeam1.TestRole1.privateRoleMethod, but not tsr.zork() referring to regular super role<br>
@@ -1065,23 +1065,23 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 		IJavaProject project= getJavaProject("OTJavaSearch");
 		IType type= project.findType("p_implicit_inheritance.TestTeam2.TestRole1");
 		IMethod method= type.getMethod("zork", new String[0]);
-		search(method, 
+		search(method,
 			   REFERENCES,
-			   getJavaSearchScopeFromPackage("p_implicit_inheritance"), 
+			   getJavaSearchScopeFromPackage("p_implicit_inheritance"),
 			   resultCollector);
-		
+
 		assertSearchResults("Search for role method call within tsuper method. fq name",
 				"src/p_implicit_inheritance/TestTeam1.java void p_implicit_inheritance.TestTeam1$TestRole1.privateRoleMethod() [zork()]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *  - method declarations<br>
 	 * Search pattern:<br>
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- callin method in a bound role  
+	 * 	- callin method in a bound role
 	 * Expected search result:<br>
 	 *	Declaration in<br>
 	 *		- 1 Declaration in Team1.Role1<br>
@@ -1090,25 +1090,25 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_callin_method.Team1.Role1.callinMethod()", 
-				METHOD, 
+				"p_callin_method.Team1.Role1.callinMethod()",
+				METHOD,
 				DECLARATIONS,
-				getJavaSearchScopeFromPackage("p_callin_method"), 
+				getJavaSearchScopeFromPackage("p_callin_method"),
 				resultCollector);
-		
+
 		assertSearchResults("Search for declaration of callin method. fq name",
 				"src/p_callin_method/Team1.java void p_callin_method.Team1$Role1.callinMethod() [callinMethod]",
 				resultCollector);
 	}
-	
-	
+
+
 	/**
 	 * Search for:<br>
 	 *  - method declarations<br>
 	 * Search pattern:<br>
 	 * 	- JavaElement<br>
 	 * Searched element:<br>
-	 * 	- callin method in a bound role  
+	 * 	- callin method in a bound role
 	 * Expected search result:<br>
 	 *	Declaration in<br>
 	 *		- 1 Declaration in Team1.Role1<br>
@@ -1116,21 +1116,21 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	public void test034() throws CoreException
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
-		
+
 		IType type = getRole(getTestProjectDir(),
 	    		"src",
 				"p_callin_method",
 				"Team1",
 				"Role1");
-		
+
 		IMethod method = type.getMethods()[0];
-		
+
 		search(
-				method, 
+				method,
 				DECLARATIONS,
-				getJavaSearchScopeFromPackage("p_callin_method"), 
+				getJavaSearchScopeFromPackage("p_callin_method"),
 				resultCollector);
-		
+
 		assertSearchResults("Search for declaration of callin method. javaModel",
 				"src/p_callin_method/Team1.java void p_callin_method.Team1$Role1.callinMethod() [callinMethod]",
 				resultCollector);
@@ -1142,7 +1142,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	 * Search pattern:<br>
 	 * 	- JavaElement<br>
 	 * Searched element:<br>
-	 * 	- callin method in a bound role and the method references  
+	 * 	- callin method in a bound role and the method references
 	 * Expected search result:<br>
 	 *	Declaration in<br>
 	 *		- 1 Declaration in Team1.Role1<br>
@@ -1152,28 +1152,28 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	public void test035() throws CoreException
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
-		
+
 		IType type = getRole(getTestProjectDir(),
 	    		"src",
 				"p_callin_method",
 				"Team1",
 				"Role1");
-		
+
 		IMethod method = type.getMethods()[0];
-		
+
 		search(
-				method, 
+				method,
 				ALL_OCCURRENCES,
-				getJavaSearchScopeFromPackage("p_callin_method"), 
+				getJavaSearchScopeFromPackage("p_callin_method"),
 				resultCollector);
-		
+
 		assertSearchResults("Search for all occurrences of callin method. javaModel",
 				"src/p_callin_method/Team1.java void p_callin_method.Team1$Role1.callinMethod() [callinMethod]\n" +
 				"src/p_callin_method/Team1.java void p_callin_method.Team1$Role1.callinMethod() [callinMethod()]\n" +
 				"src/p_callin_method/Team1.java p_callin_method.Team1$Role1 callinMethod <- baseMethod [callinMethod]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Reference to private role method (with focus set):
 	 * Search for:<br>
@@ -1195,13 +1195,13 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_callin_method.Team1.Role1.privateRoleMethod(String)", 
-				METHOD, 
+				"p_callin_method.Team1.Role1.privateRoleMethod(String)",
+				METHOD,
 				REFERENCES,
 				method, /* focus */
-				getJavaSearchScopeFromPackage("p_callin_method"), 
+				getJavaSearchScopeFromPackage("p_callin_method"),
 				resultCollector);
-		
+
 		assertSearchResults("src/p_callin_method/Team1.java void p_callin_method.Team1$Role1.callinMethodParam(String) [privateRoleMethod(str)]",
 				resultCollector);
 	}
@@ -1212,7 +1212,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	 * Search pattern:<br>
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- references of a private base method whose name is used in the subclass to declare a non private method  
+	 * 	- references of a private base method whose name is used in the subclass to declare a non private method
 	 * Expected search result:<br>
 	 *	References in<br>
 	 *		- Reference fo foo() in A.m()<br>
@@ -1222,26 +1222,26 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		IType classA = getType(getTestProjectDir(), "src", "p_TPX_363", "A");
 		IMethod methodFoo = classA.getMethod("foo", new String[0]);
-		
+
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				methodFoo, 
+				methodFoo,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p_TPX_363"), 
+				getJavaSearchScopeFromPackage("p_TPX_363"),
 				resultCollector);
-		
+
 		assertSearchResults("see TPX-363, fq name",
 				"src/p_TPX_363/A.java void p_TPX_363.A.m() [foo()]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *  - method declaration<br>
 	 * Search pattern:<br>
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- declaration of a private base method whose name is used in the subclass to declare a non private method  
+	 * 	- declaration of a private base method whose name is used in the subclass to declare a non private method
 	 * Expected search result:<br>
 	 *	Declaration<br>
 	 *		- private void A.foo()<br>
@@ -1251,31 +1251,31 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		IType classA = getType(getTestProjectDir(), "src", "p_TPX_363", "A");
 		IMethod methodFoo = classA.getMethod("foo", new String[0]);
-		
+
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				methodFoo, 
+				methodFoo,
 				DECLARATIONS,
-				getJavaSearchScopeFromPackage("p_TPX_363"), 
+				getJavaSearchScopeFromPackage("p_TPX_363"),
 				resultCollector);
-		
+
 		assertSearchResults("see TPX-363, fq name",
 				"src/p_TPX_363/A.java void p_TPX_363.A.foo() [foo]\n" +
 				"src/p_TPX_363/B.java void p_TPX_363.B.foo() [foo]",
 				resultCollector);
 	}
-	
+
 	//see TPX-229
 	public void testTPX_229_1() throws CoreException
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p3.TeamA.RoleA.foo()", 
-				METHOD, 
+				"p3.TeamA.RoleA.foo()",
+				METHOD,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p3"), 
+				getJavaSearchScopeFromPackage("p3"),
 				resultCollector);
-		
+
 		assertSearchResults("src/p3/TeamA.java void p3.TeamA$RoleA.bar() [foo()]\n" +
 		        			"src/p3/TeamB.java p3.TeamB$RoleB foo -> foo [foo]",
 				resultCollector);
@@ -1285,23 +1285,23 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p3.TeamB.RoleB.foo()", 
-				METHOD, 
+				"p3.TeamB.RoleB.foo()",
+				METHOD,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p3"), 
+				getJavaSearchScopeFromPackage("p3"),
 				resultCollector);
-		
+
 		assertSearchResults("src/p3/TeamB.java p3.TeamB$RoleB foo -> foo [foo]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *  - method declarations<br>
 	 * Search pattern:<br>
 	 * 	- JavaElement<br>
 	 * Searched element:<br>
-	 * 	- callin method in a bound role  
+	 * 	- callin method in a bound role
 	 * Expected search result:<br>
 	 *	Declaration in<br>
 	 *		- 1 Declaration in Team1.Role1<br>
@@ -1309,21 +1309,21 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	public void testTPX_483() throws CoreException
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
-		
+
 		IType type = getRole(getTestProjectDir(),
 	    		"src",
 				"p_callin_method",
 				"Team1",
 				"Role1");
-		
+
 		IMethod method = type.getMethods()[1];
-		
+
 		search(
-				method, 
+				method,
 				DECLARATIONS,
-				getJavaSearchScopeFromPackage("p_callin_method"), 
+				getJavaSearchScopeFromPackage("p_callin_method"),
 				resultCollector);
-		
+
 		assertSearchResults("Search for declaration of callin method. javaModel",
 				"src/p_callin_method/Team1.java void p_callin_method.Team1$Role1.callinMethodParam(String) [callinMethodParam]",
 				resultCollector);
@@ -1335,7 +1335,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	 * Search pattern:<br>
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- overridden method gulp()<br> 
+	 * 	- overridden method gulp()<br>
 	 * Expected search result:<br>
 	 *	Reference in<br>
 	 *		- ref in TestTeam1.TestRole1.bar() <br>
@@ -1350,21 +1350,21 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 		IMethod method= type.getMethod("gulp", new String[0]);
 		search( method,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p_implicit_inheritance"), 
+				getJavaSearchScopeFromPackage("p_implicit_inheritance"),
 				resultCollector);
-		
+
 		assertSearchResults("Search for references of implicitly overridden role method, fully qualified name",
 							"src/p_implicit_inheritance/TestTeam1.java void p_implicit_inheritance.TestTeam1$TestRole1.bar() [gulp()]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
 	 *	- method reference<br>
 	 * Search pattern:<br>
 	 * 	- fully qualified name<br>
 	 * Searched element:<br>
-	 * 	- overridden method gulp()<br> 
+	 * 	- overridden method gulp()<br>
 	 * Expected search result:<br>
 	 *	Reference in<br>
 	 *		- ref in TestTeam1.TestRole1.bar() <br>
@@ -1377,9 +1377,9 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 		search("p_implicit_inheritance.TestTeam1.TestRole2.gulp()",
 			   METHOD,
 			   REFERENCES,
-			   getJavaSearchScopeFromPackage("p_implicit_inheritance"), 
+			   getJavaSearchScopeFromPackage("p_implicit_inheritance"),
 			   resultCollector);
-		
+
 		assertSearchResults("Search for references of implicitly overridden role method, fully qualified name",
 							"src/p_implicit_inheritance/TestTeam1.java void p_implicit_inheritance.TestTeam1$TestRole2.good() [gulp()]",
 				resultCollector);
@@ -1395,9 +1395,9 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 		// not yet seeing the NPE :-/
 		search( callout,
 				REFERENCES,
-				getJavaSearchScopeFromPackages(new String[]{"bug325297","bug325297/OuterTeam"}), 
+				getJavaSearchScopeFromPackages(new String[]{"bug325297","bug325297/OuterTeam"}),
 				resultCollector);
-		
+
 		assertSearchResults("Search for references of callout-defined role method in role within specific nesting/inheritance structure",
 				"src/bug325297/OuterTeam/InnerSubTeam.java void bug325297.OuterTeam.InnerSubTeam.test(InnerRole) [concat(\"1\", \"2\")]",
 				resultCollector);
@@ -1408,16 +1408,16 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 		IJavaProject project= getJavaProject("OTJavaSearch");
 		IType type= project.findType("bug323076.MyTeam");
 		IMethod method = type.getMethod("foo", new String[]{"[QMyBase;"});
-		
+
 		search( method,
 				REFERENCES,
-				getJavaSearchScopeFromPackages(new String[]{"bug323076"}), 
+				getJavaSearchScopeFromPackages(new String[]{"bug323076"}),
 				resultCollector);
-		
+
 		assertSearchResults("Search for references to method with array lifting",
 				"src/bug323076/MyTeam.java void bug323076.MyTeam.test() [foo(new MyBase[]{ new MyBase() })]",
 				resultCollector);
-		
+
 	}
 
 	public void test459055() throws CoreException {
@@ -1425,16 +1425,16 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 		IJavaProject project= getJavaProject("OTJavaSearch");
 		IType type= project.findType("bug459055.MyTeam.MyRole");
 		IMethod method = type.getMethod("targetMethod", new String[0]);
-		
+
 		search( method,
 				REFERENCES,
 				R_EXACT_MATCH | R_CASE_SENSITIVE | R_FULL_MATCH,
-				getJavaSearchScopeFromPackages(new String[]{"bug459055", "bug459055/MyTeam"}), 
+				getJavaSearchScopeFromPackages(new String[]{"bug459055", "bug459055/MyTeam"}),
 				resultCollector);
-		
+
 		assertSearchResults("Search for references to method of role file",
 				"src/bug459055/MyTeam.java void bug459055.MyTeam.teamTest(R) [targetMethod()]\n" +
 				"src/bug459055/MyTeam/MyRole.java void bug459055.MyTeam.MyRole.sourceMethod() [targetMethod()]",
-				resultCollector);		
+				resultCollector);
 	}
 }

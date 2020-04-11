@@ -63,7 +63,7 @@ public class TypeParameterPattern extends JavaSearchPattern {
 		this.name = typeParameter.getElementName().toCharArray(); // store type parameter name
 		IMember member = typeParameter.getDeclaringMember();
 		this.declaringMemberName = member.getElementName().toCharArray(); // store type parameter declaring member name
-		
+
 		// For method type parameter, store also declaring class name and parameters type names
 		if (member instanceof IMethod) {
 			IMethod method = (IMethod) member;
@@ -91,7 +91,7 @@ public class TypeParameterPattern extends JavaSearchPattern {
     	    IModuleDescription md = root.getModuleDescription();
             if(md != null) {
             	String module = md.getElementName();
-            	documentPath = root.getPath() + IJavaSearchScope.JAR_FILE_ENTRY_SEPARATOR 
+            	documentPath = root.getPath() + IJavaSearchScope.JAR_FILE_ENTRY_SEPARATOR
             			+ module + IJavaSearchScope.JAR_FILE_ENTRY_SEPARATOR + relativePath;
             } else {
             	documentPath = root.getPath() + IJavaSearchScope.JAR_FILE_ENTRY_SEPARATOR + relativePath;
@@ -101,18 +101,18 @@ public class TypeParameterPattern extends JavaSearchPattern {
 	        documentPath = path.toString();
 			relativePath = Util.relativePath(path, 1/*remove project segment*/);
 	    }
-	
+
 		if (scope instanceof JavaSearchScope) {
 			JavaSearchScope javaSearchScope = (JavaSearchScope) scope;
 			// Get document path access restriction from java search scope
 			// Note that requestor has to verify if needed whether the document violates the access restriction or not
 			AccessRuleSet access = javaSearchScope.getAccessRuleSet(relativePath, index.containerPath);
 			if (access != JavaSearchScope.NOT_ENCLOSED) { // scope encloses the path
-				if (!requestor.acceptIndexMatch(documentPath, this, participant, access)) 
+				if (!requestor.acceptIndexMatch(documentPath, this, participant, access))
 					throw new OperationCanceledException();
 			}
 		} else if (scope.encloses(documentPath)) {
-			if (!requestor.acceptIndexMatch(documentPath, this, participant, null)) 
+			if (!requestor.acceptIndexMatch(documentPath, this, participant, null))
 				throw new OperationCanceledException();
 		}
 	}

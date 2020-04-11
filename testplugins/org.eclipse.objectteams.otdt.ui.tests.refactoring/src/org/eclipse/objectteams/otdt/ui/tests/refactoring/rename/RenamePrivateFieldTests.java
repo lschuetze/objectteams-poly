@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -108,7 +108,7 @@ public class RenamePrivateFieldTests extends RefactoringTest
             String declaringTypeName,
             String fieldName,
             String newFieldName,
-            boolean renameGetter, 
+            boolean renameGetter,
             boolean renameSetter) throws Exception
 	{
         int selectionCuIndex = firstIndexOf(selectionCuName, cuNames);
@@ -132,7 +132,7 @@ public class RenamePrivateFieldTests extends RefactoringTest
 
     private void performRenamingFtoG_passing(
             String[] cuNames,
-            String declaringTypeName, 
+            String declaringTypeName,
             boolean updateReferences) throws Exception
     {
         performRenameRefactoring_passing(
@@ -210,7 +210,7 @@ public class RenamePrivateFieldTests extends RefactoringTest
     		assertEqualLines("invalid undo",
     				getFileContents(createInputTestFileName(cus, idx)), cus[idx].getSource());
         }
-        
+
 		assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager()
 				.anythingToUndo());
 		assertTrue("anythingToRedo", RefactoringCore.getUndoManager()
@@ -242,12 +242,12 @@ public class RenamePrivateFieldTests extends RefactoringTest
 	{
         performRenamingFtoG_passing(new String[]{"T"}, "T", true);
 	}
-    
+
     public void testUpdateFieldReferenceInTeamMethod() throws Exception
     {
         performRenamingFtoG_passing(new String[]{"T"}, "T", true);
     }
-    
+
     public void testUpdateFieldReferenceInLiftingMethod() throws Exception
     {
         performRenamingFtoG_passing(new String[]{"T"}, "T", true);
@@ -266,7 +266,7 @@ public class RenamePrivateFieldTests extends RefactoringTest
                 new String[]{"T"}, "T", "number", "amount",
                 true, false, false, false, false, false);
     }
-    
+
     public void testUpdateTeamFieldReferenceInNestedTeam1() throws Exception
     {
         performRenameRefactoring_passing(
@@ -285,7 +285,7 @@ public class RenamePrivateFieldTests extends RefactoringTest
 	{
         performRenamingFtoG_passing(new String[]{"T"}, "R", true);
 	}
-    
+
     public void testUpdateFieldReferenceInRoleclass1() throws Exception
     {
         performRenameRefactoring_passing(
@@ -342,7 +342,7 @@ public class RenamePrivateFieldTests extends RefactoringTest
 	{
         performRenamingFtoG_passing(new String[]{"B", "T"}, "B", true);
 	}
-    
+
     //passing
     public void testRenameGetterAndSetter1() throws Exception
     {

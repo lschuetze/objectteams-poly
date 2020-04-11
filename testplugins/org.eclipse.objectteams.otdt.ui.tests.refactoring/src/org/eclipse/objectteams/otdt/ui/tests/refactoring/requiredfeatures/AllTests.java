@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -27,7 +27,7 @@ import junit.framework.TestSuite;
 
 /**
  * @author svacina
- * 
+ *
  * Runs all test cases which are needed for refactoring
  */
 public class AllTests
@@ -42,9 +42,9 @@ public class AllTests
     {
         TestSuite suite = new TestSuite(
                 "Tests for required features");
-     
+
         //TODO(jsv) test only the usage of specific components used in Refactoring Processor
-        
+
         // Hierarchy
         suite.addTest(org.eclipse.objectteams.otdt.tests.superhierarchy.AllTests.suite());
         // TypeHelper.getInheritedMethods
@@ -52,7 +52,7 @@ public class AllTests
         // SearchEngine
         suite.addTest(org.eclipse.objectteams.otdt.tests.search.OTJavaMethodSearchTests.suite());
         suite.addTest(org.eclipse.objectteams.otdt.tests.search.OTJavaTypeSearchTests.suite());
-        //TODO(jsv): add required selection tests 
+        //TODO(jsv): add required selection tests
         return suite;
     }
 }

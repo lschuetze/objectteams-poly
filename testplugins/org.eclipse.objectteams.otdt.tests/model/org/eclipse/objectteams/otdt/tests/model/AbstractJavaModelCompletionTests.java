@@ -6,7 +6,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -48,7 +48,7 @@ protected void addLibrary(String projectName, String jarName, String sourceZipNa
 	IJavaProject javaProject = getJavaProject(projectName);
 	IProject project = javaProject.getProject();
 	String projectPath = '/' + project.getName() + '/';
-	
+
 	IClasspathAttribute[] extraAttributes;
 	if(docZipName == null) {
 		extraAttributes = new IClasspathAttribute[0];
@@ -59,7 +59,7 @@ protected void addLibrary(String projectName, String jarName, String sourceZipNa
 						IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME,
 						"jar:platform:/resource"+projectPath+docZipName+"!/")};
 	}
-	
+
 	addLibraryEntry(
 			javaProject,
 			new Path(projectPath + jarName),
@@ -69,9 +69,9 @@ protected void addLibrary(String projectName, String jarName, String sourceZipNa
 			null,
 			extraAttributes,
 			exported);
-} 
+}
 protected void removeLibrary(String projectName, String jarName) throws CoreException, IOException {
-	IJavaProject javaProject = getJavaProject(projectName);		
+	IJavaProject javaProject = getJavaProject(projectName);
 	IProject project = javaProject.getProject();
 	String projectPath = '/' + project.getName() + '/';
 	removeClasspathEntry(javaProject, new Path(projectPath + jarName));
@@ -98,7 +98,7 @@ protected CompletionResult complete(String path, String source, boolean showPosi
 		tokenEnd = tokenStart + token.length() - 1;
 	}
 	this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	CompletionResult result =  new CompletionResult();
 	result.proposals = requestor.getResults();
 	result.context = requestor.getContext();
@@ -137,9 +137,9 @@ protected CompletionResult contextComplete0(
 	requestor.setComputeEnclosingElement(computeEnclosingElement);
 	requestor.setComputeVisibleElements(computeVisibleElements);
 	requestor.setAssignableType(typeSignature);
-	
+
 	cu.codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	CompletionResult result =  new CompletionResult();
 	result.proposals = requestor.getResults();
 	result.context = requestor.getContext();
@@ -154,7 +154,7 @@ protected CompletionResult snippetContextComplete(
 		boolean isStatic) throws JavaModelException {
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, false, false, false);
 	type.codeComplete(snippet.toCharArray(), insertion, cursorLocation, null, null, null, isStatic, requestor, this.wcOwner);
-	
+
 	CompletionResult result =  new CompletionResult();
 	result.proposals = requestor.getResults();
 	result.context = requestor.getContext();

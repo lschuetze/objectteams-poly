@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -47,7 +47,7 @@ import org.eclipse.objectteams.otdt.ui.tests.dom.FileBasedDOMTest;
 /**
  * @author mkr
  * @version $Id: CallinMappingDeclarationTest.java 23496 2010-02-05 23:20:15Z stephan $
- * 
+ *
  * NOTE: ParameterMappings are tested in ParameterMappingTest, including the PARAMETER_MAPPINGS_PROPERTY
  * (attribute of CallinMappingDeclaration).
  */
@@ -68,12 +68,12 @@ public class CallinMappingDeclarationTest extends FileBasedDOMTest
 	{
 		super(name);
 	}
-	
+
 	public static Test suite()
 	{
 		return new Suite(CallinMappingDeclarationTest.class);
 	}
-	
+
 	public void setUpSuite() throws Exception
 	{
 		setTestProjectDir(TEST_PROJECT);
@@ -88,13 +88,13 @@ public class CallinMappingDeclarationTest extends FileBasedDOMTest
 		_parser.setProject( getJavaProject(TEST_PROJECT) );
 		_parser.setSource(_simpleTeam);
 		_parser.setResolveBindings(true);
-		
+
         ASTNode root = _parser.createAST( new NullProgressMonitor() );
 		CompilationUnit compUnit = (CompilationUnit) root;
 		_typeDecl = (TypeDeclaration)compUnit.types().get(0);
 	}
 
-	protected void setUp() throws Exception 
+	protected void setUp() throws Exception
 	{
 		super.setUp();
 	}
@@ -130,11 +130,11 @@ public class CallinMappingDeclarationTest extends FileBasedDOMTest
         TypeDeclaration role = types[0];
 
         _testObj = (CallinMappingDeclaration)role.bodyDeclarations().get(0);
-        
+
         assertTrue("Missing 'before' modifier",
                      Modifier.isBefore(_testObj.getCallinModifier()));
     }
-	
+
     public void testGetCallinModifiers_ReplaceBinding()
     {
         TypeDeclaration[] types = _typeDecl.getTypes();
@@ -198,7 +198,7 @@ public class CallinMappingDeclarationTest extends FileBasedDOMTest
 
         assertEquals(1, actual.size());
     }
-    
+
     public void testGetBaseMappingElements_ThreeElems()
     {
         TypeDeclaration[] types = _typeDecl.getTypes();
@@ -210,41 +210,41 @@ public class CallinMappingDeclarationTest extends FileBasedDOMTest
         assertEquals("Wrong number of MethodSpec",
                      3, actual.size());
     }
-    
+
     public void testGetRoleMappingElement_InstanceType()
     {
         TypeDeclaration[] types = _typeDecl.getTypes();
         TypeDeclaration role = types[0];
 
         _testObj = (CallinMappingDeclaration)role.bodyDeclarations().get(3);
-        
+
         assertTrue("Left side of callin not a MethodSpec",
                    _testObj.getRoleMappingElement() instanceof MethodSpec);
     }
-    
+
     public void testGetBaseMappingElements_InstanceType()
     {
         TypeDeclaration[] types = _typeDecl.getTypes();
         TypeDeclaration role = types[0];
 
         _testObj = (CallinMappingDeclaration)role.bodyDeclarations().get(3);
-        
+
         assertTrue("Right side of callin not a MethodSpec",
                    _testObj.getBaseMappingElements().get(0) instanceof MethodSpec);
         assertTrue("Right side of callin not a MethodSpec",
                 _testObj.getBaseMappingElements().get(1) instanceof MethodSpec);
         assertTrue("Right side of callin not a MethodSpec",
                 _testObj.getBaseMappingElements().get(2) instanceof MethodSpec);
-       
+
     }
-   
+
     public void testGetParameterMappings_NotNull()
     {
         TypeDeclaration[] types = _typeDecl.getTypes();
         TypeDeclaration role = types[0];
 
         _testObj = (CallinMappingDeclaration)role.bodyDeclarations().get(4);
-        
+
         assertTrue("Parameter mapping null", _testObj.getParameterMappings() != null);
     }
 
@@ -255,12 +255,12 @@ public class CallinMappingDeclarationTest extends FileBasedDOMTest
 
         _testObj = (CallinMappingDeclaration)role.bodyDeclarations().get(4);
         List actualNodes = _testObj.getParameterMappings();
-        for (Iterator iter = actualNodes.iterator(); iter.hasNext();) 
+        for (Iterator iter = actualNodes.iterator(); iter.hasNext();)
         {
             ParameterMapping curActual = (ParameterMapping) iter.next();
             assertTrue("CallinMappingDeclaration has ParameterMapping with wrong parent",
                        _testObj == curActual.getParent());
-        }        
+        }
     }
 
     public void testGetParameterMappings_Empty()
@@ -303,7 +303,7 @@ public class CallinMappingDeclarationTest extends FileBasedDOMTest
 	            "BrokenTeam.java");
 		_parser.setSource(brokenCU);
 		_parser.setResolveBindings(true);
-		
+
         ASTNode root = _parser.createAST( new NullProgressMonitor() );
 		CompilationUnit compUnit = (CompilationUnit) root;
 		TypeDeclaration teamType = (TypeDeclaration)compUnit.types().get(0);
@@ -312,5 +312,5 @@ public class CallinMappingDeclarationTest extends FileBasedDOMTest
 		assertEquals("foo <- after bar;", callinMapping.toString());
 		// TODO(SH): adjust once recovery of parameter mappings is implemented.
     }
-    
+
 }

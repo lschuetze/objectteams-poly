@@ -283,7 +283,7 @@ public class PrecedenceDeclaration extends ASTNode {
 					count--;
 				} else {
 					if (i < len)
-						type.scope.problemReporter().incompatiblePrecedenceLists(findPrecedenceSource(precedences[i], precedences[j], type), 
+						type.scope.problemReporter().incompatiblePrecedenceLists(findPrecedenceSource(precedences[i], precedences[j], type),
 																				 type, precedences[i], precedences[j]);
 					else
 						throw new InternalCompilerError("Incompatible inherited precedence lists"); //$NON-NLS-1$
@@ -301,7 +301,7 @@ public class PrecedenceDeclaration extends ASTNode {
 		}
 		return precedences;
 	}
-	
+
 	private static ASTNode findPrecedenceSource(PrecedenceBinding prec1, PrecedenceBinding prec2, TypeDeclaration type) {
 		if (type.precedences != null)
 			for (int i = 0; i < type.precedences.length; i++)

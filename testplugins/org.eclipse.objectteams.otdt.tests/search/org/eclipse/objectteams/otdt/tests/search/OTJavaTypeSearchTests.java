@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -32,12 +32,12 @@ import org.eclipse.objectteams.otdt.core.IRoleType;
 
 /**
  * @author svacina
- * 
+ *
  * @version $Id: OTJavaTypeSearchTests.java 23494 2010-02-05 23:06:44Z stephan $
  */
 
 //Note: in case of search for type declaration with fully qualified name use the search method with the current JavaModel
-//		and not the fully qualified name as string -> Workbench use the javaElement to build the search pattern   
+//		and not the fully qualified name as string -> Workbench use the javaElement to build the search pattern
 public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 {
 	private Map originalOptions;
@@ -46,7 +46,7 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	{
 		super(name);
 	}
-	
+
 	public static Test suite()
 	{
 	    if (false)
@@ -72,7 +72,7 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 		this.originalOptions = this.javaProject.getOptions(true);
 		this.javaProject.setOption(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, JavaCore.ENABLED);
 	}
-		
+
 	public void tearDown() throws Exception {
 		this.javaProject.setOptions(originalOptions);
 		super.tearDown();
@@ -84,10 +84,10 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	private void disableJavadocOptions() {
 		this.javaProject.setOption(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, JavaCore.DISABLED);
 	}
-	
+
 	/**
 	 * Search for:<br>
-	 *	- Team declaration<br> 
+	 *	- Team declaration<br>
 	 * Search pattern:<br>
 	 *	- fully qualified name<br>
 	 * Searched element:<br>
@@ -100,20 +100,20 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_type_search.T1", 
-				TYPE, 
+				"p_type_search.T1",
+				TYPE,
 				DECLARATIONS,
-				getJavaSearchScopeFromPackage("p_type_search"), 
+				getJavaSearchScopeFromPackage("p_type_search"),
 				resultCollector);
-		
+
 		assertSearchResults("Team decl, fq name",
 							"src/p_type_search/T1.java p_type_search.T1 [T1]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
-	 *	- Team declaration<br> 
+	 *	- Team declaration<br>
 	 * Search pattern:<br>
 	 *	- simple name<br>
 	 * Searched element:<br>
@@ -126,20 +126,20 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"T1", 
-				TYPE, 
+				"T1",
+				TYPE,
 				DECLARATIONS,
-				getJavaSearchScopeFromPackage("p_type_search"), 
+				getJavaSearchScopeFromPackage("p_type_search"),
 				resultCollector);
-		
+
 		assertSearchResults("Team decl, simple name",
 							"src/p_type_search/T1.java p_type_search.T1 [T1]",
 				resultCollector);
 	}
-		
+
 	/**
 	 * Search for:<br>
-	 *	- Interface References in the implementors<br> 
+	 *	- Interface References in the implementors<br>
 	 * Search pattern:<br>
 	 *	- fully qualified name<br>
 	 * Searched element:<br>
@@ -156,24 +156,24 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_type_search.I1", 
-				TYPE, 
+				"p_type_search.I1",
+				TYPE,
 				IMPLEMENTORS,
 				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}),
 				resultCollector);
-		
+
 		assertSearchResults("Interface References in the implementors, fq name",
-							"src/p_type_search/B1.java p_type_search.B1 [I1]\n" + 
+							"src/p_type_search/B1.java p_type_search.B1 [I1]\n" +
 							"src/p_type_search/T1.java p_type_search.T1 [I1]\n" +
 							"src/p_type_search/T2.java p_type_search.T2$R0 [I1]\n" +
 							"src/p_type_search/T2.java p_type_search.T2$T3 [I1]\n" +
 							"src/p_type_search/T6/R6.java p_type_search.T6.R6 [I1]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
-	 *	- References in Implementors of a Interface<br> 
+	 *	- References in Implementors of a Interface<br>
 	 * Search pattern:<br>
 	 *	- simple name<br>
 	 * Searched element:<br>
@@ -190,24 +190,24 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"I1", 
-				TYPE, 
+				"I1",
+				TYPE,
 				IMPLEMENTORS,
 				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}),
 				resultCollector);
-		
+
 		assertSearchResults("Interface References in the implementors, simple name",
-							"src/p_type_search/B1.java p_type_search.B1 [I1]\n" + 
+							"src/p_type_search/B1.java p_type_search.B1 [I1]\n" +
 							"src/p_type_search/T1.java p_type_search.T1 [I1]\n" +
 							"src/p_type_search/T2.java p_type_search.T2$R0 [I1]\n" +
 							"src/p_type_search/T2.java p_type_search.T2$T3 [I1]\n" +
 							"src/p_type_search/T6/R6.java p_type_search.T6.R6 [I1]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
-	 *	- Role declaration<br> 
+	 *	- Role declaration<br>
 	 * Search pattern:<br>
 	 *	- fully qualified name<br>
 	 * Searched element:<br>
@@ -220,20 +220,20 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_type_search.T2.R1", 
-				TYPE, 
+				"p_type_search.T2.R1",
+				TYPE,
 				DECLARATIONS,
-				getJavaSearchScopeFromPackage("p_type_search"), 
+				getJavaSearchScopeFromPackage("p_type_search"),
 				resultCollector);
-		
+
 		assertSearchResults("role declaration, fully qualified name",
 							"src/p_type_search/T2.java p_type_search.T2$R1 [R1]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
-	 *	- Role declaration<br> 
+	 *	- Role declaration<br>
 	 * Search pattern:<br>
 	 *	- simple name<br>
 	 * Searched element:<br>
@@ -246,20 +246,20 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"R1", 
-				TYPE, 
+				"R1",
+				TYPE,
 				DECLARATIONS,
-				getJavaSearchScopeFromPackage("p_type_search"), 
+				getJavaSearchScopeFromPackage("p_type_search"),
 				resultCollector);
-		
+
 		assertSearchResults("role declaration, simple",
 							"src/p_type_search/T2.java p_type_search.T2$R1 [R1]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
-	 *	- Role reference in lifting type<br> 
+	 *	- Role reference in lifting type<br>
 	 * Search pattern:<br>
 	 *	- fully qualified name<br>
 	 * Searched element:<br>
@@ -272,20 +272,20 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"p_type_search.T2.R1", 
-				TYPE, 
+				"p_type_search.T2.R1",
+				TYPE,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p_type_search"), 
+				getJavaSearchScopeFromPackage("p_type_search"),
 				resultCollector);
-		
+
 		assertSearchResults("Role reference in lifting type, fq name",
 							"src/p_type_search/T2.java void p_type_search.T2.teamMethod(B1) [R1]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
-	 *	- Role reference in lifting type<br> 
+	 *	- Role reference in lifting type<br>
 	 * Search pattern:<br>
 	 *	- simple name<br>
 	 * Searched element:<br>
@@ -298,28 +298,28 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"R1", 
-				TYPE, 
+				"R1",
+				TYPE,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p_type_search"), 
+				getJavaSearchScopeFromPackage("p_type_search"),
 				resultCollector);
-		
+
 		assertSearchResults("Role reference in lifting type, simple name",
 							"src/p_type_search/T2.java void p_type_search.T2.teamMethod(B1) [R1]",
 				resultCollector);
 	}
-	
+
 	// Fine Grained: restrict to class instance creation
 	public void testRoleLiftingReferences3() throws CoreException
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"R1", 
-				TYPE, 
+				"R1",
+				TYPE,
 				CLASS_INSTANCE_CREATION_TYPE_REFERENCE,
-				getJavaSearchScopeFromPackage("p_type_search"), 
+				getJavaSearchScopeFromPackage("p_type_search"),
 				resultCollector);
-		
+
 		assertSearchResults("Role reference in lifting type - restricted to class instance creation",
 							"src/p_type_search/T2.java void p_type_search.T2.teamMethod(B1) [R1]",
 				resultCollector);
@@ -330,14 +330,14 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"R8", 
-				TYPE, 
+				"R8",
+				TYPE,
 				CLASS_INSTANCE_CREATION_TYPE_REFERENCE,
-				getJavaSearchScopeFromPackage("p_type_search"), 
+				getJavaSearchScopeFromPackage("p_type_search"),
 				resultCollector);
-		
+
 		assertSearchResults("Role lifting references - restricted to class instance creation",
-							"src/p_type_search/T8.java p_type_search.T8$R8 consumeR8(R8) <- getB3() [R8]\n" + 
+							"src/p_type_search/T8.java p_type_search.T8$R8 consumeR8(R8) <- getB3() [R8]\n" +
 							"src/p_type_search/T8.java p_type_search.T8$R8 getR8() -> getB3() [R8]",
 				resultCollector);
 	}
@@ -347,14 +347,14 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"R6", 
-				TYPE, 
+				"R6",
+				TYPE,
 				CLASS_INSTANCE_CREATION_TYPE_REFERENCE,
-				getJavaSearchScopeFromPackage("p_type_search"), 
+				getJavaSearchScopeFromPackage("p_type_search"),
 				resultCollector);
-		
+
 		assertSearchResults("Role reference in method spec, lifting position - restricted to class instance creation",
-				"src/p_type_search/T2.java void p_type_search.T2.teamMethod(B3) [R6]\n" +	// declared lifting 
+				"src/p_type_search/T2.java void p_type_search.T2.teamMethod(B3) [R6]\n" +	// declared lifting
 				"src/p_type_search/T2.java p_type_search.T2$R6 role6Method(R6) <- compareTo(B3) [R6]", // callin arg lifting
 				resultCollector);
 	}
@@ -364,12 +364,12 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"R6", 
-				TYPE, 
+				"R6",
+				TYPE,
 				CLASS_INSTANCE_CREATION_TYPE_REFERENCE|PARAMETER_DECLARATION_TYPE_REFERENCE,
-				getJavaSearchScopeFromPackage("p_type_search"), 
+				getJavaSearchScopeFromPackage("p_type_search"),
 				resultCollector);
-		
+
 		assertSearchResults("Role reference in method spec, lifting position - restricted to class instance creation or method parameter",
 				"src/p_type_search/T2.java void p_type_search.T2.teamMethod(B3) [R6]\n" +	// declared lifting
 				"src/p_type_search/T2.java boolean p_type_search.T2$R6.role6Method(R6) [R6]\n" + // method parameter
@@ -382,12 +382,12 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"R6", 
-				TYPE, 
+				"R6",
+				TYPE,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p_type_search"), 
+				getJavaSearchScopeFromPackage("p_type_search"),
 				resultCollector);
-		
+
 		assertSearchResults("Role reference in method spec, lifting position - all references",
 				"src/p_type_search/T2.java void p_type_search.T2.teamMethod(B3) [R6]\n" +	// declared lifting
 				"src/p_type_search/T2.java boolean p_type_search.T2$R6.role6Method(R6) [R6]\n" + // method parameter
@@ -395,43 +395,43 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 				"src/p_type_search/T6.java p_type_search.T6 [R6]", // javadoc @role tag
 				resultCollector);
 	}
-	
+
 	// see https://svn.objectteams.org/trac/ot/ticket/81
-	public void testRoleReferenceInPrecedences()  throws CoreException 
+	public void testRoleReferenceInPrecedences()  throws CoreException
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"R71", 
-				TYPE, 
+				"R71",
+				TYPE,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p_type_search"), 
+				getJavaSearchScopeFromPackage("p_type_search"),
 				resultCollector);
-		
+
 		assertSearchResults("Role reference in precedence declaration, simple name",
 							"src/p_type_search/T7.java p_type_search.T7 [R71]",
 				resultCollector);
 	}
 
 	// see https://svn.objectteams.org/trac/ot/ticket/82
-	public void testRoleReferenceInPredicate()  throws CoreException 
+	public void testRoleReferenceInPredicate()  throws CoreException
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"R72", 
-				TYPE, 
+				"R72",
+				TYPE,
 				REFERENCES,
-				getJavaSearchScopeFromPackage("p_type_search"), 
+				getJavaSearchScopeFromPackage("p_type_search"),
 				resultCollector);
-		
+
 		assertSearchResults("Role reference in precedence declaration, simple name",
 							"src/p_type_search/T7.java p_type_search.T7 [R72]\n"+   // precedence
 							"src/p_type_search/T7.java boolean p_type_search.T7$R72._OT$base_when() [R72]", // predicate
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
-	 *	- Role declaration<br> 
+	 *	- Role declaration<br>
 	 * Search pattern:<br>
 	 *	- javaModel<br>
 	 * Searched element:<br>
@@ -452,15 +452,15 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 				DECLARATIONS,
 				getJavaSearchScopeFromProject(),
 				resultCollector);
-		
+
 		assertSearchResults("Role declaration in role file, JavaModel",
 				"src/p_type_search/T6/R6.java p_type_search.T6.R6 [R6]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
-	 *	- Role declaration<br> 
+	 *	- Role declaration<br>
 	 * Search pattern:<br>
 	 *	- simple name<br>
 	 * Searched element:<br>
@@ -473,21 +473,21 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	{
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		search(
-				"R6", 
-				TYPE, 
+				"R6",
+				TYPE,
 				DECLARATIONS,
-				getJavaSearchScopeFromPackages(new String[]{"p_type_search.T6"}), 
+				getJavaSearchScopeFromPackages(new String[]{"p_type_search.T6"}),
 				resultCollector);
-		
+
 		assertSearchResults("Role declaration in role file, simple name",
 				"src/p_type_search/T6/R6.java p_type_search.T6.R6 [R6]",
 				resultCollector);
 	}
-	
+
 	//base class as return type in callin callout with signature
 	/**
 	 * Search for:<br>
-	 *	- Base class references<br> 
+	 *	- Base class references<br>
 	 * Search pattern:<br>
 	 *	- JavaModel<br>
 	 * Searched element:<br>
@@ -506,34 +506,34 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	    		"src",
 				"p_type_search",
 				"C1");
-		
+
 		search(
-				type, 
+				type,
 				REFERENCES,
-				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}), 
+				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}),
 				resultCollector);
-		
+
 		assertSearchResults("Base class references in callins/callouts as return types, JavaModel",
-				"src/p_type_search/B1.java C1 p_type_search.B1.baseMethod3(B4) [C1]\n" + 
-				"src/p_type_search/T2.java C1 p_type_search.T2$R1.roleMethod(B4) [C1]\n" + 
-				"src/p_type_search/T2.java p_type_search.T2$R1 roleMethod(B4) <- baseMethod3(B4) [C1]\n" + 
-				"src/p_type_search/T2.java p_type_search.T2$R1 roleMethod(B4) <- baseMethod3(B4) [C1]\n" + 
+				"src/p_type_search/B1.java C1 p_type_search.B1.baseMethod3(B4) [C1]\n" +
+				"src/p_type_search/T2.java C1 p_type_search.T2$R1.roleMethod(B4) [C1]\n" +
+				"src/p_type_search/T2.java p_type_search.T2$R1 roleMethod(B4) <- baseMethod3(B4) [C1]\n" +
+				"src/p_type_search/T2.java p_type_search.T2$R1 roleMethod(B4) <- baseMethod3(B4) [C1]\n" +
 				"src/p_type_search/T2.java p_type_search.T2$R1 roleMethod2(B4) -> baseMethod3(B4) [C1]\n" +
 				"src/p_type_search/T2.java p_type_search.T2$R1 roleMethod2(B4) -> baseMethod3(B4) [C1]",
 				resultCollector);
-	}	
-	
+	}
+
 	//Base class in type binding (after playedBy (in nested teams und rolefiles))
 	/**
 	 * Search for:<br>
-	 *	- Base class references<br> 
+	 *	- Base class references<br>
 	 * Search pattern:<br>
 	 *	- JavaModel<br>
 	 * Searched element:<br>
 	 *	- Base class references after playedBy keyword<br>
 	 * Expected search result:<br>
 	 *	References in<br>
-	 *		- p_type_search.T6.R6 (role file)<br> 
+	 *		- p_type_search.T6.R6 (role file)<br>
 	 *		- p_type_search.T2.T3.R5 (nested team)<br>
 	 *      - p_type_search.B3 (as superclass)
 	 */
@@ -544,17 +544,17 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	    		"src",
 				"p_type_search",
 				"B2");
-		
+
 		search(
-				type, 
+				type,
 				REFERENCES,
-				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}), 
+				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}),
 				resultCollector);
-		
+
 		assertSearchResults("Base class after playedBy in roleFile and nested Team, JavaModel",
 		        "src/p_type_search/B3.java p_type_search.B3 [B2]\n" +
-		        "src/p_type_search/T2.java p_type_search.T2$R6 [B2]\n" + // javadoc reference (@see) 
-				"src/p_type_search/T2.java p_type_search.T2$T3$R5 [B2]\n" + 
+		        "src/p_type_search/T2.java p_type_search.T2$R6 [B2]\n" + // javadoc reference (@see)
+				"src/p_type_search/T2.java p_type_search.T2$T3$R5 [B2]\n" +
 				"src/p_type_search/T6/R6.java p_type_search.T6.R6 [B2]",
 				resultCollector);
 	}
@@ -562,14 +562,14 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	//Base class in type binding (only after playedBy (in nested teams und rolefiles))
 	/**
 	 * Search for:<br>
-	 *	- Base class references<br> 
+	 *	- Base class references<br>
 	 * Search pattern:<br>
 	 *	- JavaModel<br>
 	 * Searched element:<br>
 	 *	- Base class references after playedBy keyword<br>
 	 * Expected search result:<br>
 	 *	References in<br>
-	 *		- p_type_search.T6.R6 (role file)<br> 
+	 *		- p_type_search.T6.R6 (role file)<br>
 	 *		- p_type_search.T2.T3.R5 (nested team)<br>
      *      - DON'T show B3 (cf. above)
 	 */
@@ -580,22 +580,22 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	    		"src",
 				"p_type_search",
 				"B2");
-		
+
 		search(
-				type, 
+				type,
 				PLAYEDBY_REFERENCES,
-				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}), 
+				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}),
 				resultCollector);
-		
+
 		assertSearchResults("Base class after playedBy in roleFile and nested Team, JavaModel",
-				"src/p_type_search/T2.java p_type_search.T2$T3$R5 [B2]\n" + 
+				"src/p_type_search/T2.java p_type_search.T2$T3$R5 [B2]\n" +
 				"src/p_type_search/T6/R6.java p_type_search.T6.R6 [B2]",
 				resultCollector);
 	}
 	//Base class in javadoc @role tag
 	/**
 	 * Search for:<br>
-	 *	- Role class references<br> 
+	 *	- Role class references<br>
 	 * Search pattern:<br>
 	 *	- JavaModel<br>
 	 * Searched element:<br>
@@ -607,7 +607,7 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	public void test012b() throws CoreException
 	{
 		setJavadocOptions();
-		
+
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		resultCollector.showAccuracy = true;
 		resultCollector.showInsideDoc = true;
@@ -618,13 +618,13 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 				"T6");
 		IType type = getRole(teamType,
 				"T6.R6");
-		
+
 		search(
-				type, 
+				type,
 				REFERENCES,
-				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}), 
+				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}),
 				resultCollector);
-		
+
 		assertSearchResults("Javadoc role reference, JavaModel",
 				"src/p_type_search/T6.java p_type_search.T6 [R6] EXACT_MATCH INSIDE_JAVADOC",
 				resultCollector);
@@ -632,7 +632,7 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	//Base class in javadoc @role tag, filtered, not a playedBy reference.
 	/**
 	 * Search for:<br>
-	 *	- Base class references<br> 
+	 *	- Base class references<br>
 	 * Search pattern:<br>
 	 *	- JavaModel<br>
 	 * Searched element:<br>
@@ -643,7 +643,7 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	public void test012c() throws CoreException
 	{
 		setJavadocOptions();
-				
+
 		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
 		IType teamType = getType(getTestProjectDir(),
 	    		"src",
@@ -651,29 +651,29 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 				"T6");
 		IType type = getRole(teamType,
 				"T6.R6");
-		
+
 		search(
-				type, 
+				type,
 				PLAYEDBY_REFERENCES,
-				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}), 
+				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}),
 				resultCollector);
-		
+
 		assertSearchResults("Javadoc role reference, JavaModel",
 				"",
 				resultCollector);
 	}
-	
+
 	// Base class in lifting type
 	/**
 	 * Search for:<br>
-	 *	- Base class references<br> 
+	 *	- Base class references<br>
 	 * Search pattern:<br>
 	 *	- JavaModel<br>
 	 * Searched element:<br>
 	 *	- Base class references in lifting type<br>
 	 * Expected search result:<br>
 	 *	References in<br>
-	 *		- role declaration (public class R6 playedBy B3)<br> 
+	 *		- role declaration (public class R6 playedBy B3)<br>
 	 *		- base side of lifting type (teamMethod(B3 as R6 role))<br>
      *      - regular base method (B3.compareTo(B3))<br>
      *      - regular base method (B3.getB3()B3)<br>
@@ -689,36 +689,36 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	    		"src",
 				"p_type_search",
 				"B3");
-		
+
 		search(
-				type, 
+				type,
 				REFERENCES,
-				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}), 
+				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}),
 				resultCollector);
-		
+
 		assertSearchResults("Base class after playedBy in roleFile and nested Team, JavaModel",
 				"src/p_type_search/B3.java boolean p_type_search.B3.compareTo(B3) [B3]\n" +
 				"src/p_type_search/B3.java B3 p_type_search.B3.getB3() [B3]\n" +
 				"src/p_type_search/T2.java void p_type_search.T2.teamMethod(B3) [B3]\n" +
-				"src/p_type_search/T2.java p_type_search.T2$R6 [B3]\n" + 
-				"src/p_type_search/T2.java p_type_search.T2$R6 role6Method(R6) <- compareTo(B3) [B3]\n" + 
+				"src/p_type_search/T2.java p_type_search.T2$R6 [B3]\n" +
+				"src/p_type_search/T2.java p_type_search.T2$R6 role6Method(R6) <- compareTo(B3) [B3]\n" +
 				"src/p_type_search/T8.java p_type_search.T8$R8 [B3]\n" +
-				"src/p_type_search/T8.java p_type_search.T8$R8 consumeR8(R8) <- getB3() [B3]\n" + 
+				"src/p_type_search/T8.java p_type_search.T8$R8 consumeR8(R8) <- getB3() [B3]\n" +
 				"src/p_type_search/T8.java p_type_search.T8$R8 getR8() -> getB3() [B3]",
 				resultCollector);
 	}
-	
-	// Base class as argument in method spec 
+
+	// Base class as argument in method spec
 	/**
 	 * Search for:<br>
-	 *	- Base class references<br> 
+	 *	- Base class references<br>
 	 * Search pattern:<br>
 	 *	- JavaModel<br>
 	 * Searched element:<br>
 	 *	- Base class references in method spec signature<br>
 	 * Expected search result:<br>
 	 *	References in<br>
-	 *		- callin / callout / method declaration<br> 
+	 *		- callin / callout / method declaration<br>
 	 */
 	public void test014() throws CoreException
 	{
@@ -727,34 +727,34 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	    		"src",
 				"p_type_search",
 				"B4");
-		
+
 		search(
-				type, 
+				type,
 				REFERENCES,
-				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}), 
+				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}),
 				resultCollector);
-		
+
 		assertSearchResults("Base class as argument in callin callout with signature, JavaModel",
-				"src/p_type_search/B1.java C1 p_type_search.B1.baseMethod3(B4) [B4]\n" + 
-				"src/p_type_search/T2.java C1 p_type_search.T2$R1.roleMethod(B4) [B4]\n" + 
-				"src/p_type_search/T2.java p_type_search.T2$R1 roleMethod(B4) <- baseMethod3(B4) [B4]\n" + 
-				"src/p_type_search/T2.java p_type_search.T2$R1 roleMethod(B4) <- baseMethod3(B4) [B4]\n" + 
-				"src/p_type_search/T2.java p_type_search.T2$R1 roleMethod2(B4) -> baseMethod3(B4) [B4]\n" + 
+				"src/p_type_search/B1.java C1 p_type_search.B1.baseMethod3(B4) [B4]\n" +
+				"src/p_type_search/T2.java C1 p_type_search.T2$R1.roleMethod(B4) [B4]\n" +
+				"src/p_type_search/T2.java p_type_search.T2$R1 roleMethod(B4) <- baseMethod3(B4) [B4]\n" +
+				"src/p_type_search/T2.java p_type_search.T2$R1 roleMethod(B4) <- baseMethod3(B4) [B4]\n" +
+				"src/p_type_search/T2.java p_type_search.T2$R1 roleMethod2(B4) -> baseMethod3(B4) [B4]\n" +
 				"src/p_type_search/T2.java p_type_search.T2$R1 roleMethod2(B4) -> baseMethod3(B4) [B4]",
 				resultCollector);
 	}
-	
+
 	// Base class as role attribute
 	/**
 	 * Search for:<br>
-	 *	- Base class references<br> 
+	 *	- Base class references<br>
 	 * Search pattern:<br>
 	 *	- JavaModel<br>
 	 * Searched element:<br>
 	 *	- Base class references in private role attribute<br>
 	 * Expected search result:<br>
 	 *	References in<br>
-	 *		- p_type_search.T2.T3.R5<br> 
+	 *		- p_type_search.T2.T3.R5<br>
 	 */
 	public void test015() throws CoreException
 	{
@@ -763,13 +763,13 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	    		"src",
 				"p_type_search",
 				"B5");
-		
+
 		search(
-				type, 
+				type,
 				REFERENCES,
-				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}), 
+				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}),
 				resultCollector);
-		
+
 		assertSearchResults("Base class in private role attribute, JavaModel",
 				"src/p_type_search/T2.java p_type_search.T2$T3$R5.b5 [B5]",
 				resultCollector);
@@ -778,7 +778,7 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 
 	/**
 	 * Search for:<br>
-	 *	- Team reference<br> 
+	 *	- Team reference<br>
 	 * Search pattern:<br>
 	 *	- JavaModel<br>
 	 * Searched element:<br>
@@ -794,21 +794,21 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 	    		"src",
 				"p_type_search",
 				"T6");
-		
+
 		search(
-				type, 
+				type,
 				REFERENCES,
-				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}), 
+				getJavaSearchScopeFromPackages(new String[]{"p_type_search","p_type_search.T6"}),
 				resultCollector);
-		
+
 		assertSearchResults("Team reference in Team package, JavaModel",
 							"src/p_type_search/T6/R6.java [p_type_search.T6]",
 				resultCollector);
 	}
-	
+
 	/**
 	 * Search for:<br>
-	 *	- Reference to externalized role using <code>type anchor</code>(base)<br> 
+	 *	- Reference to externalized role using <code>type anchor</code>(base)<br>
 	 * Search pattern:<br>
 	 *	- JavaModel<br>
 	 * Searched element:<br>
@@ -827,13 +827,13 @@ public class OTJavaTypeSearchTests extends OTJavaSearchTestBase
 				"p_type_search",
 				"T5",
 				"R8");
-		
+
 		search(
-				type.getCorrespondingJavaElement(), 
+				type.getCorrespondingJavaElement(),
 				REFERENCES,
-				getJavaSearchScopeFromPackages(new String[]{"p_type_search"}), 
+				getJavaSearchScopeFromPackages(new String[]{"p_type_search"}),
 				resultCollector);
-		
+
 		assertSearchResults("Reference to externalized role in field declaration, callin method, and after playedBy, JavaModel",
 							"src/p_type_search/T4.java p_type_search.T4$R7.aRoleOfMyBase [base.R8]\n" +
 		        			"src/p_type_search/T4.java void p_type_search.T4$R7.tm(base.R8) [base.R8]\n" +

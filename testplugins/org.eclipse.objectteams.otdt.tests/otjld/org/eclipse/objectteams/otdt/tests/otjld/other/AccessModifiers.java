@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -27,11 +27,11 @@ import junit.framework.Test;
 
 @SuppressWarnings("unchecked")
 public class AccessModifiers extends AbstractOTJLDTest {
-	
+
 	public AccessModifiers(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -39,7 +39,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -86,16 +86,16 @@ public class AccessModifiers extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team0a1a2.java (at line 4)\n" + 
-    		"	private void secret (Missing a) {}\n" + 
-    		"	                     ^^^^^^^\n" + 
-    		"Missing cannot be resolved to a type\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team0a1a2.java (at line 6)\n" + 
-    		"	this.secret(null);\n" + 
-    		"	     ^^^^^^\n" + 
-    		"The method secret(Missing) from the type Team0a1a2.R1 refers to the missing type Missing\n" + 
+            "----------\n" +
+    		"1. ERROR in Team0a1a2.java (at line 4)\n" +
+    		"	private void secret (Missing a) {}\n" +
+    		"	                     ^^^^^^^\n" +
+    		"Missing cannot be resolved to a type\n" +
+    		"----------\n" +
+    		"2. ERROR in Team0a1a2.java (at line 6)\n" +
+    		"	this.secret(null);\n" +
+    		"	     ^^^^^^\n" +
+    		"The method secret(Missing) from the type Team0a1a2.R1 refers to the missing type Missing\n" +
     		"----------\n");
     }
 
@@ -198,7 +198,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // private role method is callin bound, binding inheritance
     // 0.a.1.a-otjld-private-role-method-7
     public void test0a1a_privateRoleMethod7() {
-       
+
        runConformTest(
             new String[] {
 		"Team0a1aprm7_2.java",
@@ -243,7 +243,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     public void test0a1a_privateRoleMethod8() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team0a1aprm8_2.java",
@@ -289,7 +289,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     public void test0a1a_privateRoleMethod9() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team0a1aprm9_2.java",
@@ -331,42 +331,42 @@ public class AccessModifiers extends AbstractOTJLDTest {
             customOptions,
             null/*no custom requestor*/);
     }
-    
+
     // private method of nested team accesses protected inner role
     // Bug 323327 -  [compiler] accessing a protected inner role from a private method of a nested team
     public void test0a1a_privateRoleMethod10() {
         runConformTest(
             new String[] {
         "Team0a1aprm10.java",
-        		"public team class Team0a1aprm10 {\n" + 
-        		"	protected team class Mid {\n" + 
+        		"public team class Team0a1aprm10 {\n" +
+        		"	protected team class Mid {\n" +
         		"		protected class R {\n" +
-        		"		    protected void m() {\n" + 
-        		"			    System.out.println(\"OK\");\n" + 
-        		"		    }\n" + 
-        		"       }\n" + 
-        		"		private void m(R r) {\n" + 
-        		"			r.m();\n" + 
-        		"		}\n" + 
-        		"		protected void test() {\n" + 
-        		"			m(new R());\n" + 
-        		"		}\n" + 
-        		"	}\n" + 
-        		"	void test() {\n" + 
-        		"		new Mid().test();\n" + 
-        		"	}\n" + 
-        		"	public static void main(String[] args) {\n" + 
-        		"		new Team0a1aprm10().test();\n" + 
-        		"	}\n" + 
+        		"		    protected void m() {\n" +
+        		"			    System.out.println(\"OK\");\n" +
+        		"		    }\n" +
+        		"       }\n" +
+        		"		private void m(R r) {\n" +
+        		"			r.m();\n" +
+        		"		}\n" +
+        		"		protected void test() {\n" +
+        		"			m(new R());\n" +
+        		"		}\n" +
+        		"	}\n" +
+        		"	void test() {\n" +
+        		"		new Mid().test();\n" +
+        		"	}\n" +
+        		"	public static void main(String[] args) {\n" +
+        		"		new Team0a1aprm10().test();\n" +
+        		"	}\n" +
         		"}\n"
             },
             "OK");
     }
-    
+
     // a private role field has a type of a non-externalizable role (synth accessor despite role being protected - witness for a regression in miniCRM )
     // 0.a.1.A-otjld-private-role-field
     public void test0a1A_privateRoleField() {
-       
+
        runConformTest(
             new String[] {
 		"Team0a1A.java",
@@ -402,7 +402,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a private role field is accessed - multilevel team inheritance - witness for CCE in RoleTypeBinding
     // 0.a.1.A-otjld-private-role-field-2
     public void test0a1A_privateRoleField2() {
-       
+
        runConformTest(
             new String[] {
 		"Team0a1A2_3.java",
@@ -449,7 +449,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a private role method needs a synth accessor, arg has role type of same name as its base (was incorrectly resolved to the base class
     // 0.a.1.A-otjld-private-role-method-1
     public void test0a1A_privateRoleMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"T0a1Aprm1Main.java",
@@ -686,7 +686,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // public field accessed within team
     // 0.a.5-otjld-public-role-field
     public void test0a5_publicRoleField() {
-       
+
        runConformTest(
             new String[] {
 		"T0a5prf.java",
@@ -735,7 +735,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // protected role field accessed outside role
     // 0.a.6-otjld-role-field-access-2
     public void test0a6_roleFieldAccess2() {
-       
+
        runConformTest(
             new String[] {
 		"Team0a6rfa2.java",
@@ -789,7 +789,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // protected role field accessed from other role
     // 0.a.7-otjld-role-field-access-other-role-2
     public void test0a7_roleFieldAccessOtherRole2() {
-       
+
        runConformTest(
             new String[] {
 		"Team0a7rfaor2.java",
@@ -819,7 +819,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // protected role field accessed from other role - receiver is a message send
     // 0.a.7-otjld-role-field-access-other-role-3
     public void test0a7_roleFieldAccessOtherRole3() {
-       
+
        runConformTest(
             new String[] {
 		"Team0a7rfaor3.java",
@@ -879,7 +879,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // role field accessed from other role
     // 0.a.8-otjld-role-field-access-other-role-2
     public void test0a8_roleFieldAccessOtherRole2() {
-       
+
        runConformTest(
             new String[] {
 		"Team0a8rfaor2.java",
@@ -908,7 +908,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // role field accessed across externalized roles
     // 0.a.8-otjld-role-field-access-other-role-2e
     public void test0a8_roleFieldAccessOtherRole2e() {
-       
+
        runConformTest(
             new String[] {
 		"T0a8rfaor2eMain.java",
@@ -949,7 +949,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // role field accessed across externalized roles (MOVE to incremental tests and solve using BuildManager)
     // 0.a.8-otjld_role-field-access-other-role-2f
     public void _role_test0a8_fieldAccessOtherRole2f() {
-       
+
        runConformTest(
             new String[] {
 		"T0a8rfaor2fMain.java",
@@ -990,7 +990,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // role field accessed from other role - implicitely inherited to other package
     // 0.a.8-otjld-role-field-access-other-role-3
     public void test0a8_roleFieldAccessOtherRole3() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team0a8rfaor3_2.java",
@@ -1026,7 +1026,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // role field accessed from the team - implicitely inherited to other package
     // 0.a.8-otjld-role-field-accessed-by-team-4
     public void test0a8_roleFieldAccessedByTeam4() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team0a8rfabt4_2.java",
@@ -1058,7 +1058,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // role synth field (this$0) used from nested role - implicitely inherited to other package
     // 0.a.8-otjld-role-field-accessed-by-team-4t
     public void test0a8_roleFieldAccessedByTeam4t() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team0a8rfabt4t_2.java",
@@ -1121,7 +1121,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // role field accessed (write) from the team - implicitely inherited to other package
     // 0.a.8-otjld-role-field-accessed-by-team-5
     public void test0a8_roleFieldAccessedByTeam5() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team0a8rfabt5_2.java",
@@ -1156,7 +1156,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // role field accessed (write) from the team - implicitely inherited to other package, using source type (1 compile)
     // 0.a.8-otjld-role-field-accessed-by-team-5s
     public void test0a8_roleFieldAccessedByTeam5s() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team0a8rfabt5s_2.java",
@@ -1191,7 +1191,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // role field accessed from the team - implicitely inherited to other package - write object
     // 0.a.8-otjld-role-field-accessed-by-team-6
     public void test0a8_roleFieldAccessedByTeam6() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team0a8rfabt6_2.java",
@@ -1232,7 +1232,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // role field accessed from the team - implicitely inherited to other package - super access to default-vis role method
     // 0.a.8-otjld-role-field-accessed-by-team-6s
     public void test0a8_roleFieldAccessedByTeam6s() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team0a8rfabt6s_2.java",
@@ -1307,7 +1307,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // role field accessed from the team - implicitely inherited to other package - write long
     // 0.a.8-otjld-role-field-accessed-by-team-7
     public void test0a8_roleFieldAccessedByTeam7() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team0a8rfabt7_2.java",
@@ -1343,7 +1343,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a field of an externalized role is written and read, team is compatible but not identical
     // 0.a.8-otjld-role-field-access-other-role-8
     public void test0a8_roleFieldAccessOtherRole8() {
-       
+
        runConformTest(
             new String[] {
 		"T0a8rfaor8Main.java",
@@ -1482,7 +1482,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a wide field is accessed via another role instance of the same team
     // 0.a.8-otjld-role-field-access-other-role-13
     public void test0a8_roleFieldAccessOtherRole13() {
-       
+
        runConformTest(
             new String[] {
 		"Team0a8rfaor13.java",
@@ -1515,7 +1515,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a role has a public static final field
     // 0.a.9-otjld-static-final-role-field-1
     public void test0a9_staticFinalRoleField1() {
-       
+
        runConformTest(
             new String[] {
 		"T0a9sfrf1Main.java",
@@ -1571,7 +1571,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a role has a public static non-final field - access via anchored role type: unsupported syntax
     // 0.a.9-otjld_static-final-role-field-1b
     public void _static_test0a9_finalRoleField1b() {
-       
+
        runConformTest(
             new String[] {
 		"T0a9sfrf1bMain.java",
@@ -1609,7 +1609,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a role has a public static non-final field - access via anchored role type
     // 0.a.9-otjld_static-final-role-field-1c
     public void _static_test0a9_finalRoleField1c() {
-       
+
        runConformTest(
             new String[] {
 		"T0a9sfrf1cMain.java",
@@ -1702,7 +1702,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a role has a protected static final field
     // 0.a.9-otjld-static-final-role-field-3
     public void test0a9_staticFinalRoleField3() {
-       
+
        runConformTest(
             new String[] {
 		"T0a9sfrf3Main.java",
@@ -1764,7 +1764,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a team field accessed from its role across packages needs a synthetic accessor - role type
     // 0.a.10-otjld-team-field-needs-synthetic-1
     public void test0a10_teamFieldNeedsSynthetic1() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team0a10tfns1_2.java",
@@ -1802,7 +1802,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a team field accessed from its role across packages needs a synthetic accessor - basic type
     // 0.a.10-otjld-team-field-needs-synthetic-2
     public void test0a10_teamFieldNeedsSynthetic2() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team0a10tfns2_2.java",
@@ -1841,7 +1841,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a team field accessed from its role across packages needs a synthetic accessor - qualified outer access
     // 0.a.10-otjld-team-field-needs-synthetic-3
     public void test0a10_teamFieldNeedsSynthetic3() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team0a10tfns3_2.java",
@@ -1880,7 +1880,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a team field accessed from its role across packages needs a synthetic accessor - qualified field access
     // 0.a.10-otjld-team-field-needs-synthetic-4
     public void test0a10_teamFieldNeedsSynthetic4() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team0a10tfns4_2.java",
@@ -1923,7 +1923,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a team field accessed from its role across packages needs a synthetic accessor - broken Outer.this in field initializer
     // 0.a.10-otjld-team-field-needs-synthetic-5
     public void test0a10_teamFieldNeedsSynthetic5() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team0a10tfns5_2.java",
@@ -1963,7 +1963,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a team method accessed from its role across packages needs a synthetic accessor - role type
     // 0.a.11-otjld-team-method-needs-synthetic-1
     public void test0a11_teamMethodNeedsSynthetic1() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team0a11tmns1_2.java",
@@ -2002,7 +2002,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a role accesses a friendly field of its team, team inheritance crosses packages
     // 0.a.12-otjld-role-accessing-team-field-1
     public void test0a12_roleAccessingTeamField1() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team0a12ratf1_2.java",
@@ -2037,7 +2037,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a role accesses a protected field of its team, team inheritance crosses packages
     // 0.a.12-otjld-role-accessing-team-field-2
     public void test0a12_roleAccessingTeamField2() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team0a12ratf2_2.java",
@@ -2072,7 +2072,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a local class accesses a private feature of its enclosing role
     // 0.a.13-otjld-private-role-method-accessed-1
     public void test0a13_privateRoleMethodAccessed1() {
-       
+
        runConformTest(
             new String[] {
 		"Team0a13prma1.java",
@@ -2106,7 +2106,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a private role method is callin bound
     // 0.a.13-otjld-private-role-method-accessed-2
     public void test0a13_privateRoleMethodAccessed2() {
-       
+
        runConformTest(
             new String[] {
 		"Team0a13prma2.java",
@@ -2206,7 +2206,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a public role advertizes a protected role in a public method
     // 0.a.15-otjld-advertize-protected-role-1a
     public void test0a15_advertizeProtectedRole1a() {
-       
+
        runConformTest(
             new String[] {
 		"T0a15apr1aMain.java",
@@ -2239,7 +2239,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a public role advertizes a protected role in a protected method - witness also for bug re non-final anchor
     // 0.a.15-otjld-advertize-protected-role-2
     public void test0a15_advertizeProtectedRole2() {
-       
+
        runConformTest(
             new String[] {
 		"Team0a15apr2.java",
@@ -2269,7 +2269,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a protected role advertizes a protected role in a public method
     // 0.a.15-otjld-advertize-protected-role-3
     public void test0a15_advertizeProtectedRole3() {
-       
+
        runConformTest(
             new String[] {
 		"Team0a15apr3.java",
@@ -2299,7 +2299,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     // a role overrides a static method from its tsuper
     // 0.a.16-otjld_unsupported_static-role-method-1
     public void _unsupported_test0a16_staticRoleMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"Team0a16srm1_2.java",

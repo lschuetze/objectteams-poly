@@ -372,7 +372,7 @@ public abstract class AbstractMethodDeclaration
 					else if (methodBinding.parameters[i].isFreeTypeVariable()) {
 						flowInfo.markNullStatus(methodArguments[i].binding, FlowInfo.FREE_TYPEVARIABLE);
 					}
-				} else {					
+				} else {
 					if (methodBinding.parameterNonNullness != null) {
 						// leverage null-info from parameter annotations:
 						Boolean nonNullNess = methodBinding.parameterNonNullness[i];
@@ -490,7 +490,7 @@ public abstract class AbstractMethodDeclaration
 					restart = true;
 				} else {
 					restart = false;
-					abort = true; 
+					abort = true;
 				}
 			}
 		} while (restart);
@@ -516,7 +516,7 @@ public abstract class AbstractMethodDeclaration
         // special body for abstract static:
         int abstractStatic = ClassFileConstants.AccAbstract | ClassFileConstants.AccStatic;
         if (   (this.binding.modifiers & abstractStatic) == abstractStatic
-        	&& !this.binding.declaringClass.isInterface()) 
+        	&& !this.binding.declaringClass.isInterface())
         {
     		// Code attribute
     		attributeNumber += generateAbstractStaticRoleMethodCode(classFile);
@@ -601,7 +601,7 @@ public abstract class AbstractMethodDeclaration
 		classFile.generateCodeAttributeHeader();
 		CodeStream codeStream = classFile.codeStream;
 		codeStream.reset(this, classFile);
-		String errorMessage = this.scope.problemReporter().problemFactory.getLocalizedMessage(IProblem.AbstractStaticMethodCalled, 
+		String errorMessage = this.scope.problemReporter().problemFactory.getLocalizedMessage(IProblem.AbstractStaticMethodCalled,
 										new String[]{new String(this.binding.readableName())});
 		codeStream.generateCodeAttributeForProblemMethod(errorMessage);
 		int[] startLineIndexes = this.compilationResult.getLineSeparatorPositions();
@@ -846,7 +846,7 @@ public abstract class AbstractMethodDeclaration
 		  if (!(this.isGenerated || this.isCopied))
 // SH}
 			resolveAnnotations(this.scope, this.annotations, this.binding, this.isConstructor());
-			
+
 			long sourceLevel = this.scope.compilerOptions().sourceLevel;
 			if (sourceLevel < ClassFileConstants.JDK1_8) // otherwise already checked via Argument.createBinding
 				validateNullAnnotations(this.scope.environment().usesNullTypeAnnotations());
@@ -992,12 +992,12 @@ public abstract class AbstractMethodDeclaration
 				// similarly hide local types from copy inheritance:
 				SourceTypeBinding sourceType = this.scope.enclosingSourceType();
 				if (sourceType != null && sourceType.roleModel != null)
-					sourceType.roleModel.purgeLocalTypes(this.sourceStart, this.declarationSourceEnd);				
+					sourceType.roleModel.purgeLocalTypes(this.sourceStart, this.declarationSourceEnd);
 			}
 		}
 // SH}
 	}
-	
+
 	@Override
 	public void tagAsHavingIgnoredMandatoryErrors(int problemId) {
 		// Nothing to do for this context;

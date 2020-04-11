@@ -17,7 +17,7 @@
  *								bug 391376 - [1.8] check interaction of default methods with bridge methods and generics
  *								bug 421543 - [1.8][compiler] Compiler fails to recognize default method being turned into abstract by subtytpe
  *     Jesper S Moller - Contributions for
- *							Bug 405066 - [1.8][compiler][codegen] Implement code generation infrastructure for JSR335        
+ *							Bug 405066 - [1.8][compiler][codegen] Implement code generation infrastructure for JSR335
  *     Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *                          Bug 409247 - [1.8][compiler] Verify error with code allocating multidimensional array
@@ -152,12 +152,12 @@ public class CodeStream {
 	protected long targetLevel;
 
 	public LocalVariableBinding[] visibleLocals = new LocalVariableBinding[LOCALS_INCREMENT];
-		
+
 	int visibleLocalsCount;
-	
+
 	// to handle goto_w
-	public boolean wideMode = false;	
-	
+	public boolean wideMode = false;
+
 public CodeStream(ClassFile givenClassFile) {
 	this.targetLevel = givenClassFile.targetJDK;
 	this.generateAttributes = givenClassFile.produceAttributes;
@@ -2155,7 +2155,7 @@ public void generateImplicitConversion(int implicitConversionCode) {
 			int runtimeType = (implicitConversionCode & TypeIds.IMPLICIT_CONVERSION_MASK) >> 4;
 			checkcast(runtimeType);
 			generateUnboxingConversion(runtimeType);
-			break;	
+			break;
 	}
 	if ((implicitConversionCode & TypeIds.BOXING) != 0) {
 		// need to unbox/box the constant
@@ -2546,10 +2546,10 @@ public void generateSyntheticBodyForFactoryMethod(SyntheticMethodBinding methodB
 	MethodBinding constructorBinding = methodBinding.targetMethod;
 	TypeBinding[] parameters = methodBinding.parameters;
 	int length = parameters.length;
-	
+
 	new_(constructorBinding.declaringClass);
 	dup();
-	
+
 	int resolvedPosition = 0;
 	for (int i = 0; i < length; i++) {
 		TypeBinding parameter;
@@ -2566,7 +2566,7 @@ public void generateSyntheticBodyForFactoryMethod(SyntheticMethodBinding methodB
 	}
 	for (int i = 0; i < methodBinding.fakePaddedParameters; i++)
 		aconst_null();
-	
+
 	invoke(Opcodes.OPC_invokespecial, constructorBinding, null /* default declaringClass */);
 	areturn();
 }
@@ -2594,7 +2594,7 @@ public void generateSyntheticBodyForEnumValueOf(SyntheticMethodBinding methodBin
 public void generateSyntheticBodyForDeserializeLambda(SyntheticMethodBinding methodBinding,SyntheticMethodBinding[] syntheticMethodBindings) {
 	initializeMaxLocals(methodBinding);
 
-	// Compute a map of hashcodes to a list of synthetic methods whose names share a hashcode 
+	// Compute a map of hashcodes to a list of synthetic methods whose names share a hashcode
 	Map hashcodesTosynthetics = new LinkedHashMap();
 	for (int i=0,max=syntheticMethodBindings.length;i<max;i++) {
 		SyntheticMethodBinding syntheticMethodBinding = syntheticMethodBindings[i];
@@ -2611,7 +2611,7 @@ public void generateSyntheticBodyForDeserializeLambda(SyntheticMethodBinding met
 		}
 	}
 	ClassScope scope = ((SourceTypeBinding)methodBinding.declaringClass).scope;
-	
+
 	// Generate the first switch, on method name hashcode
 	aload_0();
 	invoke(Opcodes.OPC_invokevirtual, 1, 1, ConstantPool.JavaLangInvokeSerializedLambdaConstantPoolName, ConstantPool.GetImplMethodName, ConstantPool.GetImplMethodNameSignature);
@@ -2626,7 +2626,7 @@ public void generateSyntheticBodyForDeserializeLambda(SyntheticMethodBinding met
 	addVariable(lvb2);
 	aload_1();
 	invokeStringHashCode();
-	
+
 	BranchLabel label = new BranchLabel(this);
 	CaseLabel defaultLabel = new CaseLabel(this);
 	int numberOfHashcodes = hashcodesTosynthetics.size();
@@ -2648,7 +2648,7 @@ public void generateSyntheticBodyForDeserializeLambda(SyntheticMethodBinding met
 	sort(localKeysCopy, 0, numberOfHashcodes-1, sortedIndexes);
 	// TODO need to use a tableswitch at some size threshold?
 	lookupswitch(defaultLabel, keys, sortedIndexes, switchLabels);
-	// TODO cope with multiple names that share the same hashcode	
+	// TODO cope with multiple names that share the same hashcode
 	hashcodeIterator = hashcodes.iterator();
 	index = 0;
 	while (hashcodeIterator.hasNext()) {
@@ -2837,7 +2837,7 @@ public void generateSyntheticBodyForDeserializeLambda(SyntheticMethodBinding met
 			}
 		}
 	}
-	
+
 	removeVariable(lvb1);
 	removeVariable(lvb2);
 	defaultLabel.place();
@@ -2845,7 +2845,7 @@ public void generateSyntheticBodyForDeserializeLambda(SyntheticMethodBinding met
 	// Code: throw new IllegalArgumentException("Invalid lambda deserialization")
 	new_(scope.getJavaLangIllegalArgumentException());
 	dup();
-	ldc("Invalid lambda deserialization"); //$NON-NLS-1$ // TODO into a constant?		
+	ldc("Invalid lambda deserialization"); //$NON-NLS-1$ // TODO into a constant?
 	// invokespecial: java.lang.IllegalArgumentException.<init>(Ljava/lang/String;)V
 	invoke(
 			Opcodes.OPC_invokespecial,
@@ -2935,8 +2935,8 @@ public void generateSyntheticBodyForFieldReadAccess(SyntheticMethodBinding acces
 	initializeMaxLocals(accessMethod);
 	FieldBinding fieldBinding = accessMethod.targetReadField;
 	// target method declaring class may not be accessible (247953);
-	TypeBinding declaringClass = accessMethod.purpose == SyntheticMethodBinding.SuperFieldReadAccess 
-			? accessMethod.declaringClass.superclass() 
+	TypeBinding declaringClass = accessMethod.purpose == SyntheticMethodBinding.SuperFieldReadAccess
+			? accessMethod.declaringClass.superclass()
 			: accessMethod.declaringClass;
 //{ObjectTeams: role field?
 	if (accessMethod instanceof SyntheticRoleFieldAccess) {
@@ -2944,7 +2944,7 @@ public void generateSyntheticBodyForFieldReadAccess(SyntheticMethodBinding acces
 	} else
 // SH}
 	if (fieldBinding.isStatic()) {
-		fieldAccess(Opcodes.OPC_getstatic, fieldBinding, declaringClass); 
+		fieldAccess(Opcodes.OPC_getstatic, fieldBinding, declaringClass);
 	} else {
 		aload_0();
 		fieldAccess(Opcodes.OPC_getfield, fieldBinding, declaringClass);
@@ -2978,9 +2978,9 @@ public void generateSyntheticBodyForFieldWriteAccess(SyntheticMethodBinding acce
 	initializeMaxLocals(accessMethod);
 	FieldBinding fieldBinding = accessMethod.targetWriteField;
 	// target method declaring class may not be accessible (247953);
-	TypeBinding declaringClass = accessMethod.purpose == SyntheticMethodBinding.SuperFieldWriteAccess 
-			? accessMethod.declaringClass.superclass() 
-			: accessMethod.declaringClass;	
+	TypeBinding declaringClass = accessMethod.purpose == SyntheticMethodBinding.SuperFieldWriteAccess
+			? accessMethod.declaringClass.superclass()
+			: accessMethod.declaringClass;
 //{ObjectTeams: role field?
 	if (accessMethod instanceof SyntheticRoleFieldAccess) {
 		((SyntheticRoleFieldAccess)accessMethod).generateBodyForWrite(fieldBinding, this);
@@ -3053,7 +3053,7 @@ public void generateSyntheticBodyForMethodAccess(SyntheticMethodBinding accessMe
 				// qualified super "X.super.foo()" targets methods from superclass
 				|| accessMethod.purpose == SyntheticMethodBinding.SuperMethodAccess){
 			// target method declaring class may not be accessible (247953);
-			TypeBinding declaringClass = accessMethod.purpose == SyntheticMethodBinding.SuperMethodAccess 
+			TypeBinding declaringClass = accessMethod.purpose == SyntheticMethodBinding.SuperMethodAccess
 					? findDirectSuperTypeTowards(accessMethod, targetMethod)
 					: accessMethod.declaringClass;
 //{ObjectTeams: private methods also occur in role interfaces:
@@ -3108,7 +3108,7 @@ ReferenceBinding findDirectSuperTypeTowards(SyntheticMethodBinding accessMethod,
 	ReferenceBinding currentType = accessMethod.declaringClass;
 	ReferenceBinding superclass = currentType.superclass();
 	if (targetMethod.isDefaultMethod()) {
-		// could be inherited via superclass *or* a super interface 
+		// could be inherited via superclass *or* a super interface
 		ReferenceBinding targetType = targetMethod.declaringClass;
 		if (superclass.isCompatibleWith(targetType))
 			return superclass;
@@ -3218,11 +3218,11 @@ public void generateSyntheticEnclosingInstanceValues(BlockScope currentScope, Re
 			//compliance >= JDK1_7
 			if (invocationSite instanceof AllocationExpression) {
 				denyEnclosingArgInConstructorCall = !targetType.isLocalType();
-			} else if (invocationSite instanceof ExplicitConstructorCall && 
+			} else if (invocationSite instanceof ExplicitConstructorCall &&
 					((ExplicitConstructorCall)invocationSite).isSuperAccess()) {
 				MethodScope enclosingMethodScope = currentScope.enclosingMethodScope();
 				denyEnclosingArgInConstructorCall = !targetType.isLocalType() && enclosingMethodScope != null
-						&& enclosingMethodScope.isConstructorCall; 
+						&& enclosingMethodScope.isConstructorCall;
 			} else {
 				denyEnclosingArgInConstructorCall = false;
 			}
@@ -3535,7 +3535,7 @@ public static TypeBinding getConstantPoolDeclaringClass(Scope currentScope, Fiel
 
 			return actualReceiverType.erasure();
 		}
-	}	
+	}
 	return constantPoolDeclaringClass;
 }
 
@@ -3563,7 +3563,7 @@ public static TypeBinding getConstantPoolDeclaringClass(Scope currentScope, Meth
 		// and not from Object or implicit static method call.
 		if (TypeBinding.notEquals(constantPoolDeclaringClass, actualReceiverType.erasure()) && !actualReceiverType.isArrayType()) {
 			CompilerOptions options = currentScope.compilerOptions();
-	
+
 			if ((options.targetJDK >= ClassFileConstants.JDK1_2
 						&& (options.complianceLevel >= ClassFileConstants.JDK1_4 || !(isImplicitThisReceiver && codegenBinding.isStatic()))
 						&& codegenBinding.declaringClass.id != TypeIds.T_JavaLangObject) // no change for Object methods
@@ -3584,7 +3584,7 @@ public static TypeBinding getConstantPoolDeclaringClass(Scope currentScope, Meth
 					constantPoolDeclaringClass = erasedReceiverType;
 				}
 			}
-		}				
+		}
 	}
 	return constantPoolDeclaringClass;
 }
@@ -4357,7 +4357,7 @@ public void initializeMaxLocals(MethodBinding methodBinding) {
 				case TypeIds.T_double :
 					this.maxLocals += 2;
 					break;
-				default: 
+				default:
 					this.maxLocals++;
 			}
 		}
@@ -4424,7 +4424,7 @@ protected void invoke(byte opcode, int receiverAndArgsSize, int returnTypeSize, 
 // Hence adding explicit parameter 'isInterface', which is needed only for non-ctor invokespecial invocations
 // (i.e., other clients may still call the shorter overload).
 private void invoke18(byte opcode, int receiverAndArgsSize, int returnTypeSize, char[] declaringClass,
-		boolean isInterface, char[] selector, char[] signature) {	
+		boolean isInterface, char[] selector, char[] signature) {
 	this.countLabels = 0;
 	if (opcode == Opcodes.OPC_invokeinterface) {
 		// invokeinterface
@@ -4521,10 +4521,10 @@ public void invoke(byte opcode, MethodBinding methodBinding, TypeBinding declari
 								case TypeIds.T_long :
 									receiverAndArgsSize += 2;
 									break;
-								default: 
+								default:
 									receiverAndArgsSize++;
 									break;
-							}    						
+							}
 						}
 					}
 				}
@@ -4532,7 +4532,7 @@ public void invoke(byte opcode, MethodBinding methodBinding, TypeBinding declari
 					// adding String (name) and int (ordinal)
 					receiverAndArgsSize += 2;
 				}
-			}    		
+			}
 			break;
 		default :
 			return; // should not occur
@@ -4564,12 +4564,12 @@ public void invoke(byte opcode, MethodBinding methodBinding, TypeBinding declari
 			break;
 	}
 	invoke18(
-			opcode, 
-			receiverAndArgsSize, 
-			returnTypeSize, 
-			declaringClass.constantPoolName(), 
+			opcode,
+			receiverAndArgsSize,
+			returnTypeSize,
+			declaringClass.constantPoolName(),
 			declaringClass.isInterface(),
-			methodBinding.selector, 
+			methodBinding.selector,
 			methodBinding.signature(this.classFile));
 //{ObjectTeams: if signature is weakened to conform to tsuper erasure, we need a cast to make the result compatible to the expected type
 	if ((methodBinding.otBits & IOTConstants.IsCopyOfParameterized) != 0 &&
@@ -4577,7 +4577,7 @@ public void invoke(byte opcode, MethodBinding methodBinding, TypeBinding declari
 		checkcast(methodBinding.returnType.erasure());
 // SH}
 }
-//{ObjectTeams: misguided callout-to-field accessor?? 
+//{ObjectTeams: misguided callout-to-field accessor??
 private byte checkInvokeCalloutToField(byte opcode, SyntheticMethodBinding accessor) {
 	if (  (   accessor.purpose == SyntheticMethodBinding.FieldReadAccess
 		   || accessor.purpose == SyntheticMethodBinding.FieldWriteAccess)
@@ -4705,8 +4705,8 @@ public void invokeIterableIterator(TypeBinding iterableReceiverType) {
 			iterableReceiverType.isInterface() ? Opcodes.OPC_invokeinterface : Opcodes.OPC_invokevirtual,
 			1, // receiverAndArgsSize
 			1, // returnTypeSize
-			iterableReceiverType.constantPoolName(), 
-			ConstantPool.ITERATOR_NAME, 
+			iterableReceiverType.constantPoolName(),
+			ConstantPool.ITERATOR_NAME,
 			ConstantPool.ITERATOR_SIGNATURE);
 }
 
@@ -4719,8 +4719,8 @@ public void invokeAutoCloseableClose(TypeBinding resourceType) {
 			resourceType.erasure().isInterface() ? Opcodes.OPC_invokeinterface : Opcodes.OPC_invokevirtual,
 			1, // receiverAndArgsSize
 			0, // returnTypeSize
-			resourceType.constantPoolName(), 
-			ConstantPool.Close, 
+			resourceType.constantPoolName(),
+			ConstantPool.Close,
 			ConstantPool.CloseSignature);
 }
 
@@ -4729,7 +4729,7 @@ public void invokeThrowableAddSuppressed() {
 			2, // receiverAndArgsSize
 			0, // returnTypeSize
 			ConstantPool.JavaLangThrowableConstantPoolName,
-			ConstantPool.AddSuppressed, 
+			ConstantPool.AddSuppressed,
 			ConstantPool.AddSuppressedSignature);
 }
 
@@ -4828,11 +4828,11 @@ public void invokeJavaLangEnumValues(TypeBinding enumBinding, ArrayBinding array
 	char[] signature = "()".toCharArray(); //$NON-NLS-1$
 	signature = CharOperation.concat(signature, arrayBinding.constantPoolName());
 	invoke(
-			Opcodes.OPC_invokestatic, 
+			Opcodes.OPC_invokestatic,
 			0,  // receiverAndArgsSize
 			1,  // return type size
-			enumBinding.constantPoolName(), 
-			TypeConstants.VALUES, 
+			enumBinding.constantPoolName(),
+			TypeConstants.VALUES,
 			signature);
 }
 
@@ -5183,7 +5183,7 @@ public void invokeStringConcatenationToString() {
 	} else {
 		// invokespecial: java.lang.StringStringBuilder.<init>(java.langString)V
 		declaringClass = ConstantPool.JavaLangStringBuilderConstantPoolName;
-	}	
+	}
 	invoke(
 			Opcodes.OPC_invokevirtual,
 			1, // receiverAndArgsSize

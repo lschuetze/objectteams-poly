@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -37,55 +37,55 @@ public class OTSuperTypeHierarchyTest007_Stress extends FileBasedHierarchyTest
 {
     private IType _T1;
     private IType _T2;
-    
+
 	private IType _T1_R1;
 	private IType _T1_R2;
-	
+
 	private IType _T2_R1;
 	private IType _T2_R2;
-	
+
 	private IType _classA;
     private IType _classB;
-    
+
     private IType _interfaceA;
     private IType _interfaceB;
     private IType _interfaceC;
-    
+
     private IType _objectType;
-	
+
 	public OTSuperTypeHierarchyTest007_Stress(String name)
 	{
 		super(name);
 	}
-	
+
 	public static Test suite()
 	{
 		if (true)
 		{
 			return new Suite(OTSuperTypeHierarchyTest007_Stress.class);
 		}
-		junit.framework.TestSuite suite = 
+		junit.framework.TestSuite suite =
 			new Suite(OTSuperTypeHierarchyTest007_Stress.class.getName());
 		return suite;
 	}
-	
+
 	public void setUpSuite() throws Exception
 	{
 		setTestProjectDir("Hierarchy");
 		super.setUpSuite();
-		
+
 		String srcFolder = "src";
 		String pkg = "test007";
-		
+
         _T1 = getType(getTestProjectDir(), srcFolder, pkg, "T1");
         _T2 = getType(getTestProjectDir(), srcFolder, pkg, "T2");
-        
+
         _T1_R1 = getRole(_T1, "T1.R1");
         _T1_R2 = getRole(_T1, "T1.R2");
-        
+
         _T2_R1 = getRole(_T2, "T2.R1");
         _T2_R2 = getRole(_T2, "T2.R2");
-                
+
         _classA =
             getType(getTestProjectDir(), srcFolder, pkg, "ClassA");
         _classB =
@@ -98,9 +98,9 @@ public class OTSuperTypeHierarchyTest007_Stress extends FileBasedHierarchyTest
             getType(getTestProjectDir(), srcFolder, pkg, "InterfaceC");
         _objectType =
             getType(getTestProjectDir(), "rt.jar", "java.lang", "Object");
-        
+
 	}
-	
+
 	public void testGetAllSuperInterfacesFor_T2R2_Run001()
         throws JavaModelException
 	{
@@ -112,66 +112,66 @@ public class OTSuperTypeHierarchyTest007_Stress extends FileBasedHierarchyTest
     {
         runActualTestCase();
     }
-    
+
     public void testGetAllSuperInterfacesFor_T2R2_Run003()
         throws JavaModelException
     {
         runActualTestCase();
     }
-    
+
     public void testGetAllSuperInterfacesFor_T2R2_Run004()
         throws JavaModelException
     {
         runActualTestCase();
     }
-    
+
     public void testGetAllSuperInterfacesFor_T2R2_Run005()
         throws JavaModelException
     {
         runActualTestCase();
     }
-    
+
     public void testGetAllSuperInterfacesFor_T2R2_Run006()
         throws JavaModelException
     {
         runActualTestCase();
     }
-    
+
     public void testGetAllSuperInterfacesFor_T2R2_Run007()
         throws JavaModelException
     {
         runActualTestCase();
     }
-    
+
     public void testGetAllSuperInterfacesFor_T2R2_Run008()
         throws JavaModelException
     {
         runActualTestCase();
     }
-    
+
     public void testGetAllSuperInterfacesFor_T2R2_Run009()
         throws JavaModelException
     {
         runActualTestCase();
     }
-    
+
     public void testGetAllSuperInterfacesFor_T2R2_Run010()
         throws JavaModelException
     {
         runActualTestCase();
-    } 
+    }
 
     private void runActualTestCase() throws JavaModelException
     {
         _focusType = _T2_R2;
         _testObj = createSuperTypeHierarchy(_focusType);
-        
+
         IType[] expected = new IType[] { _interfaceA,
                                          _interfaceB,
-                                         _interfaceC };        
+                                         _interfaceC };
         IType [] actual = OTTypeHierarchies.getInstance().getAllSuperInterfaces(_testObj, _focusType);
-        
-        assertEquals(expected.length, actual.length);        
+
+        assertEquals(expected.length, actual.length);
         assertTrue(compareTypes(expected, actual));
     }
 }

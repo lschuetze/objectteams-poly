@@ -98,7 +98,7 @@ public class BindingAmbiguitiesM extends AbstractOTJLDTest {
               true/*shouldFlush*/,
               null/*vmArguments*/,
               options,
-              null/*requester*/);     
+              null/*requester*/);
      }
 
      // callin binding despite binding ambiguity regarding super base and intermediate roles,
@@ -146,7 +146,7 @@ public class BindingAmbiguitiesM extends AbstractOTJLDTest {
               true/*shouldFlush*/,
               null/*vmArguments*/,
               options,
-              null/*requester*/);     
+              null/*requester*/);
      }
 
 }

@@ -226,7 +226,7 @@ public boolean visit(LambdaExpression lambdaExpression, BlockScope scope) {
 		if (lambdaExpression.resolvedType != null && lambdaExpression.resolvedType.isValidBinding() &&
 				!(lambdaExpression.descriptor instanceof ProblemMethodBinding))
 			this.locator.reportMatching(lambdaExpression, this.enclosingElement, level != null ? level.intValue() : -1, this.nodeSet, this.typeInHierarchy);
-		else 
+		else
 			return true;
 	} catch (CoreException e) {
 		throw new WrappedCoreException(e);
@@ -311,7 +311,7 @@ int getInTypeOccurrenceCountForBinaryAnonymousType(TypeDeclaration typeDeclarati
 public boolean visit(TypeDeclaration typeDeclaration, BlockScope unused) {
 	try {
 		char[] simpleName;
-		if ((typeDeclaration.bits & ASTNode.IsAnonymousType) != 0) {				
+		if ((typeDeclaration.bits & ASTNode.IsAnonymousType) != 0) {
 			simpleName = CharOperation.NO_CHAR;
 		} else {
 			simpleName = typeDeclaration.name;

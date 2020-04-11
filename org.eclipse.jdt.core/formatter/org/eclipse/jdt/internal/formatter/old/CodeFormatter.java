@@ -166,5 +166,5 @@ public class CodeFormatter implements TerminalTokens, org.eclipse.jdt.core.ICode
 			}
 		}
 		return org.eclipse.jdt.internal.core.util.Util.editedString(string, textEdit);
-	}	
+	}
 }

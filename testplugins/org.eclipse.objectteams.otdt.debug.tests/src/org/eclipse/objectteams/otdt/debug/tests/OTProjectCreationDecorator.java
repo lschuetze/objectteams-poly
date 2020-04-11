@@ -6,7 +6,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  * 	  Fraunhofer FIRST - Initial API and implementation
@@ -57,7 +57,7 @@ import org.eclipse.ui.PlatformUI;
 public class OTProjectCreationDecorator extends AbstractOTDTDebugTest {
 
 	public static boolean fgReady = false;
-	
+
     /**
      * Constructor
      * @param name
@@ -66,7 +66,7 @@ public class OTProjectCreationDecorator extends AbstractOTDTDebugTest {
         super(name);
         fgReady = true;
     }
-    
+
     public static boolean isReady() {
     	return fgReady;
     }
@@ -105,7 +105,7 @@ public class OTProjectCreationDecorator extends AbstractOTDTDebugTest {
         IWorkspaceDescription wsDescription = ResourcesPlugin.getWorkspace().getDescription();
         wsDescription.setAutoBuilding(false);
         ResourcesPlugin.getWorkspace().setDescription(wsDescription);
-        
+
         // create & configure project and import source
         fJavaProject = org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper.createOTJavaProject("DebugTests", "bin");
         fJavaProject.setOption(CompilerOptions.OPTION_ReportUncheckedTypeOperation, CompilerOptions.IGNORE);
@@ -113,16 +113,16 @@ public class OTProjectCreationDecorator extends AbstractOTDTDebugTest {
         fJavaProject.setOption(CompilerOptions.OPTION_ReportDeadCode, CompilerOptions.IGNORE);
         fJavaProject.setOption(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_5);
         IPackageFragmentRoot src = JavaProjectHelper.addSourceContainer(fJavaProject, "src");
-        
-//{ObjectTeams: rootfile-path is now org.eclipse.objectteams.otdt.debug.tests + "testprograms"      
+
+//{ObjectTeams: rootfile-path is now org.eclipse.objectteams.otdt.debug.tests + "testprograms"
         File root = DebugTestsPlugin.getDefault().getPluginDirectoryPath(JavaProjectHelper.TEST_SRC_DIR);
 //ike}
         JavaProjectHelper.importFilesFromDirectory(root, src.getPath(), null);
-        
+
         // import classfiles
         root = DebugTestsPlugin.getDefault().getPluginDirectoryPath(new Path("classfiles"));
         JavaProjectHelper.importFilesFromDirectory(root, src.getPath(), null);
-       
+
         // add rt.jar
         IVMInstall vm = JavaRuntime.getDefaultVMInstall();
         assertNotNull("No default JRE", vm);
@@ -135,7 +135,7 @@ public class OTProjectCreationDecorator extends AbstractOTDTDebugTest {
         // all set up, can start auto-building now:
         wsDescription.setAutoBuilding(true);
         ResourcesPlugin.getWorkspace().setDescription(wsDescription);
-        
+
         // create launch configuration folder
 
         IFolder folder = pro.getFolder("launchConfigurations");
@@ -152,7 +152,7 @@ public class OTProjectCreationDecorator extends AbstractOTDTDebugTest {
 
         // this one used by StratumTests:
         createLaunchConfiguration("Breakpoints");
-//{ObjectTeams: own tests:        
+//{ObjectTeams: own tests:
         createLaunchConfiguration("rofitests.RoFiTeam");
         createLaunchConfiguration("copyinheritancetests.SubTeam");
         createLaunchConfiguration("copyinheritancetests.SubTeam2");
@@ -179,7 +179,7 @@ public class OTProjectCreationDecorator extends AbstractOTDTDebugTest {
 
 	/**
      * Create a project with non-default, mulitple output locations.
-     * 
+     *
      * @throws Exception
      */
     public void _testMultipleOutputProjectCreation() throws Exception {
@@ -278,9 +278,9 @@ public class OTProjectCreationDecorator extends AbstractOTDTDebugTest {
 //            IMarker marker = markers[i];
 //            Integer severity = (Integer) marker.getAttribute(IMarker.SEVERITY);
 //            IResource resource = marker.getResource();
-//            
+//
 //            System.out.println(resource.getName());
-//            
+//
 //            if (severity != null && severity.intValue() >= IMarker.SEVERITY_ERROR) {
 //                errors++;
 //            }

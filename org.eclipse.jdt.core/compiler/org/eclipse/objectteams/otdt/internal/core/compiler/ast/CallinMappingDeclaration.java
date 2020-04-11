@@ -266,7 +266,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 					if (baseMethod.isConstructor()) {
 						if (this.callinModifier != TokenNameafter) {
 							this.scope.problemReporter().callinToCtorMustBeAfter(this.baseMethodSpecs[i], baseMethod);
-							this.binding.tagBits |= TagBits.HasMappingIncompatibility;							
+							this.binding.tagBits |= TagBits.HasMappingIncompatibility;
 						}
 					}
 				}
@@ -293,7 +293,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 			return false;
 		} else {
 			// before modifying the parameters array copy it:
-			System.arraycopy(this.roleMethodSpec.parameters, 0, 
+			System.arraycopy(this.roleMethodSpec.parameters, 0,
 							 this.roleMethodSpec.parameters = new TypeBinding[roleParams.length], 0,
 							 roleParams.length);
 			for (int j = 0; j < roleParams.length; j++) {
@@ -362,7 +362,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 						methodSpec.argNeedsTranslation[j] = true;
 						this.roleMethodSpec.argNeedsTranslation[j] = true;
 						this.roleMethodSpec.parameters[j] = roleToLiftTo; // this applies to all bindings
-						
+
 						// still need to check for ambiguity/abstract role:
 						ReferenceBinding enclosingTeam = this.scope.enclosingSourceType().enclosingType();
 						int iProblem = enclosingTeam.getTeamModel().canLiftingFail((ReferenceBinding)roleToLiftTo.leafComponentType());
@@ -462,7 +462,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 							break;
 						}
 					}
-				}				
+				}
 			}
 		}
 		TypeVariableBinding returnVariable= MethodModel.checkedGetReturnTypeVariable(this.roleMethodSpec.resolvedMethod);
@@ -609,7 +609,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 			}
 		}
 	}
-	
+
 	private boolean typeUsesTypeVariable(TypeBinding type, TypeBinding variable) {
 		if (TypeBinding.equalsEquals(type.leafComponentType(), variable))
 			return true;
@@ -644,11 +644,11 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	}
 
 	/** Check details that require analyseCode() of methods to be finished: */
-	public void analyseDetails(TypeDeclaration roleClass, WeavingScheme weavingScheme) 
-	{		
+	public void analyseDetails(TypeDeclaration roleClass, WeavingScheme weavingScheme)
+	{
 		// check validity of base-super call
 		if (   this.roleMethodSpec.isValid()
-			&& MethodModel.hasCallinFlag(this.roleMethodSpec.resolvedMethod, CALLIN_FLAG_BASE_SUPER_CALL)) 
+			&& MethodModel.hasCallinFlag(this.roleMethodSpec.resolvedMethod, CALLIN_FLAG_BASE_SUPER_CALL))
 		{
 			for (int i = 0; i < this.baseMethodSpecs.length; i++) {
 				MethodBinding baseMethod = this.baseMethodSpecs[i].resolvedMethod;
@@ -663,7 +663,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		}
 		// check whether a base result is missing
 		if (   this.baseMethodNeedingResultFromBasecall != null
-			&& !this.isResultMapped) 
+			&& !this.isResultMapped)
 		{
 			if (MethodModel.hasCallinFlag(this.roleMethodSpec.resolvedMethod, CALLIN_FLAG_DEFINITELY_MISSING_BASECALL))
 			{
@@ -967,7 +967,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	}
 
 	/**
-	 * Answer the name of the role that introduced this callin mapping 
+	 * Answer the name of the role that introduced this callin mapping
 	 * (support for overriding in otredyn).
 	 */
 	public char[] declaringRoleName() {

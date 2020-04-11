@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2012 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany, and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -51,49 +51,49 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 
 	private MethodData[] baseMethodHandles;
 	private String       name;
-	
+
 
 	public CallinMapping(
 			int          declarationSourceStart,
 			int          sourceStart,
 			int			 sourceEnd,
 			int          declarationSourceEnd,
-			IRoleType    parent, 
+			IRoleType    parent,
 			IMethod 	 corrJavaMeth,
 			char[]       name,
 			int 	     callinKind,
 			MethodData   roleMethodHandle,
-			MethodData[] baseMethodHandles, 
+			MethodData[] baseMethodHandles,
 			boolean 	 hasSignature)
 	{
-		this(declarationSourceStart, sourceStart, sourceEnd, declarationSourceEnd, 
-		     parent, corrJavaMeth, 
-		     name, callinKind, roleMethodHandle, baseMethodHandles, 
+		this(declarationSourceStart, sourceStart, sourceEnd, declarationSourceEnd,
+		     parent, corrJavaMeth,
+		     name, callinKind, roleMethodHandle, baseMethodHandles,
 		     hasSignature, /*addAsChild*/true);
 	}
-	
-    // for use by sub-class ResolvedCallinMapping 
+
+    // for use by sub-class ResolvedCallinMapping
     public CallinMapping(
         	int          declarationSourceStart,
 			int          sourceStart,
 			int          sourceEnd,
         	int          declarationSourceEnd,
-            IRoleType    parent, 
+            IRoleType    parent,
         	IMethod 	 corrJavaMeth,
             char[]       name,
             int 	     callinKind,
             MethodData   roleMethodHandle,
-            MethodData[] baseMethodHandles, 
+            MethodData[] baseMethodHandles,
             boolean 	 hasSignature,
             boolean 	 addAsChild)
     {
-        super(declarationSourceStart, sourceStart, sourceEnd, declarationSourceEnd, 
-        	  CALLIN_MAPPING, corrJavaMeth, parent, 
-        	  roleMethodHandle, 
+        super(declarationSourceStart, sourceStart, sourceEnd, declarationSourceEnd,
+        	  CALLIN_MAPPING, corrJavaMeth, parent,
+        	  roleMethodHandle,
         	  hasSignature, addAsChild);
-        this.name              = new String(name); 
+        this.name              = new String(name);
         this.callinKind        = callinKind;
-		this.baseMethodHandles = baseMethodHandles;        
+		this.baseMethodHandles = baseMethodHandles;
     }
 
     // ==== memento generation: ====
@@ -115,7 +115,7 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 	protected void getBaseMethodsForHandle(StringBuffer buff) {
     	for (IMethodSpec baseMethod : this.baseMethodHandles)
     		getMethodForHandle(baseMethod, buff);
-    }    
+    }
     // ====
 
 	@Override
@@ -138,14 +138,14 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
     		return this.name;
     	return super.getSourceName();
     }
-    
+
     @Override
     @SuppressWarnings("nls")
 	public String getElementName()
 	{
 		StringBuffer elementName = new StringBuffer(super.getElementName());
 		elementName.append(" <- ");
-		
+
 		if (this.baseMethodHandles.length > 1)
 		{
 		    elementName.append("{");
@@ -182,7 +182,7 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 		}
 		return elementName.toString();
 	}
-	
+
 	/**
 	 * @return Does this mapping have a name (aka callin label) in the source code?
 	 */
@@ -190,7 +190,7 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 	public boolean hasName() {
 		return this.name != null && !this.name.startsWith("<"); // generated names start with '<'. //$NON-NLS-1$
 	}
-	
+
 	@Override
 	public String getName() {
 		return this.name;
@@ -210,11 +210,11 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
     {
         return this.callinKind;
     }
-    
+
     @Override
 	public boolean hasCovariantReturn() {
     	if (this.baseMethodHandles != null)
-    		for (IMethodSpec baseMethod : this.baseMethodHandles) 
+    		for (IMethodSpec baseMethod : this.baseMethodHandles)
 				if (baseMethod.hasCovariantReturn())
 					return true;
 		return false;
@@ -225,7 +225,7 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
     {
         return findBaseMethods();
     }
-    
+
     @Override
 	public boolean equals(Object obj)
     {
@@ -244,14 +244,14 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 			return true;
 		return this.callinKind == other.callinKind;
     }
-    
+
     @Override
     @SuppressWarnings("nls")
 	public String toString()
     {
     	return "callin " + super.toString();
     }
-    
+
     /**
      * Performs resolving of all bound base methods
      */
@@ -280,20 +280,20 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 		for (int idx = 0; idx < this.baseMethodHandles.length; idx++)
         {
             IMethod baseMethod = findMethod(typeParents, this.baseMethodHandles[idx]);
-			
+
 			// TODO(jwl): A warning from the compiler should be given to the developer, elsewhere!
 			// TODO(jwl): Do we really want an inconsistant OT model??
-			// Only existing base methods are added, if an assigned base method 
+			// Only existing base methods are added, if an assigned base method
 			// doesn't exist, it just will be ignored
 			if (baseMethod != null)
 			{
 				baseMethods.add(baseMethod);
-			}			
+			}
         }
-    	    	
+
 		return baseMethods.toArray(new IMethod[baseMethods.size()]);
 	}
-	
+
 	// added for the SourceTypeConverter
 	@Override
 	public IMethodSpec[] getBaseMethodHandles()
@@ -304,7 +304,7 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 	/**
 	 * Converts the ICallinMapping.KIND_ constants to TerminalTokens constants.
 	 */
-	public static int convertModelToTerminalToken(int icallinmappingKind) 
+	public static int convertModelToTerminalToken(int icallinmappingKind)
 	{
 		switch (icallinmappingKind)
 		{
@@ -318,7 +318,7 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 		}
 	}
 
-	public static int convertTerminalTokenToModel(int terminalTokensCallinKind) 
+	public static int convertTerminalTokenToModel(int terminalTokensCallinKind)
 	{
 		switch (terminalTokensCallinKind)
 		{
@@ -335,21 +335,21 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 	// implementation and alternate API of resolved(Binding)
 	@Override
 	public OTJavaElement resolved(char[] uniqueKey) {
-		ResolvedCallinMapping resolvedHandle = 
+		ResolvedCallinMapping resolvedHandle =
 			new ResolvedCallinMapping(
 					getDeclarationSourceStart(),
 					getSourceStart(),
 					getSourceEnd(),
 			    	getDeclarationSourceEnd(),
-			        (IRoleType) getParent(), 
+			        (IRoleType) getParent(),
 			    	getIMethod(),
 			        this.name.toCharArray(),
 			        this.callinKind,
 			        getRoleMethodHandle(),
-			        this.baseMethodHandles, 
-			        hasSignature(), 					
+			        this.baseMethodHandles,
+			        hasSignature(),
 					new String(uniqueKey));
-		
+
 		return resolvedHandle;
 	}
 }

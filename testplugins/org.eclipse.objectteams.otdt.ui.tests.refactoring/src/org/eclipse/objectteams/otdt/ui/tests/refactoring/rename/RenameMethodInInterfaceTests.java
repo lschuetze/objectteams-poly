@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -40,7 +40,7 @@ import org.eclipse.objectteams.otdt.ui.tests.refactoring.RefactoringTest;
 
 /**
  * @author brcan
- *  
+ *
  */
 public class RenameMethodInInterfaceTests extends RefactoringTest
 {
@@ -81,7 +81,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest
     {
         performRenameRefactoring_failing(cuQNames, "m", "k", new String[0]);
     }
-    
+
     private void performRenameRefactoring_failing(
             String[] cuQNames,
             String methodName,
@@ -111,7 +111,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest
     {
         performRenamingMtoK_passing(cuQNames, true);
     }
-    
+
     /**
      * Rename method m to k and update all references.
      */
@@ -127,10 +127,10 @@ public class RenameMethodInInterfaceTests extends RefactoringTest
 
     private void performRenameRefactoring_passing(
             String[] cuQNames,
-            String methodName, 
+            String methodName,
             String newMethodName,
-            String[] signatures, 
-            boolean shouldPass, 
+            String[] signatures,
+            boolean shouldPass,
             boolean updateReferences)
     	throws Exception
     {
@@ -166,7 +166,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest
 	                getFileContents(
 	                        getOutputTestFileName(
 	                                getSimpleName(cuQNames[idx]))), cus[idx].getSource());
-        }	
+        }
         assertTrue("anythingToUndo", RefactoringCore.getUndoManager()
                 .anythingToUndo());
         assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager()
@@ -202,7 +202,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest
 		throws Exception
 	{
 	    ICompilationUnit[] cus = new ICompilationUnit[qualifiedNames.length];
-	
+
 	    for (int idx = 0; idx < qualifiedNames.length; idx++)
 	    {
 	        Assert.isNotNull(qualifiedNames[idx]);
@@ -212,7 +212,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest
 	    }
 	    return cus;
 	}
-    
+
     private String getQualifier(String qualifiedName)
     {
         int dot = qualifiedName.lastIndexOf('.');

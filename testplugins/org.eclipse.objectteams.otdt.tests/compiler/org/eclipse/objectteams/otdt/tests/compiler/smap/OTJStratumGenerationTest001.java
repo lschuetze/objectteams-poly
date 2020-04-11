@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -41,9 +41,9 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SmapStratum;
  */
 public class OTJStratumGenerationTest001 extends AbstractSourceMapGeneratorTest
 {
-	private org.eclipse.jdt.core.ICompilationUnit _role; 
+	private org.eclipse.jdt.core.ICompilationUnit _role;
 	private org.eclipse.jdt.core.ICompilationUnit _team;
-	
+
     public OTJStratumGenerationTest001(String name)
     {
         super(name);
@@ -53,7 +53,7 @@ public class OTJStratumGenerationTest001 extends AbstractSourceMapGeneratorTest
     {
         return buildModelTestSuite(OTJStratumGenerationTest001.class);
     }
-    
+
     protected void setUp() throws Exception
     {
         super.setUp();
@@ -69,7 +69,7 @@ public class OTJStratumGenerationTest001 extends AbstractSourceMapGeneratorTest
                 "roleFile",
                 "TeamA.java");
     }
-    
+
     public void testSimpleRoleSmapGeneration() throws JavaModelException
     {
         SmapStratum stratum = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
@@ -81,15 +81,15 @@ public class OTJStratumGenerationTest001 extends AbstractSourceMapGeneratorTest
         fileInfo.addLineInfo(lineInfo);
         fileInfo.addLineInfo(lineInfo1);
         fileInfo.addLineInfo(lineInfo2);
-        
+
         stratum.optimize();
-        
+
         TYPENAME = "__OT__RoleA";
         List <SmapStratum>strata = new ArrayList<SmapStratum>();
         strata.add(stratum);
-        
+
         expectedStrata.put(TYPENAME, strata);
-        
+
         try
         {
             parseAndCompile(new org.eclipse.jdt.core.ICompilationUnit[]{_team, _role});
@@ -99,31 +99,31 @@ public class OTJStratumGenerationTest001 extends AbstractSourceMapGeneratorTest
             fail(e.getMessage());
         }
     }
-    
+
     public void callback(CompilationUnitDeclaration cuDecl)
     {
         TypeDeclaration typeDecl = cuDecl.types[0];
-        
+
         assertNotNull("TypeDeclaration should not be null.", typeDecl);
-        
+
         if (typeDecl.memberTypes == null)
         {
             return;
         }
-        
+
         TypeDeclaration [] members = typeDecl.memberTypes;
         for (int idx = 0; idx < members.length; idx++)
         {
             TypeDeclaration decl = members[idx];
             String typeName = String.valueOf(decl.name);
-            
+
             if (decl.isRole() && !decl.isInterface() && typeName.equals(TYPENAME))
             {
                 RoleSmapGenerator rolefileSmapGenerator = new RoleSmapGenerator(decl);
                 rolefileSmapGenerator.addStratum("OTJ");
                 rolefileSmapGenerator.generate();
                 List actualStrata = rolefileSmapGenerator.getStrata();
-                
+
                 assertEquals("Strata of type \"" + typeName + "\" should be equal.\n", expectedStrata.get(typeName), actualStrata);
             }
         }

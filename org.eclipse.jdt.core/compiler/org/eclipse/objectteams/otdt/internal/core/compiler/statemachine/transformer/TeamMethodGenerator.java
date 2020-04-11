@@ -77,18 +77,18 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
  * This class adds methods and fields from org.objectteams.Team to those teams that
  * extend a non-team class and thus cannot inherit these necessary members.
  * Methods are copied via byte-code copy, fields are generated at AST-level (incl. initialization).
- * 
+ *
  * Technical note: the way this generator is constructed it assumes that org.objectteams.Team
  * exists in binary form, i.e., a team leveraging this generator cannot be compiled together
  * with org.objectteams.Team.
- * 
+ *
  * @since 1.4.0
  */
 public class TeamMethodGenerator {
 	static final char[][] JAVA_LANG_WEAKHASHMAP = new char[][] {"java".toCharArray(), "util".toCharArray(), "WeakHashMap".toCharArray()};  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	static final char[][] JAVA_LANG_THREAD 		= new char[][] {"java".toCharArray(), "lang".toCharArray(), "Thread".toCharArray()}; 	   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	static final char[][] JAVA_LANG_THREADLOCAL = new char[][] {"java".toCharArray(), "lang".toCharArray(), "ThreadLocal".toCharArray()};  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	
+
 	/** Simple structure to represent one method of o.o.Team. */
 	static class MethodDescriptor {
 		String selector;
@@ -96,12 +96,12 @@ public class TeamMethodGenerator {
 		Type   args;
 		Type   returnType;
 		int    modifiers;
-		
+
 		// store from binary method of o.o.Team:
 		int methodCodeOffset;
 		ReferenceBinding declaringClass;
 		MethodBinding binding;
-		
+
 		MethodDescriptor(String selector, String signature, Type args, Type returnType, int modifiers) {
 			super();
 			this.selector	= selector;
@@ -115,15 +115,15 @@ public class TeamMethodGenerator {
 		Argument[] makeArgs(AstGenerator gen) {
 			switch (this.args) {
 				case THREAD:
-					return new Argument[] { 
+					return new Argument[] {
 						gen.argument("thread".toCharArray(), gen.qualifiedTypeReference(JAVA_LANG_THREAD))
 					};
 				case BOOLEAN:
-					return new Argument[] { 
+					return new Argument[] {
 						gen.argument("flag".toCharArray(), gen.baseTypeReference(TypeConstants.BOOLEAN))
 					};
 				case INT:
-					return new Argument[] { 
+					return new Argument[] {
 						gen.argument("flags".toCharArray(), gen.baseTypeReference(TypeConstants.INT))
 					};
 				case OTDYNARGS1:
@@ -171,7 +171,7 @@ public class TeamMethodGenerator {
 					return null;
 			}
 		}
-		
+
 		TypeReference makeReturnRef(AstGenerator gen) {
 			switch (this.returnType) {
 				case BOOLEAN:
@@ -187,11 +187,11 @@ public class TeamMethodGenerator {
 			}
 		}
 	}
-	enum Type { 
+	enum Type {
 		NONE {
 			@Override public int length() { return 0; }
-		}, 
-		THREAD, BOOLEAN, INT, OBJECT, 
+		},
+		THREAD, BOOLEAN, INT, OBJECT,
 		OTDYNARGS1 { @Override int length() { return 6; } },
 		OTDYNARGS2 { @Override int length() { return 8; } },
 		OTDYNARGS3 { @Override int length() { return 4; } },
@@ -222,17 +222,17 @@ public class TeamMethodGenerator {
 	};
 	@SuppressWarnings("nls")
 	final MethodDescriptor[] methodDescriptorsDyn = new MethodDescriptor[] {
-		new MethodDescriptor("_OT$callAllBindings",		"(Lorg/objectteams/IBoundBase2;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;)Ljava/lang/Object;", 
+		new MethodDescriptor("_OT$callAllBindings",		"(Lorg/objectteams/IBoundBase2;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;)Ljava/lang/Object;",
 																							Type.OTDYNARGS1,		Type.OBJECT,	AccPublic),
-		new MethodDescriptor("_OT$callNext",			"(Lorg/objectteams/IBoundBase2;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;[Ljava/lang/Object;I)Ljava/lang/Object;", 
+		new MethodDescriptor("_OT$callNext",			"(Lorg/objectteams/IBoundBase2;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;[Ljava/lang/Object;I)Ljava/lang/Object;",
 																							Type.OTDYNARGS2,		Type.OBJECT,	AccPublic),
-		new MethodDescriptor("_OT$callReplace",			"(Lorg/objectteams/IBoundBase2;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;)Ljava/lang/Object;", 
+		new MethodDescriptor("_OT$callReplace",			"(Lorg/objectteams/IBoundBase2;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;)Ljava/lang/Object;",
 																							Type.OTDYNARGS1,		Type.OBJECT,	AccPublic),
-		new MethodDescriptor("_OT$callBefore",			"(Lorg/objectteams/IBoundBase2;II[Ljava/lang/Object;)V", 
+		new MethodDescriptor("_OT$callBefore",			"(Lorg/objectteams/IBoundBase2;II[Ljava/lang/Object;)V",
 																							Type.OTDYNARGS3,		Type.NONE,		AccPublic),
-		new MethodDescriptor("_OT$callAfter",			"(Lorg/objectteams/IBoundBase2;II[Ljava/lang/Object;Ljava/lang/Object;)V", 
+		new MethodDescriptor("_OT$callAfter",			"(Lorg/objectteams/IBoundBase2;II[Ljava/lang/Object;Ljava/lang/Object;)V",
 																							Type.OTDYNARGS4,		Type.NONE,		AccPublic),
-		new MethodDescriptor("_OT$callOrigStatic",		"(II[Ljava/lang/Object;)Ljava/lang/Object;", 
+		new MethodDescriptor("_OT$callOrigStatic",		"(II[Ljava/lang/Object;)Ljava/lang/Object;",
 																							Type.OTDYNARGS5,		Type.OBJECT,	AccPublic)
 	};
 
@@ -242,7 +242,7 @@ public class TeamMethodGenerator {
 	// --- variant if o.o.Team is a SourceTypeBinding:
 	public SourceTypeBinding ooTeamBinding;
 	// ==== ====
-	
+
 	public TeamMethodGenerator(WeavingScheme weavingScheme) {
 		if (weavingScheme == WeavingScheme.OTDRE) {
 			int l1 = this.methodDescriptors.length;
@@ -259,7 +259,7 @@ public class TeamMethodGenerator {
 		try {
 			char[] selector = method.getSelector();
 			char[] descriptor = method.getMethodDescriptor();
-			File file = new File(String.valueOf(binaryType.getFileName()));					
+			File file = new File(String.valueOf(binaryType.getFileName()));
 			ClassFileReader reader = ClassFileReader.read(file, true);
 			for (IBinaryMethod binMethod : reader.getMethods()) {
 				if (CharOperation.equals(selector, binMethod.getSelector())
@@ -278,9 +278,9 @@ public class TeamMethodGenerator {
     public void registerTeamMethod(IBinaryMethod method, MethodBinding methodBinding) {
     	String selector = String.valueOf(method.getSelector());
     	String descriptor = String.valueOf(method.getMethodDescriptor());
-		registerTeamMethod(methodBinding.declaringClass, methodBinding, selector, descriptor, -1/*structOffset not yet known*/);    	
+		registerTeamMethod(methodBinding.declaringClass, methodBinding, selector, descriptor, -1/*structOffset not yet known*/);
     }
-   
+
 	/** When o.o.Team is read from .class file, record the byte code here. */
     public synchronized void maybeRegisterTeamClassBytes(ClassFileReader teamClass, ReferenceBinding teamClassBinding) {
     	if (this.classBytes != null)
@@ -351,14 +351,14 @@ public class TeamMethodGenerator {
 		return registerTeamMethod(method.declaringClass, method, selector, signature, -1/*no structOffset before class is complete*/);
 	}
 	// ==============
-    /** 
+    /**
      * Add the AST representing all relevant methods and fields from o.o.Team,
      * and prepare methods for byte-code copy.
      */
     public void addMethodsAndFields(TypeDeclaration teamDecl) {
     	// FIXME(SH): test subteams of teams already treated by this generator!
     	AstGenerator gen = new AstGenerator(teamDecl);
-    	
+
     	boolean hasBoundRole = false;
     	// check what will be generated:
     	boolean hasCallinBefore = false, hasCallinAfter = false, hasCallinReplace = false;
@@ -396,13 +396,13 @@ public class TeamMethodGenerator {
 				if (hasBoundRole) {
 					newMethod = new CopiedTeamMethod(teamDecl.compilationResult, methodDescriptor, gen);
 				} else {
-					newMethod = gen.method(teamDecl.compilationResult, 
-							methodDescriptor.modifiers, 
-							methodDescriptor.makeReturnRef(gen), 
-							methodDescriptor.selector.toCharArray(), 
+					newMethod = gen.method(teamDecl.compilationResult,
+							methodDescriptor.modifiers,
+							methodDescriptor.makeReturnRef(gen),
+							methodDescriptor.selector.toCharArray(),
 							null,
 							new Statement[0]); // regular empty method.
-				}				
+				}
 			}
 			AstEdit.addGeneratedMethod(teamDecl, newMethod);
 		}
@@ -428,16 +428,16 @@ public class TeamMethodGenerator {
 	void addFields(TypeDeclaration teamDecl, AstGenerator gen) {
 		// private WeakHashMap<Thread, Boolean> _OT$activatedThreads = new WeakHashMap<Thread, Boolean>();
     	addPrivateField(teamDecl, gen,
-    			weakHashMapTypeReference(gen), 
+    			weakHashMapTypeReference(gen),
     			"_OT$activatedThreads".toCharArray(),
     			gen.allocation(weakHashMapTypeReference(gen), null));
-    	
+
     	// private Object _OT$registrationLock= new Object();
     	addPrivateField(teamDecl, gen,
-    			gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 
+    			gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT),
     			"_OT$registrationLock".toCharArray(),
     			gen.allocation(gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), null));
-    	
+
     	// private boolean _OT$lazyGlobalActiveFlag = false;
     	addPrivateField(teamDecl, gen,
     			gen.baseTypeReference(TypeConstants.BOOLEAN),
@@ -449,19 +449,19 @@ public class TeamMethodGenerator {
     			gen.baseTypeReference(TypeConstants.BOOLEAN),
     			"_OT$isExecutingCallin".toCharArray(),
     			gen.booleanLiteral(false));
-    	
+
     	// private  int _OT$registrationState = _OT$UNREGISTERED;
     	addPrivateField(teamDecl, gen,
     			gen.baseTypeReference(TypeConstants.INT),
     			"_OT$registrationState".toCharArray(),
     			gen.intLiteral(0));
-    	
+
     	// private boolean _OT$globalActive = false;
     	addPrivateField(teamDecl, gen,
     			gen.baseTypeReference(TypeConstants.BOOLEAN),
     			"_OT$globalActive".toCharArray(),
     			gen.booleanLiteral(false));
- 
+
 		// private ThreadLocal<Integer> _OT$implicitActivationsPerThread = new ThreadLocal<Integer>() {
 		// 		protected synchronized Integer initialValue() {
 		// 			return Integer.valueOf(0);
@@ -469,13 +469,13 @@ public class TeamMethodGenerator {
 		// };
     	TypeDeclaration anonThreadLocal = gen.anonymousType(teamDecl.compilationResult);
     	anonThreadLocal.methods = new MethodDeclaration[] {
-    		gen.method(	teamDecl.compilationResult, 
-    				   	AccProtected|AccSynchronized, 
-    				   	gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_INTEGER), 
-    				   	"initialValue".toCharArray(), 
+    		gen.method(	teamDecl.compilationResult,
+    				   	AccProtected|AccSynchronized,
+    				   	gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_INTEGER),
+    				   	"initialValue".toCharArray(),
     				   	null/*arguments*/,
     				   	new Statement[] {
-        					gen.returnStatement(gen.intLiteral(0)) // rely on autoboxing	
+        					gen.returnStatement(gen.intLiteral(0)) // rely on autoboxing
         			   	})
     	};
     	addPrivateField(teamDecl, gen,
@@ -488,11 +488,11 @@ public class TeamMethodGenerator {
     	boolean teamHasProblems = teamDecl.ignoreFurtherInvestigation;
     	AstEdit.addField(teamDecl, field, !teamHasProblems, false, false);
     	if (!teamHasProblems)
-    		field.binding.modifiers |= ExtraCompilerModifiers.AccLocallyUsed;     	
+    		field.binding.modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
     }
 	QualifiedTypeReference weakHashMapTypeReference(AstGenerator gen) {
 		return gen.parameterizedQualifiedTypeReference(
-				JAVA_LANG_WEAKHASHMAP, 
+				JAVA_LANG_WEAKHASHMAP,
 				new TypeReference[]{
 					gen.qualifiedTypeReference(JAVA_LANG_THREAD),
 					gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_BOOLEAN)
@@ -505,8 +505,8 @@ public class TeamMethodGenerator {
 					gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_INTEGER)
 				});
 	}
-    
-	/** 
+
+	/**
 	 * Add fake method bindings for methods that will be generated by the OTRE.
 	 * These bindings are needed by the TeamConstantPoolMapper.
 	 */
@@ -569,16 +569,16 @@ public class TeamMethodGenerator {
     			offsets      = TeamMethodGenerator.this.constantPoolOffsets;
     			structOffset = this.descriptor.methodCodeOffset;
     		}
-			ConstantPoolObjectReader reader = new ConstantPoolObjectReader( bytes, 
-    																		offsets, 
-    																		this.descriptor.declaringClass.getTeamModel(), 
+			ConstantPoolObjectReader reader = new ConstantPoolObjectReader( bytes,
+    																		offsets,
+    																		this.descriptor.declaringClass.getTeamModel(),
     																		this.scope.environment());
 			new BytecodeTransformer().doCopyMethodCode( null /*srcRoleModel*/, this.binding, 					// source
     													(SourceTypeBinding)this.binding.declaringClass, this, 	// destination
     													bytes, 				 									// source bytes
     													offsets,
     													structOffset,
-    													reader, mapper,											// mapping strategies 
+    													reader, mapper,											// mapping strategies
     													classFile);												// final destination
     	}
     }
@@ -599,7 +599,7 @@ public class TeamMethodGenerator {
 		@Override
 		public ConstantPoolObject mapConstantPoolObject(ConstantPoolObject src_cpo) {
 			int type=src_cpo.getType();
-			
+
 			TypeBinding clazz = null;
 			switch (type) {
 			case MethodRefTag:
@@ -613,7 +613,7 @@ public class TeamMethodGenerator {
 			}
 			if (TypeBinding.notEquals(clazz, this.srcType))
 				return src_cpo; // only map references to o.o.Team
-			
+
 			// perform the mapping:
 			switch(type){
 				case FieldRefTag:

@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010 GK Software AG
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -41,7 +41,7 @@ import base org.eclipse.jdt.ui.tests.core.HierarchicalASTVisitorTest;
 
 /**
  * This team excludes OT-specific AST nodes from HierarchicalASTVisitorTest
- * because the HierarchicalASTVisitor is not OT-aware. 
+ * because the HierarchicalASTVisitor is not OT-aware.
  */
 public team class HierarchicalASTVisiting {
 
@@ -53,8 +53,8 @@ public team class HierarchicalASTVisiting {
 		static callin boolean isVisitMethod(Method method) {
 			return base.isVisitMethod(method) && !isOTNode(method.getParameterTypes()[0]);
 		}
-		
-		
+
+
 		private static boolean isOTNode(Class nodeClass) {
 			Class[] otNodeClasses = new Class[] {
 					MethodSpec.class,
@@ -74,7 +74,7 @@ public team class HierarchicalASTVisiting {
 					PrecedenceDeclaration.class,
 					GuardPredicateDeclaration.class
 			};
-			for (int i = 0; i < otNodeClasses.length; i++) 
+			for (int i = 0; i < otNodeClasses.length; i++)
 				if (otNodeClasses[i] == nodeClass)
 					return true;
 			return false;

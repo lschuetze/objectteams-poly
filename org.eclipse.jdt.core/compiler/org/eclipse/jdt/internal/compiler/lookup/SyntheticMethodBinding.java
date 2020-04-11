@@ -50,9 +50,9 @@ public class SyntheticMethodBinding extends MethodBinding {
 	public MethodBinding targetMethod;			// method or constructor
 	public TypeBinding targetEnumType; 			// enum type
 	public LambdaExpression lambda;
-	
+
 	/** Switch (one from many) linked to the switch table */
-	public SwitchStatement switchStatement; 
+	public SwitchStatement switchStatement;
 	/**
 	 * Method reference expression whose target FI is Serializable. Should be set when
 	 * purpose is {@link #SerializableMethodReference}
@@ -415,7 +415,7 @@ public class SyntheticMethodBinding extends MethodBinding {
 			this.modifiers |= ClassFileConstants.AccStrictfp;
 		}
 	}
-	
+
 	/**
 	 * Construct $deserializeLambda$ method
 	 */
@@ -432,7 +432,7 @@ public class SyntheticMethodBinding extends MethodBinding {
 		int methodId = knownAccessMethods == null ? 0 : knownAccessMethods.length;
 		this.index = methodId;
 	}
-	
+
 	/**
 	 * Construct enum special methods: values or valueOf methods
 	 */
@@ -442,7 +442,7 @@ public class SyntheticMethodBinding extends MethodBinding {
 		this.index = knownAccessMethods == null ? 0 : knownAccessMethods.length;
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(TypeConstants.SYNTHETIC_ENUM_CONSTANT_INITIALIZATION_METHOD_PREFIX).append(this.index);
-		this.selector = String.valueOf(buffer).toCharArray(); 
+		this.selector = String.valueOf(buffer).toCharArray();
 		this.modifiers = ClassFileConstants.AccPrivate | ClassFileConstants.AccStatic;
 		this.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
 		this.purpose = SyntheticMethodBinding.TooManyEnumsConstants;
@@ -536,7 +536,7 @@ public class SyntheticMethodBinding extends MethodBinding {
 	    this.modifiers = ClassFileConstants.AccSynthetic | ClassFileConstants.AccPrivate | ClassFileConstants.AccStatic;
 		this.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
 	    this.returnType = publicConstructor.declaringClass;
-	
+
 	    int realParametersLength = privateConstructor.parameters.length;
 	    int enclosingInstancesLength = enclosingInstances.length;
 	    int parametersLength =  enclosingInstancesLength + realParametersLength;
@@ -544,7 +544,7 @@ public class SyntheticMethodBinding extends MethodBinding {
 	    System.arraycopy(enclosingInstances, 0, this.parameters, 0, enclosingInstancesLength);
 	    System.arraycopy(privateConstructor.parameters, 0, this.parameters, enclosingInstancesLength, realParametersLength);
 	    this.fakePaddedParameters = publicConstructor.parameters.length - realParametersLength;
-	    
+
 	    this.thrownExceptions = publicConstructor.thrownExceptions;
 	    this.purpose = SyntheticMethodBinding.FactoryMethod;
 	    this.targetMethod = publicConstructor;
@@ -718,12 +718,12 @@ public class SyntheticMethodBinding extends MethodBinding {
 		this.purpose = isSuperAccess ? SyntheticMethodBinding.SuperMethodAccess : SyntheticMethodBinding.MethodAccess;
 
 //{ObjectTeams: is accessed role method also static?
-		if (accessedMethod.needsSyntheticEnclosingTeamInstance()) { 
+		if (accessedMethod.needsSyntheticEnclosingTeamInstance()) {
 			this.parameters = new TypeBinding[accessedMethod.parameters.length + 2];
 			this.parameters[0] = TypeBinding.INT;						// dummy
 			this.parameters[1] = declaringSourceType.enclosingType();	// synth team arg
 			System.arraycopy(accessedMethod.parameters, 0, this.parameters, 2, accessedMethod.parameters.length);
-		} else 
+		} else
 // SH}
 		if (accessedMethod.isStatic() || (isSuperAccess && receiverType.isInterface())) {
 			this.parameters = accessedMethod.parameters;
@@ -779,7 +779,7 @@ public class SyntheticMethodBinding extends MethodBinding {
 	protected boolean isConstructorRelated() {
 		return this.purpose == SyntheticMethodBinding.ConstructorAccess;
 	}
-	
+
 	@Override
 	public LambdaExpression sourceLambda() {
 		return this.lambda;

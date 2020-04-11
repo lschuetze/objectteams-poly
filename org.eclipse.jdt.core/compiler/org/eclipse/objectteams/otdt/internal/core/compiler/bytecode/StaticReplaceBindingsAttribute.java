@@ -237,7 +237,7 @@ public class StaticReplaceBindingsAttribute extends AbstractAttribute {
      *
 	 * @param reader				this reader holds the bytes to read
 	 * @param readOffset			offset where to start reading
-	 * @param constantPoolOffsets	constant pool offset to be used during reading 
+	 * @param constantPoolOffsets	constant pool offset to be used during reading
 	 */
 	public StaticReplaceBindingsAttribute(ClassFileStruct reader, int readOffset, int[] constantPoolOffsets) {
 		super(IOTConstants.STATIC_REPLACE_BINDINGS);

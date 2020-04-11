@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.search.*;
 
 /**
  * Java Search concrete class for a type name match.
- * 
+ *
  * @since 3.3
  */
 public class JavaSearchTypeNameMatch extends TypeNameMatch {
@@ -85,7 +85,7 @@ public int hashCode() {
 
 /**
  * Sets the accessibility of the accepted match.
- * 
+ *
  * @param accessibility the accessibility of the current match
  */
 public void setAccessibility(int accessibility) {
@@ -94,7 +94,7 @@ public void setAccessibility(int accessibility) {
 
 /**
  * Set modifiers of the matched type.
- * 
+ *
  * @param modifiers the modifiers of the matched type.
  */
 public void setModifiers(int modifiers) {
@@ -103,7 +103,7 @@ public void setModifiers(int modifiers) {
 
 /**
  * Set matched type.
- * 
+ *
  * @param type the matched type.
  */
 public void setType(IType type) {

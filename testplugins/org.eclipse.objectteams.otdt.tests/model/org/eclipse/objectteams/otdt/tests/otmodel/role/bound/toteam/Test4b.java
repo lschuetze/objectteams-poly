@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -59,38 +59,38 @@ public class Test4b extends Test4a
             .getName());
         return suite;
     }
-    
+
     public void setUpSuite() throws Exception
     {
         super.setUpSuite();
         getTestSetting().setTeamClass("Team_4b");
     }
-    
+
     public void testExistenceOfInnerClassInOTModel() throws JavaModelException
     {
         assertNotNull(getTestSetting().getRoleJavaElement());
         assertTrue(getTestSetting().getRoleJavaElement().exists());
-        
+
         IType innerclass = getTestSetting().getRoleJavaElement().getType(getInnerclassName());
         assertNotNull(innerclass);
         assertTrue(innerclass.exists());
-        
+
         IOTType innerclassOTElem = OTModelManager.getOTElement(innerclass);
-        assertNotNull(innerclassOTElem);        
+        assertNotNull(innerclassOTElem);
     }
-    
+
     public void testTeamPropertyOfInnerclass() throws JavaModelException
     {
         assertNotNull(getTestSetting().getRoleJavaElement());
         assertTrue(getTestSetting().getRoleJavaElement().exists());
-        
+
         IType innerclass = getTestSetting().getRoleJavaElement().getType(getInnerclassName());
         assertNotNull(innerclass);
         assertTrue(innerclass.exists());
-        
+
         IOTType innerclassOTElem = OTModelManager.getOTElement(innerclass);
         assertNotNull(innerclassOTElem);
-        
+
         assertTrue(innerclassOTElem.isTeam());
-    }        
+    }
 }

@@ -82,7 +82,7 @@ public class TransformStatementsVisitor
     private boolean isLocalTypeInCallin = false;
 
     private WeavingScheme weavingScheme;
-    
+
     public TransformStatementsVisitor(WeavingScheme weavingScheme) {
     	this.weavingScheme = weavingScheme;
     }
@@ -154,7 +154,7 @@ public class TransformStatementsVisitor
 		messageSend.bits |= ASTNode.HasBeenTransformed; // only the outer has been transformed so far.
     	return true;
     }
-    
+
     /** May need to add arguments to a 'recursive' callin message send. */
     @Override
     public boolean visit(MessageSend messageSend, BlockScope scope) {
@@ -177,7 +177,7 @@ public class TransformStatementsVisitor
 		    				int len = args.length;
 		    				if (methodDecl.isStatic()) // chop of premature isSuperAccess flag:
 		    					System.arraycopy(args, 1, args=new Expression[len-1], 0, len-1);
-		    			}	
+		    			}
 	    		}
     		}
 			messageSend.arguments = MethodSignatureEnhancer.enhanceArguments(args, messageSend.sourceEnd+1, this.weavingScheme);

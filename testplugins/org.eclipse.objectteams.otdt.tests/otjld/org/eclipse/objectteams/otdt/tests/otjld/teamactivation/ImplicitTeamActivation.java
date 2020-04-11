@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -26,11 +26,11 @@ import junit.framework.Test;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 public class ImplicitTeamActivation extends AbstractOTJLDTest {
-	
+
 	public ImplicitTeamActivation(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -38,7 +38,7 @@ public class ImplicitTeamActivation extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -50,7 +50,7 @@ public class ImplicitTeamActivation extends AbstractOTJLDTest {
 	static final String IMPLICIT_ACTIVATION_ALWAYS    = "-Dot.implicit.team.activation=ALWAYS";
 	static final String IMPLICIT_ACTIVATION_ANNOTATED = "-Dot.implicit.team.activation=ANNOTATED";
 	static final String IMPLICIT_ACTIVATION_NEVER     = "-Dot.implicit.team.activation=NEVER";
-	
+
 	// a team is explicitly activated and a callin binding is called in the activation context
     // 5.3.1-otjld-callin-invocation-in-team-method
     public void test531_callinInvocationInTeamMethod() {
@@ -1804,7 +1804,7 @@ public class ImplicitTeamActivation extends AbstractOTJLDTest {
     // 5.3.17-otjld-concurrent-activation-1
     // see http://trac.objectteams.org/ot/ticket/331
     public void test5317_concurrentActivation1() {
-       
+
        runConformTest(
             new String[] {
 		"T5317ca1Main2.java",

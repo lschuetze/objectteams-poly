@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -83,7 +83,7 @@ import junit.framework.Test;
 /**
  * Tests for errors shown only in the gutter (CompilationUnitProblemFinder),
  * but not reported by the ImageBuilder.
- * 
+ *
  * @author stephan
  * @since 1.2.1
  */
@@ -92,15 +92,15 @@ public class OTReconcilerTests extends ReconcilerTests {
 	public static Test suite() {
 		return buildModelTestSuite(OTReconcilerTests.class);
 	}
-	
+
 	public OTReconcilerTests(String name) {
 		super(name);
 	}
-	
+
 	static {
 //		TESTS_NAMES = new String[] { "testDecodeTeamAnchor" };
 	}
-// ===== Copied all our modifications from AbstractJavaModelTests ===== 
+// ===== Copied all our modifications from AbstractJavaModelTests =====
 	/*
 	 * Returns the OS path to the external directory that contains external jar files.
 	 * This path ends with a File.separatorChar.
@@ -125,7 +125,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 	 */
 	protected String getPluginDirectoryPath() {
 		try {
-//{ObjectTeams: adjust plugin id from org.eclipse.jdt.core.tests.model to org.eclipse.objectteams.otdt.tests 
+//{ObjectTeams: adjust plugin id from org.eclipse.jdt.core.tests.model to org.eclipse.objectteams.otdt.tests
 			URL platformURL = Platform.getBundle("org.eclipse.objectteams.otdt.tests").getEntry("/");
 //carp}
 			return new File(FileLocator.toFileURL(platformURL).getFile()).getAbsolutePath();
@@ -141,7 +141,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 // SH}
 	}
 //{ObjectTeams: copy jcl at least once per test run:
-	private static boolean forceCopyJCL= true; 
+	private static boolean forceCopyJCL= true;
 // SH}
 	/**
 	 * Check locally for the required JCL files, <jclName>.jar and <jclName>src.zip.
@@ -191,7 +191,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 // SH}
 		}
 	}
-	
+
 // ===== End COPY_AND_PASTE
 	// --- support OT libraries: ---
 	boolean addOTtoLibrary = false;
@@ -225,7 +225,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 		return null;
 	}
 	// ---
-	
+
 	protected IJavaProject createOTJavaProject(String projectName, String[] sourceFolders, String[] libraries, String output) throws CoreException {
 		return createOTJavaProject(projectName, sourceFolders, libraries, "1.5", output);
 	}
@@ -285,10 +285,10 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] sourceChars = sourceFoo.toCharArray();
 			this.problemRequestor.initialize(sourceChars);
-		
-			
+
+
 			getCompilationUnit("/P/Foo.java").getWorkingCopy(this.wcOwner, null);
-			
+
 			assertProblems(
 				"Unexpected problems",
 				"----------\n" +
@@ -298,7 +298,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			deleteProject("P");
 		}
 	}
-	
+
 	// http://trac.objectteams.org/ot/ticket/143 (comment1)
 	public void testTrac143b() throws CoreException, InterruptedException {
 		try {
@@ -341,10 +341,10 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] sourceChars = sourceSubFoo.toCharArray();
 			this.problemRequestor.initialize(sourceChars);
-		
-			
+
+
 			getCompilationUnit("/P/SubFoo.java").getWorkingCopy(this.wcOwner, null);
-			
+
 			assertProblems(
 				"Unexpected problems",
 				"----------\n" +
@@ -354,7 +354,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			deleteProject("P");
 		}
 	}
-	
+
 
 	// http://trac.objectteams.org/ot/ticket/248
 	public void testTrac248() throws CoreException, InterruptedException {
@@ -375,15 +375,15 @@ public class OTReconcilerTests extends ReconcilerTests {
 					"/P/src/FooTeam/R.java",
 					"team package FooTeam;\n" +
 					"protected class R {\n" +
-					"    private static int getI() {\n" + 
-					"        return 3;\n" + 
-					"    }\n" + 
-					"    protected int test() {\n" + 
-					"        return getI();\n" + 
+					"    private static int getI() {\n" +
+					"        return 3;\n" +
+					"    }\n" +
+					"    protected int test() {\n" +
+					"        return getI();\n" +
 					"    }\n" +
 					"}\n");
-			
-			String sourceTeam = 
+
+			String sourceTeam =
 				"public team class FooTeam {\n" +
 				"   R r;\n" +
 				"}\n";
@@ -394,10 +394,10 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] sourceChars = sourceTeam.toCharArray();
 			this.problemRequestor.initialize(sourceChars);
-		
-			
+
+
 			getCompilationUnit("/P/src/FooTeam.java").getWorkingCopy(this.wcOwner, null);
-			
+
 			assertProblems(
 				"Unexpected problems",
 				"----------\n" +
@@ -406,7 +406,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 		} finally {
 			deleteProject("P");
 		}
-	}	
+	}
 
 	// http://trac.objectteams.org/ot/ticket/259
 	public void testTrac259() throws CoreException, InterruptedException {
@@ -429,7 +429,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 				"}\n"
 			);
 			this.createFolder("/P/Foo");
-			this.createFile("/P/Foo/Role.java", 
+			this.createFile("/P/Foo/Role.java",
 					"team package Foo;\n" +
 					"protected class Role playedBy MyBase {\n" +
 					"	protected void doit() -> void secretDo();\n" +
@@ -446,10 +446,10 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] sourceChars = sourceFoo.toCharArray();
 			this.problemRequestor.initialize(sourceChars);
-		
-			
+
+
 			getCompilationUnit("/P/Foo.java").getWorkingCopy(this.wcOwner, null);
-			
+
 			assertProblems(
 				"Unexpected problems",
 				"----------\n" +
@@ -459,7 +459,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			deleteProject("P");
 		}
 	}
-	
+
 	// previously a syntax error could cause an IllegalArgumentException, see r19238 ff.
 	public void testSyntaxError() throws CoreException, InterruptedException {
 		try {
@@ -503,10 +503,10 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] sourceChars = sourceMain.toCharArray();
 			this.problemRequestor.initialize(sourceChars);
-		
-			
+
+
 			getCompilationUnit("/P/Main.java").getWorkingCopy(this.wcOwner, null);
-			
+
 			assertProblems(
 				"Unexpected problems",
 				"----------\n" +
@@ -516,7 +516,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			deleteProject("P");
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked") // options in a raw map
 	public void testLocalInRoFi() throws CoreException, InterruptedException {
 		try {
@@ -539,15 +539,15 @@ public class OTReconcilerTests extends ReconcilerTests {
 			this.createFile(
 				"/P/Plain.java",
 				"public class Plain {\n" +
-				"    public Object getVal() {\n" + 
-				"        return \"Plain\";\n" + 
+				"    public Object getVal() {\n" +
+				"        return \"Plain\";\n" +
 				"    }\n" +
 				"}\n"
 			);
 			String sourceTeam = "public team class Foo {\n" +
-				"    String foo, blub, bar, dings, wurgs, zork;\n" + 
-				"    public static void main(String[] args) {\n" + 
-				"        new Foo().new Role().test();\n" + 
+				"    String foo, blub, bar, dings, wurgs, zork;\n" +
+				"    public static void main(String[] args) {\n" +
+				"        new Foo().new Role().test();\n" +
 				"    }\n" +
 				"}\n";
 			this.createFile(
@@ -555,7 +555,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 					sourceTeam
 			);
 			this.createFolder("/P/Foo");
-			
+
 			String sourceRole1= "team package Foo;\n" +
 				"public class Role1 {\n" +
 				"	String s1, s2, s3, s4, s5, s6;\n" +
@@ -566,20 +566,20 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			String sourceRole2 = "team package Foo;\n" +
 				"public class Role2 extends Role1 {\n" +
-				"        protected void test() {\n" + 
-				"            Plain isub = new Plain() {\n" + 
-				"                public Object getVal() {\n" + 
-				"                    Object edits = super.getVal();\n" + 
-				"                    if (edits instanceof String) {\n" + 
-				"                        String string = (String)edits;\n" + 
-				"                        @SuppressWarnings(\"unused\")\n" + 
-				"                        int l = string.length();\n" + 
-				"                    }\n" + 
-				"                    return edits;\n" + 
-				"                }\n" + 
+				"        protected void test() {\n" +
+				"            Plain isub = new Plain() {\n" +
+				"                public Object getVal() {\n" +
+				"                    Object edits = super.getVal();\n" +
+				"                    if (edits instanceof String) {\n" +
+				"                        String string = (String)edits;\n" +
+				"                        @SuppressWarnings(\"unused\")\n" +
+				"                        int l = string.length();\n" +
+				"                    }\n" +
+				"                    return edits;\n" +
+				"                }\n" +
 				"            };\n" +
-				"            @SuppressWarnings(\"unused\")\n" + 
-				"            Object v = isub.getVal();\n" + 
+				"            @SuppressWarnings(\"unused\")\n" +
+				"            Object v = isub.getVal();\n" +
 				"        }\n" +
 				"}\n";
 			this.createFile(
@@ -589,13 +589,13 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] sourceChars = sourceRole2.toCharArray();
 			this.problemRequestor.initialize(sourceChars);
-		
-			
+
+
 			ICompilationUnit wc = getCompilationUnit("/P/Foo/Role2.java").getWorkingCopy(this.wcOwner, null);
-			wc.reconcile(AST.JLS12, 
+			wc.reconcile(AST.JLS12,
 						 ICompilationUnit.FORCE_PROBLEM_DETECTION|ICompilationUnit.ENABLE_STATEMENTS_RECOVERY|ICompilationUnit.ENABLE_BINDINGS_RECOVERY,
 						 wc.getOwner(), null);
-			
+
 			assertProblems(
 				"Unexpected problems",
 				"----------\n" +
@@ -607,7 +607,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			deleteProject("P");
 		}
 	}
-	
+
 
 	@SuppressWarnings("unchecked") // options in a raw map
 	public void testRemoveRole() throws CoreException, InterruptedException, UnsupportedEncodingException {
@@ -633,18 +633,18 @@ public class OTReconcilerTests extends ReconcilerTests {
 				"	public class Role1 {\n" +
 				"		String s1, s2, s3, s4, s5, s6;\n" +
 				"	}\n" +
-				"   String foo, blub, bar, dings, wurgs, zork;\n" + 
-				"   public static void main(String[] args) {\n" + 
-				"       new Foo().new Role1().test();\n" + 
+				"   String foo, blub, bar, dings, wurgs, zork;\n" +
+				"   public static void main(String[] args) {\n" +
+				"       new Foo().new Role1().test();\n" +
 				"   }\n" +
 				"}\n";
 			this.createFile(
 					"/P/Foo.java",
 					sourceTeam
 			);
-					
+
 			this.problemRequestor.initialize(sourceTeam.toCharArray());
-			
+
 			ICompilationUnit wc = getCompilationUnit("/P/Foo.java").getWorkingCopy(this.wcOwner, null);
 			IType itype = wc.getType("Foo");
 			IOTType ottype = OTModelManager.getOTElement(itype);
@@ -652,18 +652,18 @@ public class OTReconcilerTests extends ReconcilerTests {
 			IOTType roleType = OTModelManager.getOTElement(rt); // this caches the role type
 			assertTrue ("Role should initially exist", rt.exists());
 			assertTrue ("RoleType should initially exist", roleType.exists());
-			
+
 			// delete Role1
 			wc.applyTextEdit(new DeleteEdit(
-					("public team class Foo {\n").length(), 
+					("public team class Foo {\n").length(),
 					("	public class Role1 {\n" +
 							"		String s1, s2, s3, s4, s5, s6;\n" +
-					"	}\n").length()), 
+					"	}\n").length()),
 					null);
 			wc.reconcile(AST.JLS12,
 					ICompilationUnit.FORCE_PROBLEM_DETECTION|ICompilationUnit.ENABLE_STATEMENTS_RECOVERY|ICompilationUnit.ENABLE_BINDINGS_RECOVERY,
 					wc.getOwner(), null);
-			
+
 			// watch that
 			// ... the JavaElement no longer exists:
 			rt = itype.getType("Role1");
@@ -671,7 +671,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			// ... and OTModel no longer has a RoleType:
 			ottype = OTModelManager.getOTElement(itype);
 			rt = ottype.getRoleType("Role1");
-			assertNull("Role should be null", rt);			
+			assertNull("Role should be null", rt);
 		} finally {
 			deleteProject("P");
 		}
@@ -695,7 +695,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 				"	public class Role {}\n" +
 				"}\n"
 			);
-			
+
 			String sourceFoo = "public team class Foo {\n" +
 					"   protected team class Mid playedBy BaseTeam {\n" +
 					"		public class Inner1 playedBy Role<@Mid.base> {}\n" +
@@ -711,16 +711,16 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] sourceChars = sourceFoo.toCharArray();
 			this.problemRequestor.initialize(sourceChars);
-			
+
 			ICompilationUnit fooWC = getCompilationUnit("/P/Foo.java").getWorkingCopy(this.wcOwner, null);
 			IType foo =  fooWC.getType("Foo");
-			
+
 			CompilerOptions compilerOptions = new CompilerOptions(p.getOptions(true));
 			ProblemReporter problemReporter = new ProblemReporter(
 					DefaultErrorHandlingPolicies.proceedWithAllProblems(),
 					compilerOptions,
 					new DefaultProblemFactory());
-			
+
 			// force usage of type converter:
 			CompilationUnitDeclaration parsedUnit =
 				SourceTypeConverter.buildCompilationUnit(
@@ -728,10 +728,10 @@ public class OTReconcilerTests extends ReconcilerTests {
 						SourceTypeConverter.FIELD_AND_METHOD | SourceTypeConverter.MEMBER_TYPE,
 						problemReporter,
 						new CompilationResult("Foo.java".toCharArray(), 1, 1, 90));
-			
+
 			// force resolving:
 			process(parsedUnit, p, compilerOptions, problemReporter, ITranslationStates.STATE_RESOLVED);
-			
+
 			// evaluate result:
 			String result = "";
 			CategorizedProblem[] problems = parsedUnit.compilationResult().problems;
@@ -744,7 +744,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			deleteProject("P");
 		}
 	}
-	
+
 	public void testAnchoredType02() throws CoreException, InterruptedException {
 		try {
 			// Resources creation
@@ -764,7 +764,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 				"   Role baseField;" +
 				"}\n"
 			);
-			
+
 			String sourceFoo = "public team class Foo {\n" +
 					"   protected team class Mid playedBy BaseTeam {\n" +
 					"		public class Inner playedBy Role<@Mid.base> {}\n" +
@@ -781,16 +781,16 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] sourceChars = sourceFoo.toCharArray();
 			this.problemRequestor.initialize(sourceChars);
-			
+
 			ICompilationUnit fooWC = getCompilationUnit("/P/Foo.java").getWorkingCopy(this.wcOwner, null);
 			IType foo =  fooWC.getType("Foo");
-			
+
 			CompilerOptions compilerOptions = new CompilerOptions(p.getOptions(true));
 			ProblemReporter problemReporter = new ProblemReporter(
 					DefaultErrorHandlingPolicies.proceedWithAllProblems(),
 					compilerOptions,
 					new DefaultProblemFactory());
-			
+
 			// force usage of type converter:
 			CompilationUnitDeclaration parsedUnit =
 				SourceTypeConverter.buildCompilationUnit(
@@ -798,10 +798,10 @@ public class OTReconcilerTests extends ReconcilerTests {
 						SourceTypeConverter.FIELD_AND_METHOD | SourceTypeConverter.MEMBER_TYPE,
 						problemReporter,
 						new CompilationResult("Foo.java".toCharArray(), 1, 1, 90));
-			
+
 			// force resolving:
 			process(parsedUnit, p, compilerOptions, problemReporter, ITranslationStates.STATE_RESOLVED);
-			
+
 			// evaluate result:
 			String result = "";
 			CategorizedProblem[] problems = parsedUnit.compilationResult().problems;
@@ -819,9 +819,9 @@ public class OTReconcilerTests extends ReconcilerTests {
 		public SourceTypeCompiler(INameEnvironment nameEnvironment,
 				IErrorHandlingPolicy policy,
 				CompilerOptions compilerOptions,
-				IProblemFactory problemFactory) 
+				IProblemFactory problemFactory)
 		{
-			super(nameEnvironment, policy, compilerOptions, 
+			super(nameEnvironment, policy, compilerOptions,
 				  new ICompilerRequestor() { public void acceptResult(CompilationResult result) { } },
 				  problemFactory);
 		}
@@ -835,15 +835,15 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			CompilationResult result =
 				new CompilationResult(sourceTypes[0].getFileName(), 1, 1, this.options.maxProblemsPerUnit);
-			
+
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259, build the compilation unit in its own sand box.
 			final long savedComplianceLevel = this.options.complianceLevel;
 			final long savedSourceLevel = this.options.sourceLevel;
-			
+
 			LookupEnvironment environment = packageBinding.environment;
 			if (environment == null)
 				environment = this.lookupEnvironment;
-			
+
 			try {
 				IJavaProject project = ((SourceTypeElementInfo) sourceTypes[0]).getHandle().getJavaProject();
 				this.options.complianceLevel = CompilerOptions.versionToJdkLevel(project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
@@ -882,17 +882,17 @@ public class OTReconcilerTests extends ReconcilerTests {
 		Parser parser = new Parser(problemReporter, false);
 		INameEnvironment nameEnvironment = new SearchableEnvironment((JavaProject)p, this.wcOwner, false);
 		Compiler compiler = new SourceTypeCompiler(
-					nameEnvironment, 
-					DefaultErrorHandlingPolicies.proceedWithAllProblems(), 
-					compilerOptions, 
+					nameEnvironment,
+					DefaultErrorHandlingPolicies.proceedWithAllProblems(),
+					compilerOptions,
 					problemReporter.problemFactory);
-		
+
 		try (Config config = Dependencies.setup(this, parser, compiler.lookupEnvironment, true, false))
 		{
 			Dependencies.ensureState(parsedUnit, state);
 		}
 	}
-	
+
 	public void testAnchoredType03() throws CoreException, InterruptedException {
 		try {
 			// Resources creation
@@ -926,7 +926,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] sourceChars = sourceFoo.toCharArray();
 			this.problemRequestor.initialize(sourceChars);
-		
+
 			this.createFile(
 					"/P/Main.java",
 					"public team class Main extends Foo {\n" +
@@ -937,9 +937,9 @@ public class OTReconcilerTests extends ReconcilerTests {
 					"	}\n" +
 					"}\n"
 			);
-			
+
 			getCompilationUnit("/P/Main.java").getWorkingCopy(this.wcOwner, null);
-			
+
 			assertProblems(
 				"Unexpected problems",
 				"----------\n" +
@@ -949,7 +949,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			deleteProject("P");
 		}
 	}
-	
+
 	//  Bug 316658 -  [reconciler] implicitly inherited field reports "illegal modifier"
     public void testImplicitlyInheritedInitializedField1() throws CoreException {
     	try {
@@ -960,7 +960,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			//prjDesc.setNatureIds(OTDTPlugin.createProjectNatures(prjDesc));
 			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
 			project.setDescription(prjDesc, null);
-	
+
 			OTREContainer.initializeOTJProject(project);
 			this.createFile(
 				"/P/MyTeam.java",
@@ -969,7 +969,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 	    			"		final String val= new String(\"OK\");\n" +
 	    			"	}\n" +
 	    			"}\n");
-			
+
 			String sourceString = "public team class MySubTeam extends MyTeam {\n" +
 			"	protected class R {\n" +
 			"		protected R() { super(); }\n" +
@@ -990,9 +990,9 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] sourceChars = sourceString.toCharArray();
 			this.problemRequestor.initialize(sourceChars);
-			
+
 			getCompilationUnit("/P/MySubTeam.java").getWorkingCopy(this.wcOwner, null);
-			
+
 			assertProblems(
 				"Unexpected problems",
 				"----------\n" +
@@ -1002,7 +1002,7 @@ public class OTReconcilerTests extends ReconcilerTests {
     		deleteProject("P");
     	}
     }
-	
+
     // Bug 321352 -  [compiler][reconciler] reporting of non-externalized string constants in role files
     //   should report as error
     public void testNLSinRoFi1() throws CoreException {
@@ -1015,10 +1015,10 @@ public class OTReconcilerTests extends ReconcilerTests {
 			project.setDescription(prjDesc, null);
 			p.setOption(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.ERROR);
 			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
-	
+
 			OTREContainer.initializeOTJProject(project);
 			this.createFolder("/P/MyTeam");
-			String roleSourceString =	
+			String roleSourceString =
 				"team package MyTeam;\n" +
 				"public class Role {\n" +
 				"	void foo() {\n" +
@@ -1028,7 +1028,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			this.createFile(
 				"/P/MyTeam/Role.java",
 	    			roleSourceString);
-			
+
 			String teamSourceString =
 				"public team class  MyTeam {\n" +
 				"	Role r;\n" +
@@ -1039,23 +1039,23 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] roleSourceChars = roleSourceString.toCharArray();
 			this.problemRequestor.initialize(roleSourceChars);
-			
+
 			getCompilationUnit("/P/MyTeam/Role.java").getWorkingCopy(this.wcOwner, null);
-			
+
 			assertProblems(
 				"Unexpected problems",
-				"----------\n" + 
-				"1. ERROR in /P/MyTeam/Role.java (at line 4)\n" + 
-				"	String val= \"OK\";\n" + 
-				"	            ^^^^\n" + 
-				"Non-externalized string literal; it should be followed by //$NON-NLS-<n>$\n" + 
+				"----------\n" +
+				"1. ERROR in /P/MyTeam/Role.java (at line 4)\n" +
+				"	String val= \"OK\";\n" +
+				"	            ^^^^\n" +
+				"Non-externalized string literal; it should be followed by //$NON-NLS-<n>$\n" +
 				"----------\n");
 
     	} finally {
     		deleteProject("P");
     	}
     }
-    
+
     // Bug 321352 -  [compiler][reconciler] reporting of non-externalized string constants in role files
     //   using $NON-NLS-<n>$
     public void testNLSinRoFi2() throws CoreException {
@@ -1068,10 +1068,10 @@ public class OTReconcilerTests extends ReconcilerTests {
 			project.setDescription(prjDesc, null);
 			p.setOption(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.ERROR);
 			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
-	
+
 			OTREContainer.initializeOTJProject(project);
 			this.createFolder("/P/MyTeam");
-			String roleSourceString =	
+			String roleSourceString =
 				"team package MyTeam;\n" +
 				"public class Role {\n" +
 				"	void foo() {\n" +
@@ -1081,7 +1081,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			this.createFile(
 				"/P/MyTeam/Role.java",
 	    			roleSourceString);
-			
+
 			String teamSourceString =
 				"public team class  MyTeam {\n" +
 				"	Role r;\n" +
@@ -1092,9 +1092,9 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] roleSourceChars = roleSourceString.toCharArray();
 			this.problemRequestor.initialize(roleSourceChars);
-			
+
 			getCompilationUnit("/P/MyTeam/Role.java").getWorkingCopy(this.wcOwner, null);
-			
+
 			assertProblems(
 				"Unexpected problems",
 				"----------\n" +
@@ -1104,7 +1104,7 @@ public class OTReconcilerTests extends ReconcilerTests {
     		deleteProject("P");
     	}
     }
-    
+
     // a role file holds a nested team which extends a non-team role file
     // Bug 324526 -  [reconciler] NPE during AST creation, team in role file subclassing non-team role
     public void testRoFiNestedTeam() throws CoreException {
@@ -1117,24 +1117,24 @@ public class OTReconcilerTests extends ReconcilerTests {
 			project.setDescription(prjDesc, null);
 			p.setOption(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.ERROR);
 			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
-	
+
 			OTREContainer.initializeOTJProject(project);
 			this.createFolder("/P/MyTeam");
-			String role1SourceString =	
+			String role1SourceString =
 				"team package MyTeam;\n" +
 				"public class Role1 {\n" +
 				"}\n";
 			this.createFile(
 				"/P/MyTeam/Role1.java",
 	    			role1SourceString);
-			String role2SourceString =	
+			String role2SourceString =
 				"team package MyTeam;\n" +
 				"public team class Role2 extends Role1 {\n" +
 				"}\n";
 			this.createFile(
 				"/P/MyTeam/Role2.java",
 	    			role2SourceString);
-			
+
 			String teamSourceString =
 				"public team class  MyTeam {\n" +
 				"	Role1 r;\n" +
@@ -1145,9 +1145,9 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] role2SourceChars = role2SourceString.toCharArray();
 			this.problemRequestor.initialize(role2SourceChars);
-			
+
 			getCompilationUnit("/P/MyTeam/Role2.java").getWorkingCopy(this.wcOwner, null);
-			
+
 			assertProblems(
 				"Unexpected problems",
 				"----------\n" +
@@ -1169,7 +1169,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			project.setDescription(prjDesc, null);
 			p.setOption(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.ERROR);
 			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
-	
+
 			OTREContainer.initializeOTJProject(project);
 			this.createFile(
 					"/P/JavaLinkedModeProposal.java",
@@ -1177,254 +1177,254 @@ public class OTReconcilerTests extends ReconcilerTests {
 		    		"    String baseMethod() { return null; }\n" +
 		    		"}\n");
 			this.createFolder("/P/MyTeam");
-			String role1SourceString =	
+			String role1SourceString =
 				"team package MyTeam;\n" +
 				"public class Role1 {\n" +
 				"}\n";
 			this.createFile(
 				"/P/MyTeam/Role1.java",
 	    			role1SourceString);
-			String role2SourceString =	
+			String role2SourceString =
 
-				"team package MyTeam;\n" + 
-				"\n" + 
-				"import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLINBINDING_AFTER_IMG;\n" + 
-				"import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLINBINDING_BEFORE_IMG;\n" + 
-				"import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLINBINDING_REPLACE_IMG;\n" + 
-				"import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLOUTBINDING_IMG;\n" + 
-				"\n" + 
-				"import java.util.List;\n" + 
-				"\n" + 
-				"import org.eclipse.core.runtime.CoreException;\n" + 
-				"import org.eclipse.jdt.core.CompletionProposal;\n" + 
-				"import org.eclipse.jdt.core.ICompilationUnit;\n" + 
-				"import org.eclipse.jdt.core.IJavaProject;\n" + 
-				"import org.eclipse.jdt.core.JavaModelException;\n" + 
-				"import org.eclipse.jdt.core.dom.AST;\n" + 
-				"import org.eclipse.jdt.core.dom.ASTNode;\n" + 
-				"import org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration;\n" + 
-				"import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;\n" + 
-				"import org.eclipse.jdt.core.dom.IMethodBinding;\n" + 
-				"import org.eclipse.jdt.core.dom.ITypeBinding;\n" + 
-				"import org.eclipse.jdt.core.dom.MethodBindingOperator;\n" + 
-				"import org.eclipse.jdt.core.dom.MethodSpec;\n" + 
-				"import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;\n" + 
-				"import org.eclipse.jdt.core.dom.SingleVariableDeclaration;\n" + 
-				"import org.eclipse.jdt.core.dom.Type;\n" + 
-				"import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;\n" + 
-				"import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;\n" + 
-				"import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;\n" + 
-				"import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;\n" + 
-				"import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;\n" + 
-				"import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.Proposal;\n" + 
-				"import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;\n" + 
-				"import org.eclipse.jface.text.link.LinkedModeModel;\n" + 
-				"import org.eclipse.jface.text.link.LinkedPosition;\n" + 
-				"import org.eclipse.objectteams.otdt.internal.ui.util.Images;\n" + 
-				"import org.eclipse.objectteams.otdt.internal.ui.util.OTStubUtility;\n" + 
-				"import org.eclipse.swt.graphics.Image;\n" + 
-				"import org.eclipse.text.edits.DeleteEdit;\n" + 
-				"import org.eclipse.text.edits.MultiTextEdit;\n" + 
-				"import org.eclipse.text.edits.ReplaceEdit;\n" + 
-				"import org.eclipse.text.edits.TextEdit;\n" + 
-				"\n" + 
-				"/** \n" + 
-				" */ \n" + 
-				"@SuppressWarnings(\"restriction\")\n" + 
-				"protected team class CreateMethodMappingCompletionProposal extends MethodMappingCompletionProposal \n" + 
-				"{\n" + 
-				"\n" + 
-				"	/* gateway to private final base class. */\n" + 
-				"	@SuppressWarnings(\"decapsulation\")\n" + 
-				"	protected class MyJavaLinkedModeProposal playedBy JavaLinkedModeProposal  {\n" + 
-				"\n" + 
-				"		public MyJavaLinkedModeProposal(ICompilationUnit unit, ITypeBinding typeProposal, int relevance) {\n" + 
-				"			base(unit, typeProposal, relevance);\n" + 
-				"		}\n" + 
-				"		TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model) \n" + 
-				"		-> TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model);\n" + 
-				"	}\n" + 
-				"\n" + 
-				"\n" + 
-				"\n" + 
-				"	boolean fIsOverride = false;\n" + 
-				"	boolean fIsOnlyCallin = false; \n" + 
-				"	\n" + 
-				"	protected CreateMethodMappingCompletionProposal(IJavaProject 	   jProject, \n" + 
-				"												    ICompilationUnit   cu,\n" + 
-				"												    CompletionProposal proposal,\n" + 
-				"												    String[]           paramTypes,\n" + 
-				"												    boolean 		   isOverride,\n" + 
-				"												    boolean 		   isOnlyCallin,\n" + 
-				"												    int                length,\n" + 
-				"												    String             displayName, \n" + 
-				"												    Image              image)\n" + 
-				"	{\n" + 
-				"		super(jProject, cu, proposal, paramTypes, length, displayName, image);\n" + 
-				"		this.fIsOverride= isOverride;\n" + 
-				"		this.fIsOnlyCallin = isOnlyCallin;\n" + 
-				"	}\n" + 
-				"	protected CreateMethodMappingCompletionProposal(IJavaProject 	   jProject, \n" + 
-				"									    ICompilationUnit   cu,  \n" + 
-				"									    CompletionProposal proposal,\n" + 
-				"									    int                length,\n" + 
-				"									    String             displayName,\n" + 
-				"									    Image              image) \n" + 
-				"	{\n" + 
-				"		super(jProject, cu, proposal, length, displayName, image);\n" + 
-				"	}\n" + 
-				"	\n" + 
-				"	/** Create a rewrite that additionally removes typed fragment if needed. \n" + 
-				"     *  That fragment will not be represented by an AST-node, that could be removed.\n" + 
-				"     */\n" + 
-				"	ASTRewrite createRewrite(AST ast) \n" + 
-				"	{\n" + 
-				"		if (fLength == 0)\n" + 
-				"			return ASTRewrite.create(ast);\n" + 
-				"		\n" + 
-				"		// the typed prefix will have to be deleted:\n" + 
-				"		final TextEdit delete= new DeleteEdit(fReplaceStart, fLength);\n" + 
-				"		\n" + 
-				"		// return a custom rewrite that additionally deletes typed fragment\n" + 
-				"		return new ASTRewrite(ast) {\n" + 
-				"			@Override\n" + 
-				"			public TextEdit rewriteAST() \n" + 
-				"					throws JavaModelException, IllegalArgumentException \n" + 
-				"			{\n" + 
-				"				TextEdit edits = super.rewriteAST();\n" + 
-				"				if (edits instanceof MultiTextEdit) {\n" + 
-				"					MultiTextEdit multi = (MultiTextEdit) edits;\n" + 
-				"					multi.addChild(delete);\n" + 
-				"				}\n" + 
-				"				return edits;\n" + 
-				"			}\n" + 
-				"		};\n" + 
-				"	}\n" + 
-				"	\n" + 
-				"	/** Overridable, see CalloutToFieldCompletionProposal.\n" + 
-				"	 *  At least baseBinding must be set, roleBinding is optional.\n" + 
-				"	 */\n" + 
-				"	boolean setupRewrite(ICompilationUnit                 iCU, \n" + 
-				"			          ASTRewrite       				   rewrite, \n" + 
-				"			          ImportRewrite   			       importRewrite,\n" + 
-				"			          ITypeBinding					   roleBinding,\n" + 
-				"			          ITypeBinding					   baseBinding,\n" + 
-				"			          ASTNode                          type,\n" + 
-				"			          AbstractMethodMappingDeclaration partialMapping,\n" + 
-				"			          ChildListPropertyDescriptor      bodyProperty) \n" + 
-				"			throws CoreException\n" + 
-				"	{\n" + 
-				"		// find base method:\n" + 
-				"		IMethodBinding method= findMethod(baseBinding, fMethodName, fParamTypes);\n" + 
-				"		if (method == null)\n" + 
-				"			return false;\n" + 
-				"		\n" + 
-				"		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);\n" + 
-				"		// create callout:\n" + 
-				"		AbstractMethodMappingDeclaration stub= this.fIsOnlyCallin \n" + 
-				"				? OTStubUtility.createCallin(iCU, rewrite, importRewrite,\n" + 
-				"						 				    method, baseBinding.getName(), ModifierKeyword.BEFORE_KEYWORD, settings)\n" + 
-				"				: OTStubUtility.createCallout(iCU, rewrite, importRewrite,\n" + 
-				"											 method, baseBinding.getName(), settings);\n" + 
-				"		if (stub != null) {\n" + 
-				"			insertStub(rewrite, type, bodyProperty, fReplaceStart, stub);\n" + 
-				"			\n" + 
-				"			MethodSpec roleMethodSpec = (MethodSpec)stub.getRoleMappingElement();\n" + 
-				"			\n" + 
-				"			// return type:\n" + 
-				"			ITrackedNodePosition returnTypePosition = null;\n" + 
-				"			ITypeBinding returnType = method.getReturnType();\n" + 
-				"			if (!(returnType.isPrimitive() && \"void\".equals(returnType.getName()))) {\n" + 
-				"				returnTypePosition = rewrite.track(roleMethodSpec.getReturnType2());\n" + 
-				"				addLinkedPosition(returnTypePosition, true, ROLEMETHODRETURN_KEY);\n" + 
-				"				LinkedProposalPositionGroup group1 = getLinkedProposalModel().getPositionGroup(ROLEMETHODRETURN_KEY, true);\n" + 
-				"				group1.addProposal(new MyJavaLinkedModeProposal(iCU, method.getReturnType(), 13)); //$NON-NLS-1$\n" + 
-				"				group1.addProposal(\"void\", null, 13); //$NON-NLS-1$\n" + 
-				"			}\n" + 
-				"			\n" + 
-				"			// role method name:\n" + 
-				"			addLinkedPosition(rewrite.track(roleMethodSpec.getName()), false, ROLEMETHODNAME_KEY);\n" + 
-				"			\n" + 
-				"			// argument lifting?\n" + 
-				"			if (roleBinding != null)\n" + 
-				"				addLiftingProposals(roleBinding, method, stub, rewrite);\n" + 
-				"			\n" + 
-				"			// binding operator:\n" + 
-				"			addLinkedPosition(rewrite.track(stub.bindingOperator()), false, BINDINGKIND_KEY);\n" + 
-				"			LinkedProposalPositionGroup group2= getLinkedProposalModel().getPositionGroup(BINDINGKIND_KEY, true);\n" + 
-				"			if (!this.fIsOnlyCallin) {\n" + 
-				"				String calloutToken = \"->\";\n" + 
-				"				if (this.fIsOverride) {\n" + 
-				"					calloutToken = \"=>\";\n" + 
-				"					stub.bindingOperator().setBindingKind(MethodBindingOperator.KIND_CALLOUT_OVERRIDE);\n" + 
-				"				}\n" + 
-				"				group2.addProposal(calloutToken, Images.getImage(CALLOUTBINDING_IMG), 13);         //$NON-NLS-1$\n" + 
-				"			}\n" + 
-				"			group2.addProposal(makeBeforeAfterBindingProposal(\"<- before\", Images.getImage(CALLINBINDING_BEFORE_IMG), returnTypePosition));  //$NON-NLS-1$\n" + 
-				"			group2.addProposal(\"<- replace\", Images.getImage(CALLINBINDING_REPLACE_IMG), 13); //$NON-NLS-1$\n" + 
-				"			group2.addProposal(makeBeforeAfterBindingProposal(\"<- after\",  Images.getImage(CALLINBINDING_AFTER_IMG), returnTypePosition));   //$NON-NLS-1$\n" + 
-				"		}\n" + 
-				"		return true;	\n" + 
-				"	}\n" + 
-				"	/** Create a method-binding proposal that, when applied, will change the role-returntype to \"void\": */\n" + 
-				"	Proposal makeBeforeAfterBindingProposal(String displayString, Image image, final ITrackedNodePosition returnTypePosition) {\n" + 
-				"		return new Proposal(displayString, image, 13) {\n" + 
-				"			@Override\n" + 
-				"			public TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model)\n" + 
-				"					throws CoreException \n" + 
-				"			{\n" + 
-				"				MultiTextEdit edits = new MultiTextEdit();\n" + 
-				"				if (returnTypePosition != null)\n" + 
-				"					edits.addChild(new ReplaceEdit(returnTypePosition.getStartPosition(), returnTypePosition.getLength(), \"void\"));\n" + 
-				"				edits.addChild(super.computeEdits(offset, position, trigger, stateMask, model));\n" + 
-				"				return edits;\n" + 
-				"			}\n" + 
-				"		};\n" + 
-				"	}\n" + 
-				"	\n" + 
-				"	/** Check if any parameters or the return type are candidates for lifting/lowering. */\n" + 
-				"	@SuppressWarnings(\"rawtypes\")\n" + 
-				"	private void addLiftingProposals(ITypeBinding roleTypeBinding, IMethodBinding methodBinding,\n" + 
-				"			AbstractMethodMappingDeclaration stub, ASTRewrite rewrite) \n" + 
-				"	{\n" + 
-				"		ITypeBinding[] roles= roleTypeBinding.getDeclaringClass().getDeclaredTypes();\n" + 
-				"		MethodSpec roleSpec= (MethodSpec)stub.getRoleMappingElement();\n" + 
-				"		List params= roleSpec.parameters();\n" + 
-				"		ITypeBinding[] paramTypes = methodBinding.getParameterTypes();\n" + 
-				"		for (int i= 0; i<params.size(); i++)\n" + 
-				"			addLiftingProposalGroup(rewrite, ROLEPARAM_KEY+i, roles, \n" + 
-				"							        ((SingleVariableDeclaration)params.get(i)).getType(), paramTypes[i]);\n" + 
-				"		addLiftingProposalGroup(rewrite, ROLEPARAM_KEY+\"return\", roles,  //$NON-NLS-1$\n" + 
-				"									roleSpec.getReturnType2(), methodBinding.getReturnType());\n" + 
-				"	}\n" + 
-				"	/**\n" + 
-				"	 * check whether a given type is played by a role from a given array and create a proposal group containing base and role type. \n" + 
-				"	 * @param rewrite\n" + 
-				"	 * @param positionGroupID \n" + 
-				"	 * @param roles       available roles in the enclosing team\n" + 
-				"	 * @param type        AST node to investigate\n" + 
-				"	 * @param typeBinding type binding of AST node to investigate\n" + 
-				"	 */\n" + 
-				"	void addLiftingProposalGroup(ASTRewrite rewrite, String positionGroupID, ITypeBinding[] roles, Type type, ITypeBinding typeBinding)\n" + 
-				"	{\n" + 
-				"		for (ITypeBinding roleBinding : roles) {\n" + 
-				"			if (roleBinding.isSynthRoleIfc()) continue; // synth ifcs would otherwise cause dupes\n" + 
-				"			if (typeBinding.equals(roleBinding.getBaseClass())) {\n" + 
-				"				ITrackedNodePosition argTypePos= rewrite.track(type);\n" + 
-				"				addLinkedPosition(argTypePos, true, positionGroupID);\n" + 
-				"				LinkedProposalPositionGroup group=\n" + 
-				"					getLinkedProposalModel().getPositionGroup(positionGroupID, true);\n" + 
-				"				group.addProposal(type.toString(), null, 13);\n" + 
-				"				group.addProposal(roleBinding.getName(), null, 13);\n" + 
-				"				break;\n" + 
-				"			}\n" + 
-				"		}		\n" + 
-				"	}\n" + 
+				"team package MyTeam;\n" +
+				"\n" +
+				"import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLINBINDING_AFTER_IMG;\n" +
+				"import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLINBINDING_BEFORE_IMG;\n" +
+				"import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLINBINDING_REPLACE_IMG;\n" +
+				"import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLOUTBINDING_IMG;\n" +
+				"\n" +
+				"import java.util.List;\n" +
+				"\n" +
+				"import org.eclipse.core.runtime.CoreException;\n" +
+				"import org.eclipse.jdt.core.CompletionProposal;\n" +
+				"import org.eclipse.jdt.core.ICompilationUnit;\n" +
+				"import org.eclipse.jdt.core.IJavaProject;\n" +
+				"import org.eclipse.jdt.core.JavaModelException;\n" +
+				"import org.eclipse.jdt.core.dom.AST;\n" +
+				"import org.eclipse.jdt.core.dom.ASTNode;\n" +
+				"import org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration;\n" +
+				"import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;\n" +
+				"import org.eclipse.jdt.core.dom.IMethodBinding;\n" +
+				"import org.eclipse.jdt.core.dom.ITypeBinding;\n" +
+				"import org.eclipse.jdt.core.dom.MethodBindingOperator;\n" +
+				"import org.eclipse.jdt.core.dom.MethodSpec;\n" +
+				"import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;\n" +
+				"import org.eclipse.jdt.core.dom.SingleVariableDeclaration;\n" +
+				"import org.eclipse.jdt.core.dom.Type;\n" +
+				"import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;\n" +
+				"import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;\n" +
+				"import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;\n" +
+				"import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;\n" +
+				"import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;\n" +
+				"import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.Proposal;\n" +
+				"import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;\n" +
+				"import org.eclipse.jface.text.link.LinkedModeModel;\n" +
+				"import org.eclipse.jface.text.link.LinkedPosition;\n" +
+				"import org.eclipse.objectteams.otdt.internal.ui.util.Images;\n" +
+				"import org.eclipse.objectteams.otdt.internal.ui.util.OTStubUtility;\n" +
+				"import org.eclipse.swt.graphics.Image;\n" +
+				"import org.eclipse.text.edits.DeleteEdit;\n" +
+				"import org.eclipse.text.edits.MultiTextEdit;\n" +
+				"import org.eclipse.text.edits.ReplaceEdit;\n" +
+				"import org.eclipse.text.edits.TextEdit;\n" +
+				"\n" +
+				"/** \n" +
+				" */ \n" +
+				"@SuppressWarnings(\"restriction\")\n" +
+				"protected team class CreateMethodMappingCompletionProposal extends MethodMappingCompletionProposal \n" +
+				"{\n" +
+				"\n" +
+				"	/* gateway to private final base class. */\n" +
+				"	@SuppressWarnings(\"decapsulation\")\n" +
+				"	protected class MyJavaLinkedModeProposal playedBy JavaLinkedModeProposal  {\n" +
+				"\n" +
+				"		public MyJavaLinkedModeProposal(ICompilationUnit unit, ITypeBinding typeProposal, int relevance) {\n" +
+				"			base(unit, typeProposal, relevance);\n" +
+				"		}\n" +
+				"		TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model) \n" +
+				"		-> TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model);\n" +
+				"	}\n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"	boolean fIsOverride = false;\n" +
+				"	boolean fIsOnlyCallin = false; \n" +
+				"	\n" +
+				"	protected CreateMethodMappingCompletionProposal(IJavaProject 	   jProject, \n" +
+				"												    ICompilationUnit   cu,\n" +
+				"												    CompletionProposal proposal,\n" +
+				"												    String[]           paramTypes,\n" +
+				"												    boolean 		   isOverride,\n" +
+				"												    boolean 		   isOnlyCallin,\n" +
+				"												    int                length,\n" +
+				"												    String             displayName, \n" +
+				"												    Image              image)\n" +
+				"	{\n" +
+				"		super(jProject, cu, proposal, paramTypes, length, displayName, image);\n" +
+				"		this.fIsOverride= isOverride;\n" +
+				"		this.fIsOnlyCallin = isOnlyCallin;\n" +
+				"	}\n" +
+				"	protected CreateMethodMappingCompletionProposal(IJavaProject 	   jProject, \n" +
+				"									    ICompilationUnit   cu,  \n" +
+				"									    CompletionProposal proposal,\n" +
+				"									    int                length,\n" +
+				"									    String             displayName,\n" +
+				"									    Image              image) \n" +
+				"	{\n" +
+				"		super(jProject, cu, proposal, length, displayName, image);\n" +
+				"	}\n" +
+				"	\n" +
+				"	/** Create a rewrite that additionally removes typed fragment if needed. \n" +
+				"     *  That fragment will not be represented by an AST-node, that could be removed.\n" +
+				"     */\n" +
+				"	ASTRewrite createRewrite(AST ast) \n" +
+				"	{\n" +
+				"		if (fLength == 0)\n" +
+				"			return ASTRewrite.create(ast);\n" +
+				"		\n" +
+				"		// the typed prefix will have to be deleted:\n" +
+				"		final TextEdit delete= new DeleteEdit(fReplaceStart, fLength);\n" +
+				"		\n" +
+				"		// return a custom rewrite that additionally deletes typed fragment\n" +
+				"		return new ASTRewrite(ast) {\n" +
+				"			@Override\n" +
+				"			public TextEdit rewriteAST() \n" +
+				"					throws JavaModelException, IllegalArgumentException \n" +
+				"			{\n" +
+				"				TextEdit edits = super.rewriteAST();\n" +
+				"				if (edits instanceof MultiTextEdit) {\n" +
+				"					MultiTextEdit multi = (MultiTextEdit) edits;\n" +
+				"					multi.addChild(delete);\n" +
+				"				}\n" +
+				"				return edits;\n" +
+				"			}\n" +
+				"		};\n" +
+				"	}\n" +
+				"	\n" +
+				"	/** Overridable, see CalloutToFieldCompletionProposal.\n" +
+				"	 *  At least baseBinding must be set, roleBinding is optional.\n" +
+				"	 */\n" +
+				"	boolean setupRewrite(ICompilationUnit                 iCU, \n" +
+				"			          ASTRewrite       				   rewrite, \n" +
+				"			          ImportRewrite   			       importRewrite,\n" +
+				"			          ITypeBinding					   roleBinding,\n" +
+				"			          ITypeBinding					   baseBinding,\n" +
+				"			          ASTNode                          type,\n" +
+				"			          AbstractMethodMappingDeclaration partialMapping,\n" +
+				"			          ChildListPropertyDescriptor      bodyProperty) \n" +
+				"			throws CoreException\n" +
+				"	{\n" +
+				"		// find base method:\n" +
+				"		IMethodBinding method= findMethod(baseBinding, fMethodName, fParamTypes);\n" +
+				"		if (method == null)\n" +
+				"			return false;\n" +
+				"		\n" +
+				"		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);\n" +
+				"		// create callout:\n" +
+				"		AbstractMethodMappingDeclaration stub= this.fIsOnlyCallin \n" +
+				"				? OTStubUtility.createCallin(iCU, rewrite, importRewrite,\n" +
+				"						 				    method, baseBinding.getName(), ModifierKeyword.BEFORE_KEYWORD, settings)\n" +
+				"				: OTStubUtility.createCallout(iCU, rewrite, importRewrite,\n" +
+				"											 method, baseBinding.getName(), settings);\n" +
+				"		if (stub != null) {\n" +
+				"			insertStub(rewrite, type, bodyProperty, fReplaceStart, stub);\n" +
+				"			\n" +
+				"			MethodSpec roleMethodSpec = (MethodSpec)stub.getRoleMappingElement();\n" +
+				"			\n" +
+				"			// return type:\n" +
+				"			ITrackedNodePosition returnTypePosition = null;\n" +
+				"			ITypeBinding returnType = method.getReturnType();\n" +
+				"			if (!(returnType.isPrimitive() && \"void\".equals(returnType.getName()))) {\n" +
+				"				returnTypePosition = rewrite.track(roleMethodSpec.getReturnType2());\n" +
+				"				addLinkedPosition(returnTypePosition, true, ROLEMETHODRETURN_KEY);\n" +
+				"				LinkedProposalPositionGroup group1 = getLinkedProposalModel().getPositionGroup(ROLEMETHODRETURN_KEY, true);\n" +
+				"				group1.addProposal(new MyJavaLinkedModeProposal(iCU, method.getReturnType(), 13)); //$NON-NLS-1$\n" +
+				"				group1.addProposal(\"void\", null, 13); //$NON-NLS-1$\n" +
+				"			}\n" +
+				"			\n" +
+				"			// role method name:\n" +
+				"			addLinkedPosition(rewrite.track(roleMethodSpec.getName()), false, ROLEMETHODNAME_KEY);\n" +
+				"			\n" +
+				"			// argument lifting?\n" +
+				"			if (roleBinding != null)\n" +
+				"				addLiftingProposals(roleBinding, method, stub, rewrite);\n" +
+				"			\n" +
+				"			// binding operator:\n" +
+				"			addLinkedPosition(rewrite.track(stub.bindingOperator()), false, BINDINGKIND_KEY);\n" +
+				"			LinkedProposalPositionGroup group2= getLinkedProposalModel().getPositionGroup(BINDINGKIND_KEY, true);\n" +
+				"			if (!this.fIsOnlyCallin) {\n" +
+				"				String calloutToken = \"->\";\n" +
+				"				if (this.fIsOverride) {\n" +
+				"					calloutToken = \"=>\";\n" +
+				"					stub.bindingOperator().setBindingKind(MethodBindingOperator.KIND_CALLOUT_OVERRIDE);\n" +
+				"				}\n" +
+				"				group2.addProposal(calloutToken, Images.getImage(CALLOUTBINDING_IMG), 13);         //$NON-NLS-1$\n" +
+				"			}\n" +
+				"			group2.addProposal(makeBeforeAfterBindingProposal(\"<- before\", Images.getImage(CALLINBINDING_BEFORE_IMG), returnTypePosition));  //$NON-NLS-1$\n" +
+				"			group2.addProposal(\"<- replace\", Images.getImage(CALLINBINDING_REPLACE_IMG), 13); //$NON-NLS-1$\n" +
+				"			group2.addProposal(makeBeforeAfterBindingProposal(\"<- after\",  Images.getImage(CALLINBINDING_AFTER_IMG), returnTypePosition));   //$NON-NLS-1$\n" +
+				"		}\n" +
+				"		return true;	\n" +
+				"	}\n" +
+				"	/** Create a method-binding proposal that, when applied, will change the role-returntype to \"void\": */\n" +
+				"	Proposal makeBeforeAfterBindingProposal(String displayString, Image image, final ITrackedNodePosition returnTypePosition) {\n" +
+				"		return new Proposal(displayString, image, 13) {\n" +
+				"			@Override\n" +
+				"			public TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model)\n" +
+				"					throws CoreException \n" +
+				"			{\n" +
+				"				MultiTextEdit edits = new MultiTextEdit();\n" +
+				"				if (returnTypePosition != null)\n" +
+				"					edits.addChild(new ReplaceEdit(returnTypePosition.getStartPosition(), returnTypePosition.getLength(), \"void\"));\n" +
+				"				edits.addChild(super.computeEdits(offset, position, trigger, stateMask, model));\n" +
+				"				return edits;\n" +
+				"			}\n" +
+				"		};\n" +
+				"	}\n" +
+				"	\n" +
+				"	/** Check if any parameters or the return type are candidates for lifting/lowering. */\n" +
+				"	@SuppressWarnings(\"rawtypes\")\n" +
+				"	private void addLiftingProposals(ITypeBinding roleTypeBinding, IMethodBinding methodBinding,\n" +
+				"			AbstractMethodMappingDeclaration stub, ASTRewrite rewrite) \n" +
+				"	{\n" +
+				"		ITypeBinding[] roles= roleTypeBinding.getDeclaringClass().getDeclaredTypes();\n" +
+				"		MethodSpec roleSpec= (MethodSpec)stub.getRoleMappingElement();\n" +
+				"		List params= roleSpec.parameters();\n" +
+				"		ITypeBinding[] paramTypes = methodBinding.getParameterTypes();\n" +
+				"		for (int i= 0; i<params.size(); i++)\n" +
+				"			addLiftingProposalGroup(rewrite, ROLEPARAM_KEY+i, roles, \n" +
+				"							        ((SingleVariableDeclaration)params.get(i)).getType(), paramTypes[i]);\n" +
+				"		addLiftingProposalGroup(rewrite, ROLEPARAM_KEY+\"return\", roles,  //$NON-NLS-1$\n" +
+				"									roleSpec.getReturnType2(), methodBinding.getReturnType());\n" +
+				"	}\n" +
+				"	/**\n" +
+				"	 * check whether a given type is played by a role from a given array and create a proposal group containing base and role type. \n" +
+				"	 * @param rewrite\n" +
+				"	 * @param positionGroupID \n" +
+				"	 * @param roles       available roles in the enclosing team\n" +
+				"	 * @param type        AST node to investigate\n" +
+				"	 * @param typeBinding type binding of AST node to investigate\n" +
+				"	 */\n" +
+				"	void addLiftingProposalGroup(ASTRewrite rewrite, String positionGroupID, ITypeBinding[] roles, Type type, ITypeBinding typeBinding)\n" +
+				"	{\n" +
+				"		for (ITypeBinding roleBinding : roles) {\n" +
+				"			if (roleBinding.isSynthRoleIfc()) continue; // synth ifcs would otherwise cause dupes\n" +
+				"			if (typeBinding.equals(roleBinding.getBaseClass())) {\n" +
+				"				ITrackedNodePosition argTypePos= rewrite.track(type);\n" +
+				"				addLinkedPosition(argTypePos, true, positionGroupID);\n" +
+				"				LinkedProposalPositionGroup group=\n" +
+				"					getLinkedProposalModel().getPositionGroup(positionGroupID, true);\n" +
+				"				group.addProposal(type.toString(), null, 13);\n" +
+				"				group.addProposal(roleBinding.getName(), null, 13);\n" +
+				"				break;\n" +
+				"			}\n" +
+				"		}		\n" +
+				"	}\n" +
 				"}";
 			this.createFile(
 				"/P/MyTeam/CreateMethodMappingCompletionProposal.java",
 	    			role2SourceString);
-			
+
 			String teamSourceString =
 				"public team class  MyTeam {\n" +
 				"	CreateMethodMappingCompletionProposal r;\n" +
@@ -1435,7 +1435,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] role2SourceChars = role2SourceString.toCharArray();
 			this.problemRequestor.initialize(role2SourceChars);
-			
+
 			ICompilationUnit cu = getCompilationUnit("/P/MyTeam/CreateMethodMappingCompletionProposal.java").getWorkingCopy(this.wcOwner, null);
 			// inject an error at 'random' location
 			cu.applyTextEdit(new InsertEdit(1000, "\t\t@"), null);
@@ -1450,7 +1450,7 @@ public class OTReconcilerTests extends ReconcilerTests {
     	}
     }
 
-	
+
     // Bug 351520 - Undefined getClass() for role in seperate role file
     public void testClassLiteralForRoFi() throws CoreException {
     	try {
@@ -1462,10 +1462,10 @@ public class OTReconcilerTests extends ReconcilerTests {
 			project.setDescription(prjDesc, null);
 			p.setOption(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.ERROR);
 			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
-	
+
 			OTREContainer.initializeOTJProject(project);
 			this.createFolder("/P/MyTeam");
-			String roleSourceString =	
+			String roleSourceString =
 				"team package MyTeam;\n" +
 				"public class Role {\n" +
 				"	void foo() {\n" +
@@ -1475,7 +1475,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			this.createFile(
 				"/P/MyTeam/Role.java",
 	    			roleSourceString);
-			
+
 			String teamSourceString =
 				"public team class  MyTeam {\n" +
 				"	final MyTeam other = new MyTeam();\n" +
@@ -1487,16 +1487,16 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] teamSourceChars = teamSourceString.toCharArray();
 			this.problemRequestor.initialize(teamSourceChars);
-			
+
 			getCompilationUnit("/P/MyTeam.java").getWorkingCopy(this.wcOwner, null);
-			
+
 			assertProblems(
 				"Unexpected problems",
-				"----------\n" + 
-				"1. WARNING in /P/MyTeam.java (at line 3)\n" + 
-				"	Class c = Role<@other>.class;\n" + 
-				"	^^^^^\n" + 
-				"Class is a raw type. References to generic type Class<T> should be parameterized\n" + 
+				"----------\n" +
+				"1. WARNING in /P/MyTeam.java (at line 3)\n" +
+				"	Class c = Role<@other>.class;\n" +
+				"	^^^^^\n" +
+				"Class is a raw type. References to generic type Class<T> should be parameterized\n" +
 				"----------\n");
 
     	} finally {
@@ -1516,60 +1516,60 @@ public class OTReconcilerTests extends ReconcilerTests {
 			project.setDescription(prjDesc, null);
 			p.setOption(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.ERROR);
 			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
-	
+
 			OTREContainer.initializeOTJProject(project);
-			String baseSourceString =	
+			String baseSourceString =
 				"public class Base {\n" +
 				"}\n";
 			this.createFile(
 				"/P/Base.java",
 	    		baseSourceString);
-			String superTeamSourceString =	
+			String superTeamSourceString =
 				"public team class SuperTeam {\n" +
-				"     protected class R0 playedBy Base {}\n" + 
-				"     protected class R1 extends R0 {}\n" + 
+				"     protected class R0 playedBy Base {}\n" +
+				"     protected class R1 extends R0 {}\n" +
 				"     public void foo(Base as R0 bar) {}\n" +
 				"}\n";
 			this.createFile(
 				"/P/SuperTeam.java",
     			superTeamSourceString);
-			String subTeamSourceString =	
+			String subTeamSourceString =
 				"public team class SubTeam extends SuperTeam {\n" +
 				"     protected class R2 extends R0 {}\n" +
 				"}\n";
 			this.createFile(
 				"/P/SubTeam.java",
     			subTeamSourceString);
-			
+
 
 			char[] subTeamSourceChars = subTeamSourceString.toCharArray();
 			this.problemRequestor.initialize(subTeamSourceChars);
-			
+
 			getCompilationUnit("/P/SubTeam.java").getWorkingCopy(this.wcOwner, null);
-			
+
 			assertProblems(
 				"Unexpected problems",
-				"----------\n" + 
-				"1. WARNING in /P/SubTeam.java (at line 1)\n" + 
-				"	public team class SubTeam extends SuperTeam {\n" + 
-				"	                  ^^^^^^^\n" + 
-				"Potential ambiguity in role binding. The base \'Base\' is bound to the following roles: SubTeam.R1,SubTeam.R2 (OTJLD 2.3.4(a)).\n" + 
-				"----------\n" + 
-				"2. ERROR in /P/SubTeam.java (at line 1)\n" + 
-				"	public team class SubTeam extends SuperTeam {\n" + 
-				"	                  ^^^^^^^\n" + 
-				"Team introduces binding ambiguity for role R1<@tthis[SubTeam]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" + 
-				"----------\n" + 
-				"3. ERROR in /P/SubTeam.java (at line 1)\n" + 
-				"	public team class SubTeam extends SuperTeam {\n" + 
-				"	                  ^^^^^^^\n" + 
-				"Team introduces binding ambiguity for role R0<@tthis[SubTeam]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" + 
+				"----------\n" +
+				"1. WARNING in /P/SubTeam.java (at line 1)\n" +
+				"	public team class SubTeam extends SuperTeam {\n" +
+				"	                  ^^^^^^^\n" +
+				"Potential ambiguity in role binding. The base \'Base\' is bound to the following roles: SubTeam.R1,SubTeam.R2 (OTJLD 2.3.4(a)).\n" +
+				"----------\n" +
+				"2. ERROR in /P/SubTeam.java (at line 1)\n" +
+				"	public team class SubTeam extends SuperTeam {\n" +
+				"	                  ^^^^^^^\n" +
+				"Team introduces binding ambiguity for role R1<@tthis[SubTeam]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" +
+				"----------\n" +
+				"3. ERROR in /P/SubTeam.java (at line 1)\n" +
+				"	public team class SubTeam extends SuperTeam {\n" +
+				"	                  ^^^^^^^\n" +
+				"Team introduces binding ambiguity for role R0<@tthis[SubTeam]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" +
 				"----------\n");
     	} finally {
     		deleteProject("P");
     	}
     }
-    
+
     public void testBug348574a() throws CoreException {
     	try {
 			// Resources creation
@@ -1579,60 +1579,60 @@ public class OTReconcilerTests extends ReconcilerTests {
 			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
 			project.setDescription(prjDesc, null);
 			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
-	
+
 			OTREContainer.initializeOTJProject(project);
 
-			String superTeamSourceString =	
+			String superTeamSourceString =
 				"public team class SuperTeam {\n" +
 				"     protected abstract class R0 {\n" +
 				"         abstract void foo();" +
 				"         abstract static void fooStatic();" +
-				"     }\n" + 
+				"     }\n" +
 				"}\n";
 			this.createFile(
 				"/P/SuperTeam.java",
     			superTeamSourceString);
-			
-			String subTeamSourceString =	
+
+			String subTeamSourceString =
 				"public team class SubTeam extends SuperTeam {\n" +
 				"     protected class R0 {}\n" +
 				"}\n";
 			this.createFile(
 				"/P/SubTeam.java",
     			subTeamSourceString);
-			
+
 
 			char[] subTeamSourceChars = subTeamSourceString.toCharArray();
 			this.problemRequestor.initialize(subTeamSourceChars);
-			
+
 			getCompilationUnit("/P/SubTeam.java").getWorkingCopy(this.wcOwner, null);
-			
+
 			assertProblems(
 				"Unexpected problems",
-				"----------\n" + 
-				"1. ERROR in /P/SubTeam.java (at line 2)\n" + 
-				"	protected class R0 {}\n" + 
-				"	                ^^\n" + 
-				"The abstract method foo in type R0 can only be defined by an abstract class\n" + 
-				"----------\n" + 
-				"2. ERROR in /P/SubTeam.java (at line 2)\n" + 
-				"	protected class R0 {}\n" + 
-				"	                ^^\n" + 
-				"The type SubTeam.R0 must implement the inherited abstract method SubTeam.R0.foo()\n" + 
-				"----------\n" + 
-				"3. ERROR in /P/SubTeam.java (at line 2)\n" + 
-				"	protected class R0 {}\n" + 
-				"	                ^^\n" + 
-				"The abstract method fooStatic in type R0 can only be defined by an abstract class\n" + 
-				"----------\n" + 
-				"4. ERROR in /P/SubTeam.java (at line 2)\n" + 
-				"	protected class R0 {}\n" + 
-				"	                ^^\n" + 
-				"The type SubTeam.R0 must implement the inherited abstract method SubTeam.R0.fooStatic()\n" + 
+				"----------\n" +
+				"1. ERROR in /P/SubTeam.java (at line 2)\n" +
+				"	protected class R0 {}\n" +
+				"	                ^^\n" +
+				"The abstract method foo in type R0 can only be defined by an abstract class\n" +
+				"----------\n" +
+				"2. ERROR in /P/SubTeam.java (at line 2)\n" +
+				"	protected class R0 {}\n" +
+				"	                ^^\n" +
+				"The type SubTeam.R0 must implement the inherited abstract method SubTeam.R0.foo()\n" +
+				"----------\n" +
+				"3. ERROR in /P/SubTeam.java (at line 2)\n" +
+				"	protected class R0 {}\n" +
+				"	                ^^\n" +
+				"The abstract method fooStatic in type R0 can only be defined by an abstract class\n" +
+				"----------\n" +
+				"4. ERROR in /P/SubTeam.java (at line 2)\n" +
+				"	protected class R0 {}\n" +
+				"	                ^^\n" +
+				"The type SubTeam.R0 must implement the inherited abstract method SubTeam.R0.fooStatic()\n" +
 				"----------\n");
     	} finally {
     		deleteProject("P");
-    	}    	
+    	}
     }
 
     // Bug 382188 - NPE in copyRole() when commenting out roles in a nested
@@ -1645,12 +1645,12 @@ public class OTReconcilerTests extends ReconcilerTests {
 			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
 			project.setDescription(prjDesc, null);
 			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
-	
+
 			OTREContainer.initializeOTJProject(project);
 
 			this.createFolder("/P/p");
-			
-			String superTeamSourceString =	
+
+			String superTeamSourceString =
 				"package p;\n" +
 				"public team class SuperTeam {\n" +
 				"}\n";
@@ -1658,7 +1658,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 				"/P/p/SuperTeam.java",
     			superTeamSourceString);
 
-			String superMidString = 
+			String superMidString =
 				"team package p.SuperTeam;\n" +
 				"protected team class Mid {\n" +
 				"    protected class Inner {}\n" +
@@ -1668,8 +1668,8 @@ public class OTReconcilerTests extends ReconcilerTests {
 			this.createFile(
 				"/P/p/SuperTeam/Mid.java",
 				superMidString);
-			
-			String subTeamSourceString =	
+
+			String subTeamSourceString =
 				"package p;\n" +
 				"public team class SubTeam extends SuperTeam {\n" +
 				"    protected class Mid2 {}\n" +
@@ -1677,26 +1677,26 @@ public class OTReconcilerTests extends ReconcilerTests {
 			this.createFile(
 				"/P/p/SubTeam.java",
     			subTeamSourceString);
-			
+
 			this.createFolder(
 					"/P/p/SubTeam");
-			String subMidCompleteSourceString =	
+			String subMidCompleteSourceString =
 				"team package p/SubTeam;\n" +
 				"protected team class Mid {\n" +
 				"    protected class Inner {}\n" +
 				"}\n";
 			this.createFile("/P/p/SubTeam/Mid.java", subMidCompleteSourceString);
-			
+
 			project.build(IncrementalProjectBuilder.FULL_BUILD, null);
 
-			String subMidSourceString =	
+			String subMidSourceString =
 				"team package p.SubTeam;\n" +
 				"protected team class Mid {\n" +
 				"}\n";
 
 			char[] subMidSourceChars = subMidSourceString.toCharArray();
 			this.problemRequestor.initialize(subMidSourceChars);
-			
+
 			ICompilationUnit icu = getCompilationUnit("/P/p/SubTeam/Mid.java").getWorkingCopy(this.wcOwner, null);
 			assertNoProblem(subMidSourceChars, icu);
     	} finally {
@@ -1714,45 +1714,45 @@ public class OTReconcilerTests extends ReconcilerTests {
 			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
 			project.setDescription(prjDesc, null);
 			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
-	
+
 			OTREContainer.initializeOTJProject(project);
 
-			String allShapesSourceString =	
-					"public team class AllShapes {\n" + 
-		    		"\n" + 
-		    		"	public abstract class Connector { }\n" + 
-		    		"	public abstract class RectangularConnector extends Connector { }\n" + 
+			String allShapesSourceString =
+					"public team class AllShapes {\n" +
+		    		"\n" +
+		    		"	public abstract class Connector { }\n" +
+		    		"	public abstract class RectangularConnector extends Connector { }\n" +
 		    		"}\n";
 			this.createFile(
 				"/P/AllShapes.java",
 				allShapesSourceString);
-			
-			String chdSourceString =	
-					"public team class CompanyHierarchyDisplay {\n" + 
-		    		"    \n" + 
-		    		"	public final AllShapes _shapes = new AllShapes();\n" + 
-		    		"	\n" + 
-		    		"    public class Connection {\n" + 
-		    		"    	Connector<@_shapes> connShape;\n" + 
-		    		"    }\n" + 
+
+			String chdSourceString =
+					"public team class CompanyHierarchyDisplay {\n" +
+		    		"    \n" +
+		    		"	public final AllShapes _shapes = new AllShapes();\n" +
+		    		"	\n" +
+		    		"    public class Connection {\n" +
+		    		"    	Connector<@_shapes> connShape;\n" +
+		    		"    }\n" +
 		    		"}\n";
 			this.createFile(
 				"/P/CompanyHierarchyDisplay.java",
     			chdSourceString);
-			
-			String versionASourceString =	
-					"public team class VersionA {\n" + 
-		    		"    private final CompanyHierarchyDisplay _chd;\n" + 
-		    		"    \n" + 
-		    		"    public VersionA(CompanyHierarchyDisplay chd) {\n" + 
-		    		"    	_chd = chd;\n" + 
-		    		"    }\n" + 
-		    		"    \n" + 
-		    		"    public class RectangularConnections playedBy Connection<@_chd> {\n" + 
+
+			String versionASourceString =
+					"public team class VersionA {\n" +
+		    		"    private final CompanyHierarchyDisplay _chd;\n" +
+		    		"    \n" +
+		    		"    public VersionA(CompanyHierarchyDisplay chd) {\n" +
+		    		"    	_chd = chd;\n" +
+		    		"    }\n" +
+		    		"    \n" +
+		    		"    public class RectangularConnections playedBy Connection<@_chd> {\n" +
 		    		"       final AllShapes _shapesX = _chd._shapes;\n" +
-		    		"       @SuppressWarnings(\"decapsulation\")\n" + 
-		    		"		void setShape(RectangularConnector<@_shapesX> shape) -> set Connector<@_chd._shapes> connShape;\n" + 
-		    		"    }\n" + 
+		    		"       @SuppressWarnings(\"decapsulation\")\n" +
+		    		"		void setShape(RectangularConnector<@_shapesX> shape) -> set Connector<@_chd._shapes> connShape;\n" +
+		    		"    }\n" +
 		    		"}\n";
 			this.createFile(
 				"/P/VersionA.java",
@@ -1760,13 +1760,13 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] versionASourceChars = versionASourceString.toCharArray();
 			this.problemRequestor.initialize(versionASourceChars);
-			
+
 			ICompilationUnit unit = getCompilationUnit("/P/VersionA.java").getWorkingCopy(this.wcOwner, null);
-			
+
 			assertNoProblem(versionASourceChars, unit);
     	} finally {
     		deleteProject("P");
-    	}    	
+    	}
     }
 
     // Bug 406603 - [reconciler] fails to decode team anchor reference if name contains a 'D'
@@ -1780,9 +1780,9 @@ public class OTReconcilerTests extends ReconcilerTests {
 			project.setDescription(prjDesc, null);
 			p.setOption(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.ERROR);
 			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
-	
+
 			OTREContainer.initializeOTJProject(project);
-			
+
 			String teamSourceString =
 				"public team class  DomainObject {\n" +
 				"	public class Item{}\n" +
@@ -1791,21 +1791,21 @@ public class OTReconcilerTests extends ReconcilerTests {
 			this.createFile(
 				"/P/DomainObject.java",
 	    			teamSourceString);
-			
+
 			this.createFile(
 				"/P/ItemService.java",
-				"public class ItemService<DomainObject theDO> {\n" + 
-				"     public void processItem(Item<@theDO> item) { }\n" + 
+				"public class ItemService<DomainObject theDO> {\n" +
+				"     public void processItem(Item<@theDO> item) { }\n" +
 				"}\n");
-			
+
 			project.build(IncrementalProjectBuilder.FULL_BUILD, null);
 
-			String clientSourceString =	
+			String clientSourceString =
 				"public class Client {\n" +
 				"	void foo(final DomainObject theDO) {\n" +
 				"		ItemService<@theDO> service = new ItemService<@theDO>();" +
 				"		Item<@theDO> myItem = new Item<@theDO>();\n" +
-				"		service.processItem(myItem);\n" + 
+				"		service.processItem(myItem);\n" +
 				"	}\n" +
 				"}\n";
 			this.createFile(
@@ -1814,16 +1814,16 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] clientSourceChars = clientSourceString.toCharArray();
 			this.problemRequestor.initialize(clientSourceChars);
-			
+
 			ICompilationUnit unit = getCompilationUnit("/P/Client.java").getWorkingCopy(this.wcOwner, null);
-			
+
 			assertNoProblem(clientSourceChars, unit);
 
     	} finally {
     		deleteProject("P");
     	}
     }
-    
+
 
     // static role method accesses enclosing team instance
     public void testStaticRoleMethod() throws CoreException, InterruptedException {
@@ -1835,11 +1835,11 @@ public class OTReconcilerTests extends ReconcilerTests {
 			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
 			project.setDescription(prjDesc, null);
 			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
-	
+
 			OTREContainer.initializeOTJProject(project);
 
 			this.createFolder("/P/src/p");
-			String teamSourceString =	
+			String teamSourceString =
 				"package p;\n" +
 				"public team class MyTeam {\n" +
 				"	String val;" +
@@ -1848,17 +1848,17 @@ public class OTReconcilerTests extends ReconcilerTests {
 			project.build(IncrementalProjectBuilder.FULL_BUILD, null);
 
 			this.createFolder("/P/src/p/MyTeam");
-			String roleSourceString =	
+			String roleSourceString =
 					"team package p.MyTeam;\n" +
 					"protected class R {\n" +
 					"    static String test() { /* missing return */ }\n" +
 					"}\n";
 			this.createFile("/P/src/p/MyTeam/R.java", roleSourceString);
 			project.build(IncrementalProjectBuilder.FULL_BUILD, null);
-			
+
 			this.workingCopy = getCompilationUnit("/P/src/p/MyTeam/R.java").getWorkingCopy(this.wcOwner, null);
 
-			roleSourceString =	
+			roleSourceString =
 				"team package p.MyTeam;\n" +
 				"protected class R {\n" +
 				"   static String test(boolean b) {\n" +
@@ -1887,36 +1887,36 @@ public class OTReconcilerTests extends ReconcilerTests {
 			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
 			project.setDescription(prjDesc, null);
 			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
-	
+
 			OTREContainer.initializeOTJProject(project);
-			
+
 			this.createFolder("/P/src/org/objectteams");
-			this.createFile("P/src/org/objectteams/Team.java", 
+			this.createFile("P/src/org/objectteams/Team.java",
 					"package org.objectteams;\n" +
 					"public class Team implements ITeam {\n" +
-					"	public boolean _OT$setExecutingCallin(boolean newFlag) {\n" + 
-					"		boolean oldVal = _OT$isExecutingCallin;\n" + 
-					"		_OT$isExecutingCallin = newFlag;\n" + 
-					"		return oldVal;\n" + 
-					"	}\n" + 
+					"	public boolean _OT$setExecutingCallin(boolean newFlag) {\n" +
+					"		boolean oldVal = _OT$isExecutingCallin;\n" +
+					"		_OT$isExecutingCallin = newFlag;\n" +
+					"		return oldVal;\n" +
+					"	}\n" +
 					"}\n");
 			this.createFolder("/P/src/b");
-			String b1SourceString =	
+			String b1SourceString =
 				"package b;\n" +
 				"public class B1 {\n" +
 				"	void bm1() {};\n" +
 				"}\n";
 			this.createFile("P/src/b/B1.java", b1SourceString);
 
-			String b2SourceString =	
+			String b2SourceString =
 					"package b;\n" +
 					"public class B2 {\n" +
 					"	public void bm2() {};\n" +
 					"}\n";
 			this.createFile("P/src/b/B2.java", b2SourceString);
-	
+
 			this.createFolder("/P/src/p");
-			String team1SourceString =	
+			String team1SourceString =
 				"package p;\n" +
 				"import base b.B1;\n" +
 				"public team class MyTeam1 {\n" +
@@ -1930,7 +1930,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			p.close();
 			p.open(null);
 
-			String team2SourceString =	
+			String team2SourceString =
 					"package p;\n" +
 					"import base b.B2;\n" +
 					"public team class MyTeam2 extends MyTeam1 {\n" +
@@ -1940,7 +1940,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 					"	}\n" +
 					"}\n";
 			this.createFile("/P/src/p/MyTeam2.java", team2SourceString);
-			
+
 			this.problemRequestor.initialize(team2SourceString.toCharArray());
 			ICompilationUnit unit = getCompilationUnit("/P/src/p/MyTeam2.java").getWorkingCopy(this.wcOwner, null);
 			assertNoProblem((team2SourceString).toCharArray(), unit);
@@ -1965,7 +1965,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			project.build(IncrementalProjectBuilder.FULL_BUILD, null);
 
 			this.createFolder("/P/src/p2");
-			String team2SourceString =	
+			String team2SourceString =
 					"package p2;\n" +
 					"public team class MyTeam2 extends MyTeam1 {\n" +
 					"	protected class R2 extends R1 {\n" +
@@ -1978,27 +1978,27 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			this.problemRequestor.initialize(team2SourceString.toCharArray());
 			getCompilationUnit("/P/src/p2/MyTeam2.java").getWorkingCopy(this.wcOwner, null);
-			assertProblems("Expecting problems", 
-					"----------\n" + 
-					"1. ERROR in /P/src/p2/MyTeam2.java (at line 2)\n" + 
-					"	public team class MyTeam2 extends MyTeam1 {\n" + 
-					"	                                  ^^^^^^^\n" + 
-					"MyTeam1 cannot be resolved to a type\n" + 
-					"----------\n" + 
-					"2. ERROR in /P/src/p2/MyTeam2.java (at line 3)\n" + 
-					"	protected class R2 extends R1 {\n" + 
-					"	                ^^\n" + 
-					"The hierarchy of the type R2 is inconsistent\n" + 
-					"----------\n" + 
-					"3. ERROR in /P/src/p2/MyTeam2.java (at line 3)\n" + 
-					"	protected class R2 extends R1 {\n" + 
-					"	                           ^^\n" + 
-					"R1 cannot be resolved to a type\n" + 
-					"----------\n" + 
-					"4. ERROR in /P/src/p2/MyTeam2.java (at line 5)\n" + 
-					"	return getFlag();\n" + 
-					"	       ^^^^^^^\n" + 
-					"The method getFlag() is undefined for the type MyTeam2.R2\n" + 
+			assertProblems("Expecting problems",
+					"----------\n" +
+					"1. ERROR in /P/src/p2/MyTeam2.java (at line 2)\n" +
+					"	public team class MyTeam2 extends MyTeam1 {\n" +
+					"	                                  ^^^^^^^\n" +
+					"MyTeam1 cannot be resolved to a type\n" +
+					"----------\n" +
+					"2. ERROR in /P/src/p2/MyTeam2.java (at line 3)\n" +
+					"	protected class R2 extends R1 {\n" +
+					"	                ^^\n" +
+					"The hierarchy of the type R2 is inconsistent\n" +
+					"----------\n" +
+					"3. ERROR in /P/src/p2/MyTeam2.java (at line 3)\n" +
+					"	protected class R2 extends R1 {\n" +
+					"	                           ^^\n" +
+					"R1 cannot be resolved to a type\n" +
+					"----------\n" +
+					"4. ERROR in /P/src/p2/MyTeam2.java (at line 5)\n" +
+					"	return getFlag();\n" +
+					"	       ^^^^^^^\n" +
+					"The method getFlag() is undefined for the type MyTeam2.R2\n" +
 					"----------\n",
 					this.problemRequestor);
 
@@ -2016,11 +2016,11 @@ public class OTReconcilerTests extends ReconcilerTests {
 			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
 			project.setDescription(prjDesc, null);
 			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
-	
+
 			OTREContainer.initializeOTJProject(project);
-			
+
 			this.createFolder("/P/src/b");
-			String b1SourceString =	
+			String b1SourceString =
 				"package b;\n" +
 				"public class B1 {\n" +
     			"	int f0;\n" +
@@ -2031,7 +2031,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			this.createFile("P/src/b/B1.java", b1SourceString);
 
 			this.createFolder("/P/src/p");
-			String team1SourceString =	
+			String team1SourceString =
 				"package p;\n" +
 				"import base b.B1;\n" +
     			"@SuppressWarnings(\"decapsulation\")\n" +
@@ -2053,7 +2053,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			p.open(null);
 
 			this.createFolder("/P/src/p2");
-			String team2SourceString =	
+			String team2SourceString =
 					"package p;\n" +
 					"import p.MyTeam1;\n" +
 					"public team class MyTeam2 extends MyTeam1 {\n" +
@@ -2086,26 +2086,26 @@ public class OTReconcilerTests extends ReconcilerTests {
 					"}\n";
 			String teamFilename = "/P/src/p/MyTeam2.java";
 			this.createFile(teamFilename, team2SourceString);
-			
+
 			this.problemRequestor.initialize(team2SourceString.toCharArray());
 			getCompilationUnit(teamFilename).getWorkingCopy(this.wcOwner, null);
 
 			assertProblems("Expecting problems",
-		    		"----------\n" + 
-    				"1. ERROR in /P/src/p/MyTeam2.java (at line 20)\n" + 
-    				"	return getF1() +\n" + 
-    				"	       ^^^^^\n" + 
-    				"The method getF1() from the role type MyTeam2.R is not visible (OTJLD 1.2.1(e)).\n" + 
-    				"----------\n" + 
-    				"2. ERROR in /P/src/p/MyTeam2.java (at line 21)\n" + 
-    				"	getF2() +\n" + 
-    				"	^^^^^\n" + 
-    				"The method getF2() from the role type MyTeam2.R is not visible (OTJLD 1.2.1(e)).\n" + 
-    				"----------\n" + 
-    				"3. ERROR in /P/src/p/MyTeam2.java (at line 26)\n" + 
-    				"	m2() +\n" + 
-    				"	^^\n" + 
-    				"The method m2() from the role type MyTeam2.R is not visible (OTJLD 1.2.1(e)).\n" + 
+		    		"----------\n" +
+    				"1. ERROR in /P/src/p/MyTeam2.java (at line 20)\n" +
+    				"	return getF1() +\n" +
+    				"	       ^^^^^\n" +
+    				"The method getF1() from the role type MyTeam2.R is not visible (OTJLD 1.2.1(e)).\n" +
+    				"----------\n" +
+    				"2. ERROR in /P/src/p/MyTeam2.java (at line 21)\n" +
+    				"	getF2() +\n" +
+    				"	^^^^^\n" +
+    				"The method getF2() from the role type MyTeam2.R is not visible (OTJLD 1.2.1(e)).\n" +
+    				"----------\n" +
+    				"3. ERROR in /P/src/p/MyTeam2.java (at line 26)\n" +
+    				"	m2() +\n" +
+    				"	^^\n" +
+    				"The method m2() from the role type MyTeam2.R is not visible (OTJLD 1.2.1(e)).\n" +
     				"----------\n",
 					this.problemRequestor);
     	} finally {
@@ -2116,8 +2116,8 @@ public class OTReconcilerTests extends ReconcilerTests {
     public void testTeamInJar1() throws CoreException, InterruptedException, IOException {
     	try {
 			// Resources creation
-			IJavaProject p = createOTJavaProject("P", new String[] {"src"}, 
-					new String[] {"JCL18_FULL"}, "1.8", "bin", true/*fullJCL*/, 
+			IJavaProject p = createOTJavaProject("P", new String[] {"src"},
+					new String[] {"JCL18_FULL"}, "1.8", "bin", true/*fullJCL*/,
 					CompilerOptions.WeavingScheme.OTRE.toString());
 			IProject project = p.getProject();
 			IProjectDescription prjDesc = project.getDescription();
@@ -2137,7 +2137,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			}, "1.8");
 
 			this.createFolder("/P/src/p2");
-			String subTeamSourceString =	
+			String subTeamSourceString =
 				"package p2;\n" +
 				"public team class SubTeam extends p.MyTeam {\n" +
     			"	@Override\n" +
@@ -2183,7 +2183,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 				"	void m(Object o, String[] vals) throws Exception {}\n" +
 				"}\n");
 			createFolder("/P/MyTeam");
-			String roleSourceString =	
+			String roleSourceString =
 				"team package MyTeam;\n" +
 				"public class Role playedBy MyBase {\n" +
 				"	@SuppressWarnings(\"decapsulation\")\n" +
@@ -2196,7 +2196,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			createFile(
 				"/P/MyTeam/Role.java",
 	    			roleSourceString);
-			
+
 			String teamSourceString =
 				"import base b.MyBase;\n" +
 				"public team class  MyTeam {\n" +
@@ -2208,12 +2208,12 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] roleSourceChars = roleSourceString.toCharArray();
 			this.problemRequestor.initialize(roleSourceChars);
-			
+
 			getCompilationUnit("/P/MyTeam/Role.java").getWorkingCopy(this.wcOwner, null);
-			
+
 			assertProblems(
 				"Unexpected problems",
-				"----------\n" + 
+				"----------\n" +
 				"----------\n");
 
     	} finally {
@@ -2241,8 +2241,8 @@ public class OTReconcilerTests extends ReconcilerTests {
 				"	public void baseMethod(int flag, String name) {}\n" +
 				"}\n"
 			);
-			
-			String sourceFoo = 
+
+			String sourceFoo =
 					"import base pbase.Base;\n" +
 					"public team class Foo {\n" +
 					"	@SuppressWarnings(\"unused\") private String v1;\n" +
@@ -2269,16 +2269,16 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] sourceChars = sourceFoo.toCharArray();
 			this.problemRequestor.initialize(sourceChars);
-			
+
 			ICompilationUnit fooWC = getCompilationUnit("/P/src/Foo.java").getWorkingCopy(this.wcOwner, null);
 			IType foo =  fooWC.getType("Foo");
-			
+
 			CompilerOptions compilerOptions = new CompilerOptions(p.getOptions(true));
 			ProblemReporter problemReporter = new ProblemReporter(
 					DefaultErrorHandlingPolicies.proceedWithAllProblems(),
 					compilerOptions,
 					new DefaultProblemFactory());
-			
+
 			// force usage of type converter:
 			CompilationUnitDeclaration parsedUnit =
 				SourceTypeConverter.buildCompilationUnit(
@@ -2286,10 +2286,10 @@ public class OTReconcilerTests extends ReconcilerTests {
 						SourceTypeConverter.FIELD_AND_METHOD | SourceTypeConverter.MEMBER_TYPE | SourceTypeConverter.LOCAL_TYPE,
 						problemReporter,
 						new CompilationResult("Foo.java".toCharArray(), 1, 1, 90));
-			
+
 			// force resolving:
 			process(parsedUnit, p, compilerOptions, problemReporter, ITranslationStates.STATE_RESOLVED);
-			
+
 			// evaluate result:
 			CategorizedProblem[] problems = parsedUnit.compilationResult().problems;
 			assertNull(problems);
@@ -2318,8 +2318,8 @@ public class OTReconcilerTests extends ReconcilerTests {
 				"	public void baseMethod(int flag, String name) {}\n" +
 				"}\n"
 			);
-			
-			String sourceFoo = 
+
+			String sourceFoo =
 					"import base pbase.Base;\n" +
 					"public team class Foo {\n" +
 					"	@SuppressWarnings(\"unused\") private String v1;\n" +
@@ -2349,16 +2349,16 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			char[] sourceChars = sourceFoo.toCharArray();
 			this.problemRequestor.initialize(sourceChars);
-			
+
 			ICompilationUnit fooWC = getCompilationUnit("/P/src/Foo.java").getWorkingCopy(this.wcOwner, null);
 			IType foo =  fooWC.getType("Foo");
-			
+
 			CompilerOptions compilerOptions = new CompilerOptions(p.getOptions(true));
 			ProblemReporter problemReporter = new ProblemReporter(
 					DefaultErrorHandlingPolicies.proceedWithAllProblems(),
 					compilerOptions,
 					new DefaultProblemFactory());
-			
+
 			// force usage of type converter:
 			CompilationUnitDeclaration parsedUnit =
 				SourceTypeConverter.buildCompilationUnit(
@@ -2366,10 +2366,10 @@ public class OTReconcilerTests extends ReconcilerTests {
 						SourceTypeConverter.FIELD_AND_METHOD | SourceTypeConverter.MEMBER_TYPE | SourceTypeConverter.LOCAL_TYPE,
 						problemReporter,
 						new CompilationResult("Foo.java".toCharArray(), 1, 1, 90));
-			
+
 			// force resolving:
 			process(parsedUnit, p, compilerOptions, problemReporter, ITranslationStates.STATE_RESOLVED);
-			
+
 			// evaluate result:
 			CategorizedProblem[] problems = parsedUnit.compilationResult().problems;
 			assertNull(problems);
@@ -2400,8 +2400,8 @@ public class OTReconcilerTests extends ReconcilerTests {
 				"	public String f;\n" +
 				"}\n"
 			);
-			
-			String sourceFoo = 
+
+			String sourceFoo =
 					"import base pbase.Base;\n" +
 					"public team class Foo {\n" +
 					"	@SuppressWarnings(\"unused\") private String v1;\n" +
@@ -2437,16 +2437,16 @@ public class OTReconcilerTests extends ReconcilerTests {
 			Indexer.getInstance().waitForIndex(null);
 			char[] sourceChars = sourceFoo.toCharArray();
 			this.problemRequestor.initialize(sourceChars);
-			
+
 			ICompilationUnit fooWC = getCompilationUnit("/P/src/Foo.java").getWorkingCopy(this.wcOwner, null);
 			IType foo =  fooWC.getType("Foo");
-			
+
 			CompilerOptions compilerOptions = new CompilerOptions(p.getOptions(true));
 			ProblemReporter problemReporter = new ProblemReporter(
 					DefaultErrorHandlingPolicies.proceedWithAllProblems(),
 					compilerOptions,
 					new DefaultProblemFactory());
-			
+
 			// force usage of type converter:
 			CompilationUnitDeclaration parsedUnit =
 				SourceTypeConverter.buildCompilationUnit(
@@ -2454,10 +2454,10 @@ public class OTReconcilerTests extends ReconcilerTests {
 						SourceTypeConverter.FIELD_AND_METHOD | SourceTypeConverter.MEMBER_TYPE | SourceTypeConverter.LOCAL_TYPE,
 						problemReporter,
 						new CompilationResult("Foo.java".toCharArray(), 1, 1, 90));
-			
+
 			// force resolving:
 			process(parsedUnit, p, compilerOptions, problemReporter, ITranslationStates.STATE_RESOLVED);
-			
+
 			// evaluate result:
 			CategorizedProblem[] problems = parsedUnit.compilationResult().problems;
 			assertNull(problems);
@@ -2491,8 +2491,8 @@ public class OTReconcilerTests extends ReconcilerTests {
 			StringBuilder attributes = new StringBuilder();
 			for (int i=0; i<110; i++)
 				attributes.append("@SuppressWarnings(\"unused\") private int i"+i+";\n");
-			
-			String sourceFoo = 
+
+			String sourceFoo =
 					"public team class Foo extends Foo0 {\n" +
 					attributes.toString() +
 					"   protected class R {\n" +
@@ -2522,7 +2522,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 					"----------\n");
 
 			this.problemRequestor.initialize(sourceChars);
-			fooWC.reconcile(AST.JLS12, 
+			fooWC.reconcile(AST.JLS12,
 					 ICompilationUnit.FORCE_PROBLEM_DETECTION|ICompilationUnit.ENABLE_STATEMENTS_RECOVERY|ICompilationUnit.ENABLE_BINDINGS_RECOVERY,
 					 fooWC.getOwner(), null);
 
@@ -2539,31 +2539,31 @@ public class OTReconcilerTests extends ReconcilerTests {
 	private void createRuntimeStubs() throws CoreException {
 		createFolder("/P/org/objectteams");
 		createFile("/P/org/objectteams/ITeam.java",
-				"package org.objectteams;\n" + 
+				"package org.objectteams;\n" +
 				"public interface ITeam {\n" +
 				"}\n");
 		createFile("/P/org/objectteams/Team.java",
-				"package org.objectteams;\n" + 
+				"package org.objectteams;\n" +
 				"public class Team implements ITeam {\n" +
-				"	public Object _OT$callNext(IBoundBase2 baze, ITeam[] teams, int idx, int[] callinIds, int boundMethodId, Object[] args, Object[] baseCallArgs, int baseCallFlags)\n" + 
+				"	public Object _OT$callNext(IBoundBase2 baze, ITeam[] teams, int idx, int[] callinIds, int boundMethodId, Object[] args, Object[] baseCallArgs, int baseCallFlags)\n" +
 				"		return null;\n" +
 				"	}\n" +
 				"}\n");
 		createFile("/P/org/objectteams/ITeamMigratable.java",
-				"package org.objectteams;\n" + 
-				"\n" + 
-				"public interface ITeamMigratable {\n" + 
-				"	<R> R migrateToTeam(final ITeam otherTeam);\n" + 
+				"package org.objectteams;\n" +
+				"\n" +
+				"public interface ITeamMigratable {\n" +
+				"	<R> R migrateToTeam(final ITeam otherTeam);\n" +
 				"}"
 				);
 		createFile("/P/org/objectteams/IBaseMigratable.java",
-				"package org.objectteams;\n" + 
-				"public interface IBaseMigratable {\n" + 
-				"	<B> void migrateToBase(B otherBase);\n" + 
-				"}\n" + 
+				"package org.objectteams;\n" +
+				"public interface IBaseMigratable {\n" +
+				"	<B> void migrateToBase(B otherBase);\n" +
+				"}\n" +
 				"");
 		createFile("/P/org/objectteams/IBoundBase2.java",
-				"package org.objectteams;\n" + 
+				"package org.objectteams;\n" +
 				"public interface IBoundBase2 {}\n");
 	}
 

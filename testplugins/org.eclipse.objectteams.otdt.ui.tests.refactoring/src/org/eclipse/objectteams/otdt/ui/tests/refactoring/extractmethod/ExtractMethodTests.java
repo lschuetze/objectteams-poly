@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -42,13 +42,13 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring
 
 /**
  * @author brcan
- * 
+ *
  */
 @SuppressWarnings({ "nls", "restriction" })
 public class ExtractMethodTests extends AbstractSelectionTestCase
 {
 	private static ExtractMethodTestSetup _testSetup;
-	
+
     public ExtractMethodTests(String name)
     {
         super(name);
@@ -64,12 +64,12 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	{
 		return _testSetup.getRoot();
 	}
-	
+
 	protected String getResourceLocation()
 	{
 		return "ExtractMethod/";
 	}
-	
+
 	protected String adaptName(String name)
 	{
 	    if (getName().startsWith("testFocusType"))
@@ -77,8 +77,8 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	        return super.adaptName(name);
 	    }
 		return name + "_" + getName() + ".java";
-	}	
-	
+	}
+
 //	protected void selectionTest(int startLine, int startColumn, int endLine, int endColumn)
 //		throws Exception
 //	{
@@ -90,12 +90,12 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 //		assertEquals(expected.getOffset(), selection[0]);
 //		assertEquals(expected.getLength(), selection[1]);
 //	}
-//	
+//
 //	private IPackageFragment getSelectionPackage() throws JavaModelException
 //	{
 //		return _testSetup.getSelectionPackage();
 // 	}
-	
+
 	protected void performTest(
 	        IPackageFragment packageFragment,
 	        String[] ids,
@@ -104,7 +104,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	{
 		performTest(packageFragment, ids, mode, outputFolder, null, null, 0);
 	}
-	
+
 	protected void performTest(
 	        IPackageFragment packageFragment,
 	        String[] ids,
@@ -156,24 +156,24 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 			}
 		}
 		refactoring.setDestination(destination);
-		
+
 		String out = null;
 		switch (mode)
 		{
 			case COMPARE_WITH_OUTPUT:
 			    out = getProofedContent(outputFolder, ids[0]);
-			    break;		
+			    break;
 		}
 		performTest(compUnits[0], refactoring, mode, out, true);
 	}
-	
+
     private ICompilationUnit[] createCUs(
             IPackageFragment packageFragment,
             String[] ids)
 		throws Exception
 	{
 	    ICompilationUnit[] cus = new ICompilationUnit[ids.length];
-	
+
 	    for (int idx = 0; idx < ids.length; idx++)
 	    {
 	        Assert.isNotNull(ids[idx]);
@@ -201,7 +201,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	            COMPARE_WITH_OUTPUT,
 	            "team_out");
     }
-	//extract expression in team 
+	//extract expression in team
 	public void testTeamclass2() throws Exception
     {
 	    performTest(
@@ -245,7 +245,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	    performTest(
 	            _testSetup.getNestedTeamPackage(),
 	            new String[]{"T1"},
-	            COMPARE_WITH_OUTPUT, 
+	            COMPARE_WITH_OUTPUT,
 	            "nestedTeam_out");
     }
 	//extract method invocation in inner role of unbound nested team
@@ -254,7 +254,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	    performTest(
 	            _testSetup.getNestedTeamPackage(),
 	            new String[]{"T1"},
-	            COMPARE_WITH_OUTPUT, 
+	            COMPARE_WITH_OUTPUT,
 	            "nestedTeam_out");
     }
 
@@ -278,7 +278,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        "nestedTeam_out");
     }
 	//extract method invocation in bound inner role of nested team ->
-	//ambiguous base method spec 
+	//ambiguous base method spec
 	public void testNestedTeam5() throws Exception
     {
 		performTest(
@@ -288,7 +288,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        "nestedTeam_out");
     }
 	//extract method invocation in bound inner role of nested team ->
-	//ambiguous role method spec 
+	//ambiguous role method spec
 	public void testNestedTeam6() throws Exception
     {
 		performTest(
@@ -297,7 +297,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        INVALID_SELECTION,
 		        "nestedTeam_out");
     }
-	
+
 	//=====================================================================================
 	// Testing role files
 	//=====================================================================================
@@ -334,7 +334,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	}
 	//	=====================================================================================
 	// 	Testing overloading and/or ambiguity for different focus types
-	//	=====================================================================================	
+	//	=====================================================================================
 
 	//focus implicit role hierarchy
 	public void testFocusTypeIsSuperroleInRoleHierarchy() throws Exception
@@ -345,7 +345,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        INVALID_SELECTION,
 		        "focusType_out");
     }
-	
+
 	public void testFocusTypeIsMiddleRoleInRoleHierarchy() throws Exception
     {
 		performTest(
@@ -371,9 +371,9 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        _testSetup.getFocusTypePackage(),
 		        new String[] {"A", "B", "C", "T1", "T2", "T3"},
 		        INVALID_SELECTION,
-		        "focusType_out");        
+		        "focusType_out");
     }
-	
+
 	public void testFocusTypeIsMiddleBasetypeInBaseHierarchy() throws Exception
     {
 		performTest(
@@ -382,7 +382,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        INVALID_SELECTION,
 		        "focusType_out");
     }
-	
+
 	public void testFocusTypeIsLowestBasetypeInBaseHierarchy() throws Exception
     {
 		performTest(
@@ -391,7 +391,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        INVALID_SELECTION,
 		        "focusType_out");
     }
-		
+
 	//focus team hierarchy
 	public void testFocusTypeIsSuperteamInTeamHierachy() throws Exception
     {
@@ -401,7 +401,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        INVALID_SELECTION,
 		        "focusType_out");
     }
-	
+
 	public void testFocusTypeIsMiddleTeamInTeamHierachy() throws Exception
     {
 		performTest(
@@ -429,7 +429,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        INVALID_SELECTION,
 		        "overloading_out");
 	}
-	
+
 	// role is a indirect subclass of target class, explicit + implicit inheritance, short methodSpec
 	public void test21() throws Exception
 	{
@@ -439,7 +439,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        INVALID_SELECTION,
 		        "overloading_out");
 	}
-	
+
 	// role is a indirect subclass of target class, explicit + implicit inheritance, long methodSpec
 	public void test22() throws Exception
 	{
@@ -449,8 +449,8 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        COMPARE_WITH_OUTPUT,
 		        "overloading_out");
 	}
-	
-	// bound base class is target class, short methodSpec 
+
+	// bound base class is target class, short methodSpec
 	public void test23() throws Exception
 	{
 		performTest(
@@ -459,7 +459,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        INVALID_SELECTION,
 		        "overloading_out");
 	}
-	
+
 	// bound base class is direct/indirect subclass of target class, short methodSpec
 	public void test24() throws Exception
 	{
@@ -469,7 +469,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        INVALID_SELECTION,
 		        "overloading_out");
 	}
-	
+
 	// base class is subclass of target class, long methodSpec
 	public void test25() throws Exception
 	{
@@ -482,7 +482,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 
 	//	=====================================================================================
 	// 	Testing special syntactic nodes
-	//	=====================================================================================	
+	//	=====================================================================================
 
 	// call target is a declared-lifting argument
 	public void testDeclaredLifting1() throws Exception

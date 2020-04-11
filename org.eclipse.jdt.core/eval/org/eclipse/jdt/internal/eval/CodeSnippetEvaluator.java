@@ -68,13 +68,13 @@ protected void addEvaluationResultForCompilationProblem(Map<char[], EvaluationRe
 	switch(evaluationType) {
 		case EvaluationResult.T_PACKAGE:
 			evaluationID = this.context.packageName;
-			
+
 			// shift line number, source start and source end
 			problem.setSourceLineNumber(1);
 			problem.setSourceStart(0);
 			problem.setSourceEnd(evaluationID.length - 1);
 			break;
-			
+
 		case EvaluationResult.T_IMPORT:
 			evaluationID = sourceMapper.getImport(pbLineNumber);
 
@@ -86,13 +86,13 @@ protected void addEvaluationResultForCompilationProblem(Map<char[], EvaluationRe
 
 		case EvaluationResult.T_CODE_SNIPPET:
 			evaluationID = this.codeSnippet;
-		
+
 			// shift line number, source start and source end
 			problem.setSourceLineNumber(pbLineNumber - this.mapper.lineNumberOffset);
 			problem.setSourceStart(problem.getSourceStart() - this.mapper.startPosOffset);
 			problem.setSourceEnd(problem.getSourceEnd() - this.mapper.startPosOffset);
 			break;
-			
+
 		case EvaluationResult.T_INTERNAL:
 			evaluationID = cuSource;
 			break;
@@ -120,18 +120,18 @@ Compiler getCompiler(ICompilerRequestor compilerRequestor) {
 	Compiler compiler = null;
 	if (!DEVELOPMENT_MODE) {
 		// If we are not developping the code snippet support classes,
-		// use a regular compiler and feed its lookup environment with 
+		// use a regular compiler and feed its lookup environment with
 		// the code snippet support classes
 
 		CompilerOptions compilerOptions = new CompilerOptions(this.options);
 		compilerOptions.performMethodsFullRecovery = true;
 		compilerOptions.performStatementsRecovery = true;
-		compiler = 
+		compiler =
 			new CodeSnippetCompiler(
-				this.environment, 
-				DefaultErrorHandlingPolicies.exitAfterAllProblems(), 
-				compilerOptions, 
-				compilerRequestor, 
+				this.environment,
+				DefaultErrorHandlingPolicies.exitAfterAllProblems(),
+				compilerOptions,
+				compilerRequestor,
 				this.problemFactory,
 				this.context,
 				getMapper().startPosOffset,
@@ -164,10 +164,10 @@ Compiler getCompiler(ICompilerRequestor compilerRequestor) {
 		compilerOptions.performMethodsFullRecovery = true;
 		compilerOptions.performStatementsRecovery = true;
 		compiler = new Compiler(
-			getWrapperEnvironment(), 
-			DefaultErrorHandlingPolicies.exitAfterAllProblems(), 
-			compilerOptions, 
-			compilerRequestor, 
+			getWrapperEnvironment(),
+			DefaultErrorHandlingPolicies.exitAfterAllProblems(),
+			compilerOptions,
+			compilerRequestor,
 			this.problemFactory);
 	}
 	return compiler;
@@ -183,17 +183,17 @@ private CodeSnippetToCuMapper getMapper() {
 			} else {
 				varClassName = installedVars.className;
 			}
-			
+
 		}
 		this.mapper = new CodeSnippetToCuMapper(
-			this.codeSnippet, 
+			this.codeSnippet,
 			this.context.packageName,
 			this.context.imports,
 			getClassName(),
 			varClassName,
-			this.context.localVariableNames, 
-			this.context.localVariableTypeNames, 
-			this.context.localVariableModifiers, 
+			this.context.localVariableNames,
+			this.context.localVariableTypeNames,
+			this.context.localVariableModifiers,
 			this.context.declaringTypeName,
 			this.context.lineSeparator,
 			CompilerOptions.versionToJdkLevel(this.options.get(JavaCore.COMPILER_COMPLIANCE))

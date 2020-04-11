@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.*;
  * <p>
  * This class is intended to be instantiated and subclassed by clients.
  * </p>
- * 
+ *
  * @since 3.0
  */
 public class TypeReferenceMatch extends ReferenceMatch {
@@ -31,7 +31,7 @@ public class TypeReferenceMatch extends ReferenceMatch {
 
 /**
  * Creates a new type reference match.
- * 
+ *
  * @param enclosingElement the inner-most enclosing member that references this type
  * @param accuracy one of {@link #A_ACCURATE} or {@link #A_INACCURATE}
  * @param offset the offset the match starts at, or -1 if unknown
@@ -58,7 +58,7 @@ public TypeReferenceMatch(IJavaElement enclosingElement, int accuracy, int offse
  *             void method() {}
  *         }
  *         </pre>
- * 		will return one match whose other elements is an array of two fields: 
+ * 		will return one match whose other elements is an array of two fields:
  * 		{@link IField test2} and {@link IField test3}.
  * 		<br><br>
  * 	</li>
@@ -71,7 +71,7 @@ public TypeReferenceMatch(IJavaElement enclosingElement, int accuracy, int offse
  *             }
  *         }
  *         </pre>
- * 		will return one match whose other elements is an array of two local 
+ * 		will return one match whose other elements is an array of two local
  * 		variables: {@link ILocalVariable local2} and {@link ILocalVariable local3}.
  * 		<br><br>
  * 	</li>
@@ -90,7 +90,7 @@ public TypeReferenceMatch(IJavaElement enclosingElement, int accuracy, int offse
  * 		{@link ILocalVariable test2}.
  * 	</li>
  * </ul>
- * 
+ *
  * @return the other elements of the search match, or <code>null</code> if none
  * @since 3.2
  */
@@ -100,9 +100,9 @@ public final IJavaElement[] getOtherElements() {
 
 /**
  * Sets the other elements of this search match.
- * 
+ *
  * @see #getOtherElements()
- * 
+ *
  * @param otherElements the other elements of the match,
  * 	or <code>null</code> if none
  * @since 3.2

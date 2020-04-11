@@ -15,7 +15,7 @@
  *                          Bug 409245 - [1.8][compiler] Type annotations dropped when call is routed through a synthetic bridge method
  *                          Bug 409250 - [1.8][compiler] Various loose ends in 308 code generation
  *        Stephan Herrmann - Contribution for
- *							Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec) 
+ *							Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *							Bug 424415 - [1.8][compiler] Eventual resolution of ReferenceExpression is not seen to be happening.
  *							Bug 427438 - [1.8][compiler] NPE at org.eclipse.jdt.internal.compiler.ast.ConditionalExpression.generateCode(ConditionalExpression.java:280)
  *******************************************************************************/
@@ -111,7 +111,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, 	boolea
 				codeStream.aastore();
 				if (i < argsLength - 1) {
 					codeStream.dup();
-				}	
+				}
 			}
 		} else {
 			codeStream.generateInlinedValue(0);
@@ -122,7 +122,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, 	boolea
 	}
 	codeStream.recordPositionsFrom(pc, this.sourceStart);
 }
-/* Inner emulation consists in either recording a dependency 
+/* Inner emulation consists in either recording a dependency
  * link only, or performing one level of propagation.
  *
  * Dependency mechanism is used whenever dealing with source target
@@ -225,11 +225,11 @@ public TypeBinding resolveType(BlockScope scope) {
 		}
 		this.resolvedType = this.type.resolvedType = scope.environment().createParameterizedType(((ParameterizedTypeBinding) this.resolvedType).genericType(), inferredTypes, ((ParameterizedTypeBinding) this.resolvedType).enclosingType());
  	}
-	
+
 	ReferenceBinding allocatedType = (ReferenceBinding) this.resolvedType;
 	this.binding = findConstructorBinding(scope, this, allocatedType, this.argumentTypes);
 
-	if (!this.binding.isValidBinding()) {	
+	if (!this.binding.isValidBinding()) {
 		if (this.binding instanceof ProblemMethodBinding
 			&& ((ProblemMethodBinding) this.binding).problemId() == NotVisible) {
 			if (this.evaluationContext.declaringTypeName != null) {
@@ -240,7 +240,7 @@ public TypeBinding resolveType(BlockScope scope) {
 					}
 					if (this.type != null && !this.type.resolvedType.isValidBinding()) {
 						return null;
-					}					
+					}
 					scope.problemReporter().invalidConstructor(this, this.binding);
 					return this.resolvedType;
 				}
@@ -250,11 +250,11 @@ public TypeBinding resolveType(BlockScope scope) {
 				}
 				if (this.type != null && !this.type.resolvedType.isValidBinding()) {
 					return null;
-				}				
+				}
 				scope.problemReporter().invalidConstructor(this, this.binding);
 				return this.resolvedType;
 			}
-			CodeSnippetScope localScope = new CodeSnippetScope(scope);			
+			CodeSnippetScope localScope = new CodeSnippetScope(scope);
 			MethodBinding privateBinding = localScope.getConstructor((ReferenceBinding)this.delegateThis.type, this.argumentTypes, this);
 			if (!privateBinding.isValidBinding()) {
 				if (this.binding.declaringClass == null) {
@@ -262,19 +262,19 @@ public TypeBinding resolveType(BlockScope scope) {
 				}
 				if (this.type != null && !this.type.resolvedType.isValidBinding()) {
 					return null;
-				}				
+				}
 				scope.problemReporter().invalidConstructor(this, this.binding);
 				return this.resolvedType;
 			} else {
 				this.binding = privateBinding;
-			}				
+			}
 		} else {
 			if (this.binding.declaringClass == null) {
 				this.binding.declaringClass = allocatedType;
 			}
 			if (this.type != null && !this.type.resolvedType.isValidBinding()) {
 				return null;
-			}			
+			}
 			scope.problemReporter().invalidConstructor(this, this.binding);
 			return this.resolvedType;
 		}

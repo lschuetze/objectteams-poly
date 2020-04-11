@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010, 2014 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -29,13 +29,13 @@ import junit.framework.Test;
 
 @SuppressWarnings("unchecked")
 public class Java5 extends AbstractOTJLDTest {
-	
+
 	private String VALUE_IS;
 
 	public Java5(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -43,7 +43,7 @@ public class Java5 extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -61,7 +61,7 @@ public class Java5 extends AbstractOTJLDTest {
 	// a base field has a generic type and is bound via callout
     // A.1.1-otjld-generic-feature-in-base-1
     public void testA11_genericFeatureInBase1() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA11gfib1.java",
@@ -101,7 +101,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a base field has a generic type and is bound via callout
     // A.1.1-otjld-generic-feature-in-base-2
     public void testA11_genericFeatureInBase2() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA11gfib2.java",
@@ -145,7 +145,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a base has a parameterized method  which is bound via callout
     // A.1.1-otjld-generic-feature-in-base-3
     public void testA11_genericFeatureInBase3() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA11gfib3.java",
@@ -179,7 +179,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a base has a parameterized method  which is bound via callout with substitution
     // A.1.1-otjld-generic-feature-in-base-3s
     public void testA11_genericFeatureInBase3s() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA11gfib3s.java",
@@ -213,7 +213,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a base has a parameterized method  which is bound via callin
     // A.1.1-otjld-generic-feature-in-base-3ci
     public void testA11_genericFeatureInBase3ci() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA11gfib3ci.java",
@@ -245,7 +245,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a base has a parameterized method with type bound which is bound via callin
     // A.1.1-otjld-generic-feature-in-base-3cib
     public void testA11_genericFeatureInBase3cib() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA11gfib3cib.java",
@@ -277,7 +277,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a base has a parameterized method with type bound which is bound via callin - compatible type variable declaration
     // A.1.1-otjld-generic-feature-in-base-3cib2
     public void testA11_genericFeatureInBase3cib2() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA11gfib3cib2.java",
@@ -335,18 +335,18 @@ public class Java5 extends AbstractOTJLDTest {
 			    "  \n"
             },
             (this.complianceLevel < ClassFileConstants.JDK1_8 ?
-	    		"----------\n" + 
-	    		"1. ERROR in TeamA11gfib3cib3.java (at line 4)\n" + 
-	    		"	<T> T getIt(T it) <- replace T getIt(T it);\n" + 
-	    		"	      ^^^^^\n" + 
-	    		"Bound mismatch: The generic method getIt(T) of type TeamA11gfib3cib3.R is not applicable for the arguments (T). The inferred type T is not a valid substitute for the bounded parameter <T extends Number>\n" + 
+	    		"----------\n" +
+	    		"1. ERROR in TeamA11gfib3cib3.java (at line 4)\n" +
+	    		"	<T> T getIt(T it) <- replace T getIt(T it);\n" +
+	    		"	      ^^^^^\n" +
+	    		"Bound mismatch: The generic method getIt(T) of type TeamA11gfib3cib3.R is not applicable for the arguments (T). The inferred type T is not a valid substitute for the bounded parameter <T extends Number>\n" +
 	    		"----------\n"
 	    	:
-	    		"----------\n" + 
-	    		"1. ERROR in TeamA11gfib3cib3.java (at line 4)\n" + 
-	    		"	<T> T getIt(T it) <- replace T getIt(T it);\n" + 
-	    		"	^^^^^^^^^^^^^^^^^\n" + 
-	    		"No method getIt(T) found in type TeamA11gfib3cib3.R to resolve method designator (OTJLD 4.1(c)).\n" + 
+	    		"----------\n" +
+	    		"1. ERROR in TeamA11gfib3cib3.java (at line 4)\n" +
+	    		"	<T> T getIt(T it) <- replace T getIt(T it);\n" +
+	    		"	^^^^^^^^^^^^^^^^^\n" +
+	    		"No method getIt(T) found in type TeamA11gfib3cib3.R to resolve method designator (OTJLD 4.1(c)).\n" +
 	    		"----------\n"));
     }
 
@@ -406,7 +406,7 @@ public class Java5 extends AbstractOTJLDTest {
 
     // a base has a parameterized method, type variable used as type argument -  which is bound via callin
     public void testA11_genericFeatureInBase3cih() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA11gfib3ci.java",
@@ -438,7 +438,7 @@ public class Java5 extends AbstractOTJLDTest {
 
     // a base has a parameterized method, base's type parameter omitted -  which is bound via callin
     public void testA11_genericFeatureInBase3cii() {
-       
+
        runNegativeTest(
             new String[] {
 		"TeamA11gfib3ci.java",
@@ -465,22 +465,22 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "  \n"
             },
-            "----------\n" + 
-    		"1. WARNING in TeamA11gfib3ci.java (at line 4)\n" + 
-    		"	<T> T getIt(Object it, Class<T> c) <- replace T getIt(Object it, Class c)\n" + 
-    		"	                                                                 ^^^^^\n" + 
-    		"Class is a raw type. References to generic type Class<T> should be parameterized\n" + 
-    		"----------\n" + 
-    		"2. ERROR in TeamA11gfib3ci.java (at line 4)\n" + 
-    		"	<T> T getIt(Object it, Class<T> c) <- replace T getIt(Object it, Class c)\n" + 
-    		"	                                                                 ^^^^^\n" + 
-    		"Method specifier finds no direct match, argument of closest match is Class<Object> instead of Class (OTJLD 4.1(c)).\n" + 
+            "----------\n" +
+    		"1. WARNING in TeamA11gfib3ci.java (at line 4)\n" +
+    		"	<T> T getIt(Object it, Class<T> c) <- replace T getIt(Object it, Class c)\n" +
+    		"	                                                                 ^^^^^\n" +
+    		"Class is a raw type. References to generic type Class<T> should be parameterized\n" +
+    		"----------\n" +
+    		"2. ERROR in TeamA11gfib3ci.java (at line 4)\n" +
+    		"	<T> T getIt(Object it, Class<T> c) <- replace T getIt(Object it, Class c)\n" +
+    		"	                                                                 ^^^^^\n" +
+    		"Method specifier finds no direct match, argument of closest match is Class<Object> instead of Class (OTJLD 4.1(c)).\n" +
     		"----------\n");
     }
 
     // a base has a parameterized method, base's type parameter erased to Object -  which is bound via callin
     public void testA11_genericFeatureInBase3cij() {
-       
+
        runNegativeTest(
             new String[] {
 		"TeamA11gfib3ci.java",
@@ -507,17 +507,17 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "  \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamA11gfib3ci.java (at line 4)\n" + 
-    		"	<T> T getIt(Object it, Class<T> c) <- replace T getIt(Object it, Class<Object> c)\n" + 
-    		"	                                ^\n" + 
-    		"When mapping the 2. argument of getIt(Object, Class): cannot convert from java.lang.Class<java.lang.Object> to java.lang.Class<T> (OTJLD 4.5(d)).\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamA11gfib3ci.java (at line 4)\n" +
+    		"	<T> T getIt(Object it, Class<T> c) <- replace T getIt(Object it, Class<Object> c)\n" +
+    		"	                                ^\n" +
+    		"When mapping the 2. argument of getIt(Object, Class): cannot convert from java.lang.Class<java.lang.Object> to java.lang.Class<T> (OTJLD 4.5(d)).\n" +
     		"----------\n");
     }
 
     // a base has a parameterized method, type variable used as type argument -  which is bound via callin with parameter mapping
     public void _testA11_genericFeatureInBase3cik() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA11gfib3ci.java",
@@ -555,7 +555,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a base has a parameterized method  which is bound via callout
     // A.1.1-otjld-generic-feature-in-base-4
     public void testA11_genericFeatureInBase4() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA11gfib4.java",
@@ -604,7 +604,7 @@ public class Java5 extends AbstractOTJLDTest {
     // mimiced after a variation of the DeclarationImplAdaptor suggested to svenk
     // A.1.1-otjld-generic-feature-in-base-5
     public void testA11_genericFeatureInBase5() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA11gfib5.java",
@@ -657,7 +657,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role method has a generic parameter and is bound via callout
     // A.1.2-otjld-generic-role-feature-1
     public void testA12_genericRoleFeature1() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA12grf1.java",
@@ -698,7 +698,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role method has a generic parameter and is bound via callout - lowering required
     // A.1.2-otjld-generic-role-feature-2
     public void testA12_genericRoleFeature2() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA12grf2.java",
@@ -740,7 +740,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a team has a parameterized collection of bases, lowering required
     // A.1.2-otjld-generic-role-feature-2a
     public void testA12_genericRoleFeature2a() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA12grf2a.java",
@@ -775,7 +775,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a team has a parameterized collection of bases, lowering ambiguous
     // A.1.2-otjld-generic-role-feature-2w
     public void testA12_genericRoleFeature2w() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA12grf2w.java",
@@ -809,7 +809,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a team has a parameterized collection of bases, lowering ambiguous
     // A.1.2-otjld-generic-role-feature-2w2
     public void testA12_genericRoleFeature2w2() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA12grf2w2.java",
@@ -844,7 +844,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a base method has a generic parameter and is bound via callin
     // A.1.2-otjld-generic-role-feature-3
     public void testA12_genericRoleFeature3() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA12grf3.java",
@@ -886,7 +886,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role method has a generic parameter and is bound via callin - lifting required
     // A.1.2-otjld-generic-role-feature-4
     public void testA12_genericRoleFeature4() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA12grf4.java",
@@ -931,7 +931,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role is used as type parameter, implicit inheritance involved
     // A.1.2-otjld-generic-role-feature-6
     public void testA12_genericRoleFeature6() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA12grf6_2.java",
@@ -973,7 +973,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role is used as type parameter, implicit inheritance involved - class LinkedList vs. interface List
     // A.1.2-otjld-generic-role-feature-7
     public void testA12_genericRoleFeature7() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA12grf7_2.java",
@@ -1015,7 +1015,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role is used as type parameter, implicit inheritance involved - used in return statement
     // A.1.2-otjld-generic-role-feature-8
     public void testA12_genericRoleFeature8() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA12grf8_2.java",
@@ -1060,7 +1060,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role is used as type parameter, implicit inheritance involved - used within abstract role
     // A.1.2-otjld-generic-role-feature-9
     public void testA12_genericRoleFeature9() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA12grf9_2.java",
@@ -1123,23 +1123,23 @@ public class Java5 extends AbstractOTJLDTest {
 				    "}\n" +
 				    "    \n"
 			},
-			"----------\n" + 
-    		"1. WARNING in TeamA12grf10.java (at line 9)\n" + 
-    		"	callin List ci() { return base.ci(); }\n" + 
-    		"	       ^^^^\n" + 
-    		"List is a raw type. References to generic type List<E> should be parameterized\n" + 
-    		"----------\n" + 
-    		"2. WARNING in TeamA12grf10.java (at line 9)\n" + 
-    		"	callin List ci() { return base.ci(); }\n" + 
-    		"	       ^^^^\n" + 
-    		"Type safety: The return type List for ci() from the type TeamA12grf10.R2 needs unchecked conversion to conform to List<String> from the type TeamA12grf10.R1\n" + 
+			"----------\n" +
+    		"1. WARNING in TeamA12grf10.java (at line 9)\n" +
+    		"	callin List ci() { return base.ci(); }\n" +
+    		"	       ^^^^\n" +
+    		"List is a raw type. References to generic type List<E> should be parameterized\n" +
+    		"----------\n" +
+    		"2. WARNING in TeamA12grf10.java (at line 9)\n" +
+    		"	callin List ci() { return base.ci(); }\n" +
+    		"	       ^^^^\n" +
+    		"Type safety: The return type List for ci() from the type TeamA12grf10.R2 needs unchecked conversion to conform to List<String> from the type TeamA12grf10.R1\n" +
     		"----------\n");
     }
 
     // a role method has a return type with wildcard  - reported by Olaf Otto
     // A.1.2-otjld-generic-role-feature-11
     public void testA12_genericRoleFeature11() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA12grf11.java",
@@ -1170,7 +1170,7 @@ public class Java5 extends AbstractOTJLDTest {
     // an externalized role is used as a type argument
     // A.1.2-otjld-generic-role-feature-12
     public void testA12_genericRoleFeature12() {
-       
+
        runConformTest(
             new String[] {
 		"TA12grf12Main.java",
@@ -1553,10 +1553,10 @@ public class Java5 extends AbstractOTJLDTest {
     			"   protected String test(String u){ return u;}" +
     			"}\n"
     		},
-    		"----------\n" + 
-			"1. ERROR in TeamA12grf16f_2.java (at line 4)\n" + 
-			"	test <- before test;\n" + 
-			"	^^^^\n" + 
+    		"----------\n" +
+			"1. ERROR in TeamA12grf16f_2.java (at line 4)\n" +
+			"	test <- before test;\n" +
+			"	^^^^\n" +
 			(this.weavingScheme == WeavingScheme.OTRE
 			? "Type mismatch: cannot convert from String to U\n"
 			: "The method test(U) in the type TeamA12grf16f_2<U>.R is not applicable for the arguments (String)\n"
@@ -1669,7 +1669,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a parameter of a callout binding requires autoboxing - explicit mapping
     // A.1.3-otjld-autoboxing-in-method-mapping-1
     public void testA13_autoboxingInMethodMapping1() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA13aimm1.java",
@@ -1703,7 +1703,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a parameter of a callout binding requires autoboxing - implicit mapping
     // A.1.3-otjld-autoboxing-in-method-mapping-2
     public void testA13_autoboxingInMethodMapping2() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA13aimm2.java",
@@ -1736,7 +1736,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a parameter of a callout binding requires autounboxing - explicit mapping
     // A.1.3-otjld-autoboxing-in-method-mapping-3
     public void testA13_autoboxingInMethodMapping3() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA13aimm3.java",
@@ -1770,7 +1770,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a parameter of a callout binding requires autounboxing - implicit mapping
     // A.1.3-otjld-autoboxing-in-method-mapping-4
     public void testA13_autoboxingInMethodMapping4() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA13aimm4.java",
@@ -1803,7 +1803,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a parameter of a callout binding requires autounboxing - explicit mapping - lifting direction
     // A.1.3-otjld-autoboxing-in-method-mapping-5
     public void testA13_autoboxingInMethodMapping5() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA13aimm5.java",
@@ -1837,7 +1837,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a parameter of a callout binding requires autounboxing - implicit mapping - lifting direction
     // A.1.3-otjld-autoboxing-in-method-mapping-6
     public void testA13_autoboxingInMethodMapping6() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA13aimm6.java",
@@ -1870,7 +1870,7 @@ public class Java5 extends AbstractOTJLDTest {
     // the return of a callin binding requires unboxing - implicit mapping
     // A.1.3-otjld-autoboxing-in-method-mapping-7
     public void testA13_autoboxingInMethodMapping7() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA13aimm7.java",
@@ -1906,7 +1906,7 @@ public class Java5 extends AbstractOTJLDTest {
     // the return of a callin binding requires autounboxing - implicit mapping
     // A.1.3-otjld-autoboxing-in-method-mapping-8
     public void testA13_autoboxingInMethodMapping8() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA13aimm8.java",
@@ -1942,7 +1942,7 @@ public class Java5 extends AbstractOTJLDTest {
     // the argument of a callin binding requires autoboxing - implicit mapping - signature less binding
     // A.1.3-otjld-autoboxing-in-method-mapping-9
     public void testA13_autoboxingInMethodMapping9() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA13aimm9.java",
@@ -1979,7 +1979,7 @@ public class Java5 extends AbstractOTJLDTest {
     // the argument of a callin binding requires autoboxing - callin unbound at site of decleration
     // A.1.3-otjld-autoboxing-in-method-mapping-10
     public void testA13_autoboxingInMethodMapping10() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA13aimm10.java",
@@ -2018,7 +2018,7 @@ public class Java5 extends AbstractOTJLDTest {
     // reported by Dehla, see TPX-468
     // A.1.4-otjld-autounboxing-in-method-mapping-1
     public void testA14_autounboxingInMethodMapping1() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA14aimm1.java",
@@ -2077,7 +2077,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role class literal is used in a static role method
     // A.1.5-otjld-role-class-literal-2
     public void testA15_roleClassLiteral2() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA15rcl2.java",
@@ -2118,10 +2118,10 @@ public class Java5 extends AbstractOTJLDTest {
             "1.2.4(c)");
     }
 
-    // 
+    //
     // A.1.5-otjld-role-class-literal-4
     public void testA15_roleClassLiteral4() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA15rcl4_2.java",
@@ -2157,7 +2157,7 @@ public class Java5 extends AbstractOTJLDTest {
     // an invisible type is mentioned as a type parameter in a callout RHS
     // A.1.6-otjld-decapsulation-for-type-parameter-1
     public void testA16_decapsulationForTypeParameter1() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA16dftp1.java",
@@ -2203,7 +2203,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role is played by the raw type of a generic base class
     // A.1.7-otjld-generic-baseclass-1
     public void testA17_genericBaseclass1() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA17gb1.java",
@@ -2270,7 +2270,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a parameterized role is played by a parameterized base class
     // A.1.7-otjld-generic-baseclass-3
     public void testA17_genericBaseclass3() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA17gb3.java",
@@ -2308,7 +2308,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a generic list is modified from its role
     // A.1.7-otjld-generic-baseclass-4
     public void testA17_genericBaseclass4() {
-       
+
        runConformTest(
             new String[] {
 		"TA17gb4Main.java",
@@ -2354,7 +2354,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a generic list is modified from its role
     // A.1.7-otjld-generic-baseclass-5
     public void testA17_genericBaseclass5() {
-       
+
        runConformTest(
             new String[] {
 		"TA17gb5Main.java",
@@ -2406,7 +2406,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a generic list is modified from its role - iterate over role/base as an Iterable
     // A.1.7-otjld-generic-baseclass-6
     public void testA17_genericBaseclass6() {
-       
+
        runConformTest(
             new String[] {
 		"TA17gb6Main.java",
@@ -2458,7 +2458,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a callout binding has a type parameter whereas its super-role-method uses the raw type
     // A.1.8-otjld-callout-redefines-inherited-1
     public void testA18_calloutRedefinesInherited1() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA18cri1.java",
@@ -2500,7 +2500,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a callout binding covariantly redefines the return type of the abstract bound role method
     // A.1.8-otjld-callout-redefines-inherited-2
     public void testA18_calloutRedefinesInherited2() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA18cri2.java",
@@ -2535,7 +2535,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a callin method has a generic argument
     // A.1.8-otjld-callin-method-with-generic-1
     public void testA18_callinMethodWithGeneric1() {
-       
+
        runConformTest(
             new String[] {
 		"TA18cmwg1Main.java",
@@ -2580,7 +2580,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a method has a type parameter constrained by "base"
     // A.1.9-otjld-basetype-parameter-1
     public void testA19_basetypeParameter1() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA19bp1.java",
@@ -2676,11 +2676,11 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamA19bp3.java (at line 12)\n" + 
-    		"	public <B base Role0> void test(B as Role0 o) {\n" + 
-    		"	                                ^^^^^^^^^^\n" + 
-    		"Unhandled exception type LiftingFailedException, caused by an unsafe lifting request (OTJLD 2.3.5).\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamA19bp3.java (at line 12)\n" +
+    		"	public <B base Role0> void test(B as Role0 o) {\n" +
+    		"	                                ^^^^^^^^^^\n" +
+    		"Unhandled exception type LiftingFailedException, caused by an unsafe lifting request (OTJLD 2.3.5).\n" +
     		"----------\n");
     }
 
@@ -2718,11 +2718,11 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamA19bp3a.java (at line 16)\n" + 
-    		"	test(b);\n" + 
-    		"	^^^^^^^\n" + 
-    		"Unhandled exception type LiftingFailedException\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamA19bp3a.java (at line 16)\n" +
+    		"	test(b);\n" +
+    		"	^^^^^^^\n" +
+    		"Unhandled exception type LiftingFailedException\n" +
     		"----------\n");
     }
 
@@ -2769,18 +2769,18 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamA19bp4.java (at line 17)\n" + 
-    		"	t.test(new TA19bp4_2());\n" + 
-    		"	  ^^^^\n" + 
-    		"Bound mismatch: The generic method test(B) of type TeamA19bp4 is not applicable for the arguments (TA19bp4_2). The inferred type TA19bp4_2 is not a valid substitute for the bounded parameter <B base TeamA19bp4.Role0> (OTJLD 2.3.2(e)).\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamA19bp4.java (at line 17)\n" +
+    		"	t.test(new TA19bp4_2());\n" +
+    		"	  ^^^^\n" +
+    		"Bound mismatch: The generic method test(B) of type TeamA19bp4 is not applicable for the arguments (TA19bp4_2). The inferred type TA19bp4_2 is not a valid substitute for the bounded parameter <B base TeamA19bp4.Role0> (OTJLD 2.3.2(e)).\n" +
     		"----------\n");
     }
 
     // a method has a type parameter constrained by "base" - nested team
     // A.1.9-otjld-basetype-parameter-5
     public void testA19_basetypeParameter5() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA19bp5.java",
@@ -2832,7 +2832,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a method has a type parameter constrained by "base" - some inheritance used
     // A.1.9-otjld-basetype-parameter-6
     public void testA19_basetypeParameter6() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA19bp6.java",
@@ -2893,7 +2893,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a method has a type parameter constrained by "base" , using the type variable
     // A.1.9-otjld-basetype-parameter-7
     public void testA19_basetypeParameter7() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA19bp7.java",
@@ -2953,7 +2953,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a method has a type parameter constrained by "base" - deferred lifting
     // A.1.9-otjld-basetype-parameter-8
     public void testA19_basetypeParameter8() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA19bp8.java",
@@ -3006,7 +3006,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a method has a type parameter constrained by "base" - team inheritance involved
     // A.1.9-otjld-basetype-parameter-9
     public void testA19_basetypeParameter9() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA19bp9_2.java",
@@ -3053,7 +3053,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a method has two type parameters constrained by "base"
     // A.1.9-otjld-basetype-parameter-10
     public void testA19_basetypeParameter10() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA19bp10.java",
@@ -3134,7 +3134,7 @@ public class Java5 extends AbstractOTJLDTest {
     // methods are consistently redefined with covariant return type
     // A.1.10-otjld-covariance-and-implicit-inheritance-2
     public void testA110_covarianceAndImplicitInheritance2() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA110caii2_2.java",
@@ -3182,7 +3182,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a callin method is covariantly overridden
     // A.1.11-otjld-covariance-1
     public void testA111_covariance1() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA111c1.java",
@@ -3218,7 +3218,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a team has a type parameter
     // A.1.12-otjld-generic-team-1
     public void testA112_genericTeam1() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA112gt1.java",
@@ -3238,7 +3238,7 @@ public class Java5 extends AbstractOTJLDTest {
     }
     // a team has a type parameter that is used in a static role method
     public void testA112_genericTeam2() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA112gt2.java",
@@ -3261,7 +3261,7 @@ public class Java5 extends AbstractOTJLDTest {
             },
             "OK");
     }
-    
+
     // Bug 332795 - [compiler][generics] import issues with inherited playedBy binding inside parameterized team
     // Bug 335774 - [compiler] don't flag "bindingconventions" against import in superteam
     public void testA112_genericTeam3() {
@@ -3289,30 +3289,30 @@ public class Java5 extends AbstractOTJLDTest {
     			"package mypack;\n" +
     			"public class B1 {}\n"
     		},
-    		"----------\n" + 
-    		"1. WARNING in TeamA112gt3_1.java (at line 3)\n" + 
-    		"	protected class R playedBy B1 {\n" + 
-    		"	                           ^^\n" + 
-    		"It is recommended that base class B1 be imported with the modifier \"base\" (OTJLD 2.1.2(d)).\n" + 
+    		"----------\n" +
+    		"1. WARNING in TeamA112gt3_1.java (at line 3)\n" +
+    		"	protected class R playedBy B1 {\n" +
+    		"	                           ^^\n" +
+    		"It is recommended that base class B1 be imported with the modifier \"base\" (OTJLD 2.1.2(d)).\n" +
     		"----------\n",
     		"OK");
     }
-    
-    // Bug 394263 - Team with generic type parameter causes role inheritance error 
+
+    // Bug 394263 - Team with generic type parameter causes role inheritance error
     public void testA112_genericTeam4() {
     	runConformTest(
     		new String[] {
     	"MyTeam.java",
-    			"public team class MyTeam<T> {	\n" + 
-    			"	protected class MyRole {}	\n" + 
-    			"	protected class MySubRole extends MyRole {}\n" + 
+    			"public team class MyTeam<T> {	\n" +
+    			"	protected class MyRole {}	\n" +
+    			"	protected class MySubRole extends MyRole {}\n" +
     			"}"
     		}
     	);
     }
 
     // a static method in a role file suppresses an nls warning
-    // Bug 321352 -  [compiler][reconciler] reporting of non-externalized string constants in role files 
+    // Bug 321352 -  [compiler][reconciler] reporting of non-externalized string constants in role files
     public void testA113_suppressWarnings1() {
     	Map customOptions = getCompilerOptions();
     	customOptions.put(CompilerOptions.OPTION_ReportNonExternalizedStringLiteral, CompilerOptions.ERROR);
@@ -3343,7 +3343,7 @@ public class Java5 extends AbstractOTJLDTest {
     }
 
     // a static method in a role file reports an nls warning
-    // Bug 321352 -  [compiler][reconciler] reporting of non-externalized string constants in role files 
+    // Bug 321352 -  [compiler][reconciler] reporting of non-externalized string constants in role files
     public void testA113_suppressWarnings1w() {
     	Map customOptions = getCompilerOptions();
     	customOptions.put(CompilerOptions.OPTION_ReportNonExternalizedStringLiteral, CompilerOptions.ERROR);
@@ -3407,7 +3407,7 @@ public class Java5 extends AbstractOTJLDTest {
     // A role class is generic - ICE reported by Ivica Loncar
     // A.1.14-otjld-generic-role-1
     public void testA114_genericRole1() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA114gr1.java",
@@ -3467,7 +3467,7 @@ public class Java5 extends AbstractOTJLDTest {
     // A bound role class is generic - created using declared lifting
     // A.1.14-otjld_illegal_generic-role-3
     public void _illegal_testA114_genericRole3() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA114gr3.java",
@@ -3499,7 +3499,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a generic role is a parameter in a replace callin - modeled after a situation in OrderSystemPersistenceTeam
     // A.1.14-otjld-generic-role-4
     public void testA114_genericRole4() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA114gr4.java",
@@ -3542,7 +3542,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a generic role is a parameter in a replace callin - modeled after a situation in OrderSystemPersistenceTeam - more difficult type inference
     // A.1.14-otjld-generic-role-5
     public void testA114_genericRole5() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA114gr5.java",
@@ -3590,7 +3590,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a generic role is a parameter in a replace callin - modeled after a situation in OrderSystemPersistenceTeam - more difficult type inference
     // A.1.14-otjld-generic-role-6
     public void testA114_genericRole6() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA114gr6.java",
@@ -3636,23 +3636,23 @@ public class Java5 extends AbstractOTJLDTest {
             },
             "OK");
     }
-    
+
     // Bug 332801 - [compiler][generics] instantiating a generic role cannot be type-checked
     public void testA114_genericRole7() {
     	runConformTest(
     		new String[] {
     	"Canonicalization.java",
-    			"public team class Canonicalization {\n" + 
+    			"public team class Canonicalization {\n" +
     			"  protected class Cache<K,V> {\n" +
     			"      protected V getV(K k, V v1, V v2) { return v1; }\n" +
-    			"  }\n" + 
+    			"  }\n" +
     			"  Cache<Integer,String> stringCache = new Cache<Integer, String>();\n" +
     			"  void test() {\n" +
     			"      System.out.print(stringCache.getV(2, \"OK\", \"NOTOK\"));\n" +
-    			"  }\n" + 
+    			"  }\n" +
     			"  public static void main(String... args) {\n" +
     			"     new Canonicalization().test();\n" +
-    			"  }\n" + 
+    			"  }\n" +
     			"}\n"
     		},
     		"OK");
@@ -3661,7 +3661,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a decapsulating expression in a base guard requires a generic cast, witness for NPE since 3.4.2
     // A.1.15-otjld-generic-cast-in-baseaccess-1
     public void testA115_genericCastInBaseaccess1() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA115gcib1.java",
@@ -3700,7 +3700,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a decapsulating expression in a base guard requires a generic cast, witness for NPE since 3.4.2
     // A.1.15-otjld-generic-cast-in-baseaccess-2
     public void testA115_genericCastInBaseaccess2() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA115gcib2.java",
@@ -3744,7 +3744,7 @@ public class Java5 extends AbstractOTJLDTest {
     // an overriding role has an override annotation
     // A.1.16-otjld-override-annotation-1
     public void testA116_overrideAnnotation1() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA116on1_2.java",
@@ -3799,7 +3799,7 @@ public class Java5 extends AbstractOTJLDTest {
     public void testA116_overrideAnnotation3() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportMissingOverrideAnnotation, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"TeamA116on3_2.java",
@@ -3839,7 +3839,7 @@ public class Java5 extends AbstractOTJLDTest {
 
     // Bug 381790 - [compiler] support @Override for role method implementing an interface method
     // With @Override Annotations
-    // R: role class implementing regular interface 
+    // R: role class implementing regular interface
     // R1: role class extending role class
     // R2: role extending regular class
     public void testA116_overrideAnnotation4() {
@@ -3868,11 +3868,11 @@ public class Java5 extends AbstractOTJLDTest {
     	};
     	if (this.complianceLevel == ClassFileConstants.JDK1_5)
     		runNegativeTest(sources,
-				"----------\n" + 
-				"1. ERROR in TeamA117oi4.java (at line 3)\n" + 
-				"	@Override public void bar() {}\n" + 
-				"	                      ^^^^^\n" + 
-				"The method bar() of type TeamA117oi4.R must override a superclass method\n" + 
+				"----------\n" +
+				"1. ERROR in TeamA117oi4.java (at line 3)\n" +
+				"	@Override public void bar() {}\n" +
+				"	                      ^^^^^\n" +
+				"The method bar() of type TeamA117oi4.R must override a superclass method\n" +
 				"----------\n");
     	else
     		runConformTest(sources, "");
@@ -3912,16 +3912,16 @@ public class Java5 extends AbstractOTJLDTest {
     	if (this.complianceLevel == ClassFileConstants.JDK1_5)
 			runNegativeTest(
 	    		sources,
-	    		"----------\n" + 
-				"1. ERROR in TeamA117oi5.java (at line 6)\n" + 
-				"	public void bar() {}\n" + 
-				"	            ^^^^^\n" + 
-				"The method bar() of type TeamA117oi5.R1 should be tagged with @Override since it actually overrides a superclass method\n" + 
-				"----------\n" + 
-				"2. ERROR in TeamA117oi5.java (at line 9)\n" + 
-				"	public void foo() {}\n" + 
-				"	            ^^^^^\n" + 
-				"The method foo() of type TeamA117oi5.R2 should be tagged with @Override since it actually overrides a superclass method\n" + 
+	    		"----------\n" +
+				"1. ERROR in TeamA117oi5.java (at line 6)\n" +
+				"	public void bar() {}\n" +
+				"	            ^^^^^\n" +
+				"The method bar() of type TeamA117oi5.R1 should be tagged with @Override since it actually overrides a superclass method\n" +
+				"----------\n" +
+				"2. ERROR in TeamA117oi5.java (at line 9)\n" +
+				"	public void foo() {}\n" +
+				"	            ^^^^^\n" +
+				"The method foo() of type TeamA117oi5.R2 should be tagged with @Override since it actually overrides a superclass method\n" +
 				"----------\n",
 				null,
 				true,
@@ -3929,21 +3929,21 @@ public class Java5 extends AbstractOTJLDTest {
     	else
 			runNegativeTest(
 	    		sources,
-				"----------\n" + 
-				"1. ERROR in TeamA117oi5.java (at line 3)\n" + 
-				"	public void bar() {}\n" + 
-				"	            ^^^^^\n" + 
-				"The method bar() of type TeamA117oi5.R should be tagged with @Override since it actually overrides a superinterface method\n" + 
-				"----------\n" + 
-				"2. ERROR in TeamA117oi5.java (at line 6)\n" + 
-				"	public void bar() {}\n" + 
-				"	            ^^^^^\n" + 
-				"The method bar() of type TeamA117oi5.R1 should be tagged with @Override since it actually overrides a superclass method\n" + 
-				"----------\n" + 
-				"3. ERROR in TeamA117oi5.java (at line 9)\n" + 
-				"	public void foo() {}\n" + 
-				"	            ^^^^^\n" + 
-				"The method foo() of type TeamA117oi5.R2 should be tagged with @Override since it actually overrides a superclass method\n" + 
+				"----------\n" +
+				"1. ERROR in TeamA117oi5.java (at line 3)\n" +
+				"	public void bar() {}\n" +
+				"	            ^^^^^\n" +
+				"The method bar() of type TeamA117oi5.R should be tagged with @Override since it actually overrides a superinterface method\n" +
+				"----------\n" +
+				"2. ERROR in TeamA117oi5.java (at line 6)\n" +
+				"	public void bar() {}\n" +
+				"	            ^^^^^\n" +
+				"The method bar() of type TeamA117oi5.R1 should be tagged with @Override since it actually overrides a superclass method\n" +
+				"----------\n" +
+				"3. ERROR in TeamA117oi5.java (at line 9)\n" +
+				"	public void foo() {}\n" +
+				"	            ^^^^^\n" +
+				"The method foo() of type TeamA117oi5.R2 should be tagged with @Override since it actually overrides a superclass method\n" +
 				"----------\n",
 				null,
 				true,
@@ -3975,23 +3975,23 @@ public class Java5 extends AbstractOTJLDTest {
 				    "}\n" +
 				    "    \n"
 			},
-			"----------\n" + 
-			"1. WARNING in TeamA117cfa1_2.java (at line 3)\n" + 
-			"	protected class R {\n" + 
-			"	                ^\n" + 
-			"Role TeamA117cfa1_2.R should be tagged with @Override since it actually overrides a superteam role (OTJLD 1.3.1(c)).\n" + 
-			"----------\n" + 
-			"2. WARNING in TeamA117cfa1_2.java (at line 5)\n" + 
-			"	dep();\n" + 
-			"	^^^^^\n" + 
-			"The method dep() from the type TeamA117cfa1_1.R is deprecated\n" + 
+			"----------\n" +
+			"1. WARNING in TeamA117cfa1_2.java (at line 3)\n" +
+			"	protected class R {\n" +
+			"	                ^\n" +
+			"Role TeamA117cfa1_2.R should be tagged with @Override since it actually overrides a superteam role (OTJLD 1.3.1(c)).\n" +
+			"----------\n" +
+			"2. WARNING in TeamA117cfa1_2.java (at line 5)\n" +
+			"	dep();\n" +
+			"	^^^^^\n" +
+			"The method dep() from the type TeamA117cfa1_1.R is deprecated\n" +
 			"----------\n");
     }
 
     // a role method is deprecated, so should be its tsub  -  testing at runtime via reflection
     // A.1.17-otjld-copyinheritance-for-annotation-2
     public void _testA117_copyinheritanceForAnnotation2() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA117cfa2_2.java",
@@ -4032,7 +4032,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role method has a custom annotation, so should its tsub  -  testing at runtime via reflection
     // A.1.17-otjld-copyinheritance-for-annotation-3
     public void _testA117_copyinheritanceForAnnotation3() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA117cfa3_2.java",
@@ -4135,7 +4135,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role method has a nested custom annotation, so should its tsub  -  testing at runtime via reflection
     // A.1.17-otjld-copyinheritance-for-annotation-5
     public void testA117_copyinheritanceForAnnotation5() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA117cfa5_2.java",
@@ -4199,7 +4199,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role method has a custom annotation with enum values, annotation was in conflict with implicit activation annotation
     // A.1.17-otjld-copyinheritance-for-annotation-5e
     public void testA117_copyinheritanceForAnnotation5e() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA117cfa5e_2.java",
@@ -4309,7 +4309,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role field has a custom annotation, so should its tsub  -  testing at runtime via reflection
     // A.1.17-otjld-copyinheritance-for-annotation-7
     public void testA117_copyinheritanceForAnnotation7() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA117cfa7_2.java",
@@ -4364,7 +4364,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role field has a custom annotation (scalar arg), so should its tsub  -  testing at runtime via reflection
     // A.1.17-otjld-copyinheritance-for-annotation-8
     public void testA117_copyinheritanceForAnnotation8() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA117cfa8_2.java",
@@ -4419,7 +4419,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role field has a custom annotation (enum typed arg), so should its tsub  -  testing at runtime via reflection
     // A.1.17-otjld-copyinheritance-for-annotation-8e
     public void testA117_copyinheritanceForAnnotation8e() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA117cfa8e_2.java",
@@ -4475,7 +4475,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role field has a custom annotation, so should its tsub  -  testing at runtime via reflection
     // A.1.17-otjld-copyinheritance-for-annotation-9
     public void testA117_copyinheritanceForAnnotation9() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA117cfa9_2.java",
@@ -4530,7 +4530,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role class extends a generic class providing type parameters
     // A.1.18-otjld-role-extends-parameterized-1
     public void testA118_roleExtendsParameterized1() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA118rep1.java",
@@ -4560,7 +4560,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role class extends a generic role providing type parameters
     // A.1.18-otjld-role-extends-parameterized-2
     public void testA118_roleExtendsParameterized2() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA118rep2.java",
@@ -4590,7 +4590,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role class extends a generic regular class with type bounds
     // A.1.18-otjld-role-extends-parameterized-3
     public void testA118_roleExtendsParameterized3() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA118rep3.java",
@@ -4630,7 +4630,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a type parameter has a nested value parameter
     // A.1.19-otjld-nested-value-parameter-1
     public void testA119_nestedValueParameter1() {
-       
+
        runConformTest(
             new String[] {
 		"TeamA119nvp1.java",
@@ -4698,16 +4698,16 @@ public class Java5 extends AbstractOTJLDTest {
 			    "public class TA119nvp2_2 {}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. WARNING in TeamA119nvp2.java (at line 10)\n" + 
-    		"	TA119nvp2_1<@t2,Role<@t1>> c = new TA119nvp2_1<@t2,Role<@t1>>();\n" + 
-    		"	^^^^^^^^^^^\n" + 
-    		"Using an experimental feature: Implementation for mixed type and value parameters is experimental..\n" + 
-    		"----------\n" + 
-    		"2. WARNING in TeamA119nvp2.java (at line 10)\n" + 
-    		"	TA119nvp2_1<@t2,Role<@t1>> c = new TA119nvp2_1<@t2,Role<@t1>>();\n" + 
-    		"	                                   ^^^^^^^^^^^\n" + 
-    		"Using an experimental feature: Implementation for mixed type and value parameters is experimental..\n" + 
+            "----------\n" +
+    		"1. WARNING in TeamA119nvp2.java (at line 10)\n" +
+    		"	TA119nvp2_1<@t2,Role<@t1>> c = new TA119nvp2_1<@t2,Role<@t1>>();\n" +
+    		"	^^^^^^^^^^^\n" +
+    		"Using an experimental feature: Implementation for mixed type and value parameters is experimental..\n" +
+    		"----------\n" +
+    		"2. WARNING in TeamA119nvp2.java (at line 10)\n" +
+    		"	TA119nvp2_1<@t2,Role<@t1>> c = new TA119nvp2_1<@t2,Role<@t1>>();\n" +
+    		"	                                   ^^^^^^^^^^^\n" +
+    		"Using an experimental feature: Implementation for mixed type and value parameters is experimental..\n" +
     		"----------\n");
     }
 
@@ -4826,31 +4826,31 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. WARNING in pt\\TeamA119nvp4.java (at line 6)\n" + 
-    		"	public class Role extends Showable playedBy pb.TA119nvp4_2 {\n" + 
-    		"	                                            ^^^^^^^^^^^^^^\n" + 
-    		"Qualified reference to base class pb.TA119nvp4_2 is deprecated, should use a base import instead (OTJLD 2.1.2(d)).\n" + 
-    		"----------\n" + 
+            "----------\n" +
+    		"1. WARNING in pt\\TeamA119nvp4.java (at line 6)\n" +
+    		"	public class Role extends Showable playedBy pb.TA119nvp4_2 {\n" +
+    		"	                                            ^^^^^^^^^^^^^^\n" +
+    		"Qualified reference to base class pb.TA119nvp4_2 is deprecated, should use a base import instead (OTJLD 2.1.2(d)).\n" +
+    		"----------\n" +
     		(this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
-    		? 
-			"2. WARNING in pt\\TeamA119nvp4.java (at line 6)\n" + 
-			"	public class Role extends Showable playedBy pb.TA119nvp4_2 {\n" + 
-			"	                                            ^^^^^^^^^^^^^^\n" + 
-			"Base class pb.TA119nvp4_2 has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
+    		?
+			"2. WARNING in pt\\TeamA119nvp4.java (at line 6)\n" +
+			"	public class Role extends Showable playedBy pb.TA119nvp4_2 {\n" +
+			"	                                            ^^^^^^^^^^^^^^\n" +
+			"Base class pb.TA119nvp4_2 has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" +
 			"----------\n"
     		: ""
 			) +
-    		"----------\n" + 
-    		"1. ERROR in TA119nvp4Main.java (at line 6)\n" + 
-    		"	pb.TA119nvp4_1<@t1,Role<@t1>> c = new pb.TA119nvp4_1<@t1,Role<@t1>>();\n" + 
-    		"	               ^^^\n" + 
-    		"Illegal position for value parameter @t1: must be a parameter of a single name type reference(OTJLD A.9(a)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in TA119nvp4Main.java (at line 6)\n" + 
-    		"	pb.TA119nvp4_1<@t1,Role<@t1>> c = new pb.TA119nvp4_1<@t1,Role<@t1>>();\n" + 
-    		"	                                                     ^^^\n" + 
-    		"Illegal position for value parameter @t1: must be a parameter of a single name type reference(OTJLD A.9(a)).\n" + 
+    		"----------\n" +
+    		"1. ERROR in TA119nvp4Main.java (at line 6)\n" +
+    		"	pb.TA119nvp4_1<@t1,Role<@t1>> c = new pb.TA119nvp4_1<@t1,Role<@t1>>();\n" +
+    		"	               ^^^\n" +
+    		"Illegal position for value parameter @t1: must be a parameter of a single name type reference(OTJLD A.9(a)).\n" +
+    		"----------\n" +
+    		"2. ERROR in TA119nvp4Main.java (at line 6)\n" +
+    		"	pb.TA119nvp4_1<@t1,Role<@t1>> c = new pb.TA119nvp4_1<@t1,Role<@t1>>();\n" +
+    		"	                                                     ^^^\n" +
+    		"Illegal position for value parameter @t1: must be a parameter of a single name type reference(OTJLD A.9(a)).\n" +
     		"----------\n");
     }
 
@@ -4950,7 +4950,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a type parameter has a nested value parameter with additional type bound (plain class)
     // A.1.19-otjld-nested-value-parameter-7
     public void testA119_nestedValueParameter7() {
-       
+
        runConformTest(
             new String[] {
 		"TA119nvp7Main.java",
@@ -5001,7 +5001,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a method has a nested value paramter
     // A.1.19-otjld-nested-value-parameter-8
     public void testA119_nestedValueParameter8() {
-       
+
        runConformTest(
             new String[] {
 		"TA119nvp8.java",
@@ -5086,18 +5086,18 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TA119nvp10.java (at line 13)\n" + 
-    		"	unregister(3, r, t1, t2);\n" + 
-    		"	^^^^^^^^^^\n" + 
-    		"The method unregister(int, R<@t1>, Team, Team) in the type TA119nvp10 is not applicable for the arguments (int, Role<@t2>, TeamA119nvp10, TeamA119nvp10)\n" + 
+            "----------\n" +
+    		"1. ERROR in TA119nvp10.java (at line 13)\n" +
+    		"	unregister(3, r, t1, t2);\n" +
+    		"	^^^^^^^^^^\n" +
+    		"The method unregister(int, R<@t1>, Team, Team) in the type TA119nvp10 is not applicable for the arguments (int, Role<@t2>, TeamA119nvp10, TeamA119nvp10)\n" +
     		"----------\n");
     }
 
     // a plain generic type is parameterized by an externalized role - positive case
     // A.1.19-otjld-parameterized-by-role-1
     public void testA119_parameterizedByRole1() {
-       
+
        runConformTest(
             new String[] {
 		"TA119pbr1Main.java",
@@ -5172,7 +5172,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a plain generic type is parameterized by two externalized roles
     // A.1.19-otjld-parameterized-by-role-3
     public void testA119_parameterizedByRole3() {
-       
+
        runConformTest(
             new String[] {
 		"TA119pbr3Main.java",
@@ -5241,7 +5241,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a role type is used as a type bound
     // A.1.19-otjld-parameterized-by-role-5
     public void testA119_parameterizedByRole5() {
-       
+
        runConformTest(
             new String[] {
 		"TA119pbr5Main.java",
@@ -5274,23 +5274,23 @@ public class Java5 extends AbstractOTJLDTest {
             },
             "true");
     }
-    
+
     // similar to above but not using OT specifics
     public void testA119_plainJava() {
     	runConformTest(
     		new String[] {
     			"GetRole.java",
-    			"\n" + 
-    			"class R<Z> {}\n" + 
-    			"\n" + 
-    			"public class GetRole {\n" + 
-    			"	public <T> T getRole(Object o, Class<T> clazz) {\n" + 
-    			"		return null;\n" + 
-    			"	}\n" + 
-    			"	public Class<? extends R> getRClass() { return R.class; }\n" + 
-    			"	static void test(GetRole gr, Object o) {\n" + 
-    			"		R<String> rs = gr.getRole(o, gr.getRClass());\n" + 
-    			"	}\n" + 
+    			"\n" +
+    			"class R<Z> {}\n" +
+    			"\n" +
+    			"public class GetRole {\n" +
+    			"	public <T> T getRole(Object o, Class<T> clazz) {\n" +
+    			"		return null;\n" +
+    			"	}\n" +
+    			"	public Class<? extends R> getRClass() { return R.class; }\n" +
+    			"	static void test(GetRole gr, Object o) {\n" +
+    			"		R<String> rs = gr.getRole(o, gr.getRClass());\n" +
+    			"	}\n" +
     			"}\n"
     		},
     		"");
@@ -5299,7 +5299,7 @@ public class Java5 extends AbstractOTJLDTest {
     // a collection is parameterized by a role, used in foreach outside the team
     // A.1.19-otjld-parameterized-by-role-6
     public void testA119_parameterizedByRole6() {
-       
+
        runConformTest(
             new String[] {
 		"TA119pbr6Main.java",
@@ -5339,7 +5339,7 @@ public class Java5 extends AbstractOTJLDTest {
     // method call through an externalized role takes as argument a type parameterized by a role
     // A.1.19-otjld-parameterized-by-role-7
     public void testA119_parameterizedByRole7() {
-       
+
        runConformTest(
             new String[] {
 		"TA119pbr7Main.java",
@@ -5408,11 +5408,11 @@ public class Java5 extends AbstractOTJLDTest {
     	"B.java",
     		"public class B {}\n"
     		},
-    		"----------\n" + 
-    		"1. ERROR in TeamA120eit2.java (at line 3)\n" + 
-    		"	protected class R playedBy B base when(unfinished.) {}\n" + 
-    		"	                                                 ^\n" + 
-    		"Syntax error on token \".\", this expected after this token\n" + 
+    		"----------\n" +
+    		"1. ERROR in TeamA120eit2.java (at line 3)\n" +
+    		"	protected class R playedBy B base when(unfinished.) {}\n" +
+    		"	                                                 ^\n" +
+    		"Syntax error on token \".\", this expected after this token\n" +
     		"----------\n");
     }
 
@@ -5483,11 +5483,11 @@ public class Java5 extends AbstractOTJLDTest {
 	    		"	}\n" +
 	    		"}"
     		},
-    		"----------\n" + 
-			"1. ERROR in TeamA120eit5.java (at line 5)\n" + 
-			"	public R r = new R();\n" + 
-			"	             ^^^^^^^\n" + 
-			"No enclosing instance of type TeamA120eit5 is accessible. Must qualify the allocation with an enclosing instance of type TeamA120eit5 (e.g. x.new A() where x is an instance of TeamA120eit5).\n" + 
+    		"----------\n" +
+			"1. ERROR in TeamA120eit5.java (at line 5)\n" +
+			"	public R r = new R();\n" +
+			"	             ^^^^^^^\n" +
+			"No enclosing instance of type TeamA120eit5 is accessible. Must qualify the allocation with an enclosing instance of type TeamA120eit5 (e.g. x.new A() where x is an instance of TeamA120eit5).\n" +
 			"----------\n");
     }
 
@@ -5504,7 +5504,7 @@ public class Java5 extends AbstractOTJLDTest {
 			"}\n"
     		});
     }
-    
+
     public void testA122_genericsRegression1() {
     	runConformTest(
     		new String[] {

@@ -39,7 +39,7 @@ public class ASTRewriteFlattener extends ASTVisitor {
 
 	/** @deprecated using deprecated code */
 	private static final ChildPropertyDescriptor INTERNAL_METHOD_RETURN_TYPE_PROPERTY = MethodDeclaration.RETURN_TYPE_PROPERTY;
-	
+
 	/** @deprecated using deprecated code */
 	private static final SimplePropertyDescriptor INTERNAL_METHOD_EXTRA_DIMENSIONS_PROPERTY = MethodDeclaration.EXTRA_DIMENSIONS_PROPERTY;
 
@@ -96,7 +96,7 @@ public class ASTRewriteFlattener extends ASTVisitor {
 
 	/** @deprecated using deprecated code */
 	private static final int JLS9_INTERNAL = AST.JLS9;
-	
+
 	public static String asString(ASTNode node, RewriteEventStore store) {
 		ASTRewriteFlattener flattener= new ASTRewriteFlattener(store);
 		node.accept(flattener);
@@ -761,15 +761,15 @@ public class ASTRewriteFlattener extends ASTVisitor {
 					}
 				}
 			}
-		
+
 			visitList(node, MethodDeclaration.PARAMETERS_PROPERTY, String.valueOf(','));
 			this.result.append(')');
 		}
 		visitExtraDimensions(node, INTERNAL_METHOD_EXTRA_DIMENSIONS_PROPERTY, MethodDeclaration.EXTRA_DIMENSIONS2_PROPERTY);
 
-		ChildListPropertyDescriptor exceptionsProperty = node.getAST().apiLevel() <	JLS8_INTERNAL ? 
+		ChildListPropertyDescriptor exceptionsProperty = node.getAST().apiLevel() <	JLS8_INTERNAL ?
 				INTERNAL_METHOD_THROWN_EXCEPTIONS_PROPERTY : MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY;
-		visitList(node, exceptionsProperty, String.valueOf(','), " throws ", Util.EMPTY_STRING); //$NON-NLS-1$			
+		visitList(node, exceptionsProperty, String.valueOf(','), " throws ", Util.EMPTY_STRING); //$NON-NLS-1$
 //{ObjectTeams: predicate
 		ASTNode guardPredicate = getChildNode(node, MethodDeclaration.GUARD_PROPERTY);
 		if (guardPredicate != null) {
@@ -911,9 +911,9 @@ public class ASTRewriteFlattener extends ASTVisitor {
 		this.result.append("record ");//$NON-NLS-1$
 		getChildNode(node, RecordDeclaration.NAME_PROPERTY).accept(this);
 		this.result.append(' ');
-		
+
 		visitList(node, RecordDeclaration.TYPE_PARAMETERS_PROPERTY, String.valueOf(','), String.valueOf('<'), String.valueOf('>'));
-		
+
 		this.result.append('(');
 		visitList(node, RecordDeclaration.RECORD_COMPONENTS_PROPERTY, String.valueOf(','));
 		this.result.append(')');
@@ -926,7 +926,7 @@ public class ASTRewriteFlattener extends ASTVisitor {
 		this.result.append('}');
 		return false;
 	}
-	
+
 	@Override
 	public boolean visit(RequiresDirective node) {
 		this.result.append("requires "); //$NON-NLS-1$
@@ -1055,7 +1055,7 @@ public class ASTRewriteFlattener extends ASTVisitor {
 						t.accept(this);
 						this.result.append(it.hasNext() ? ", " : ""); //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				this.result.append(getBooleanAttribute(node, SwitchCase.SWITCH_LABELED_RULE_PROPERTY) ? " ->" : ":");//$NON-NLS-1$ //$NON-NLS-2$ 
+				this.result.append(getBooleanAttribute(node, SwitchCase.SWITCH_LABELED_RULE_PROPERTY) ? " ->" : ":");//$NON-NLS-1$ //$NON-NLS-2$
 			}
 		} else {
 			ASTNode expression= getChildNode(node, INTERNAL_SWITCH_EXPRESSION_PROPERTY);
@@ -1075,7 +1075,7 @@ public class ASTRewriteFlattener extends ASTVisitor {
 		visitSwitchNode(node);
 		return false;
 	}
-	
+
 	private void visitSwitchNode(ASTNode node) {
 		this.result.append("switch ("); //$NON-NLS-1$
 		if (node instanceof SwitchExpression) {
@@ -1092,10 +1092,10 @@ public class ASTRewriteFlattener extends ASTVisitor {
 		else if (node instanceof SwitchStatement) {
 			visitList(node, SwitchStatement.STATEMENTS_PROPERTY, null);
 		}
-		
+
 		this.result.append('}');
 	}
-	
+
 	@Override
 	public boolean visit(SwitchStatement node) {
 		visitSwitchNode(node);
@@ -1358,7 +1358,7 @@ public class ASTRewriteFlattener extends ASTVisitor {
 		this.result.append(getAttribute(node, TextBlock.ESCAPED_VALUE_PROPERTY));
 		return false;
 	}
-	
+
 	@Override
 	public boolean visit(TextElement node) {
 		this.result.append(getAttribute(node, TextElement.TEXT_PROPERTY));
@@ -1591,13 +1591,13 @@ public class ASTRewriteFlattener extends ASTVisitor {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public boolean visit(YieldStatement node) {
 		if (node.getAST().apiLevel() >= AST.JLS14 && node.isImplicit()  && node.getExpression() == null) {
 			return false;
 		}
-		
+
 		this.result.append("yield"); //$NON-NLS-1$
 
 		ASTNode expression = getChildNode(node, YieldStatement.EXPRESSION_PROPERTY);

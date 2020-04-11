@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -41,7 +41,7 @@ import org.eclipse.objectteams.otdt.ui.tests.dom.FileBasedDOMTest;
 public class PrecedenceDeclarationTest extends FileBasedDOMTest
 {
 	    public static final String TEST_PROJECT = "DOM_AST";
-	    
+
 		private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS9;
 
 		private ASTParser _parser;
@@ -55,12 +55,12 @@ public class PrecedenceDeclarationTest extends FileBasedDOMTest
 		{
 			super(name);
 		}
-		
+
 		public static Test suite()
 		{
 			return new Suite(PrecedenceDeclarationTest.class);
 		}
-		
+
 		public void setUpSuite() throws Exception
 		{
 			setTestProjectDir(TEST_PROJECT);
@@ -74,13 +74,13 @@ public class PrecedenceDeclarationTest extends FileBasedDOMTest
 	        _parser = ASTParser.newParser(JAVA_LANGUAGE_SPEC_LEVEL);
 			_parser.setProject( getJavaProject(TEST_PROJECT) );
 			_parser.setSource(_simpleTeam);
-			
+
 	        ASTNode root = _parser.createAST( new NullProgressMonitor() );
 			_cu = (CompilationUnit) root;
 			_typeDecl = (TypeDeclaration)_cu.types().get(0);
 		}
 
-		protected void setUp() throws Exception 
+		protected void setUp() throws Exception
 		{
 			super.setUp();
 		}
@@ -91,7 +91,7 @@ public class PrecedenceDeclarationTest extends FileBasedDOMTest
 	        List<?> precedences = role1.precedences();
 	        assertFalse("precedences are non-null", precedences == null);
 	        assertTrue("Role1 has 3 precedence lists", precedences.size() == 3);
-	        
+
 	        PrecedenceDeclaration prec;
 	        prec = (PrecedenceDeclaration)precedences.get(0);
 	        List<?> elements = prec.elements();
@@ -122,7 +122,7 @@ public class PrecedenceDeclarationTest extends FileBasedDOMTest
 	        List<?> precedences = _typeDecl.precedences();
 	        assertFalse("precedences are non-null", precedences == null);
 	        assertTrue("Team2 has 2 precedence lists", precedences.size() == 2);
-	        
+
 	        PrecedenceDeclaration prec;
 	        prec = (PrecedenceDeclaration)precedences.get(0);
 	        List<?> elements = prec.elements();
@@ -136,7 +136,7 @@ public class PrecedenceDeclarationTest extends FileBasedDOMTest
 	        List<?> precedences = _typeDecl.precedences();
 	        assertFalse("precedences are non-null", precedences == null);
 	        assertTrue("Team2 has 2 precedence lists", precedences.size() == 2);
-	        
+
 	        PrecedenceDeclaration prec;
 	        prec = (PrecedenceDeclaration)precedences.get(1);
 	        List<?> elements = prec.elements();
@@ -145,13 +145,13 @@ public class PrecedenceDeclarationTest extends FileBasedDOMTest
 			assertEquals("expecting element", elements.get(0).toString(), "Role2");
 			assertEquals("expecting element", elements.get(1).toString(), "Role1");
 		}
-		
+
 		public void testPrecedenceFlattening()  {
 		    ASTRewriteFlattener _rewriteFlattener = new ASTRewriteFlattener(new RewriteEventStore());
 	        _cu.accept(_rewriteFlattener);
 
 	        String actual = _rewriteFlattener.getResult();
-	        String expected = 
+	        String expected =
 	        	"package precedences.teampkg;"+
 	        	"import precedences.basepkg.MyClass;"+
 				"public team class Team1 {"+
@@ -170,11 +170,11 @@ public class PrecedenceDeclarationTest extends FileBasedDOMTest
 						"precedence callin3, callin2;" +
 						"precedence after callinA3, callinA2;"+
 					"}"+
-					"public class Role2 {}"+	
+					"public class Role2 {}"+
 					"precedence Role1.callin2, Role1.callin1;"+
 					"precedence Role2, Role1;"+
 				"}";
-	        
+
 	        assertEquals("Wrong CU-Code", expected, actual);
 		}
 }

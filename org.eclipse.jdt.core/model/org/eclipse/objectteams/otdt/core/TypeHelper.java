@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id: TypeHelper.java 23416 2010-02-03 19:59:31Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -56,7 +56,7 @@ public class TypeHelper
 {
 	public static final String JAVA_LANG_OBJECT = "java.lang.Object"; //$NON-NLS-1$
 	public static final String ORG_OBJECTTEAMS_TEAM = new String(IOTConstants.STR_ORG_OBJECTTEAMS_TEAM);
-	
+
     private static final String ICONFINED  = new String(IOTConstants.ICONFINED);
 	private static final String CONFINED   = new String(IOTConstants.CONFINED);
 	private static final String ILOWERABLE = new String(IOTConstants.ILOWERABLE);
@@ -84,8 +84,8 @@ public class TypeHelper
     /**
      * Returns all super types __including the given type__ for a given type.
      * The hierarchy is created in the sense of ordinary object inheritance.
-     * 
-     * The returned elements are arranged from the current to the top most 
+     *
+     * The returned elements are arranged from the current to the top most
      * parent.
      */
     public static IType[] getSuperTypes(IType type) throws JavaModelException
@@ -105,11 +105,11 @@ public class TypeHelper
     }
 
     /**
-     * Returns the corresponding Java elements (ITypes) from the JavaModel of 
-     * all super types __including the given type__ for a given role. The 
+     * Returns the corresponding Java elements (ITypes) from the JavaModel of
+     * all super types __including the given type__ for a given role. The
      * hierarchy is created in the sense of implicit inheritance.
-     * 
-     * The returned elements are arranged from the current to the top most 
+     *
+     * The returned elements are arranged from the current to the top most
      * parent.
      */
     public static IType[] getImplicitSuperTypes(IRoleType role) throws JavaModelException
@@ -118,7 +118,7 @@ public class TypeHelper
 
         while (role != null)
         {
-            parents.add(role.getCorrespondingJavaElement());						
+            parents.add(role.getCorrespondingJavaElement());
             role = getParentTeamRoleType(role);
         }
 
@@ -174,10 +174,10 @@ public class TypeHelper
                     && children[idx].getElementName().equals(roleName))
                 {
                     IOTType otType = OTModelManager.getOTElement(children[idx]);
-                    
+
                     if ((otType != null) && (otType instanceof IRoleType))
                     {
-                    	result = (IRoleType)otType; 
+                    	result = (IRoleType)otType;
                     }
                     else
                     {
@@ -194,36 +194,36 @@ public class TypeHelper
     }
 
 	/**
-	 * Find a role type within a given team. 
+	 * Find a role type within a given team.
 	 * Respect inline roles and role files.
-	 * 
+	 *
 	 * @param teamType where to look
 	 * @param roleName what to look for
 	 * @return null in cases the type is not found
 	 */
-	public static IType findRoleType(IType teamType, String roleName) 
+	public static IType findRoleType(IType teamType, String roleName)
 	{
 		IType roleType = teamType.getType(roleName);
-		
+
 		// inline roles exit here:
 		if (roleType.exists())
 			return roleType;
-		
+
 		// look for a team package:
 		// TODO(SH): does not yet account for all kinds of nesting!
 		IJavaElement parent = teamType.getParent();
 		if (parent.getElementType() == IJavaElement.COMPILATION_UNIT)
 			parent = parent.getParent();
-		if (parent.getElementType() == IJavaElement.PACKAGE_FRAGMENT) 
+		if (parent.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
 		{
 			IPackageFragment enclosingPackage = (IPackageFragment)parent;
-			IPackageFragmentRoot root = (IPackageFragmentRoot)enclosingPackage.getParent(); 
-			try 
+			IPackageFragmentRoot root = (IPackageFragmentRoot)enclosingPackage.getParent();
+			try
 			{
 				IPackageFragment teamPackage = root.getPackageFragment(enclosingPackage.getElementName()+'.'+teamType.getElementName());
-				if (teamPackage.exists()) 
+				if (teamPackage.exists())
 				{
-					
+
 					// found the team package, look for the role file:
 					IJavaElement[] cus = teamPackage.getChildren();
 					for (int i = 0; i < cus.length; i++) {
@@ -236,7 +236,7 @@ public class TypeHelper
 								{
 									return (IType)children[j];
 								}
-							}							
+							}
 						}
 					}
 				}
@@ -253,7 +253,7 @@ public class TypeHelper
      * @param qualRoleName role name relative to the given team, e.g. <code>"T1.T2.T3.R1"</code>.
      * @return found role type or <code>null</code>, e.g. <code>T1.T2.T3.R1</code>.
      */
-    public static IType findNestedRoleType(IType teamType, String qualRoleName) 
+    public static IType findNestedRoleType(IType teamType, String qualRoleName)
     {
         if (teamType == null || qualRoleName == null)
         {
@@ -277,11 +277,11 @@ public class TypeHelper
             	return null;
             }
 		}
-        
+
         return currType;
     }
-    
-    
+
+
     /**
      * Returns the method mapping element that binds the given method or
      * null, if there is none. Search scope is the role, that declares
@@ -297,12 +297,12 @@ public class TypeHelper
     {
         if ( (method == null) || (teamType == null) )
 			return null;
-        
+
         IType t = OTModelManager.getOTElement(method.getDeclaringType());
         IRoleType role = TypeHelper.getTeamRoleType(teamType, (IRoleType)t);
         if (role == null)
 			return null;
-        
+
         String signature = TypeHelper.getMethodSignature(method);
         IRoleType[] roles = getImplicitSuperRoles(role);
         for (int roleIdx = 0; roleIdx < roles.length; roleIdx++)
@@ -323,12 +323,12 @@ public class TypeHelper
 	/**
      * Returns all super types __including the given type__ for a given role.
      * The hierarchy is created in the sense of ordinary object inheritance.
-     * 
-     * This method uses TypeHelper.getSuperTypes(), but for role types 
+     *
+     * This method uses TypeHelper.getSuperTypes(), but for role types
      * the supertype hierarchy needs to be build not on the IRoleType,
      * but on the corresponding java element.
-     * 
-     * The returned elements are arranged from the current to the top most 
+     *
+     * The returned elements are arranged from the current to the top most
      * parent.
      */
     public static IType[] getRoleSuperTypes(IRoleType role) throws JavaModelException
@@ -343,8 +343,8 @@ public class TypeHelper
             return null;
         }
     }
-    
-    
+
+
     /**
      * Get all teams in the super type hierarchy for the specified team,
      * including the team itself. The returned elements are arranged
@@ -369,28 +369,28 @@ public class TypeHelper
 
             ITypeHierarchy hierarchy =
                 teamType.newSupertypeHierarchy(new NullProgressMonitor());
-        
+
             IType[] superTeams = hierarchy.getAllSuperclasses(teamType);
             result.addAll(Arrays.asList(superTeams));
         }
 
         return result.toArray(new IType[result.size()]);
-    }    
-    
-    
+    }
+
+
     /**
      * Gets implicit inherited methods of specified role of a team.
      * @param teamType The role's team
      * @param roleName Name of the Role
      * @return Array of role methods
      * @throws JavaModelException if creation of supertype hierarchy fails
-     */    
+     */
     public static IMethod[] getInheritedRoleMethods(IType teamType, String roleName)
         throws JavaModelException
     {
         return getRoleMethods(teamType, roleName, true);
     }
-    
+
 
     /**
      * Gets all methods of the specified role of a team.
@@ -405,7 +405,7 @@ public class TypeHelper
     {
         return getRoleMethods(teamType, roleName, false);
     }
-    
+
     /**
      * Gets all methods of the specified role of a team.
      * When only implicit inherited methods
@@ -419,22 +419,22 @@ public class TypeHelper
         throws JavaModelException
     {
         Map<String, IMethod> result = new HashMap<String, IMethod>();
-        
+
         IType[] teams = getSuperTeams(teamType);
-        
+
         // for all superteams
         for (int teamsIdx = 0; teamsIdx < teams.length; teamsIdx++) {
-            
+
             if (onlySuperTeams && teamsIdx == 0)
             {
                 continue;
             }
-            
+
             if (teams[teamsIdx].getFullyQualifiedName().compareTo(ORG_OBJECTTEAMS_TEAM) == 0)
             {
                 break;
             }
-            
+
             IType currentRole = OTModelManager.getOTElement(teams[teamsIdx]).getRoleType(roleName);
             if (currentRole != null)
             {
@@ -446,7 +446,7 @@ public class TypeHelper
                     {
                         continue;
                     }
-                    
+
                     if (!roleMethods[methIdx].isConstructor())
                     {
                         String key = getMethodSignature(roleMethods[methIdx]);
@@ -459,9 +459,9 @@ public class TypeHelper
                 }
             }
         }
-        
+
         return result.values().toArray(new IMethod[result.size()]);
-    
+
     }
 
     /**
@@ -491,7 +491,7 @@ public class TypeHelper
         }
         return result;
     }
-    
+
     //TODO(mkr) remove
     public static List<IMethod> getAllImplicitInheritedMethods(IRoleType role)
         throws JavaModelException
@@ -502,9 +502,9 @@ public class TypeHelper
         {
             result.addAll(Arrays.asList(superRoles[roleIdx].getMethods()));
         }
-        return result;    
+        return result;
     }
-    
+
     //TODO(mkr) check dependencies with getAllRegularInheritedMethods()
     //TODO(mkr) this one needs more tests.
     public static IMethod[] getRoleMethodsComplete(IRoleType role)
@@ -513,58 +513,58 @@ public class TypeHelper
 	    Map<String,IMethod> result = new HashMap<String,IMethod>();
 	    List<IMethod> methods = new LinkedList<IMethod>();
 	    IRoleType[] roles = getImplicitSuperRoles(role);
-	    
+
 	    // for all roles add declared role methods
 	    for (int roleIdx = 0; roleIdx < roles.length; roleIdx++)
 	    {
 	        methods.addAll(Arrays.asList(roles[roleIdx].getMethods()));
 	    }
-	    
+
 	    // for all roles add regular inherited methods
 	    for (int roleIdx = 0; roleIdx < roles.length; roleIdx++)
 	    {
 	        methods.addAll(getAllRegularInheritedMethods(roles[roleIdx]));
 	    }
-	    
+
 	    for (Iterator<IMethod> methIdx = methods.iterator(); methIdx.hasNext();)
 	    {
 	        IMethod meth = methIdx.next();
-	
+
 	        // Just in case
 	        if (meth == null)
 	        {
 	            continue;
 	        }
-	
+
 	        // filter _OT$ methods
 	        if (meth.getElementName().startsWith(IOTConstants.OT_DOLLAR))
 	        {
 	            continue;
 	        }
-	        
+
 	        // filter constructors and main()
 	        if (meth.isConstructor() || meth.isMainMethod())
 	        {
 	            continue;
 	        }
-	        
+
 	        String key = getMethodSignature(meth);
 	        if (!result.containsKey(key))
 	        {
 	            result.put(key, meth);
 	        }
 	    }
-	    
+
 	    return result.values().toArray(new IMethod[result.size()]);
 	}
-    
+
     /**
      * Returns all implicit super role classes __including__ the given role
      * for a given role. This is similar to
      * <code>TypeHelper.getImplicitSuperType()</code>,
      * except the result is typed different and the supertype hierarchy of
      * the enclosing team is created only once.
-     * The returned elements are arranged from the current to the top most 
+     * The returned elements are arranged from the current to the top most
      * parent.
      * @param role
      * @return Roles in the type hierarchy of the enclosing team with the same
@@ -572,16 +572,16 @@ public class TypeHelper
      * @throws JavaModelException
      */
     public static IRoleType[] getImplicitSuperRoles(IRoleType role)
-        throws JavaModelException 
+        throws JavaModelException
     {
 
         List<IRoleType> result = new LinkedList<IRoleType>();
         IType teamType = role.getTeam();
-        IType[] teams  = getSuperTeams(teamType); 
-        
+        IType[] teams  = getSuperTeams(teamType);
+
         // for all superteams
         for (int teamsIdx = 0; teamsIdx < teams.length; teamsIdx++) {
-            
+
             if (teams[teamsIdx].getFullyQualifiedName().compareTo(ORG_OBJECTTEAMS_TEAM) == 0)
             {
                 break;
@@ -598,8 +598,8 @@ public class TypeHelper
         }
         return result.toArray(new IRoleType[result.size()]);
     }
-    
-    
+
+
     /**
      * Gets only inherited role types for a specified team.
      * @param teamType Team
@@ -612,7 +612,7 @@ public class TypeHelper
         return getRoleTypes(teamType, true);
     }
 
-    
+
     /**
      * Gets inherited and declared role types for a specified team.
      * @param teamType Team
@@ -624,8 +624,8 @@ public class TypeHelper
     {
         return getRoleTypes(teamType, false);
     }
-    
-    
+
+
     /**
      * Gets role types for a specified team.
      * @param teamType Team
@@ -640,15 +640,15 @@ public class TypeHelper
         IType[] roles = null;
         IType currentRole = null;
 
-        IType[] superTeams = getSuperTeams(teamType); 
-        
-        for (int teamsIdx = 0; teamsIdx < superTeams.length; teamsIdx++) 
+        IType[] superTeams = getSuperTeams(teamType);
+
+        for (int teamsIdx = 0; teamsIdx < superTeams.length; teamsIdx++)
         {
             if (onlySuperTeams && teamsIdx == 0)
             {
                 continue;
             }
-            
+
             if (   superTeams[teamsIdx].getFullyQualifiedName().compareTo(ORG_OBJECTTEAMS_TEAM) == 0
             	|| !isTeam(superTeams[teamsIdx].getFlags()))
             {
@@ -657,13 +657,13 @@ public class TypeHelper
 
             // find implicit roles of superteams
             roles = OTModelManager.getOTElement(superTeams[teamsIdx]).getRoleTypes();
-            for (int roleIdx = 0; roleIdx < roles.length; roleIdx++) 
+            for (int roleIdx = 0; roleIdx < roles.length; roleIdx++)
             {
                 currentRole = roles[roleIdx];
-                
+
                 // when handling binary types, ignore OT elements
                 if (currentRole.isBinary())
-                {          
+                {
                     if (currentRole.isInterface())
                     {
                         String name = currentRole.getElementName();
@@ -672,7 +672,7 @@ public class TypeHelper
                              || name.equals(ILOWERABLE)
                              || name.equals(CONFINED)
                              || name.equals(ICONFINED))
-                        {                            
+                        {
                             continue;
                         }
                     }
@@ -682,14 +682,14 @@ public class TypeHelper
                     }
                 }
 
-                if (!result.containsKey(currentRole.getElementName())) 
+                if (!result.containsKey(currentRole.getElementName()))
                 {
                     result.put(currentRole.getElementName(),
                                OTModelManager.getOTElement(currentRole));
                 }
             }
         }
-        
+
         return result.values().toArray(new IRoleType[result.size()]);
     }
 
@@ -701,12 +701,12 @@ public class TypeHelper
     public static String getMethodSignature(IMethod method)
     {
         StringBuffer result = new StringBuffer();
-    
+
         if (method != null)
         {
             result.append(method.getElementName());
             result.append('(');
-            
+
             String[] parameterTypes = method.getParameterTypes();
             for (int idx = 0; idx < parameterTypes.length; idx++)
             {
@@ -719,20 +719,20 @@ public class TypeHelper
             }
             result.append(')');
         }
-    
+
         return result.toString();
     }
-    
+
     @SuppressWarnings("rawtypes") // uses method.parameters(), which returns a raw List.
 	public static String getMethodSignature(MethodDeclaration method)
     {
     	StringBuffer result = new StringBuffer();
-    	
+
     	if (method != null)
     	{
     		result.append(method.getName().getIdentifier());
     		result.append('(');
-    		
+
     		Iterator params = method.parameters().iterator();
     		while (params.hasNext())
     		{
@@ -759,7 +759,7 @@ public class TypeHelper
 
         while (currentType != null) {
             result.insert(0, currentType.getElementName());
-            
+
 	        if (currentType.isClass()) {
 	            int flags = currentType.getFlags();
 	            if (/*Flags.isTeam(flags) &&*/ Flags.isRole(flags))
@@ -769,12 +769,12 @@ public class TypeHelper
 	        if (currentType != null) // enclosing available, insert separator
 	            result.insert(0, '$');
 	    }
-        
+
     	String packageName = type.getPackageFragment().getElementName();
     	if (packageName.equals(IPackageFragment.DEFAULT_PACKAGE_NAME)) {
     		return result.toString();
     	}
-    	
+
     	return packageName + '.' + result.toString();
 	}
 
@@ -782,7 +782,7 @@ public class TypeHelper
     {
         return CharOperation.equals(IOTConstants.STR_ORG_OBJECTTEAMS_TEAM, type.getFullyQualifiedName().toCharArray());
     }
-    
+
     public static boolean isConfined(IType type) {
     	String simpleTypeName = type.getElementName();
     	return CONFINED.equals(simpleTypeName) || ICONFINED.equals(simpleTypeName);

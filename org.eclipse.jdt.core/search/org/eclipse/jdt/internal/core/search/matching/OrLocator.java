@@ -188,7 +188,7 @@ public int match(CalloutMappingDeclaration node, MatchingNodeSet nodeSet)
 		    {
 			    return ACCURATE_MATCH;
 		    }
-			level = newLevel; 
+			level = newLevel;
 		}
     }
     return level;
@@ -227,7 +227,7 @@ public int match(ParameterMapping node, MatchingNodeSet nodeSet)
 			level = newLevel;
 		}
     }
-    return level;    
+    return level;
 }
 @Override
 public int match(MethodSpec node, MatchingNodeSet nodeSet)

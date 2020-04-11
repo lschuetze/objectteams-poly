@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -23,11 +23,11 @@ import junit.framework.Test;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 public class CompilationOrder extends AbstractOTJLDTest {
-	
+
 	public CompilationOrder(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -35,7 +35,7 @@ public class CompilationOrder extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -50,49 +50,49 @@ public class CompilationOrder extends AbstractOTJLDTest {
         runConformTest(
             new String[] {
 		"TheTest.java",
-				"public class TheTest {\n" + 
-				"        final B b = new B();\n" + 
-				"        final A a = new A<@b>();\n" + 
-				"\n" + 
-				"        public void run() {\n" + 
-				"                within(b) {\n" + 
-				"                        a.run();\n" + 
-				"                }\n" + 
-				"        }\n" + 
-				"        public static void main(String[] args) {\n" + 
-				"			new TheTest().run();\n" + 
-				"		}\n" + 
+				"public class TheTest {\n" +
+				"        final B b = new B();\n" +
+				"        final A a = new A<@b>();\n" +
+				"\n" +
+				"        public void run() {\n" +
+				"                within(b) {\n" +
+				"                        a.run();\n" +
+				"                }\n" +
+				"        }\n" +
+				"        public static void main(String[] args) {\n" +
+				"			new TheTest().run();\n" +
+				"		}\n" +
 				" }",
 		"A.java",
-			    "public team class A<B b> {\n" + 
-				"        public void run() {\n" + 
-				"                System.out.println(\"A.run()\");\n" + 
-				"        }\n" + 
-				"        public class Q playedBy R<@b> {\n" + 
+			    "public team class A<B b> {\n" +
+				"        public void run() {\n" +
+				"                System.out.println(\"A.run()\");\n" +
+				"        }\n" +
+				"        public class Q playedBy R<@b> {\n" +
 				"                @SuppressWarnings(\"decapsulation\")\n" +
-				"                void run() <- replace void run();\n" + 
-				"                // 1. originally the compiler forced to declare \'Object run()\'\n" + 
-				"                // 2. compile process is fragile with circular references, like in this exercise\n" + 
-				"                callin void run() {\n" + 
-				"                        base.run();\n" + 
-				"                        System.out.println(\"callin: Q.run()\");\n" + 
-				"                }\n" + 
-				"        }       \n" + 
+				"                void run() <- replace void run();\n" +
+				"                // 1. originally the compiler forced to declare \'Object run()\'\n" +
+				"                // 2. compile process is fragile with circular references, like in this exercise\n" +
+				"                callin void run() {\n" +
+				"                        base.run();\n" +
+				"                        System.out.println(\"callin: Q.run()\");\n" +
+				"                }\n" +
+				"        }       \n" +
 				"}",
 		"B.java",
-				"public team class B {\n" + 
-				"        public class R playedBy A {\n" + 
-				"                void run() <- replace void run();\n" + 
-				"                callin void run() {\n" + 
-				"                        base.run();\n" + 
-				"                        System.out.println(\"R.run()\");\n" + 
-				"                }\n" + 
-				"        }       \n" + 
+				"public team class B {\n" +
+				"        public class R playedBy A {\n" +
+				"                void run() <- replace void run();\n" +
+				"                callin void run() {\n" +
+				"                        base.run();\n" +
+				"                        System.out.println(\"R.run()\");\n" +
+				"                }\n" +
+				"        }       \n" +
 				"}"
             },
             "A.run()\nR.run()");
     }
-    
+
     // basic case, no error observed
     public void testB22_twoToplevelTeams1() {
     	runConformTest(
@@ -118,7 +118,7 @@ public class CompilationOrder extends AbstractOTJLDTest {
     		},
     		"OK");
     }
-    
+
     // with two nested role-teams, witness for InternalCompilerError("Class file was not yet written to disk")
     public void testB22_twoToplevelTeams2() {
     	runConformTest(
@@ -217,7 +217,7 @@ public class CompilationOrder extends AbstractOTJLDTest {
     			"		}\n" +
     			"		test2 <- after bm2;\n" +
 				"	}\n" +
-				"}\n"    			
+				"}\n"
     		};
     	runner.runConformTest();
     }

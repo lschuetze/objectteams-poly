@@ -519,7 +519,7 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 
 	SourceTypeBinding invocationType = scope.enclosingSourceType();
 //{ObjectTeams: staticness is no problem in synthetic role interfaces:
-  if (!this.declaringClass.isSynthInterface())	
+  if (!this.declaringClass.isSynthInterface())
 // SH}
 	if (this.declaringClass.isInterface() && isStatic() && !isPrivate()) {
 		// Static interface methods can be explicitly invoked only through the type reference of the declaring interface or implicitly in the interface itself or via static import.
@@ -529,9 +529,9 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 			return true;
 		return false;
 	}
-	
+
 	if (isPublic()) return true;
-	
+
 
 //{ObjectTeams:
 	// creator methods conceptually belong to the role, check for stored orig ctor:
@@ -551,7 +551,7 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
     	receiverClass = ((ReferenceBinding)receiverType).getRealClass();
     	receiverType = ((ReferenceBinding)receiverType).getRealType();
     }
-	
+
     // short-cut for generated methods (here: callin wrappers)
 	if (scope.methodScope() != null && scope.methodScope().isCallinWrapper())
 		if (   !isPrivate()
@@ -590,7 +590,7 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 /* orig:
 		TypeBinding receiverErasure = receiverType.erasure();
   :giro*/
-		TypeBinding receiverErasure = receiverClass != null ? receiverClass.erasure() 
+		TypeBinding receiverErasure = receiverClass != null ? receiverClass.erasure()
 									: receiverType.erasure();
 // SH}
 		ReferenceBinding declaringErasure = (ReferenceBinding) this.declaringClass.erasure();
@@ -900,8 +900,8 @@ public TypeBinding getCodeGenType(int pos) {
 				break checkTsuper;
 			tsuperType = tsuperOriginal.parameters[pos];
 		}
-		if (   tsuperType.isTypeVariable() 
-			&& (((TypeVariableBinding)tsuperType).declaringElement.kind() & Binding.TYPE) != 0 
+		if (   tsuperType.isTypeVariable()
+			&& (((TypeVariableBinding)tsuperType).declaringElement.kind() & Binding.TYPE) != 0
 			&& !currentType.isTypeVariable())
 			return tsuperType.erasure();
 	}
@@ -926,8 +926,8 @@ public final char[] constantPoolName() {
 
 /**
  * After method verifier has finished, fill in missing @NonNull specification from the applicable default.
- * @param needToApplyParameterNonNullDefault 
- * @param needToApplyReturnNonNullDefault 
+ * @param needToApplyParameterNonNullDefault
+ * @param needToApplyReturnNonNullDefault
  */
 protected void fillInDefaultNonNullness(AbstractMethodDeclaration sourceMethod, boolean needToApplyReturnNonNullDefault, ParameterNonNullDefaultProvider needToApplyParameterNonNullDefault) {
 	if (this.parameterNonNullness == null)
@@ -999,7 +999,7 @@ protected void fillInDefaultNonNullness18(AbstractMethodDeclaration sourceMethod
 	if (original.returnType != null && hasNonNullDefaultForReturnType(sourceMethod) && original.returnType.acceptsNonNullDefault()) {
 		if ((this.returnType.tagBits & TagBits.AnnotationNullMASK) == 0) {
 			this.returnType = env.createAnnotatedType(this.returnType, new AnnotationBinding[]{env.getNonNullAnnotation()});
-		} else if (sourceMethod instanceof MethodDeclaration && (this.returnType.tagBits & TagBits.AnnotationNonNull) != 0 
+		} else if (sourceMethod instanceof MethodDeclaration && (this.returnType.tagBits & TagBits.AnnotationNonNull) != 0
 						&& ((MethodDeclaration)sourceMethod).hasNullTypeAnnotation(AnnotationPosition.MAIN_TYPE)) {
 			sourceMethod.scope.problemReporter().nullAnnotationIsRedundant(sourceMethod, -1/*signifies method return*/);
 		}
@@ -2017,9 +2017,9 @@ public boolean redeclaresPublicObjectMethod(Scope scope) {
 	MethodBinding [] methods = javaLangObject.getMethods(this.selector);
 	for (int i = 0, length = methods == null ? 0 : methods.length; i < length; i++) {
 		final MethodBinding method = methods[i];
-		if (!method.isPublic() || method.isStatic() || method.parameters.length != this.parameters.length) 
+		if (!method.isPublic() || method.isStatic() || method.parameters.length != this.parameters.length)
 			continue;
-		if (MethodVerifier.doesMethodOverride(this, method, scope.environment())) 
+		if (MethodVerifier.doesMethodOverride(this, method, scope.environment()))
 			return true;
 	}
 	return false;

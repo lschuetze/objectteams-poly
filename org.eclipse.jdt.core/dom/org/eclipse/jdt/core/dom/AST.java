@@ -135,7 +135,7 @@ public final class AST {
 	 * @since 3.1
 	 */
 	/*package*/ static final int JLS2_INTERNAL = JLS2;
-	
+
 	/**
 	 * Constant for indicating the AST API that handles JLS3.
 	 * <p>
@@ -152,7 +152,7 @@ public final class AST {
 	 * @deprecated Clients should use the {@link #JLS_Latest} AST API instead.
 	 */
 	public static final int JLS3 = 3;
-	
+
 	/**
 	 * Internal synonym for {@link #JLS3}. Use to alleviate
 	 * deprecation warnings.
@@ -176,14 +176,14 @@ public final class AST {
 	 * @deprecated Clients should use the {@link #JLS_Latest} AST API instead.
 	 */
 	public static final int JLS4 = 4;
-	
+
 	/**
 	 * Internal synonym for {@link #JLS4}. Use to alleviate
 	 * deprecation warnings.
 	 * @since 3.10
 	 */
 	/*package*/ static final int JLS4_INTERNAL = JLS4;
-	
+
 	/**
 	 * Constant for indicating the AST API that handles JLS8.
 	 * <p>
@@ -207,7 +207,7 @@ public final class AST {
 	 * @since 3.14
 	 */
 	/*package*/ static final int JLS8_INTERNAL = JLS8;
-	
+
 	/**
 	 * Constant for indicating the AST API that handles JLS9.
 	 * <p>
@@ -231,7 +231,7 @@ public final class AST {
 	 * @since 3.14
 	 */
 	/*package*/ static final int JLS9_INTERNAL = JLS9;
-	
+
 	/**
 	 * Constant for indicating the AST API that handles JLS10.
 	 * <p>
@@ -276,10 +276,10 @@ public final class AST {
 	/**
 	 * Internal synonym for {@link #JLS11}. Use to alleviate
 	 * deprecation warnings once JLS11 is deprecated
-	 * @since 3.14 
+	 * @since 3.14
 	 */
 	/*package*/ static final int JLS11_INTERNAL = JLS11;
-	
+
 	/**
 	 * Constant for indicating the AST API that handles JLS12.
 	 * <p>
@@ -298,10 +298,10 @@ public final class AST {
 	/**
 	 * Internal synonym for {@link #JLS12}. Use to alleviate
 	 * deprecation warnings once JLS12 is deprecated
-	 * @since 3.18 
+	 * @since 3.18
 	 */
 	static final int JLS12_INTERNAL = JLS12;
-	
+
 	/**
 	 * Constant for indicating the AST API that handles JLS13.
 	 * <p>
@@ -317,11 +317,11 @@ public final class AST {
 	 * @since 3.20
 	 */
 	public static final int JLS13 = 13;
-	
+
 	/**
 	 * Internal synonym for {@link #JLS13}. Use to alleviate
 	 * deprecation warnings once JLS13 is deprecated
-	 * @since 3.20 
+	 * @since 3.20
 	 */
 	static final int JLS13_INTERNAL = JLS13;
 
@@ -340,7 +340,7 @@ public final class AST {
 	 * @since 3.22
 	 */
 	public static final int JLS14 = 14;
-	
+
 	/**
 	 * Internal synonym for {@link #JLS14}. Use to alleviate
 	 * deprecation warnings once JLS14 is deprecated
@@ -351,7 +351,7 @@ public final class AST {
 	@SuppressWarnings("unused")
 	/* Used for Java doc only*/
 	private static final int JLS_Latest = JLS14;
-	
+
 	/*
 	 * Must not collide with a value for ICompilationUnit constants
 	 */
@@ -478,7 +478,7 @@ public final class AST {
 	public static AST newAST(int level) {
 		return new AST(level, false);
 	}
-	
+
 		/**
 	 * Creates a new Java abstract syntax tree
      * (AST) following the specified set of API rules.
@@ -955,7 +955,7 @@ public final class AST {
 						null/*taskPriorities*/,
 						true/*taskCaseSensitive*/,
 						false/*isPreviewEnabled*/);
-				break;	
+				break;
 			case JLS9_INTERNAL :
 				this.apiLevel = level;
 				// initialize a scanner
@@ -969,7 +969,7 @@ public final class AST {
 						null/*taskPriorities*/,
 						true/*taskCaseSensitive*/,
 						false/*isPreviewEnabled*/);
-				break;	
+				break;
 			case JLS10_INTERNAL :
 				this.apiLevel = level;
 				// initialize a scanner
@@ -983,7 +983,7 @@ public final class AST {
 						null/*taskPriorities*/,
 						true/*taskCaseSensitive*/,
 						false/*isPreviewEnabled*/);
-				break;	
+				break;
 			case JLS11_INTERNAL :
 				this.apiLevel = level;
 				// initialize a scanner
@@ -1832,7 +1832,7 @@ public final class AST {
 	/**
 	 * Creates an unparented creation reference node owned by this AST.
 	 * By default, the type is unspecified (but legal), and there are no type arguments.
-	 * 
+	 *
 	 * @return a new unparented creation reference expression node
 	 * @exception UnsupportedOperationException if this operation is used in a JLS2, JLS3 or JLS4 AST
 	 * @since 3.10
@@ -2189,7 +2189,7 @@ public final class AST {
 	 * Creates an unparented lambda expression node owned by this AST.
 	 * By default, the new lambda expression has parentheses enabled, contains an empty argument
 	 * list, and the body is an empty block.
-	 * 
+	 *
 	 * @return a new unparented lambda expression node
 	 * @exception UnsupportedOperationException if this operation is used in a JLS2, JLS3 or JLS4 AST
 	 * @since 3.10
@@ -2293,7 +2293,7 @@ public final class AST {
 		result.setConstructor(false);
 		result.setParent(declaringType, declaringType.getBodyDeclarationsProperty());
 		return result;
-	}	
+	}
 // SH}
 
 	/**
@@ -2949,7 +2949,7 @@ public final class AST {
 
 	/**
 	 * Creates and returns a new unparented switch expression node
-	 * owned by this AST. By default, the expression is unspecified, but legal, 
+	 * owned by this AST. By default, the expression is unspecified, but legal,
 	 * and there are no statements or switch cases.
 	 *
 	 * @return a new unparented labeled switch expression node
@@ -2959,11 +2959,11 @@ public final class AST {
 		SwitchExpression result = new SwitchExpression(this);
 		return result;
 	}
-	
+
 	/**
 	 * Creates a new unparented switch case statement node owned by
-	 * this AST. By default, the node has no expression, but legal, and 
-	 * switchLabeledRule is false which indicates ":". 
+	 * this AST. By default, the node has no expression, but legal, and
+	 * switchLabeledRule is false which indicates ":".
 	 *
 	 * @return a new unparented switch case node
 	 */
@@ -3035,7 +3035,7 @@ public final class AST {
 		TagElement result = new TagElement(this);
 		return result;
 	}
-	 
+
 	/**
 	 * Creates an unparented yield statement node owned by this AST. The yield statement has no
 	 * label/identifier/expression and is not implicit.
@@ -3183,7 +3183,7 @@ public final class AST {
 	 * Creates an unparented type method reference node owned by this AST.
 	 * By default, the type and method name are unspecified (but legal),
 	 * and there are no type arguments.
-	 * 
+	 *
 	 * @return a new unparented type method reference node
 	 * @exception UnsupportedOperationException if this operation is used in a JLS2, JLS3 or JLS4 AST
 	 * @since 3.10
@@ -3903,10 +3903,10 @@ public final class AST {
 	  	throw new UnsupportedOperationException("Operation not supported in JLS2 AST"); //$NON-NLS-1$
 	  }
 	}
-	
-	
+
+
 	/**
-	 * 
+	 *
 	 * @return If previewEnabled flag is set to <code>true</code>, return <code>true</code> else <code>false</code>
 	 * @since 3.21
 	 * @noreference This method is not intended to be referenced by clients.
@@ -3916,7 +3916,7 @@ public final class AST {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return If preview is enabled and apiLevel is latest, return <code>true</code> else <code>false</code>
 	 * @since 3.19
 	 */

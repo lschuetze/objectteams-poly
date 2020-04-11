@@ -189,7 +189,7 @@ public class TypeParameter extends AbstractVariableDeclaration {
 					this.binding.evaluateNullAnnotations(scope, this);
 				}
 			}
-		}	
+		}
 	}
 
 	@Override
@@ -263,7 +263,7 @@ public class TypeParameter extends AbstractVariableDeclaration {
 		visitor.endVisit(this, scope);
 	}
 //{ObjectTeams: for type parameters with an anchor (C<R<@t..>>)
-	public void connectTypeAnchors(Scope scope) {		
+	public void connectTypeAnchors(Scope scope) {
 		if (this.type instanceof TypeAnchorReference) {
 			int numParams = 1;
 			if (this.bounds != null)
@@ -287,7 +287,7 @@ public class TypeParameter extends AbstractVariableDeclaration {
 							this.binding.superclass = (ReferenceBinding) bound;
 						else
 							scope.problemReporter().incompleteDependentTypesImplementation(this, "Cannot combine more than one type bound with an instance bound");
-					}						
+					}
 				}
 			this.binding.anchors = anchors;
 		}

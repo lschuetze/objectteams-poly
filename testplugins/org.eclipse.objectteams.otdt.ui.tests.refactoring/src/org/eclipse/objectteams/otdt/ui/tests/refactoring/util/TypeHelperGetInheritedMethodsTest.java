@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -55,8 +55,8 @@ public class TypeHelperGetInheritedMethodsTest extends FileBasedModelTest
     private IMethod   _t2r1m5;
     private IMethod   _t3r2m1;
     private IMethod   _t3r2m3;
-    
-    
+
+
 
     public TypeHelperGetInheritedMethodsTest(String name)
     {
@@ -67,7 +67,7 @@ public class TypeHelperGetInheritedMethodsTest extends FileBasedModelTest
     {
         return new Suite(TypeHelperGetInheritedMethodsTest.class);
     }
-    
+
     /**
      * Creates a team hierarchy with implicit role type inheritance.
      */
@@ -75,14 +75,14 @@ public class TypeHelperGetInheritedMethodsTest extends FileBasedModelTest
     {
         setTestProjectDir("Hierarchy");
         super.setUpSuite();
-                
+
         _t1r1 =
             getRole(getTestProjectDir(),
                 "analysis",
                 "rolehierarchy4",
                 "T1",
                 "R1");
-        
+
         _t2r1 =
             getRole(getTestProjectDir(),
                 "analysis",
@@ -96,14 +96,14 @@ public class TypeHelperGetInheritedMethodsTest extends FileBasedModelTest
                 "rolehierarchy4",
                 "T2",
                 "R2");
-        
+
         _t3r1 =
             getRole(getTestProjectDir(),
                 "analysis",
                 "rolehierarchy4",
                 "T3",
                 "R1");
-        
+
         _t3r2 =
             getRole(getTestProjectDir(),
                 "analysis",
@@ -116,7 +116,7 @@ public class TypeHelperGetInheritedMethodsTest extends FileBasedModelTest
                 "analysis",
                 "rolehierarchy4",
                 "C1");
-        
+
         _c1m1 = _c1.getMethods()[0];
         _c1m2 = _c1.getMethods()[1];
         _t1r1m3 = _t1r1.getMethods()[0];
@@ -124,12 +124,12 @@ public class TypeHelperGetInheritedMethodsTest extends FileBasedModelTest
         _t2r1m5 = _t2r1.getMethods()[1];
         _t2r2m3 = _t2r2.getMethods()[0];
         _t2r2m4 = _t2r2.getMethods()[1];
-        
+
         _t3r2m1 = _t3r2.getMethods()[0];
 		_t3r2m3 = _t3r2.getMethods()[1];
-        
+
     }
-        
+
     protected void setUp() throws Exception
     {
         super.setUp();
@@ -141,13 +141,13 @@ public class TypeHelperGetInheritedMethodsTest extends FileBasedModelTest
     	IMethod[] actual = RefactoringUtil.getInheritedMethods(_t3r2, false, false, true, new NullProgressMonitor());
     	assertTrue( compareMethods(expected, actual) );
 	}
-    
+
     public void testGetInheritedMethodsFocusTypeIncluded() throws JavaModelException
 	{
     	IMethod[] expected = new IMethod[] {_t3r2m3, _t2r2m4, _t3r2m1, _c1m2};
     	IMethod[] actual = RefactoringUtil.getInheritedMethods(_t3r2, true, false, true, new NullProgressMonitor());
     	assertTrue( compareMethods(expected, actual) );
 	}
-    
+
     //TODO(jsv) test with nested teams
 }

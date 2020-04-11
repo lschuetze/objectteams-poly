@@ -232,7 +232,7 @@ public class DeclaredLifting implements IOTConstants {
 
 		// spare the details during completion - see comment regarding local.declaration.initialization inside
 		// InternalExtendedCompletionContext.searchVisibleVariablesAndMethods(Scope, ObjectVector, ObjectVector, ObjectVector, boolean)
-	    if (!Config.isUsingAssistParser()) { 
+	    if (!Config.isUsingAssistParser()) {
 			if (   roleRef.isValidBinding()
 				&& roleRef.isRole()
 				&& (roleRef.tagBits & TagBits.HierarchyHasProblems) == 0
@@ -252,7 +252,7 @@ public class DeclaredLifting implements IOTConstants {
 							baseType = (ReferenceBinding) baseScope.getType(ltr.baseTokens, ltr.baseTokens.length);
 							baseScope.originalScope = null;
 						}
-					} 
+					}
 					if (baseType == null || !baseType.isValidBinding())
 						// fall back to normal scope:
 						baseType = (ReferenceBinding)scope.getType(ltr.baseTokens, ltr.baseTokens.length);
@@ -413,19 +413,19 @@ public class DeclaredLifting implements IOTConstants {
 			return TypeBinding.equalsEquals(((MemberTypeBinding)type).enclosingType(), enclosingTeam.erasure());
 		return false;
 	}
-	
+
 	/**
 	 * A team constructor copied for declared lifting requests access to targetMethod.
 	 * This can happen in two ways:
 	 * - create a new copy of the target constructor
 	 * - create a turning constructor that delegates to the target constructor using a real super call.
-	 * The strategy is chosen by searching the argument types for role types. 
+	 * The strategy is chosen by searching the argument types for role types.
 	 */
-	public static MethodBinding createCopyOrTurningCtor(Scope         scope, 
+	public static MethodBinding createCopyOrTurningCtor(Scope         scope,
 														  MethodBinding targetConstructor,
 														  TypeBinding[] argumentTypes,
 														  boolean      needsLifting,
-														  AstGenerator  gen) 
+														  AstGenerator  gen)
 	{
 		if (RoleTypeBinding.hasNonExternalizedRoleParameter(targetConstructor))
 			return copyTeamConstructorForDeclaredLifting(
@@ -491,7 +491,7 @@ public class DeclaredLifting implements IOTConstants {
 			ConstructorDeclaration srcCtor = (ConstructorDeclaration)src;
 			if (src.isCopied) {
 				if (src.model != null)
-					selfcall = src.model.adjustedSelfcall;					
+					selfcall = src.model.adjustedSelfcall;
 			} else if (srcCtor.constructorCall != null) {
 				Dependencies.ensureTeamState(superTeamCtor.declaringClass.getTeamModel(),
 						                     ITranslationStates.STATE_RESOLVED);
@@ -542,7 +542,7 @@ public class DeclaredLifting implements IOTConstants {
 											ClassFileConstants.AccPublic,
 											teamDecl.name,
 											AstConverter.createArgumentsFromParameters(providedWithMarker, gen));
-		
+
 		// adjust argument-anchored types in this signature:
 		for (int i=0; i<superTeamCtor.parameters.length; i++)
 			if (RoleTypeBinding.isRoleWithExplicitAnchor(superTeamCtor.parameters[i])) {
@@ -573,7 +573,7 @@ public class DeclaredLifting implements IOTConstants {
 	 * A constructor being copied contains a self call which might require
 	 * transitive copying of more team constructors.
 	 * @param scope 	   scope of the location triggering this copy operation
-	 * @param selfcall	   
+	 * @param selfcall
 	 * @param providedArgs arguments provided to the selfcall
 	 * @param needsLifting has the context required lifting of any args? pass this info down.
 	 * @param gen
@@ -724,12 +724,12 @@ public class DeclaredLifting implements IOTConstants {
 		char[] dynamicLiftingSelector = dynamicLiftSelector(roleType);
 		if (teamDecl.binding.getMethods(dynamicLiftingSelector) != Binding.NO_METHODS)
 			return; // already present
-		
+
 		if (roleType.isArrayType()) {
 			teamDecl.scope.problemReporter().missingImplementation(ref, "Generic lifting of array not yet implemented.");
 		} else if (roleType.isBaseType()) {
 			teamDecl.scope.problemReporter().primitiveTypeNotAllowedForLifting(teamDecl, ref, roleType);
-		} else { 
+		} else {
 			// reference type
 			AstGenerator gen = new AstGenerator(ref);
 			MethodDeclaration dynLiftMeth = gen.method(teamDecl.compilationResult(),
@@ -739,7 +739,7 @@ public class DeclaredLifting implements IOTConstants {
 													   new Argument[] {
 															gen.argument(IOTConstants.BASE, gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT))
 													   });
-	
+
 			dynLiftMeth.statements = new Statement[] { gen.emptyStatement() }; // to be replaced below
 			int problemId = teamDecl.getTeamModel().canLiftingFail((ReferenceBinding) roleType.erasure());
 			if (problemId == 0) {
@@ -756,10 +756,10 @@ public class DeclaredLifting implements IOTConstants {
 			}
 
 			if (problemId != 0)
-				AstEdit.addException(dynLiftMeth, 
-									 gen.qualifiedTypeReference(IOTConstants.O_O_LIFTING_FAILED_EXCEPTION), 
+				AstEdit.addException(dynLiftMeth,
+									 gen.qualifiedTypeReference(IOTConstants.O_O_LIFTING_FAILED_EXCEPTION),
 									 false/*resolve*/);
-			
+
 			dynLiftMeth.hasParsedStatements = true;
 			AstEdit.addMethod(teamDecl, dynLiftMeth);
 			dynLiftMeth.binding.returnType = ((ReferenceBinding)roleType).getRealType().erasure(); // force erased type after signature resolve
@@ -805,19 +805,19 @@ public class DeclaredLifting implements IOTConstants {
 		return ifStat;
 	}
 
-	private static IfStatement genNewIf(BlockScope scope, AstGenerator gen, ReferenceBinding boundDescendant, 
-									    LookupEnvironment environment) 
+	private static IfStatement genNewIf(BlockScope scope, AstGenerator gen, ReferenceBinding boundDescendant,
+									    LookupEnvironment environment)
 	{
 		TypeBinding boundBase = boundDescendant.baseclass();
 		if (RoleTypeBinding.isRoleWithExplicitAnchor(boundBase)) {
 			if (boundBase.isParameterizedType()) {
 				// tricky case: need to discard type parameters, but retain/recreate the role type wrapping:
 				RoleTypeBinding baseRole = (RoleTypeBinding)boundBase;
-				boundBase = environment.createParameterizedType(baseRole._declaredRoleType, 
+				boundBase = environment.createParameterizedType(baseRole._declaredRoleType,
 															 	null, 					// erase type parameters
 															 	baseRole._teamAnchor, 	// but retain anchor
 																-1,						// valueParamPosition
-																baseRole.enclosingType(), 
+																baseRole.enclosingType(),
 																Binding.NO_ANNOTATIONS);
 			}
 			// only RTB but not parameterized: leave unchanged.

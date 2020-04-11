@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -23,11 +23,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 import junit.framework.Test;
 
 public class Confinement extends AbstractOTJLDTest {
-	
+
 	public Confinement(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -35,7 +35,7 @@ public class Confinement extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -72,7 +72,7 @@ public class Confinement extends AbstractOTJLDTest {
     // invoking a method from user class on an IConfined object
     // 1.7.1-otjld-invalid-method-on-iconfined-2
     public void test171_invalidMethodOnIconfined2() {
-       
+
        runConformTest(
             new String[] {
 		"T171imoi2Main.java",
@@ -122,11 +122,11 @@ public class Confinement extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team171imoi3.java (at line 10)\n" + 
-    		"	Object o = i.clone();\n" + 
-    		"	             ^^^^^\n" + 
-    		"The method clone() is undefined for the type IConfined<@tthis[Team171imoi3]>\n" + 
+            "----------\n" +
+    		"1. ERROR in Team171imoi3.java (at line 10)\n" +
+    		"	Object o = i.clone();\n" +
+    		"	             ^^^^^\n" +
+    		"The method clone() is undefined for the type IConfined<@tthis[Team171imoi3]>\n" +
     		"----------\n");
     }
 
@@ -264,7 +264,7 @@ public class Confinement extends AbstractOTJLDTest {
     // invoking a method from user class on an IConfined role
     // 1.7.1-otjld-invalid-method-on-iconfined-4
     public void test171_invalidMethodOnIconfined4() {
-       
+
        runConformTest(
             new String[] {
 		"T171imoi4Main.java",
@@ -303,7 +303,7 @@ public class Confinement extends AbstractOTJLDTest {
     // invoking a method from user class on an IConfined role
     // 1.7.1-otjld-invalid-method-on-iconfined-5
     public void test171_invalidMethodOnIconfined5() {
-       
+
        runConformTest(
             new String[] {
 		"T171imoi5Main.java",
@@ -339,7 +339,7 @@ public class Confinement extends AbstractOTJLDTest {
     // invoking a method that is listed in Confined - according to 6.2(a) nothing is listed there
     // 1.7.1-otjld_invalid_invalid-method-on-iconfined-6
     public void _invalid_test171_invalidMethodOnIconfined6() {
-       
+
        runConformTest(
             new String[] {
 		"T171imoi6Main.java",
@@ -507,11 +507,11 @@ public class Confinement extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team172iwocr5.java (at line 8)\n" + 
-    		"	return (Object)ic;    }\n" + 
-    		"	       ^^^^^^^^^^\n" + 
-    		"Cannot cast from IMyConfined<@tthis[Team172iwocr5]> to Object\n" + 
+            "----------\n" +
+    		"1. ERROR in Team172iwocr5.java (at line 8)\n" +
+    		"	return (Object)ic;    }\n" +
+    		"	       ^^^^^^^^^^\n" +
+    		"Cannot cast from IMyConfined<@tthis[Team172iwocr5]> to Object\n" +
     		"----------\n");
     }
 
@@ -607,7 +607,7 @@ public class Confinement extends AbstractOTJLDTest {
     // an object of a confined type is seen by the type IConfined
     // 1.7.4-otjld-viewing-confined-role-by-interface-1
     public void test174_viewingConfinedRoleByInterface1() {
-       
+
        runConformTest(
             new String[] {
 		"T174vcrbi1Main.java",
@@ -677,7 +677,7 @@ public class Confinement extends AbstractOTJLDTest {
     // an object of a confined type is seen by the type org.obectteams.IConfined -- passed to wrong team
     // 1.7.4-otjld-viewing-confined-role-by-interface-3
     public void test174_viewingConfinedRoleByInterface3() {
-       
+
        runConformTest(
             new String[] {
 		"T174vcrbi3Main.java",
@@ -810,7 +810,7 @@ public class Confinement extends AbstractOTJLDTest {
     // see also TPX-465
     // 1.7.7-otjld-otjld-example-1
     public void test177_example1() {
-       
+
        runConformTest(
             new String[] {
 		"T177oe1Main.java",
@@ -863,7 +863,7 @@ public class Confinement extends AbstractOTJLDTest {
     // see also TPX-465 - but using generics
     // 1.7.7-otjld-otjld-example-2
     public void test177_example2() {
-       
+
        runConformTest(
             new String[] {
 		"T177oe2Main.java",
@@ -915,7 +915,7 @@ public class Confinement extends AbstractOTJLDTest {
     // see also TPX-465 -- casting null
     // 1.7.7-otjld-otjld-example-3
     public void test177_example3() {
-       
+
        runConformTest(
             new String[] {
 		"T177oe3Main.java",
@@ -966,7 +966,7 @@ public class Confinement extends AbstractOTJLDTest {
     // relevant cast to IConfined
     // 1.7.7-otjld-otjld-example-4
     public void test177_example4() {
-       
+
        runConformTest(
             new String[] {
 		"T177oe4Main.java",
@@ -1065,18 +1065,18 @@ public class Confinement extends AbstractOTJLDTest {
 			    "\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in T177oe5Main.java (at line 7)\n" + 
-    		"	System.out.println(emp); //<-- forbidden!\n" + 
-    		"	           ^^^^^^^\n" + 
-    		"The method println(boolean) in the type PrintStream is not applicable for the arguments (IConfined<@comp>)\n" + 
+            "----------\n" +
+    		"1. ERROR in T177oe5Main.java (at line 7)\n" +
+    		"	System.out.println(emp); //<-- forbidden!\n" +
+    		"	           ^^^^^^^\n" +
+    		"The method println(boolean) in the type PrintStream is not applicable for the arguments (IConfined<@comp>)\n" +
     		"----------\n");
     }
 
     // see TPX-466
     // 1.7.8-otjld-confined-implicit-inheritance-1
     public void test178_confinedImplicitInheritance1() {
-       
+
        runConformTest(
             new String[] {
 		"Team178cii1_2.java",
@@ -1108,7 +1108,7 @@ public class Confinement extends AbstractOTJLDTest {
     // see TPX-467
     // 1.7.8-otjld-confined-implicit-inheritance-2
     public void test178_confinedImplicitInheritance2() {
-       
+
        runConformTest(
             new String[] {
 		"Team178cii2_2.java",
@@ -1146,7 +1146,7 @@ public class Confinement extends AbstractOTJLDTest {
     // variation: explicit tsuper
     // 1.7.8-otjld-confined-implicit-inheritance-3
     public void test178_confinedImplicitInheritance3() {
-       
+
        runConformTest(
             new String[] {
 		"Team178cii3_2.java",
@@ -1229,7 +1229,7 @@ public class Confinement extends AbstractOTJLDTest {
     // a bound role is confined
     // 1.7.10-otjld-confined-bound-role-1
     public void test1710_confinedBoundRole1() {
-       
+
        runConformTest(
             new String[] {
 		"T1710cbr1Main.java",
@@ -1284,7 +1284,7 @@ public class Confinement extends AbstractOTJLDTest {
 
     // a bound role is confined, base constructor used
     public void test1710_confinedBoundRole2() {
-       
+
        runConformTest(
             new String[] {
 		"T1710cbr2Main.java",
@@ -1347,7 +1347,7 @@ public class Confinement extends AbstractOTJLDTest {
     // a bound role is confined, callin defined
     // see https://bugs.eclipse.org/370271 [compiler] NPE in PredicateGenerator with no predicate present
     public void test1710_confinedBoundRole3() {
-       
+
        runConformTest(
             new String[] {
 		"T1710cbr3Main.java",
@@ -1432,7 +1432,7 @@ public class Confinement extends AbstractOTJLDTest {
     // a role explicitly extends confined, using the super type
     // 1.7.12-otjld-explicit-inheritance-of-confined-1
     public void test1712_explicitInheritanceOfConfined1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1712eioc1.java",

@@ -81,7 +81,7 @@ public class BinaryType extends BinaryMember implements IType, SuffixConstants {
 				this.name = this.name.substring(IOTConstants.OT_DELIM_LEN);
 			}
 			this.storedEnclosingTypeName = enclosingTypeName;
-			this.enclosingNameSet = true;			
+			this.enclosingNameSet = true;
 		}
 	}
 // SH}
@@ -1042,7 +1042,7 @@ public JavadocContents getJavadocContents(IProgressMonitor monitor) throws JavaM
 	synchronized (projectInfo.javadocCache) {
 		cachedJavadoc = (JavadocContents) projectInfo.javadocCache.get(this);
 	}
-	
+
 	if (cachedJavadoc != null && cachedJavadoc != EMPTY_JAVADOC) {
 		return cachedJavadoc;
 	}

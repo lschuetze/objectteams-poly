@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -24,11 +24,11 @@ import junit.framework.Test;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 public class SmartLifting6 extends AbstractOTJLDTest {
-	
+
 	public SmartLifting6(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -54,7 +54,7 @@ public class SmartLifting6 extends AbstractOTJLDTest {
     // a base object from a class hierarchy is smart-lifted to a role class from a role class hierarchy
     // 6.4.6-otjld-smart-lifting-1
     public void test646_smartLifting1() {
-       
+
        runConformTest(
             new String[] {
 		"T646sl1Main.java",
@@ -202,7 +202,7 @@ public class SmartLifting6 extends AbstractOTJLDTest {
     // a base object from a class hierarchy is smart-lifted to a role class from a role class hierarchy
     // 6.4.6-otjld-smart-lifting-2
     public void test646_smartLifting2() {
-       
+
        runConformTest(
             new String[] {
 		"T646sl2Main.java",
@@ -350,7 +350,7 @@ public class SmartLifting6 extends AbstractOTJLDTest {
     // a base object from a class hierarchy is smart-lifted to a role class from a role class hierarchy
     // 6.4.6-otjld-smart-lifting-3
     public void test646_smartLifting3() {
-       
+
        runConformTest(
             new String[] {
 		"T646sl3Main.java",
@@ -498,7 +498,7 @@ public class SmartLifting6 extends AbstractOTJLDTest {
     // a base object from a class hierarchy is smart-lifted to a role class from a role class hierarchy
     // 6.4.6-otjld-smart-lifting-4
     public void test646_smartLifting4() {
-       
+
        runConformTest(
             new String[] {
 		"T646sl4Main.java",
@@ -646,7 +646,7 @@ public class SmartLifting6 extends AbstractOTJLDTest {
     // a base object from a class hierarchy is smart-lifted to a role class from a role class hierarchy
     // 6.4.6-otjld-smart-lifting-5
     public void test646_smartLifting5() {
-       
+
        runConformTest(
             new String[] {
 		"T646sl5Main.java",
@@ -795,7 +795,7 @@ public class SmartLifting6 extends AbstractOTJLDTest {
     // a base object from a class hierarchy is smart-lifted to a role class from a role class hierarchy
     // 6.4.6-otjld-smart-lifting-6
     public void test646_smartLifting6() {
-       
+
        runConformTest(
             new String[] {
 		"T646sl6Main.java",
@@ -944,7 +944,7 @@ public class SmartLifting6 extends AbstractOTJLDTest {
     // a base object from a class hierarchy is smart-lifted to a role class from a role class hierarchy
     // 6.4.6-otjld-smart-lifting-7
     public void test646_smartLifting7() {
-       
+
        runConformTest(
             new String[] {
 		"T646sl7Main.java",
@@ -1093,7 +1093,7 @@ public class SmartLifting6 extends AbstractOTJLDTest {
     // a base object from a class hierarchy is smart-lifted to a role class from a role class hierarchy
     // 6.4.6-otjld-smart-lifting-8
     public void test646_smartLifting8() {
-       
+
        runConformTest(
             new String[] {
 		"T646sl8Main.java",

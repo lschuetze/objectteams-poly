@@ -981,7 +981,7 @@ public TypeReference getTypeReference(int dim) {
 	 */
 
 //{ObjectTeams: wrap to introduce 2nd parameter
-	return getTypeReference(dim, false);  
+	return getTypeReference(dim, false);
 }
 @Override
 protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {

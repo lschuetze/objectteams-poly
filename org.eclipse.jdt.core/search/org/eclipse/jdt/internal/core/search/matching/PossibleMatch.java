@@ -160,7 +160,7 @@ PossibleMatch getSimilarMatch() {
 private String getSourceFileName() {
 	if (this.sourceFileName != null) return this.sourceFileName;
 
-	this.sourceFileName = NO_SOURCE_FILE_NAME; 
+	this.sourceFileName = NO_SOURCE_FILE_NAME;
 	if (this.openable.getSourceMapper() != null) {
 		if (this.openable instanceof ClassFile) {
 			BinaryType type = (BinaryType) ((ClassFile) this.openable).getType();
@@ -175,7 +175,7 @@ private String getSourceFileName() {
 		}
 	}
 	return this.sourceFileName;
-}	
+}
 boolean hasSimilarMatch() {
 	return this.similarMatch != null && (this.source == NO_SOURCE_FILE || isModuleInfo(this));
 }

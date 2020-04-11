@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -48,7 +48,7 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class AddImportQuickFixTest extends OTQuickFixTest {
-	
+
 	@Rule
     public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
@@ -66,39 +66,39 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 		// team:
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test.import1", false, null);
 		buf = new StringBuffer();
-		buf.append("package test.import1;\n");	
+		buf.append("package test.import1;\n");
 		buf.append("public team class T {\n");
 		buf.append("	protected class R2 playedBy test.base1.Base1 {\n");
 		buf.append("	}\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= null;
 		for (Object prop : proposals)
 			if (prop instanceof CUCorrectionProposal && ((CUCorrectionProposal)prop).getRelevance() > 0)
 				proposal = (CUCorrectionProposal)prop;
 		assertNotNull("Need proposal with positive relevance", proposal);
 		assertEquals("Wrong quickfix label", "\"Change qualified reference to using 'import base test...Base1;'\"", proposal.getDisplayString());
-		
+
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test.import1;\n");
-		buf.append("\n");	
+		buf.append("\n");
 		buf.append("import base test.base1.Base1;\n");
-		buf.append("\n");	
+		buf.append("\n");
 		buf.append("public team class T {\n");
 		buf.append("	protected class R2 playedBy Base1 {\n");
 		buf.append("	}\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-		
+
 	// ROFI variant:
 	@Test
 	public void testChangeFQNToBaseImport2() throws Exception {
@@ -114,30 +114,30 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 		// team:
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test.import1", false, null);
 		buf = new StringBuffer();
-		buf.append("package test.import1;\n");	
+		buf.append("package test.import1;\n");
 		buf.append("public team class T {\n");
 		buf.append("}\n");
 		ICompilationUnit teamUnit = pack1.createCompilationUnit("T.java", buf.toString(), false, null);
 		// ROFI:
 		IPackageFragment teamPack = fSourceFolder.createPackageFragment("test.import1.T", true, null);
 		buf = new StringBuffer();
-		buf.append("team package test.import1.T;\n");	
+		buf.append("team package test.import1.T;\n");
 		buf.append("protected class R2 playedBy test.base1.Base1 {\n");
 		buf.append("}\n");
 		ICompilationUnit cu= teamPack.createCompilationUnit("R2.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= null;
 		for (Object prop : proposals)
 			if (prop instanceof CUCorrectionProposal && ((CUCorrectionProposal)prop).getRelevance() > 0)
 				proposal = (CUCorrectionProposal)prop;
 		assertNotNull("Need proposal with positive relevance", proposal);
 		assertEquals("Wrong quickfix label", "\"Change qualified reference to using 'import base test...Base1;'\"", proposal.getDisplayString());
-		
+
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -157,7 +157,7 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 		assertEquals("Expected one import", 1, imports.length);
 		assertEquals("Unexpected import", "test.base1.Base1", imports[0].getElementName());
 		assertEquals("Expected base import", ExtraCompilerModifiers.AccBase, imports[0].getFlags());
-		
+
 		// drop editors whose content has been modified by apply(),
 		// so that tearDown can delete files without asking the user:
 		Workbench.getInstance().getActiveWorkbenchWindow().getActivePage().closeAllEditors(false);
@@ -228,7 +228,7 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 		// team:
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test.import1", false, null);
 		buf = new StringBuffer();
-		buf.append("package test.import1;\n");	
+		buf.append("package test.import1;\n");
 		buf.append("public team class T {\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("T.java", buf.toString(), false, null);
@@ -241,25 +241,25 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1T.createCompilationUnit("R2.java", buf.toString(), false, null);
 
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 6);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test.import1;\n");
-		buf.append("\n");	
+		buf.append("\n");
 		buf.append("import base test.base.Base1;\n");
-		buf.append("\n");	
+		buf.append("\n");
 		buf.append("public team class T {\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
 	// this time files already have content
 	@Test
 	public void testAddBaseImportForRofi2() throws Exception {
@@ -298,18 +298,18 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1T.createCompilationUnit("R2.java", buf.toString(), false, null);
 
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 6);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test.import1;\n");
-		buf.append("\n");	
+		buf.append("\n");
 		buf.append("import java.util.List;\n");
 		buf.append("\n");
 		buf.append("import base java.awt.Window;\n");
@@ -337,7 +337,7 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 		buf.append("    public class R {}\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("T.java", buf.toString(), false, null);
-		
+
 		// client
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test.import2", false, null);
 		buf = new StringBuffer();
@@ -352,12 +352,12 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu = pack2.createCompilationUnit("C.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
@@ -395,7 +395,7 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 		buf.append("\n");
 		buf.append("public class R {}\n");
 		teampack.createCompilationUnit("R.java", buf.toString(), false, null);
-		
+
 		// client
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test.import2", false, null);
 		buf = new StringBuffer();
@@ -410,12 +410,12 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu = pack2.createCompilationUnit("C.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 

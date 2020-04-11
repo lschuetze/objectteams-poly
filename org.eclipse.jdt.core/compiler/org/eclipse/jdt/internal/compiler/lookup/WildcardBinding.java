@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - extended API and implementation
@@ -122,12 +122,12 @@ public class WildcardBinding extends ReferenceBinding {
 	TypeBinding bound() {
 		return this.bound;
 	}
-	
+
 	@Override
 	int boundKind() {
 		return this.boundKind;
 	}
-	
+
 	public TypeBinding allBounds() {
 		if (this.otherBounds == null || this.otherBounds.length == 0)
 			return this.bound;
@@ -140,8 +140,8 @@ public class WildcardBinding extends ReferenceBinding {
 		}
 		return this.environment.createIntersectionType18(allBounds);
 	}
-	
-	
+
+
 	@Override
 	public void setTypeAnnotations(AnnotationBinding[] annotations, boolean evalNullAnnotations) {
 		this.tagBits |= TagBits.HasTypeAnnotations;
@@ -258,17 +258,17 @@ public class WildcardBinding extends ReferenceBinding {
 		return nullTagBits;
 	}
 
-	
+
 	@Override
 	public ReferenceBinding actualType() {
 		return this.genericType;
 	}
-	
+
 	@Override
 	TypeBinding[] additionalBounds() {
 		return this.otherBounds;
 	}
-	
+
 	@Override
 	public int kind() {
 		return this.otherBounds == null ? Binding.WILDCARD_TYPE : Binding.INTERSECTION_TYPE;
@@ -596,7 +596,7 @@ public class WildcardBinding extends ReferenceBinding {
 	public TypeBinding clone(TypeBinding immaterial) {
 		return new WildcardBinding(this.genericType, this.rank, this.bound, this.otherBounds, this.boundKind, this.environment);
 	}
-	
+
 	@Override
 	public String annotatedDebugName() {
 		StringBuffer buffer = new StringBuffer(16);
@@ -689,7 +689,7 @@ public class WildcardBinding extends ReferenceBinding {
 			this.fPackage = someGenericType.getPackage();
 		}
 		if (someBound != null) {
-			this.tagBits |= someBound.tagBits & (TagBits.HasTypeVariable | TagBits.HasMissingType | TagBits.ContainsNestedTypeReferences | 
+			this.tagBits |= someBound.tagBits & (TagBits.HasTypeVariable | TagBits.HasMissingType | TagBits.ContainsNestedTypeReferences |
 					TagBits.HasNullTypeAnnotation | TagBits.HasCapturedWildcard);
 		}
 		if (someOtherBounds != null) {
@@ -824,7 +824,7 @@ public class WildcardBinding extends ReferenceBinding {
 	int rank() {
 		return this.rank;
 	}
-	
+
     @Override
 	public char[] readableName() {
         switch (this.boundKind) {
@@ -1072,7 +1072,7 @@ public class WildcardBinding extends ReferenceBinding {
 		if (!hasNullTypeAnnotations())
 			return this;
 		AnnotationBinding[] newAnnotations = this.environment.filterNullTypeAnnotations(getTypeAnnotations());
-		return this.environment.createWildcard(this.genericType, this.rank, this.bound, this.otherBounds, this.boundKind, newAnnotations);			
+		return this.environment.createWildcard(this.genericType, this.rank, this.bound, this.otherBounds, this.boundKind, newAnnotations);
 	}
 	@Override
 	public TypeBinding uncapture(Scope scope) {

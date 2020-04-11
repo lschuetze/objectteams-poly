@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -46,7 +46,7 @@ import org.eclipse.objectteams.otdt.ui.tests.dom.FileBasedDOMTest;
  */
 public class BaseCallMessageSendTest2 extends FileBasedDOMTest
 {
-    
+
     public static final String TEST_PROJECT = "DOM_AST";
     private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS4;
 
@@ -59,12 +59,12 @@ public class BaseCallMessageSendTest2 extends FileBasedDOMTest
 	{
 		super(name);
 	}
-	
+
 	public static Test suite()
 	{
 		return new Suite(BaseCallMessageSendTest2.class);
 	}
-	
+
 	public void setUpSuite() throws Exception
 	{
 		setTestProjectDir(TEST_PROJECT);
@@ -77,14 +77,14 @@ public class BaseCallMessageSendTest2 extends FileBasedDOMTest
 		ASTParser parser = ASTParser.newParser(JAVA_LANGUAGE_SPEC_LEVEL);
 		parser.setProject(getJavaProject(TEST_PROJECT));
 		parser.setSource(teamClass);
-	
-		ASTNode root = parser.createAST( new NullProgressMonitor() );        
+
+		ASTNode root = parser.createAST( new NullProgressMonitor() );
         CompilationUnit compUnit = (CompilationUnit) root;
         _typeDecl = (TypeDeclaration)compUnit.types().get(0);
         _role = _typeDecl.getTypes()[0];
 	}
 
-	protected void setUp() throws Exception 
+	protected void setUp() throws Exception
 	{
 		super.setUp();
 	}
@@ -94,18 +94,18 @@ public class BaseCallMessageSendTest2 extends FileBasedDOMTest
         MethodDeclaration method = _role.getMethods()[0];
         TryStatement tryStatement = (TryStatement)method.getBody().statements().get(0);
         Block block = tryStatement.getBody();
-        
+
         ExpressionStatement exprStatement = (ExpressionStatement)block.statements().get(0);
-            
+
         _testObj = (BaseCallMessageSend)exprStatement.getExpression();
 
         String actual = _testObj.getName().getIdentifier();
-        
+
         assertEquals("Base call has wrong name ",
                      "roleMethod0",
                      actual);
     }
-    
+
     public void testGetName2()
     {
         MethodDeclaration method = _role.getMethods()[1];
@@ -114,9 +114,9 @@ public class BaseCallMessageSendTest2 extends FileBasedDOMTest
         _testObj = (BaseCallMessageSend)exprStatement.getExpression();
 
         String actual = _testObj.getName().getIdentifier();
-        
+
         assertEquals("Base call has wrong name ",
                      "roleMethod1",
                      actual);
     }
-}   
+}

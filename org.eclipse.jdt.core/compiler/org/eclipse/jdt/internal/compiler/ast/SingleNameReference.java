@@ -20,7 +20,7 @@
  *								Bug 412203 - [compiler] Internal compiler error: java.lang.IllegalArgumentException: info cannot be null
  *								Bug 458396 - NPE in CodeStream.invoke()
  *								Bug 407414 - [compiler][null] Incorrect warning on a primitive type being null
- *     Jesper S Moller - <jesper@selskabet.org>   - Contributions for 
+ *     Jesper S Moller - <jesper@selskabet.org>   - Contributions for
  *     							bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *								bug 378674 - "The method can be declared as static" is wrong
  *								bug 404657 - [1.8][compiler] Analysis for effectively final variables fails to consider loops
@@ -84,7 +84,7 @@ public class SingleNameReference extends NameReference implements OperatorIds {
 	public MethodBinding[] syntheticAccessors; // [0]=read accessor [1]=write accessor
 	public TypeBinding genericCast;
 	public boolean isLabel;// flagging for break expression when expression is SwitchExpression - java 12 preview-feature
-//{ObjectTeams: in generated out-of-scope code a name may have the privilige of a (t)this: 
+//{ObjectTeams: in generated out-of-scope code a name may have the privilige of a (t)this:
 	public boolean isThisLike;
 // SH}
 
@@ -419,7 +419,7 @@ public void generateAssignment(BlockScope currentScope, CodeStream codeStream, A
 							default :
 								codeStream.pop();
 								break;
-						}						
+						}
 					}
 				}
 				return;
@@ -603,7 +603,7 @@ public void generateCompoundAssignment(BlockScope currentScope, CodeStream codeS
 			FieldBinding codegenField = ((FieldBinding) this.binding).original();
 			if (codegenField.isStatic()) {
 				if ((this.syntheticAccessors == null) || (this.syntheticAccessors[SingleNameReference.READ] == null)) {
-					TypeBinding constantPoolDeclaringClass = CodeStream.getConstantPoolDeclaringClass(currentScope, codegenField, this.actualReceiverType, true /* implicit this */);					
+					TypeBinding constantPoolDeclaringClass = CodeStream.getConstantPoolDeclaringClass(currentScope, codegenField, this.actualReceiverType, true /* implicit this */);
 					codeStream.fieldAccess(Opcodes.OPC_getstatic, codegenField, constantPoolDeclaringClass);
 				} else {
 					codeStream.invoke(Opcodes.OPC_invokestatic, this.syntheticAccessors[SingleNameReference.READ], null /* default declaringClass */);
@@ -798,7 +798,7 @@ public void generatePostIncrement(BlockScope currentScope, CodeStream codeStream
 						default:
 							codeStream.dup();
 							break;
-					}					
+					}
 				} else { // Stack:  [owner][old field value]  ---> [old field value][owner][old field value]
 					switch (operandType.id) {
 						case TypeIds.T_long :
@@ -816,7 +816,7 @@ public void generatePostIncrement(BlockScope currentScope, CodeStream codeStream
 			codeStream.sendOperator(postIncrement.operator, this.implicitConversion & TypeIds.COMPILE_TYPE_MASK);
 			codeStream.generateImplicitConversion(postIncrement.preAssignImplicitConversion);
 			fieldStore(currentScope, codeStream, codegenField, this.syntheticAccessors == null ? null : this.syntheticAccessors[SingleNameReference.WRITE], this.actualReceiverType, true /*implicit this*/, false);
-			// no need for generic cast 
+			// no need for generic cast
 			return;
 		case Binding.LOCAL : // assigning to a local variable
 			LocalVariableBinding localBinding = (LocalVariableBinding) this.binding;
@@ -853,7 +853,7 @@ public void generatePostIncrement(BlockScope currentScope, CodeStream codeStream
 						default:
 							codeStream.dup();
 							break;
-					}					
+					}
 				}
 				codeStream.generateImplicitConversion(this.implicitConversion);
 				codeStream.generateConstant(postIncrement.expression.constant, this.implicitConversion);
@@ -910,7 +910,7 @@ public VariableBinding nullAnnotatedVariableBinding(boolean supportTypeAnnotatio
 	switch (this.bits & ASTNode.RestrictiveFlagMASK) {
 		case Binding.FIELD : // reading a field
 		case Binding.LOCAL : // reading a local variable
-			if (supportTypeAnnotations 
+			if (supportTypeAnnotations
 					|| (((VariableBinding)this.binding).tagBits & TagBits.AnnotationNullMASK) != 0)
 				return (VariableBinding) this.binding;
 	}
@@ -1146,7 +1146,7 @@ public TypeBinding resolveType(BlockScope scope) {
 		if (((FieldAccessSpec)callout.baseMethodSpec).isSetter())
 			this.resolvedType = callout.roleMethodSpec.resolvedParameters()[0];
 		else
-			this.resolvedType = callout.roleMethodSpec.resolvedType(); 
+			this.resolvedType = callout.roleMethodSpec.resolvedType();
 		return this.resolvedType;
 	}
 // SH}

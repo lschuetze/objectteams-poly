@@ -7,7 +7,7 @@
  *  https://www.eclipse.org/legal/epl-2.0/
  *
  *  SPDX-License-Identifier: EPL-2.0
- * 
+ *
  *  Contributors:
  *     Ben Konrath <ben@bagu.org> - initial implementation
  *     Red Hat Incorporated - improvements based on comments from JDT developers
@@ -40,9 +40,9 @@ import org.eclipse.text.edits.TextEdit;
 
 /**
  * Implements an Eclipse Application for org.eclipse.jdt.core.JavaCodeFormatter.
- * 
+ *
  * <p>On MacOS, when invoked using the Eclipse executable, the "user.dir" property is set to the folder
- * in which the eclipse.ini file is located. This makes it harder to use relative paths to point to the 
+ * in which the eclipse.ini file is located. This makes it harder to use relative paths to point to the
  * files to be formatted or the configuration file to use to set the code formatter's options.</p>
  *
  * <p>There are a couple improvements that could be made: 1. Make a list of all the
@@ -77,7 +77,7 @@ public class CodeFormatterApplication implements IApplication {
 		public static String CommandLineErrorFileDir;
 
 		public static String CommandLineErrorQuietVerbose;
-		
+
 		public static String CommandLineErrorNoConfigFile;
 
 		public static String CommandLineFormatting;
@@ -103,7 +103,7 @@ public class CodeFormatterApplication implements IApplication {
 		/**
 		 * Bind the given message's substitution locations with the given string
 		 * values.
-		 * 
+		 *
 		 * @param message
 		 *            the message to be manipulated
 		 * @return the manipulated String
@@ -115,7 +115,7 @@ public class CodeFormatterApplication implements IApplication {
 		/**
 		 * Bind the given message's substitution locations with the given string
 		 * values.
-		 * 
+		 *
 		 * @param message
 		 *            the message to be manipulated
 		 * @param binding
@@ -131,7 +131,7 @@ public class CodeFormatterApplication implements IApplication {
 		/**
 		 * Bind the given message's substitution locations with the given string
 		 * values.
-		 * 
+		 *
 		 * @param message
 		 *            the message to be manipulated
 		 * @param binding1
@@ -149,7 +149,7 @@ public class CodeFormatterApplication implements IApplication {
 		/**
 		 * Bind the given message's substitution locations with the given string
 		 * values.
-		 * 
+		 *
 		 * @param message
 		 *            the message to be manipulated
 		 * @param bindings
@@ -179,7 +179,7 @@ public class CodeFormatterApplication implements IApplication {
 
 	private boolean verbose = false;
 
-	/** 
+	/**
 	 * Display the command line usage message.
 	 */
 	private void displayHelp() {
@@ -269,11 +269,11 @@ public class CodeFormatterApplication implements IApplication {
 
 		final int DEFAULT_MODE = 0;
 		final int CONFIG_MODE = 1;
-		
+
 		int mode = DEFAULT_MODE;
 		final int INITIAL_SIZE = 1;
 		int fileCounter = 0;
-		
+
 		File[] filesToFormat = new File[INITIAL_SIZE];
 
 		loop: while (index < argCount) {
@@ -286,7 +286,7 @@ public class CodeFormatterApplication implements IApplication {
 					}
 					if (ARG_HELP.equals(currentArg)) {
 						displayHelp();
-						return null;				
+						return null;
 					}
 					if (ARG_VERBOSE.equals(currentArg)) {
 						this.verbose = true;
@@ -330,12 +330,12 @@ public class CodeFormatterApplication implements IApplication {
 					}
 					mode = DEFAULT_MODE;
 					continue loop;
-			}			
+			}
 		}
 
 		if (mode == CONFIG_MODE || this.options == null) {
 			displayHelp(Messages.bind(Messages.CommandLineErrorNoConfigFile));
-			return null;			
+			return null;
 		}
 		if (this.quiet && this.verbose) {
 			displayHelp(
@@ -425,7 +425,7 @@ public class CodeFormatterApplication implements IApplication {
 				formatDirTree(file, codeFormatter);
 			} else if (Util.isJavaLikeFileName(file.getPath())) {
 				formatFile(file, codeFormatter);
-			}			
+			}
 		}
 		if (!this.quiet) {
 			System.out.println(Messages.bind(Messages.CommandLineDone));

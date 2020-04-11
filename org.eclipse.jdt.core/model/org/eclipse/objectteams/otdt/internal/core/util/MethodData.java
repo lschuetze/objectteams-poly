@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id: MethodData.java 23416 2010-02-03 19:59:31Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 		Fraunhofer FIRST - Initial API and implementation
  * 		Technical University Berlin - Initial API and implementation
@@ -31,16 +31,16 @@ import org.eclipse.objectteams.otdt.core.IMethodSpec;
 
 /**
  * The implementation of methods getTypeParameterBounds & getTypeParameterNames
- * has been copied from class org.eclipse.jdt.internal.core.SourceMethodElementInfo 
+ * has been copied from class org.eclipse.jdt.internal.core.SourceMethodElementInfo
  * of the Eclipse JDT.
- * 
+ *
  * @author kaiser
  * @version $Id$
  */
-public class MethodData implements IMethodSpec 
+public class MethodData implements IMethodSpec
 {
     private static final String [] EMPTY_STRING_ARRAY = new String[0];
-    
+
 	private String   selector;
 	// attention: this field seems to use the constant pool encoding of types:
     private String[] argumentsTypes;
@@ -51,10 +51,10 @@ public class MethodData implements IMethodSpec
 	static final ITypeParameter[] NO_TYPE_PARAMETERS = new ITypeParameter[0];
     public ITypeParameter[] typeParameters = NO_TYPE_PARAMETERS;
 
- 
+
     private boolean isDeclaration = false;
     private boolean covariantReturn= false;
-    
+
     // FIXME(SH): fill with values:
     private int sourceStart, sourceEnd;
 
@@ -68,30 +68,30 @@ public class MethodData implements IMethodSpec
 		this.argumentsTypes = types;
 		this.argumentsNames = names;
 		this.returnType = returnType;
-		
+
 		assert types != null: "Long method spec must have types"; //$NON-NLS-1$
 		if (names == null)
 			this.argumentsNames = EMPTY_STRING_ARRAY;
-		
+
 		this.isDeclaration = isDeclaration;
 	}
-    
+
     public MethodData(String selector, String[] types, String[] names, String returnType, boolean isDeclaration,
-    				  boolean covariantReturn) 
+    				  boolean covariantReturn)
     {
     	this(selector, types, names, returnType, isDeclaration);
     	this.covariantReturn= covariantReturn;
     }
-    
+
     /** Create a short method spec (no signature). */
     public MethodData(String selector, boolean isDeclaration)
 	{
 		this.selector  = selector;
 		this.returnType = null; // TODO(SH): is this OK??
-		
+
 	    this.argumentsTypes = EMPTY_STRING_ARRAY;
 	    this.argumentsNames = EMPTY_STRING_ARRAY;
-		
+
 		this.isDeclaration = isDeclaration;
 	}
     /**
@@ -129,7 +129,7 @@ public class MethodData implements IMethodSpec
     {
         return this.argumentsTypes;
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getArgumentNames()
 	 */
@@ -147,7 +147,7 @@ public class MethodData implements IMethodSpec
     {
         return this.selector;
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getReturnType()
 	 */
@@ -164,7 +164,7 @@ public class MethodData implements IMethodSpec
 	public String getSignature() {
 		return Signature.createMethodSignature(this.argumentsTypes, this.returnType);
 	}
-	
+
     /* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#isDeclaration()
 	 */
@@ -172,7 +172,7 @@ public class MethodData implements IMethodSpec
 	public boolean isDeclaration() {
     	return this.isDeclaration;
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#hasCovariantReturn()
 	 */
@@ -180,7 +180,7 @@ public class MethodData implements IMethodSpec
 	public boolean hasCovariantReturn() {
     	return this.covariantReturn;
     }
-    
+
     @Override
 	public ITypeParameter[] getTypeParameters() {
     	return this.typeParameters;
@@ -203,7 +203,7 @@ public class MethodData implements IMethodSpec
 	public String toString()
     {
     	String signature = this.selector + "("; //$NON-NLS-1$
-    	
+
     	if (this.argumentsTypes != null)
     	{
 	    	for (int idx=0; idx < this.argumentsTypes.length; idx++)
@@ -213,7 +213,7 @@ public class MethodData implements IMethodSpec
 	    	}
     	}
     	signature += ")"; //$NON-NLS-1$
-    	
+
     	return signature;
     }
 

@@ -284,7 +284,7 @@ public class LiftingTypeReference extends TypeReference {
 	public char[][] getParameterizedTypeName() {
 		return this.baseReference.getParameterizedTypeName();
 	}
-	
+
 	@Override
 	public char[] getLastToken() {
 		return this.baseReference.getLastToken();

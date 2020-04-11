@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -63,24 +63,24 @@ public class MethodMappingBindingTest extends FileBasedDOMTest
     private CalloutMappingDeclaration[] _callouts;
     private MethodDeclaration[] _methods;
 	private IMethodMappingBinding _testObj;
-	
+
 	public MethodMappingBindingTest(String name)
 	{
 		super(name);
 	}
-	
+
 	public static Test suite()
 	{
 		return new Suite(MethodMappingBindingTest.class);
 	}
-	
+
 	public void setUpSuite() throws Exception
 	{
 		setTestProjectDir(TEST_PROJECT);
 		super.setUpSuite();
 	}
 
-	protected void setUp() throws Exception 
+	protected void setUp() throws Exception
 	{
 		super.setUp();
 		_team = getCompilationUnit(
@@ -88,12 +88,12 @@ public class MethodMappingBindingTest extends FileBasedDOMTest
 	            "src",
 	            "bindings.teampkg",
 	            "T1.java");
-        
+
 		_parser = ASTParser.newParser(JAVA_LANGUAGE_SPEC_LEVEL);
 		_parser.setProject( getJavaProject(TEST_PROJECT) );
 		_parser.setSource(_team);
         _parser.setResolveBindings(true);
-		
+
 		ASTNode root = _parser.createAST( new NullProgressMonitor() );
 		CompilationUnit compUnit = (CompilationUnit)root;
 		_teamDecl = (TypeDeclaration)compUnit.types().get(0);
@@ -113,43 +113,43 @@ public class MethodMappingBindingTest extends FileBasedDOMTest
     public void testGetName_NoSignature()
     {
         _testObj = _callouts[0].resolveBinding();
-        
+
         String actual = _testObj.getName();
         String expected = "void m1() -> void m1() ;";
-        
+
         assertEquals(expected, actual);
     }
 
     public void testGetName_WithSignature()
     {
         _testObj = _callouts[1].resolveBinding();
-        
+
         String actual = _testObj.getName();
-        String expected = "java.lang.String m2(java.lang.Integer) -> java.lang.String m2(java.lang.Integer) ;"; 
-        
+        String expected = "java.lang.String m2(java.lang.Integer) -> java.lang.String m2(java.lang.Integer) ;";
+
         assertEquals(expected, actual);
     }
-    
+
     public void testGetDeclaringClass()
     {
         _testObj = _callouts[0].resolveBinding();
-        
+
         ITypeBinding actual = _testObj.getDeclaringRoleClass();
         ITypeBinding expected = _roleDecl.resolveBinding();
-        
+
         assertEquals(expected, actual);
     }
 
     public void testGetRoleMethod()
     {
         _testObj = _callins[0].resolveBinding();
-        
+
         MethodDeclaration roleMethod =
             (MethodDeclaration)_methods[1];
-        
+
         IMethodBinding actual = _testObj.getRoleMethod();
         IMethodBinding expected = roleMethod.resolveBinding();
-        
+
         assertEquals(expected, actual);
     }
 
@@ -160,36 +160,36 @@ public class MethodMappingBindingTest extends FileBasedDOMTest
         // check we have the same method:
         MethodDeclaration roleMethod = (MethodDeclaration)_methods[1];
         assertEquals(roleMethod.resolveBinding(), ((MethodSpec)roleMappingElement).resolveBinding());
-        
+
         // check the return types:
         ITypeBinding actual = roleMappingElement.getName().resolveTypeBinding();
         ITypeBinding expected = roleMethod.resolveBinding().getReturnType();
-        
+
         assertEquals(expected, actual);
     }
-    
+
     public void testGetReferencedBaseClass()
     {
         _testObj = _callins[0].resolveBinding();
 
         ITypeBinding actual = _testObj.getReferencedBaseClass();
         ITypeBinding expected = _roleDecl.resolveBinding().getBaseClass();
-        
+
         assertNotNull(actual);
         assertEquals(expected, actual);
     }
-    
+
     public void testGetModifiers_After()
     {
         _testObj = _callins[0].resolveBinding();
         int modifier = _testObj.getModifiers();
-        
+
         boolean isCallinReplace = Modifier.isAfter(modifier)
             && _testObj.isCallin();
-        
+
         assertTrue(isCallinReplace);
     }
-    
+
     /** Resolve a qualified callin name in a precedence declaration. */
     public void testPrecedence1() {
     	PrecedenceDeclaration prec = (PrecedenceDeclaration) _teamDecl.precedences().get(0);
@@ -199,7 +199,7 @@ public class MethodMappingBindingTest extends FileBasedDOMTest
     	assertTrue("Is mapping binding", binding instanceof IMethodMappingBinding);
     	assertEquals("Has expected representation", "ci1: java.lang.Integer m5(java.lang.Integer) <- after java.lang.Integer m5(java.lang.Integer) ;", binding.toString());
     }
-    
+
     /** Try to resolve an unqualified callin name in a precedence declaration -> fails to resolve but shouldn't CCE. */
     public void testPrecedence2() {
     	PrecedenceDeclaration prec = (PrecedenceDeclaration) _teamDecl.precedences().get(0);
@@ -209,7 +209,7 @@ public class MethodMappingBindingTest extends FileBasedDOMTest
     	assertTrue("Is mapping binding", binding instanceof IMethodMappingBinding);
     	assertEquals("Has expected representation", "missingCallin:ci2: NULL ROLE METHODS<- <unknown> ;", binding.toString());
     }
-    
+
     /** Resolve an unqualified callin name in a precedence declaration */
     public void testPrecedence3() {
     	RoleTypeDeclaration role2Decl = (RoleTypeDeclaration)_teamDecl.getRoles()[1];

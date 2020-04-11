@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2005, 2014 Berlin Institute of Technology, Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	Berlin Institute of Technology - Initial API and implementation
  **********************************************************************/
@@ -36,11 +36,11 @@ import junit.framework.Test;
  */
 @SuppressWarnings("unchecked")
 public class ReportedBugs extends AbstractOTJLDTest {
-	
+
 	public ReportedBugs(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -48,7 +48,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -57,7 +57,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
 		return ReportedBugs.class;
 	}
 
-    
+
     String[] getClassLibraries(String jarFilename) {
     	String destPath = this.outputRootDirectoryPath+"/regression";
     	createOutputTestDirectory("/regression");
@@ -106,31 +106,31 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}    \n" +
 			    "    \n"
             },
-    		"----------\n" + 
-			"1. ERROR in TB11sh1fMain.java (at line 5)\n" + 
-			"	final TeamB11sh1f1 theTeam = new TeamB11sh1f();\n" + 
-			"	      ^^^^^^^^^^^^\n" + 
-			"TeamB11sh1f1 cannot be resolved to a type\n" + 
-			"----------\n" + 
-			"2. ERROR in TB11sh1fMain.java (at line 6)\n" + 
-			"	theTeam.R1[] r1s = new theTeam.R1[1];\n" + 
-			"	^^^^^^^\n" + 
-			"theTeam cannot be resolved to a type\n" + 
-			"----------\n" + 
-			"3. ERROR in TB11sh1fMain.java (at line 6)\n" + 
-			"	theTeam.R1[] r1s = new theTeam.R1[1];\n" + 
-			"	                       ^^^^^^^\n" + 
-			"theTeam cannot be resolved to a type\n" + 
-			"----------\n" + 
-			"4. ERROR in TB11sh1fMain.java (at line 7)\n" + 
-			"	r1s[0] = theTeam.new R1();\n" + 
-			"	                     ^^\n" + 
-			"TeamB11sh1f1.R1 cannot be resolved to a type\n" + 
-			"----------\n" + 
-			"5. ERROR in TB11sh1fMain.java (at line 8)\n" + 
-			"	theTeam.R3 r3 = r1s[0].getR2().getR3();\n" + 
-			"	^^^^^^^\n" + 
-			"theTeam cannot be resolved to a type\n" + 
+    		"----------\n" +
+			"1. ERROR in TB11sh1fMain.java (at line 5)\n" +
+			"	final TeamB11sh1f1 theTeam = new TeamB11sh1f();\n" +
+			"	      ^^^^^^^^^^^^\n" +
+			"TeamB11sh1f1 cannot be resolved to a type\n" +
+			"----------\n" +
+			"2. ERROR in TB11sh1fMain.java (at line 6)\n" +
+			"	theTeam.R1[] r1s = new theTeam.R1[1];\n" +
+			"	^^^^^^^\n" +
+			"theTeam cannot be resolved to a type\n" +
+			"----------\n" +
+			"3. ERROR in TB11sh1fMain.java (at line 6)\n" +
+			"	theTeam.R1[] r1s = new theTeam.R1[1];\n" +
+			"	                       ^^^^^^^\n" +
+			"theTeam cannot be resolved to a type\n" +
+			"----------\n" +
+			"4. ERROR in TB11sh1fMain.java (at line 7)\n" +
+			"	r1s[0] = theTeam.new R1();\n" +
+			"	                     ^^\n" +
+			"TeamB11sh1f1.R1 cannot be resolved to a type\n" +
+			"----------\n" +
+			"5. ERROR in TB11sh1fMain.java (at line 8)\n" +
+			"	theTeam.R3 r3 = r1s[0].getR2().getR3();\n" +
+			"	^^^^^^^\n" +
+			"theTeam cannot be resolved to a type\n" +
 			"----------\n"
     		);
     }
@@ -138,7 +138,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // reported by Robert in GebitProposalComputer
     // B.1.1-otjld-sh-1
     public void testB11_sh1() {
-       
+
        runConformTest(
             new String[] {
 		"TB11sh1Main.java",
@@ -234,11 +234,11 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}    \n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh4_1.java (at line 4)\n" + 
-    		"	foo(); \n" + 
-    		"	^^^\n" + 
-    		"The method foo() is undefined for the type TeamB11sh4_1\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh4_1.java (at line 4)\n" +
+    		"	foo(); \n" +
+    		"	^^^\n" +
+    		"The method foo() is undefined for the type TeamB11sh4_1\n" +
     		"----------\n",
             null/*classLibraries*/,
             true/*shouldFlushOutputDirectory*/,
@@ -259,16 +259,16 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}    \n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh4_2.java (at line 3)\n" + 
-    		"	TeamB11sh4_2(TB11sh4 as Role2 b) { \n" + 
-    		"	                        ^^^^^\n" + 
-    		"Role2 cannot be resolved to a type\n" + 
-    		"----------\n" + 
-    		"2. ERROR in TeamB11sh4_2.java (at line 7)\n" + 
-    		"	public class Role1 extends Role2 playedBy TB11sh4 {} \n" + 
-    		"	                           ^^^^^\n" + 
-    		"Role2 cannot be resolved to a type\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh4_2.java (at line 3)\n" +
+    		"	TeamB11sh4_2(TB11sh4 as Role2 b) { \n" +
+    		"	                        ^^^^^\n" +
+    		"Role2 cannot be resolved to a type\n" +
+    		"----------\n" +
+    		"2. ERROR in TeamB11sh4_2.java (at line 7)\n" +
+    		"	public class Role1 extends Role2 playedBy TB11sh4 {} \n" +
+    		"	                           ^^^^^\n" +
+    		"Role2 cannot be resolved to a type\n" +
     		"----------\n",
             null/*classLibraries*/,
             false/*shouldFlushOutputDirectory*/,
@@ -311,11 +311,11 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}    \n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TB11sh6.java (at line 3)\n" + 
-    		"	int team x = 1;\n" + 
-    		"	    ^^^^\n" + 
-    		"Syntax error on token \"team\", delete this token\n" + 
+            "----------\n" +
+    		"1. ERROR in TB11sh6.java (at line 3)\n" +
+    		"	int team x = 1;\n" +
+    		"	    ^^^^\n" +
+    		"Syntax error on token \"team\", delete this token\n" +
     		"----------\n");
     }
 
@@ -341,11 +341,11 @@ public class ReportedBugs extends AbstractOTJLDTest {
 				"    char charAt(int i) { return 'c'; }\n" +
 				"}\n"
             },
-            "----------\n" + 
-    		"1. ERROR in TB11sh7.java (at line 4)\n" + 
-    		"	int team x = 1;\n" + 
-    		"	    ^^^^\n" + 
-    		"Syntax error on token \"team\", delete this token\n" + 
+            "----------\n" +
+    		"1. ERROR in TB11sh7.java (at line 4)\n" +
+    		"	int team x = 1;\n" +
+    		"	    ^^^^\n" +
+    		"Syntax error on token \"team\", delete this token\n" +
     		"----------\n");
     }
 
@@ -431,7 +431,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // Bug reported by Karsten Meier (miniCRM): result in after binding may need lifting
     // B.1.1-otjld-sh-10
     public void testB11_sh10() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh10.java",
@@ -548,11 +548,11 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}	\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh11b.java (at line 12)\n" + 
-    		"	void setOther(R other, boolean flag) <- after void setOther(TB11sh11b other) \n" + 
-    		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Incomplete parameter mapping: argument flag of role method void setOther(R other, boolean flag) is not mapped (OTJLD 4.4(a)).\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh11b.java (at line 12)\n" +
+    		"	void setOther(R other, boolean flag) <- after void setOther(TB11sh11b other) \n" +
+    		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+    		"Incomplete parameter mapping: argument flag of role method void setOther(R other, boolean flag) is not mapped (OTJLD 4.4(a)).\n" +
     		"----------\n");
     }
 
@@ -579,7 +579,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // detected while creating an example for discussion with Erik Ernst
     // B.1.1-otjld-sh-13
     public void testB11_sh13() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh13_2.java",
@@ -629,7 +629,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // TPX-320 nested copy of callout
     // B.1.1-otjld-sh-14
     public void testB11_sh14() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh14.java",
@@ -693,18 +693,18 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}		\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh15.java (at line 3)\n" + 
-    		"	public team class TeamB11sh15 {}\n" + 
-    		"	                  ^^^^^^^^^^^\n" + 
-    		"The nested type TeamB11sh15 cannot hide an enclosing type\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh15.java (at line 3)\n" +
+    		"	public team class TeamB11sh15 {}\n" +
+    		"	                  ^^^^^^^^^^^\n" +
+    		"The nested type TeamB11sh15 cannot hide an enclosing type\n" +
     		"----------\n");
     }
 
     // white box: breaking MessageSend.resolve by externally invoking a shorthand callout
     // B.1.1-otjld-sh-16
     public void testB11_sh16() {
-       
+
        runConformTest(
             new String[] {
 		"TB11sh16Main.java",
@@ -743,7 +743,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // local class in parameter mapping - reported by hsudhof, see SessionDeployment
     // B.1.1-otjld-sh-17
     public void testB11_sh17() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh17.java",
@@ -790,7 +790,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // TPX-397: conflict between resolution of anchored types and sorting of field bindings
     // B.1.1-otjld-sh-18
     public void testB11_sh18() {
-       
+
        runConformTest(
             new String[] {
 		"p2/C3.java",
@@ -868,7 +868,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // from Dehla's error log: enum fields have no declared type
     // B.1.1-otjld-sh-20
     public void testB11_sh20() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh20.java",
@@ -892,7 +892,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // conflict between weakening of a team's field's type and interface implementation - occurred in hierarchy:ColumnTree.<init>(MyTreeNode)
     // B.1.1-otjld-sh-21
     public void testB11_sh21() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh21_2.java",
@@ -944,7 +944,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // conflict between weakening of a team's field's type and interface implementation - same as above but method instead of ctor
     // B.1.1-otjld-sh-22
     public void testB11_sh22() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh22_2.java",
@@ -1086,11 +1086,11 @@ public class ReportedBugs extends AbstractOTJLDTest {
 				"    String toUpperCase() { return \"\"; }\n" +
 				"}\n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh26.java (at line 3)\n" + 
-    		"	protected class // unfinished\n" + 
-    		"	          ^^^^^\n" + 
-    		"Syntax error on token \"class\", callin expected\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh26.java (at line 3)\n" +
+    		"	protected class // unfinished\n" +
+    		"	          ^^^^^\n" +
+    		"Syntax error on token \"class\", callin expected\n" +
     		"----------\n");
     }
 
@@ -1116,11 +1116,11 @@ public class ReportedBugs extends AbstractOTJLDTest {
 				"    String toUpperCase() { return \"\"; }\n" +
 				"}\n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh27.java (at line 3)\n" + 
-    		"	protected class // unfinished\n" + 
-    		"	          ^^^^^\n" + 
-    		"Syntax error on token \"class\", callin expected\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh27.java (at line 3)\n" +
+    		"	protected class // unfinished\n" +
+    		"	          ^^^^^\n" +
+    		"Syntax error on token \"class\", callin expected\n" +
     		"----------\n");
     }
 
@@ -1153,7 +1153,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // A callin method has a name that is misinterpreted as a creator method - reported by kmeier on 07/12/06
     // B.1.1-otjld-sh-29
     public void testB11_sh29() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh29.java",
@@ -1212,7 +1212,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // TPX-458
     // B.1.1-otjld-sh-31
     public void testB11_sh31() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh31_3.java",
@@ -1261,7 +1261,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // The bug leading to the workaround leading to TPX-458
     // B.1.1-otjld-sh-32
     public void testB11_sh32() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh32_3.java",
@@ -1311,7 +1311,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // broken control flow in woven base, observed in CompletionAdaptor
     // B.1.1-otjld-sh-34
     public void testB11_sh34() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh34.java",
@@ -1387,11 +1387,11 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh35.java (at line 5)\n" + 
-    		"	Object o = new Missing() {\n" + 
-    		"	               ^^^^^^^\n" + 
-    		"Missing cannot be resolved to a type\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh35.java (at line 5)\n" +
+    		"	Object o = new Missing() {\n" +
+    		"	               ^^^^^^^\n" +
+    		"Missing cannot be resolved to a type\n" +
     		"----------\n");
     }
 
@@ -1416,16 +1416,16 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-    		"----------\n" + 
-    		"1. ERROR in TeamB11sh36.java (at line 4)\n" + 
-    		"	toString =>  // incomplete\n" + 
-    		"	         ^^\n" + 
-    		"Syntax error on token \"=>\", delete this token\n" + 
-    		"----------\n" + 
-    		"2. ERROR in TeamB11sh36.java (at line 5)\n" + 
-    		"	R() {}\n" + 
-    		"	^\n" + 
-    		"No method R found in type TB11sh36 to resolve method designator (OTJLD 3.1(c)).\n" + 
+    		"----------\n" +
+    		"1. ERROR in TeamB11sh36.java (at line 4)\n" +
+    		"	toString =>  // incomplete\n" +
+    		"	         ^^\n" +
+    		"Syntax error on token \"=>\", delete this token\n" +
+    		"----------\n" +
+    		"2. ERROR in TeamB11sh36.java (at line 5)\n" +
+    		"	R() {}\n" +
+    		"	^\n" +
+    		"No method R found in type TB11sh36 to resolve method designator (OTJLD 3.1(c)).\n" +
     		"----------\n");
     }
 
@@ -1463,7 +1463,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // lowering-confusion reported by mehner in SportCourseManagement: tried to lower an exception, but only its ctor-arg should be lowered
     // B.1.1-otjld-sh-38
     public void testB11_sh38() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh38.java",
@@ -1511,7 +1511,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // copy inheritance for subclass of JFrame: couldn't deal with type variables in signatures to copy
     // B.1.1-otjld-sh-39
     public void testB11_sh39() {
-       
+
        String[] files = {
 		"TeamB11sh39_2.java",
 			    "\n" +
@@ -1548,7 +1548,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // multiple anonymous classes, implicitely inherited
     // B.1.1-otjld-sh-40
     public void testB11_sh40() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh40_2.java",
@@ -1598,7 +1598,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // multiple anonymous classes, implicitely inherited - reuse binary of local
     // B.1.1-otjld-sh-40f
     public void testB11_sh40f() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh40f_2.java",
@@ -1648,7 +1648,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // reported by kmeier
     // B.1.1-otjld-sh-41
     public void testB11_sh41() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh41_3.java",
@@ -1698,7 +1698,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // check added by resix
     // B.1.1-otjld-sh-41a
     public void testB11_sh41a() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh41a_3.java",
@@ -1753,7 +1753,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // B.1.1-otjld-sh-42
     public void testB11_sh42() {
        Map customOptions = getCompilerOptions();
-       
+
        runConformTest(
             new String[] {
 		"TB11sh42Main.java",
@@ -1888,7 +1888,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // conflicting package and field
     // B.1.1-otjld-sh-45
     public void testB11_sh45() {
-       
+
        runConformTest(
             new String[] {
 		"p2/TeamB11sh45_2.java",
@@ -2090,58 +2090,58 @@ public class ReportedBugs extends AbstractOTJLDTest {
             },
 		    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 		    ?
-    		"----------\n" + 
-    		"1. WARNING in TeamB11sh47.java (at line 6)\n" + 
-    		"	protected class R1 playedBy JFrame {\n" + 
-    		"	                            ^^^^^^\n" + 
-    		"Base class javax.swing.JFrame has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
-    		"----------\n" + 
-    		"2. ERROR in TeamB11sh47.java (at line 11)\n" + 
-    		"	correct <- replace show;\n" + 
-    		"	                   ^^^^\n" + 
-    		"Method specifier \"show\" is ambiguous for the type javax.swing.JFrame. Please use the exact method signature to disambiguate (OTJLD 4.1(c)).\n" + 
-    		"----------\n" + 
-    		"3. ERROR in TeamB11sh47.java (at line 14)\n" + 
-    		"	protected class Unfinished playedBy\n" + 
-    		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Syntax error on token(s), misplaced construct(s)\n" + 
-    		"----------\n" + 
-    		"4. ERROR in TeamB11sh47.java (at line 15)\n" + 
-    		"	protected class R3 playedBy String {\n" + 
-    		"	                ^^\n" + 
-    		"Member types not allowed in regular roles. Mark class TeamB11sh47.Unfinished as a team if R3 should be its role (OTJLD 1.5(a,b)). \n" + 
-    		"----------\n" + 
-    		"5. WARNING in TeamB11sh47.java (at line 15)\n" + 
-    		"	protected class R3 playedBy String {\n" + 
-    		"	                            ^^^^^^\n" + 
-    		"PlayedBy binding overrides finalness of base class java.lang.String (OTJLD 2.1.2(c)).\n" + 
-    		"----------\n" + 
-    		"6. WARNING in TeamB11sh47.java (at line 15)\n" + 
-    		"	protected class R3 playedBy String {\n" + 
-    		"	                            ^^^^^^\n" + 
-    		"Base class java.lang.String has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
+    		"----------\n" +
+    		"1. WARNING in TeamB11sh47.java (at line 6)\n" +
+    		"	protected class R1 playedBy JFrame {\n" +
+    		"	                            ^^^^^^\n" +
+    		"Base class javax.swing.JFrame has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" +
+    		"----------\n" +
+    		"2. ERROR in TeamB11sh47.java (at line 11)\n" +
+    		"	correct <- replace show;\n" +
+    		"	                   ^^^^\n" +
+    		"Method specifier \"show\" is ambiguous for the type javax.swing.JFrame. Please use the exact method signature to disambiguate (OTJLD 4.1(c)).\n" +
+    		"----------\n" +
+    		"3. ERROR in TeamB11sh47.java (at line 14)\n" +
+    		"	protected class Unfinished playedBy\n" +
+    		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+    		"Syntax error on token(s), misplaced construct(s)\n" +
+    		"----------\n" +
+    		"4. ERROR in TeamB11sh47.java (at line 15)\n" +
+    		"	protected class R3 playedBy String {\n" +
+    		"	                ^^\n" +
+    		"Member types not allowed in regular roles. Mark class TeamB11sh47.Unfinished as a team if R3 should be its role (OTJLD 1.5(a,b)). \n" +
+    		"----------\n" +
+    		"5. WARNING in TeamB11sh47.java (at line 15)\n" +
+    		"	protected class R3 playedBy String {\n" +
+    		"	                            ^^^^^^\n" +
+    		"PlayedBy binding overrides finalness of base class java.lang.String (OTJLD 2.1.2(c)).\n" +
+    		"----------\n" +
+    		"6. WARNING in TeamB11sh47.java (at line 15)\n" +
+    		"	protected class R3 playedBy String {\n" +
+    		"	                            ^^^^^^\n" +
+    		"Base class java.lang.String has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" +
     		"----------\n"
 		    :
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh47.java (at line 11)\n" + 
-    		"	correct <- replace show;\n" + 
-    		"	                   ^^^^\n" + 
-    		"Method specifier \"show\" is ambiguous for the type javax.swing.JFrame. Please use the exact method signature to disambiguate (OTJLD 4.1(c)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in TeamB11sh47.java (at line 14)\n" + 
-    		"	protected class Unfinished playedBy\n" + 
-    		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Syntax error on token(s), misplaced construct(s)\n" + 
-    		"----------\n" + 
-    		"3. ERROR in TeamB11sh47.java (at line 15)\n" + 
-    		"	protected class R3 playedBy String {\n" + 
-    		"	                ^^\n" + 
-    		"Member types not allowed in regular roles. Mark class TeamB11sh47.Unfinished as a team if R3 should be its role (OTJLD 1.5(a,b)). \n" + 
-    		"----------\n"+ 
-    		"4. WARNING in TeamB11sh47.java (at line 15)\n" + 
-    		"	protected class R3 playedBy String {\n" + 
-    		"	                            ^^^^^^\n" + 
-    		"PlayedBy binding overrides finalness of base class java.lang.String (OTJLD 2.1.2(c)).\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh47.java (at line 11)\n" +
+    		"	correct <- replace show;\n" +
+    		"	                   ^^^^\n" +
+    		"Method specifier \"show\" is ambiguous for the type javax.swing.JFrame. Please use the exact method signature to disambiguate (OTJLD 4.1(c)).\n" +
+    		"----------\n" +
+    		"2. ERROR in TeamB11sh47.java (at line 14)\n" +
+    		"	protected class Unfinished playedBy\n" +
+    		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+    		"Syntax error on token(s), misplaced construct(s)\n" +
+    		"----------\n" +
+    		"3. ERROR in TeamB11sh47.java (at line 15)\n" +
+    		"	protected class R3 playedBy String {\n" +
+    		"	                ^^\n" +
+    		"Member types not allowed in regular roles. Mark class TeamB11sh47.Unfinished as a team if R3 should be its role (OTJLD 1.5(a,b)). \n" +
+    		"----------\n"+
+    		"4. WARNING in TeamB11sh47.java (at line 15)\n" +
+    		"	protected class R3 playedBy String {\n" +
+    		"	                            ^^^^^^\n" +
+    		"PlayedBy binding overrides finalness of base class java.lang.String (OTJLD 2.1.2(c)).\n" +
     		"----------\n"
     		),
     		null/*classLibraries*/,
@@ -2173,28 +2173,28 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-    		"----------\n" + 
-    		"1. WARNING in TeamB11sh48_2.java (at line 4)\n" + 
-    		"	protected class R2 playedBy R1<@base> {\n" + 
-    		"	                            ^^\n" + 
-    		"Overriding access restriction of base class R1<@base> (OTJLD 2.1.2(c)).\n" + 
     		"----------\n" +
-    		"----------\n" + 
-    		"1. ERROR in TeamB11sh48_1.java (at line 3)\n" + 
-    		"	public team class TeamB11sh48_1 extends MissingTeam {\n" + 
-    		"	                                        ^^^^^^^^^^^\n" + 
-    		"MissingTeam cannot be resolved to a type\n" + 
-    		"----------\n" + 
-    		"2. ERROR in TeamB11sh48_1.java (at line 5)\n" + 
-    		"	protected class R1 playedBy Arrays {\n" + 
-    		"	                ^^\n" + 
-    		"The hierarchy of the type R1 is inconsistent\n" + 
-    		"----------\n" + 
+    		"1. WARNING in TeamB11sh48_2.java (at line 4)\n" +
+    		"	protected class R2 playedBy R1<@base> {\n" +
+    		"	                            ^^\n" +
+    		"Overriding access restriction of base class R1<@base> (OTJLD 2.1.2(c)).\n" +
+    		"----------\n" +
+    		"----------\n" +
+    		"1. ERROR in TeamB11sh48_1.java (at line 3)\n" +
+    		"	public team class TeamB11sh48_1 extends MissingTeam {\n" +
+    		"	                                        ^^^^^^^^^^^\n" +
+    		"MissingTeam cannot be resolved to a type\n" +
+    		"----------\n" +
+    		"2. ERROR in TeamB11sh48_1.java (at line 5)\n" +
+    		"	protected class R1 playedBy Arrays {\n" +
+    		"	                ^^\n" +
+    		"The hierarchy of the type R1 is inconsistent\n" +
+    		"----------\n" +
     		(this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8 ?
-			"3. WARNING in TeamB11sh48_1.java (at line 5)\n" + 
-			"	protected class R1 playedBy Arrays {\n" + 
-			"	                            ^^^^^^\n" + 
-			"Base class java.util.Arrays has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
+			"3. WARNING in TeamB11sh48_1.java (at line 5)\n" +
+			"	protected class R1 playedBy Arrays {\n" +
+			"	                            ^^^^^^\n" +
+			"Base class java.util.Arrays has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" +
 			"----------\n"
 			: ""
     		));
@@ -2213,21 +2213,21 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "    }\n" +
 			    "}\n" +
 			    "    \n"},
-			    "----------\n" + 
-				"1. ERROR in TeamB11sh49.java (at line 4)\n" + 
-				"	void getString() -> toString;\n" + 
-				"	     ^^^^^^^^^\n" + 
-				"Method binding not allowed here, role R is not played by a base class (OTJLD 3.1(a)).\n" + 
-				"----------\n" + 
-				"2. ERROR in TeamB11sh49.java (at line 4)\n" + 
-				"	void getString() -> toString;\n" + 
-				"	                    ^^^^^^^^\n" + 
-				"Syntax error, insert \"Identifier (\" to complete MethodHeaderName\n" + 
-				"----------\n" + 
-				"3. ERROR in TeamB11sh49.java (at line 4)\n" + 
-				"	void getString() -> toString;\n" + 
-				"	                    ^^^^^^^^\n" + 
-				"Syntax error, insert \")\" to complete MethodSpecLong\n" + 
+			    "----------\n" +
+				"1. ERROR in TeamB11sh49.java (at line 4)\n" +
+				"	void getString() -> toString;\n" +
+				"	     ^^^^^^^^^\n" +
+				"Method binding not allowed here, role R is not played by a base class (OTJLD 3.1(a)).\n" +
+				"----------\n" +
+				"2. ERROR in TeamB11sh49.java (at line 4)\n" +
+				"	void getString() -> toString;\n" +
+				"	                    ^^^^^^^^\n" +
+				"Syntax error, insert \"Identifier (\" to complete MethodHeaderName\n" +
+				"----------\n" +
+				"3. ERROR in TeamB11sh49.java (at line 4)\n" +
+				"	void getString() -> toString;\n" +
+				"	                    ^^^^^^^^\n" +
+				"Syntax error, insert \")\" to complete MethodSpecLong\n" +
 				"----------\n",
 				null/*classLibraries*/,
 				false/*shouldFlushOutputDirectory*/,
@@ -2273,11 +2273,11 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh50.java (at line 3)\n" + 
-    		"	protected class R1 playedBy Missing {\n" + 
-    		"	                            ^^^^^^^\n" + 
-    		"Missing cannot be resolved to a type\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh50.java (at line 3)\n" +
+    		"	protected class R1 playedBy Missing {\n" +
+    		"	                            ^^^^^^^\n" +
+    		"Missing cannot be resolved to a type\n" +
     		"----------\n");
     }
 
@@ -2312,7 +2312,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // curiosities if bound base method is covariantly redefined, reported by hsudof, base version: OK
     // B.1.1-otjld-sh-51
     public void testB11_sh51() {
-       
+
        runConformTest(
             new String[] {
 		"TB11sh51_1.java",
@@ -2421,7 +2421,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // curiosities if bound base method is covariantly redefined, reported by hsudof, static type changed the behaviour
     // B.1.1-otjld-sh-52
     public void testB11_sh52() {
-       
+
        runConformTest(
             new String[] {
 		"TB11sh52_1.java",
@@ -2478,7 +2478,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // curiosities if bound base method is covariantly redefined, reported by hsudof, referencing sub team changed behavior
     // B.1.1-otjld-sh-53
     public void testB11_sh53() {
-       
+
        runConformTest(
             new String[] {
 		"TB11sh53_1.java",
@@ -2691,21 +2691,21 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "public class TB11sh60 {}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh60.java (at line 2)\n" + 
-    		"	public team class TeamB11sh60 extends MissingTeam {\n" + 
-    		"	                                      ^^^^^^^^^^^\n" + 
-    		"MissingTeam cannot be resolved to a type\n" + 
-    		"----------\n" + 
-    		"2. ERROR in TeamB11sh60.java (at line 3)\n" + 
-    		"	public class Role extends MissingSuperRole playedBy TB11sh60 { }\n" + 
-    		"	             ^^^^\n" + 
-    		"The hierarchy of the type Role is inconsistent\n" + 
-    		"----------\n" + 
-    		"3. ERROR in TeamB11sh60.java (at line 3)\n" + 
-    		"	public class Role extends MissingSuperRole playedBy TB11sh60 { }\n" + 
-    		"	                          ^^^^^^^^^^^^^^^^\n" + 
-    		"MissingSuperRole cannot be resolved to a type\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh60.java (at line 2)\n" +
+    		"	public team class TeamB11sh60 extends MissingTeam {\n" +
+    		"	                                      ^^^^^^^^^^^\n" +
+    		"MissingTeam cannot be resolved to a type\n" +
+    		"----------\n" +
+    		"2. ERROR in TeamB11sh60.java (at line 3)\n" +
+    		"	public class Role extends MissingSuperRole playedBy TB11sh60 { }\n" +
+    		"	             ^^^^\n" +
+    		"The hierarchy of the type Role is inconsistent\n" +
+    		"----------\n" +
+    		"3. ERROR in TeamB11sh60.java (at line 3)\n" +
+    		"	public class Role extends MissingSuperRole playedBy TB11sh60 { }\n" +
+    		"	                          ^^^^^^^^^^^^^^^^\n" +
+    		"MissingSuperRole cannot be resolved to a type\n" +
     		"----------\n");
     }
 
@@ -2780,18 +2780,18 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-    		"----------\n" + 
-    		"1. ERROR in TeamB11sh61.java (at line 51)\n" + 
-    		"	precedence Dirty, ClosePending;\n" + 
-    		"	                  ^^^^^^^^^^^^\n" + 
-    		"Callin binding ClosePending not found in type TeamB11sh61.Level1 (OTJLD 4.8(b)).\n" + 
+    		"----------\n" +
+    		"1. ERROR in TeamB11sh61.java (at line 51)\n" +
+    		"	precedence Dirty, ClosePending;\n" +
+    		"	                  ^^^^^^^^^^^^\n" +
+    		"Callin binding ClosePending not found in type TeamB11sh61.Level1 (OTJLD 4.8(b)).\n" +
     		"----------\n");
     }
 
     // witness for NPE in CallinBindingManager
     // B.1.1-otjld-sh-62
     public void testB11_sh62() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh62.java",
@@ -2937,7 +2937,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // witness for base method tag overflow, old result was: "0190290390467nullnull"
     // B.1.1-otjld-sh-64
     public void testB11_sh64() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh64.java",
@@ -2998,7 +2998,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // anonymous type in callin method - witness for scoping problem
     // B.1.1-otjld-sh-65
     public void testB11_sh65() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh65.java",
@@ -3043,7 +3043,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // initializer in a role class
     // B.1.1-otjld-sh-66
     public void testB11_sh66() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh66.java",
@@ -3148,21 +3148,21 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. WARNING in TeamB11sh68.java (at line 2)\n" + 
-    		"	@SuppressWarnings({\"unused\",\"basecall\",\"restriction\"}) // last one is unnecessary\n" + 
-    		"	                            ^^^^^^^^^^\n" + 
-    		"Unnecessary @SuppressWarnings(\"basecall\")\n" + 
-    		"----------\n" + 
-    		"2. WARNING in TeamB11sh68.java (at line 2)\n" + 
-    		"	@SuppressWarnings({\"unused\",\"basecall\",\"restriction\"}) // last one is unnecessary\n" + 
-    		"	                                       ^^^^^^^^^^^^^\n" + 
-    		"Unnecessary @SuppressWarnings(\"restriction\")\n" + 
-    		"----------\n" + 
-    		"3. WARNING in TeamB11sh68.java (at line 7)\n" + 
-    		"	int getSecret() -> get int secret; // <- decapsulation warning was masked by above @SuppressWarnings\n" + 
-    		"	                           ^^^^^^\n" + 
-    		"Access restriction of private field secret in type TB11sh68 is overridden by this binding (OTJLD 3.5(e)).\n" + 
+            "----------\n" +
+    		"1. WARNING in TeamB11sh68.java (at line 2)\n" +
+    		"	@SuppressWarnings({\"unused\",\"basecall\",\"restriction\"}) // last one is unnecessary\n" +
+    		"	                            ^^^^^^^^^^\n" +
+    		"Unnecessary @SuppressWarnings(\"basecall\")\n" +
+    		"----------\n" +
+    		"2. WARNING in TeamB11sh68.java (at line 2)\n" +
+    		"	@SuppressWarnings({\"unused\",\"basecall\",\"restriction\"}) // last one is unnecessary\n" +
+    		"	                                       ^^^^^^^^^^^^^\n" +
+    		"Unnecessary @SuppressWarnings(\"restriction\")\n" +
+    		"----------\n" +
+    		"3. WARNING in TeamB11sh68.java (at line 7)\n" +
+    		"	int getSecret() -> get int secret; // <- decapsulation warning was masked by above @SuppressWarnings\n" +
+    		"	                           ^^^^^^\n" +
+    		"Access restriction of private field secret in type TB11sh68 is overridden by this binding (OTJLD 3.5(e)).\n" +
     		"----------\n",
     		customOptions);
     }
@@ -3170,7 +3170,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // issue with static initialization - user and generated conflicting, reported by Miguel Monteiro
     // B.1.1-otjld-sh-69
     public void testB11_sh69() {
-       
+
        runConformTest(
             new String[] {
 		"TB11sh69Main.java",
@@ -3212,7 +3212,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // internal call should use custom ctor
     // B.1.1-otjld-sh-70
     public void testB11_sh70() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh70.java",
@@ -3248,7 +3248,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // witness for ArrayStoreException found in the logs - custom ctor is never used
     // B.1.1-otjld-sh-70f
     public void testB11_sh70f() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh70f.java",
@@ -3285,7 +3285,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // variant of above, right ctor resolved
     // B.1.1-otjld-sh-71
     public void testB11_sh71() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh71.java",
@@ -3317,7 +3317,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // witness for NegativeArraySizeException in StackMapFrame.duplicate (pre r19271
     // B.1.1-otjld-sh-72
     public void testB11_sh72() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh72.java",
@@ -3364,11 +3364,11 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh73.java (at line 5)\n" + 
-    		"	tsuper.doit(); // no tsuper available\n" + 
-    		"	^^^^^^^^^^^^^\n" + 
-    		"Illegal tsuper call: role TeamB11sh73.R has no implicit super class (OTJLD 1.3.1(f)).\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh73.java (at line 5)\n" +
+    		"	tsuper.doit(); // no tsuper available\n" +
+    		"	^^^^^^^^^^^^^\n" +
+    		"Illegal tsuper call: role TeamB11sh73.R has no implicit super class (OTJLD 1.3.1(f)).\n" +
     		"----------\n");
     }
 
@@ -3397,12 +3397,12 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh74_1.java (at line 4)\n" + 
-    		"	String getId() -> get int id; // bug\n" + 
-    		"	^^^^^^^^^^^^^^\n" + 
-    		"When binding field id via callout to role method getId():\n" + 
-    		"Incompatible types: can\'t convert int to java.lang.String (OTJLD 3.5(b)).\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh74_1.java (at line 4)\n" +
+    		"	String getId() -> get int id; // bug\n" +
+    		"	^^^^^^^^^^^^^^\n" +
+    		"When binding field id via callout to role method getId():\n" +
+    		"Incompatible types: can\'t convert int to java.lang.String (OTJLD 3.5(b)).\n" +
     		"----------\n");
     }
 
@@ -3410,7 +3410,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // B.1.1-otjld-sh-75
     public void testB11_sh75() {
        Map customOptions = getCompilerOptions();
-       
+
        runTest(
             new String[] {
 		"TeamB11sh75_2.java",
@@ -3446,11 +3446,11 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "    \n"
             },
             true/*expectingCompilerErrors*/,
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh75_1.java (at line 4)\n" + 
-    		"	String mismatch() -> get String id;\n" + 
-    		"	                         ^^^^^^\n" + 
-    		"Field specifier \'id\' resolves to type int whereas type java.lang.String is specified (OTJLD 3.5(a)).\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh75_1.java (at line 4)\n" +
+    		"	String mismatch() -> get String id;\n" +
+    		"	                         ^^^^^^\n" +
+    		"Field specifier \'id\' resolves to type int whereas type java.lang.String is specified (OTJLD 3.5(a)).\n" +
     		"----------\n",
             "OK",
             ""/*expectedErrorOutput*/,
@@ -3467,7 +3467,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // B.1.1-otjld-sh-75
     public void testB11_sh75a() {
        Map customOptions = getCompilerOptions();
-       
+
        runTest(
             new String[] {
 		"TeamB11sh75a_2.java",
@@ -3503,12 +3503,12 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "    \n"
             },
             true/*expectingCompilerErrors*/,
-            "----------\n" + 
-			"1. ERROR in TeamB11sh75a_1.java (at line 4)\n" + 
-			"	String mismatch() -> get int id;\n" + 
-			"	^^^^^^^^^^^^^^^^^\n" + 
-			"When binding field id via callout to role method mismatch():\n" + 
-			"Incompatible types: can\'t convert int to java.lang.String (OTJLD 3.5(b)).\n" + 
+            "----------\n" +
+			"1. ERROR in TeamB11sh75a_1.java (at line 4)\n" +
+			"	String mismatch() -> get int id;\n" +
+			"	^^^^^^^^^^^^^^^^^\n" +
+			"When binding field id via callout to role method mismatch():\n" +
+			"Incompatible types: can\'t convert int to java.lang.String (OTJLD 3.5(b)).\n" +
 			"----------\n",
             "OK",
             ""/*expectedErrorOutput*/,
@@ -3535,11 +3535,11 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in p1\\TeamB11sh76.java (at line 5)\n" + 
-    		"	void foo (p1.TeamB11sh76.R[] roles) {}\n" + 
-    		"	          ^^^^^^^^^^^^^^^^^^\n" + 
-    		"Illegal qualified use of non-public role R (OTJLD 1.2.3(b)).\n" + 
+            "----------\n" +
+    		"1. ERROR in p1\\TeamB11sh76.java (at line 5)\n" +
+    		"	void foo (p1.TeamB11sh76.R[] roles) {}\n" +
+    		"	          ^^^^^^^^^^^^^^^^^^\n" +
+    		"Illegal qualified use of non-public role R (OTJLD 1.2.3(b)).\n" +
     		"----------\n");
     }
 
@@ -3569,7 +3569,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // NPE was thrown by LiftingEnvironment if late role was unbound after inline roles are bound
     // B.1.1-otjld-sh-78
     public void testB11_sh78() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh78.java",
@@ -3639,27 +3639,27 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh78f.java (at line 6)\n" + 
-    		"	R1 r = new R1();\n" + 
-    		"	^^\n" + 
-    		"R1 cannot be resolved to a type\n" + 
-    		"----------\n" + 
-    		"2. ERROR in TeamB11sh78f.java (at line 6)\n" + 
-    		"	R1 r = new R1();\n" + 
-    		"	           ^^\n" + 
-    		"R1 cannot be resolved to a type\n" + 
-    		"----------\n" + 
-    		"----------\n" + 
-    		"1. ERROR in TeamB11sh78f\\R1.java (at line 2)\n" + 
-    		"	team package Wrong;\n" + 
-    		"	             ^^^^^\n" + 
-    		"Enclosing team Wrong not found for role file R1 (OTJLD 1.2.5(c)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in TeamB11sh78f\\R1.java (at line 3)\n" + 
-    		"	protected class R1 {\n" + 
-    		"	                ^^\n" + 
-    		"Illegal modifier for the class R1; only public, abstract & final are permitted\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh78f.java (at line 6)\n" +
+    		"	R1 r = new R1();\n" +
+    		"	^^\n" +
+    		"R1 cannot be resolved to a type\n" +
+    		"----------\n" +
+    		"2. ERROR in TeamB11sh78f.java (at line 6)\n" +
+    		"	R1 r = new R1();\n" +
+    		"	           ^^\n" +
+    		"R1 cannot be resolved to a type\n" +
+    		"----------\n" +
+    		"----------\n" +
+    		"1. ERROR in TeamB11sh78f\\R1.java (at line 2)\n" +
+    		"	team package Wrong;\n" +
+    		"	             ^^^^^\n" +
+    		"Enclosing team Wrong not found for role file R1 (OTJLD 1.2.5(c)).\n" +
+    		"----------\n" +
+    		"2. ERROR in TeamB11sh78f\\R1.java (at line 3)\n" +
+    		"	protected class R1 {\n" +
+    		"	                ^^\n" +
+    		"Illegal modifier for the class R1; only public, abstract & final are permitted\n" +
     		"----------\n");
     }
 
@@ -3712,26 +3712,26 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh80_2.java (at line 3)\n" + 
-    		"	import p1.TeamB11sh80_1.R_1;\n" + 
-    		"	       ^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Illegal import for role type p1.TeamB11sh80_1.R_1: roles cannot be imported (OTJLD 1.2.2(i)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in TeamB11sh80_2.java (at line 6)\n" + 
-    		"	protected class R_2 playedBy R_1 {\n" + 
-    		"	                ^^^\n" + 
-    		"Missing anchor (team instance) for role type p1.TeamB11sh80_1.R_1 outside its team context (OTJLD 1.2.2(b)).\n" + 
-    		"----------\n" + 
-    		"3. ERROR in TeamB11sh80_2.java (at line 6)\n" + 
-    		"	protected class R_2 playedBy R_1 {\n" + 
-    		"	                             ^^^\n" + 
-    		"Missing anchor (team instance) for role type p1.TeamB11sh80_1.R_1 outside its team context (OTJLD 1.2.2(b)).\n" + 
-    		"----------\n" + 
-    		"4. ERROR in TeamB11sh80_2.java (at line 6)\n" + 
-    		"	protected class R_2 playedBy R_1 {\n" + 
-    		"	                             ^^^\n" + 
-    		"Missing anchor (team instance) for role type p1.TeamB11sh80_1.R_1 outside its team context (OTJLD 1.2.2(b)).\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh80_2.java (at line 3)\n" +
+    		"	import p1.TeamB11sh80_1.R_1;\n" +
+    		"	       ^^^^^^^^^^^^^^^^^^^^\n" +
+    		"Illegal import for role type p1.TeamB11sh80_1.R_1: roles cannot be imported (OTJLD 1.2.2(i)).\n" +
+    		"----------\n" +
+    		"2. ERROR in TeamB11sh80_2.java (at line 6)\n" +
+    		"	protected class R_2 playedBy R_1 {\n" +
+    		"	                ^^^\n" +
+    		"Missing anchor (team instance) for role type p1.TeamB11sh80_1.R_1 outside its team context (OTJLD 1.2.2(b)).\n" +
+    		"----------\n" +
+    		"3. ERROR in TeamB11sh80_2.java (at line 6)\n" +
+    		"	protected class R_2 playedBy R_1 {\n" +
+    		"	                             ^^^\n" +
+    		"Missing anchor (team instance) for role type p1.TeamB11sh80_1.R_1 outside its team context (OTJLD 1.2.2(b)).\n" +
+    		"----------\n" +
+    		"4. ERROR in TeamB11sh80_2.java (at line 6)\n" +
+    		"	protected class R_2 playedBy R_1 {\n" +
+    		"	                             ^^^\n" +
+    		"Missing anchor (team instance) for role type p1.TeamB11sh80_1.R_1 outside its team context (OTJLD 1.2.2(b)).\n" +
     		"----------\n");
     }
 
@@ -3762,23 +3762,23 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "public class TB11sh81 { public void bm() {} }\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh81.java (at line 6)\n" + 
-    		"	protected class R2 {\n" + 
-    		"	                ^^\n" + 
-    		"Member types not allowed in regular roles. Mark class TeamB11sh81.R1 as a team if R2 should be its role (OTJLD 1.5(a,b)). \n" + 
-    		"----------\n" + 
-    		"2. ERROR in TeamB11sh81.java (at line 15)\n" + 
-    		"	}\n" + 
-    		"	^\n" + 
-    		"Syntax error, insert \"}\" to complete ClassBody\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh81.java (at line 6)\n" +
+    		"	protected class R2 {\n" +
+    		"	                ^^\n" +
+    		"Member types not allowed in regular roles. Mark class TeamB11sh81.R1 as a team if R2 should be its role (OTJLD 1.5(a,b)). \n" +
+    		"----------\n" +
+    		"2. ERROR in TeamB11sh81.java (at line 15)\n" +
+    		"	}\n" +
+    		"	^\n" +
+    		"Syntax error, insert \"}\" to complete ClassBody\n" +
     		"----------\n");
     }
 
     // method in a nested team needs both a private-accessor and type wrapping
     // B.1.1-otjld-sh-82
     public void testB11_sh82() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh82.java",
@@ -3817,7 +3817,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // public field caused ctor with declared lifting to produce illegal byte code
     // B.1.1-otjld-sh-83
     public void testB11_sh83() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh83_2.java",
@@ -3894,11 +3894,11 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh84_1.java (at line 5)\n" + 
-    		"	unresolved();\n" + 
-    		"	^^^^^^^^^^\n" + 
-    		"The method unresolved() is undefined for the type TeamB11sh84_1.R\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh84_1.java (at line 5)\n" +
+    		"	unresolved();\n" +
+    		"	^^^^^^^^^^\n" +
+    		"The method unresolved() is undefined for the type TeamB11sh84_1.R\n" +
     		"----------\n",
             null/*classLibraries*/,
             true/*shouldFlushOutputDirectory*/,
@@ -3930,11 +3930,11 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh85_1.java (at line 2)\n" + 
-    		"	import not.existing.Import;\n" + 
-    		"	       ^^^\n" + 
-    		"The import not cannot be resolved\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh85_1.java (at line 2)\n" +
+    		"	import not.existing.Import;\n" +
+    		"	       ^^^\n" +
+    		"The import not cannot be resolved\n" +
     		"----------\n",
             null/*classLibraries*/,
             true/*shouldFlushOutputDirectory*/,
@@ -3988,7 +3988,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
                 false/*shouldFlushOutputDirectory*/,
                 null/*vmArguments*/,
                 customOptions,
-                null/*requestor*/); 
+                null/*requestor*/);
         runNegativeTest(
             new String[] {
 		"TeamB11sh86_1.java",
@@ -4001,11 +4001,11 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh86_1.java (at line 5)\n" + 
-    		"	public abstract TB11sh86_1 getBase(Object o);\n" + 
-    		"	                ^^^^^^^^^^\n" + 
-    		"TB11sh86_1 cannot be resolved to a type\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh86_1.java (at line 5)\n" +
+    		"	public abstract TB11sh86_1 getBase(Object o);\n" +
+    		"	                ^^^^^^^^^^\n" +
+    		"TB11sh86_1 cannot be resolved to a type\n" +
     		"----------\n",
             null/*classLibraries*/,
             false/*shouldFlushOutputDirectory*/,
@@ -4030,33 +4030,33 @@ public class ReportedBugs extends AbstractOTJLDTest {
             // FIXME(SH): why these errors:?
 		    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
 		    ?
-    		"----------\n" + 
-    		"1. WARNING in TeamB11sh86_2.java (at line 5)\n" + 
-    		"	protected class R playedBy TB11sh86_2 {\n" + 
-    		"	                           ^^^^^^^^^^\n" + 
-    		"Base class TB11sh86_2 has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
-    		"----------\n" + 
-    		"2. ERROR in TeamB11sh86_2.java (at line 6)\n" + 
-    		"	getBase -> bm;\n" + 
-    		"	^^^^^^^\n" + 
-    		"A non-abstract role method exists for this callout-binding. Use callout-override (\'=>\') if you want to override it (OTJLD 3.1(e)).\n" + 
-    		"----------\n" + 
-    		"3. ERROR in TeamB11sh86_2.java (at line 6)\n" + 
-    		"	getBase -> bm;\n" + 
-    		"	^^^^^^^\n" + 
-    		"The return type is incompatible with TeamB11sh86_1.R.getBase(Object)\n" + 
+    		"----------\n" +
+    		"1. WARNING in TeamB11sh86_2.java (at line 5)\n" +
+    		"	protected class R playedBy TB11sh86_2 {\n" +
+    		"	                           ^^^^^^^^^^\n" +
+    		"Base class TB11sh86_2 has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" +
+    		"----------\n" +
+    		"2. ERROR in TeamB11sh86_2.java (at line 6)\n" +
+    		"	getBase -> bm;\n" +
+    		"	^^^^^^^\n" +
+    		"A non-abstract role method exists for this callout-binding. Use callout-override (\'=>\') if you want to override it (OTJLD 3.1(e)).\n" +
+    		"----------\n" +
+    		"3. ERROR in TeamB11sh86_2.java (at line 6)\n" +
+    		"	getBase -> bm;\n" +
+    		"	^^^^^^^\n" +
+    		"The return type is incompatible with TeamB11sh86_1.R.getBase(Object)\n" +
     		"----------\n"
     		:
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh86_2.java (at line 6)\n" + 
-    		"	getBase -> bm;\n" + 
-    		"	^^^^^^^\n" + 
-    		"A non-abstract role method exists for this callout-binding. Use callout-override (\'=>\') if you want to override it (OTJLD 3.1(e)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in TeamB11sh86_2.java (at line 6)\n" + 
-    		"	getBase -> bm;\n" + 
-    		"	^^^^^^^\n" + 
-    		"The return type is incompatible with TeamB11sh86_1.R.getBase(Object)\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh86_2.java (at line 6)\n" +
+    		"	getBase -> bm;\n" +
+    		"	^^^^^^^\n" +
+    		"A non-abstract role method exists for this callout-binding. Use callout-override (\'=>\') if you want to override it (OTJLD 3.1(e)).\n" +
+    		"----------\n" +
+    		"2. ERROR in TeamB11sh86_2.java (at line 6)\n" +
+    		"	getBase -> bm;\n" +
+    		"	^^^^^^^\n" +
+    		"The return type is incompatible with TeamB11sh86_1.R.getBase(Object)\n" +
     		"----------\n"
     		),
             null/*classLibraries*/,
@@ -4073,12 +4073,12 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "public team class TeamB11sh86_3 extends TeamB11sh86_2 { }\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh86_3.java (at line 1)\n" + 
-    		"	\n" + 
-    		"public team class TeamB11sh86_3 extends TeamB11sh86_2 { }\n" + 
-    		"	^\n" + 
-    		"The type TB11sh86_1 cannot be resolved. It is indirectly referenced from required .class files\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh86_3.java (at line 1)\n" +
+    		"	\n" +
+    		"public team class TeamB11sh86_3 extends TeamB11sh86_2 { }\n" +
+    		"	^\n" +
+    		"The type TB11sh86_1 cannot be resolved. It is indirectly referenced from required .class files\n" +
     		"----------\n",
             null/*classLibraries*/,
             false/*shouldFlushOutputDirectory*/,
@@ -4088,7 +4088,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // challenging decapsulation an inherited method - exception reported by Eugene Hutorny
     // B.1.1-otjld-sh-87
     public void testB11_sh87() {
-       
+
        runConformTest(
             new String[] {
 		"pb/TB11sh87Main.java",
@@ -4192,7 +4192,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // Callin binding w/ static base method (reported in TPX-318).
     // B.1.1-otjld-sh-89
     public void testB11_sh89() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh89Main.java",
@@ -4244,17 +4244,17 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "team package TeamB11sh90;\n" +
 			    "public class RB11sh90 playedBy TB11sh90 {}\n"
             },
-            "----------\n" + 
-    		"1. ERROR in "+convertedOutputPath+"TeamB11sh90.java (at line 3)\n" + 
-    		"	public class RB11sh90 {}\n" + 
-    		"	  ^^^^^^^^\n" + 
-    		"The method put(TB11sh90, TeamB11sh90.RB11sh90) in the type DoublyWeakHashMap<TB11sh90,RB11sh90<@tthis[TeamB11sh90]>> is not applicable for the arguments (TB11sh90, TeamB11sh90.RB11sh90)\n" + 
-    		"----------\n" + 
-    		"----------\n" + 
-    		"1. ERROR in TeamB11sh90\\RB11sh90.java (at line 3)\n" + 
-    		"	public class RB11sh90 playedBy TB11sh90 {}\n" + 
-    		"	             ^^^^^^^^\n" + 
-    		"Duplicate nested type RB11sh90\n" + 
+            "----------\n" +
+    		"1. ERROR in "+convertedOutputPath+"TeamB11sh90.java (at line 3)\n" +
+    		"	public class RB11sh90 {}\n" +
+    		"	  ^^^^^^^^\n" +
+    		"The method put(TB11sh90, TeamB11sh90.RB11sh90) in the type DoublyWeakHashMap<TB11sh90,RB11sh90<@tthis[TeamB11sh90]>> is not applicable for the arguments (TB11sh90, TeamB11sh90.RB11sh90)\n" +
+    		"----------\n" +
+    		"----------\n" +
+    		"1. ERROR in TeamB11sh90\\RB11sh90.java (at line 3)\n" +
+    		"	public class RB11sh90 playedBy TB11sh90 {}\n" +
+    		"	             ^^^^^^^^\n" +
+    		"Duplicate nested type RB11sh90\n" +
     		"----------\n",
             null/*classLibraries*/,
             false/*shouldFlushOutputDirectory*/,
@@ -4334,24 +4334,24 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "     \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh92.java (at line 6)\n" + 
-    		"	protected class RBroken implements IB11sh92 playedBy IB11sh92 {\n" + 
-    		"	                                   ^^^^^^^^\n" + 
-    		"IB11sh92 cannot be resolved to a type\n" + 
-    		"----------\n" + 
-    		"2. WARNING in TeamB11sh92.java (at line 6)\n" + 
-    		"	protected class RBroken implements IB11sh92 playedBy IB11sh92 {\n" + 
-    		"	                                                     ^^^^^^^^\n" + 
-    		"When binding interface IB11sh92 as base of RBroken:\n" + 
-    		"Note that some features like callin bindings are not yet supported in this situation (OTJLD 2.1.1).\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh92.java (at line 6)\n" +
+    		"	protected class RBroken implements IB11sh92 playedBy IB11sh92 {\n" +
+    		"	                                   ^^^^^^^^\n" +
+    		"IB11sh92 cannot be resolved to a type\n" +
+    		"----------\n" +
+    		"2. WARNING in TeamB11sh92.java (at line 6)\n" +
+    		"	protected class RBroken implements IB11sh92 playedBy IB11sh92 {\n" +
+    		"	                                                     ^^^^^^^^\n" +
+    		"When binding interface IB11sh92 as base of RBroken:\n" +
+    		"Note that some features like callin bindings are not yet supported in this situation (OTJLD 2.1.1).\n" +
     		"----------\n");
     }
 
     // callin w/ one-way parameter mapping
     // B.1.1-otjld-sh-93
     public void testB11_sh93() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11sh93.java",
@@ -4411,14 +4411,14 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "  \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh94.java (at line 4)\n" + 
-    		"	base when activated // bug\n" + 
-    		"	^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Syntax error on tokens, delete these tokens\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh94.java (at line 4)\n" +
+    		"	base when activated // bug\n" +
+    		"	^^^^^^^^^^^^^^^^^^^\n" +
+    		"Syntax error on tokens, delete these tokens\n" +
     		"----------\n");
     }
-    
+
     // Bug 350318 - [compiler] Erroneous name clash error in @Override methods
     // originally reported by André Lehmann
     public void testB11_sh95() {
@@ -4428,74 +4428,74 @@ public class ReportedBugs extends AbstractOTJLDTest {
         runTestExpectingWarnings(
             new String[] {
 		"Caller.java",
-			    "\n" + 
-			    "public class Caller {\n" + 
-			    "	private static class VisitorImpl extends VisitorAdapter<Object> {\n" + 
-			    "		\n" + 
-			    "		@Override\n" + 
-			    "		public Parameter1 visit(Long r, Object a) {\n" + 
-			    "			return null;\n" + 
-			    "		}\n" + 
-			    "		\n" + 
-			    "		@Override\n" + 
-			    "		public Parameter1 visit(Integer r, Object a) {\n" + 
-			    "			return null;\n" + 
-			    "		}\n" + 
-			    "		\n" + 
-			    "		@Override\n" + 
-			    "		public Parameter1 visit(Number r, Object a) {\n" + 
-			    "			return null;\n" + 
-			    "		}\n" + 
-			    "	}\n" + 
-			    "\n" + 
-			    "	private void accept(Visitor<Parameter1, Parameter2> v) {\n" + 
-			    "		v.visit(1, new Parameter2());\n" + 
-			    "	}\n" + 
-			    "	\n" + 
-			    "	public void start() {\n" + 
-			    "	}\n" + 
+			    "\n" +
+			    "public class Caller {\n" +
+			    "	private static class VisitorImpl extends VisitorAdapter<Object> {\n" +
+			    "		\n" +
+			    "		@Override\n" +
+			    "		public Parameter1 visit(Long r, Object a) {\n" +
+			    "			return null;\n" +
+			    "		}\n" +
+			    "		\n" +
+			    "		@Override\n" +
+			    "		public Parameter1 visit(Integer r, Object a) {\n" +
+			    "			return null;\n" +
+			    "		}\n" +
+			    "		\n" +
+			    "		@Override\n" +
+			    "		public Parameter1 visit(Number r, Object a) {\n" +
+			    "			return null;\n" +
+			    "		}\n" +
+			    "	}\n" +
+			    "\n" +
+			    "	private void accept(Visitor<Parameter1, Parameter2> v) {\n" +
+			    "		v.visit(1, new Parameter2());\n" +
+			    "	}\n" +
+			    "	\n" +
+			    "	public void start() {\n" +
+			    "	}\n" +
 			    "}\n",
 		"Visitor.java",
-			    "public interface Visitor<R, A> {\n" + 
-			    "\n" + 
-			    "	R visit(Long r, A a);\n" + 
-			    "\n" + 
-			    "	R visit(Integer r, A a);\n" + 
-			    "\n" + 
-			    "	R visit(Number r, A a);\n" + 
-			    "}\n" + 
-			    "class Parameter1 {\n" + 
-			    "	\n" + 
-			    "}\n" + 
-			    "class Parameter2 {\n" + 
-			    "	\n" + 
+			    "public interface Visitor<R, A> {\n" +
+			    "\n" +
+			    "	R visit(Long r, A a);\n" +
+			    "\n" +
+			    "	R visit(Integer r, A a);\n" +
+			    "\n" +
+			    "	R visit(Number r, A a);\n" +
 			    "}\n" +
-			    "abstract class VisitorAdapter<A> implements Visitor<Parameter1, A> {\n" + 
-			    "\n" + 
-			    "	public Parameter1 visit(Long r, A a) {\n" + 
-			    "		return null;\n" + 
-			    "	}\n" + 
-			    "\n" + 
-			    "	public Parameter1 visit(Integer r, A a) {\n" + 
-			    "		return null;\n" + 
-			    "	}\n" + 
-			    "\n" + 
-			    "	public Parameter1 visit(Number r, A a) {\n" + 
-			    "		return null;\n" + 
-			    "	}\n" + 
-			    "	\n" + 
+			    "class Parameter1 {\n" +
+			    "	\n" +
+			    "}\n" +
+			    "class Parameter2 {\n" +
+			    "	\n" +
+			    "}\n" +
+			    "abstract class VisitorAdapter<A> implements Visitor<Parameter1, A> {\n" +
+			    "\n" +
+			    "	public Parameter1 visit(Long r, A a) {\n" +
+			    "		return null;\n" +
+			    "	}\n" +
+			    "\n" +
+			    "	public Parameter1 visit(Integer r, A a) {\n" +
+			    "		return null;\n" +
+			    "	}\n" +
+			    "\n" +
+			    "	public Parameter1 visit(Number r, A a) {\n" +
+			    "		return null;\n" +
+			    "	}\n" +
+			    "	\n" +
 			    "}\n"
             },
-            "----------\n" + 
-    		"1. WARNING in Caller.java (at line 3)\n" + 
-    		"	private static class VisitorImpl extends VisitorAdapter<Object> {\n" + 
-    		"	                     ^^^^^^^^^^^\n" + 
-    		"The type Caller.VisitorImpl is never used locally\n" + 
-    		"----------\n" + 
-    		"2. WARNING in Caller.java (at line 21)\n" + 
-    		"	private void accept(Visitor<Parameter1, Parameter2> v) {\n" + 
-    		"	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"The method accept(Visitor<Parameter1,Parameter2>) from the type Caller is never used locally\n" + 
+            "----------\n" +
+    		"1. WARNING in Caller.java (at line 3)\n" +
+    		"	private static class VisitorImpl extends VisitorAdapter<Object> {\n" +
+    		"	                     ^^^^^^^^^^^\n" +
+    		"The type Caller.VisitorImpl is never used locally\n" +
+    		"----------\n" +
+    		"2. WARNING in Caller.java (at line 21)\n" +
+    		"	private void accept(Visitor<Parameter1, Parameter2> v) {\n" +
+    		"	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+    		"The method accept(Visitor<Parameter1,Parameter2>) from the type Caller is never used locally\n" +
     		"----------\n",
     		options);
     }
@@ -4520,25 +4520,25 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "    public class Role1 playedBy TB11sh4 {} \n" +
 			    "}\n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh4_1.java (at line 2)\n" + 
-    		"	public team class TeamB11sh4_1 implements java.io.Serializable {\n" + 
-    		"	                  ^^^^^^^^^^^\n" + 
-    		"Name clash: The method restoreRole(Class<?>, Object) of type TeamB11sh4_1 has the same erasure as restoreRole(Class, Object) of type Team but does not override it\n" + 
-    		"----------\n" + 
-    		"2. WARNING in TeamB11sh4_1.java (at line 2)\n" + 
-    		"	public team class TeamB11sh4_1 implements java.io.Serializable {\n" + 
-    		"	                  ^^^^^^^^^^^^\n" + 
-    		"The serializable class TeamB11sh4_1 does not declare a static final serialVersionUID field of type long\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamB11sh4_1.java (at line 2)\n" +
+    		"	public team class TeamB11sh4_1 implements java.io.Serializable {\n" +
+    		"	                  ^^^^^^^^^^^\n" +
+    		"Name clash: The method restoreRole(Class<?>, Object) of type TeamB11sh4_1 has the same erasure as restoreRole(Class, Object) of type Team but does not override it\n" +
+    		"----------\n" +
+    		"2. WARNING in TeamB11sh4_1.java (at line 2)\n" +
+    		"	public team class TeamB11sh4_1 implements java.io.Serializable {\n" +
+    		"	                  ^^^^^^^^^^^^\n" +
+    		"The serializable class TeamB11sh4_1 does not declare a static final serialVersionUID field of type long\n" +
     		"----------\n",
             null/*classLibraries*/,
             true/*shouldFlushOutputDirectory*/,
             customOptions,
             true/*generateOutput*/,
             false/*showCategory*/,
-            false/*showWarningToken*/);    
+            false/*showWarningToken*/);
     }
-    
+
     // Bug 366597 - [compiler] NPE with role ifc wrongly interpreted as a team
     public void testB11_sh97() {
     	runNegativeTest(new String[] {
@@ -4556,7 +4556,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     			"b/Base.java",
     			"package b;\n" +
     			"public class Base { void foo() {} }\n"
-    	}, 
+    	},
 		"----------\n" +
 		"1. ERROR in t\\T1.java (at line 4)\n" +
 		"	protected interface IR\n" +
@@ -4608,29 +4608,29 @@ public class ReportedBugs extends AbstractOTJLDTest {
     			"b/Base.java",
     			"package b;\n" +
     			"public class Base { void foo() {} }\n"
-    	}, 
-		"----------\n" + 
-		"1. ERROR in t\\T1.java (at line 4)\n" + 
-		"	protected team interface IR {}\n" + 
-		"	                         ^^\n" + 
-		"Illegal modifier for the member interface IR; only public, protected, private, abstract & static are permitted\n" + 
-		"----------\n" + 
-		"2. WARNING in t\\T1.java (at line 8)\n" + 
-		"	this.foo();\n" + 
-		"	^^^^^^^^^^\n" + 
-		"Access restriction of method foo() in type b.Base is overridden by this method binding (OTJLD 3.4(a)).\n" + 
-		"----------\n" + 
-		"3. ERROR in t\\T1.java (at line 8)\n" + 
-		"	this.foo();\n" + 
-		"	^^^^^^^^^^\n" + 
-		"Unresolved self call foo() is implicitly bound by an inferred callout (OTJLD 3.1(j)).\n" + 
+    	},
+		"----------\n" +
+		"1. ERROR in t\\T1.java (at line 4)\n" +
+		"	protected team interface IR {}\n" +
+		"	                         ^^\n" +
+		"Illegal modifier for the member interface IR; only public, protected, private, abstract & static are permitted\n" +
+		"----------\n" +
+		"2. WARNING in t\\T1.java (at line 8)\n" +
+		"	this.foo();\n" +
+		"	^^^^^^^^^^\n" +
+		"Access restriction of method foo() in type b.Base is overridden by this method binding (OTJLD 3.4(a)).\n" +
+		"----------\n" +
+		"3. ERROR in t\\T1.java (at line 8)\n" +
+		"	this.foo();\n" +
+		"	^^^^^^^^^^\n" +
+		"Unresolved self call foo() is implicitly bound by an inferred callout (OTJLD 3.1(j)).\n" +
 		"----------\n");
     }
 
     // reported by Christine Hundt
     // B.1.1-otjld-ju-1
     public void testB11_ju1() {
-       
+
        runConformTest(
             new String[] {
 		"TB11ju1Main.java",
@@ -4679,7 +4679,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // TPX-318: Callin binding doesn't work with static base method. Callin-binding (after) w/ static method.
     // B.1.1-otjld-ju-2
     public void testB11_ju2() {
-       
+
        runConformTest(
             new String[] {
 		"TB11ju2Main.java",
@@ -4717,7 +4717,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // TPX-318: Callin binding doesn't work with static base method. Callin-binding (before) w/ static method.
     // B.1.1-otjld-ju-3
     public void testB11_ju3() {
-       
+
        runConformTest(
             new String[] {
 		"TB11ju3Main.java",
@@ -4755,7 +4755,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // TPX-318: Callin binding doesn't work with static base method. Callin binding w/ static method with an argument.
     // B.1.1-otjld-ju-4
     public void testB11_ju4() {
-       
+
        runConformTest(
             new String[] {
 		"TB11ju4Main.java",
@@ -4793,7 +4793,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // TPX-318: Callin binding doesn't work with static base method. Callin binding (replace) w/ static method with an argument.
     // B.1.1-otjld-ju-5
     public void testB11_ju5() {
-       
+
        runConformTest(
             new String[] {
 		"TB11ju5Main.java",
@@ -4835,7 +4835,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
        Map customOptions = getCompilerOptions();
            customOptions.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.GENERATE);
                                       customOptions.put(CompilerOptions.OPTION_LineNumberAttribute, CompilerOptions.GENERATE);
-                                      customOptions.put(CompilerOptions.OPTION_SourceFileAttribute, CompilerOptions.GENERATE);        
+                                      customOptions.put(CompilerOptions.OPTION_SourceFileAttribute, CompilerOptions.GENERATE);
        runConformTest(
             new String[] {
 		"TB11ju6Main.java",
@@ -4881,7 +4881,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // Wrong calculation of base field type
     // B.1.1-otjld-ch-1
     public void testB11_ch1() {
-       
+
        runConformTest(
             new String[] {
 		"TB11ch1Main.java",
@@ -4934,7 +4934,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // Wrong calculation of base field type
     // B.1.1-otjld-ch-2
     public void testB11_ch2() {
-       
+
        runConformTest(
             new String[] {
 		"TB11ch2Main.java",
@@ -5068,7 +5068,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // Problem with a static field in a role an inheritance
     // B.1.1-otjld-ch-4
     public void testB11_ch4() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11ch4_2.java",
@@ -5126,7 +5126,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // Problem with a static field in a role an inheritance - additional static field in the subrole
     // B.1.1-otjld-ch-5
     public void testB11_ch5() {
-       
+
        runConformTest(
             new String[] {
 		"TeamB11ch5_2.java",
@@ -5263,7 +5263,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // variant reported by Andreas Werner, correct by using a team field
     // B.1.1-otjld-ch-5d
     public void testB11_ch5d() {
-       
+
        runConformTest(
             new String[] {
 		"TB11ch5dMain.java",
@@ -5340,11 +5340,11 @@ public class ReportedBugs extends AbstractOTJLDTest {
     			"   }\n" +
     			"}\n"
     		},
-    		"----------\n" + 
-    		"1. ERROR in TBug372786.java (at line 1)\n" + 
-    		"	import jarred.TeamBug372786;\n" + 
-    		"	^\n" + 
-    		"The type notjarred.Missing cannot be resolved. It is indirectly referenced from required .class files\n" + 
+    		"----------\n" +
+    		"1. ERROR in TBug372786.java (at line 1)\n" +
+    		"	import jarred.TeamBug372786;\n" +
+    		"	^\n" +
+    		"The type notjarred.Missing cannot be resolved. It is indirectly referenced from required .class files\n" +
     		"----------\n",
     		getClassLibraries(jarFilename),
     		false);
@@ -5369,7 +5369,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     				"public interface User extends Entity {}",
     			"p/UserByCustomerIndex.java",
     				"package p;\n" +
-    				"public interface UserByCustomerIndex extends NonUniqueIndex<User, UserByCustomerIndex.UserByCustomerKey> {\n" + 
+    				"public interface UserByCustomerIndex extends NonUniqueIndex<User, UserByCustomerIndex.UserByCustomerKey> {\n" +
     				"	class UserByCustomerKey {}\n" +
     				"}",
     			"p3/NonUniqueIndexImpl.java",
@@ -5390,7 +5390,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			},
 			"", null, false/*flush*/, null);
     }
-    
+
     public void testBug433146() {
     	runConformTest(
     		new String[] {
@@ -5409,51 +5409,51 @@ public class ReportedBugs extends AbstractOTJLDTest {
     			"}\n"
     		});
     }
-    
+
     public void testBug448378() {
     	runNegativeTest(
     		new String[] {
     			"C.java",
-    			"public class C {\n" + 
-    			"	\n" + 
-    			"	void test() {\n" + 
-    			"		try {\n" + 
-    			"			final C c = missing().v;\n" + 
-    			"		} finally {\n" + 
-    			"			System.out.println(0); \n" + 
-    			"		}\n" + 
-    			"	}\n" + 
+    			"public class C {\n" +
+    			"	\n" +
+    			"	void test() {\n" +
+    			"		try {\n" +
+    			"			final C c = missing().v;\n" +
+    			"		} finally {\n" +
+    			"			System.out.println(0); \n" +
+    			"		}\n" +
+    			"	}\n" +
     			"}\n"
     		},
-    		"----------\n" + 
-			"1. ERROR in C.java (at line 5)\n" + 
-			"	final C c = missing().v;\n" + 
-			"	            ^^^^^^^\n" + 
-			"The method missing() is undefined for the type C\n" + 
+    		"----------\n" +
+			"1. ERROR in C.java (at line 5)\n" +
+			"	final C c = missing().v;\n" +
+			"	            ^^^^^^^\n" +
+			"The method missing() is undefined for the type C\n" +
 			"----------\n");
     }
     public void testBug448298() {
     	runNegativeTest(
     		new String[] {
     			"Test.java",
-    			"public class Test {\n" + 
-    					"	Test(Test other) {}\n" + 
-    					"	\n" + 
-    					"	Test(final int arg, Object o) { \n" + 
-    					"		this((arg.nothing)o); \n" + 
-    					"	}\n" + 
+    			"public class Test {\n" +
+    					"	Test(Test other) {}\n" +
+    					"	\n" +
+    					"	Test(final int arg, Object o) { \n" +
+    					"		this((arg.nothing)o); \n" +
+    					"	}\n" +
     					"}"
     		},
-    		"----------\n" + 
-			"1. ERROR in Test.java (at line 5)\n" + 
-			"	this((arg.nothing)o); \n" + 
-			"	^^^^^^^^^^^^^^^^^^^^^\n" + 
-			"The constructor Test(nothing) is undefined\n" + 
-			"----------\n" + 
-			"2. ERROR in Test.java (at line 5)\n" + 
-			"	this((arg.nothing)o); \n" + 
-			"	      ^^^\n" + 
-			"arg cannot be resolved to a type\n" + 
+    		"----------\n" +
+			"1. ERROR in Test.java (at line 5)\n" +
+			"	this((arg.nothing)o); \n" +
+			"	^^^^^^^^^^^^^^^^^^^^^\n" +
+			"The constructor Test(nothing) is undefined\n" +
+			"----------\n" +
+			"2. ERROR in Test.java (at line 5)\n" +
+			"	this((arg.nothing)o); \n" +
+			"	      ^^^\n" +
+			"arg cannot be resolved to a type\n" +
 			"----------\n");
     }
     public void testBug495462() {
@@ -5479,7 +5479,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     			"	public static void main(String... args) {\n" +
     			"		System.out.println(pt.MyTeam.val);\n" +
     			"	}\n" +
-    			"}\n"	
+    			"}\n"
     		},
     		"OK",
     		null,
@@ -5496,21 +5496,21 @@ public class ReportedBugs extends AbstractOTJLDTest {
     			"class f {\n" +
     			"	static class b {}\n" +
     			"}\n" +
-    			"public class C1 {\n" + 
-    			"	void m() {\n" + 
-    			"		C1<String> f;\n" + 
-    			"		f.b c = new f.b(); \n" + 
-    			"	}\n" + 
+    			"public class C1 {\n" +
+    			"	void m() {\n" +
+    			"		C1<String> f;\n" +
+    			"		f.b c = new f.b(); \n" +
+    			"	}\n" +
     			"}\n"
     		},
-    		"----------\n" + 
-			"1. ERROR in C1.java (at line 6)\n" + 
-			"	C1<String> f;\n" + 
-			"	^^\n" + 
-			"The type C1 is not generic; it cannot be parameterized with arguments <String>\n" + 
+    		"----------\n" +
+			"1. ERROR in C1.java (at line 6)\n" +
+			"	C1<String> f;\n" +
+			"	^^\n" +
+			"The type C1 is not generic; it cannot be parameterized with arguments <String>\n" +
 			"----------\n");
     }
-    
+
     // Bug 529685 - ECJ creates class with java.lang.ClassFormatError when overriding method from Generic class
     public void testBug529685() {
     	runConformTest(

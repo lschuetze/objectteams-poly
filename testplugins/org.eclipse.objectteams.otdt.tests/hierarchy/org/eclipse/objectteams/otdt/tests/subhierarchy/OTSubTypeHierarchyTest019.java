@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -35,11 +35,11 @@ import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
  */
 public class OTSubTypeHierarchyTest019 extends FileBasedModelTest
 {
-	
+
 	private TypeHierarchy _testObj;
 
 	private IType _focusType;
-	
+
     private IType _TA;
     private IType _TB;
     private IType _TC;
@@ -60,12 +60,12 @@ public class OTSubTypeHierarchyTest019 extends FileBasedModelTest
     private IType _TB_R14;
     private IType _TB_R15;
 
-    
+
 	public OTSubTypeHierarchyTest019(String name)
 	{
 		super(name);
 	}
-	
+
 	public static Test suite()
 	{
 		if (true)
@@ -73,16 +73,16 @@ public class OTSubTypeHierarchyTest019 extends FileBasedModelTest
 			return new Suite(OTSubTypeHierarchyTest019.class);
 		}
 		@SuppressWarnings("unused")
-		junit.framework.TestSuite suite = 
+		junit.framework.TestSuite suite =
 			new Suite(OTSubTypeHierarchyTest019.class.getName());
 		return suite;
 	}
-	
+
 	public void setUpSuite() throws Exception
 	{
 		setTestProjectDir("Hierarchy");
 		super.setUpSuite();
-		
+
 		String srcFolder = "src";
 		String pkg = "test019";
 
@@ -90,7 +90,7 @@ public class OTSubTypeHierarchyTest019 extends FileBasedModelTest
                 srcFolder,
                 pkg,
                 "TA");
-		
+
 		_TB = getType(getTestProjectDir(),
                 srcFolder,
                 pkg,
@@ -116,9 +116,9 @@ public class OTSubTypeHierarchyTest019 extends FileBasedModelTest
         _TB_R13 = getRole(_TB, "TB.R13");
         _TB_R14 = getRole(_TB, "TB.R14");
         _TB_R15 = getRole(_TB, "TB.R15");
-		
+
 	}
-	
+
     public void testCreation()
     {
         assertCreation(_TA);
@@ -139,17 +139,17 @@ public class OTSubTypeHierarchyTest019 extends FileBasedModelTest
         assertCreation(_TB_R12);
         assertCreation(_TB_R13);
         assertCreation(_TB_R14);
-        assertCreation(_TB_R15);    
+        assertCreation(_TB_R15);
     }
-    
+
 	public void testOTTypeHiearchyCreation() throws JavaModelException
 	{
 		_focusType = _TB_R1;
 
 		_testObj = new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         _testObj.refresh(new NullProgressMonitor());
-        
+
 		assertTrue(true);
 	}
 }
-	
+

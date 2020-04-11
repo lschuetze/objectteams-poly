@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -27,11 +27,11 @@ import junit.framework.Test;
 
 @SuppressWarnings("unchecked")
 public class ValueParameters extends AbstractOTJLDTest {
-	
+
 	public ValueParameters(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -39,7 +39,7 @@ public class ValueParameters extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -170,7 +170,7 @@ public class ValueParameters extends AbstractOTJLDTest {
     // a regular class has a value parameter - compile in one pass
     // 1.9.2-otjld-regular-class-with-value-parameter-1
     public void test192_regularClassWithValueParameter1() {
-       
+
        runConformTest(
             new String[] {
 		"T192rcwvp1Main.java",
@@ -200,7 +200,7 @@ public class ValueParameters extends AbstractOTJLDTest {
     // a regular class has a value parameter - compile in separately
     // 1.9.2-otjld-regular-class-with-value-parameter-2
     public void test192_regularClassWithValueParameter2() {
-       
+
        runConformTest(
             new String[] {
 		"T192rcwvp2Main.java",
@@ -331,7 +331,7 @@ public class ValueParameters extends AbstractOTJLDTest {
     // using "base" in a type anchor
     // 1.9.6-otjld-base-anchored-type-1
     public void test196_baseAnchoredType1() {
-       
+
        runConformTest(
             new String[] {
 		"Team196bat1_2.java",
@@ -412,7 +412,7 @@ public class ValueParameters extends AbstractOTJLDTest {
     // using "base" in a type anchor
     // 1.9.6-otjld-base-anchored-type-3
     public void test196_baseAnchoredType3() {
-       
+
        runConformTest(
             new String[] {
 		"Team196bat3_2.java",
@@ -464,7 +464,7 @@ public class ValueParameters extends AbstractOTJLDTest {
     // using "base" in a type anchor (callout-return), nested generics
     // 1.9.6-otjld-base-anchored-type-4
     public void test196_baseAnchoredType4() {
-       
+
        runConformTest(
             new String[] {
 		"Team196bat4_2.java",
@@ -521,7 +521,7 @@ public class ValueParameters extends AbstractOTJLDTest {
     // using "base" in a type anchor (callout-to-field-return), nested generics
     // 1.9.6-otjld-base-anchored-type-4f
     public void test196_baseAnchoredType4f() {
-       
+
        runConformTest(
             new String[] {
 		"Team196bat4f_2.java",
@@ -582,7 +582,7 @@ public class ValueParameters extends AbstractOTJLDTest {
     // using "base" in a type anchor (callin-return), array
     // 1.9.6-otjld-base-anchored-type-5
     public void test196_baseAnchoredType5() {
-       
+
        runConformTest(
             new String[] {
 		"Team196bat5_2.java",
@@ -639,7 +639,7 @@ public class ValueParameters extends AbstractOTJLDTest {
     // a role type is explicitly anchored to 'this' (OTJLD(1.2.2(d))
     // 1.9.7-otjld-special-anchors-1
     public void test197_specialAnchors1() {
-       
+
        runConformTest(
             new String[] {
 		"Team197sa1.java",
@@ -722,7 +722,7 @@ public class ValueParameters extends AbstractOTJLDTest {
     // a team has a value parameter - parameter used as value
     // 1.9.9-otjld-parameterized-team-1
     public void test199_parameterizedTeam1() {
-       
+
        runConformTest(
             new String[] {
 		"T199pt1Main.java",
@@ -758,7 +758,7 @@ public class ValueParameters extends AbstractOTJLDTest {
     // a team has a value parameter - parameter used as anchor for field type
     // 1.9.9-otjld-parameterized-team-2
     public void test199_parameterizedTeam2() {
-       
+
        runConformTest(
             new String[] {
 		"T199pt2Main.java",
@@ -804,7 +804,7 @@ public class ValueParameters extends AbstractOTJLDTest {
     // a team has a value parameter - parameter used as anchor for base-role
     // 1.9.9-otjld-parameterized-team-3
     public void test199_parameterizedTeam3() {
-       
+
        runConformTest(
             new String[] {
 		"T199pt3Main.java",
@@ -852,7 +852,7 @@ public class ValueParameters extends AbstractOTJLDTest {
     // a team has a value parameter - parameter used as anchor for base-role - uses decapsulation
     // 1.9.9-otjld-parameterized-team-3d
     public void test199_parameterizedTeam3d() {
-       
+
        runConformTest(
             new String[] {
 		"T199pt3dMain.java",
@@ -901,7 +901,7 @@ public class ValueParameters extends AbstractOTJLDTest {
     // a team has a value parameter - nesting involved
     // 1.9.9-otjld-parameterized-team-4
     public void test199_parameterizedTeam4() {
-       
+
        runConformTest(
             new String[] {
 		"T199pt4Main.java",
@@ -997,11 +997,11 @@ public class ValueParameters extends AbstractOTJLDTest {
 			    "    }\n" +
 			    "}\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team199pt4f_2.java (at line 10)\n" + 
-    		"	wrongPrint();\n" + 
-    		"	^^^^^^^^^^\n" + 
-    		"The method wrongPrint() is undefined for the type Team199pt4f_2<@other>.Mid.RInner\n" + 
+            "----------\n" +
+    		"1. ERROR in Team199pt4f_2.java (at line 10)\n" +
+    		"	wrongPrint();\n" +
+    		"	^^^^^^^^^^\n" +
+    		"The method wrongPrint() is undefined for the type Team199pt4f_2<@other>.Mid.RInner\n" +
     		"----------\n");
     }
 
@@ -1048,23 +1048,23 @@ public class ValueParameters extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team199pt4ff_2.java (at line 7)\n" + 
-    		"	protected class RInner playedBy RMid {\n" + 
-    		"	                ^^^^^^\n" + 
-    		"Member types not allowed in regular roles. Mark class Team199pt4ff_2.Mid as a team if RInner should be its role (OTJLD 1.5(a,b)). \n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team199pt4ff_2.java (at line 10)\n" + 
-    		"	wrongPrint();\n" + 
-    		"	^^^^^^^^^^\n" + 
-    		"The method wrongPrint() is undefined for the type Team199pt4ff_2<@other>.Mid.RInner\n" + 
+            "----------\n" +
+    		"1. ERROR in Team199pt4ff_2.java (at line 7)\n" +
+    		"	protected class RInner playedBy RMid {\n" +
+    		"	                ^^^^^^\n" +
+    		"Member types not allowed in regular roles. Mark class Team199pt4ff_2.Mid as a team if RInner should be its role (OTJLD 1.5(a,b)). \n" +
+    		"----------\n" +
+    		"2. ERROR in Team199pt4ff_2.java (at line 10)\n" +
+    		"	wrongPrint();\n" +
+    		"	^^^^^^^^^^\n" +
+    		"The method wrongPrint() is undefined for the type Team199pt4ff_2<@other>.Mid.RInner\n" +
     		"----------\n");
     }
 
     // a type depends on an enum instance, ctor has explicit arg, too
     // 1.9.10-otjld-dependent-type-1
     public void test1910_dependentType1() {
-       
+
        runConformTest(
             new String[] {
 		"T1910dt1Main.java",

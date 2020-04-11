@@ -57,7 +57,7 @@ public class InferenceSubstitution extends Scope.Substitutor implements Substitu
 				return false;
 			}
 		};
-		
+
 		int l1 = this.sites.length;
 		subst.sites = new InvocationSite[l1+1];
 		System.arraycopy(this.sites, 0, subst.sites, 0, l1);
@@ -76,7 +76,7 @@ public class InferenceSubstitution extends Scope.Substitutor implements Substitu
 	}
 
 	/**
-	 * Override method {@link Scope.Substitutor#substitute(Substitution, TypeBinding)}, 
+	 * Override method {@link Scope.Substitutor#substitute(Substitution, TypeBinding)},
 	 * to add substitution of types other than type variables.
 	 */
 	@Override
@@ -129,7 +129,7 @@ public class InferenceSubstitution extends Scope.Substitutor implements Substitu
 				continue;
 			}
 			if (superInterfaces != null) {
-				int ifcLen = superInterfaces.length; 
+				int ifcLen = superInterfaces.length;
 				for (int j = 0; j < ifcLen; j++) {
 					if (TypeBinding.equalsEquals(pi, superInterfaces[j])) {
 						if (superInterfaces == typeVariable.superInterfaces)

@@ -139,7 +139,7 @@ public class ThisReference extends Reference {
 	public TypeBinding resolveType(BlockScope scope) {
 
 		this.constant = Constant.NotAConstant;
-		
+
 		ReferenceBinding enclosingReceiverType = scope.enclosingReceiverType();
 		if (!isImplicitThis() &&!checkAccess(scope, enclosingReceiverType)) {
 			return null;
@@ -156,7 +156,7 @@ public class ThisReference extends Reference {
 			this.resolvedType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(
                 this.resolvedType,
                 scope,
-                this);	
+                this);
 		}
 // SH}
 		return this.resolvedType;

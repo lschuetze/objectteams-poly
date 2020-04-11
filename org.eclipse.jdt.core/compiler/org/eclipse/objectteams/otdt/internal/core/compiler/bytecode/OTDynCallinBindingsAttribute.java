@@ -1,17 +1,17 @@
-/** 
+/**
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2009, 2019 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors: Stephan Herrmann - Initial API and implementation
  **********************************************************************/
  package org.eclipse.objectteams.otdt.internal.core.compiler.bytecode;
@@ -45,7 +45,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 /**
  * Encodes all callin bindings of a team class.
  * Structure:
- * <pre> 
+ * <pre>
  * CallinBindings_attribute {
  *   u2 attribute_name_index;
  *   u4 attribute_length;
@@ -60,7 +60,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
  *      u2 base_class_index_table;			// internal name: java/util/Map$Entry
  *      u2 file_name_index_table; 	// for SMAP
  *      u2 line_number;				// for SMAP
- *      u2 line_offset; 			// for SMAP 
+ *      u2 line_offset; 			// for SMAP
  *      u2 base_methods_count;
  *      {
  *         u2 base_method_name_index_table;
@@ -72,13 +72,13 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
  *   } bindings[bindings_count];
  * }
  * </pre>
- * 
+ *
  * This attribute is inherited / copied / merged into all sub and tsub teams, as to advise
  * the OTDRE to generate dispatch code into the team.
- * 
+ *
  * No team declares callinIds that would conflict with any of its supers/tsupers
  * (see TeamModel.nextCallinID and the methods operating on it).
- * 
+ *
  * @author stephan
  * @since 1.3.0M3
  */
@@ -92,14 +92,14 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 	public static final short COVARIANT_BASE_RETURN = 8;
 	public static final short BASE_SUPER_CALL = 16;
 
-	
+
 	private class Mapping {
 		char[] roleClassName, declaringRoleName, callinName, roleSelector, roleSignature, callinModifier, baseClassName, fileName;
 		int flags; // STATIC_ROLE_METHOD, INHERITED, COVARIANT_BASE_RETURN
 		int lineNumber, lineOffset;
 		BaseMethod[] baseMethods;
 		MethodBinding roleMethod;
-		Mapping(char[] roleClassName, char[] declaringRoleName, char[] callinName, char[] roleSelector, char[] roleSignature, char[] callinModifer, int flags, char[] baseClassName, int baseMethodCount, MethodBinding roleMethod) 
+		Mapping(char[] roleClassName, char[] declaringRoleName, char[] callinName, char[] roleSelector, char[] roleSignature, char[] callinModifer, int flags, char[] baseClassName, int baseMethodCount, MethodBinding roleMethod)
 		{
 			this.roleClassName	= roleClassName;
 			this.declaringRoleName = declaringRoleName;
@@ -137,9 +137,9 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 				(short)Util.getLineNumber(decl.declarationSourceEnd, lineEnds, 0, lineEnds.length-1);
 			this.lineOffset = (short)(lineEnd - this.lineNumber);
 		}
-		
 
-	    /** 
+
+	    /**
 	     * Compute the name of the file containing the given callin mapping.
 	     * Do consider packages but no projects or source folders.
 	     */
@@ -189,7 +189,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 			return buf.toString();
 		}
 	}
-	
+
 	/* Encodes the binding to one individual base method. */
 	private class BaseMethod {
     	static final int CALLIN = 1;
@@ -208,23 +208,23 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 			this.translationFlags 		= translationFlags;
 		}
 	}
-	
+
 	private List<Mapping> mappings;
 	private TeamModel theTeam;
-	
+
 	OTDynCallinBindingsAttribute(TeamModel theTeam) {
 		super(ATTRIBUTE_NAME, -1/*size pending*/, -1/*variable entry size*/);
 		this.theTeam = theTeam;
 		this.theTeam.addAttribute(this);
 		this.mappings = new ArrayList<Mapping>();
 	}
-	
+
 	private OTDynCallinBindingsAttribute(TeamModel theTeam, List<Mapping> mappings) {
 		super(ATTRIBUTE_NAME, mappings.size(), -1/*variable entry size*/);
 		this.theTeam = theTeam;
 		this.mappings = mappings;
 	}
-	
+
     /**
      * Read the attribute from byte code.
      *
@@ -242,7 +242,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		for (int i=0; i<this._count; i++)
 			this.mappings.add(readMapping());
 	}
-	
+
 	@Override
 	protected int getAttributeSize() {
 		int s = 2; // entry count
@@ -252,7 +252,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 	}
 	void addMappings(char[] baseClassName, CallinMappingDeclaration callinDecl) {
 		MethodSpec roleSpec = callinDecl.roleMethodSpec;
-		int flags = 0; 			
+		int flags = 0;
 		if (callinDecl.roleMethodSpec.resolvedMethod.isStatic())
 			flags |= STATIC_ROLE_METHOD;
 		if (callinDecl.hasCovariantReturn())
@@ -260,7 +260,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		MethodSpec[] baseMethodSpecs = callinDecl.getBaseMethodSpecs();
 		Mapping mapping = new Mapping(callinDecl.scope.enclosingSourceType().sourceName(), // indeed: simple name
 									  callinDecl.declaringRoleName(), callinDecl.name, roleSpec.selector, roleSpec.signature(WeavingScheme.OTDRE),
-									  callinDecl.getCallinModifier(), flags, 
+									  callinDecl.getCallinModifier(), flags,
 									  baseClassName, baseMethodSpecs.length,
 									  roleSpec.resolvedMethod);
 		for (int i=0; i<baseMethodSpecs.length; i++) {
@@ -276,7 +276,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 				baseFlags |= BaseMethod.PRIVATE;
 			if (baseSpec.isPublic())
 				baseFlags |= BaseMethod.PUBLIC;
-			mapping.addBaseMethod(i, baseSpec.codegenSeletor(), baseSpec.signature(WeavingScheme.OTDRE), 
+			mapping.addBaseMethod(i, baseSpec.codegenSeletor(), baseSpec.signature(WeavingScheme.OTDRE),
 									baseSpec.resolvedMethod.declaringClass.constantPoolName(),
 									baseSpec.getCallinId(this.theTeam, callinDecl.explicitName()),
 									baseFlags, baseSpec.getTranslationFlags());
@@ -285,11 +285,11 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		this.mappings.add(mapping);
 		this._count = this.mappings.size();
 	}
-	
+
 	public static void createOrMerge(TeamModel theTeam, char[] baseClassName, CallinMappingDeclaration[] mappingDecls) {
 		AbstractAttribute existingAttr = theTeam.getAttribute(ATTRIBUTE_NAME);
-		OTDynCallinBindingsAttribute theAttr = existingAttr != null 
-					? (OTDynCallinBindingsAttribute)existingAttr 
+		OTDynCallinBindingsAttribute theAttr = existingAttr != null
+					? (OTDynCallinBindingsAttribute)existingAttr
 					: new OTDynCallinBindingsAttribute(theTeam);
 		for (CallinMappingDeclaration callinDecl : mappingDecls)
 			theAttr.addMappings(baseClassName, callinDecl);
@@ -324,7 +324,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		buf.append('\n');
 		return buf.toString();
 	}
-	
+
 	@Override
 	void writeElementValue(int i) {
 		Mapping mapping = this.mappings.get(i);
@@ -353,7 +353,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 			writeUnsignedShort(baseMethods[j].translationFlags);
 		}
 	}
-	
+
 	Mapping readMapping() {
 		char[] roleClassName	= consumeName();
 		char[] callinName 		= consumeName();
@@ -370,7 +370,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		char[] declaringRoleName = CharOperation.subarray(callinName, 0, pos);
 		callinName = CharOperation.subarray(callinName, pos+1, -1);
 
-		Mapping result = new Mapping(roleClassName, declaringRoleName, callinName, roleSelector, roleSignature, callinModifer, flags, baseClassName, baseMethodCount, null); 
+		Mapping result = new Mapping(roleClassName, declaringRoleName, callinName, roleSelector, roleSignature, callinModifer, flags, baseClassName, baseMethodCount, null);
 		result.setSMAPInfo(fileName, lineNumber, lineOffset);
 		for (int i=0; i<baseMethodCount; i++) {
 			char[] baseMethodName 		= consumeName();
@@ -383,7 +383,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		}
 		return result;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment)
 	 */
@@ -393,7 +393,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		if (((ReferenceBinding)binding).isTeam())
 			((ReferenceBinding)binding).getTeamModel().addAttribute(this);
 	}
-	
+
 	// Evaluate CallinMethodMappingAttribute late, because we need our methods to be in place.
     @Override
 	public void evaluateLateAttribute(ReferenceBinding teamBinding, int state)

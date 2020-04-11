@@ -48,8 +48,8 @@ public class CallinMappingDeclarationTest extends AstRewritingDescribingTest {
 		suite.addTest(new CallinMappingDeclarationTest("test0009")); // FIXME? Used?
 		return suite;
 	}
-	
-	
+
+
 	// copied from org.eclipse.jdt.core.tests.rewrite.describing.ASTRewritingMethodDeclTest
 	// and syntactically adjusted for callins
 	public void testModifiersAST3WithAnnotations() throws Exception {
@@ -68,15 +68,15 @@ public class CallinMappingDeclarationTest extends AstRewritingDescribingTest {
 		buf.append("    @ToBeRemoved\n");
 		buf.append("    @Deprecated\n");
 		buf.append("    Object foo4() <- after Object bfoo4();\n");
-		buf.append("}\n");	
-		buf.append("}\n");	
-		ICompilationUnit cu= pack1.createCompilationUnit("T.java", buf.toString(), false, null);	
-		
+		buf.append("}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("T.java", buf.toString(), false, null);
+
 		CompilationUnit astRoot= createAST(cu);
 		ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		RoleTypeDeclaration type= findRoleTypeDeclaration(findTypeDeclaration(astRoot, "T"), "E");
-		
+
 		{ // insert annotation first before normal
 			CallinMappingDeclaration mappingDecl= findCallinMappingDeclaration(type, "foo1");
 			ListRewrite listRewrite= rewrite.getListRewrite(mappingDecl, CallinMappingDeclaration.MODIFIERS2_PROPERTY);
@@ -90,7 +90,7 @@ public class CallinMappingDeclarationTest extends AstRewritingDescribingTest {
 			MarkerAnnotation annot= ast.newMarkerAnnotation();
 			annot.setTypeName(ast.newSimpleName("Override"));
 			listRewrite.insertFirst(annot, null);
-		}		
+		}
 		{ // remove annotation before normal
 			CallinMappingDeclaration mappingDecl= findCallinMappingDeclaration(type, "foo3");
 			ListRewrite listRewrite= rewrite.getListRewrite(mappingDecl, CallinMappingDeclaration.MODIFIERS2_PROPERTY);
@@ -101,9 +101,9 @@ public class CallinMappingDeclarationTest extends AstRewritingDescribingTest {
 			ListRewrite listRewrite= rewrite.getListRewrite(mappingDecl, CallinMappingDeclaration.MODIFIERS2_PROPERTY);
 			listRewrite.remove((ASTNode) mappingDecl.modifiers().get(0), null);
 		}
-		
+
 		String preview= evaluateRewrite(cu, rewrite);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public team abstract class T {\n");
@@ -118,10 +118,10 @@ public class CallinMappingDeclarationTest extends AstRewritingDescribingTest {
 		buf.append("    /** javadoc comment */\n");
 		buf.append("    @Deprecated\n");
 		buf.append("    Object foo4() <- after Object bfoo4();\n");
-		buf.append("}\n");	
-		buf.append("}\n");	
+		buf.append("}\n");
+		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
-	
+
+
 }

@@ -297,13 +297,13 @@ public class MethodSpec extends ASTNode implements InvocationSite
 			enhancedParameters = MethodSignatureEnhancer.enhanceParameters(scope, this.parameters);
    	    	CompilationResult compilationResult = scope.referenceContext().compilationResult();
 			CheckPoint cp = compilationResult.getCheckPoint(scope.referenceContext());
-			
+
 			this.resolvedMethod = TypeAnalyzer.findMethod(scope, receiverClass, realSelector, enhancedParameters, isBaseSide, isBaseSide ? this : null);
 			boolean notFound = false, isVarargs = false;
 			if (this.resolvedMethod.isValidBinding())
 				isVarargs = this.resolvedMethod.isVarargs();
 			else
-				notFound = this.resolvedMethod.problemId() == ProblemReasons.NotFound; 
+				notFound = this.resolvedMethod.problemId() == ProblemReasons.NotFound;
 			if (notFound || (isVarargs && ((this.bits & IsVarArgs) == 0))) {
 				// second+ chance: try plain:
 				while (receiverClass != null) {
@@ -343,13 +343,13 @@ public class MethodSpec extends ASTNode implements InvocationSite
 		if (this.resolvedMethod != null) {
 			if (this.resolvedMethod.isValidBinding()) {
 				// check visibility of role-side in callin:
-				if (!isBaseSide 
-						&& scope.referenceContext() instanceof CallinMappingDeclaration 
-						&& !this.resolvedMethod.canBeSeenBy(this, scope)) 
+				if (!isBaseSide
+						&& scope.referenceContext() instanceof CallinMappingDeclaration
+						&& !this.resolvedMethod.canBeSeenBy(this, scope))
 				{
 					scope.problemReporter().invisibleMethod(this, this.resolvedMethod);
 					this.resolvedMethod = new ProblemMethodBinding(this.resolvedMethod, this.selector, this.parameters, ProblemReasons.NotVisible);
-				}				
+				}
 			}
 			if (!this.resolvedMethod.isValidBinding() && this.resolvedMethod.declaringClass == null)
 				this.resolvedMethod.declaringClass = receiverClass; // needed for computeUniqueKey (via CallinCalloutBinding.computeUniqueKey)
@@ -490,7 +490,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 				default:
 					scope.problemReporter().missingImplementation(this, "Unexpected compile error at MethodSpec "+this); //$NON-NLS-1$
 					return;
-			}			
+			}
 		}
 		initTranslationBits();
 	}
@@ -514,7 +514,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 	void checkDecapsulation(ReferenceBinding baseClass, Scope scope) {
 		if (!this.resolvedMethod.canBeSeenBy(baseClass, this, scope)) {
 			WeavingScheme weavingScheme = scope.compilerOptions().weavingScheme;
-			this.implementationStrategy = weavingScheme == WeavingScheme.OTDRE 
+			this.implementationStrategy = weavingScheme == WeavingScheme.OTDRE
 					? ImplementationStrategy.DYN_ACCESS : ImplementationStrategy.DECAPS_WRAPPER;
     		this.accessId = createAccessAttribute(scope.enclosingSourceType().roleModel);
    			scope.problemReporter().decapsulation(this, baseClass, scope);
@@ -609,7 +609,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 			if (!TypeAnalyzer.isSameType(
 					scope.enclosingSourceType(),
 					specifiedArgType.resolvedType,
-					realParameter)) 
+					realParameter))
 			{
 				scope.problemReporter().differentParamInMethodSpec(
 						this, specifiedArgType, realParameter,
@@ -672,7 +672,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 		return signature(this.resolvedMethod, weavingScheme);
 	}
 	/**
-	 * This method is used by 
+	 * This method is used by
 	 * {@link org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CallinMethodMappingsAttribute CallinMethodMappingsAttribute}
 	 * for decoding a mapping from its bytecode attribute.
 	 * @param method
@@ -691,7 +691,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 		// manual retrenching?
 		boolean shouldRetrench = weavingScheme == WeavingScheme.OTRE && method.isCallin();
 		int offset = shouldRetrench ? MethodSignatureEnhancer.getEnhancingArgLen(weavingScheme) : 0;
-		int paramLen = method.parameters.length;	
+		int paramLen = method.parameters.length;
 		for (int i = offset; i < paramLen; i++) {
 			// 'weaken' to that erasure that was used in the tsuper version:
 			TypeBinding targetParameter = method.getCodeGenType(i);
@@ -702,8 +702,8 @@ public class MethodSpec extends ASTNode implements InvocationSite
 				? MethodModel.getReturnType(method)
 				: method.returnType;
 		// 'weaken' to that erasure that was used in the tsuper version:
-		MethodBinding tsuperOriginal = (method.otBits & IOTConstants.IsCopyOfParameterized) != 0 
-				? method.copyInheritanceSrc.original() 
+		MethodBinding tsuperOriginal = (method.otBits & IOTConstants.IsCopyOfParameterized) != 0
+				? method.copyInheritanceSrc.original()
 				: null;
 		TypeBinding returnType = (tsuperOriginal != null && tsuperOriginal.returnType.isTypeVariable() && !sourceReturnType.isTypeVariable())
 			 ? tsuperOriginal.returnType
@@ -779,7 +779,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 	public boolean isSuperAccess() {
 		return true; // grant access to inherited methods
 	}
-	
+
 	@Override
 	public boolean isTypeAccess() {
 		return this.resolvedMethod != null && this.resolvedMethod.isStatic();
@@ -787,7 +787,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 
 	@Override
 	public void setActualReceiverType(ReferenceBinding receiverType) {
-		// ignored		
+		// ignored
 	}
 
 	@Override
@@ -797,7 +797,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 
 	@Override
 	public void setFieldIndex(int depth) {
-		// ignored		
+		// ignored
 	}
 
 	/**
@@ -807,7 +807,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 	public TypeBinding invocationTargetType() {
 		return null;
 	}
-	
+
 	@Override
 	public InferenceContext18 freshInferenceContext(Scope scope) {
 		int nArgs = this.arguments.length;
@@ -821,13 +821,13 @@ public class MethodSpec extends ASTNode implements InvocationSite
 
 		return new InferenceContext18(scope, expressions, this, null);
 	}
-	
+
 	@Override
 	public ExpressionContext getExpressionContext() {
 		return ExpressionContext.ASSIGNMENT_CONTEXT;
 	}
-	
+
 	public int createAccessAttribute(RoleModel roleModel) {
-		return roleModel.addInaccessibleBaseMethod(this.resolvedMethod);		
+		return roleModel.addInaccessibleBaseMethod(this.resolvedMethod);
 	}
 }

@@ -405,7 +405,7 @@ public abstract class TypeConverter {
 						// anchors including a 'base' token are encoded differently:
 						if (CharOperation.equals(identifiers[identCount-1], IOTConstants.BASE)) {
 							TypeReference qualification;
-							if (identCount == 2) {  
+							if (identCount == 2) {
 								qualification = new SingleTypeReference(identifiers[0], positions[0]);
 							} else {
 								System.arraycopy(positions, 0, positions=new long[positions.length-1], 0, positions.length-1);
@@ -539,11 +539,11 @@ public abstract class TypeConverter {
 				case '<' :
 					/* We need to convert and preserve 1.5 specific constructs either if compliance is 1.5 or above,
 					   or the caller has explicitly requested generics to be included. The parameter includeGenericsAnyway
-					   should be used by the caller to signal that in the calling context generics information must be 
+					   should be used by the caller to signal that in the calling context generics information must be
 					   internalized even when the requesting project is 1.4. But in all cases, we must skip over them to
 					   see if there are any applicable type fragments after the type parameters: i.e we just aren't done
-					   having seen a '<' in 1.4 mode. 
-					   
+					   having seen a '<' in 1.4 mode.
+
 					   Because of the way type signatures are encoded, TypeConverter.decodeType(String, int, int, int) is immune
 					   to this problem. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=325633
 					 */
@@ -585,7 +585,7 @@ public abstract class TypeConverter {
 
 	/*
 	 * Method should be inlined.
-	 * 
+	 *
 	 * Only extracted to work around https://bugs.eclipse.org/471835 :
 	 * Random crashes in PhaseIdealLoop::build_loop_late_post when C2 JIT tries to compile TypeConverter::decodeType
 	 */
@@ -813,7 +813,7 @@ public abstract class TypeConverter {
 	/**
 	 * @param methodMapping
 	 * @param compilationResult
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
 	protected CallinMappingDeclaration convertCallin(
 			IMethodMapping methodMapping, CompilationResult compilationResult) throws JavaModelException

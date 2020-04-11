@@ -606,7 +606,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 								gen.qualifiedTypeReference(ORG_OBJECTTEAMS_IBOUNDBASE2),
 								CastExpression.RAW),
 							ADD_REMOVE_ROLE,
-							new Expression[] {gen.singleNameReference(_OT_ROLE_ARG), 
+							new Expression[] {gen.singleNameReference(_OT_ROLE_ARG),
 											  gen.booleanLiteral(false)}) // isAdding=false
 						: gen.messageSend(
 							gen.castExpression(
@@ -877,7 +877,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 							gen.qualifiedTypeReference(ORG_OBJECTTEAMS_IBOUNDBASE2),
 							CastExpression.RAW),
 						ADD_REMOVE_ROLE,
-						new Expression[] {gen.singleNameReference(_OT_ROLE_ARG), 
+						new Expression[] {gen.singleNameReference(_OT_ROLE_ARG),
 										  gen.booleanLiteral(false)}) // isAdding=false
 					: gen.messageSend(
 						gen.castExpression(

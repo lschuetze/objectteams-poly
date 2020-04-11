@@ -106,10 +106,10 @@ public class RoleModel extends TypeModel
 	// Flag constants for tagBits:
 	// is parameterized type instantiated via tsuper-link?
 	public static final int IsViewedAsTSuper = ASTNode.Bit1;
-	
+
     // had the baseclass field/playedBy problems?
     public static final int BaseclassHasProblems = ASTNode.Bit2;
-    
+
     // several issues making lifting impossible
     public static final int HasLiftingProblem = ASTNode.Bit3;
 
@@ -178,7 +178,7 @@ public class RoleModel extends TypeModel
 
     /** does this bound role have a binding ambiguity prohibiting lifting? */
     public boolean _hasBindingAmbiguity = false;
-    
+
     /** is the baseclass an (indirect) enclosing class? */
 	public boolean _playedByEnclosing = false;
 
@@ -328,10 +328,10 @@ public class RoleModel extends TypeModel
 				return true;
 		return false;
 	}
-	
+
 
     public static void setTagBit(ReferenceBinding role, int tagBit) {
-		role.roleModel.tagBits |= tagBit;		
+		role.roleModel.tagBits |= tagBit;
 	}
 
 	public static boolean hasTagBit(ReferenceBinding typeBinding, int tagBit) {
@@ -1185,7 +1185,7 @@ public class RoleModel extends TypeModel
 
 	/**
 	 * @param srcField a synthetic field from tsuper
-	 * @param newField the synthetic new field copy 
+	 * @param newField the synthetic new field copy
 	 */
 	public void addSyntheticFieldMapping(FieldBinding srcField, FieldBinding newField) {
 		this._syntheticMap.put(srcField, newField);
@@ -1412,7 +1412,7 @@ public class RoleModel extends TypeModel
 			CopyInheritance.copyGeneratedFeatures(this);
 		super.evaluateLateAttributes(state);
 	}
-	
+
 	public synchronized void releaseClassFile() {
 		this._classFile= null;
 	}

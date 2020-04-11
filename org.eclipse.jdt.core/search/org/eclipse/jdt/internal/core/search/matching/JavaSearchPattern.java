@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.core.util.Util;
 
 
 public class JavaSearchPattern extends SearchPattern implements IIndexConstants {
-	
+
 	/*
 	 * Whether this pattern is case sensitive.
 	 */
@@ -60,14 +60,14 @@ public class JavaSearchPattern extends SearchPattern implements IIndexConstants 
 	 * Fine grain limitation
 	 */
 	public int fineGrain = 0;
-	
+
 	/**
 	 * Mask used on match rule for match mode.
 	 */
 	public static final int MATCH_MODE_MASK = R_EXACT_MATCH
-		| R_PREFIX_MATCH 
-		| R_PATTERN_MATCH 
-		| R_REGEXP_MATCH 
+		| R_PREFIX_MATCH
+		| R_PATTERN_MATCH
+		| R_REGEXP_MATCH
 		| R_CAMELCASE_MATCH
 		| R_CAMELCASE_SAME_PART_COUNT_MATCH;
 
@@ -216,7 +216,7 @@ public class JavaSearchPattern extends SearchPattern implements IIndexConstants 
 			}
 			return null;
 		}
-		
+
 		// Try to get the argument using the JavaModel info
 		try {
 			ITypeParameter[] parameters = method.getTypeParameters();
@@ -270,13 +270,13 @@ public class JavaSearchPattern extends SearchPattern implements IIndexConstants 
 	public final boolean hasTypeParameters() {
 		return !hasSignatures() && hasTypeArguments();
 	}
-	
+
 	/**
 	 * Return whether two suffixes are compatible.
-	 * 
+	 *
 	 * Note that obvious compatibility values as equals and {@link IIndexConstants#TYPE_SUFFIX}
 	 * has to be tested by caller to avoid unnecessary method call...
-	 * 
+	 *
 	 * @param typeSuffix
 	 * @param patternSuffix
 	 * @return true if suffixes are compatible, false otherwise
@@ -329,7 +329,7 @@ public class JavaSearchPattern extends SearchPattern implements IIndexConstants 
 				}
 				return false;
 		}
-		
+
 		// Default behavior is to match suffixes
 		return true;
 	}
@@ -342,7 +342,7 @@ public class JavaSearchPattern extends SearchPattern implements IIndexConstants 
 			output.append("\", "); //$NON-NLS-1$
 		}
 		switch(getMatchMode()) {
-			case R_EXACT_MATCH : 
+			case R_EXACT_MATCH :
 				output.append("exact match, "); //$NON-NLS-1$
 				break;
 			case R_PREFIX_MATCH :

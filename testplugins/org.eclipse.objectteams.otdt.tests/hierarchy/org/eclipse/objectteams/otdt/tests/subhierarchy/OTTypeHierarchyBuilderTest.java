@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -35,13 +35,13 @@ import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 
 /**
- * 
+ *
  * @author Michael Krueger (mkr)
- * 
+ *
  */
-public class OTTypeHierarchyBuilderTest extends FileBasedModelTest 
+public class OTTypeHierarchyBuilderTest extends FileBasedModelTest
 {
-	
+
 	@SuppressWarnings("unused")
 	private ITypeHierarchy _testObj;
 	private IType _focusType;
@@ -49,7 +49,7 @@ public class OTTypeHierarchyBuilderTest extends FileBasedModelTest
 	private IType _objectType;
 	private IType _T20;
 	private IType _T21;
-	
+
 	private IType _T20T10T00R0;
 	private IType _T20T10T00R1;
 	private IType _T21T10T00R1;
@@ -57,45 +57,45 @@ public class OTTypeHierarchyBuilderTest extends FileBasedModelTest
 	private IType _T21T11T00R0;
 	private IType _T21T11T00R1;
 	private IType _T21T11T00R2;
-    
-    
+
+
 	public OTTypeHierarchyBuilderTest(String name)
 	{
 		super(name);
 	}
-	
+
 	public static Test suite()
 	{
 		if (true)
 			return new Suite(OTTypeHierarchyBuilderTest.class);
 		@SuppressWarnings("unused")
-		junit.framework.TestSuite suite = 
+		junit.framework.TestSuite suite =
 			new Suite(OTTypeHierarchyBuilderTest.class.getName());
 		return suite;
 	}
-	
+
 	public void setUpSuite() throws Exception
 	{
 		setTestProjectDir("Hierarchy");
 		super.setUpSuite();
-		
+
 		String srcFolder = "src";
 		String pkg = "test004";
-		
-		_T20 = 
+
+		_T20 =
 			getType(getTestProjectDir(),
 					srcFolder,
 					pkg,
 					"T20");
 
-        _T21 = 
+        _T21 =
             getType(getTestProjectDir(),
                     srcFolder,
                     pkg,
                     "T21");
-        
-        
-        _objectType = 
+
+
+        _objectType =
             getType(getTestProjectDir(),
                     "rt.jar",
                     "java.lang",
@@ -106,29 +106,29 @@ public class OTTypeHierarchyBuilderTest extends FileBasedModelTest
 
         _T21T10T00R1 = TypeHelper.findNestedRoleType(_T21, "T21.T10.T00.R1");
         _T21T10T00R2 = TypeHelper.findNestedRoleType(_T21, "T21.T10.T00.R2");
-        
+
         _T21T11T00R0 = TypeHelper.findNestedRoleType(_T21, "T21.T11.T00.R0");
         _T21T11T00R1 = TypeHelper.findNestedRoleType(_T21, "T21.T11.T00.R1");
         _T21T11T00R2 = TypeHelper.findNestedRoleType(_T21, "T21.T11.T00.R2");
     }
 
-    
+
 	public void testCreation()
 	{
 		assertCreation(_T20);
 		assertCreation(_T21);
-		
+
 		assertCreation(_T20T10T00R0);
 		assertCreation(_T20T10T00R1);
 
 		assertCreation(_T21T10T00R1);
 		assertCreation(_T21T10T00R2);
-		
+
 		assertCreation(_T21T11T00R0);
 		assertCreation(_T21T11T00R1);
 		assertCreation(_T21T11T00R2);
     }
- 
+
 	public void testGetResult_T20T10T00R0() throws CoreException
 	{
 	    _focusType = _T20T10T00R0;
@@ -136,10 +136,10 @@ public class OTTypeHierarchyBuilderTest extends FileBasedModelTest
 	    HierarchyBuilder builder = new IndexBasedHierarchyBuilder(hierarchy, SearchEngine.createJavaSearchScope(new IJavaElement[] {_focusType.getJavaProject()} ));
 
 	    IType[] expected = { _T21T11T00R0, _T21T11T00R1, _T21T11T00R2 };
-	    
+
 	    builder.build(true);
 	    IType[] actual = hierarchy.getAllSubtypes(_focusType);
-	    
+
 	    assertTrue(compareTypes(expected, actual));
 	}
 
@@ -148,12 +148,12 @@ public class OTTypeHierarchyBuilderTest extends FileBasedModelTest
 	    _focusType = _T20T10T00R1;
 	    TypeHierarchy hierarchy = new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), false);
 	    HierarchyBuilder builder = new IndexBasedHierarchyBuilder(hierarchy, SearchEngine.createJavaSearchScope(new IJavaElement[] {_focusType.getJavaProject()} ));
-	    
+
 	    IType[] expected = { _T21T10T00R1, _T21T10T00R2, _T21T11T00R1, _T21T11T00R2 };
 
 	    builder.build(true);
 	    IType[] actual = hierarchy.getAllSubtypes(_focusType);
-	    
+
 	    assertTrue(compareTypes(expected, actual));
 	}
 
@@ -162,12 +162,12 @@ public class OTTypeHierarchyBuilderTest extends FileBasedModelTest
 	    _focusType = javaProject.findType("java.lang.Object");
 	    TypeHierarchy hierarchy = new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), false);
 	    HierarchyBuilder builder = new IndexBasedHierarchyBuilder(hierarchy, SearchEngine.createJavaSearchScope(new IJavaElement[] {_focusType.getJavaProject()} ));
-   
+
 	    builder.build(true);
 	    IType[] actual = hierarchy.getAllSubtypes(_focusType);
 	    assertNotNull(actual);
-	    
+
 	    // no real assert not throwing NPE is all we need to check
 	}
-	
+
 }

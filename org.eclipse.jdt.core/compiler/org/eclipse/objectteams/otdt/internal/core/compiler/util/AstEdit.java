@@ -180,7 +180,7 @@ public class AstEdit {
             TypeDeclaration classTypeDeclaration,
             AbstractMethodDeclaration methodDeclaration,
 			boolean wasSynthetic,
-			boolean addToFront, 
+			boolean addToFront,
 			MethodBinding copyInheritanceSrc)
     {
 		addMethod(classTypeDeclaration, methodDeclaration, wasSynthetic, addToFront, copyInheritanceSrc, true);
@@ -199,7 +199,7 @@ public class AstEdit {
             TypeDeclaration classTypeDeclaration,
             AbstractMethodDeclaration methodDeclaration,
 			boolean wasSynthetic,
-			boolean addToFront, 
+			boolean addToFront,
 			MethodBinding original,
 			boolean isCopyInheritance)
     {
@@ -264,7 +264,7 @@ public class AstEdit {
             	decl.methods = null;
             } else {
 	            AbstractMethodDeclaration[] methods = new AbstractMethodDeclaration[length - 1];
-	
+
 	            if (decl.methods != null) {
 	                for (int i = 0; i < decl.methods.length; i++) {
 	                    if (method == decl.methods[i].binding) {
@@ -273,7 +273,7 @@ public class AstEdit {
 	                    }
 	                }
 	            }
-	
+
 	            if (pos >= 0) {
 	                System.arraycopy(decl.methods, 0, methods, 0, pos);
 	                System.arraycopy(
@@ -530,7 +530,7 @@ public class AstEdit {
 	    addImplementsReference(roleClassDecl, implementsRef);
 	}
 
-	public static void addException(AbstractMethodDeclaration methodDecl, TypeReference exceptionRef, boolean resolve) 
+	public static void addException(AbstractMethodDeclaration methodDecl, TypeReference exceptionRef, boolean resolve)
 	{
 		if (methodDecl.thrownExceptions != null) {
 			int len = methodDecl.thrownExceptions.length;

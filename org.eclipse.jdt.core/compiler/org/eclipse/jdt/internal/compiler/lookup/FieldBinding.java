@@ -349,7 +349,7 @@ public void fillInDefaultNonNullness(FieldDeclaration sourceField, Scope scope) 
 			this.tagBits |= TagBits.AnnotationNonNull;
 		} else if ((this.tagBits & TagBits.AnnotationNonNull) != 0) {
 			scope.problemReporter().nullAnnotationIsRedundant(sourceField);
-		}		
+		}
 	}
 }
 

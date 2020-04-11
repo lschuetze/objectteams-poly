@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -31,7 +31,7 @@ import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 /**
  * @author kaschja
  * @version $Id: Test1.java 23494 2010-02-05 23:06:44Z stephan $
- * 
+ *
  * This test class contains tests for an empty team class
  */
 public class Test1 extends FileBasedModelTest
@@ -51,43 +51,43 @@ public class Test1 extends FileBasedModelTest
             .getName());
         return suite;
     }
-    
+
     public void setUpSuite() throws Exception
     {
         setTestProjectDir(getTestSetting().getTestProject());
         super.setUpSuite();
         getTestSetting().setTeamClass("Team1");
     }
-    
+
     protected void setUp() throws Exception
     {
 		super.setUp();
         getTestSetting().setUp();
     }
-    
+
     public void testExistenceOfTypeInJavaModel()
     {
         assertNotNull(getTestSetting().getTeamJavaElement());
         assertTrue(getTestSetting().getTeamJavaElement().exists());
     }
-    
-    public void testExistenceOfTypeInOTModel() throws JavaModelException 
+
+    public void testExistenceOfTypeInOTModel() throws JavaModelException
     {
         assertNotNull(getTestSetting().getTeamJavaElement());
-        assertTrue(getTestSetting().getTeamJavaElement().exists());        
-        
+        assertTrue(getTestSetting().getTeamJavaElement().exists());
+
         IOTType teamOTElem = OTModelManager.getOTElement(getTestSetting().getTeamJavaElement());
         assertNotNull(teamOTElem);
     }
- 
+
     public void testTeamProperty() throws JavaModelException
     {
         assertNotNull(getTestSetting().getTeamJavaElement());
-        assertTrue(getTestSetting().getTeamJavaElement().exists());        
-        
-        IOTType teamOTElem = OTModelManager.getOTElement(getTestSetting().getTeamJavaElement());
-        assertNotNull(teamOTElem);        
+        assertTrue(getTestSetting().getTeamJavaElement().exists());
 
-        assertTrue(teamOTElem.isTeam());        
+        IOTType teamOTElem = OTModelManager.getOTElement(getTestSetting().getTeamJavaElement());
+        assertNotNull(teamOTElem);
+
+        assertTrue(teamOTElem.isTeam());
     }
 }

@@ -103,21 +103,21 @@ public class TSuperMessageSend extends MessageSend {
 
 	@Override
 	protected TypeBinding findMethodBinding(BlockScope scope) {
-		
+
 		// check: is a tsuper call legal in the current context?
-		
+
 		AbstractMethodDeclaration context = scope.methodScope().referenceMethod();
-		if (context == null 
+		if (context == null
 				|| !CharOperation.equals(this.selector, context.selector)
-				|| context.binding.parameters.length != this.argumentTypes.length) 
+				|| context.binding.parameters.length != this.argumentTypes.length)
 		{
 			scope.problemReporter().tsuperCallsWrongMethod(this);
 			return null;
 		}
 
 		ReferenceBinding receiverRole;
-		if (!(this.actualReceiverType instanceof ReferenceBinding) 
-				|| !(receiverRole = (ReferenceBinding)this.actualReceiverType).isSourceRole()) 
+		if (!(this.actualReceiverType instanceof ReferenceBinding)
+				|| !(receiverRole = (ReferenceBinding)this.actualReceiverType).isSourceRole())
 		{
 			scope.problemReporter().tsuperOutsideRole(context, this, this.actualReceiverType);
 			return null;
@@ -157,7 +157,7 @@ public class TSuperMessageSend extends MessageSend {
 	    		resolvePolyExpressionArguments(this, this.binding, this.argumentTypes, scope);
 	    		return this.binding.returnType;
 	    	}
-	    	if (bestMatch == null || 
+	    	if (bestMatch == null ||
 	    			(bestMatch.problemId() == ProblemReasons.NotFound && candidate.problemId() != ProblemReasons.NotFound))
 	    		bestMatch = candidate;
 	    }
@@ -168,20 +168,20 @@ public class TSuperMessageSend extends MessageSend {
 	    this.binding = bestMatch;
 	    return this.binding.returnType;
 	}
-	
+
 	@Override
-	public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) 
+	public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired)
 	{
-		// for code gen we need to add the marker arg... 
+		// for code gen we need to add the marker arg...
 		int len = this.binding.parameters.length;
 		TypeBinding[] extendedParameters = new TypeBinding[len+1];
 		System.arraycopy(this.binding.parameters, 0, extendedParameters, 0, len);
 		char[] tSuperMarkName = TSuperHelper.getTSuperMarkName(this.tsuperReference.resolvedType.enclosingType());
 		extendedParameters[len] = currentScope.getType(tSuperMarkName);
-	
+
 		// ... and find the copied method binding
 		MethodBinding codegenBinding = currentScope.getMethod(this.actualReceiverType, this.selector, extendedParameters, this);
-		
+
 		if (codegenBinding.problemId() == ProblemReasons.NotFound) {
 			// tsuper.m() may in fact refer to tsuper.super.m().
 			// try to find the method as super.tsuper() instead:
@@ -197,7 +197,7 @@ public class TSuperMessageSend extends MessageSend {
 			this.receiver.constant = Constant.NotAConstant;
 			this.actualReceiverType = superRole;
 		}
-			
+
 		MethodBinding tsuperMethod = this.binding;
 		this.binding = codegenBinding;
 		try {
@@ -205,7 +205,7 @@ public class TSuperMessageSend extends MessageSend {
 		} finally {
 			this.binding = tsuperMethod;
 		}
-		
+
 		if (valueRequired && this.binding.isCallin()) {
 			if (this.resolvedType != null && this.resolvedType.isValidBinding()) {
 				if (this.resolvedType.isBaseType()) {
@@ -223,7 +223,7 @@ public class TSuperMessageSend extends MessageSend {
 
 	@SuppressWarnings("hiding")
 	@Override
-	public void generateArguments(MethodBinding binding, Expression[] arguments, BlockScope currentScope, CodeStream codeStream) 
+	public void generateArguments(MethodBinding binding, Expression[] arguments, BlockScope currentScope, CodeStream codeStream)
 	{
 		super.generateArguments(binding, arguments, currentScope, codeStream);
 		// check if we need to pass the marker arg, too:
@@ -267,7 +267,7 @@ public class TSuperMessageSend extends MessageSend {
 		if (this.binding != null && this.binding.isCallin())
 			// restore return type which has been generalized to 'Object':
 			return this.resolvedType= MethodModel.getReturnType(this.binding);
-	
+
 		return answer;
 	}
 

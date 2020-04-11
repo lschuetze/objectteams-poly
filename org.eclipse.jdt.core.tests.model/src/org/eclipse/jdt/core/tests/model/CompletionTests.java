@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -90,7 +90,7 @@ public void testAbortCompletion1() throws JavaModelException {
 		"}\n");
 
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
-	
+
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "Objec";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
@@ -103,7 +103,7 @@ public void testAbortCompletion1() throws JavaModelException {
 	} catch (OperationCanceledException e) {
 		assertTrue("Should not be cancelled", false);
 	}
-	
+
 }
 
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=247941
@@ -118,11 +118,11 @@ public void testAbortCompletion2() throws JavaModelException {
 		"}\n");
 
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
-	
+
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "Objec";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
-	
+
 	try {
 		IProgressMonitor monitor = new NullProgressMonitor();
 		monitor.setCanceled(true); /*force completion to abort*/
@@ -150,12 +150,12 @@ public void testArrayInitializer1() throws JavaModelException {
 		"}\n");
 
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
-	
+
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "bar(";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	assertResults(
 			"bar[METHOD_REF]{, LArrayInitializer;, ()I, bar, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_EXACT_NAME + R_UNQUALIFIED + R_NON_RESTRICTED) + "}",
 			requestor.getResults());
@@ -188,7 +188,7 @@ public void testBug132679() throws JavaModelException {
 			"    };\n" +
 			"  }\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "foo.equ";
@@ -316,7 +316,7 @@ public void testBug99811() throws JavaModelException {
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=169682
 public void testBug169682a() throws JavaModelException {
 	this.workingCopies = new ICompilationUnit[1];
-	
+
 	String source =
 		"package test;\n"+
 		"\n"+
@@ -414,9 +414,9 @@ public void testBug169682a() throws JavaModelException {
 		"                                }\n"+
 		"                        }       \n"+
 		"                }\n"+
-		"        };   \n"+   
+		"        };   \n"+
 		"}";
-	
+
 	this.workingCopies[0] = getWorkingCopy(
 		"/Completion/src/test/Test.java",
 		source);
@@ -433,7 +433,7 @@ public void testBug169682a() throws JavaModelException {
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=169682
 public void testBug169682b() throws JavaModelException {
 	this.workingCopies = new ICompilationUnit[1];
-	
+
 	String source =
 		"package test;\n"+
 		"public class Test\n"+
@@ -442,7 +442,7 @@ public void testBug169682b() throws JavaModelException {
 		"        int[] i;\n"+
 		"        Obj x; // do ctrl+space at |\n"+
 		"}";
-	
+
 	this.workingCopies[0] = getWorkingCopy(
 		"/Completion/src/test/Test.java",
 		source);
@@ -460,7 +460,7 @@ public void testBug169682b() throws JavaModelException {
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=275518
 public void testBug275518a() throws JavaModelException {
 	this.workingCopies = new ICompilationUnit[1];
-	
+
 	String source =
 		"package test;\n"+
 		"public class Test {\n"+
@@ -470,7 +470,7 @@ public void testBug275518a() throws JavaModelException {
 		"        }\n"+
 		"\n"+
 		"}";
-	
+
 	this.workingCopies[0] = getWorkingCopy(
 		"/Completion/src/test/Test.java",
 		source);
@@ -499,7 +499,7 @@ public void testBug275518a() throws JavaModelException {
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=275518
 public void testBug275518b() throws JavaModelException {
 	this.workingCopies = new ICompilationUnit[1];
-	
+
 	String source =
 		"package test;\n"+
 		"public class Test {\n"+
@@ -509,7 +509,7 @@ public void testBug275518b() throws JavaModelException {
 		"        }\n"+
 		"\n"+
 		"}";
-	
+
 	this.workingCopies[0] = getWorkingCopy(
 		"/Completion/src/test/Test.java",
 		source);
@@ -538,7 +538,7 @@ public void testBug275518b() throws JavaModelException {
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=275518
 public void testBug275518c() throws JavaModelException {
 	this.workingCopies = new ICompilationUnit[1];
-	
+
 	String source =
 		"package test;\n"+
 		"public class Test {\n"+
@@ -548,7 +548,7 @@ public void testBug275518c() throws JavaModelException {
 		"        }\n"+
 		"\n"+
 		"}";
-	
+
 	this.workingCopies[0] = getWorkingCopy(
 		"/Completion/src/test/Test.java",
 		source);
@@ -5452,7 +5452,7 @@ public void testCompletionFieldName2() throws JavaModelException {
 }
 
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=38111
-public void testCompletionFieldName3() throws JavaModelException { 
+public void testCompletionFieldName3() throws JavaModelException {
 	this.workingCopies = new ICompilationUnit[1];
 	this.workingCopies[0] = getWorkingCopy(
 		"/Completion/src/test/TypeNameRequestor.java",
@@ -5475,7 +5475,7 @@ public void testCompletionFieldName3() throws JavaModelException {
 }
 
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=38111
-public void testCompletionFieldName4() throws JavaModelException { 
+public void testCompletionFieldName4() throws JavaModelException {
 	this.workingCopies = new ICompilationUnit[1];
 	this.workingCopies[0] = getWorkingCopy(
 		"/Completion/src/test/TypeNameRequestor.java",
@@ -5498,7 +5498,7 @@ public void testCompletionFieldName4() throws JavaModelException {
 }
 
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=38111
-public void testCompletionFieldName5() throws JavaModelException { 
+public void testCompletionFieldName5() throws JavaModelException {
 	this.workingCopies = new ICompilationUnit[1];
 	this.workingCopies[0] = getWorkingCopy(
 		"/Completion/src/test/TypeNameRequestor.java",
@@ -5521,7 +5521,7 @@ public void testCompletionFieldName5() throws JavaModelException {
 }
 
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=38111
-public void testCompletionFieldName6() throws JavaModelException { 
+public void testCompletionFieldName6() throws JavaModelException {
 	this.workingCopies = new ICompilationUnit[1];
 	this.workingCopies[0] = getWorkingCopy(
 		"/Completion/src/test/TypeNameRequestor.java",
@@ -5544,7 +5544,7 @@ public void testCompletionFieldName6() throws JavaModelException {
 }
 
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=38111
-public void testCompletionFieldName7() throws JavaModelException { 
+public void testCompletionFieldName7() throws JavaModelException {
 	this.workingCopies = new ICompilationUnit[1];
 	this.workingCopies[0] = getWorkingCopy(
 		"/Completion/src/test/TypeNameRequestor.java",
@@ -11453,7 +11453,7 @@ public void testCompletionKeywordThis15() throws JavaModelException {
 	assertResults(
 			"CompletionKeywordThis15.InnerClass[TYPE_REF]{InnerClass, , LCompletionKeywordThis15$InnerClass;, null, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_INHERITED + R_NON_RESTRICTED) + "}\n" +
 			"class[FIELD_REF]{class, null, Ljava.lang.Class;, class, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_INHERITED + R_NON_RESTRICTED) + "}\n"+
-			"super[KEYWORD]{super, null, null, super, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_INHERITED + R_NON_RESTRICTED) +"}\n"+	
+			"super[KEYWORD]{super, null, null, super, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_INHERITED + R_NON_RESTRICTED) +"}\n"+
 			"this[KEYWORD]{this, null, null, this, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_INHERITED + R_NON_RESTRICTED) + "}",
 		requestor.getResults());
 }
@@ -12735,23 +12735,23 @@ public void testCompletionMethodDeclaration17() throws JavaModelException {
 		System.arraycopy(classpath, 0, newClasspath, 1, length);
 		newClasspath[0] = JavaCore.newLibraryEntry(new Path("/Completion/bug325270.jar"), null, null);
 		this.currentProject.setRawClasspath(newClasspath, null);
-	
+
 		this.wc = getWorkingCopy(
 				"/Completion/src/CompletionMethodDeclaration17.java",
-				"class CompletionMethodDeclaration17 {\n" + 
-				"	void test() {\n" + 
-				"		new pkg.Foo1.Bar1(\n" + 
-				"	}\n" + 
+				"class CompletionMethodDeclaration17 {\n" +
+				"	void test() {\n" +
+				"		new pkg.Foo1.Bar1(\n" +
+				"	}\n" +
 				"}" +
 		"}");
-	
-	
+
+
 		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
 		String str = this.wc.getSource();
 		String completeBehind = "new pkg.Foo1.Bar1(";
 		int cursorLocation = str.indexOf(completeBehind) + completeBehind.length();
 		this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 		assertResults(
 				"Bar1[METHOD_REF<CONSTRUCTOR>]{, Lpkg.Foo1$Bar1;, (II)V, Bar1, (a, b), "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED)+ "}\n" +
 				"Foo1.Bar1[ANONYMOUS_CLASS_DECLARATION]{, Lpkg.Foo1$Bar1;, (II)V, null, (a, b), "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED)+"}",
@@ -14251,10 +14251,10 @@ public void testCompletionUnresolvedSuperclass() throws JavaModelException {
 	this.workingCopies[0] = getWorkingCopy(
 		"/Completion/src/test/Test.java",
 		"package test;"+
-		"public class Test {\n" + 
-		"  public void foo(pack.Bin4 b) {\n" + 
-		"    b.bar\n" + 
-		"  }\n" + 
+		"public class Test {\n" +
+		"  public void foo(pack.Bin4 b) {\n" +
+		"    b.bar\n" +
+		"  }\n" +
 		"}\n");
 
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
@@ -14272,10 +14272,10 @@ public void testCompletionUnresolvedSuperinteface() throws JavaModelException {
 	this.workingCopies[0] = getWorkingCopy(
 		"/Completion/src/test/Test.java",
 		"package test;"+
-		"public class Test {\n" + 
-		"  public void foo(pack.Bin5 b) {\n" + 
-		"    b.bar\n" + 
-		"  }\n" + 
+		"public class Test {\n" +
+		"  public void foo(pack.Bin5 b) {\n" +
+		"    b.bar\n" +
+		"  }\n" +
 		"}\n");
 
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
@@ -15798,7 +15798,7 @@ public void testCompletionVisibilityCheckEnabled() throws JavaModelException {
 
 	try {
 		ICompilationUnit cu= getCompilationUnit("Completion", "src", "", "CompletionVisibilityCheck.java");
-	
+
 		String str = cu.getSource();
 		String completeBehind = "x.p";
 		int cursorLocation = str.indexOf(completeBehind) + completeBehind.length();
@@ -19808,7 +19808,7 @@ public void testCompletionOnExtendFinalClass () throws JavaModelException {
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
-			"ThisClassIsNotFinal[TYPE_REF]{ThisClassIsNotFinal, test, Ltest.ThisClassIsNotFinal;, null, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED + R_CLASS) + "}",	
+			"ThisClassIsNotFinal[TYPE_REF]{ThisClassIsNotFinal, test, Ltest.ThisClassIsNotFinal;, null, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED + R_CLASS) + "}",
 			requestor.getResults());
 }
 
@@ -19873,11 +19873,11 @@ public void test203060a() throws JavaModelException {
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "as";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
-	
+
 	// Save current compliance settings
 	Map<String, String> options = COMPLETION_PROJECT.getOptions(true);
 	String savedOptionCompliance = options.get(CompilerOptions.OPTION_Compliance);
-	
+
 	try {
 		// Verify that at 1.3 assert is not proposed.
 		options.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_3);
@@ -19887,7 +19887,7 @@ public void test203060a() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 
@@ -19907,11 +19907,11 @@ public void test203060b() throws JavaModelException {
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "as";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
-	
+
 	// Save current compliance settings
 	Map<String, String> options = COMPLETION_PROJECT.getOptions(true);
 	String savedOptionCompliance = options.get(CompilerOptions.OPTION_Compliance);
-	
+
 	try {
 		options.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_4);
 		COMPLETION_PROJECT.setOptions(options);
@@ -19922,7 +19922,7 @@ public void test203060b() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 
@@ -19941,16 +19941,16 @@ public void test203060c() throws JavaModelException {
 		"		}\n" +
 		"	}\n" +
 		"}\n");
-		
+
 	CompletionTestsRequestor requestor = new CompletionTestsRequestor();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "as";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
-	
+
 	// Save current compliance settings
 	Map<String, String> options = COMPLETION_PROJECT.getOptions(true);
 	String savedOptionCompliance = options.get(CompilerOptions.OPTION_Compliance);
-	
+
 	try {
 		// Verify that at 1.3 assert is not proposed.
 		options.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_3);
@@ -19960,7 +19960,7 @@ public void test203060c() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 
@@ -19979,16 +19979,16 @@ public void test203060d() throws JavaModelException {
 			"		}\n" +
 			"	}\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor requestor = new CompletionTestsRequestor();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "as";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
-	
+
 	// Save current compliance settings
 	Map<String, String> options = COMPLETION_PROJECT.getOptions(true);
 	String savedOptionCompliance = options.get(CompilerOptions.OPTION_Compliance);
-	
+
 	try {
 		options.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_4);
 		COMPLETION_PROJECT.setOptions(options);
@@ -19999,7 +19999,7 @@ public void test203060d() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 
@@ -20018,8 +20018,8 @@ public void test269493() throws JavaModelException {
 			"	}\n" +
 			"}\n" +
 			"}\n");
-			
-	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(); 
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "ass";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
@@ -20027,7 +20027,7 @@ public void test269493() throws JavaModelException {
 	// Save current compliance settings
 	Map<String, String> options = COMPLETION_PROJECT.getOptions(true);
 	String savedOptionCompliance = options.get(CompilerOptions.OPTION_Compliance);
-	
+
 	try {
 		options.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_4);
 		COMPLETION_PROJECT.setOptions(options);
@@ -20038,7 +20038,7 @@ public void test269493() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 
@@ -20055,7 +20055,7 @@ public void test269493b() throws JavaModelException {
 			"	}\n" +
 			"}\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "ret";
@@ -20080,7 +20080,7 @@ public void test269493c() throws JavaModelException {
 			"	}\n" +
 			"}\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "bre";
@@ -20105,7 +20105,7 @@ public void test269493d() throws JavaModelException {
 			"	}\n" +
 			"}\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "cont";
@@ -20132,7 +20132,7 @@ public void test269493e() throws JavaModelException {
 			"	}\n" +
 			"}\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "ret";
@@ -20158,7 +20158,7 @@ public void test269493f() throws JavaModelException {
 			"	}\n" +
 			"}\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "els";
@@ -20182,7 +20182,7 @@ public void test269493g() throws JavaModelException {
 			"	}\n" +
 			"}\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "els";
@@ -20209,7 +20209,7 @@ public void test269493h() throws JavaModelException {
 			"	}\n" +
 			"}\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "els";
@@ -20237,7 +20237,7 @@ public void test269493i() throws JavaModelException {
 			"	}\n" +
 			"}\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "els";
@@ -20264,7 +20264,7 @@ public void test253008() throws JavaModelException {
 			"       }\n" +
 			"	}\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "methodR";
@@ -20291,7 +20291,7 @@ public void test253008b() throws JavaModelException {
 			"       }\n" +
 			"	}\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "methodR";
@@ -20317,7 +20317,7 @@ public void test253008c() throws JavaModelException {
 			"   }  while (methodR);\n" +
 			"	}\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "methodR";
@@ -20343,7 +20343,7 @@ public void test253008d() throws JavaModelException {
 			"   }\n" +
 			"	}\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "methodR";
@@ -20369,7 +20369,7 @@ public void test253008e() throws JavaModelException {
 			"   }\n" +
 			"	}\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "methodR";
@@ -20395,7 +20395,7 @@ public void test253008f() throws JavaModelException {
 			"   }\n" +
 			"	}\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "methodR";
@@ -20435,20 +20435,20 @@ public void test201762() throws JavaModelException {
 			"        while (!shell.isDisposed()) { }\n" +
 			"    }\n" +
 			"}\n");
-	
+
 	this.workingCopies[1] = getWorkingCopy(
 			"/Completion/src/test/AnObject.java",
 			"package test;\n" +
 			"public class AnObject {\n" +
 			"	public void setLineCap(int capZz) {}\n" +
 			"}\n");
-	
+
 	this.workingCopies[2] = getWorkingCopy(
 			"/Completion/src/test/ControlAdapter.java",
 			"package test;\n" +
 			"public class ControlAdapter {\n" +
 			"}\n");
-	
+
 	this.workingCopies[3] = getWorkingCopy(
 			"/Completion/src/test/Label.java",
 			"package test;\n" +
@@ -20458,20 +20458,20 @@ public void test201762() throws JavaModelException {
 			"	public void addPaintListener(PaintListener paintListener) {\n" +
 			"	}\n" +
 			"}\n");
-	
+
 	this.workingCopies[4] = getWorkingCopy(
 			"/Completion/src/test/Label.java",
 			"package test;\n" +
 			"public class PaintEvent {\n" +
 			"	public AnObject gc;\n" +
 			"}\n");
-	
+
 	this.workingCopies[5] = getWorkingCopy(
 			"/Completion/src/test/PaintListener.java",
 			"package test;\n" +
 			"public interface PaintListener {\n" +
 			"}\n");
-	
+
 	this.workingCopies[6] = getWorkingCopy(
 			"/Completion/src/test/Shell.java",
 			"package test;\n" +
@@ -20482,7 +20482,7 @@ public void test201762() throws JavaModelException {
 			"	public void addControlListener(ControlAdapter controlAdapter) {\n" +
 			"	}\n" +
 			"}\n");
-	
+
 	this.workingCopies[7] = getWorkingCopy(
 			"/Completion/src/test/SWT.java",
 			"package test;\n" +
@@ -20490,7 +20490,7 @@ public void test201762() throws JavaModelException {
 			"	int WRAP = 0;\n" +
 			"	int CAP_ZZ = 0;\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "SWT.CAP_";
@@ -20516,14 +20516,14 @@ public void test270437a() throws JavaModelException {
 			"public class Test270437a extends Test270437a. {\n" +
 			"	public class Inner {}\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "Test270437a.";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	// In the absence of the fix, the results would be as follows, which is wrong:
 	//"Test270437a.Inner[TYPE_REF]{Inner, test, Ltest.Test270437a$Inner;, null, 39}",
 	assertResults(
@@ -20544,14 +20544,14 @@ public void test270437b() throws JavaModelException {
 			"public class Test270437b implements Test270437b. {\n" +
 			"	public interface Inner {}\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "Test270437b.";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	// In the absence of the fix, the results would be as follows, which is wrong:
 	//"Test270437b.Inner[TYPE_REF]{Inner, test, Ltest.Test270437b$Inner;, null, 39}",
 	assertResults(
@@ -20575,14 +20575,14 @@ public void test270437c() throws JavaModelException {
 		    "            }\n" +
 		    "    }\n" +
 			"}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "X.MyClass1.";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	// In the absence of the fix, the results would be as follows, which is wrong:
 	//"X.MyClass1.MyClass2[TYPE_REF]{MyClass2, test, Ltest.X$MyClass1$MyClass2;, null, 39}",
 	assertResults(
@@ -20602,7 +20602,7 @@ public void test285379a() throws JavaModelException {
 	int cursorLocation = str.indexOf(completeBehind) + completeBehind.length();
 	cu.codeComplete(cursorLocation, requestor);
 
-	// just not hang...	
+	// just not hang...
 }
 
 /*
@@ -20617,7 +20617,7 @@ public void test285379b() throws JavaModelException {
 	int cursorLocation = str.indexOf(completeBehind) + completeBehind.length();
 	cu.codeComplete(cursorLocation, requestor);
 
-	// just not hang...	
+	// just not hang...
 }
 
 /*
@@ -20632,7 +20632,7 @@ public void test285379c() throws JavaModelException {
 	int cursorLocation = str.indexOf(completeBehind) + completeBehind.length();
 	cu.codeComplete(cursorLocation, requestor);
 
-	// just not hang...	
+	// just not hang...
 }
 
 /*
@@ -20647,7 +20647,7 @@ public void test285379d() throws JavaModelException {
 	int cursorLocation = str.indexOf(completeBehind) + completeBehind.length();
 	cu.codeComplete(cursorLocation, requestor);
 
-	// just not hang...	
+	// just not hang...
 }
 
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=270436
@@ -20660,7 +20660,7 @@ public void test270436a() throws JavaModelException {
 			"public final class TestClass {}\n" +
 			"interface TestInterface {}\n" +
 			"class Subclass extends test.Test {}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "test.Test";
@@ -20684,7 +20684,7 @@ public void test270436b() throws JavaModelException {
 			"public final class TestClass {}\n" +
 			"interface TestInterface {}\n" +
 			"class Subclass extends test.Sub {}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "test.Sub";
@@ -20709,7 +20709,7 @@ public void test270436c() throws JavaModelException {
 			"interface TestInterface {}\n" +
 			"class Subclass {}\n" +
 			"interface Subinterface extends test.");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "test.";
@@ -20735,7 +20735,7 @@ public void test276526a() throws JavaModelException {
 			"interface IFoo {}\n" +
 			"interface IBar {}\n" +
 			"class Foo implements IFoo, test. {}\n");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "test.";
@@ -20759,17 +20759,17 @@ public void test276526b() throws JavaModelException {
 			"/Completion/src/test/Test276526b1.java",
 			"package test;\n" +
 			"public class TestClazz implements Interface1, test. {}");
-			
+
 	this.workingCopies[1] = getWorkingCopy(
 			"/Completion/src/test/Test276526b2.java",
 			"package test;\n" +
 			"public interface Interface1 {}");
-			
+
 	this.workingCopies[2] = getWorkingCopy(
 			"/Completion/src/test/Test276526b3.java",
 			"package test;\n" +
 			"public interface Interface2 {}");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[0].getSource();
 	String completeBehind = "test.";
@@ -20795,11 +20795,11 @@ public void test276526c() throws JavaModelException {
 			"	public interface Interface1 {}\n" +
 			"	public interface Interface2 {}\n" +
 			"}\n");
-			
+
 	this.workingCopies[1] = getWorkingCopy(
 			"/Completion/src/TestClazz.java",
 			"public class TestClazz implements p.Enclosing.Interface1, Interf {}");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[1].getSource();
 	String completeBehind = "Interf";
@@ -20825,16 +20825,16 @@ public void test276526d() throws JavaModelException {
 			"	public interface Interface1 {}\n" +
 			"	public interface Interface2 {}\n" +
 			"}\n");
-			
+
 	this.workingCopies[1] = getWorkingCopy(
 			"/Completion/src/p/Interface1.java",
 			"package p;\n" +
 			"public interface Interface1 {}");
-			
+
 	this.workingCopies[2] = getWorkingCopy(
 			"/Completion/src/TestClazz.java",
 			"public class TestClazz implements p.Interface1, Interf {}");
-			
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
 	String str = this.workingCopies[2].getSource();
 	String completeBehind = "Interf";
@@ -20883,7 +20883,7 @@ public void testBug287939a() throws JavaModelException {
 	int end2 = start2 + "this.a.r".length();
 	int start3 = str.lastIndexOf("this.a.");
 	int end3 = start3 + "this.a".length();
-	
+
 	assertResults(
 			"expectedTypesSignatures={I}\n" +
 			"expectedTypesKeys={I}",
@@ -20925,7 +20925,7 @@ public void testBug287939b() throws JavaModelException {
 	int end2 = start2 + "this.a.r".length();
 	int start3 = str.lastIndexOf("this.a.");
 	int end3 = start3 + "this.a".length();
-	
+
 	assertResults(
 			"expectedTypesSignatures={I}\n" +
 			"expectedTypesKeys={I}",
@@ -20966,7 +20966,7 @@ public void testBug287939c() throws JavaModelException {
 	int end2 = start2 + "a.r".length();
 	int start3 = str.lastIndexOf("a.");
 	int end3 = start3 + "a".length();
-	
+
 	assertResults(
 			"expectedTypesSignatures={I}\n" +
 			"expectedTypesKeys={I}",
@@ -21006,7 +21006,7 @@ public void testBug287939d() throws JavaModelException {
 	int end2 = start2 + "a.r".length();
 	int start3 = str.lastIndexOf("a.");
 	int end3 = start3 + "a".length();
-	
+
 	assertResults(
 			"expectedTypesSignatures={I}\n" +
 			"expectedTypesKeys={I}",
@@ -21037,10 +21037,10 @@ public void testBug202634a() throws JavaModelException {
 	String completeBehind = "sup";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	int start1 = str.lastIndexOf("sup");
 	int end1 = start1 + "sup".length();
-	
+
 	assertResults(
 			"super[KEYWORD]{super, null, null, super, null, replace[" + start1 + ", " + end1 +"], token[" + start1 + ", " + end1 + "], " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE+ R_NON_RESTRICTED) + "}",
 			requestor.getResults());
@@ -21067,10 +21067,10 @@ public void testBug202634b() throws JavaModelException {
 	String completeBehind = "sup";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	int start1 = str.lastIndexOf("sup");
 	int end1 = start1 + "sup".length();
-	
+
 	assertResults(
 			"super[KEYWORD]{super, null, null, super, null, replace[" + start1 + ", " + end1 +"], token[" + start1 + ", " + end1 + "], " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE+ R_NON_RESTRICTED) + "}",
 			requestor.getResults());
@@ -21097,10 +21097,10 @@ public void testBug202634c() throws JavaModelException {
 	String completeBehind = "sup";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	int start1 = str.lastIndexOf("sup");
 	int end1 = start1 + "sup".length();
-	
+
 	assertResults(
 			"super[KEYWORD]{super, null, null, super, null, replace[" + start1 + ", " + end1 +"], token[" + start1 + ", " + end1 + "], " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE+ R_NON_RESTRICTED) + "}",
 			requestor.getResults());
@@ -21127,10 +21127,10 @@ public void testBug202634d() throws JavaModelException {
 	String completeBehind = "sup";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	int start1 = str.lastIndexOf("sup");
 	int end1 = start1 + "sup".length();
-	
+
 	assertResults(
 			"super[KEYWORD]{super, null, null, super, null, replace[" + start1 + ", " + end1 +"], token[" + start1 + ", " + end1 + "], " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE+ R_NON_RESTRICTED) + "}\n" +
 			"super[METHOD_REF<CONSTRUCTOR>]{super(), Ljava.lang.Object;, ()V, super, null, replace[" + start1 + ", " + end1 + "], token[" + start1 + ", " + end1 + "], " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE+ R_NON_RESTRICTED) + "}",
@@ -21158,10 +21158,10 @@ public void testBug202634e() throws JavaModelException {
 	String completeBehind = "thi";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	int start1 = str.lastIndexOf("thi");
 	int end1 = start1 + "thi".length();
-	
+
 	assertResults(
 			"this[KEYWORD]{this, null, null, this, null, replace[" + start1 + ", " + end1 +"], token[" + start1 + ", " + end1 + "], " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE+ R_NON_RESTRICTED) + "}",
 			requestor.getResults());
@@ -21188,10 +21188,10 @@ public void testBug202634f() throws JavaModelException {
 	String completeBehind = "thi";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	int start1 = str.lastIndexOf("thi");
 	int end1 = start1 + "thi".length();
-	
+
 	assertResults(
 			"this[KEYWORD]{this, null, null, this, null, replace[" + start1 + ", " + end1 +"], token[" + start1 + ", " + end1 + "], " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE+ R_NON_RESTRICTED) + "}",
 			requestor.getResults());
@@ -21204,7 +21204,7 @@ public void testBug307337() throws JavaModelException {
 		"package test;\n" +
 		"public class TestBug307337 {\n" +
 		"    Object obj = new Object() {\n" +
-		"    TestBug307337\n" + 	
+		"    TestBug307337\n" +
 		"     };\n" +
 		"}\n");
 
@@ -21216,7 +21216,7 @@ public void testBug307337() throws JavaModelException {
 	String completeBehind = "TestBug307337";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	assertResults(
 			"expectedTypesSignatures=null\n" +
 			"expectedTypesKeys=null\n" +
@@ -21340,7 +21340,7 @@ public void testBug244820() throws JavaModelException {
 	int end2 = start2 + "chars.to".length();
 	int start3 = str.lastIndexOf("chars.");
 	int end3 = start3 + "chars".length();
-	
+
 	assertResults(
 			"toString[METHOD_REF]{toString(), Ljava.lang.Object;, ()Ljava.lang.String;, null, null, toString, null, replace[" + start1 + ", " + end1 + "], token[" + start1 + ", " + end1 +"], " + relevance1 + "}\n" +
 			"toWelcome[METHOD_REF_WITH_CASTED_RECEIVER]{((MyString)chars).toWelcome(), Ltest.MyString;, ()Ljava.lang.String;, Ltest.MyString;, null, null, toWelcome, null, replace[" + start2 +", " + end2 + "], token[" + start1 + ", " + end1 + "], receiver[" + start3 + ", " + end3 + "], " + relevance1 + "}",
@@ -21591,7 +21591,7 @@ public void testBug261534a() throws JavaModelException {
 	int end2 = start2 + "chars.to".length();
 	int start3 = str.lastIndexOf("chars.");
 	int end3 = start3 + "chars".length();
-	
+
 	assertResults(
 			"toString[METHOD_REF]{toString(), Ljava.lang.Object;, ()Ljava.lang.String;, null, null, toString, null, replace[" + start1 + ", " + end1 + "], token[" + start1 + ", " + end1 +"], " + relevance1 + "}\n" +
 			"toWelcome[METHOD_REF_WITH_CASTED_RECEIVER]{((MyString)chars).toWelcome(), Ltest.MyString;, ()Ljava.lang.String;, Ltest.MyString;, null, null, toWelcome, null, replace[" + start2 +", " + end2 + "], token[" + start1 + ", " + end1 + "], receiver[" + start3 + ", " + end3 + "], " + relevance1 + "}",
@@ -21629,7 +21629,7 @@ public void testBug261534b() throws JavaModelException {
 	int relevance1 = R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_STATIC + R_NON_RESTRICTED;
 	int start1 = str.lastIndexOf("to") + "".length();
 	int end1 = start1 + "to".length();
-	
+
 	assertResults(
 			"toString[METHOD_REF]{toString(), Ljava.lang.Object;, ()Ljava.lang.String;, null, null, toString, null, replace[" + start1 + ", " + end1 + "], token[" + start1 + ", " + end1 +"], " + relevance1 + "}",
 			requestor.getResults());
@@ -21800,7 +21800,7 @@ public void testBug304006a() throws JavaModelException {
 	int end2 = start2 + "a.r".length();
 	int start3 = str.lastIndexOf("a.");
 	int end3 = start3 + "a".length();
-	
+
 	assertResults(
 			"expectedTypesSignatures={I}\n" +
 			"expectedTypesKeys={I}",
@@ -21843,7 +21843,7 @@ public void testBug304006b() throws JavaModelException {
 	int end2 = start2 + "a.r".length();
 	int start3 = str.lastIndexOf("a.");
 	int end3 = start3 + "a".length();
-	
+
 	assertResults(
 			"returnZero[METHOD_REF_WITH_CASTED_RECEIVER]{((CompletionAfterInstanceOf)a).returnZero(), Ltest.CompletionAfterInstanceOf;, ()I, Ltest.CompletionAfterInstanceOf;, returnZero, null, replace["+start2+", "+end2+"], token["+start1+", "+end1+"], receiver["+start3+", "+end3+"], " + (relevance1) + "}",
 			requestor.getResults());
@@ -21886,7 +21886,7 @@ public void testBug304006c() throws JavaModelException {
 	int end2 = start2 + "abc.r".length();
 	int start3 = str.lastIndexOf("abc.");
 	int end3 = start3 + "abc".length();
-	
+
 	assertResults(
 			"expectedTypesSignatures={I}\n" +
 			"expectedTypesKeys={I}",
@@ -21897,8 +21897,8 @@ public void testBug304006c() throws JavaModelException {
 }
 
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=304006
-// To verify that autocast works correctly even when the completion node is preceeded by a number 
-// of unrelated instanceof expressions. This case has errors in compilation unit. 
+// To verify that autocast works correctly even when the completion node is preceeded by a number
+// of unrelated instanceof expressions. This case has errors in compilation unit.
 public void testBug304006d() throws JavaModelException {
 	this.workingCopies = new ICompilationUnit[1];
 	this.workingCopies[0] = getWorkingCopy(
@@ -21934,7 +21934,7 @@ public void testBug304006d() throws JavaModelException {
 	int end2 = start2 + "xyz.r".length();
 	int start3 = str.lastIndexOf("xyz.");
 	int end3 = start3 + "xyz".length();
-	
+
 	assertResults(
 			"returnZero[METHOD_REF_WITH_CASTED_RECEIVER]{((CompletionAfterInstanceOf)xyz).returnZero(), Ltest.CompletionAfterInstanceOf;, ()I, Ltest.CompletionAfterInstanceOf;, returnZero, null, replace["+start2+", "+end2+"], token["+start1+", "+end1+"], receiver["+start3+", "+end3+"], " + (relevance1) + "}",
 			requestor.getResults());
@@ -21974,7 +21974,7 @@ public void testBug304006e() throws JavaModelException {
 	int end2 = start2 + "a.r".length();
 	int start3 = str.lastIndexOf("a.");
 	int end3 = start3 + "a".length();
-	
+
 	assertResults(
 			"expectedTypesSignatures={I}\n" +
 			"expectedTypesKeys={I}",
@@ -22008,8 +22008,8 @@ public void test325481() throws JavaModelException {
     this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
 
     assertResults(
-            "MyClass[TYPE_REF]{mypackage.MyClass, mypackage, Lmypackage.MyClass;, null, null, " + (R_DEFAULT + 9) + "}\n" + 
-            "mypackage[PACKAGE_REF]{mypackage, mypackage, null, null, null, " + (R_DEFAULT + 19) + "}\n" + 
+            "MyClass[TYPE_REF]{mypackage.MyClass, mypackage, Lmypackage.MyClass;, null, null, " + (R_DEFAULT + 9) + "}\n" +
+            "mypackage[PACKAGE_REF]{mypackage, mypackage, null, null, null, " + (R_DEFAULT + 19) + "}\n" +
             "myString[FIELD_REF]{myString, Ltest.X;, Ljava.lang.String;, myString, null, " + (R_DEFAULT + 22) + "}\n" +
             "myString2[FIELD_REF]{myString2, Ltest.X;, Ljava.lang.String;, myString2, null, " + (R_DEFAULT + 22) + "}",
             requestor.getResults());
@@ -22035,8 +22035,8 @@ public void test312603() throws JavaModelException {
 			this.wcOwner);
 
 	assertResults(
-			"MyClass[TYPE_REF]{mypackage.MyClass, mypackage, Lmypackage.MyClass;, null, null, " + (R_DEFAULT + 9) + "}\n" + 
-			"mypackage[PACKAGE_REF]{mypackage, mypackage, null, null, null, " + (R_DEFAULT + 19) + "}\n" + 
+			"MyClass[TYPE_REF]{mypackage.MyClass, mypackage, Lmypackage.MyClass;, null, null, " + (R_DEFAULT + 9) + "}\n" +
+			"mypackage[PACKAGE_REF]{mypackage, mypackage, null, null, null, " + (R_DEFAULT + 19) + "}\n" +
 			"myString[FIELD_REF]{myString, Ltest.X;, Ljava.lang.String;, myString, null, " + (R_DEFAULT + 52) + "}",
 			requestor.getResults());
 }
@@ -22067,8 +22067,8 @@ public void test328674a() throws JavaModelException {
 			this.wcOwner);
 
 	assertResults(
-			"MyClass[TYPE_REF]{mypackage.MyClass, mypackage, Lmypackage.MyClass;, null, null, " + (R_DEFAULT + 9) + "}\n" + 
-			"mypackage[PACKAGE_REF]{mypackage, mypackage, null, null, null, " + (R_DEFAULT + 19) + "}\n" + 
+			"MyClass[TYPE_REF]{mypackage.MyClass, mypackage, Lmypackage.MyClass;, null, null, " + (R_DEFAULT + 9) + "}\n" +
+			"mypackage[PACKAGE_REF]{mypackage, mypackage, null, null, null, " + (R_DEFAULT + 19) + "}\n" +
 			"myString[LOCAL_VARIABLE_REF]{myString, null, Ljava.lang.String;, myString, null, " + (R_DEFAULT + 52) + "}\n" +
 			"myString2[LOCAL_VARIABLE_REF]{myString2, null, Ljava.lang.String;, myString2, null, " + (R_DEFAULT + 52) + "}",
 			requestor.getResults());
@@ -22100,8 +22100,8 @@ public void test328674b() throws JavaModelException {
 			this.wcOwner);
 
 	assertResults(
-			"MyClass[TYPE_REF]{mypackage.MyClass, mypackage, Lmypackage.MyClass;, null, null, " + (R_DEFAULT + 9) + "}\n" + 
-			"mypackage[PACKAGE_REF]{mypackage, mypackage, null, null, null, " + (R_DEFAULT + 19) + "}\n" + 
+			"MyClass[TYPE_REF]{mypackage.MyClass, mypackage, Lmypackage.MyClass;, null, null, " + (R_DEFAULT + 9) + "}\n" +
+			"mypackage[PACKAGE_REF]{mypackage, mypackage, null, null, null, " + (R_DEFAULT + 19) + "}\n" +
 			"myString[LOCAL_VARIABLE_REF]{myString, null, Ljava.lang.String;, myString, null, " + (R_DEFAULT + 52) + "}\n" +
 			"myString1[LOCAL_VARIABLE_REF]{myString1, null, Ljava.lang.String;, myString1, null, " + (R_DEFAULT + 52) + "}",
 			requestor.getResults());
@@ -22122,24 +22122,24 @@ public void test325481b() throws JavaModelException {
 		String str = cu.getSource();
 		String completeBehind = "_IAttributeDefinitionDescriptor.";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
-		
+
 		cu.codeComplete(cursorLocation, requestor);
 		int relevance = R_DEFAULT + 21;
 		assumeEquals(
 				"should have two completions",
-				"element:ADD_CUSTOM_ATTRIBUTES    completion:ADD_CUSTOM_ATTRIBUTES    relevance:" + relevance +"\n" + 
-				"element:ATTRIBUTE    completion:ATTRIBUTE    relevance:" + relevance +"\n" + 
-				"element:BUILT_ATTRIBUTE    completion:BUILT_ATTRIBUTE    relevance:" + relevance +"\n" + 
-				"element:RANKING_ATTRIBUTE    completion:RANKING_ATTRIBUTE    relevance:" + relevance +"\n" + 
-				"element:RANKING_ATTRIBUTE_V2    completion:RANKING_ATTRIBUTE_V2    relevance:" + relevance +"\n" + 
-				"element:REFERENCE_ATTRIBUTE    completion:REFERENCE_ATTRIBUTE    relevance:" + relevance +"\n" + 
-				"element:WORK_ATTRIBUTE    completion:WORK_ATTRIBUTE    relevance:" + relevance +"\n" + 
+				"element:ADD_CUSTOM_ATTRIBUTES    completion:ADD_CUSTOM_ATTRIBUTES    relevance:" + relevance +"\n" +
+				"element:ATTRIBUTE    completion:ATTRIBUTE    relevance:" + relevance +"\n" +
+				"element:BUILT_ATTRIBUTE    completion:BUILT_ATTRIBUTE    relevance:" + relevance +"\n" +
+				"element:RANKING_ATTRIBUTE    completion:RANKING_ATTRIBUTE    relevance:" + relevance +"\n" +
+				"element:RANKING_ATTRIBUTE_V2    completion:RANKING_ATTRIBUTE_V2    relevance:" + relevance +"\n" +
+				"element:REFERENCE_ATTRIBUTE    completion:REFERENCE_ATTRIBUTE    relevance:" + relevance +"\n" +
+				"element:WORK_ATTRIBUTE    completion:WORK_ATTRIBUTE    relevance:" + relevance +"\n" +
 				"element:class    completion:class    relevance:" + relevance,
 				requestor.getResults());
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 
@@ -22256,7 +22256,7 @@ public void testBug338789() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=338789
@@ -22315,7 +22315,7 @@ public void testBug338789b() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=338789
@@ -22362,7 +22362,7 @@ public void testBug338789c() throws JavaModelException {
 				"public class IZZException extends Exception implements CommonInt {\n" +
 				"	public void myMethod(){}\n" +
 				"}\n");
-		
+
 		this.workingCopies[4] = getWorkingCopy(
 				"/Completion/src/test/CommonInt.java",
 				"package test;"+
@@ -22382,7 +22382,7 @@ public void testBug338789c() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 
@@ -22442,7 +22442,7 @@ public void testBug338789d() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=338789
@@ -22500,7 +22500,7 @@ public void testBug338789e() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=343342
@@ -22658,7 +22658,7 @@ public void testBug343476() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=343476
@@ -22708,7 +22708,7 @@ public void testBug343476a() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=343637
@@ -22763,7 +22763,7 @@ public void testBug343637() throws JavaModelException {
 			"expectedTypesSignatures={Ltest.IZZBException;,Ltest.IZZAException;}\n" +
 			"expectedTypesKeys={Ltest/IZZBException;,Ltest/IZZAException;}",
 			requestor.getContext());
-		
+
 		assertResults(
 			"IZZAException[TYPE_REF]{IZZAException, test, Ltest.IZZAException;, null, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_UNQUALIFIED + R_EXCEPTION + R_NON_RESTRICTED + R_EXACT_EXPECTED_TYPE) + "}\n" +
 			"IZZBException[TYPE_REF]{IZZBException, test, Ltest.IZZBException;, null, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_UNQUALIFIED + R_EXCEPTION + R_NON_RESTRICTED + R_EXACT_EXPECTED_TYPE) + "}",
@@ -22771,7 +22771,7 @@ public void testBug343637() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=343637
@@ -22827,14 +22827,14 @@ public void testBug343637b() throws JavaModelException {
 			"expectedTypesSignatures={Ltest.IZZBException;}\n" +
 			"expectedTypesKeys={Ltest/IZZBException;}",
 			requestor.getContext());
-		
+
 		assertResults(
 			"IZZBException[TYPE_REF]{IZZBException, test, Ltest.IZZBException;, null, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_UNQUALIFIED + R_EXCEPTION + R_NON_RESTRICTED + R_EXACT_EXPECTED_TYPE) + "}",
 			requestor.getResults());
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=343637
@@ -22881,7 +22881,7 @@ public void testBug343637c() throws JavaModelException {
 				"package test;"+
 				"public class IZZException extends Exception {\n" +
 				"}\n");
-		
+
 		this.workingCopies[4] = getWorkingCopy(
 				"/Completion/src/test/IZZRuntimeException.java",
 				"package test;"+
@@ -22901,7 +22901,7 @@ public void testBug343637c() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=343637
@@ -22948,13 +22948,13 @@ public void testBug343637d() throws JavaModelException {
 				"package test;"+
 				"public class IZZException extends Exception {\n" +
 				"}\n");
-		
+
 		this.workingCopies[4] = getWorkingCopy(
 				"/Completion/src/test/IZZRuntimeException.java",
 				"package test;"+
 				"public class IZZRuntimeException extends RuntimeException {\n" +
 				"}\n");
-		
+
 		this.workingCopies[5] = getWorkingCopy(
 				"/Completion/src/test/IZZCException.java",
 				"package test;"+
@@ -22966,7 +22966,7 @@ public void testBug343637d() throws JavaModelException {
 		String str = this.workingCopies[0].getSource();
 		String completeBehind = "IZZAException | IZZ";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
-		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);	
+		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
 		assertResults(
 				"IZZCException[TYPE_REF]{IZZCException, test, Ltest.IZZCException;, null, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_UNQUALIFIED + R_EXCEPTION + R_NON_RESTRICTED) + "}\n" +
 				"IZZException[TYPE_REF]{IZZException, test, Ltest.IZZException;, null, null, " + (R_DEFAULT + R_RESOLVED + R_CASE + R_UNQUALIFIED + R_EXCEPTION + R_NON_RESTRICTED + R_EXACT_EXPECTED_TYPE) + "}\n" +
@@ -22976,7 +22976,7 @@ public void testBug343637d() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=343637
@@ -23023,13 +23023,13 @@ public void testBug343637e() throws JavaModelException {
 				"package test;"+
 				"public class IZZException extends Exception {\n" +
 				"}\n");
-		
+
 		this.workingCopies[4] = getWorkingCopy(
 				"/Completion/src/test/IZZRuntimeException.java",
 				"package test;"+
 				"public class IZZRuntimeException extends RuntimeException {\n" +
 				"}\n");
-		
+
 		this.workingCopies[5] = getWorkingCopy(
 				"/Completion/src/test/IZZSuperException.java",
 				"package test;"+
@@ -23042,7 +23042,7 @@ public void testBug343637e() throws JavaModelException {
 		String completeBehind = "IZZAException | IZZ";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-		
+
 		assertResults(
 				"IZZSuperException[TYPE_REF]{IZZSuperException, test, Ltest.IZZSuperException;, null, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_UNQUALIFIED + R_EXCEPTION + R_NON_RESTRICTED) + "}\n" +
 				"IZZException[TYPE_REF]{IZZException, test, Ltest.IZZException;, null, null, " + (R_DEFAULT + R_RESOLVED + R_CASE + R_UNQUALIFIED + R_EXCEPTION + R_NON_RESTRICTED + R_EXACT_EXPECTED_TYPE) + "}\n" +
@@ -23052,7 +23052,7 @@ public void testBug343637e() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=343637
@@ -23098,7 +23098,7 @@ public void testBug343637f() throws JavaModelException {
 				"package test;"+
 				"public class IZZException extends Exception {\n" +
 				"}\n");
-		
+
 		this.workingCopies[4] = getWorkingCopy(
 				"/Completion/src/test/IZZRuntimeException.java",
 				"package test;"+
@@ -23116,7 +23116,7 @@ public void testBug343637f() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=343637
@@ -23164,7 +23164,7 @@ public void testBug343637g() throws JavaModelException {
 				"package test;"+
 				"public class IZZException extends Exception {\n" +
 				"}\n");
-		
+
 		this.workingCopies[4] = getWorkingCopy(
 				"/Completion/src/test/IZZRuntimeException.java",
 				"package test;"+
@@ -23185,7 +23185,7 @@ public void testBug343637g() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=343637
@@ -23233,7 +23233,7 @@ public void testBug343637h() throws JavaModelException {
 				"package test;"+
 				"public class IZZException extends Exception {\n" +
 				"}\n");
-		
+
 		this.workingCopies[4] = getWorkingCopy(
 				"/Completion/src/test/IZZRuntimeException.java",
 				"package test;"+
@@ -23251,7 +23251,7 @@ public void testBug343637h() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=346454
@@ -23283,7 +23283,7 @@ public void testBug346454() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=346454
@@ -23315,7 +23315,7 @@ public void testBug346454b() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=346454
@@ -23353,7 +23353,7 @@ public void testBug346454c() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=346454
@@ -23393,7 +23393,7 @@ public void testBug346454c_2() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=346454
@@ -23416,7 +23416,7 @@ public void testBug346454d() throws JavaModelException {
 			"     new pack.Test<>()\n" +
 			"   }" +
 			"}\n");
-		
+
 		this.workingCopies[1] = getWorkingCopy(
 				"/Completion/src/pack/Test.java",
 				"package pack;"+
@@ -23440,7 +23440,7 @@ public void testBug346454d() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=346454
@@ -23462,7 +23462,7 @@ public void testBug346454e() throws JavaModelException {
 			"     new pack.Test<>.\n" +
 			"   }" +
 			"}\n");
-		
+
 		this.workingCopies[1] = getWorkingCopy(
 				"/Completion/src/pack/Test.java",
 				"package pack;"+
@@ -23483,7 +23483,7 @@ public void testBug346454e() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=346454
@@ -23507,7 +23507,7 @@ public void testBug346454f() throws JavaModelException {
 			"     Test<String>.T2<String> t = new Test<>().new T2<>()\n" +
 			"   }" +
 			"}\n");
-		
+
 		this.workingCopies[1] = getWorkingCopy(
 				"/Completion/src/pack/Test.java",
 				"package pack;"+
@@ -23530,7 +23530,7 @@ public void testBug346454f() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=346454
@@ -23553,7 +23553,7 @@ public void testBug346454g() throws JavaModelException {
 			"     new pack.Test<>().new T2<>()\n" +
 			"   }" +
 			"}\n");
-		
+
 		this.workingCopies[1] = getWorkingCopy(
 				"/Completion/src/pack/Test.java",
 				"package pack;"+
@@ -23577,7 +23577,7 @@ public void testBug346454g() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=346454
@@ -23601,7 +23601,7 @@ public void testBug346454h() throws JavaModelException {
 			"     new <String> Test<>()\n" +
 			"   }" +
 			"}\n");
-		
+
 		this.workingCopies[1] = getWorkingCopy(
 				"/Completion/src/pack/Test.java",
 				"package pack;"+
@@ -23617,13 +23617,13 @@ public void testBug346454h() throws JavaModelException {
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
 		assertResults(
 			"Test[METHOD_REF<CONSTRUCTOR>]{, Lpack.Test<>;, <Z:Ljava.lang.Object;>(TT;TZ;)V, Test, (t, z), " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED) + "}\n" +
-			"Test<>[ANONYMOUS_CLASS_DECLARATION]{, Lpack.Test<>;, <Z:Ljava.lang.Object;>(TT;TZ;)V, null, (t, z), " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED) + "}",	
+			"Test<>[ANONYMOUS_CLASS_DECLARATION]{, Lpack.Test<>;, <Z:Ljava.lang.Object;>(TT;TZ;)V, null, (t, z), " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED) + "}",
 			requestor.getResults());
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=346454
@@ -23647,7 +23647,7 @@ public void testBug346454i() throws JavaModelException {
 			"     new <String> Test<>().new T2<>()\n" +
 			"   }" +
 			"}\n");
-		
+
 		this.workingCopies[1] = getWorkingCopy(
 				"/Completion/src/pack/Test.java",
 				"package pack;"+
@@ -23667,13 +23667,13 @@ public void testBug346454i() throws JavaModelException {
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
 		assertResults(
 				"T2[METHOD_REF<CONSTRUCTOR>]{, Lpack.Test<>.T2<>;, (TU;)V, T2, (u), " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED) + "}\n" +
-				"Test<>.T2<>[ANONYMOUS_CLASS_DECLARATION]{, Lpack.Test<>.T2<>;, (TU;)V, null, (u), " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED) + "}",	
+				"Test<>.T2<>[ANONYMOUS_CLASS_DECLARATION]{, Lpack.Test<>.T2<>;, (TU;)V, null, (u), " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED) + "}",
 				requestor.getResults());
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=346415
@@ -23718,7 +23718,7 @@ public void testBug346415() throws JavaModelException {
 				"package test;"+
 				"public class IZZException extends Exception {\n" +
 				"}\n");
-		
+
 		this.workingCopies[4] = getWorkingCopy(
 				"/Completion/src/test/IZZRuntimeException.java",
 				"package test;"+
@@ -23738,7 +23738,7 @@ public void testBug346415() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=346415
@@ -23784,7 +23784,7 @@ public void testBug346415a() throws JavaModelException {
 				"package test;"+
 				"public class IZZException extends Exception {\n" +
 				"}\n");
-		
+
 		this.workingCopies[4] = getWorkingCopy(
 				"/Completion/src/test/IZZRuntimeException.java",
 				"package test;"+
@@ -23803,7 +23803,7 @@ public void testBug346415a() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=350767
@@ -23834,7 +23834,7 @@ public void testBug350767() throws JavaModelException {
 				"package test;"+
 				"public class IZZException extends Exception {\n" +
 				"}\n");
-		
+
 		this.workingCopies[2] = getWorkingCopy(
 				"/Completion/src/test/IZZException.java",
 				"package test;"+
@@ -23853,7 +23853,7 @@ public void testBug350767() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=350767
@@ -23908,19 +23908,19 @@ public void testBug350652() throws JavaModelException {
 			"package test;"+
 			"public class IZZException extends Exception {\n" +
 			"}\n");
-	
+
 	this.workingCopies[2] = getWorkingCopy(
 			"/Completion/src/test/IZZAnnotation.java",
 			"package test;"+
 			"public @interface IZZAnnotation{\n" +
 			"}\n");
-	
+
 	this.workingCopies[3] = getWorkingCopy(
 			"/Completion/src/test/IZZInterface.java",
 			"package test;"+
 			"public interface IZZInterface{\n" +
 			"}\n");
-	
+
 	this.workingCopies[4] = getWorkingCopy(
 			"/Completion/src/test/IZZEnum.java",
 			"package test;"+
@@ -23995,7 +23995,7 @@ public void testBug350652c() throws JavaModelException {
 				"package test;"+
 				"public class IZZException extends Exception {\n" +
 				"}\n");
-		
+
 		this.workingCopies[2] = getWorkingCopy(
 				"/Completion/src/test/IZZAException.java",
 				"package test;"+
@@ -24008,14 +24008,14 @@ public void testBug350652c() throws JavaModelException {
 		String completeBehind = "IZZAException | IZZ";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-		
+
 		assertResults(
 			"IZZException[TYPE_REF]{IZZException, test, Ltest.IZZException;, null, null, " + (R_DEFAULT + R_INTERESTING + R_RESOLVED + R_CASE + R_UNQUALIFIED + R_EXCEPTION + R_NON_RESTRICTED) + "}",
 			requestor.getResults());
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 
@@ -24042,7 +24042,7 @@ public void testBug401487a() throws JavaModelException {
 		String completeBehind = "    def";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-		
+
 		assertResults(
 			"def[POTENTIAL_METHOD_DECLARATION]{def, Ltest.P;, ()V, def, null, " + (R_DEFAULT + 9) + "}\n" + "default[KEYWORD]{default, null, null, default, null, " + (R_DEFAULT + 19) + "}" ,
 			requestor.getResults());
@@ -24050,7 +24050,7 @@ public void testBug401487a() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 public void testBug401487b() throws JavaModelException {
@@ -24074,7 +24074,7 @@ public void testBug401487b() throws JavaModelException {
 		String completeBehind = "    def";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-		
+
 		assertResults(
 			"" ,
 			requestor.getResults());
@@ -24082,7 +24082,7 @@ public void testBug401487b() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 public void testBug401487c() throws JavaModelException {
@@ -24106,7 +24106,7 @@ public void testBug401487c() throws JavaModelException {
 		String completeBehind = "    def";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-		
+
 		assertResults(
 			"def[POTENTIAL_METHOD_DECLARATION]{def, Ltest.P;, ()V, def, null, " + (R_DEFAULT + 9) + "}" ,
 			requestor.getResults());
@@ -24114,7 +24114,7 @@ public void testBug401487c() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 public void testBug401487d() throws JavaModelException {
@@ -24138,7 +24138,7 @@ public void testBug401487d() throws JavaModelException {
 		String completeBehind = "    def";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-		
+
 		assertResults(
 			"" ,
 			requestor.getResults());
@@ -24146,7 +24146,7 @@ public void testBug401487d() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 public void testBug401487e() throws JavaModelException {
@@ -24172,7 +24172,7 @@ public void testBug401487e() throws JavaModelException {
 		String completeBehind = "    def";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-		
+
 		assertResults(
 			"def[POTENTIAL_METHOD_DECLARATION]{def, Ltest.ZZ$I;, ()V, def, null, " + (R_DEFAULT + 9) + "}\n" + "default[KEYWORD]{default, null, null, default, null, " + (R_DEFAULT + 19) + "}" ,
 			requestor.getResults());
@@ -24180,7 +24180,7 @@ public void testBug401487e() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=350652
@@ -24214,14 +24214,14 @@ public void testBug350652d() throws JavaModelException {
 		String completeBehind = "IZZAException | IZZ";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-		
+
 		assertResults(
 				"IZZException[TYPE_REF]{IZZException, test, Ltest.IZZException;, null, null, " + (R_DEFAULT + R_RESOLVED + R_CASE + R_UNQUALIFIED + R_EXCEPTION + R_NON_RESTRICTED) + "}",
 			requestor.getResults());
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=350652
@@ -24246,7 +24246,7 @@ public void testBug350652e() throws JavaModelException {
 			"package test;"+
 			"public class IZZException extends Exception {\n" +
 			"}\n");
-	
+
 	this.workingCopies[2] = getWorkingCopy(
 			"/Completion/src/test/IZZAException.java",
 			"package test;"+
@@ -24289,7 +24289,7 @@ public void testBug350652f() throws JavaModelException {
 				"package test;"+
 				"public class IZZException extends Exception {\n" +
 				"}\n");
-		
+
 		this.workingCopies[2] = getWorkingCopy(
 				"/Completion/src/test/IZZAException.java",
 				"package test;"+
@@ -24302,14 +24302,14 @@ public void testBug350652f() throws JavaModelException {
 		String completeBehind = "IZZException | IZZ";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-		
+
 		assertResults(
 			"IZZAException[TYPE_REF]{IZZAException, test, Ltest.IZZAException;, null, null, " + (R_DEFAULT + R_INTERESTING + R_RESOLVED + R_CASE + R_UNQUALIFIED + R_EXCEPTION + R_NON_RESTRICTED) + "}",
 			requestor.getResults());
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=350652
@@ -24343,14 +24343,14 @@ public void testBug350652g() throws JavaModelException {
 		String completeBehind = "IZZException | IZZ";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-		
+
 		assertResults(
 				"IZZAException[TYPE_REF]{IZZAException, test, Ltest.IZZAException;, null, null, " + (R_DEFAULT + R_RESOLVED + R_CASE + R_UNQUALIFIED + R_EXCEPTION + R_NON_RESTRICTED) + "}",
 			requestor.getResults());
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=350652
@@ -24375,7 +24375,7 @@ public void testBug350652h() throws JavaModelException {
 			"package test;"+
 			"public class IZZSuperException extends Exception {\n" +
 			"}\n");
-	
+
 	this.workingCopies[2] = getWorkingCopy(
 			"/Completion/src/test/IZZBaseException.java",
 			"package test;"+
@@ -24438,7 +24438,7 @@ public void testBug350652j() throws JavaModelException {
 		"		  }\n" +
 		"   }" +
 		"}\n");
-	
+
 	this.workingCopies[1] = getWorkingCopy(
 			"/Completion/src/test2/IZZGeneral.java",
 			"package test2;"+
@@ -24488,7 +24488,7 @@ public void testBug350652k() throws JavaModelException {
 		String completeBehind = "catch (IZZAException |";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-		
+
 		assertResults(
 			"Exception[TYPE_REF]{Exception, java.lang, Ljava.lang.Exception;, null, null, " + (R_DEFAULT + R_EXACT_EXPECTED_TYPE + R_RESOLVED + R_UNQUALIFIED + R_EXCEPTION + R_NON_RESTRICTED) + "}\n" +
 			"IZZException[TYPE_REF]{IZZException, test, Ltest.IZZException;, null, null, " + (R_DEFAULT + R_EXACT_EXPECTED_TYPE + R_RESOLVED + R_CASE + R_UNQUALIFIED + R_EXCEPTION + R_NON_RESTRICTED) + "}",
@@ -24496,7 +24496,7 @@ public void testBug350652k() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=350652
@@ -24530,19 +24530,19 @@ public void testBug350652l() throws JavaModelException {
 		String completeBehind = "IZZException |";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-		
+
 		assertResults(
 			"IZZAException[TYPE_REF]{IZZAException, test, Ltest.IZZAException;, null, null, " + (R_DEFAULT + R_RESOLVED + R_CASE + R_UNQUALIFIED + R_EXCEPTION + R_NON_RESTRICTED) + "}",
 			requestor.getResults());
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=350652
 // superclass exception types allowed in different catch blocks
-// Test filtration of super-type from expected types when no prefix before caret (IZZException is expected here because of the 
+// Test filtration of super-type from expected types when no prefix before caret (IZZException is expected here because of the
 // throw and is a valid proposal even though a child, IZZAException is present in an earlier catch).
 // types in same CU
 public void testBug350652m() throws JavaModelException {
@@ -24576,7 +24576,7 @@ public void testBug350652m() throws JavaModelException {
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=350652
 // subclass exception types not allowed in different catch blocks
-// Test relevance of sub-type from expected types when no prefix before caret (IZZAException is expected here because of the 
+// Test relevance of sub-type from expected types when no prefix before caret (IZZAException is expected here because of the
 // throw, yet is a less relevant proposal since a parent, IZZException is present in an earlier catch).
 // Also, sub-type should not be an expected type.
 // types in same CU
@@ -24636,7 +24636,7 @@ public void testBug351444() throws JavaModelException {
 		String completeBehind = "new TXY";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner, monitor);
-		
+
 		assertResults(
 				"TXYU[CONSTRUCTOR_INVOCATION]{(), Ltest.TXYU<TT;>;, (Ljava.lang.String;Ljava.lang.String;)V, TXYU, (s, s2), " + (R_DEFAULT + R_EXACT_EXPECTED_TYPE + 25) + "}\n" +
 				"   TXYU[TYPE_REF]{TXYU, test, Ltest.TXYU;, null, null, " + (R_DEFAULT + R_EXACT_EXPECTED_TYPE + 25) + "}\n" +
@@ -24648,7 +24648,7 @@ public void testBug351444() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Source, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=351444
@@ -24679,7 +24679,7 @@ public void testBug351444a() throws JavaModelException {
 		String completeBehind = "new TXY";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner, monitor);
-		
+
 		assertResults(
 				"TXYU[CONSTRUCTOR_INVOCATION]{(), Ltest.TXYU<TT;>;, (Ljava.lang.String;Ljava.lang.String;)V, TXYU, (s, s2), " + (R_DEFAULT + R_EXACT_EXPECTED_TYPE + 25) + "}\n" +
 				"   TXYU[TYPE_REF]{TXYU, test, Ltest.TXYU;, null, null, " + (R_DEFAULT + R_EXACT_EXPECTED_TYPE + 25) + "}\n" +
@@ -24691,7 +24691,7 @@ public void testBug351444a() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Source, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=351444
@@ -24725,7 +24725,7 @@ public void testBug351444b() throws JavaModelException {
 		String completeBehind = "new TXY";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner, monitor);
-		
+
 		assertResults(
 				"TXYU[CONSTRUCTOR_INVOCATION]{(), Ltest.Test<Ljava.lang.Object;>.TXYU;, (Ljava.lang.String;Ljava.lang.String;)V, TXYU, (s, s2), " + (R_DEFAULT + R_EXACT_EXPECTED_TYPE + 25) + "}\n" +
 				"   Test.TXYU[TYPE_REF]{TXYU, test, Ltest.Test$TXYU;, null, null, " + (R_DEFAULT + R_EXACT_EXPECTED_TYPE + 25) + "}\n" +
@@ -24737,7 +24737,7 @@ public void testBug351444b() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Source, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=351444
@@ -24771,7 +24771,7 @@ public void testBug351444c() throws JavaModelException {
 		String completeBehind = "new TXY";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner, monitor);
-		
+
 		assertResults(
 				"TXYU[CONSTRUCTOR_INVOCATION]{(), Ltest.Test<Ljava.lang.Object;>.TXYU;, (Ljava.lang.String;Ljava.lang.String;)V, TXYU, (s, s2), " + (R_DEFAULT + R_EXACT_EXPECTED_TYPE + 25) + "}\n" +
 				"   Test.TXYU[TYPE_REF]{TXYU, test, Ltest.Test$TXYU;, null, null, " + (R_DEFAULT + R_EXACT_EXPECTED_TYPE + 25) + "}\n" +
@@ -24783,7 +24783,7 @@ public void testBug351444c() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Source, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=351444
@@ -24820,7 +24820,7 @@ public void testBug351444d() throws JavaModelException {
 		String completeBehind = "new TXY";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner, monitor);
-		
+
 		assertResults(
 				"TXYU[CONSTRUCTOR_INVOCATION]{(), Ltest.TXYU<LNumber;>;, (LNumber;)V, TXYU, (t), " + (R_DEFAULT + 55) + "}\n" +
 				"   TXYU[TYPE_REF]{TXYU, test, Ltest.TXYU;, null, null, " + (R_DEFAULT + 55) + "}\n" +
@@ -24832,7 +24832,7 @@ public void testBug351444d() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Source, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=351444
@@ -24869,7 +24869,7 @@ public void testBug351444e() throws JavaModelException {
 		String completeBehind = "new TXY";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner, monitor);
-		
+
 		assertResults(
 				"TXYU[CONSTRUCTOR_INVOCATION]{(), Ltest.TXYU<LNumber;>;, (LNumber;)V, TXYU, (t), " + (R_DEFAULT + 55) + "}\n" +
 				"   TXYU[TYPE_REF]{TXYU, test, Ltest.TXYU;, null, null, " + (R_DEFAULT + 55) + "}\n" +
@@ -24881,7 +24881,7 @@ public void testBug351444e() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Source, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=292087
@@ -25039,7 +25039,7 @@ public void testBug385858a() throws JavaModelException {
 	String completeBehind = "new C";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	assertResults(
 			"completion offset=74\n" +
 			"completion range=[73, 73]\n" +
@@ -25066,7 +25066,7 @@ public void testBug385858b() throws JavaModelException {
 	String completeBehind = "new C";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	assertResults(
 			"completion offset=61\n" +
 			"completion range=[60, 60]\n" +
@@ -25096,7 +25096,7 @@ public void testBug385858c() throws JavaModelException {
 	String completeBehind = "new Completion.";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	assertResults(
 			"completion offset=102\n" +
 			"completion range=[102, 101]\n" +
@@ -25126,7 +25126,7 @@ public void testBug385858d() throws JavaModelException {
 	String completeBehind = "new  ";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	assertResults(
 			"completion offset=92\n" +
 			"completion range=[92, 91]\n" +
@@ -25148,7 +25148,7 @@ public void testBug402574() throws JavaModelException {
 		this.workingCopies = new ICompilationUnit[2];
 		this.workingCopies[1] = getWorkingCopy(
 			"/Completion/src/test/ExampleEnumNoAutocomplete.java",
-		    "public enum ExampleEnumNoAutocomplete {\n" +		
+		    "public enum ExampleEnumNoAutocomplete {\n" +
 			"    STUFF(\"a\", \"b\") {\n" +
 			"    @Override\n" +
 			"    public String getProperty1() {\n"+
@@ -25208,9 +25208,9 @@ public void testBug402574() throws JavaModelException {
 			"			public String getSomething() {\n" +
 			"				throw new UnsupportedOperationException(\"What is this, I don't even?!\");\n" +
 			"			}\n" +
-			"		};\n" +		
+			"		};\n" +
 			"		private final String property1;\n" +
-			"		private final String property2;\n" +	
+			"		private final String property2;\n" +
 			"		ExampleEnumNoAutocomplete(final String property1, final String property2) {\n" +
 			"			this.property1 = property1;\n" +
 			"			this.property2 = property2;\n" +
@@ -25244,7 +25244,7 @@ public void testBug402574() throws JavaModelException {
 		String completeBehind = "		ExampleEnumNoAutocomplete.";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner, monitor);
-		
+
 		assertResults(
 				"IT_MAY_BE_DUE_TO_MIXING_PERHAPS[FIELD_REF]{IT_MAY_BE_DUE_TO_MIXING_PERHAPS, Ltest.ExampleEnumNoAutocomplete;, Ltest.ExampleEnumNoAutocomplete;, IT_MAY_BE_DUE_TO_MIXING_PERHAPS, null, " + (R_DEFAULT + 21) + "}\n" +
 				"MORE_STUFF[FIELD_REF]{MORE_STUFF, Ltest.ExampleEnumNoAutocomplete;, Ltest.ExampleEnumNoAutocomplete;, MORE_STUFF, null, " + (R_DEFAULT + 21) + "}\n" +
@@ -25261,7 +25261,7 @@ public void testBug402574() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Source, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=402812
@@ -25270,22 +25270,22 @@ public void testBug402812a() throws Exception {
 	Hashtable<String, String> javaCoreOldOptions = JavaCore.getOptions();
 	Map<String, String> completionProjectOptions = COMPLETION_PROJECT.getOptions(true);
 	String savedOptionCompliance = completionProjectOptions.get(CompilerOptions.OPTION_Compliance);
-	String savedOptionSource = completionProjectOptions.get(CompilerOptions.OPTION_Source);	
+	String savedOptionSource = completionProjectOptions.get(CompilerOptions.OPTION_Source);
 	try {
 		Hashtable<String, String> options = new Hashtable<>(javaCoreOldOptions);
 		options.put(JavaCore.CODEASSIST_VISIBILITY_CHECK, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
-		
+
 		completionProjectOptions.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_8);
 		completionProjectOptions.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_8);
 		COMPLETION_PROJECT.setOptions(completionProjectOptions);
-		
+
 		IJavaProject p = createJavaProject("P", new String[] {"src"}, new String[]{"JCL_LIB", "/P/lib402812.jar"}, "bin");
-		
+
 		refresh(p);
-		
+
 		waitUntilIndexesReady();
-		
+
 		this.workingCopies = new ICompilationUnit[1];
 
 		this.workingCopies[0] = getWorkingCopy(
@@ -25305,39 +25305,39 @@ public void testBug402812a() throws Exception {
 	    String completeBehind = "    stat";
 	    int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	    this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner, monitor);
-	    
+
 	    assertResults(
 			"staticMethod[METHOD_REF]{staticMethod(), Ltest.Test;, ()V, staticMethod, null, " + (R_DEFAULT + 22) + "}",
 			requestor.getResults());
 	} finally {
 		deleteProject("P");
-		
+
 		JavaCore.setOptions(javaCoreOldOptions);
 		completionProjectOptions.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		completionProjectOptions.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(completionProjectOptions);	
+		COMPLETION_PROJECT.setOptions(completionProjectOptions);
 	}
 }
 public void testBug402812b() throws Exception {
 	Hashtable<String, String> javaCoreOldOptions = JavaCore.getOptions();
 	Map<String, String> completionProjectOptions = COMPLETION_PROJECT.getOptions(true);
 	String savedOptionCompliance = completionProjectOptions.get(CompilerOptions.OPTION_Compliance);
-	String savedOptionSource = completionProjectOptions.get(CompilerOptions.OPTION_Source);	
+	String savedOptionSource = completionProjectOptions.get(CompilerOptions.OPTION_Source);
 	try {
 		Hashtable<String, String> options = new Hashtable<>(javaCoreOldOptions);
 		options.put(JavaCore.CODEASSIST_VISIBILITY_CHECK, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
-		
+
 		completionProjectOptions.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_8);
 		completionProjectOptions.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_8);
 		COMPLETION_PROJECT.setOptions(completionProjectOptions);
-		
+
 		IJavaProject p = createJavaProject("P", new String[] {"src"}, new String[]{"JCL_LIB", "/P/lib402812.jar"}, "bin");
-		
+
 		refresh(p);
-		
+
 		waitUntilIndexesReady();
-		
+
 		this.workingCopies = new ICompilationUnit[1];
 
 		this.workingCopies[0] = getWorkingCopy(
@@ -25360,39 +25360,39 @@ public void testBug402812b() throws Exception {
 	    String completeBehind = "I.stat";
 	    int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	    this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner, monitor);
-	    
+
 	    assertResults(
 			"staticMethod[METHOD_REF]{staticMethod(), Ltest.I;, ()V, staticMethod, null, " + (R_DEFAULT + 21) + "}",
 			requestor.getResults());
 	} finally {
 		deleteProject("P");
-		
+
 		JavaCore.setOptions(javaCoreOldOptions);
 		completionProjectOptions.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		completionProjectOptions.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(completionProjectOptions);	
+		COMPLETION_PROJECT.setOptions(completionProjectOptions);
 	}
 }
 public void testBug402812c() throws Exception {
 	Hashtable<String, String> javaCoreOldOptions = JavaCore.getOptions();
 	Map<String, String> completionProjectOptions = COMPLETION_PROJECT.getOptions(true);
 	String savedOptionCompliance = completionProjectOptions.get(CompilerOptions.OPTION_Compliance);
-	String savedOptionSource = completionProjectOptions.get(CompilerOptions.OPTION_Source);	
+	String savedOptionSource = completionProjectOptions.get(CompilerOptions.OPTION_Source);
 	try {
 		Hashtable<String, String> options = new Hashtable<>(javaCoreOldOptions);
 		options.put(JavaCore.CODEASSIST_VISIBILITY_CHECK, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
-		
+
 		completionProjectOptions.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_8);
 		completionProjectOptions.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_8);
 		COMPLETION_PROJECT.setOptions(completionProjectOptions);
-		
+
 		IJavaProject p = createJavaProject("P", new String[] {"src"}, new String[]{"JCL_LIB", "/P/lib402812.jar"}, "bin");
-		
+
 		refresh(p);
-		
+
 		waitUntilIndexesReady();
-		
+
 		this.workingCopies = new ICompilationUnit[1];
 
 		this.workingCopies[0] = getWorkingCopy(
@@ -25416,39 +25416,39 @@ public void testBug402812c() throws Exception {
 	    String completeBehind = "this.defa";
 	    int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	    this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner, monitor);
-	    
+
 	    assertResults(
 			"defaultMethod[METHOD_REF]{defaultMethod(), Ltest.I;, ()V, defaultMethod, null, " + (R_DEFAULT + 30) + "}",
 			requestor.getResults());
 	} finally {
 		deleteProject("P");
-		
+
 		JavaCore.setOptions(javaCoreOldOptions);
 		completionProjectOptions.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		completionProjectOptions.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(completionProjectOptions);	
+		COMPLETION_PROJECT.setOptions(completionProjectOptions);
 	}
 }
 public void testBug402812d() throws Exception {
 	Hashtable<String, String> javaCoreOldOptions = JavaCore.getOptions();
 	Map<String, String> completionProjectOptions = COMPLETION_PROJECT.getOptions(true);
 	String savedOptionCompliance = completionProjectOptions.get(CompilerOptions.OPTION_Compliance);
-	String savedOptionSource = completionProjectOptions.get(CompilerOptions.OPTION_Source);	
+	String savedOptionSource = completionProjectOptions.get(CompilerOptions.OPTION_Source);
 	try {
 		Hashtable<String, String> options = new Hashtable<>(javaCoreOldOptions);
 		options.put(JavaCore.CODEASSIST_VISIBILITY_CHECK, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
-		
+
 		completionProjectOptions.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_8);
 		completionProjectOptions.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_8);
 		COMPLETION_PROJECT.setOptions(completionProjectOptions);
-		
+
 		IJavaProject p = createJavaProject("P", new String[] {"src"}, new String[]{"JCL_LIB", "/P/lib402812.jar"}, "bin");
-		
+
 		refresh(p);
-		
+
 		waitUntilIndexesReady();
-		
+
 		this.workingCopies = new ICompilationUnit[1];
 
 		this.workingCopies[0] = getWorkingCopy(
@@ -25471,17 +25471,17 @@ public void testBug402812d() throws Exception {
 	    String completeBehind = "defaultM";
 	    int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	    this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner, monitor);
-	    
+
 	    assertResults(
 			"defaultMethod[METHOD_REF]{defaultMethod(), Ltest.I;, ()V, defaultMethod, null, " + (R_DEFAULT + 22) + "}",
 			requestor.getResults());
 	} finally {
 		deleteProject("P");
-		
+
 		JavaCore.setOptions(javaCoreOldOptions);
 		completionProjectOptions.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		completionProjectOptions.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(completionProjectOptions);	
+		COMPLETION_PROJECT.setOptions(completionProjectOptions);
 	}
 }
 //Bug 370971 - Content Assist autocomplete broken within an array of anonymous classes instances
@@ -25515,7 +25515,7 @@ public void testBug370971() throws JavaModelException {
 		String completeBehind = "return super.toS";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner, monitor);
-		
+
 		assertResults(
 				"toString[METHOD_REF]{toString(), Ljava.lang.Object;, ()Ljava.lang.String;, toString, null, " + (R_DEFAULT + 60) + "}",
 				requestor.getResults());
@@ -25524,7 +25524,7 @@ public void testBug370971() throws JavaModelException {
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Source, savedOptionCompliance);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // Bug 406468 - [1.8][code assist] No completion proposals after the use of a constructor reference
@@ -25548,7 +25548,7 @@ public void testBug406468a() throws JavaModelException {
 				"		I i = X[][][]::new;\n" +
 				"		X[][][] x = i.copy(136);\n" +
 				"		System.out.println(x.length);\n" +
-				"           \n" +	
+				"           \n" +
 				"	}\n" +
 				"}\n");
 		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
@@ -25568,7 +25568,7 @@ public void testBug406468a() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 public void testBug406468b() throws JavaModelException {
@@ -25590,7 +25590,7 @@ public void testBug406468b() throws JavaModelException {
 				"		I i = X<java.lang.String>::new;\n" +
 				"		X x = i.copy();\n" +
 				"		System.out.println(x);\n" +
-				"           \n" +	
+				"           \n" +
 				"	}\n" +
 				"}\n");
 		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
@@ -25611,7 +25611,7 @@ public void testBug406468b() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // Bug 405250 - [1.8][code assist] Annotations getting suggested at import statements
@@ -25640,7 +25640,7 @@ public void testBug405250a() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 public void testBug405250b() throws JavaModelException {
@@ -25667,7 +25667,7 @@ public void testBug405250b() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 public void testBug405250c() throws JavaModelException {
@@ -25694,7 +25694,7 @@ public void testBug405250c() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 public void testBug405250d() throws JavaModelException {
@@ -25721,7 +25721,7 @@ public void testBug405250d() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=421469, [1.8][code assist] NPE in LocalDeclaration.resolve with anonymous class in lambda body
@@ -25765,7 +25765,7 @@ public void testBug421469() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=421469, [1.8][code assist] NPE in LocalDeclaration.resolve with anonymous class in lambda body
@@ -25810,7 +25810,7 @@ public void testBug421469a() throws JavaModelException {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
 		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
-		COMPLETION_PROJECT.setOptions(options);	
+		COMPLETION_PROJECT.setOptions(options);
 	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=508951, Stackoverflow in RecoveredBlock.add during content assist

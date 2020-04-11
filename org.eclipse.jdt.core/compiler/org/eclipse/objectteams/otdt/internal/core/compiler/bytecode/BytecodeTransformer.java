@@ -110,7 +110,7 @@ public class BytecodeTransformer
         if (dstType.isTeam()) {
         	ReferenceBinding orgObjectteamsTeam = scope.getOrgObjectteamsTeam();
         	if (   !TypeAnalyzer.isOrgObjectteamsTeam(dstType)
-        		&& !dstType.superclass.isTeam()) 
+        		&& !dstType.superclass.isTeam())
         	{
         		TeamMethodGenerator tmg = scope.environment().getTeamMethodGenerator();
         		if (tmg.requestBytes()) { // if o.o.Team is converted we don't have the bytecode - and shouldn't need it
@@ -164,7 +164,7 @@ public class BytecodeTransformer
         	dstMethod.binding.bytecodeMissing= true;
        		return;
         }
-        
+
 		if (CharOperation.equals(CalloutImplementorDyn.OT_ACCESS, dstMethod.selector)
 			||CharOperation.equals(CalloutImplementorDyn.OT_ACCESS_STATIC, dstMethod.selector))
         	return;
@@ -232,7 +232,7 @@ public class BytecodeTransformer
     	// keep this offset for updating the stored value after adjustTail():
     	int copyInhSrcLineOffsetOffset;
     	// first phase of adjustment (method prefix and attributes except code):
-		ConstantPoolSimpleConverter conv = constantPoolOffsets == null 
+		ConstantPoolSimpleConverter conv = constantPoolOffsets == null
 								? ConstantPoolSimpleConverter.create(srcRole, srcMethodBinding, methodCode, classFile)
 								: new ConstantPoolSimpleConverter(srcConstantPool, constantPoolOffsets, offset, methodCode, classFile);
 
@@ -305,7 +305,7 @@ public class BytecodeTransformer
 
         dstMethod.maybeRecordByteCode(classFile, newMethodOffset);
     }
-    
+
     /**
 	 * @param srcConstantPool
 	 * @param offset          start of this method (within srcConstantPool)
@@ -440,7 +440,7 @@ public class BytecodeTransformer
             {
             	if (isAddingMarkerArg) {
 	            	OTByteCodes.setInt(dest, offset+destOff-4, attrLen+2);				// grow attr by 2
-	            	
+
 	            	int paramCount = OTByteCodes.getUnsignedByte(src, srcOffset+offset);
 	            	dest[offset+destOff] = (byte)(paramCount+1);						// grow paramCount by 1
 	            	offset++;
@@ -471,7 +471,7 @@ public class BytecodeTransformer
 		conv.updateName(offset); // annotation name
 		offset += 2;
 		int numMembers = OTByteCodes.getWord(src, srcOffset+offset);
-		offset += 2; 
+		offset += 2;
 		if (numMembers > 0)
 			for (int k=0; k<numMembers; k++) {
 				conv.updateName(offset);
@@ -485,8 +485,8 @@ public class BytecodeTransformer
      * SH: inspired by AnnotationInfo.scanElementValue(int);
      * @return the next offset to read.
      */
-    private int adjustAnnotationElementValue(ConstantPoolSimpleConverter conv, byte[] src, int srcOffset, int offset) 
-    		throws IllegalArgumentException 
+    private int adjustAnnotationElementValue(ConstantPoolSimpleConverter conv, byte[] src, int srcOffset, int offset)
+    		throws IllegalArgumentException
     {
     	int currentOffset = offset;
     	int tag = OTByteCodes.getUnsignedByte(src, srcOffset+currentOffset);
@@ -554,7 +554,7 @@ public class BytecodeTransformer
      * @param dstClassFile This is the destination Classfile wich contains the later flushed ConstantPool
      * @param mModel the destination method
      * @param codeToAdjust this is the duplicated code-part of the code_attribute (see getCodeByteCode)
-     * @param codeAttributeOffset attribute offset within codeToAdjust 
+     * @param codeAttributeOffset attribute offset within codeToAdjust
      * @param codeLength   length of codeToAdjust
      * @param isCtorAddingMarkArg are we copying into a tsuper ctor with additional marger arg?
      */
@@ -702,9 +702,9 @@ public class BytecodeTransformer
 			ConstantPoolObject src_cpo = it.next();
 			ConstantPoolObject dst_cpo = src_cpo.isClass()
 				? new ConstantPoolObject(
-						ClassFileConstants.ClassTag, 
+						ClassFileConstants.ClassTag,
 						ConstantPoolObjectMapper.mapClass(srcTeamBinding, src_cpo.getClassObject(), dstType))
-				: src_cpo;				
+				: src_cpo;
 			this._writer.writeConstantPoolObject(dst_cpo);
 		}
 	}

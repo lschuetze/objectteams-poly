@@ -24,9 +24,9 @@ import org.eclipse.jdt.internal.compiler.lookup.Scope;
 
 
 /**
- * Represents a team anchor for which a problem has been detected but not 
+ * Represents a team anchor for which a problem has been detected but not
  * immediately been reported.
- * 
+ *
  * @author stephan
  * @since 1.4.0
  */
@@ -34,7 +34,7 @@ public class ProblemAnchorBinding extends TeamAnchor {
 
 	TeamAnchor closestMatch;
 	int problemId;
-	
+
 	public ProblemAnchorBinding(TeamAnchor closestMatch, int problemId) {
 		super();
 		this.closestMatch = closestMatch;
@@ -70,19 +70,19 @@ public class ProblemAnchorBinding extends TeamAnchor {
 	public boolean isFinal() {
 		return this.closestMatch.isFinal();
 	}
-	
+
 	@Override
 	public int problemId() {
 		return this.problemId;
 	}
 
-	/** 
+	/**
 	 * Check if given anchor is a ProblemAnchorBinding and report error if suitable.
 	 * @param scope for reporting
 	 * @param location for reporting
 	 * @param anchor given anchor to check
 	 * @param typeName for reporting
-	 * @return true if anchor is valid, false if it is null or a ProblemAnchorBinding. 
+	 * @return true if anchor is valid, false if it is null or a ProblemAnchorBinding.
 	 */
 	public static boolean checkAnchor(Scope scope, ASTNode location, ITeamAnchor anchor, char[] typeName) {
 		if (anchor == null)

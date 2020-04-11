@@ -673,7 +673,7 @@ private static void legacySearchAllPossibleSubTypes(
 		type = ((IRoleType)OTModelManager.getOTElement(type)).getTeamJavaType();
 		queue.add(type.getElementName().toCharArray());
 	}
-// SH}	
+// SH}
 	try {
 		while (queue.start <= queue.end) {
 			subMonitor.setWorkRemaining(Math.max(queue.end - queue.start + 1, 100));

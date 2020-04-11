@@ -34,7 +34,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
  *
  * The structural investigation includes: - package statement - import
  * statements - top-level types: package member, member types (member types of
- * member types...) - fields - methods. From Java 9 onwards it includes the 
+ * member types...) - fields - methods. From Java 9 onwards it includes the
  * module name in a module declaration
  *
  * If reference information is requested, then all source constructs are
@@ -293,7 +293,7 @@ public interface ISourceElementRequestor {
 	public void exitCalloutToFieldMapping(int sourceEnd, int declarationSourceEnd);
 	public void exitCallinMapping(int sourceEnd, int declarationSourceEnd);
 //ak, jwl, gbr}
-	
+
 	default void enterModule(ModuleInfo info) {
 		// do nothing
 	}

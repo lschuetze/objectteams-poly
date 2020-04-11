@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -99,7 +99,7 @@ public class CodeSelectionTests extends AbstractJavaModelTests
                 "B1() [in B1 [in B1.java [in basepkg [in src [in CodeSelection]]]]]",
                 elements);
     }
-    
+
     public void testBaseclass2() throws JavaModelException
     {
         ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "teampkg1", "T2.java");
@@ -109,7 +109,7 @@ public class CodeSelectionTests extends AbstractJavaModelTests
                 "B1 [in B1.java [in basepkg [in src [in CodeSelection]]]]",
                 elements);
     }
-    
+
    public void testBaseclass3() throws JavaModelException
    {
        ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "teampkg1", "T3.java");
@@ -119,7 +119,7 @@ public class CodeSelectionTests extends AbstractJavaModelTests
                "T1 [in T1.java [in teampkg1 [in src [in CodeSelection]]]]",
                elements);
    }
-   
+
    public void testBaseclass4() throws JavaModelException
    {
        ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "teampkg1", "T4.java");
@@ -129,7 +129,7 @@ public class CodeSelectionTests extends AbstractJavaModelTests
                "T0 [in T0.java [in teampkg2 [in src [in CodeSelection]]]]",
                elements);
    }
-   
+
    public void testBaseclass5() throws JavaModelException
    {
        ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "teampkg1", "T5.java");
@@ -146,7 +146,7 @@ public class CodeSelectionTests extends AbstractJavaModelTests
        IJavaElement[] elements = codeSelect(cu, "base.R1", "base.R1");
        assertElementsEqual(
                "Unexpected elements",
-               "R1 [in T5 [in T5.java [in teampkg1 [in src [in CodeSelection]]]]]",              
+               "R1 [in T5 [in T5.java [in teampkg1 [in src [in CodeSelection]]]]]",
                elements);
    }
 
@@ -169,9 +169,9 @@ public class CodeSelectionTests extends AbstractJavaModelTests
                "R1 [in T5 [in T5.java [in teampkg1 [in src [in CodeSelection]]]]]",
                elements);
    }
-   
+
    // select the superclass ref from one rofi to another
-   public void testRoleSuperclass() throws JavaModelException 
+   public void testRoleSuperclass() throws JavaModelException
    {
 	   ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "teampkg2.T2", "R2.java");
        IJavaElement[] elements = codeSelect(cu, "R1", "R1");
@@ -180,7 +180,7 @@ public class CodeSelectionTests extends AbstractJavaModelTests
                "R1 [in R1.java [in teampkg2.T2 [in src [in CodeSelection]]]]",
                elements);
    }
-   
+
    //testing type declarations
    public void testTeamDeclaration() throws JavaModelException
    {
@@ -211,9 +211,9 @@ public class CodeSelectionTests extends AbstractJavaModelTests
                "R1 [in T1 [in T1.java [in teampkg2 [in src [in CodeSelection]]]]]",
                elements);
    }
-   
+
    //TODO(gbr) test role declaration in role file.
-   
+
    //testing method declarations
    public void testMethodDeclaration1() throws JavaModelException
    {
@@ -295,7 +295,7 @@ public class CodeSelectionTests extends AbstractJavaModelTests
                "A [in A.java [in regression [in src [in CodeSelection]]]]",
                elements);
    }
- 
+
 
 	/**
 	 * Select a callout mapping (role method spec)
@@ -309,7 +309,7 @@ public class CodeSelectionTests extends AbstractJavaModelTests
 	               "rm2(int) -> bm1(int) [in R [in MappingsTeam1 [in MappingsTeam1.java [in mappings [in src [in CodeSelection]]]]]]",
 	               elements);
 	}
-	
+
 	/**
 	 * Select a callout mapping (role method spec)
 	 */
@@ -335,7 +335,7 @@ public class CodeSelectionTests extends AbstractJavaModelTests
 	               "rm1(int, Collection) [in R [in MappingsTeam1 [in MappingsTeam1.java [in mappings [in src [in CodeSelection]]]]]]",
 	               elements);
 	}
-	
+
 	/**
 	 * Select argument name inside a callin parameter mapping.
 	 */
@@ -364,11 +364,11 @@ public class CodeSelectionTests extends AbstractJavaModelTests
 	               // "x [in rm2(int)->bm1(int) [in R [in MappingsTeam1 [in MappingsTeam1.java [in mappings [in src [in CodeSelection]]]]]]]",
 	               elements);
 	}
-	
+
 	/**
 	 * Select method call inside a callout parameter mapping.
 	 */
-	public void testParamMapping3() throws JavaModelException 
+	public void testParamMapping3() throws JavaModelException
 	{
 	       ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "mappings", "MappingsTeam1.java");
 	       IJavaElement[] elements = codeSelect(cu, "doubleIt(result)", "doubleIt");
@@ -377,33 +377,33 @@ public class CodeSelectionTests extends AbstractJavaModelTests
 	               "doubleIt(int) [in R [in MappingsTeam1 [in MappingsTeam1.java [in mappings [in src [in CodeSelection]]]]]]",
 	               // codeSelect cannot handle children of OTJavaElement :(, uses corresponding SourceMethod as parent
 	               // "x [in rm2(int)->bm1(int) [in R [in MappingsTeam1 [in MappingsTeam1.java [in mappings [in src [in CodeSelection]]]]]]]",
-	               elements);		
+	               elements);
 	}
 
 	/**
 	 * Select base field reference inside a callout-to-field parameter mapping.
 	 */
-	public void testParamMapping4() throws JavaModelException 
+	public void testParamMapping4() throws JavaModelException
 	{
 	       ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "mappings", "MappingsTeam1.java");
 	       IJavaElement[] elements = codeSelect(cu, "jon } // c-t-f", "jon");
 	       assertElementsEqual(
 	               "Unexpected elements",
 	               "jon [in B1 [in B1.java [in basepkg [in src [in CodeSelection]]]]]",
-	               elements);		
+	               elements);
 	}
 
 	/**
 	 * Select base field reference inside a callin parameter mapping.
 	 */
-	public void testParamMapping5() throws JavaModelException 
+	public void testParamMapping5() throws JavaModelException
 	{
 	       ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "mappings", "MappingsTeam1.java");
 	       IJavaElement[] elements = codeSelect(cu, "jon } // callin", "jon");
 	       assertElementsEqual(
 	               "Unexpected elements",
 	               "jon [in B1 [in B1.java [in basepkg [in src [in CodeSelection]]]]]",
-	               elements);		
+	               elements);
 	}
 
 	public void testInferredCallout1() throws JavaModelException
@@ -413,9 +413,9 @@ public class CodeSelectionTests extends AbstractJavaModelTests
 	       assertElementsEqual(
 	               "Unexpected elements",
 	               "bm1(int) [in B1 [in B1.java [in basepkg [in src [in CodeSelection]]]]]",
-	               elements);		
+	               elements);
 	}
-	
+
 	public void testInferredCallout2() throws JavaModelException
 	{
 	       ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "mappings", "InferredCallouts.java");
@@ -423,9 +423,9 @@ public class CodeSelectionTests extends AbstractJavaModelTests
 	       assertElementsEqual(
 	               "Unexpected elements",
 	               "jon [in B1 [in B1.java [in basepkg [in src [in CodeSelection]]]]]",
-	               elements);		
+	               elements);
 	}
-	
+
 	public void testInferredCallout3() throws JavaModelException
 	{
 	       ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "mappings", "InferredCallouts.java");
@@ -433,9 +433,9 @@ public class CodeSelectionTests extends AbstractJavaModelTests
 	       assertElementsEqual(
 	               "Unexpected elements",
 	               "jon [in B1 [in B1.java [in basepkg [in src [in CodeSelection]]]]]",
-	               elements);		
+	               elements);
 	}
-	
+
 	public void testInferredCallout4() throws JavaModelException
 	{
 	       ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "mappings", "InferredCallouts.java");
@@ -443,9 +443,9 @@ public class CodeSelectionTests extends AbstractJavaModelTests
 	       assertElementsEqual(
 	               "Unexpected elements",
 	               "jon [in B1 [in B1.java [in basepkg [in src [in CodeSelection]]]]]",
-	               elements);		
+	               elements);
 	}
-	
+
 	public void testInferredCallout5() throws JavaModelException
 	{
 	       ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "mappings", "InferredCallouts.java");
@@ -453,10 +453,10 @@ public class CodeSelectionTests extends AbstractJavaModelTests
 	       assertElementsEqual(
 	               "Unexpected elements",
 	               "jon [in B1 [in B1.java [in basepkg [in src [in CodeSelection]]]]]",
-	               elements);		
+	               elements);
 	}
 
-	public void testRoleCreation1()  throws JavaModelException 
+	public void testRoleCreation1()  throws JavaModelException
 	{
 		ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "statements", "RoleCreation.java");
 		IJavaElement[] elements = codeSelect(cu, "R<@t>(\"1\");", "R");
@@ -466,7 +466,7 @@ public class CodeSelectionTests extends AbstractJavaModelTests
 					elements);
 	}
 
-	public void testRoleCreation2()  throws JavaModelException 
+	public void testRoleCreation2()  throws JavaModelException
 	{
 		ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "statements", "RoleCreation.java");
 		IJavaElement[] elements = codeSelect(cu, "R(\"2\");", "R");
@@ -475,9 +475,9 @@ public class CodeSelectionTests extends AbstractJavaModelTests
 					"R(String) [in R [in RoleCreation [in RoleCreation.java [in statements [in src [in CodeSelection]]]]]]",
 					elements);
 	}
-	
+
 	// awaiting progress in Trac #192
-	public void _testRoleCreation3()  throws JavaModelException 
+	public void _testRoleCreation3()  throws JavaModelException
 	{
 		ProblemRequestor problemRequestor = new ProblemRequestor();
 		WorkingCopyOwner owner = newWorkingCopyOwner(problemRequestor);
@@ -485,23 +485,23 @@ public class CodeSelectionTests extends AbstractJavaModelTests
 		ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "statements", "RoleCreation.java");
 		cu.getWorkingCopy(owner, null);
 		IJavaElement[] elements = codeSelect(cu, "RProtected<@t>(\"3\");", "RProtected");
-		assertProblems("Unexpected problems", 
-						"----------\n" + 
-						"1. ERROR in /CodeSelection/src/statements/RoleCreation.java\n" + 
-						"Illegal parameterized use of non-public role RProtected (OTJLD 1.2.3(b)).\n" + 
-						"----------\n" + 
-						"2. ERROR in /CodeSelection/src/statements/RoleCreation.java\n" + 
-						"Illegal parameterized use of non-public role RProtected (OTJLD 1.2.3(b)).\n" + 
-						"----------\n", 
+		assertProblems("Unexpected problems",
+						"----------\n" +
+						"1. ERROR in /CodeSelection/src/statements/RoleCreation.java\n" +
+						"Illegal parameterized use of non-public role RProtected (OTJLD 1.2.3(b)).\n" +
+						"----------\n" +
+						"2. ERROR in /CodeSelection/src/statements/RoleCreation.java\n" +
+						"Illegal parameterized use of non-public role RProtected (OTJLD 1.2.3(b)).\n" +
+						"----------\n",
 						problemRequestor);
-		
+
 		assertElementsEqual(
 					"Unexpected elements",
 					"RProtected(String) [in RProtected [in RoleCreation [in RoleCreation.java [in statements [in src [in CodeSelection]]]]]]",
 					elements);
 	}
 
-	public void testRoleCreation4()  throws JavaModelException 
+	public void testRoleCreation4()  throws JavaModelException
 	{
 		ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "statements", "RoleCreation.java");
 		IJavaElement[] elements = codeSelect(cu, "RProtected(\"4\");", "RProtected");
@@ -510,7 +510,7 @@ public class CodeSelectionTests extends AbstractJavaModelTests
 					"RProtected(String) [in RProtected [in RoleCreation [in RoleCreation.java [in statements [in src [in CodeSelection]]]]]]",
 					elements);
 	}
-	
+
 	public void testTSuperCall1() throws JavaModelException {
 		ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "statements", "TSuper.java");
 		IJavaElement[] elements = codeSelect(cu, "m(1);", "m");

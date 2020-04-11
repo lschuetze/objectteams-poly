@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -62,7 +62,7 @@ public class OTPasteActionTest extends RefactoringTest
 	public OTPasteActionTest(String name) {
 		super(name);
 	}
-	
+
 	public static Test suite() {
 		return new MySetup(new TestSuite(OTPasteActionTest.class));
 	}
@@ -76,8 +76,8 @@ public class OTPasteActionTest extends RefactoringTest
 		_clipboard= new MockClipboard(Display.getDefault());
 		_packageQ = MySetup.getDefaultSourceFolder().createPackageFragment("q", true, null);
 	}
-	
-	protected void tearDown() throws Exception 
+
+	protected void tearDown() throws Exception
 	{
 		if (_packageQ.exists())
         {
@@ -93,7 +93,7 @@ public class OTPasteActionTest extends RefactoringTest
 		elements.addAll(Arrays.asList(array2));
 		return elements.toArray();
 	}
-	
+
 	private PasteAction verifyEnabled(IResource[] copySelectedResources, IJavaElement[] copySelectedJavaElements, IResource[] pasteSelectedResources, IJavaElement[] pasteSelectedJavaElements) throws JavaModelException {
 		PasteAction pasteAction= new PasteAction(new MockWorkbenchSite(merge(pasteSelectedResources, pasteSelectedJavaElements)), _clipboard);
 		CopyToClipboardAction copyToClipboardAction= new CopyToClipboardAction(new MockWorkbenchSite(merge(copySelectedResources, copySelectedJavaElements)), _clipboard);
@@ -101,7 +101,7 @@ public class OTPasteActionTest extends RefactoringTest
 		copyToClipboardAction.update(copyToClipboardAction.getSelection());
 		assertTrue("copy not enabled", copyToClipboardAction.isEnabled());
 		copyToClipboardAction.run();
-		
+
 		pasteAction.update(pasteAction.getSelection());
 		assertTrue("paste should be enabled", pasteAction.isEnabled());
 		return pasteAction;
@@ -110,7 +110,7 @@ public class OTPasteActionTest extends RefactoringTest
 	private void compareContents(String cuName) throws JavaModelException, IOException {
 		assertEqualLines(cuName, getFileContents(getOutputTestFileName(cuName)), getPackageP().getCompilationUnit(cuName + ".java").getSource());
 	}
-	
+
 	private void delete(ICompilationUnit cu) throws Exception {
 		try {
 			performDummySearch();
@@ -132,7 +132,7 @@ public class OTPasteActionTest extends RefactoringTest
 		{
 			IType teamTSource = cuTSource.getType("TSource");
 			IType teamTDest = cuTDest.getType("TDest");
-			
+
 			assertTrue("TSource does not exist", teamTSource.exists());
 			assertTrue("TDest does not exist", teamTDest.exists());
 
@@ -143,7 +143,7 @@ public class OTPasteActionTest extends RefactoringTest
 			PasteAction paste = verifyEnabled(copyResources,
 					copyJavaElements, pasteResources, pasteJavaElements);
 			paste.run((IStructuredSelection)paste.getSelection());
-			
+
 			compareContents("TSource");
 			compareContents("TDest");
 		}
@@ -152,7 +152,7 @@ public class OTPasteActionTest extends RefactoringTest
 			delete(cuTSource);
 		}
 	}
-	
+
 	public void testPasteNestedTeamclass() throws Exception
 	{
 		ICompilationUnit cuTSource = createCUfromTestFile(getPackageP(),
@@ -219,16 +219,16 @@ public class OTPasteActionTest extends RefactoringTest
 	{
 		ICompilationUnit cuTSource= createCUfromTestFile(getPackageP(), "TSource");
 		ICompilationUnit cuTDest= createCUfromTestFile(getPackageP(), "TDest");
-		
-		try 
+
+		try
 		{
 			IRoleType roleSrc = (IRoleType)OTModelManager.getOTElement(cuTSource.getType("TSource").getType("R"));
 			IMethodMapping calloutMapping = roleSrc.getMethodMappings()[0];
 			IType roleTDest_R = cuTDest.getType("TDest").getType("R");
-	
+
 			assertTrue("callout does not exist", calloutMapping.exists());
 			assertTrue("R does not exist", roleTDest_R.exists());
-	
+
 			IJavaElement[] copyJavaElements= {calloutMapping};
 			IResource[] copyResources= {};
 			IJavaElement[] pasteJavaElements= {roleTDest_R};
@@ -237,7 +237,7 @@ public class OTPasteActionTest extends RefactoringTest
 			paste.run((IStructuredSelection)paste.getSelection());
 			compareContents("TSource");
 			compareContents("TDest");
-		} 
+		}
 		finally
 		{
 			delete(cuTSource);
@@ -249,16 +249,16 @@ public class OTPasteActionTest extends RefactoringTest
 	{
 		ICompilationUnit cuTSource= createCUfromTestFile(getPackageP(), "TSource");
 		ICompilationUnit cuTDest= createCUfromTestFile(getPackageP(), "TDest");
-		
-		try 
+
+		try
 		{
 			IRoleType roleSrc = (IRoleType)OTModelManager.getOTElement(cuTSource.getType("TSource").getType("R"));
 			IMethodMapping calloutMapping = roleSrc.getMethodMappings()[0];
 			IType roleTDest_R = cuTDest.getType("TDest").getType("R");
-	
+
 			assertTrue("callout does not exist", calloutMapping.exists());
 			assertTrue("R does not exist", roleTDest_R.exists());
-	
+
 			IJavaElement[] copyJavaElements= {calloutMapping};
 			IResource[] copyResources= {};
 			IJavaElement[] pasteJavaElements= {roleTDest_R};
@@ -267,7 +267,7 @@ public class OTPasteActionTest extends RefactoringTest
 			paste.run((IStructuredSelection)paste.getSelection());
 			compareContents("TSource");
 			compareContents("TDest");
-		} 
+		}
 		finally
 		{
 			delete(cuTSource);
@@ -279,16 +279,16 @@ public class OTPasteActionTest extends RefactoringTest
 	{
 		ICompilationUnit cuTSource= createCUfromTestFile(getPackageP(), "TSource");
 		ICompilationUnit cuTDest= createCUfromTestFile(getPackageP(), "TDest");
-		
-		try 
+
+		try
 		{
 			IRoleType roleSrc = (IRoleType)OTModelManager.getOTElement(cuTSource.getType("TSource").getType("R"));
 			IMethodMapping calloutMapping = roleSrc.getMethodMappings()[0];
 			IType roleTDest_R = cuTDest.getType("TDest").getType("R");
-	
+
 			assertTrue("callout does not exist", calloutMapping.exists());
 			assertTrue("R does not exist", roleTDest_R.exists());
-	
+
 			IJavaElement[] copyJavaElements= {calloutMapping};
 			IResource[] copyResources= {};
 			IJavaElement[] pasteJavaElements= {roleTDest_R};
@@ -297,7 +297,7 @@ public class OTPasteActionTest extends RefactoringTest
 			paste.run((IStructuredSelection)paste.getSelection());
 			compareContents("TSource");
 			compareContents("TDest");
-		} 
+		}
 		finally
 		{
 			delete(cuTSource);
@@ -337,7 +337,7 @@ public class OTPasteActionTest extends RefactoringTest
 			delete(cuTDest);
 		}
 	}
-	
+
 	public void testPasteCallinMapping() throws Exception
 	{
 		ICompilationUnit cuTSource = createCUfromTestFile(getPackageP(),
@@ -370,5 +370,5 @@ public class OTPasteActionTest extends RefactoringTest
 			delete(cuTDest);
 		}
 	}
-	
+
 }

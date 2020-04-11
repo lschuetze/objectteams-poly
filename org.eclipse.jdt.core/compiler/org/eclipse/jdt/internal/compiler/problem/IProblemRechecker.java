@@ -21,10 +21,10 @@ package org.eclipse.jdt.internal.compiler.problem;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
 
-/** 
+/**
  * Protocol for rechecking problems that were detected early during compilation
  * but might later turn out to be false alarms.
- * 
+ *
  * @author stephan
  * @since 1.3.0
  */
@@ -34,7 +34,7 @@ public interface IProblemRechecker {
 	 * Answer whether a given problem should actually be reported.
 	 * Implementing classes are responsible for remembering enough context
 	 * so that checking can be performed.
-	 * 
+	 *
 	 * @param foundIrritants if reporting is suppressed by a suppress warnings annotation,
 	 *    the fact of suppression should be recorded in this array of irritant sets
 	 *    (cf. {@link CompilationUnitDeclaration#finalizeProblems()}).

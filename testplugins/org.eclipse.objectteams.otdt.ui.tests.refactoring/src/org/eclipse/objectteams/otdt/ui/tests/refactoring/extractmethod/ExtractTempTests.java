@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -38,7 +38,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * @author stephan
- * 
+ *
  */
 @SuppressWarnings("restriction")
 public class ExtractTempTests extends AbstractSelectionTestCase
@@ -60,12 +60,12 @@ public class ExtractTempTests extends AbstractSelectionTestCase
 	{
 		return _testSetup.getRoot();
 	}
-	
+
 	protected String getResourceLocation()
 	{
 		return "ExtractTemp/";
 	}
-	
+
 	protected String adaptName(String name)
 	{
 	    if (getName().startsWith("testFocusType"))
@@ -73,8 +73,8 @@ public class ExtractTempTests extends AbstractSelectionTestCase
 	        return super.adaptName(name);
 	    }
 		return name + "_" + getName() + ".java";
-	}	
-	
+	}
+
 	protected void performTest(
 	        int startLine,
 	        int startColumn,
@@ -85,12 +85,12 @@ public class ExtractTempTests extends AbstractSelectionTestCase
 	{
 		performTest(_testSetup.getStatementsPackage(),
 					new String[]{"T"},
-					startLine, 
-					startColumn, endLine, endColumn, 
-					COMPARE_WITH_OUTPUT, declareFinal, 
+					startLine,
+					startColumn, endLine, endColumn,
+					COMPARE_WITH_OUTPUT, declareFinal,
 					outputFolder);
 	}
-	
+
 	protected void performTest(
 	        IPackageFragment packageFragment,
 	        String[] ids,
@@ -103,7 +103,7 @@ public class ExtractTempTests extends AbstractSelectionTestCase
 	{
 		performTest(packageFragment, ids, startLine, startColumn, endLine, endColumn, mode, false, outputFolder);
 	}
-	
+
 	protected void performTest(
 	        IPackageFragment packageFragment,
 	        String[] ids,
@@ -134,24 +134,24 @@ public class ExtractTempTests extends AbstractSelectionTestCase
 				if (!status.isOK())
 					return;
 		}
-		
+
 		String out = null;
 		switch (mode)
 		{
 			case COMPARE_WITH_OUTPUT:
 			    out = getProofedContent(outputFolder, ids[0]);
-			    break;		
+			    break;
 		}
 		performTest(compUnits[0], refactoring, mode, out, true);
 	}
-	
+
     private ICompilationUnit[] createCUs(
             IPackageFragment packageFragment,
             String[] ids)
 		throws Exception
 	{
 	    ICompilationUnit[] cus = new ICompilationUnit[ids.length];
-	
+
 	    for (int idx = 0; idx < ids.length; idx++)
 	    {
 	        Assert.isNotNull(ids[idx]);
@@ -184,9 +184,9 @@ public class ExtractTempTests extends AbstractSelectionTestCase
 	            	false,
 	            	"statements_out");
     }
-	
+
 	// two element path, extracted is a dependent type
-	public void testTypeAnchor1() throws Exception 
+	public void testTypeAnchor1() throws Exception
 	{
 		performTest(15,13,15,18,
 					true,
@@ -194,7 +194,7 @@ public class ExtractTempTests extends AbstractSelectionTestCase
 	}
 
 	// three element path, extracted is not a dependent type
-	public void testTypeAnchor2() throws Exception 
+	public void testTypeAnchor2() throws Exception
 	{
 		performTest(21,13,21,20,
 					true,
@@ -202,7 +202,7 @@ public class ExtractTempTests extends AbstractSelectionTestCase
 	}
 
 	// three element path, extracted is a dependent type
-	public void testTypeAnchor3() throws Exception 
+	public void testTypeAnchor3() throws Exception
 	{
 		performTest(19,13,19,20,
 					true,

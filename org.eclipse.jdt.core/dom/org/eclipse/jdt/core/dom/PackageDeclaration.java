@@ -63,7 +63,7 @@ public class PackageDeclaration extends ASTNode {
 	public static final ChildListPropertyDescriptor MODIFIERS_PROPERTY =
 		new ChildListPropertyDescriptor(PackageDeclaration.class, "modifiers", IExtendedModifier.class, CYCLE_RISK); //$NON-NLS-1$
 // SH}
-	
+
 	/**
 	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),

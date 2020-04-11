@@ -211,7 +211,7 @@ public class AstConverter implements ClassFileConstants, ExtraCompilerModifiers,
 			fieldDeclaration.copyInheritanceSrc = fieldBinding.copyInheritanceSrc;
 		else
 			fieldDeclaration.copyInheritanceSrc = fieldBinding;
-		
+
 		AnnotationBinding[] annotBindings = fieldBinding.getAnnotations();
 		if (annotBindings != Binding.NO_ANNOTATIONS) {
 			ProblemReporter pr = fieldBinding.isStatic() ?
@@ -238,7 +238,7 @@ public class AstConverter implements ClassFileConstants, ExtraCompilerModifiers,
 						pr.unexpectedAnnotationStructure(annotTypeName, fieldBinding.name, gen.sourceStart, gen.sourceEnd);
 						hasAnnotationError = true;
 					} else
-					if (   numPairs == 1 
+					if (   numPairs == 1
 						&& CharOperation.equals(names[0], TypeConstants.VALUE)) {
 						annotDecls[i] = gen.singleMemberAnnotation(annotTypeName, values[0]);
 					} else {

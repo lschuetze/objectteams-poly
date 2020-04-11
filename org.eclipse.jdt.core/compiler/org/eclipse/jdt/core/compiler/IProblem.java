@@ -225,7 +225,7 @@
  *									VarLocalWithoutInitizalier
  *									VarLocalInitializedToNull
  *									VarLocalCannotBeArrayInitalizers
- *									VarLocalCannotBeLambda 
+ *									VarLocalCannotBeLambda
  *									VarLocalCannotBeMethodReference
  *									VarIsReserved
  *									VarIsReservedInFuture
@@ -380,7 +380,7 @@ void setSourceStart(int sourceStart);
 	/** @since 3.18 */
 	int Compliance = 0x00400000;
 	/** @since 3.20 */
-	int PreviewRelated = 0x00200000; 
+	int PreviewRelated = 0x00200000;
 
 	/**
 	 * Mask to use in order to filter out the category portion of the problem ID.
@@ -420,7 +420,7 @@ void setSourceStart(int sourceStart);
 	int TypeMismatch = TypeRelated + 17;
 	/** @since 3.0 */
 	int IndirectAccessToStaticType = Internal + TypeRelated + 18;
-	
+
 	/** @since 3.10 */
 	int ReturnTypeMismatch = TypeRelated + 19;
 
@@ -1581,7 +1581,7 @@ void setSourceStart(int sourceStart);
 	int IllegalModifierForEnum = TypeRelated + 750;
 	/** @since 3.1 */
 	int IllegalModifierForEnumConstant = FieldRelated + 751;
-	/** @deprecated - problem could not be reported, enums cannot be local takes precedence 
+	/** @deprecated - problem could not be reported, enums cannot be local takes precedence
 	 *   @since 3.1 */
 	int IllegalModifierForLocalEnum = TypeRelated + 752;
 	/** @since 3.1 */
@@ -1681,7 +1681,7 @@ void setSourceStart(int sourceStart);
 	/** @since 3.7.1 */
 	int AssignmentToResource = Internal + 872;
 	/** @since 3.7.1 */
-	int InvalidUnionTypeReferenceSequence = Internal + TypeRelated + 873; 
+	int InvalidUnionTypeReferenceSequence = Internal + TypeRelated + 873;
 	/** @since 3.7.1 */
 	int AutoManagedResourceNotBelow17 = Syntax + Internal + 874;
 	/** @since 3.7.1 */
@@ -1735,7 +1735,7 @@ void setSourceStart(int sourceStart);
 	int DisallowedTargetForContainerAnnotationType = TypeRelated + 898;
 	/** @since 3.10 */
 	int RepeatedAnnotationWithContainerAnnotation = TypeRelated + 899;
-	
+
 	/** @since 3.14 */
 	int AutoManagedVariableResourceNotBelow9 = Syntax + Internal + 1351;
 	/**
@@ -1749,7 +1749,7 @@ void setSourceStart(int sourceStart);
 	// associated with it
 	/** @since 3.2 */
 	int ExternalProblemFixable = 901;
-	
+
 	/** @since 3.10 */
 	int ContainerAnnotationTypeHasWrongValueType = TypeRelated + 902;
 	/** @since 3.10 */
@@ -1766,7 +1766,7 @@ void setSourceStart(int sourceStart);
 	int RepeatableAnnotationTypeIsInherited = TypeRelated + 908;
 	/** @since 3.10 */
 	int RepeatableAnnotationWithRepeatingContainerAnnotation = TypeRelated + 909;
-	
+
 	/**
 	 * Errors/warnings from annotation based null analysis
 	 */
@@ -1934,10 +1934,10 @@ void setSourceStart(int sourceStart);
 
 	/** @since 3.10 */
 	int DefaultMethodOverridesObjectMethod = MethodRelated + 1051;
-	
+
 	/** @since 3.10 */
 	int InheritedDefaultMethodConflictsWithOtherInherited = MethodRelated + 1052;
-	
+
 	/** @since 3.10 */
 	int DuplicateInheritedDefaultMethods = MethodRelated + 1053;
 
@@ -1953,14 +1953,14 @@ void setSourceStart(int sourceStart);
 	int IllegalDefaultModifierSpecification = MethodRelated + 1058;
 	/** @since 3.13 */
 	int CannotInferInvocationType = TypeRelated + 1059;
-	
-	
+
+
 	/** @since 3.13 */
 	int TypeAnnotationAtQualifiedName = Internal + Syntax + 1060;
 
 	/** @since 3.13 */
 	int NullAnnotationAtQualifyingType = Internal + Syntax + 1061;
-	
+
 	/** @since 3.14*/
 	int IllegalModifierForInterfaceMethod9 = MethodRelated + 1071;
 	/** @since 3.14*/
@@ -2064,7 +2064,7 @@ void setSourceStart(int sourceStart);
 	int UsingTerminallyDeprecatedModule = ModuleRelated + 1431;
 	/** @since 3.14 */
 	int UsingTerminallyDeprecatedSinceVersionModule = ModuleRelated + 1432;
-	
+
 	/** @since 3.14 */
 	int NotAccessibleType = TypeRelated + 1450;
 	/** @since 3.14 */
@@ -2092,13 +2092,13 @@ void setSourceStart(int sourceStart);
 
 	/** @since 3.13 */
 	int RedundantNullDefaultAnnotationLocal = Internal + 1062;
-	
+
 	/** @since 3.13 */
 	int RedundantNullDefaultAnnotationField = Internal + 1063;
-	
+
 	/** @since 3.10 */
 	int GenericInferenceError = 1100; 	// FIXME: This is just a stop-gap measure, be more specific via https://bugs.eclipse.org/404675
-	
+
 	/** @deprecated - problem is no longer generated (implementation issue has been resolved)
 	 * @since 3.10 */
 	int LambdaShapeComputationError = 1101;
@@ -2218,7 +2218,7 @@ void setSourceStart(int sourceStart);
 	int QualifiedReferenceToBaseclass			 = ROLE_RELATED + 1211; // 2.1.2(d)
 	int ParameterizedBaseclass                   = ROLE_RELATED + 1212; // 2.1.2(e)
 	int NonParameterizedBaseclass                = ROLE_RELATED + 1213; // 2.1.2(e)
-	
+
 	int DeprecatedBaseclass						 = ROLE_RELATED + 1299; // no OTJLD
 
 	// ==>> do not change these numbers: they are used from persisted state to determine if base imports are legal:
@@ -2231,7 +2231,7 @@ void setSourceStart(int sourceStart);
 	// <<==
 	int BaseImportFromSplitPackage				 = ROLE_RELATED + 1314; // OT/Equinox
 	int BaseImportFromSplitPackagePlural		 = ROLE_RELATED + 1315; // OT/Equinox
-	
+
 	int IllegalImplicitLower 					 = ROLE_RELATED + 2001; // 2.2(b)
 	int OmitCastForLowering 					 = ROLE_RELATED + 2002; // 2.2(b)
 	int UseTmpForLoweringInstanceof              = ROLE_RELATED + 2003; // 2.2(b)
@@ -2375,7 +2375,7 @@ void setSourceStart(int sourceStart);
 	int CallinOverriddenInTeam					 = CALLIN_RELATED + 1013; // 4.1(e)
 
 	int CallinToDeprecated						 = CALLIN_RELATED + 1099; // no OTJLD
-	
+
 	int CallinInNonRole                          = CALLIN_RELATED + 2001; // 4.2(d)
 	int CallinWithVisibility 	            	 = CALLIN_RELATED + 2002; // 4.2(d)
 	int CallToCallin                             = CALLIN_RELATED + 2003; // 4.2(d)
@@ -2468,7 +2468,7 @@ void setSourceStart(int sourceStart);
 //  ==== Joinpoint Queries: ====
 	int JP_RELATED = OTJ_RELATED + 8*OTCHAP;
 	// Chapter currently not in use
-	
+
 //  ==== Dependent Types: ====
 	int DEPENDENT_RELATED = OTJ_RELATED + 9*OTCHAP;
 	int AnchorReferenceNotAValue	             = DEPENDENT_RELATED +  210; // 9.2.1
@@ -2502,7 +2502,7 @@ void setSourceStart(int sourceStart);
 	/**
 	 * @since 3.8
 	 */
-	int IllegalModifierBeforeCallinLabel 		 = SYNTAX_RELATED + 3305; // A.3.3 // FIXME: annotations are still missing from OTJLD A.3.3  
+	int IllegalModifierBeforeCallinLabel 		 = SYNTAX_RELATED + 3305; // A.3.3 // FIXME: annotations are still missing from OTJLD A.3.3
 
 	int IllegalModifierInMethodSpecRight         = SYNTAX_RELATED + 3501; // A.3.5
 
@@ -2511,7 +2511,7 @@ void setSourceStart(int sourceStart);
 	int MissingPredicateExpression				 = SYNTAX_RELATED + 7001; // A.7.1
 
 	int ValueParamWrongPosition                  = SYNTAX_RELATED + 9001; // A.9(a)
-	
+
 	int SyntaxErrorSingleTypeReferenceExpected   = SYNTAX_RELATED + 9501; // 1.2.4(c) NOTE(SH): don't yet have a section "Expression" in §A.
 
 //  ==== LIMITATIONS: ====
@@ -2548,21 +2548,21 @@ void setSourceStart(int sourceStart);
 	int TryingToWeaveIntoSystemClass			 = LIMITATIONS +     26;
 
 	int DangerousCallinBinding 					 = LIMITATIONS +     27;
-	
+
 	int UnexpectedAnnotationStructure			 = LIMITATIONS + 	 28;
-	
+
 	int IncompatibleOTJByteCodeVersion			 = LIMITATIONS + 	 29;
 
 	int CallinBindingToInterface				 = LIMITATIONS + 	 30;
-	
+
 	int AbstractStaticMethodCalled 				 = LIMITATIONS +     31; // actually a sign of corrupt byte code
-	
+
 	/** @since 4.3 OT 2.2 */
 	int RoleFileMissingTeamDeclaration			 = LIMITATIONS + 	 32;
-	
+
 	/** @since 3.10 OT 2.3 */
 	int OtreCannotWeaveIntoJava8				 = LIMITATIONS + 	 33;
-	
+
 	/** @since 3.10 OT 2.3 */
 	int IncompatibleWeavingScheme				 = LIMITATIONS + 	 34;
 
@@ -2590,11 +2590,11 @@ void setSourceStart(int sourceStart);
 	/** @since 3.14 */
 	int VarLocalInitializedToNull = TypeRelated + 1504; // Variable initialized to ''null'' needs an explicit target-type
 	/** @since 3.14 */
-	int VarLocalInitializedToVoid = TypeRelated + 1505; // Variable initializer is ''void'' -- cannot infer variable type 
+	int VarLocalInitializedToVoid = TypeRelated + 1505; // Variable initializer is ''void'' -- cannot infer variable type
 	/** @since 3.14 */
 	int VarLocalCannotBeArrayInitalizers = TypeRelated + 1506; // Array initializer needs an explicit target-type
 	/** @since 3.14 */
-	int VarLocalCannotBeLambda = TypeRelated + 1507; // Lambda expression needs an explicit target-type 
+	int VarLocalCannotBeLambda = TypeRelated + 1507; // Lambda expression needs an explicit target-type
 	/** @since 3.14 */
 	int VarLocalCannotBeMethodReference = TypeRelated + 1508; // Method reference needs an explicit target-type
 	/** @since 3.14 */
@@ -2605,47 +2605,47 @@ void setSourceStart(int sourceStart);
 	int VarIsNotAllowedHere = Syntax + 1511; // ''var'' is not allowed here
 	/** @since 3.16 */
 	int VarCannotBeMixedWithNonVarParams = Syntax + 1512; // ''var'' cannot be mixed with explicit or implicit parameters
-	/** @since 3.18 
+	/** @since 3.18
 	 * @deprecated preview related error - will be removed
 	 * @noreference preview related error */
 	int SwitchExpressionsIncompatibleResultExpressionTypes = TypeRelated + 1600;
-	/** @since 3.18 
+	/** @since 3.18
 	 * @deprecated preview related error - will be removed
 	 * @noreference preview related error */
 	int SwitchExpressionsEmptySwitchBlock = Internal + 1601;
-	/** @since 3.18 
+	/** @since 3.18
 	 * @deprecated preview related error - will be removed
 	 * @noreference preview related error */
 	int SwitchExpressionsNoResultExpression = TypeRelated + 1602;
-	/** @since 3.18 
+	/** @since 3.18
 	 * @deprecated preview related error - will be removed
 	 * @noreference preview related error */
 	int SwitchExpressionSwitchLabeledBlockCompletesNormally = Internal + 1603;
-	/** @since 3.18 
+	/** @since 3.18
 	 * @deprecated preview related error - will be removed
 	 * @noreference preview related error */
 	int SwitchExpressionLastStatementCompletesNormally = Internal + 1604;
-	/** @since 3.18 
+	/** @since 3.18
 	 * @deprecated preview related error - will be removed
 	 * @noreference preview related error */
 	int SwitchExpressionTrailingSwitchLabels = Internal + 1605;
-	/** @since 3.18 
+	/** @since 3.18
 	 * @deprecated preview related error - will be removed
 	 * @noreference preview related error */
 	int switchMixedCase = Syntax + 1606;
-	/** @since 3.18 
+	/** @since 3.18
 	 * @deprecated preview related error - will be removed
 	 * @noreference preview related error */
 	int SwitchExpressionMissingDefaultCase = Internal + 1607;
-	/** @since 3.18 
+	/** @since 3.18
 	 * @deprecated preview related error - will be removed
 	 * @noreference preview related error */
 	int SwitchExpressionBreakMissingValue = Internal + 1610;
-	/** @since 3.18 
+	/** @since 3.18
 	 * @deprecated preview related error - will be removed
 	 * @noreference preview related error */
 	int SwitchExpressionMissingEnumConstantCase = Internal + 1611;
-	/** @since 3.18 
+	/** @since 3.18
 	 * @deprecated preview related error - will be removed
 	 * @noreference preview related error */
 	int SwitchExpressionIllegalLastStatement = Internal + 1612;

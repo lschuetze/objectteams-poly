@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -37,7 +37,7 @@ import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 public class OrdinaryInterfaceHierarchyTests extends FileBasedModelTest
 {
     private ITypeHierarchy _testObject;
-    
+
     private IType _superSuperInterface;
     private IType _superInterface1;
     private IType _superInterface2;
@@ -47,8 +47,8 @@ public class OrdinaryInterfaceHierarchyTests extends FileBasedModelTest
     private IType _subSubInterface2;
 
     private IType _javaLangObject;
-    
-    
+
+
     public OrdinaryInterfaceHierarchyTests(String name)
     {
         super(name);
@@ -64,27 +64,27 @@ public class OrdinaryInterfaceHierarchyTests extends FileBasedModelTest
 		junit.framework.TestSuite suite = new Suite(OrdinaryInterfaceHierarchyTests.class.getName());
         return suite;
     }
-    
+
     protected void setUp() throws Exception
     {
         super.setUp();
     }
-    
+
     public void setUpSuite() throws Exception
     {
         setTestProjectDir("Hierarchy");
         super.setUpSuite();
-        _focusInterface = 
+        _focusInterface =
             getType(getTestProjectDir(),
                 "src",
                 "standard.interface_hierarchy",
                 "AnInterface");
-        
+
         _testObject = new TypeHierarchy(_focusInterface, null, _focusInterface.getJavaProject(), true);
         _testObject.refresh(new NullProgressMonitor());
-        
+
         _javaLangObject = getJavaLangObject(_focusInterface.getJavaProject());
-        
+
         _superSuperInterface =
             getType(getTestProjectDir(),
                     "src",
@@ -115,9 +115,9 @@ public class OrdinaryInterfaceHierarchyTests extends FileBasedModelTest
                     "src",
                     "standard.interface_hierarchy",
                     "SubSubInterface2");
-        
+
     }
- 
+
     public void testExistence_SuperSuperInterface()
     	throws JavaModelException
 	{
@@ -166,8 +166,8 @@ public class OrdinaryInterfaceHierarchyTests extends FileBasedModelTest
 	    assertNotNull(_subSubInterface2);
 	    assertTrue(_subSubInterface2.exists());
 	}
-    
-    
+
+
     public void testGetAllTypes()
     		throws JavaModelException
 	{
@@ -181,51 +181,51 @@ public class OrdinaryInterfaceHierarchyTests extends FileBasedModelTest
 	            _subSubInterface1,
 	            _subSubInterface2};
 	    IType[] actual = _testObject.getAllTypes();
-	    
+
 	    assertEquals(expected.length, actual.length);
 	    assertTrue(compareTypes(expected, actual));
 	}
-    
+
     public void testGetAllClasses()
 		throws JavaModelException
 	{
 	    IType[] expected = new IType[] { _javaLangObject };
 	    IType[] actual = _testObject.getAllClasses();
-	    
+
 	    assertEquals(expected.length, actual.length);
 	    assertTrue(compareTypes(expected, actual));
 	}
-    
+
     public void testGetSuperclass_ofFocusInterface()
     {
         assertNull("Interfaces have no superclass", _testObject.getSuperclass(_focusInterface));
     }
-    
+
     public void testGetSubclass_ofFocusInterface()
     {
         IType[] actual = _testObject.getSubclasses(_focusInterface);
         IType[] expected = new IType[] {};
 
-        assertTrue(compareTypes(expected, actual));       
+        assertTrue(compareTypes(expected, actual));
     }
-    
+
     public void testGetSubtypes_ofFocusInterface()
     {
         IType[] expected = new IType[]{_subInterface};
         IType[] actual = _testObject.getSubtypes(_focusInterface);
-        
+
         assertEquals(expected.length, actual.length);
         assertTrue(compareTypes(expected, actual));
     }
-    
+
     public void testGetRootInterfaces()
     {
         IType[] actual = _testObject.getRootInterfaces();
         IType[] expected = new IType[] { _superInterface2, _superSuperInterface } ;
-        
-        assertTrue(compareTypes(expected, actual));       
+
+        assertTrue(compareTypes(expected, actual));
     }
-    
+
     public void testGetAllInterfaces_SevenInterfaces()
 		throws JavaModelException
 	{
@@ -238,11 +238,11 @@ public class OrdinaryInterfaceHierarchyTests extends FileBasedModelTest
 		        _subSubInterface1,
 		        _subSubInterface2};
 		IType[] actual = _testObject.getAllInterfaces();
-		
+
 		assertEquals(expected.length, actual.length);
 		assertTrue(compareTypes(expected, actual));
 	}
-    
+
     public void testGetAllSuperInterfaces_FiveParents()
 		throws JavaModelException
 	{
@@ -253,18 +253,18 @@ public class OrdinaryInterfaceHierarchyTests extends FileBasedModelTest
 		        _focusInterface,
 		        _subInterface };
 		IType[] actual = _testObject.getAllSuperInterfaces(_subSubInterface1);
-		
+
 		assertEquals(expected.length, actual.length);
 		assertTrue(compareTypes(expected, actual));
 	}
-    
+
     public void testGetExtendingInterfaces_OneChild()
 		throws JavaModelException
 	{
 		IType[] expected = new IType[]{ _superInterface1 };
 		IType[] actual = _testObject.getExtendingInterfaces(_superSuperInterface);
-		
+
 		assertEquals(expected.length, actual.length);
 		assertTrue(compareTypes(expected, actual));
-	}    
+	}
 }

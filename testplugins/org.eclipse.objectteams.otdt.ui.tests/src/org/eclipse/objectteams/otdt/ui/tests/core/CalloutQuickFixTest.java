@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -56,7 +56,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		super.addOptions(options);
 		options.put(OTDTPlugin.OT_COMPILER_INFERRED_CALLOUT, JavaCore.WARNING);
 	}
-	
+
 	/* Converting a field read to explicitly use a callout-to-field. */
 	@Test
 	public void testConvertFieldAccessToCalloutCall1() throws Exception {
@@ -69,7 +69,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        void foo(){\n");
@@ -78,7 +78,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cuteam);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cuteam, astRoot);
 		assertNumberOfProposals(proposals, 3);
@@ -86,7 +86,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 
 		String[] expectedProposals = new String[3];
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        int getVal() -> get int val;\n");
@@ -99,9 +99,9 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		expectedProposals[0] = buf.toString();
 
 		assertEquals("proposal label", "Configure problem severity", proposals.get(1).getDisplayString());
-		
+
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        @SuppressWarnings(\"inferredcallout\")\n");
@@ -115,7 +115,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		assertExpectedExistInProposals(proposals, expectedProposals);
 	}
 
-		
+
 	/* Converting a field read (this-qualified) to explicitly use a callout-to-field. */
 	@Test
 	public void testConvertFieldAccessToCalloutCall2() throws Exception {
@@ -128,7 +128,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        void foo(){\n");
@@ -137,16 +137,16 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cuteam);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cuteam, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
+
 		String[] expectedProposals = new String[3];
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        int getVal() -> get int val;\n");
@@ -161,7 +161,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		assertEquals("proposal label", "Configure problem severity", proposals.get(1).getDisplayString());
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        @SuppressWarnings(\"inferredcallout\")\n");
@@ -175,7 +175,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		assertExpectedExistInProposals(proposals, expectedProposals);
 
 	}
-	
+
 	/* Converting a field assignment to explicitly use a callout-to-field. */
 	@Test
 	public void testConvertFieldAccessToCalloutCall3() throws Exception {
@@ -188,7 +188,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        void foo(){\n");
@@ -197,16 +197,16 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cuteam);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cuteam, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
+
 		String[] expectedProposals = new String[3];
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        void setVal(int val) -> set int val;\n");
@@ -221,7 +221,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		assertEquals("proposal label", "Configure problem severity", proposals.get(1).getDisplayString());
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        @SuppressWarnings(\"inferredcallout\")\n");
@@ -235,7 +235,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		assertExpectedExistInProposals(proposals, expectedProposals);
 
 	}
-	
+
 	/* Converting a field assignment (this-qualified) to explicitly use a callout-to-field. */
 	@Test
 	public void testConvertFieldAccessToCalloutCall4() throws Exception {
@@ -248,7 +248,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        void foo(){\n");
@@ -257,16 +257,16 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cuteam);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cuteam, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
+
 		String[] expectedProposals = new String[3];
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        void setVal(int val) -> set int val;\n");
@@ -276,13 +276,13 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("		}\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		
+
 		expectedProposals[0] = buf.toString();
 
 		assertEquals("proposal label", "Configure problem severity", proposals.get(1).getDisplayString());
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        @SuppressWarnings(\"inferredcallout\")\n");
@@ -295,8 +295,8 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expectedProposals);
 	}
-	
-	
+
+
 	/* Convert field access to call to existing callout-to-field. */
 	@Test
 	public void testConvertFieldAccessToCalloutCall5() throws Exception {
@@ -309,7 +309,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        int getVal() -> get int val;\n");
@@ -320,17 +320,17 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cuteam);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cuteam, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
+
 		String[] expectedProposals = new String[3];
 
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        int getVal() -> get int val;\n");
@@ -345,7 +345,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		assertEquals("proposal label", "Configure problem severity", proposals.get(1).getDisplayString());
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        int getVal() -> get int val;\n");
@@ -373,7 +373,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        void setVal(int val) -> set int val;\n");
@@ -384,17 +384,17 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cuteam);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cuteam, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
+
 		String[] expectedProposals = new String[3];
 
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        void setVal(int val) -> set int val;\n");
@@ -409,7 +409,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		assertEquals("proposal label", "Configure problem severity", proposals.get(1).getDisplayString());
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        void setVal(int val) -> set int val;\n");
@@ -424,7 +424,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expectedProposals);
 	}
-	
+
 
 	/* Remove signatures from a callout to field. */
 	@Test
@@ -438,7 +438,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        abstract String getFoo();\n");
@@ -446,7 +446,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		int offset= buf.toString().indexOf("getFoo() -> get");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -456,7 +456,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 
 		String[] expectedProposals = new String[1];
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        abstract String getFoo();\n");
@@ -480,7 +480,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        abstract String getFoo(Boolean b);\n");
@@ -488,7 +488,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		int offset= buf.toString().indexOf("getFoo -> foo");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -498,7 +498,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 
 		String[] expectedProposals = new String[1];
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        abstract String getFoo(Boolean b);\n");
@@ -522,15 +522,15 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        abstract String getFoo();\n");
-		buf.append("		getFoo -> get foo;\n"); 
+		buf.append("		getFoo -> get foo;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		int offset= buf.toString().indexOf("getFoo -> get");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -540,7 +540,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 
 		String[] expectedProposals = new String[1];
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        abstract String getFoo();\n");

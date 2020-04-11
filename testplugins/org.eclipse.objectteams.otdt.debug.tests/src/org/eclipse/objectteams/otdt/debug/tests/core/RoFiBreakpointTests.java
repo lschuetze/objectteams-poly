@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2008 Technical University Berlin, Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Technical University Berlin - Initial API and implementation
  **********************************************************************/
@@ -29,17 +29,17 @@ public class RoFiBreakpointTests extends AbstractOTDTDebugTest {
 		super(name);
 	}
 
-	
-	
+
+
 	/**
 	 * Test breaking in a team method
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testBreakInTeamMethod1() throws Exception {
 		String typeName = "rofitests.RoFiTeam";
-		createLineBreakpoint(6, typeName);		
-		
+		createLineBreakpoint(6, typeName);
+
 		IJavaThread thread= null;
 		try {
 			thread= launchToBreakpoint(typeName);
@@ -53,21 +53,21 @@ public class RoFiBreakpointTests extends AbstractOTDTDebugTest {
 		} finally {
 			terminateAndRemove(thread);
 			removeAllBreakpoints();
-		}		
+		}
 	}
-	
-	
+
+
 	/**
 	 * Test breaking in a method of a role file.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testBreakInRoFiMethod1() throws Exception {
 		String typeName = "rofitests.RoFiTeam";
 		String roleName = "rofitests.RoFiTeam.RoFiRole";
 		String roleBinaryName = "rofitests.RoFiTeam$__OT__RoFiRole";
-		createLineBreakpoint(5, roleName);		
-		
+		createLineBreakpoint(5, roleName);
+
 		IJavaThread thread= null;
 		try {
 			thread= launchToBreakpoint(typeName);
@@ -76,22 +76,22 @@ public class RoFiBreakpointTests extends AbstractOTDTDebugTest {
 			assertEquals("Stopped in wrong type", roleBinaryName, type.getName());
 			String methodName = ((IJavaStackFrame)thread.getTopStackFrame()).getMethodName();
 			assertEquals("Stopped in wrong method", "doRolish", methodName);
-			
-			
+
+
 			assertEquals("Wrong source name", "RoFiRole.java", ((IJavaStackFrame)thread.getTopStackFrame()).getSourceName(ISMAPConstants.OTJ_STRATUM_NAME));
 //			IPackageFragmentRoot root = getPackageFragmentRoot(getJavaProject(), "src");
 //			IJavaSourceLocation location = new PackageFragmentRootSourceLocation(root);
 //			String[] javaSourcePaths = type.getSourcePaths("java");
 //			String[] otjSourcePaths = type.getSourcePaths(ISMAPConstants.OTJ_STRATUM_NAME);
 //			System.out.println("j:"+javaSourcePaths.length+", otj:"+otjSourcePaths.length);
-//			
+//
 //			ICompilationUnit cu = (ICompilationUnit) location.findSourceElement(otjSourcePaths[0]);
 //			assertNotNull("CU should not be null", cu);
 //			assertTrue("CU should exist", cu.exists());
 		} finally {
 			terminateAndRemove(thread);
 			removeAllBreakpoints();
-		}		
+		}
 	}
-	
+
 }

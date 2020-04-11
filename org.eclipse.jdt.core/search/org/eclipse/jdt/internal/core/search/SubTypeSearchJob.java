@@ -40,7 +40,7 @@ public Index[] getIndexes(IProgressMonitor progressMonitor) {
 	Index[] values = new Index[this.indexes.elementSize];
 	this.indexes.asArray(values);
 	return values;
-}	
+}
 @Override
 public boolean search(Index index, IProgressMonitor progressMonitor) {
 	if (index == null) return COMPLETE;

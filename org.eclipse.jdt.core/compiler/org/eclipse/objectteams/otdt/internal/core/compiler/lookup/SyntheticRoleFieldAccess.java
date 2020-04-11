@@ -83,7 +83,7 @@ public class SyntheticRoleFieldAccess extends SyntheticOTTargetMethod {
 
 	public SyntheticRoleFieldAccess(FieldBinding targetField, boolean isReadAccess, SourceTypeBinding declaringClass) {
 		super(targetField, isReadAccess, false, declaringClass);
-		
+
 		if (targetField.declaringClass instanceof SourceTypeBinding && ((SourceTypeBinding)targetField.declaringClass).scope != null) {
 			FieldDeclaration sourceField = targetField.sourceField();
 			if (sourceField != null) {

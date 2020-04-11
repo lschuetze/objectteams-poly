@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2014 GK Software AG
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -34,7 +34,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 /**
  * A synthetic method binding, which used as an invocation target needs to
  * influence code generation.
- * 
+ *
  * @since 2.3.1
  */
 public abstract class SyntheticOTTargetMethod extends SyntheticMethodBinding {
@@ -42,7 +42,7 @@ public abstract class SyntheticOTTargetMethod extends SyntheticMethodBinding {
 	protected SyntheticOTTargetMethod(MethodBinding targetMethod, int purpose) {
 		super(targetMethod, purpose);
 	}
-	
+
 	protected SyntheticOTTargetMethod(FieldBinding targetField, boolean isReadAccess, boolean isSuperAccess, SourceTypeBinding declaringClass) {
 		super(targetField, isReadAccess, isSuperAccess, declaringClass);
 	}
@@ -59,7 +59,7 @@ public abstract class SyntheticOTTargetMethod extends SyntheticMethodBinding {
 	 * 						invoke still needs to be generated.
 	 */
 	public abstract byte prepareOrGenerateInvocation(CodeStream codeStream, byte opcode);
-	
+
 	/**
 	 * Represents an inferred callout-to-field.
 	 * May need to tweak invokestatic (for regular access$n methods) into invokevirtual (for the generated c-t-f method).
@@ -76,7 +76,7 @@ public abstract class SyntheticOTTargetMethod extends SyntheticMethodBinding {
 			return opcode;
 		}
 	}
-	
+
 	/**
 	 * Represents a decapsulating field access while targeting OTDRE.
 	 * We need to generate a special sequence to call _OT$access(int,int,Object[],ITeam)
@@ -91,7 +91,7 @@ public abstract class SyntheticOTTargetMethod extends SyntheticMethodBinding {
 		private TypeBinding originalType;
 		private ASTNode site;
 		private BlockScope scope;
-		
+
 		/**
 		 * Create a binding for a field access using decapsulation.
 		 * @param fakedMethod this method is member of the base class, representing the otdre-generated access method.
@@ -122,7 +122,7 @@ public abstract class SyntheticOTTargetMethod extends SyntheticMethodBinding {
 			else
 				codeStream.iconst_1();
 			// no args to pack for read access:
-			codeStream.aconst_null(); 
+			codeStream.aconst_null();
 			// enclosing team instance:
 			Object[] emulationPath = this.scope.getEmulationPath(this.enclosingTeam, true /*only exact match*/, false/*consider enclosing arg*/);
 			codeStream.generateOuterAccess(emulationPath, this.site, this.enclosingTeam, this.scope);
@@ -156,7 +156,7 @@ public abstract class SyntheticOTTargetMethod extends SyntheticMethodBinding {
 		private TypeBinding originalReturnType;
 		private ASTNode site;
 		private BlockScope scope;
-		
+
 		/**
 		 * Create a binding for a method access using decapsulation.
 		 * @param targetMethod this method is member of the base class, representing the otdre-generated access method.
@@ -214,7 +214,7 @@ public abstract class SyntheticOTTargetMethod extends SyntheticMethodBinding {
 			codeStream.bipush((byte) this.accessId);
 			codeStream.swap();
 			// accessId, array
-			
+
 			// opKind (ignored):
 			codeStream.iconst_0();
 			codeStream.swap();

@@ -182,7 +182,7 @@ ExternalAnnotationStatus getExternalAnnotationStatus();
  * Answers the "real" binary type for the given binary type.
  * By default this is an identity transformation.
  * Only IndexBinaryType will retrieve the bytes from disk to answer a fresh ClassFileReader.
- * @throws Exception 
+ * @throws Exception
  */
 default IBinaryType withClassBytes() throws Exception {
 	return this;

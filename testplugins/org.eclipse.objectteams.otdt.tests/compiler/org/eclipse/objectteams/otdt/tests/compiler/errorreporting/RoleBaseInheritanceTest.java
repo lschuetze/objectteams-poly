@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -26,7 +26,7 @@ import org.eclipse.objectteams.otdt.tests.compiler.TestBase;
 
 /**
  * Tests the relationship between role and base classes.
- * 
+ *
  * @author kaschja
  * @version $Id: RoleBaseInheritanceTest.java 23494 2010-02-05 23:06:44Z stephan $
  */
@@ -40,7 +40,7 @@ public class RoleBaseInheritanceTest extends TestBase
     /**
 	 * A role class must not be bound to a non-existing base class.
 	 */
-	public void testBindingOfNonExistingBaseClass1() 
+	public void testBindingOfNonExistingBaseClass1()
 	{
 		createFile("MyTeam","public team class MyTeam " +
 			  NL + "{ " +
@@ -48,27 +48,27 @@ public class RoleBaseInheritanceTest extends TestBase
 		      NL + "    { " +
 			  NL + "	} " +
 			  NL + "}");
-	
+
 		compileFile("MyTeam");
-	
+
 		assertFalse(isCompilationSuccessful());
 	}
-	
+
 	/**
-	 * A regular class (non-team) must not be bound to a base class. 
+	 * A regular class (non-team) must not be bound to a base class.
 	 */
 	public void testBindingRegularClassWithBaseClass1()
 	{
 		createFile("MyBase","public class MyBase {}");
-		
+
 		createFile("MyClass","public class MyClass " +
 				NL + "{" +
 				NL + "		class MyRole playedBy MyBase {}" +
 				NL + "}");
-				
-        compileFile("MyClass");    
-                    
-		assertFalse(isCompilationSuccessful());	
+
+        compileFile("MyClass");
+
+		assertFalse(isCompilationSuccessful());
 	}
 
 	/**
@@ -83,12 +83,12 @@ public class RoleBaseInheritanceTest extends TestBase
 			  NL + "    { " +
 			  NL + "	} " +
 			  NL + "}");
-	
+
 		compileFile("MyTeam");
-	
-		assertFalse(isCompilationSuccessful());		
+
+		assertFalse(isCompilationSuccessful());
 	}
-	
+
 	/**
 	 * A role class must not be bound to an array.
 	 * In this testing sample the array element type is the primitive type int.
@@ -101,12 +101,12 @@ public class RoleBaseInheritanceTest extends TestBase
 			  NL + "    { " +
 			  NL + "	} " +
 			  NL + "}");
-	
+
 		compileFile("MyTeam");
-	
-		assertFalse(isCompilationSuccessful());		
+
+		assertFalse(isCompilationSuccessful());
 	}
-	
+
 	/**
 	 * A role class must not be bound to an array.
 	 * In this testing sample the array element type is a class type.
@@ -114,20 +114,20 @@ public class RoleBaseInheritanceTest extends TestBase
 	public void testBindingOfArrayType2()
 	{
 		createFile("MyBase", "public class MyBase{}");
-		
+
 		createFile("MyTeam","public team class MyTeam " +
 			  NL + "{ " +
 			  NL + "	class MyRole playedBy MyBase[] " +
 			  NL + "    { " +
 			  NL + "	} " +
 			  NL + "}");
-	
+
 		compileFile("MyTeam");
-	
-		assertFalse(isCompilationSuccessful());		
+
+		assertFalse(isCompilationSuccessful());
 	}
-	
-		
+
+
 	/**
 	 * A role class must not be bound to a base class
 	 * if both classes have identical names
@@ -136,21 +136,21 @@ public class RoleBaseInheritanceTest extends TestBase
 	public void testBindingWithNamingClash1()
 	{
 		createFile("Role", "public class Role{}");
-		
+
 		createFile("MyTeam","public team class MyTeam " +
 			  NL + "{ " +
 			  NL + "	class Role playedBy Role " +
 			  NL + "    { " +
 			  NL + "	} " +
 			  NL + "}");
-	
-		compileFile("MyTeam");
-	
-		assertFalse(isCompilationSuccessful());		
-	}
-	
 
-//TODO fix problem with creating packages with method TestBase.createFile	
+		compileFile("MyTeam");
+
+		assertFalse(isCompilationSuccessful());
+	}
+
+
+//TODO fix problem with creating packages with method TestBase.createFile
 	/**
 	 * A role class must not be bound to a base class
 	 * if both classes have identical names
@@ -159,7 +159,7 @@ public class RoleBaseInheritanceTest extends TestBase
 //	public void testBindingWithNamingClash2()
 //	{
 //		createFile("basepackage/Role", "package basepackage;\npublic class Role{}");
-//		
+//
 //		createFile("teampackage/MyTeam",
 //                   "package teampackage;" +
 //			  NL + "public team class MyTeam " +
@@ -168,12 +168,12 @@ public class RoleBaseInheritanceTest extends TestBase
 //			  NL + "    { " +
 //			  NL + "	} " +
 //			  NL + "}");
-//	
+//
 //		compileFile("MyTeam");
-//	
-//		assertFalse(isCompilationSuccessful());		
-//	}	
-	
+//
+//		assertFalse(isCompilationSuccessful());
+//	}
+
 	/**
 	 * A role class must not be bound to a base class
 	 * if there is another role in the same team
@@ -182,7 +182,7 @@ public class RoleBaseInheritanceTest extends TestBase
 	public void testBindingWithNamingClash3()
 	{
 		createFile("RoleB", "public class RoleB{}");
-		
+
 		createFile("MyTeam","public team class MyTeam " +
 			  NL + "{ " +
 			  NL + "	class RoleA playedBy RoleB" +
@@ -190,13 +190,13 @@ public class RoleBaseInheritanceTest extends TestBase
 			  NL + "	} " +
 		      NL + "	class RoleB" +
 			  NL + "    { " +
-			  NL + "	} " + 			  
+			  NL + "	} " +
 			  NL + "}");
-	
+
 		compileFile("MyTeam");
-	
-		assertFalse(isCompilationSuccessful());		
-	}	
+
+		assertFalse(isCompilationSuccessful());
+	}
 
 	/**
 	 * A role class must not be bound to a base class
@@ -211,21 +211,21 @@ public class RoleBaseInheritanceTest extends TestBase
 			  NL + "{ " +
 			  NL + "	class RoleB" +
 			  NL + "    { " +
-			  NL + "	} " +		  
+			  NL + "	} " +
 			  NL + "}");
-		
+
 		createFile("Subteam","public team class Subteam extends Superteam" +
 			  NL + "{ " +
 			  NL + "	class RoleA playedBy RoleB" +
 			  NL + "    { " +
-			  NL + "	} " +  
+			  NL + "	} " +
 			  NL + "}");
-	
+
 		compileFile("Subteam");
-	
-		assertFalse(isCompilationSuccessful());		
-	}	
-	
+
+		assertFalse(isCompilationSuccessful());
+	}
+
 	/**
 	 * A role class must not be bound to a base class
 	 * if there is a role in a subteam
@@ -234,23 +234,23 @@ public class RoleBaseInheritanceTest extends TestBase
 	public void testBindingWithNamingClash5()
 	{
 		createFile("RoleB", "public class RoleB{}");
-		
+
 		createFile("Superteam","public team class Superteam " +
 			  NL + "{ " +
 			  NL + "	class RoleA playedBy RoleB" +
 			  NL + "    { " +
-			  NL + "	} " +		  
+			  NL + "	} " +
 			  NL + "}");
-			  
+
 		createFile("Subteam","public team class Subteam extends Superteam" +
 			  NL + "{ " +
 			  NL + "	class RoleB" +
 			  NL + "    { " +
-			  NL + "	} " +		  
-			  NL + "}");			  
+			  NL + "	} " +
+			  NL + "}");
 
 		compileFile("Subteam");
-	
-		assertFalse(isCompilationSuccessful());		
-	}				
+
+		assertFalse(isCompilationSuccessful());
+	}
 }

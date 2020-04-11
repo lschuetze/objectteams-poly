@@ -122,7 +122,7 @@ public class AnchorMapping {
      * a list of parameters. This means to propagate type anchors into all role types.
      * @param scope          For resolving names.
      * @param parameters     formal parameters of 'currentMethod' - to be instantiated from this anchor mapping
-     * @param currentMethod  a candidate for the current method call - can be null when checking method mappings 
+     * @param currentMethod  a candidate for the current method call - can be null when checking method mappings
      * @return new array or 'parameters'
      */
    public static TypeBinding[] instantiateParameters(Scope scope, TypeBinding[] parameters, MethodBinding currentMethod)
@@ -137,7 +137,7 @@ public class AnchorMapping {
    {
 	   if (this._arguments != null && this._arguments.length != parameters.length)
 		   return parameters; // don't bother to instantiate if lenghts disagree (=> varargs and param-anchored types don't work together)
-	   
+
    	   if (scope == null)
    	   	   scope = this._scope; // scope would be more specific but _scope is OK, too.
        TypeBinding[] newParams = null;
@@ -158,10 +158,10 @@ public class AnchorMapping {
     	   return newParams;
        return parameters;
    }
-   // PRE: this._arguments != null => this._arguments.length == parameters.length 
+   // PRE: this._arguments != null => this._arguments.length == parameters.length
    private TypeBinding instantiateParameter(final Scope scope, final TypeBinding parameter, final int i, final MethodBinding currentMethod, final boolean isMethodEnhanced)
    {
-	   return RoleTypeCreator.deepSubstitute(parameter, scope.environment(), 
+	   return RoleTypeCreator.deepSubstitute(parameter, scope.environment(),
 			   	new IDependentTypeSubstitution() {
 					@Override
 					@SuppressWarnings("synthetic-access")
@@ -170,11 +170,11 @@ public class AnchorMapping {
 						ITeamAnchor anchor = null;
 						if (AnchorMapping.this._arguments != null)
 							anchor = translateAnchor(scope, AnchorMapping.this._arguments[srcIdx], paramDependentType, currentMethod);
-						
+
 						// missing a required anchor?
 						if (anchor == null && paramDependentType.hasAnchorWithinThisMethodsSignature(currentMethod))
 							return new ProblemReferenceBinding(paramDependentType.sourceName(), ProblemReasons.AnchorNotFound, paramDependentType);
-						
+
 						if (anchor == null && AnchorMapping.this._receiver != null)
 						{
 							if (DependentTypeBinding.isDependentTypeOf(
@@ -196,7 +196,7 @@ public class AnchorMapping {
 								}
 							}
 							if (DependentTypeBinding.isDependentTypeVariable(currentMethod.parameters[i])) {
-								TypeVariableBinding typeVariable = (TypeVariableBinding) ((DependentTypeBinding)currentMethod.parameters[i]).type; 
+								TypeVariableBinding typeVariable = (TypeVariableBinding) ((DependentTypeBinding)currentMethod.parameters[i]).type;
 								ITeamAnchor[] anchors = typeVariable.anchors;
 								if (anchors != null && anchors[0] instanceof LocalVariableBinding) { // FIXME(SH): more positions?
 									int pos = ((LocalVariableBinding)anchors[0]).resolvedPosition;
@@ -213,8 +213,8 @@ public class AnchorMapping {
 					}
 				});
    }
-   
-   private ITeamAnchor translateAnchor(Scope scope, ASTNode typedNode, DependentTypeBinding paramDependentType, MethodBinding currentMethod) 
+
+   private ITeamAnchor translateAnchor(Scope scope, ASTNode typedNode, DependentTypeBinding paramDependentType, MethodBinding currentMethod)
    {
 	   ProblemReporter problemReporter = scope != null ? scope.problemReporter() : null;
 	   ITeamAnchor anchor = null;
@@ -230,7 +230,7 @@ public class AnchorMapping {
 						roleType,               // roleType
 						problemReporter,		//
 						typedNode);         	// typedNode
-	       else // when resolving a method spec, we interpret an Argument as an anchor expression 
+	       else // when resolving a method spec, we interpret an Argument as an anchor expression
 	       		anchor = ((Argument)anchorExpr).binding;
 
 	   } else if (paramDependentType._teamAnchor instanceof TThisBinding)
@@ -267,7 +267,7 @@ public class AnchorMapping {
 	   return anchor;
    }
 
-   // if anchor is valid return it otherwise null 
+   // if anchor is valid return it otherwise null
    private ITeamAnchor validAnchor(ITeamAnchor anchor) {
 	   if (  (anchor != null)
 		   && (anchor != RoleTypeBinding.NoAnchor)
@@ -307,13 +307,13 @@ public class AnchorMapping {
    		}
    		return false;
    }
-   
+
    /** Is 'instantiation' a legal instantiation for 'typeVariable' in terms of team anchors? */
    public static boolean isLegalInstantiation(TypeVariableBinding typeVariable, DependentTypeBinding instantiation) {
   		AnchorMapping currentMapping = currentMappings.get();
   		if (currentMapping != null)
   			return currentMapping.internalIsLegalInstantiation(typeVariable, instantiation);
-		return false;	   
+		return false;
    }
    private boolean internalIsLegalInstantiation(TypeVariableBinding typeVariable, DependentTypeBinding instantiation) {
 	   ITeamAnchor[] anchors = typeVariable.anchors;
@@ -327,10 +327,10 @@ public class AnchorMapping {
 	   return false;
    }
 
-   private boolean areTypeEqual(RoleTypeBinding role1, RoleTypeBinding role2, MethodBinding currentMethod) 
+   private boolean areTypeEqual(RoleTypeBinding role1, RoleTypeBinding role2, MethodBinding currentMethod)
    {
 	   	ITeamAnchor anchor = translateAnchor(null/*scope*/, null/*node*/, role1, currentMethod);
-	
+
 		if (anchor != null)
 			return role2.isSameType(role1, anchor);
 
@@ -385,7 +385,7 @@ public class AnchorMapping {
 					}
 				} else if (   loweringPossible 							// if we detected lowering possible before, recheck here
 							&& arguments[i].resolvedType != null
-						    && arguments[i].resolvedType.isRoleType()) 
+						    && arguments[i].resolvedType.isRoleType())
 				{
 					((DependentTypeBinding)arguments[i].resolvedType).recheckAmbiguousLowering(parameters[i], arguments[i], scope, messageSend.binding);
 				}

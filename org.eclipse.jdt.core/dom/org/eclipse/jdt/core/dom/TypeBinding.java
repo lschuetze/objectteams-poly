@@ -245,7 +245,7 @@ class TypeBinding implements ITypeBinding {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public ITypeBinding getGenericTypeOfWildcardType() {
 		switch (this.binding.kind()) {
@@ -258,7 +258,7 @@ class TypeBinding implements ITypeBinding {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public int getRank() {
 		switch (this.binding.kind()) {
@@ -270,7 +270,7 @@ class TypeBinding implements ITypeBinding {
 				return -1;
 		}
 	}
-	
+
 	@Override
 	public ITypeBinding getComponentType() {
 		if (!isArray()) {
@@ -538,12 +538,12 @@ class TypeBinding implements ITypeBinding {
 			return this.resolver.getTypeBinding(((ParameterizedTypeBinding)this.binding).genericType());
 		return this.resolver.getTypeBinding(this.binding.unannotated());
 	}
-	
+
 	@Override
 	public ITypeBinding getErasure() {
 		return this.resolver.getTypeBinding(this.binding.erasure());
 	}
-	
+
 	@Override
 	public IMethodBinding getFunctionalInterfaceMethod() {
 		Scope scope = this.resolver.scope();
@@ -646,7 +646,7 @@ class TypeBinding implements ITypeBinding {
 		return this.interfaces = NO_TYPE_BINDINGS;
 //{ObjectTeams: conclude try-with-resources from above
 	  }
-// SH}	
+// SH}
 	}
 
 	private ITypeBinding[] getIntersectingTypes() {
@@ -1186,7 +1186,7 @@ class TypeBinding implements ITypeBinding {
 
 	@Override
 	public boolean isAssignmentCompatible(ITypeBinding type) {
-//{ObjectTeams: prepare for calling into the compiler (isCompatibleWith(..)) 
+//{ObjectTeams: prepare for calling into the compiler (isCompatibleWith(..))
 		// save and reset flags:
     	Config oldConfig = Config.createOrResetConfig(this);
 // orig:
@@ -1255,7 +1255,7 @@ class TypeBinding implements ITypeBinding {
 	public boolean isEnum() {
 		return this.binding.isEnum();
 	}
-	
+
 	@Override
 	public boolean isRecord() {
 		return this.binding.isRecord();

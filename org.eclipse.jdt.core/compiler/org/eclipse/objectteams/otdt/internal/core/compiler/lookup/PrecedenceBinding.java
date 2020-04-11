@@ -393,7 +393,7 @@ public class PrecedenceBinding extends Binding {
 				names[i] = "<unresolved>".toCharArray(); //$NON-NLS-1$
 			else if (this.elements[i].kind() == Binding.BINDING)
 				names[i] = ((CallinCalloutBinding)this.elements[i]).name;
-			else 
+			else
 				names[i] = ((ReferenceBinding)this.elements[i]).sourceName();
 		}
 		return CharOperation.concatWith(names, ',');

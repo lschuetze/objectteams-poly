@@ -143,7 +143,7 @@ public abstract class HierarchyBuilder {
 			IType superclassHandle,
 			IType[] tsuperclassHandles,
 			boolean[] arePhantoms,
-			IType[] superinterfaceHandles) 
+			IType[] superinterfaceHandles)
 	{
 		connect(type, typeHandle, superclassHandle, superinterfaceHandles);
 	}

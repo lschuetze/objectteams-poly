@@ -905,14 +905,14 @@ public final int getNextChar(char testedChar1, char testedChar2) {
 }
 /*
  * This method consumes digits as well as underscores if underscores are located between digits
- * @throws InvalidInputException if underscores are not located between digits or if underscores are used in source < 1.7 
+ * @throws InvalidInputException if underscores are not located between digits or if underscores are used in source < 1.7
  */
 private final void consumeDigits(int radix) throws InvalidInputException {
 	consumeDigits(radix, false);
 }
 /*
  * This method consumes digits as well as underscores if underscores are located between digits
- * @throws InvalidInputException if underscores are not located between digits or if underscores are used in source < 1.7 
+ * @throws InvalidInputException if underscores are not located between digits or if underscores are used in source < 1.7
  */
 private final void consumeDigits(int radix, boolean expectingDigitFirst) throws InvalidInputException {
 	final int USING_UNDERSCORE = 1;
@@ -1432,7 +1432,7 @@ public int getNextToken() throws InvalidInputException {
 							return TokenNameMINUS_EQUAL;
 // FIXME:
 						if (getNextChar('>'))
-							return TokenNameARROW;				
+							return TokenNameARROW;
 //{ObjectTeams: check for callout binding after '-' tokens
 						else {
 							if (test < 0 && this._isOTSource)
@@ -2214,7 +2214,7 @@ public final void jumpOverMethodBody() {
 											firstClosingBrace = this.currentPosition;
 										break;
 									case '\r' :
-										if (this.source[this.currentPosition] == '\n') 
+										if (this.source[this.currentPosition] == '\n')
 											this.currentPosition++;
 										//$FALL-THROUGH$
 									case '\n' :

@@ -731,9 +731,9 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 			&& !OTNameUtils.isTSuperMarkerInterface(name))
 		{
 			ReferenceBinding tsuperRole = superTeam.getMemberType(name);
-			if ((tsuperRole == null || 
+			if ((tsuperRole == null ||
 					(!tsuperRole.isValidBinding() && tsuperRole.problemId() == ProblemReasons.NotFound))
-				&& superTeam instanceof SourceTypeBinding) 
+				&& superTeam instanceof SourceTypeBinding)
 			{
 				TypeDeclaration tsuperDecl = internalCheckCopyLateRoleFile(((SourceTypeBinding)superTeam), name);
 				if (tsuperDecl != null)
@@ -839,7 +839,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 		subTeam.copyAttributeFrom(superTeam.getTeamModel(), OTDynCallinBindingsAttribute.ATTRIBUTE_NAME);
 		OTSpecialAccessAttribute attrib = (OTSpecialAccessAttribute)superTeam.getTeamModel().getAttribute(IOTConstants.OTSPECIAL_ACCESS);
 		if (attrib != null)
-			attrib.addFieldAccessesTo(subTeam);		
+			attrib.addFieldAccessesTo(subTeam);
 	}
 	/**
 	 * If adjustSuperinterfaces updates a superinterface, we will check compatibility,
@@ -974,9 +974,9 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	        // Synthetic methods are not read from byte code.
 	    	// FIXME(SH): this last note is not true any more.
 
-	    if (   targetRoleDecl.isTeam() 
-	    	&& 
-			   (   ReflectionGenerator.isReflectionMethod(method) 
+	    if (   targetRoleDecl.isTeam()
+	    	&&
+			   (   ReflectionGenerator.isReflectionMethod(method)
 				|| SerializationGenerator.isSerializationMethod(method)))
 	    	return;
 	    if (MethodModel.isFakedMethod(method))
@@ -1105,14 +1105,14 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 
 		    if (methodFound != null)
 		        TSuperHelper.addMarkerArg(newMethodDecl, srcTeam);
-	
+
 		    if(newMethodDecl.isConstructor()){
 		        // comments (SH):
 		        // other phases may depend on this field (constructorCall) being set,
 		        // although it carries no real information.
 		        ConstructorDeclaration cd = (ConstructorDeclaration)newMethodDecl;
 		        cd.constructorCall = SuperReference.implicitSuperConstructorCall();
-	
+
 		        if (   Lifting.isLiftingCtor(method)
 			    	&& method.parameters[0].isRole())
 			    {
@@ -1317,7 +1317,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
     			MethodBinding dstOrigMethod = ConstantPoolObjectMapper.mapMethod(srcMethod, srcMethod.targetMethod, null, targetTeamDecl.binding);
     			if (dstOrigMethod.isCallin())
     				dstMethod = tgtTypeDecl.binding.addSyntheticBaseCallSurrogate(dstOrigMethod);
-    			else 
+    			else
     				dstMethod = tgtTypeDecl.binding.addSyntheticMethod(dstOrigMethod, isSuperAccess);
     			break;
     		case SyntheticMethodBinding.BridgeMethod:
@@ -1413,7 +1413,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
                 AstConverter.createField(field, roleDeclaration, gen);
         AstEdit.addField(roleDeclaration,fieldDeclaration, true, false/*typeProblem*/, false);
         if (fieldDeclaration.binding != null) {
-        	fieldDeclaration.binding.modifiers |= ExtraCompilerModifiers.AccLocallyUsed; 
+        	fieldDeclaration.binding.modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
         	fieldDeclaration.binding.modifiers |= (field.modifiers&ExtraCompilerModifiers.AccBlankFinal); // BlankFinal was omitted on the fieldDecl
         }
 
@@ -1721,7 +1721,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 			}
 		}
 	}
-	
+
 	public static class RoleConstructorCall extends MessageSend {
     	public AllocationExpression allocationOrig;
 
@@ -2221,7 +2221,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
             if (newType != argument.type)
             {
                 changed = true;
-                
+
                 newType.setBaseclassDecapsulation(argument.type.getBaseclassDecapsulation());
 
                 // local variable:

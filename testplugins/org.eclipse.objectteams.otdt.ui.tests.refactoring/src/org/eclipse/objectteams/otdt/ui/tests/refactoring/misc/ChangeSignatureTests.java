@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010 GK Software AG
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -50,12 +50,12 @@ import org.eclipse.objectteams.otdt.ui.tests.refactoring.RefactoringTest;
  * Some helper methods in this class have been inspired by the test class
  * <code>ChangeSignatureTests</code> in the test suite
  * <code>org.eclipse.jdt.ui.tests.refactoring</code> provided by Eclipse JDT.
- * 
+ *
  * @author stephan
  */
 @SuppressWarnings("restriction")
 public class ChangeSignatureTests extends RefactoringTest {
-	
+
     private static final String REFACTORING_PATH = "ChangeSignature/";
 
 	public ChangeSignatureTests(String name) {
@@ -170,7 +170,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	void helperDelete(ICompilationUnit cu, IType declaringClass, String[] signature, int[] deleteIndices, boolean createDelegate, String expectedInfo)
-			  throws JavaModelException, CoreException, Exception, IOException 
+			  throws JavaModelException, CoreException, Exception, IOException
 	{
 		IMethod method = declaringClass.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
@@ -202,7 +202,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	void helperRename(ICompilationUnit cu, IType declaringClass, String[] signature, int idx, String oldName, String newName, String expectedInfo)
-			  throws JavaModelException, CoreException, Exception, IOException 
+			  throws JavaModelException, CoreException, Exception, IOException
 	{
 		IMethod method = declaringClass.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
@@ -234,7 +234,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	// from RenameTempTests with adaptation:
 	private void helperRegularRename(String newName, boolean updateReferences, IJavaElement element, ICompilationUnit cu,
 			// new for OT: don't use automatic outfile name
-			String outFileName) 
+			String outFileName)
 					throws Exception
 	{
 		assertTrue(element.getClass().toString(), element instanceof ILocalVariable);
@@ -340,7 +340,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 			assertNotNull("precondition was supposed to have an error", result);
 			assertFalse("result was not supposed to be OK", result.isOK());
 		} else {
-			assertEquals("precondition was supposed to pass", null, result);			
+			assertEquals("precondition was supposed to pass", null, result);
 		}
 
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
@@ -446,7 +446,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperRename(cu, teamType, new String[]{"QA;"}, 0, "arg", "renamed", null);
 	}
 
-	// simulate performing the same operation as testRename01() triggered by Shift-Alt-R: 
+	// simulate performing the same operation as testRename01() triggered by Shift-Alt-R:
 	public void testRename01a() throws Exception {
 		boolean canRename = true;
 		String simpleTestFileName = "A_testRename01_in.java";

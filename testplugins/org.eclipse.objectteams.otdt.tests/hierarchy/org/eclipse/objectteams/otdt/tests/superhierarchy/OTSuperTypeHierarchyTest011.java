@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -30,30 +30,30 @@ import org.eclipse.objectteams.otdt.internal.core.PhantomType;
 import org.eclipse.objectteams.otdt.tests.hierarchy.FileBasedHierarchyTest;
 
 /**
- * 
+ *
  * @author Michael Krueger (mkr)
- * @version $Id: OTSuperTypeHierarchyTest011.java 23494 2010-02-05 23:06:44Z stephan $ 
- * 
+ * @version $Id: OTSuperTypeHierarchyTest011.java 23494 2010-02-05 23:06:44Z stephan $
+ *
  */
 public class OTSuperTypeHierarchyTest011 extends FileBasedHierarchyTest
 {
-    
+
     private IType _T10;
-    private IType _T21;    
+    private IType _T21;
 
     private IType _T21T11T0R1;
     private IType _phantom_T21T11T0R2;
 
     private IType _T10T0R1;
     private IType _T10T0R2;
-    
+
 	private IType _objectType;
 
     public OTSuperTypeHierarchyTest011(String name)
 	{
 		super(name);
 	}
-	
+
 	public static Test suite()
 	{
 		if (true)
@@ -61,23 +61,23 @@ public class OTSuperTypeHierarchyTest011 extends FileBasedHierarchyTest
 			return new Suite(OTSuperTypeHierarchyTest011.class);
 		}
 		@SuppressWarnings("unused")
-		junit.framework.TestSuite suite = 
+		junit.framework.TestSuite suite =
 			new Suite(OTSuperTypeHierarchyTest011.class.getName());
 		return suite;
 	}
-	
+
 	public void setUpSuite() throws Exception
 	{
 		setTestProjectDir("Hierarchy");
 		super.setUpSuite();
-		
+
 		String srcFolder = "src";
 		String pkg = "test011";
-		
+
 		_T10 = getType(getTestProjectDir(), srcFolder, pkg, "T10");
 
         _T21 =  getType(getTestProjectDir(), srcFolder, pkg, "T21");
-                
+
         _objectType =
             getType(getTestProjectDir(), "rt.jar", "java.lang", "Object");
 
@@ -86,13 +86,13 @@ public class OTSuperTypeHierarchyTest011 extends FileBasedHierarchyTest
         _T10T0R2 = getRole(_T10, "T10.T0.R2");
         _phantom_T21T11T0R2 = new PhantomType(getRole(_T21, "T21.T11.T0"), _T10T0R2);
     }
-    
+
 	public void testCreation()
 	{
 		assertCreation(_T10);
         assertCreation(_T21);
         assertCreation(_T21T11T0R1);
-        assertCreation(_phantom_T21T11T0R2);        
+        assertCreation(_phantom_T21T11T0R2);
         assertCreation(_T10T0R1);
         assertCreation(_T10T0R2);
     }
@@ -101,41 +101,41 @@ public class OTSuperTypeHierarchyTest011 extends FileBasedHierarchyTest
     {
         _focusType = _T21T11T0R1;
         _testObj = createSuperTypeHierarchy(_focusType);
-    
+
         IType[] actual = OTTypeHierarchies.getInstance().getTSuperTypes(_testObj, _focusType);
         IType[] expected = new IType[] { _T10T0R1 };
-   
-        assertEquals(expected.length, actual.length);        
-        assertTrue(compareTypes(expected, actual));        
+
+        assertEquals(expected.length, actual.length);
+        assertTrue(compareTypes(expected, actual));
     }
 
-    
+
     public void testGetSuperclasses_T21T11T0R1() throws JavaModelException
     {
         _focusType = _T21T11T0R1;
         _testObj = createSuperTypeHierarchy(_focusType);
-   
+
         IType[] actual = OTTypeHierarchies.getInstance().getSuperclasses(_testObj, _focusType);
         IType[] expected = new IType[] { _T10T0R1,
                                          _T10T0R2 };
-   
-        assertEquals(expected.length, actual.length);        
-        assertTrue(compareTypes(expected, actual));        
+
+        assertEquals(expected.length, actual.length);
+        assertTrue(compareTypes(expected, actual));
     }
 
     public void testGetAllClasses_T21T11T0R1() throws JavaModelException
     {
         _focusType = _T21T11T0R1;
         _testObj = createSuperTypeHierarchy(_focusType);
-        
+
         IType[] actual = _testObj.getAllClasses();
         IType[] expected = new IType[] { _T21T11T0R1,
         								 _T10T0R1,
 										 _T10T0R2,
 										 _objectType };
-   
-        assertEquals(expected.length, actual.length);        
-        assertTrue(compareTypes(expected, actual));        
+
+        assertEquals(expected.length, actual.length);
+        assertTrue(compareTypes(expected, actual));
     }
 
     public void testGetAllClasses_T21T11T0R1_phantom() throws JavaModelException
@@ -143,29 +143,29 @@ public class OTSuperTypeHierarchyTest011 extends FileBasedHierarchyTest
         _focusType = _T21T11T0R1;
         _testObj = createSuperTypeHierarchy(_focusType);
         OTTypeHierarchies.getInstance().setPhantomMode(_testObj, true);
-        
+
         IType[] actual = _testObj.getAllClasses();
         IType[] expected = new IType[] { _T21T11T0R1,
         		 						 _phantom_T21T11T0R2,
         								 _T10T0R1,
 										 _T10T0R2,
 										 _objectType };
-   
-        assertEquals(expected.length, actual.length);        
-        assertTrue(compareTypes(expected, actual)); 
+
+        assertEquals(expected.length, actual.length);
+        assertTrue(compareTypes(expected, actual));
     }
-    
+
     public void testGetAllClasses_T10T0R1() throws JavaModelException
     {
         _focusType = _T10T0R1;
         _testObj = createSuperTypeHierarchy(_focusType);
-        
+
         IType[] actual = _testObj.getAllClasses();
         IType[] expected = new IType[] { _T10T0R1,
 										 _T10T0R2,
 										 _objectType };
-   
-        assertEquals(expected.length, actual.length);        
-        assertTrue(compareTypes(expected, actual));        
+
+        assertEquals(expected.length, actual.length);
+        assertTrue(compareTypes(expected, actual));
     }
 }

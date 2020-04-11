@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -39,7 +39,7 @@ import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
  */
 /*
  * The testdata setting looks like this:
- *                                                                              
+ *
  * SuperSuperTeam
  *             R1                                             SuperClass
  *      /\                                                       /\
@@ -54,19 +54,19 @@ import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
  *       |'''''''''''''''''''|                |''''''''''''|'''''''''''''|          |
  *    SubTeam1            SubTeam2            |            |             |          |
  *          R1                  R1------------------>SubSubClass11 SubSubClass12    |
- *      /\                                    |                                     | 
+ *      /\                                    |                                     |
  *       |'''''''''''|                        |                                     |
  * SubSubTeam11  SubSubTeam12                 |                                     |
  *           R1            R1-----------------|                                     |
  *            |                                                                     |
  *            |---------------------------------------------------------------------|
- * 
+ *
  * The focus type is SuperClass .
  */
 public class OrdinaryClassesHierarchyWithSubRolesTest extends FileBasedModelTest
 {
     private ITypeHierarchy _testObj;
-    
+
     private IRoleType _aRole;
     private IRoleType _implSuperRole;
     @SuppressWarnings("unused")
@@ -81,13 +81,13 @@ public class OrdinaryClassesHierarchyWithSubRolesTest extends FileBasedModelTest
     private IType     _subClass2;
     private IType     _subSubClass11;
     private IType     _subSubClass12;
-    
-    
+
+
     public OrdinaryClassesHierarchyWithSubRolesTest(String name)
     {
         super(name);
     }
-    
+
     public static Test suite()
     {
         if (true)
@@ -95,127 +95,127 @@ public class OrdinaryClassesHierarchyWithSubRolesTest extends FileBasedModelTest
             return new Suite(OrdinaryClassesHierarchyWithSubRolesTest.class);
         }
         @SuppressWarnings("unused")
-		junit.framework.TestSuite suite = 
+		junit.framework.TestSuite suite =
             new Suite(OrdinaryClassesHierarchyWithSubRolesTest.class.getName());
         return suite;
     }
-    
-    
+
+
     public void setUpSuite() throws Exception
     {
         setTestProjectDir("Hierarchy");
         super.setUpSuite();
-        
-        _aRole = 
+
+        _aRole =
             getRole(getTestProjectDir(),
                 "complete_rolehierarchy_with_classes",
                 "test002.inlined",
                 "ATeam",
                 "R1");
-        
-        _implSuperRole = 
+
+        _implSuperRole =
             getRole(getTestProjectDir(),
                 "complete_rolehierarchy_with_classes",
                 "test002.inlined",
                 "SuperTeam",
                 "R1");
-        
-        _implSuperSuperRole = 
+
+        _implSuperSuperRole =
             getRole(getTestProjectDir(),
                 "complete_rolehierarchy_with_classes",
                 "test002.inlined",
                 "SuperTeam",
                 "R1");
-        
-        _implSubRole1 = 
+
+        _implSubRole1 =
             getRole(getTestProjectDir(),
                     "complete_rolehierarchy_with_classes",
                     "test002.inlined",
                     "SubTeam1",
                     "R1");
-        
-        _implSubRole2 = 
+
+        _implSubRole2 =
             getRole(getTestProjectDir(),
                     "complete_rolehierarchy_with_classes",
                     "test002.inlined",
                     "SubTeam2",
                     "R1");
-        
+
         _implSubSubRole11 =
             getRole(getTestProjectDir(),
                     "complete_rolehierarchy_with_classes",
                     "test002.inlined",
                     "SubSubTeam11",
                     "R1");
-        
+
         _implSubSubRole12 =
             getRole(getTestProjectDir(),
                     "complete_rolehierarchy_with_classes",
                     "test002.inlined",
                     "SubSubTeam12",
                     "R1");
-        
+
         _aClass =
-            getType(getTestProjectDir(), 
-                "complete_rolehierarchy_with_classes", 
-                "test002.standard", 
+            getType(getTestProjectDir(),
+                "complete_rolehierarchy_with_classes",
+                "test002.standard",
                 "AClass");
-        
+
         _superClass =
-            getType(getTestProjectDir(), 
-                    "complete_rolehierarchy_with_classes", 
-                    "test002.standard", 
+            getType(getTestProjectDir(),
+                    "complete_rolehierarchy_with_classes",
+                    "test002.standard",
                     "SuperClass");
-        
+
         _subClass1 =
-            getType(getTestProjectDir(), 
-                    "complete_rolehierarchy_with_classes", 
-                    "test002.standard", 
+            getType(getTestProjectDir(),
+                    "complete_rolehierarchy_with_classes",
+                    "test002.standard",
                     "SubClass1");
-        
+
         _subClass2 =
-            getType(getTestProjectDir(), 
-                    "complete_rolehierarchy_with_classes", 
-                    "test002.standard", 
+            getType(getTestProjectDir(),
+                    "complete_rolehierarchy_with_classes",
+                    "test002.standard",
                     "SubClass2");
-        
+
         _subSubClass11 =
-            getType(getTestProjectDir(), 
-                    "complete_rolehierarchy_with_classes", 
-                    "test002.standard", 
+            getType(getTestProjectDir(),
+                    "complete_rolehierarchy_with_classes",
+                    "test002.standard",
                     "SubSubClass11");
-        
+
         _subSubClass12 =
-            getType(getTestProjectDir(), 
-                    "complete_rolehierarchy_with_classes", 
-                    "test002.standard", 
+            getType(getTestProjectDir(),
+                    "complete_rolehierarchy_with_classes",
+                    "test002.standard",
                     "SubSubClass12");
-        
+
     }
-    
+
     public void testGetAllSubtypes_ofSuperClass() throws JavaModelException
     {
         assertNotNull(_superClass);
         assertTrue(_superClass.exists());
         _testObj = new TypeHierarchy(_superClass, null, _superClass.getJavaProject(), true);
         _testObj.refresh(new NullProgressMonitor());
-        
+
         ArrayList<IType> expectedList = new ArrayList<IType>();
         expectedList.add(_aClass);
         expectedList.add(_subClass1);
         expectedList.add(_subClass2);
         expectedList.add(_subSubClass11);
         expectedList.add(_subSubClass12);
-        
+
         expectedList.add(_implSuperRole);
         expectedList.add(_aRole);
-        expectedList.add(_implSubRole1);        
+        expectedList.add(_implSubRole1);
         expectedList.add(_implSubRole2);
         expectedList.add(_implSubSubRole11);
         expectedList.add(_implSubSubRole12);
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]);
         IType[] actual = _testObj.getAllSubtypes(_superClass);
-        
+
         assertEquals(expected.length, actual.length);
         assertTrue(compareTypes(expected, actual));
     }

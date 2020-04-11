@@ -45,7 +45,7 @@ public class CodeSnippetSkeleton implements IBinaryType, EvaluationConstants {
 		char[] methodDescriptor;
 		char[] selector;
 		boolean isConstructor;
-		
+
 		public BinaryMethodSkeleton(char[] selector, char[] methodDescriptor, char[][] exceptionTypeNames, boolean isConstructor) {
 			this.selector = selector;
 			this.methodDescriptor = methodDescriptor;
@@ -90,7 +90,7 @@ public class CodeSnippetSkeleton implements IBinaryType, EvaluationConstants {
 		}
 		@Override
 		public IBinaryTypeAnnotation[] getTypeAnnotations() {
-			return null; 
+			return null;
 		}
 		@Override
 		public char[] getSelector() {
@@ -130,7 +130,7 @@ public class CodeSnippetSkeleton implements IBinaryType, EvaluationConstants {
 			false
 		)
 	};
-	
+
 /**
  * CodeSnippetSkeleton constructor comment.
  */
@@ -143,7 +143,7 @@ public IBinaryAnnotation[] getAnnotations() {
 }
 @Override
 public IBinaryTypeAnnotation[] getTypeAnnotations() {
-	return null; 
+	return null;
 }
 @Override
 public char[] getEnclosingMethod() {

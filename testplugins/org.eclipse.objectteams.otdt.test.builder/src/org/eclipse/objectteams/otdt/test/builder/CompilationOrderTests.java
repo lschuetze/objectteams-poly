@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -42,8 +42,8 @@ public class CompilationOrderTests extends OTBuilderTests {
 	public CompilationOrderTests(String name) {
 		super(name);
 	}
-	
-	/* In batch-mode this causes a problem, 
+
+	/* In batch-mode this causes a problem,
 	 * compilation order is different in workbench mode, though
      * (depends on class names?!).
 	 * Original jacks test is removed.
@@ -51,7 +51,7 @@ public class CompilationOrderTests extends OTBuilderTests {
 	@SuppressWarnings("nls")
 	public void test177otjd5f()  throws JavaModelException {
 		System.out.println("***** test177otjd5f() *****");
-		IPath projectPath = env.addProject("Project", "1.5"); 
+		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, ClasspathUtil.getOTREPath(this.weavingScheme));
 
@@ -62,11 +62,11 @@ public class CompilationOrderTests extends OTBuilderTests {
 		env.setOutputFolder(projectPath, "bin");
 
 		env.addClass(root, "p", "ATeam",
-				"package p;	\n"+ 
+				"package p;	\n"+
 		"public team class ATeam {	protected class R implements IConfined {} public IConfined getR() { return new R(); } }");
 
-		env.addClass(root, "p", "M", 
-			"package p;	\n"+ 
+		env.addClass(root, "p", "M",
+			"package p;	\n"+
 			"public class M {\n"+
 			"   @SuppressWarnings(\"unused\")\n"+
 			"   void foo() {\n"+
@@ -86,7 +86,7 @@ public class CompilationOrderTests extends OTBuilderTests {
 	@SuppressWarnings("nls")
 	public void testMissingOTRE() throws JavaModelException {
 		System.out.println("***** testMissingOTRE() *****");
-		IPath projectPath = env.addProject("Project", "1.5"); 
+		IPath projectPath = env.addProject("Project", "1.5");
 		// don't abort when detecting the build path error
 		// (otherwise other errors would be expunged).
 		env.getJavaProject(projectPath).setOption(JavaCore.CORE_JAVA_BUILD_INVALID_CLASSPATH, JavaCore.ERROR);
@@ -100,13 +100,13 @@ public class CompilationOrderTests extends OTBuilderTests {
 		env.setOutputFolder(projectPath, "bin");
 
 		IPath ateam = env.addClass(root, "p", "ATeam",
-				"package p;	\n"+ 
+				"package p;	\n"+
 		"public team class ATeam {	ATeam() { super(); } }");
 
 		fullBuild(projectPath);
-		
+
 		expectingProblemsFor(ateam);
-		expectingOnlySpecificProblemsFor(ateam, 
+		expectingOnlySpecificProblemsFor(ateam,
 				new Problem[] {
 					new Problem("", "The type org.objectteams.Team cannot be resolved. It is indirectly referenced from required .class files", ateam, 30, 35, CategorizedProblem.CAT_BUILDPATH, IMarker.SEVERITY_ERROR),
 					new Problem("", "The constructor Team() is undefined", ateam, 48,56, CategorizedProblem.CAT_MEMBER, IMarker.SEVERITY_ERROR)

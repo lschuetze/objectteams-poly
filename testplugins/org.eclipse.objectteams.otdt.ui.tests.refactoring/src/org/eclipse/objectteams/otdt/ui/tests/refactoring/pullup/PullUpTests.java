@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -51,7 +51,7 @@ import org.eclipse.objectteams.otdt.ui.tests.refactoring.RefactoringTest;
 
 /**
  * Example TestCase to practice testing for the diploma thesis.
- * 
+ *
  * @author Johannes Gebauer
  */
 @SuppressWarnings("restriction")
@@ -103,7 +103,7 @@ public class PullUpTests extends RefactoringTest {
 	/**
 	 * The <code>ICompilationUnit</code> containing the declaring type must be
 	 * at position 0.
-	 * 
+	 *
 	 * @param fieldNames
 	 *            TODO
 	 */
@@ -116,8 +116,8 @@ public class PullUpTests extends RefactoringTest {
 		performPullUp_pass(cuNames, methodNames, signatures, makeAbstract, fieldNames, deleteAllInSourceType, deleteAllMatchingMethods, targetClassIndex, nameOfDeclaringType, false/*replace*/);
 	}
 	private void performPullUp_pass(String[] cuNames, String[] methodNames, String[][] signatures, boolean[] makeAbstract, String[] fieldNames,
-			boolean deleteAllInSourceType, boolean deleteAllMatchingMethods, int targetClassIndex, String nameOfDeclaringType, boolean replace) 
-					throws Exception 
+			boolean deleteAllInSourceType, boolean deleteAllMatchingMethods, int targetClassIndex, String nameOfDeclaringType, boolean replace)
+					throws Exception
 	{
 		ICompilationUnit[] cus = createCUs(cuNames);
 		try {
@@ -180,9 +180,9 @@ public class PullUpTests extends RefactoringTest {
 			PullUpRefactoringProcessor processor = createRefactoringProcessor(methods);
 			Refactoring ref = processor.getRefactoring();
 
-			
+
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			
+
 			setTargetClass(processor, targetClassIndex);
 
 			if (deleteAllInSourceType)
@@ -210,13 +210,13 @@ public class PullUpTests extends RefactoringTest {
 
 		}
 	}
-	
+
 	private void performPullUp_failing(String[] cuNames, String[] methodNames, String[][] signatures, String[] fieldNames, boolean deleteAllInSourceType,
 			boolean deleteAllMatchingMethods, int targetClassIndex, String nameOfDeclaringType) throws Exception {
 		performPullUp_failing(cuNames, methodNames, signatures, null,
 				fieldNames, deleteAllInSourceType, deleteAllMatchingMethods, targetClassIndex, nameOfDeclaringType,
 				null);
-	}	
+	}
 	private void performPullUp_failing(String[] cuNames, String[] methodNames, String[][] signatures, boolean[] makeAbstract, String[] fieldNames, boolean deleteAllInSourceType,
 			boolean deleteAllMatchingMethods, int targetClassIndex, String nameOfDeclaringType, String[] errorMessages)
 					throws Exception
@@ -266,7 +266,7 @@ public class PullUpTests extends RefactoringTest {
 	/******* tests ******************/
 
 	/* Pull up Method Tests */
-	
+
 	public void testPullUpBoundMethod() throws Exception {
 		performPullUp_warning(new String[] { "B", "BSuper", "T" }, new String[] { "bm" }, new String[][] { new String[0] }, true, false, 0, "B");
 	}
@@ -325,25 +325,25 @@ public class PullUpTests extends RefactoringTest {
 	}
 
 	/* Pull up Field Tests */
-	
+
 	public void testPullUpAnchoredTypeField() throws Exception {
 		performPullUp_failing(new String[] { "T2", "T1", "T3" }, new String[] {}, new String[][] { new String[0] }, new String[] { "extern" }, true, false, 0,
 				"T2");
 	}
-	
+
 	public void testPulledUpFieldWillBeShadowed() throws Exception {
 		performPullUp_failing(new String[] { "T2", "T1", "T3" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, true, false, 0,
 				"Role");
 	}
-	
+
 	public void testPullUpCalloutFieldInBase() throws Exception {
 		performPullUp_pass(new String[] { "B1", "B2", "T" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, true, false, 0, "B1");
 	}
-	
+
 	public void testPullUpFieldToImplicitSuperclass() throws Exception {
 		performPullUp_pass(new String[] { "T", "TSuper" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, true, false, 0, "R");
 	}
-	
+
 	// Bug 374841 - [refactoring] pull up does not work among (nested) roles
 	public void testPullUpWithReferenceToCallout1()  throws Exception {
 		// without pull-up of getS1/getS2 we cannot succeed:
@@ -351,35 +351,35 @@ public class PullUpTests extends RefactoringTest {
 	}
 	// Bug 386587 - [refactoring] pull-up refactoring cannot handle callout bindings
 	public void testPullUpWithReferenceToCallout2()  throws Exception {
-		performPullUp_pass(new String[] {"T", "B"}, 
-						new String[]{"foo", "getS1", "getS2"}, 
-						new String[][] { new String[0], new String[0], new String[0] }, 
-						new boolean[] {false, true, true}, 
+		performPullUp_pass(new String[] {"T", "B"},
+						new String[]{"foo", "getS1", "getS2"},
+						new String[][] { new String[0], new String[0], new String[0] },
+						new boolean[] {false, true, true},
 						new String[0], true, true, 0, "RSub",
 						true /*replace*/);
 	}
 	// Bug 386814 - [refactoring] pull-up should distinguish callouts that can be pull-up vs. abstract decl.
 	public void testPullUpCallout1()  throws Exception {
-		performPullUp_failing(new String[] {"T", "B"}, 
-						new String[]{"foo", "getS1", "getS2"}, 
-						new String[][] { new String[0], new String[0], new String[0] }, 
-						new boolean[] {false, false, true},  // true pull up of callout not possible 
+		performPullUp_failing(new String[] {"T", "B"},
+						new String[]{"foo", "getS1", "getS2"},
+						new String[][] { new String[0], new String[0], new String[0] },
+						new boolean[] {false, false, true},  // true pull up of callout not possible
 						new String[0], true, true, 0, "RSub",
 						new String[]{"The callout binding 'getS1() -> String s' can only be moved to a bound role (OTJLD \u00A73.1.(a))."});
 	}
 	// Bug 386814 - [refactoring] pull-up should distinguish callouts that can be pull-up vs. abstract decl.
 	public void testPullUpCallout2()  throws Exception {
-		performPullUp_pass(new String[] {"T", "B0", "B1", "B2"}, 
-						new String[]{"foo", "getS1", "getS2"}, 
-						new String[][] { new String[0], new String[0], new String[0] }, 
-						new boolean[] {false, false, false},  // true pull up of callout 
+		performPullUp_pass(new String[] {"T", "B0", "B1", "B2"},
+						new String[]{"foo", "getS1", "getS2"},
+						new String[][] { new String[0], new String[0], new String[0] },
+						new boolean[] {false, false, false},  // true pull up of callout
 						new String[0], true, true, 0, "RSub");
 	}
 	// Bug 386814 - [refactoring] pull-up should distinguish callouts that can be pull-up vs. abstract decl.
 	public void testPullUpCallout3()  throws Exception {
-		performPullUp_failing(new String[] {"T", "B0", "B1", "B2"}, 
-						new String[]{"foo", "getS1", "getS2"}, 
-						new String[][] { new String[0], new String[0], new String[0] }, 
+		performPullUp_failing(new String[] {"T", "B0", "B1", "B2"},
+						new String[]{"foo", "getS1", "getS2"},
+						new String[][] { new String[0], new String[0], new String[0] },
 						new boolean[] {false, false, false},  // true pull up of callout, which are NOT available in super base (B1)
 						new String[0], true, true, 0, "RSub",
 						new String[]{

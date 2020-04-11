@@ -258,13 +258,13 @@ public class CalloutMappingsAttribute extends ListValueAttribute {
 	private boolean methodMatchesSignature(MethodBinding methodBinding, char[] signature) {
 		if (CharOperation.equals(methodBinding.signature(), signature))
 			return true;
-	
+
 		char[][] signatureTypes = scanSignature(signature);
-		
+
 		TypeBinding type = methodBinding.returnType;
 		if (!typeMatchesSignature(type, signatureTypes[0]))
 			return false;
-		
+
 		char[][] types = CharOperation.subarray(signatureTypes, 1, -1);
 		if (types.length != methodBinding.parameters.length)
 			return false;
@@ -285,7 +285,7 @@ public class CalloutMappingsAttribute extends ListValueAttribute {
 		}
 		return CharOperation.equals(bindingType, signatureType);
 	}
-	
+
 	private char[] getSignatureSimpleName(char[] signatureType) {
 		if (signatureType[signatureType.length-1]!=';')
 			return signatureType;
@@ -311,7 +311,7 @@ public class CalloutMappingsAttribute extends ListValueAttribute {
 		// Ignore synthetic argument for member types or enum types.
 		int startIndex = 0;
 		// NOTE: no callout to ctor, thus no check 'isConstructor()'
-		
+
 		int size = numOfParams - startIndex;
 		char[][] result= new char[size+1][]; // [0] is returnType
 		if (size > 0) {
@@ -331,7 +331,7 @@ public class CalloutMappingsAttribute extends ListValueAttribute {
 		result[0] = CharOperation.subarray(methodDescriptor, index + 1, -1);
 		return result;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#toString(int)
 	 */

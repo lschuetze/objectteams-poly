@@ -72,7 +72,7 @@ public CodeSnippetClassFile(
 	this.headerOffset += 2;
 	this.constantPool = new ConstantPool(this);
 	int accessFlags = aType.getAccessFlags();
-	
+
 	if (!aType.isInterface()) { // class or enum
 		accessFlags |= ClassFileConstants.AccSuper;
 	}
@@ -206,7 +206,7 @@ public static void createProblemType(TypeDeclaration typeDeclaration, Compilatio
 			if (method == null) continue;
 			if (abstractMethodsOnly) {
 				method.modifiers = ClassFileConstants.AccPublic | ClassFileConstants.AccAbstract;
-			}		
+			}
 			if (method.isConstructor()) {
 				if (typeBinding.isInterface()) continue;
 				classFile.addProblemConstructor(methodDecl, method, problemsCopy);

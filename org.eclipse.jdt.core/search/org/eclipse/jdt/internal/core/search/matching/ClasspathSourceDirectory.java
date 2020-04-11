@@ -110,7 +110,7 @@ public boolean equals(Object o) {
 	if (!(o instanceof ClasspathSourceDirectory)) return false;
 
 	return this.sourceFolder.equals(((ClasspathSourceDirectory) o).sourceFolder);
-} 
+}
 
 @Override
 public NameEnvironmentAnswer findClass(String typeName, String qualifiedPackageName, String moduleName, String qualifiedBinaryFileName, boolean asBinaryOnly, Predicate<String> moduleNameFilter) {

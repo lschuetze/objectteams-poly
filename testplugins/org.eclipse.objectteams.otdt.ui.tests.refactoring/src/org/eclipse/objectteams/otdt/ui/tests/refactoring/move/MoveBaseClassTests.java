@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2012 Stephan Herrmann.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 		Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -44,39 +44,39 @@ public team class MoveBaseClassTests extends TestCase {
 
 	@SuppressWarnings("decapsulation")
 	protected class MoveBaseClass playedBy MoveTest {
-		
+
 		void setUp() -> void setUp();
 
 		void tearDown() -> void tearDown();
-		
+
 		public MoveBaseClass() {
 			base(MoveBaseClass.class.getName());
 		}
-		
+
 		@SuppressWarnings("inferredcallout")
 		public void testDestination_yes_baseTypeToDifferentPackage() throws Exception{
 			ParticipantTesting.reset();
 			IPackageFragment packB = getRoot().createPackageFragment("b", true, null);
 			IPackageFragment packBTemp = getRoot().createPackageFragment("b.temp", true, null);
 			ICompilationUnit cuB= packB.createCompilationUnit("B.java", "package b;public class B {}", true, null);
-			ICompilationUnit cuT= getPackageP().createCompilationUnit("T1.java", 
+			ICompilationUnit cuT= getPackageP().createCompilationUnit("T1.java",
 					"package p;\n" +
 					"import base b.B;\n" +
-					"team class T1{void foo(){}protected class Role playedBy B{}}", 
+					"team class T1{void foo(){}protected class Role playedBy B{}}",
 					false, new NullProgressMonitor());
 			IType baseType = cuB.getTypes()[0];
 			IJavaElement[] javaElements= {baseType};
 			IResource[] resources= {};
 			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
-			
+
 			Object destination= packBTemp;
 			verifyValidDestination(ref, destination);
-				
+
 			RefactoringStatus status= performRefactoring(ref, true);
 			assertEquals(null, status);
-			
+
 			// expect that base import has been updated in cuT:
-			String expectedSource2= 
+			String expectedSource2=
 					"package p;\n" +
 					"import base b.temp.B;\n" +
 					"team class T1{void foo(){}protected class Role playedBy B{}}";
@@ -104,13 +104,13 @@ public team class MoveBaseClassTests extends TestCase {
 		setupProject();
 		this.mover.setUp();
 	}
-	
+
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		this.mover.tearDown();
 	}
-	
+
 	void setupProject() throws Exception {
 		if (!this.projectInitialized) {
 			this.projectInitialized = true;

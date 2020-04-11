@@ -38,11 +38,11 @@ public class TypeAnnotationCodeStream extends StackMapFrameCodeStream {
 		this.generateAttributes |= ClassFileConstants.ATTR_TYPE_ANNOTATION;
 		this.allTypeAnnotationContexts = new ArrayList();
 	}
-	
+
 	private void addAnnotationContext(TypeReference typeReference, int info, int targetType, ArrayAllocationExpression allocationExpression) {
 		allocationExpression.getAllAnnotationContexts(targetType, info, this.allTypeAnnotationContexts);
 	}
-	
+
 	private void addAnnotationContext(TypeReference typeReference, int info, int targetType) {
 		typeReference.getAllAnnotationContexts(targetType, info, this.allTypeAnnotationContexts);
 	}
@@ -50,7 +50,7 @@ public class TypeAnnotationCodeStream extends StackMapFrameCodeStream {
 	private void addAnnotationContext(TypeReference typeReference, int info, int typeIndex, int targetType) {
 		typeReference.getAllAnnotationContexts(targetType, info, typeIndex, this.allTypeAnnotationContexts);
 	}
-	
+
 	@Override
 	public void instance_of(TypeReference typeReference, TypeBinding typeBinding) {
 		if (typeReference != null && (typeReference.bits & ASTNode.HasTypeAnnotations) != 0) {
@@ -58,7 +58,7 @@ public class TypeAnnotationCodeStream extends StackMapFrameCodeStream {
 		}
 		super.instance_of(typeReference, typeBinding);
 	}
-	
+
 	@Override
 	public void multianewarray(
 			TypeReference typeReference,
@@ -78,7 +78,7 @@ public class TypeAnnotationCodeStream extends StackMapFrameCodeStream {
 		}
 		super.new_(typeReference, typeBinding);
 	}
-	
+
 	@Override
 	public void newArray(TypeReference typeReference, ArrayAllocationExpression allocationExpression, ArrayBinding arrayBinding) {
 		if (typeReference != null && (typeReference.bits & ASTNode.HasTypeAnnotations) != 0) {
@@ -86,7 +86,7 @@ public class TypeAnnotationCodeStream extends StackMapFrameCodeStream {
 		}
 		super.newArray(typeReference, allocationExpression, arrayBinding);
 	}
-	
+
 	@Override
 	public void checkcast(TypeReference typeReference, TypeBinding typeBinding, int currentPosition) {
 		/* We use a slightly sub-optimal generation for intersection casts by resorting to a runtime cast for every intersecting type, but in
@@ -115,7 +115,7 @@ public class TypeAnnotationCodeStream extends StackMapFrameCodeStream {
 			super.checkcast(null, typeBinding, currentPosition);
 		}
 	}
-	
+
 	@Override
 	public void invoke(byte opcode, MethodBinding methodBinding, TypeBinding declaringClass, TypeReference[] typeArguments) {
 		if (typeArguments != null) {
@@ -131,9 +131,9 @@ public class TypeAnnotationCodeStream extends StackMapFrameCodeStream {
 		}
 		super.invoke(opcode, methodBinding, declaringClass, typeArguments);
 	}
-	
+
 	@Override
-	public void invokeDynamic(int bootStrapIndex, int argsSize, int returnTypeSize, char[] selector, char[] signature, 
+	public void invokeDynamic(int bootStrapIndex, int argsSize, int returnTypeSize, char[] selector, char[] signature,
 			boolean isConstructorReference, TypeReference lhsTypeReference, TypeReference [] typeArguments) {
 		if (lhsTypeReference != null && (lhsTypeReference.bits & ASTNode.HasTypeAnnotations) != 0) {
 			if (isConstructorReference) {
@@ -143,7 +143,7 @@ public class TypeAnnotationCodeStream extends StackMapFrameCodeStream {
 			}
 		}
 		if (typeArguments != null) {
-			int targetType = 
+			int targetType =
 					isConstructorReference
 					? AnnotationTargetTypeConstants.CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT
 					: AnnotationTargetTypeConstants.METHOD_REFERENCE_TYPE_ARGUMENT;
@@ -162,7 +162,7 @@ public class TypeAnnotationCodeStream extends StackMapFrameCodeStream {
 		super.reset(givenClassFile);
 		this.allTypeAnnotationContexts = new ArrayList();
 	}
-	
+
 	@Override
 	public void init(ClassFile targetClassFile) {
 		super.init(targetClassFile);

@@ -127,7 +127,7 @@ public class CallinCalloutScope extends MethodScope {
 		if (!(binding instanceof LocalVariableBinding))				 		// local
 			return binding;
 		LocalVariableBinding localBinding = (LocalVariableBinding)binding;
-		if (   localBinding.declaringScope != null 		
+		if (   localBinding.declaringScope != null
 			&& localBinding.declaringScope.isMethodMappingWrapper()) 		// defined in a method mapping wrapper
 		{
 			// hide internal local var but re-resolve:

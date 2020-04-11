@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * Type parameter declaration node (added in JLS3 API).
- * 
+ *
  * <pre>
  * TypeParameter:
  *    { ExtendedModifier } Identifier [ <b>extends</b> Type { <b>&amp;</b> Type } ]
@@ -38,7 +38,7 @@ public class TypeParameter extends ASTNode {
 	 */
 	public static final ChildListPropertyDescriptor MODIFIERS_PROPERTY =
 			new ChildListPropertyDescriptor(TypeParameter.class, "modifiers", IExtendedModifier.class, CYCLE_RISK); //$NON-NLS-1$
-	
+
 	/**
 	 * The "name" structural property of this node type (child type: {@link SimpleName}).
 	 */
@@ -81,7 +81,7 @@ public class TypeParameter extends ASTNode {
 		addProperty(VALUE_PARAMETER_PROPERTY, propertyList);
 // SH}
 		PROPERTY_DESCRIPTORS = reapPropertyList(propertyList);
-		
+
 		propertyList = new ArrayList(4);
 		createPropertyList(TypeParameter.class, propertyList);
 		addProperty(MODIFIERS_PROPERTY, propertyList);
@@ -138,7 +138,7 @@ public class TypeParameter extends ASTNode {
 	 * (see constructor).
 	 */
 	private ASTNode.NodeList modifiers = null;
-	
+
 	/**
 	 * Creates a new unparented node for a parameterized type owned by the
 	 * given AST. By default, an unspecified, but legal, type variable name,
@@ -312,7 +312,7 @@ public class TypeParameter extends ASTNode {
 	public List typeBounds() {
 		return this.typeBounds;
 	}
-	
+
 	/**
 	 * Returns the live ordered list of modifiers for this TypeParameter node (added in JLS8 API).
 	 *

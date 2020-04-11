@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -54,16 +54,16 @@ import org.eclipse.objectteams.otdt.tests.ClasspathUtil;
  */
 public class TestBase extends TestCase
 {
-	
+
 	public static final String NL = "\r\n";
-	
+
 	public static final String CLASS_FILE_EXTENSION = ".class";
     public static final String JAVA_FILE_EXTENSION 	= ".java";
     public static final String LOG_FILE_EXTENSION 	= ".log";
-    
+
     public static final String WORKSPACE_NAME 		= "testing-workspace";
     public static final String PROJECT_NAME 		= "TestProject";
-	
+
 	public static final String JAVA_HOME = System.getProperty("java.home");
 	public static final String USER_HOME = System.getProperty("user.home");
 
@@ -90,22 +90,22 @@ public class TestBase extends TestCase
 		}
 	}
 
-    public static final String PROJECT_PATH = USER_HOME 
-													+ File.separator 
-													+ WORKSPACE_NAME 
+    public static final String PROJECT_PATH = USER_HOME
+													+ File.separator
+													+ WORKSPACE_NAME
 													+ File.separator
 													+ PROJECT_NAME;
 
-    
+
 	private Main   _compiler;
     private String _logFileName;
     private File   _workingDir;
-    
+
     public TestBase(String testName)
     {
     		super(testName);
     }
-    
+
     private void cleanWorkingDirectory()
     {
        if (!_workingDir.isDirectory())
@@ -114,12 +114,12 @@ public class TestBase extends TestCase
        }
        cleanRecursively(_workingDir);
 //       File[] containedFiles = _workingDir.listFiles();
-//       
+//
 //       for (int idx = 0; idx < containedFiles.length; idx++)
 //	   {
-//	       	containedFiles[idx].delete();    
+//	       	containedFiles[idx].delete();
 //	   }
-//	   
+//
 //	   _workingDir.delete();
     }
     private void cleanRecursively(File file) {
@@ -156,7 +156,7 @@ public class TestBase extends TestCase
                 + this.getName()
                 + " ***************************");
         _logFileName = fname;
-        
+
         try
         {
         	String missing;
@@ -164,37 +164,37 @@ public class TestBase extends TestCase
 	        {
 	            throw new FileNotFoundException("Missing library "+missing);
 	        }
-	        
-	        String[] args = (classpath == null)  
+
+	        String[] args = (classpath == null)
 	        					? createClassPath(fname)
 	        					: classpath;
-		
-			File javaFile = new File(_workingDir.getAbsolutePath() 
-												+ File.separator 
-												+ fname 
+
+			File javaFile = new File(_workingDir.getAbsolutePath()
+												+ File.separator
+												+ fname
 												+ JAVA_FILE_EXTENSION);
-												
+
 			if(!javaFile.exists())
 			{
 				throw new FileNotFoundException("File to compile was not found!: " + _logFileName);
 			}
-			
+
             _compiler =
                 new Main(
                     new PrintWriter(
-                    	new FileOutputStream(PROJECT_PATH 
+                    	new FileOutputStream(PROJECT_PATH
                     							+ File.separator
-                    							+ _logFileName 
+                    							+ _logFileName
                     							+ LOG_FILE_EXTENSION)),
                     new PrintWriter(
-                    	new FileOutputStream(PROJECT_PATH 
+                    	new FileOutputStream(PROJECT_PATH
                     							+ File.separator
                     							+ _logFileName
                     							+ LOG_FILE_EXTENSION)),
                     false,
                     options,
                     null);
-                    
+
             _compiler.compile(args);
         }
         catch (FileNotFoundException ex)
@@ -208,7 +208,7 @@ public class TestBase extends TestCase
     	String otrePath = ClasspathUtil.getOTREPath(this.weavingScheme);
         File otreJar = new File(otrePath);
         File jreJar = new File(JRE_JAR_PATH);
-        
+
         if (!otreJar.exists())
         	return otrePath;
         if (!jreJar.exists())
@@ -222,11 +222,11 @@ public class TestBase extends TestCase
 		{
 	    	File pkgDir = createPackageDirectory(content);
 	        File file   = new File(pkgDir.getAbsolutePath()
-        						+ File.separator 
-        						+ fname 
+        						+ File.separator
+        						+ fname
         						+ JAVA_FILE_EXTENSION);
         file.deleteOnExit();
-        
+
             FileWriter writer = new FileWriter(file);
             writer.write(content);
             writer.close();
@@ -238,7 +238,7 @@ public class TestBase extends TestCase
     }
 
 	/**
-	 * Creates a file at given relative position and all necessary directories 
+	 * Creates a file at given relative position and all necessary directories
 	 * The content of package is not evaluatet for saving location
 	 * @param fname the name of the new file to create
 	 * @param relPath the relative path where to store the file
@@ -249,7 +249,7 @@ public class TestBase extends TestCase
 		try
 		{
 			String curPath = _workingDir.getAbsolutePath();
-			
+
 			if(relPath.trim().length() > 0)
 			{
 				curPath+= File.separator + relPath;
@@ -257,13 +257,13 @@ public class TestBase extends TestCase
 
 			File   pkgDir  = new File(curPath);
 			pkgDir.mkdirs();
-			
+
 			File file   = new File(pkgDir.getAbsolutePath()
-								+ File.separator 
-								+ fname 
+								+ File.separator
+								+ fname
 								+ JAVA_FILE_EXTENSION);
 		file.deleteOnExit();
-        
+
 			FileWriter writer = new FileWriter(file);
 			writer.write(content);
 			writer.close();
@@ -278,7 +278,7 @@ public class TestBase extends TestCase
     {
 		String qualPkgName = getQualifiedPackageName(fileContent);
 		String dirPath     = getDirectoryPath(qualPkgName);
-    	
+
     	String curPath = _workingDir.getAbsolutePath() + File.separator + dirPath;
 		File   result  = new File(curPath);
 		result.mkdirs();
@@ -292,7 +292,7 @@ public class TestBase extends TestCase
         {
 			return "";
         }
-        
+
         if (qualPkgName.indexOf('.') == -1)
         {
         	return qualPkgName;
@@ -306,20 +306,20 @@ public class TestBase extends TestCase
     private String getQualifiedPackageName(String fileContent)
     {
         String packageKeyword = "package ";
-        
+
         int pos1 = fileContent.indexOf(packageKeyword);
 		if (pos1 == -1)
 		{
 			return "";
 		}
-        
+
         int pos2 = fileContent.indexOf(';', pos1);
 		if (pos2 == -1)
 		{
 			return "";
-		}       
-        
-        
+		}
+
+
         return fileContent.substring(pos1 + packageKeyword.length(), pos2);
     }
 
@@ -331,7 +331,7 @@ public class TestBase extends TestCase
 
 
     /**
-     * checks whether the compiler has proceeded without errors or warnings 
+     * checks whether the compiler has proceeded without errors or warnings
      */
 	public boolean isCompilationSuccessful()
 	{
@@ -342,11 +342,11 @@ public class TestBase extends TestCase
 		}
 		else
 		{
-			File file = new File(_workingDir.getAbsolutePath() 
-									+ File.separator 
-									+ _logFileName 
+			File file = new File(_workingDir.getAbsolutePath()
+									+ File.separator
+									+ _logFileName
 									+ LOG_FILE_EXTENSION);
-			file.delete();          
+			file.delete();
 			return true;
 		}
 	}
@@ -354,7 +354,7 @@ public class TestBase extends TestCase
 	/**
 	 * checks whether the compiler has generated the expected errors and warnings,
 	 * if it created more problems than specified this is OK for this method.
-	 * @param problemIDs IDs of the expected errors and warnings as specified in 
+	 * @param problemIDs IDs of the expected errors and warnings as specified in
 	 *                   org.eclipse.jdt.core.compiler.IProblem
 	 */
 	public boolean hasAtLeastExpectedProblems(int[] problemIDs)
@@ -367,9 +367,9 @@ public class TestBase extends TestCase
 			printAllProblems();
 			return false;
 		}
-		File file = new File(_workingDir.getAbsolutePath() 
-								+ File.separator 
-								+ _logFileName 
+		File file = new File(_workingDir.getAbsolutePath()
+								+ File.separator
+								+ _logFileName
 								+ LOG_FILE_EXTENSION);
 		file.delete();
 		return true;
@@ -377,19 +377,19 @@ public class TestBase extends TestCase
 
 	/**
 	 * checks whether the compiler has generated the expected errors and warnings
-	 * @param problemIDs IDs of the expected errors and warnings as specified in 
+	 * @param problemIDs IDs of the expected errors and warnings as specified in
 	 *                   org.eclipse.jdt.core.compiler.IProblem
 	 */
 	public boolean hasExpectedProblems(int[] problemIDs)
 	{
 		if ( areProblemsEqual(_compiler.logger.globalProblems, problemIDs) )
-		{       	
-			File file = new File(_workingDir.getAbsolutePath() 
-									+ File.separator 
-									+ _logFileName 
+		{
+			File file = new File(_workingDir.getAbsolutePath()
+									+ File.separator
+									+ _logFileName
 									+ LOG_FILE_EXTENSION);
 			file.delete();
-            
+
 			return true;
 		}
 		else
@@ -398,7 +398,7 @@ public class TestBase extends TestCase
 			return false;
 		}
 	}
-	
+
     private void printAllProblems()
     {
         for (Iterator iter = _compiler.logger.globalProblems.iterator(); iter.hasNext();)
@@ -406,28 +406,28 @@ public class TestBase extends TestCase
             IProblem prob = (IProblem)iter.next();
         	System.err.println(prob.toString());
             if (prob.getID() == IProblem.Unclassified) // it was an exception.
-                throw new InternalError(prob.toString()); 
+                throw new InternalError(prob.toString());
         }
     }
-	
+
 	/**
 	 * checks whether the compiler has generated the expected errors and warnings
-	 * @param errorIDs IDs of the expected errors as specified in 
+	 * @param errorIDs IDs of the expected errors as specified in
 	 *                 org.eclipse.jdt.core.compiler.IProblem
-	 * @param warningIDs analogous 
+	 * @param warningIDs analogous
 	 */
     public boolean hasExpectedProblems(int[] errorIDs, int[] warningIDs)
     {
  		if (   areProblemsEqual(_compiler.logger.globalErrors,   errorIDs)
  		    && areProblemsEqual(_compiler.logger.globalWarnings, warningIDs) )
         {
-        	
-            File file = new File(_workingDir.getAbsolutePath() 
-            						+ File.separator 
-            						+ _logFileName 
+
+            File file = new File(_workingDir.getAbsolutePath()
+            						+ File.separator
+            						+ _logFileName
             						+ LOG_FILE_EXTENSION);
             file.delete();
-            
+
             return true;
         }
         else
@@ -435,8 +435,8 @@ public class TestBase extends TestCase
         	return false;
         }
     }
-    
-    
+
+
     /**
      * @param problems	Vector elements of type IProblem
      */
@@ -476,7 +476,7 @@ public class TestBase extends TestCase
         }
         return result;
     }
-    
+
 //	public boolean isCompilationSuccessful(int errors, int warnings)
 //	{
 //		if (_compiler.globalErrorsCount != errors
@@ -488,24 +488,24 @@ public class TestBase extends TestCase
 //		else
 //		{
 //			// TODO (SH): check whether we have the expected problems.
-//			File file = new File(_workingDir.getAbsolutePath() 
-//									+ File.separator 
-//									+ _logFileName 
+//			File file = new File(_workingDir.getAbsolutePath()
+//									+ File.separator
+//									+ _logFileName
 //									+ LOG_FILE_EXTENSION);
 //			file.delete();
-//            
+//
 //			return true;
 //		}
-//	}    
-    
-    
+//	}
+
+
     private String[] createClassPath(String fname)
     {
-        File javaFile = new File(_workingDir.getAbsolutePath() 
-        							+ File.separator 
-        							+ fname 
+        File javaFile = new File(_workingDir.getAbsolutePath()
+        							+ File.separator
+        							+ fname
         							+ JAVA_FILE_EXTENSION);
-        
+
         String[] args =
         {
             "-classpath",
@@ -513,54 +513,54 @@ public class TestBase extends TestCase
                 		+ File.pathSeparator
                 		+ new Path(JRE_JAR_PATH).toString()
                 		+ File.pathSeparator
-                		+ new Path(_workingDir.getAbsolutePath() 
+                		+ new Path(_workingDir.getAbsolutePath()
                 		+ File.separator).toString(),
             		 javaFile.getAbsolutePath()
         };
-                
+
         return args;
     }
-    
+
     protected String[] createClassPathNoOTRE(String fname)
     {
-        File javaFile = new File(_workingDir.getAbsolutePath() 
-        							+ File.separator 
-        							+ fname 
+        File javaFile = new File(_workingDir.getAbsolutePath()
+        							+ File.separator
+        							+ fname
         							+ JAVA_FILE_EXTENSION);
-        
+
         String[] args =
         {
             "-classpath",
             new Path(JRE_JAR_PATH).toString()
                 		+ File.pathSeparator
-                		+ new Path(_workingDir.getAbsolutePath() 
+                		+ new Path(_workingDir.getAbsolutePath()
                 		+ File.separator).toString(),
             javaFile.getAbsolutePath()
         };
-                
+
         return args;
     }
-       
-       
+
+
 	protected void setUp() throws Exception
 	{
 		_workingDir = new File(PROJECT_PATH);
 		cleanWorkingDirectory();
 		_workingDir.mkdirs();
 	}
-	   
+
     protected void tearDown() throws Exception
     {
 
     }
-    
+
     /**
      * This method was added for convenient testing of single testmethods in testclasses.
-     * The first commandline argument is expected to be the class where the 
+     * The first commandline argument is expected to be the class where the
      * testmethod can be found. The following arguments are the testmethodnames
-     * that should run. 
-     * example: 
-     * java Testbase org.eclipse.objectteams.otdt.tests.compiler.errorreporting.compiler.CalloutBindingTest testMultipleCalloutBinding1 
+     * that should run.
+     * example:
+     * java Testbase org.eclipse.objectteams.otdt.tests.compiler.errorreporting.compiler.CalloutBindingTest testMultipleCalloutBinding1
      * @param args
      * @throws ClassNotFoundException
      * @throws SecurityException
@@ -570,12 +570,12 @@ public class TestBase extends TestCase
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    
+
 	public static void main(String[] args) throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException
 	{
 		TestSuite selected = null;
 		Constructor clsConst =null;
-		
+
 		switch (args.length)
 		{
 			case 0:
@@ -584,27 +584,27 @@ public class TestBase extends TestCase
 				System.exit(1);
 				break; // duh
 			}
-			
+
 			case 1: // take all methods
 			{
 				Class testClass = Class.forName(args[0]);
 				selected = new TestSuite(testClass);
 				break;
 			}
-		
+
 			default: // single methods to execute given
 			{
 				Class<?> testClass = Class.forName(args[0]);
 				clsConst = testClass.getConstructor( new Class<?>[] { String.class } );
 				selected = new TestSuite();
-		
+
 				for (int idx = 1; idx < args.length; idx++)
 				{
 					selected.addTest((Test)clsConst.newInstance( new Object[] { args[idx] } ));
 				}
 			}
 		}
-				
-		TestRunner.run(selected);		
+
+		TestRunner.run(selected);
 	}
 }

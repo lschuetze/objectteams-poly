@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -60,20 +60,20 @@ public class TSuperConstructorInvocationTest extends FileBasedDOMTest
     private MethodDeclaration _constructor1;
     private Statement _tsuper0;
     private Statement _tsuper1;
-    
-    
+
+
     private TSuperConstructorInvocation _testObj;
 
     public TSuperConstructorInvocationTest(String name)
 	{
 		super(name);
 	}
-	
+
 	public static Test suite()
 	{
 		return new Suite(TSuperConstructorInvocationTest.class);
 	}
-	
+
 	public void setUpSuite() throws Exception
 	{
 		setTestProjectDir(TEST_PROJECT);
@@ -87,8 +87,8 @@ public class TSuperConstructorInvocationTest extends FileBasedDOMTest
 		parser.setProject( getJavaProject(TEST_PROJECT) );
 		parser.setSource(_teamClass);
         parser.setResolveBindings(true);
-        
-		ASTNode root = parser.createAST( new NullProgressMonitor() );        
+
+		ASTNode root = parser.createAST( new NullProgressMonitor() );
         CompilationUnit compUnit = (CompilationUnit) root;
         _typeDecl = (TypeDeclaration)compUnit.types().get(0);
 
@@ -100,12 +100,12 @@ public class TSuperConstructorInvocationTest extends FileBasedDOMTest
 
 	}
 
-	protected void setUp() throws Exception 
+	protected void setUp() throws Exception
 	{
 		super.setUp();
 	}
 
-    
+
     public void testInstanceType1()
     {
         assertTrue("tsuper call not an instance of TSuperConstructorInvocation",
@@ -121,21 +121,21 @@ public class TSuperConstructorInvocationTest extends FileBasedDOMTest
     public void testNodeType1()
     {
         _testObj = (TSuperConstructorInvocation)_tsuper1;
-        
+
         int actual = _testObj.getNodeType();
-        
+
         assertEquals("tsuper call has wrong node type",
                      ASTNode.TSUPER_CONSTRUCTOR_INVOCATION,
                      actual);
     }
 
-   
+
     public void testGetArguments2_TwoArgs()
     {
         _testObj = (TSuperConstructorInvocation)_tsuper1;
-        
+
         List actual = _testObj.getArguments();
-        
+
         assertEquals("tsuper call has wrong number of arguments",
                      2,
                      actual.size());
@@ -144,9 +144,9 @@ public class TSuperConstructorInvocationTest extends FileBasedDOMTest
     public void testGetArguments1_NoArgs()
     {
         _testObj = (TSuperConstructorInvocation)_tsuper0;
-        
+
         List actual = _testObj.getArguments();
-        
+
         assertEquals("tsuper call has wrong number of arguments",
                      0,
                      actual.size());
@@ -155,10 +155,10 @@ public class TSuperConstructorInvocationTest extends FileBasedDOMTest
     public void testChildNodesHaveCorrectParent1()
     {
         _testObj = (TSuperConstructorInvocation)_tsuper1;
-        
+
         List childNodes = _testObj.getArguments();
 
-        for (Iterator iter = childNodes.iterator(); iter.hasNext();) 
+        for (Iterator iter = childNodes.iterator(); iter.hasNext();)
         {
             Expression curChild = (Expression) iter.next();
             assertEquals("tsuper call arguments have wrong parent node",
@@ -167,34 +167,34 @@ public class TSuperConstructorInvocationTest extends FileBasedDOMTest
         }
 
     }
-     
+
     public void testSubtreeMatch1()
     {
         _testObj = (TSuperConstructorInvocation)_tsuper1;
-        
+
         boolean actual = _testObj.subtreeMatch(new ASTMatcher(), _testObj);
 
         assertTrue("tsuper call message sends don't match", actual);
- 
+
     }
 
     public void testToString1()
     {
         _testObj = (TSuperConstructorInvocation)_tsuper1;
-        
+
         String actual = _testObj.toString();
         String expected = "tsuper(arg0, arg1)";
-        
+
         assertEquals(
             "tsuper call message send: wrong naive flat string representation",
-            expected, 
+            expected,
             actual);
     }
-    
+
     public void testResolveBinding()
     {
         _testObj = (TSuperConstructorInvocation)_tsuper1;
-        
+
         ITypeBinding itb = _typeDecl.resolveBinding();
         ITypeBinding tsuperRoleClass = null;
         for (ITypeBinding role : itb.getSuperclass().getDeclaredTypes()) {
@@ -206,11 +206,11 @@ public class TSuperConstructorInvocationTest extends FileBasedDOMTest
         assertNotNull("tsuper Role not found", tsuperRoleClass);
         IMethodBinding tSuperConstructor =
             tsuperRoleClass.getDeclaredMethods()[1];
-        
+
         IMethodBinding expected = tSuperConstructor;
         IMethodBinding actual = _testObj.resolveConstructorBinding();
         assertEquals(expected, actual);
     }
-        
-    
+
+
 }

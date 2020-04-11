@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -32,18 +32,18 @@ import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 
 /**
- * 
+ *
  * @author Michael Krueger (mkr)
- * @version $Id: OTSuperTypeHierarchyTest013.java 23494 2010-02-05 23:06:44Z stephan $ 
- * 
+ * @version $Id: OTSuperTypeHierarchyTest013.java 23494 2010-02-05 23:06:44Z stephan $
+ *
  */
 public class OTSuperTypeHierarchyTest013 extends FileBasedModelTest
 {
-	
+
 	private IType _focusType;
 	private IType _objectType;
     private IType _TA1;
-    private IType _TA2;    
+    private IType _TA2;
     private IType _TA1TB2TC2R1;
 	private IType _TA1TB2TC1R1;
 	private IType _TA1TB1TC2R1;
@@ -56,12 +56,12 @@ public class OTSuperTypeHierarchyTest013 extends FileBasedModelTest
 	private IType _C1;
     private IType _C2;
     private IType _C3;
-    
+
 	public OTSuperTypeHierarchyTest013(String name)
 	{
 		super(name);
 	}
-	
+
 	public static Test suite()
 	{
 		if (true)
@@ -69,56 +69,56 @@ public class OTSuperTypeHierarchyTest013 extends FileBasedModelTest
 			return new Suite(OTSuperTypeHierarchyTest013.class);
 		}
 		@SuppressWarnings("unused")
-		junit.framework.TestSuite suite = 
+		junit.framework.TestSuite suite =
 			new Suite(OTSuperTypeHierarchyTest013.class.getName());
 		return suite;
 	}
-	
+
 	public void setUpSuite() throws Exception
 	{
 		setTestProjectDir("Hierarchy");
 		super.setUpSuite();
-		
+
 		String srcFolder = "src";
 		String pkg = "test013";
-		
-		_TA1 = 
+
+		_TA1 =
 			getType(getTestProjectDir(),
 					srcFolder,
 					pkg,
 					"TA1");
 
-        _TA2 = 
+        _TA2 =
             getType(getTestProjectDir(),
                     srcFolder,
                     pkg,
                     "TA2");
 
-        _C0 = 
+        _C0 =
             getType(getTestProjectDir(),
                     srcFolder,
                     pkg,
                     "C0");
-        
-        _C1 = 
+
+        _C1 =
             getType(getTestProjectDir(),
                     srcFolder,
                     pkg,
                     "C1");
 
-        _C2 = 
+        _C2 =
             getType(getTestProjectDir(),
                     srcFolder,
                     pkg,
                     "C2");
-        
-        _C3 = 
+
+        _C3 =
             getType(getTestProjectDir(),
                     srcFolder,
                     pkg,
                     "C3");
 
-        _objectType = 
+        _objectType =
             getType(getTestProjectDir(),
                     "rt.jar",
                     "java.lang",
@@ -136,7 +136,7 @@ public class OTSuperTypeHierarchyTest013 extends FileBasedModelTest
 
     }
 
-    
+
 	public void testCreation()
 	{
 		assertCreation(_TA1);
@@ -145,7 +145,7 @@ public class OTSuperTypeHierarchyTest013 extends FileBasedModelTest
         assertCreation(_C1);
         assertCreation(_C2);
         assertCreation(_C3);
-        
+
         assertCreation(_TA2TB2TC2R1);
         assertCreation(_TA2TB2TC1R1);
         assertCreation(_TA2TB1TC2R1);
@@ -155,12 +155,12 @@ public class OTSuperTypeHierarchyTest013 extends FileBasedModelTest
         assertCreation(_TA1TB1TC2R1);
         assertCreation(_TA1TB1TC1R1);
 	}
-    
-    
+
+
     public void testGetTSuperTypes_TA2TB2TC2R1() throws JavaModelException
     {
         _focusType = _TA2TB2TC2R1;
-        
+
         TypeHierarchy hierarchy =
             new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), false);
         hierarchy.refresh(new NullProgressMonitor());
@@ -171,16 +171,16 @@ public class OTSuperTypeHierarchyTest013 extends FileBasedModelTest
 										_TA2TB1TC2R1,
 										_TA1TB2TC2R1
         								};
-   
-        assertEquals(expected.length, actual.length);        
-        assertTrue(compareTypes(expected, actual));        
+
+        assertEquals(expected.length, actual.length);
+        assertTrue(compareTypes(expected, actual));
     }
 
 
     public void testGetSuperclasses_TA2TB2TC2R1() throws JavaModelException
     {
         _focusType = _TA2TB2TC2R1;
-        
+
         TypeHierarchy hierarchy =
             new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), false);
         hierarchy.refresh(new NullProgressMonitor());
@@ -192,15 +192,15 @@ public class OTSuperTypeHierarchyTest013 extends FileBasedModelTest
 										_TA1TB2TC2R1,
 										_C1
                                        };
-   
-        assertEquals(expected.length, actual.length);        
-        assertTrue(compareTypes(expected, actual));        
+
+        assertEquals(expected.length, actual.length);
+        assertTrue(compareTypes(expected, actual));
     }
 
     public void testGetAllSuperclasses_TA2TB2TC2R1() throws JavaModelException
     {
         _focusType = _TA2TB2TC2R1;
-        
+
         TypeHierarchy hierarchy =
             new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), false);
         hierarchy.refresh(new NullProgressMonitor());
@@ -210,7 +210,7 @@ public class OTSuperTypeHierarchyTest013 extends FileBasedModelTest
         								_TA1TB2TC2R1,
 										_TA1TB2TC1R1,
 										_TA1TB1TC2R1,
-										_TA1TB1TC1R1,										
+										_TA1TB1TC1R1,
         								_TA2TB2TC1R1,
 										_TA2TB1TC2R1,
 										_TA2TB1TC1R1,
@@ -220,44 +220,44 @@ public class OTSuperTypeHierarchyTest013 extends FileBasedModelTest
 //										_C3, 			// illegal inheritance, causes incompatible supers
 										_objectType
         								};
-   
-        assertEquals(expected.length, actual.length);        
-        assertTrue(compareTypes(expected, actual));        
+
+        assertEquals(expected.length, actual.length);
+        assertTrue(compareTypes(expected, actual));
     }
 
-    
+
     public void testGetExplicitSuperclass_TA2TB2TC2R1() throws JavaModelException
     {
         _focusType = _TA2TB2TC2R1;
-        
+
         TypeHierarchy hierarchy =
             new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), false);
         hierarchy.refresh(new NullProgressMonitor());
 
         IType actual = OTTypeHierarchies.getInstance().getExplicitSuperclass(hierarchy, _focusType);
         IType expected = _C1;
-   
-        assertTrue(compareTypes(expected, actual));        
+
+        assertTrue(compareTypes(expected, actual));
     }
-    
+
     public void testGetImplicitSuperclass_TA2TB2TC2R1() throws JavaModelException
     {
         _focusType = _TA2TB2TC2R1;
-        
+
         TypeHierarchy hierarchy =
             new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), false);
         hierarchy.refresh(new NullProgressMonitor());
 
         IType actual = hierarchy.getSuperclass(_focusType);
         IType expected = _TA1TB2TC2R1;
-   
-        assertTrue(compareTypes(expected, actual));        
+
+        assertTrue(compareTypes(expected, actual));
     }
 
     public void testGetAllClasses_TA2TB2TC2R1() throws JavaModelException
     {
         _focusType = _TA2TB2TC2R1;
-        
+
         TypeHierarchy hierarchy =
             new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), false);
         hierarchy.refresh(new NullProgressMonitor());
@@ -278,9 +278,9 @@ public class OTSuperTypeHierarchyTest013 extends FileBasedModelTest
 										_C3, 			// illegal inheritance, causes incompatible supers
 										_objectType
         								};
-   
-        assertEquals(expected.length, actual.length);        
-        assertTrue(compareTypes(expected, actual));        
+
+        assertEquals(expected.length, actual.length);
+        assertTrue(compareTypes(expected, actual));
     }
-    
+
 }

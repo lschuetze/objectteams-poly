@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -29,11 +29,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 @SuppressWarnings("unchecked")
 public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTest {
-	
+
 	public CalloutParameterBinding_LiftingAndLowering(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -41,7 +41,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -54,7 +54,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // an invocation of a callout-bound base method from the direct base class that has a parameter mapping
     // 3.2.1-otjld-callout-invocation-with-mapped-parameter-1
     public void test321_calloutInvocationWithMappedParameter1() {
-       
+
        runConformTest(
             new String[] {
 		"T321ciwmp1Main.java",
@@ -109,7 +109,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // an invocation of a callout-bound base method from the indirect base class that has a parameter mapping
     // 3.2.1-otjld-callout-invocation-with-mapped-parameter-2
     public void test321_calloutInvocationWithMappedParameter2() {
-       
+
        runConformTest(
             new String[] {
 		"T321ciwmp2Main.java",
@@ -168,7 +168,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // an invocation of a callout-bound base method from the indirect base class that has a parameter mapping
     // 3.2.1-otjld-callout-invocation-with-mapped-parameter-3
     public void test321_calloutInvocationWithMappedParameter3() {
-       
+
        runConformTest(
             new String[] {
 		"T321ciwmp3Main.java",
@@ -234,7 +234,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // corrected version of buggy reported example (callout version)
     // 3.2.1-otjld-callout-invocation-with-mapped-parameter-4
     public void test321_calloutInvocationWithMappedParameter4() {
-       
+
        runConformTest(
             new String[] {
 		"T321ciwmp4Main.java",
@@ -275,7 +275,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // corrected version of buggy reported example (callin version)
     // 3.2.1-otjld-callout-invocation-with-mapped-parameter-5
     public void test321_calloutInvocationWithMappedParameter5() {
-       
+
        runConformTest(
             new String[] {
 		"T321ciwmp5Main.java",
@@ -346,152 +346,152 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team321ciwmp6.java (at line 1)\n" + 
-    		"	\n" + 
-    		"public team class Team321ciwmp6 {\n" + 
-    		"	^\n" + 
-    		"Syntax error on token \";\", ++ expected before this token\n" + 
+            "----------\n" +
+    		"1. ERROR in Team321ciwmp6.java (at line 1)\n" +
+    		"	\n" +
+    		"public team class Team321ciwmp6 {\n" +
+    		"	^\n" +
+    		"Syntax error on token \";\", ++ expected before this token\n" +
     		"----------\n" +
-    		( this.complianceLevel < ClassFileConstants.JDK1_8 
+    		( this.complianceLevel < ClassFileConstants.JDK1_8
     		?
-	    		"2. ERROR in Team321ciwmp6.java (at line 5)\n" + 
-	    		"	int doSomethingOther(int r1) -> int doSomething(int b1) wrong\n" + 
-	    		"                        with {\n" + 
-	    		"	                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-	    		"Syntax error on tokens, EmptyParameterMappings expected instead\n" + 
-	    		"----------\n" + 
-	    		"3. ERROR in Team321ciwmp6.java (at line 7)\n" + 
-	    		"	r1 -> b1,\n" + 
-	    		"	        ^\n" + 
-	    		"Syntax error on token \",\", ; expected\n"+ 
-	    		"----------\n" + 
-	    		"4. ERROR in Team321ciwmp6.java (at line 9)\n" + 
-	    		"	};\n" + 
-	    		"	 ^\n" + 
-	    		"Syntax error, insert \"}\" to complete ClassBody\n" + 
-	    		"----------\n" + 
-	    		"5. ERROR in Team321ciwmp6.java (at line 11)\n" + 
-	    		"	int doCalloutGetSomeFieldDoubled() -> get int someField\n" + 
-	    		"	^^^\n" + 
-	    		"Syntax error on token \"int\", @ expected\n" + 
-	    		"----------\n" + 
-	    		"6. ERROR in Team321ciwmp6.java (at line 11)\n" + 
-	    		"	int doCalloutGetSomeFieldDoubled() -> get int someField\n" + 
-	    		"                        with {\n" + 
-	    		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-	    		"Syntax error on tokens, ClassHeader expected instead\n" + 
-	    		"----------\n" + 
-	    		"7. ERROR in Team321ciwmp6.java (at line 12)\n" + 
-	    		"	with {\n" + 
-	    		"                                result <- 2 * base.someField\n" + 
-	    		"	      ^\n" + 
-	    		"Syntax error on token \";\", & expected before this token\n" + 
-	    		"----------\n" + 
-	    		"8. ERROR in Team321ciwmp6.java (at line 13)\n" + 
-	    		"	result <- 2 * base.someField\n" + 
-	    		"	^^^^^^^^^^^^^\n" + 
-	    		"Syntax error on tokens, delete these tokens\n" + 
-	    		"----------\n" + 
-	    		"9. ERROR in Team321ciwmp6.java (at line 13)\n" + 
-	    		"	result <- 2 * base.someField\n" + 
-	    		"	              ^^^^^\n" + 
-	    		"Syntax error on tokens, delete these tokens\n" + 
-	    		"----------\n" + 
-	    		"10. ERROR in Team321ciwmp6.java (at line 13)\n" + 
-	    		"	result <- 2 * base.someField\n" + 
-	    		"	                  ^\n" + 
-	    		"Syntax error, insert \"enum Identifier\" to complete EnumHeaderName\n" + 
-	    		"----------\n" + 
-	    		"11. ERROR in Team321ciwmp6.java (at line 13)\n" + 
-	    		"	result <- 2 * base.someField\n" + 
-	    		"	                  ^\n" + 
-	    		"Syntax error, insert \"EnumBody\" to complete ClassBodyDeclarations\n" + 
-	    		"----------\n" + 
-	    		"12. ERROR in Team321ciwmp6.java (at line 15)\n" + 
-	    		"	}\n" + 
-	    		"}\n" + 
-	    		"	^^^\n" + 
-	    		"Syntax error on tokens, delete these tokens\n" + 
+	    		"2. ERROR in Team321ciwmp6.java (at line 5)\n" +
+	    		"	int doSomethingOther(int r1) -> int doSomething(int b1) wrong\n" +
+	    		"                        with {\n" +
+	    		"	                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+	    		"Syntax error on tokens, EmptyParameterMappings expected instead\n" +
+	    		"----------\n" +
+	    		"3. ERROR in Team321ciwmp6.java (at line 7)\n" +
+	    		"	r1 -> b1,\n" +
+	    		"	        ^\n" +
+	    		"Syntax error on token \",\", ; expected\n"+
+	    		"----------\n" +
+	    		"4. ERROR in Team321ciwmp6.java (at line 9)\n" +
+	    		"	};\n" +
+	    		"	 ^\n" +
+	    		"Syntax error, insert \"}\" to complete ClassBody\n" +
+	    		"----------\n" +
+	    		"5. ERROR in Team321ciwmp6.java (at line 11)\n" +
+	    		"	int doCalloutGetSomeFieldDoubled() -> get int someField\n" +
+	    		"	^^^\n" +
+	    		"Syntax error on token \"int\", @ expected\n" +
+	    		"----------\n" +
+	    		"6. ERROR in Team321ciwmp6.java (at line 11)\n" +
+	    		"	int doCalloutGetSomeFieldDoubled() -> get int someField\n" +
+	    		"                        with {\n" +
+	    		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+	    		"Syntax error on tokens, ClassHeader expected instead\n" +
+	    		"----------\n" +
+	    		"7. ERROR in Team321ciwmp6.java (at line 12)\n" +
+	    		"	with {\n" +
+	    		"                                result <- 2 * base.someField\n" +
+	    		"	      ^\n" +
+	    		"Syntax error on token \";\", & expected before this token\n" +
+	    		"----------\n" +
+	    		"8. ERROR in Team321ciwmp6.java (at line 13)\n" +
+	    		"	result <- 2 * base.someField\n" +
+	    		"	^^^^^^^^^^^^^\n" +
+	    		"Syntax error on tokens, delete these tokens\n" +
+	    		"----------\n" +
+	    		"9. ERROR in Team321ciwmp6.java (at line 13)\n" +
+	    		"	result <- 2 * base.someField\n" +
+	    		"	              ^^^^^\n" +
+	    		"Syntax error on tokens, delete these tokens\n" +
+	    		"----------\n" +
+	    		"10. ERROR in Team321ciwmp6.java (at line 13)\n" +
+	    		"	result <- 2 * base.someField\n" +
+	    		"	                  ^\n" +
+	    		"Syntax error, insert \"enum Identifier\" to complete EnumHeaderName\n" +
+	    		"----------\n" +
+	    		"11. ERROR in Team321ciwmp6.java (at line 13)\n" +
+	    		"	result <- 2 * base.someField\n" +
+	    		"	                  ^\n" +
+	    		"Syntax error, insert \"EnumBody\" to complete ClassBodyDeclarations\n" +
+	    		"----------\n" +
+	    		"12. ERROR in Team321ciwmp6.java (at line 15)\n" +
+	    		"	}\n" +
+	    		"}\n" +
+	    		"	^^^\n" +
+	    		"Syntax error on tokens, delete these tokens\n" +
 	    		"----------\n"
     		:
-        		"2. ERROR in Team321ciwmp6.java (at line 5)\n" + 
-        		"	int doSomethingOther(int r1) -> int doSomething(int b1) wrong\n" + 
-        		"	                                                        ^^^^^\n" + 
-        		"Syntax error on token \"wrong\", delete this token\n" + 
-        		"----------\n" + 
-        		"3. ERROR in Team321ciwmp6.java (at line 7)\n" + 
-        		"	r1 -> b1,\n" + 
-        		"	      ^^\n" + 
-        		"Syntax error, insert \"AssignmentOperator Expression\" to complete Assignment\n" + 
-        		"----------\n" + 
-        		"4. ERROR in Team321ciwmp6.java (at line 7)\n" + 
-        		"	r1 -> b1,\n" + 
-        		"	      ^^\n" + 
-        		"Syntax error, insert \"-> Identifier\" to complete ParameterMapping\n" + 
-        		"----------\n" + 
-        		"5. ERROR in Team321ciwmp6.java (at line 9)\n" + 
-        		"	};\n" + 
-        		"	 ^\n" + 
-        		"Syntax error, insert \"}\" to complete ClassBody\n" + 
-        		"----------\n" + 
-        		"6. ERROR in Team321ciwmp6.java (at line 9)\n" + 
-        		"	};\n" + 
-        		"	 ^\n" + 
-        		"Syntax error, insert \"}\" to complete ClassBody\n" + 
-        		"----------\n" + 
-        		"7. ERROR in Team321ciwmp6.java (at line 11)\n" + 
-        		"	int doCalloutGetSomeFieldDoubled() -> get int someField\n" + 
-        		"	^^^\n" + 
+        		"2. ERROR in Team321ciwmp6.java (at line 5)\n" +
+        		"	int doSomethingOther(int r1) -> int doSomething(int b1) wrong\n" +
+        		"	                                                        ^^^^^\n" +
+        		"Syntax error on token \"wrong\", delete this token\n" +
+        		"----------\n" +
+        		"3. ERROR in Team321ciwmp6.java (at line 7)\n" +
+        		"	r1 -> b1,\n" +
+        		"	      ^^\n" +
+        		"Syntax error, insert \"AssignmentOperator Expression\" to complete Assignment\n" +
+        		"----------\n" +
+        		"4. ERROR in Team321ciwmp6.java (at line 7)\n" +
+        		"	r1 -> b1,\n" +
+        		"	      ^^\n" +
+        		"Syntax error, insert \"-> Identifier\" to complete ParameterMapping\n" +
+        		"----------\n" +
+        		"5. ERROR in Team321ciwmp6.java (at line 9)\n" +
+        		"	};\n" +
+        		"	 ^\n" +
+        		"Syntax error, insert \"}\" to complete ClassBody\n" +
+        		"----------\n" +
+        		"6. ERROR in Team321ciwmp6.java (at line 9)\n" +
+        		"	};\n" +
+        		"	 ^\n" +
+        		"Syntax error, insert \"}\" to complete ClassBody\n" +
+        		"----------\n" +
+        		"7. ERROR in Team321ciwmp6.java (at line 11)\n" +
+        		"	int doCalloutGetSomeFieldDoubled() -> get int someField\n" +
+        		"	^^^\n" +
 	    		(isJ14plus
 	    		? "Syntax error on token \"int\", record expected\n"
-	    		: "Syntax error on token \"int\", @ expected\n") + 
-        		"----------\n" + 
-        		"8. ERROR in Team321ciwmp6.java (at line 11)\n" + 
-        		"	int doCalloutGetSomeFieldDoubled() -> get int someField\n" + 
-        		"                        with {\n" + 
+	    		: "Syntax error on token \"int\", @ expected\n") +
+        		"----------\n" +
+        		"8. ERROR in Team321ciwmp6.java (at line 11)\n" +
+        		"	int doCalloutGetSomeFieldDoubled() -> get int someField\n" +
+        		"                        with {\n" +
 	    		(isJ14plus
 				? "	                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
 				  "Syntax error on tokens, delete these tokens\n"
-	    		: "	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-        		"Syntax error on tokens, ClassHeader expected instead\n") + 
-        		"----------\n" + 
-        		"9. ERROR in Team321ciwmp6.java (at line 12)\n" + 
-        		"	with {\n" + 
-        		"                                result <- 2 * base.someField\n" + 
-        		"	      ^\n" + 
-        		"Syntax error on token \";\", & expected before this token\n" + 
-        		"----------\n" + 
-        		"10. ERROR in Team321ciwmp6.java (at line 13)\n" + 
-        		"	result <- 2 * base.someField\n" + 
-        		"	^^^^^^^^^^^^^\n" + 
-        		"Syntax error on tokens, delete these tokens\n" + 
-        		"----------\n" + 
-        		"11. ERROR in Team321ciwmp6.java (at line 13)\n" + 
-        		"	result <- 2 * base.someField\n" + 
-        		"	              ^^^^^\n" + 
-        		"Syntax error on tokens, delete these tokens\n" + 
-        		"----------\n" + 
-        		"12. ERROR in Team321ciwmp6.java (at line 13)\n" + 
-        		"	result <- 2 * base.someField\n" + 
-        		"	                  ^\n" + 
-        		"Syntax error, insert \"enum Identifier\" to complete EnumHeaderName\n" + 
-        		"----------\n" + 
-        		"13. ERROR in Team321ciwmp6.java (at line 13)\n" + 
-        		"	result <- 2 * base.someField\n" + 
-        		"	                  ^\n" + 
-        		"Syntax error, insert \"EnumBody\" to complete ClassBodyDeclarations\n" + 
+	    		: "	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+        		"Syntax error on tokens, ClassHeader expected instead\n") +
+        		"----------\n" +
+        		"9. ERROR in Team321ciwmp6.java (at line 12)\n" +
+        		"	with {\n" +
+        		"                                result <- 2 * base.someField\n" +
+        		"	      ^\n" +
+        		"Syntax error on token \";\", & expected before this token\n" +
+        		"----------\n" +
+        		"10. ERROR in Team321ciwmp6.java (at line 13)\n" +
+        		"	result <- 2 * base.someField\n" +
+        		"	^^^^^^^^^^^^^\n" +
+        		"Syntax error on tokens, delete these tokens\n" +
+        		"----------\n" +
+        		"11. ERROR in Team321ciwmp6.java (at line 13)\n" +
+        		"	result <- 2 * base.someField\n" +
+        		"	              ^^^^^\n" +
+        		"Syntax error on tokens, delete these tokens\n" +
+        		"----------\n" +
+        		"12. ERROR in Team321ciwmp6.java (at line 13)\n" +
+        		"	result <- 2 * base.someField\n" +
+        		"	                  ^\n" +
+        		"Syntax error, insert \"enum Identifier\" to complete EnumHeaderName\n" +
+        		"----------\n" +
+        		"13. ERROR in Team321ciwmp6.java (at line 13)\n" +
+        		"	result <- 2 * base.someField\n" +
+        		"	                  ^\n" +
+        		"Syntax error, insert \"EnumBody\" to complete ClassBodyDeclarations\n" +
         		"----------\n" +
         		(isJ14plus
-				? "14. ERROR in Team321ciwmp6.java (at line 14)\n" + 
-				  "	};\n" + 
-				  "	^\n" + 
+				? "14. ERROR in Team321ciwmp6.java (at line 14)\n" +
+				  "	};\n" +
+				  "	^\n" +
 				  "Syntax error on token \"}\", { expected\n"
-        		: "14. ERROR in Team321ciwmp6.java (at line 15)\n" + 
-        		"	}\n" + 
-        		"}\n" + 
-        		"	^^^\n" + 
-        		"Syntax error on tokens, delete these tokens\n") + 
+        		: "14. ERROR in Team321ciwmp6.java (at line 15)\n" +
+        		"	}\n" +
+        		"}\n" +
+        		"	^^^\n" +
+        		"Syntax error on tokens, delete these tokens\n") +
         		"----------\n"
     		));
     }
@@ -499,7 +499,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // an invocation of a callout-bound base method from the direct base class that has a implicit result mapping
     // 3.2.2-otjld-callout-invocation-with-result-mapping-1
     public void test322_calloutInvocationWithResultMapping1() {
-       
+
        runConformTest(
             new String[] {
 		"T322ciwrm1Main.java",
@@ -546,7 +546,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // an invocation of a callout-bound base method from the indirect base class that has an explicit result mapping
     // 3.2.2-otjld-callout-invocation-with-result-mapping-2
     public void test322_calloutInvocationWithResultMapping2() {
-       
+
        runConformTest(
             new String[] {
 		"T322ciwrm2Main.java",
@@ -677,11 +677,11 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. WARNING in Team324mfnp1.java (at line 7)\n" + 
-    		"	arg -> arg\n" + 
-    		"	^^^^^^^^^^\n" + 
-    		"Unused mapping for parameter arg is ignored (OTJLD 3.2).\n" + 
+            "----------\n" +
+    		"1. WARNING in Team324mfnp1.java (at line 7)\n" +
+    		"	arg -> arg\n" +
+    		"	^^^^^^^^^^\n" +
+    		"Unused mapping for parameter arg is ignored (OTJLD 3.2).\n" +
     		"----------\n");
     }
 
@@ -943,11 +943,11 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team3210wpmd1.java (at line 6)\n" + 
-    		"	String test(String arg) -> void test(String arg1, String arg2) with {\n" + 
-    		"	                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Incomplete parameter mapping: argument arg2 of base method void test(String arg1, String arg2) is not mapped (OTJLD 3.2(b)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team3210wpmd1.java (at line 6)\n" +
+    		"	String test(String arg) -> void test(String arg1, String arg2) with {\n" +
+    		"	                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+    		"Incomplete parameter mapping: argument arg2 of base method void test(String arg1, String arg2) is not mapped (OTJLD 3.2(b)).\n" +
     		"----------\n");
     }
 
@@ -976,11 +976,11 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team3210wpmd2.java (at line 8)\n" + 
-    		"	resultWrong <- \"OK\"\n" + 
-    		"	^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Wrong mapping direction for parameter resultWrong, should use -> unless mapping \'result\' (OTJLD 3.2(b)). \n" + 
+            "----------\n" +
+    		"1. ERROR in Team3210wpmd2.java (at line 8)\n" +
+    		"	resultWrong <- \"OK\"\n" +
+    		"	^^^^^^^^^^^^^^^^^^^\n" +
+    		"Wrong mapping direction for parameter resultWrong, should use -> unless mapping \'result\' (OTJLD 3.2(b)). \n" +
     		"----------\n");
     }
 
@@ -1124,7 +1124,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a field of the role class is used in a parameter mapping
     // 3.2.14-otjld-role-feature-access-1
     public void test3214_roleFeatureAccess1() {
-       
+
        runConformTest(
             new String[] {
 		"T3214rfa1Main.java",
@@ -1181,7 +1181,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a method of the implicit superrole is used in a result mapping
     // 3.2.14-otjld-role-feature-access-2
     public void test3214_roleFeatureAccess2() {
-       
+
        runConformTest(
             new String[] {
 		"T3214rfa2Main.java",
@@ -1237,7 +1237,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a field of the explicit superrole is used in a parameter mapping
     // 3.2.14-otjld-role-feature-access-3
     public void test3214_roleFeatureAccess3() {
-       
+
        runConformTest(
             new String[] {
 		"T3214rfa3Main.java",
@@ -1287,7 +1287,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a method of an indirect superrole is used in a result mapping
     // 3.2.14-otjld-role-feature-access-4
     public void test3214_roleFeatureAccess4() {
-       
+
        runConformTest(
             new String[] {
 		"T3214rfa4Main.java",
@@ -1345,7 +1345,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a method of the explicit superrole is used in a parameter mapping using super
     // 3.2.14-otjld-role-feature-access-5
     public void test3214_roleFeatureAccess5() {
-       
+
        runConformTest(
             new String[] {
 		"T3214rfa5Main.java",
@@ -1400,7 +1400,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a field of the enclosing team is used in a parameter mapping
     // 3.2.15-otjld-team-feature-access-1
     public void test3215_teamFeatureAccess1() {
-       
+
        runConformTest(
             new String[] {
 		"T3215tfa1Main.java",
@@ -1447,7 +1447,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a method of the direct superteam is used in a result mapping
     // 3.2.15-otjld-team-feature-access-2
     public void test3215_teamFeatureAccess2() {
-       
+
        runConformTest(
             new String[] {
 		"T3215tfa2Main.java",
@@ -1499,7 +1499,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a field of an indirect superteam is used in a parameter mapping
     // 3.2.15-otjld-team-feature-access-3
     public void test3215_teamFeatureAccess3() {
-       
+
        runConformTest(
             new String[] {
 		"p1/T3215tfa3Main.java",
@@ -1564,7 +1564,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a field of the direct superteam is used in a result mapping via tsuper
     // 3.2.15-otjld-team-feature-access-4
     public void test3215_teamFeatureAccess4() {
-       
+
        runConformTest(
             new String[] {
 		"T3215tfa4Main.java",
@@ -1614,7 +1614,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a field of the enclosing normal class is used in a result mapping
     // 3.2.16-otjld-enclosing-class-feature-access-1
     public void test3216_enclosingClassFeatureAccess1() {
-       
+
        runConformTest(
             new String[] {
 		"T3216ecfa1Main.java",
@@ -1662,7 +1662,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a method of the superclass of the enclosing normal class is used in a parameter mapping
     // 3.2.16-otjld-enclosing-class-feature-access-2
     public void test3216_enclosingClassFeatureAccess2() {
-       
+
        runConformTest(
             new String[] {
 		"T3216ecfa2Main.java",
@@ -1717,7 +1717,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a field of an indirect superclass of the enclosing normal class is used in a parameter mapping
     // 3.2.16-otjld-enclosing-class-feature-access-3
     public void test3216_enclosingClassFeatureAccess3() {
-       
+
        runConformTest(
             new String[] {
 		"T3216ecfa3Main.java",
@@ -1778,7 +1778,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a method of the superclass of the enclosing normal class is used in a result mapping
     // 3.2.16-otjld-enclosing-class-feature-access-4
     public void test3216_enclosingClassFeatureAccess4() {
-       
+
        runConformTest(
             new String[] {
 		"T3216ecfa4Main.java",
@@ -1832,7 +1832,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a static method of the enclosing normal class is used in a parameter mapping
     // 3.2.17-otjld-static-feature-access-1
     public void test3217_staticFeatureAccess1() {
-       
+
        runConformTest(
             new String[] {
 		"T3217sfa1Main.java",
@@ -1883,7 +1883,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a static method in another class in the same package is used in a result mapping
     // 3.2.17-otjld-static-feature-access-2
     public void test3217_staticFeatureAccess2() {
-       
+
        runConformTest(
             new String[] {
 		"T3217sfa2Main.java",
@@ -1935,7 +1935,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a static field of the another nested class in the enclosing normal class is used in a parameter mapping
     // 3.2.17-otjld-static-feature-access-3
     public void test3217_staticFeatureAccess3() {
-       
+
        runConformTest(
             new String[] {
 		"T3217sfa3Main.java",
@@ -1986,7 +1986,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a static field in another team class in the same package is used in a result mapping
     // 3.2.17-otjld-static-feature-access-4
     public void test3217_staticFeatureAccess4() {
-       
+
        runConformTest(
             new String[] {
 		"T3217sfa4Main.java",
@@ -2036,7 +2036,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a static field in an inner class in another package is used in a parameter mapping
     // 3.2.17-otjld-static-feature-access-5
     public void test3217_staticFeatureAccess5() {
-       
+
        runConformTest(
             new String[] {
 		"p1/T3217sfa5Main.java",
@@ -2239,7 +2239,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // in a result mapping, an instance of an anonymous class is created
     // 3.2.24-otjld-anonymous-class-instance
     public void test3224_anonymousClassInstance() {
-       
+
        runConformTest(
             new String[] {
 		"T3224aciMain.java",
@@ -2287,7 +2287,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // in a callout binding, an object is lifted to a role class
     // 3.2.25-otjld_testbug-lifting-mapping-expression-1
     public void _testbug_test3225_liftingMappingExpression1() {
-       
+
        runConformTest(
             new String[] {
 		"T3225lme1Main.java",
@@ -2338,7 +2338,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // in a callout binding with parameter mapping, an object is lifted to a role class
     // 3.2.25-otjld_testbug-lifting-mapping-expression-2
     public void _testbug_test3225_liftingMappingExpression2() {
-       
+
        runConformTest(
             new String[] {
 		"T3225lme2Main.java",
@@ -2506,7 +2506,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // in a callout binding with parameter mapping, an object is lifted to a role class
     // 3.2.25-otjld-lifting-mapping-expression-5
     public void test3225_liftingMappingExpression5() {
-       
+
        runConformTest(
             new String[] {
 		"T3225lme5Main.java",
@@ -2574,7 +2574,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // within a callout binding, an object is lowered to a role class
     // 3.2.26-otjld-lowering-mapping-expression-1
     public void test3226_loweringMappingExpression1() {
-       
+
        runConformTest(
             new String[] {
 		"T3226lme1Main.java",
@@ -2637,7 +2637,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // within a callout binding, an object is lowered to a role class
     // 3.2.26-otjld-lowering-mapping-expression-2
     public void test3226_loweringMappingExpression2() {
-       
+
        runConformTest(
             new String[] {
 		"T3226lme2Main.java",
@@ -2746,7 +2746,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // in a callout binding with parameter mapping, an object is lowered to a base class
     // 3.2.26-otjld-lowering-mapping-expression-3
     public void test3226_loweringMappingExpression3() {
-       
+
        runConformTest(
             new String[] {
 		"T3226lme3Main.java",
@@ -3009,7 +3009,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // the callout-bound role method has a return type whereas the base method has none
     // 3.2.28-otjld-return-type-addition
     public void test3228_returnTypeAddition() {
-       
+
        runConformTest(
             new String[] {
 		"T3228rtaMain.java",
@@ -3060,7 +3060,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // the callout-bound role method has no return type whereas the base method has one
     // 3.2.29-otjld-return-type-removal-1
     public void test3229_returnTypeRemoval1() {
-       
+
        runConformTest(
             new String[] {
 		"T3229rtr1Main.java",
@@ -3151,7 +3151,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // the callout-bound role method has no return type whereas the base method has one
     // 3.2.29-otjld-return-type-removal-2
     public void test3229_returnTypeRemoval2() {
-       
+
        runConformTest(
             new String[] {
 		"T3229rtr2Main.java",
@@ -3203,7 +3203,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // the callout-binding uses this to access a role feature
     // 3.2.30-otjld-this-access-1
     public void test3230_thisAccess1() {
-       
+
        runConformTest(
             new String[] {
 		"T3230ta1Main.java",
@@ -3249,7 +3249,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // the callout-binding uses this to access a role feature - default visibility
     // 3.2.30-otjld-this-access-2a
     public void test3230_thisAccess2a() {
-       
+
        runConformTest(
             new String[] {
 		"T3230ta2aMain.java",
@@ -3296,7 +3296,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // the callout-binding uses this to access a private role feature
     // 3.2.30-otjld-this-access-2b
     public void test3230_thisAccess2b() {
-       
+
        runConformTest(
             new String[] {
 		"Team3230ta2b.java",
@@ -3338,7 +3338,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // the callout-binding accesses a role feature unqualified
     // 3.2.30-otjld-this-access-2c
     public void test3230_thisAccess2c() {
-       
+
        runConformTest(
             new String[] {
 		"T3230ta2cMain.java",
@@ -3385,7 +3385,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // the callout-bound role method uses this to access a role feature
     // 3.2.30-otjld-this-access-3
     public void test3230_thisAccess3() {
-       
+
        runConformTest(
             new String[] {
 		"T3230ta3Main.java",
@@ -3431,7 +3431,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // the callout-binding uses super to access a feature of the superrole
     // 3.2.31-otjld-super-access-1
     public void test3231_superAccess1() {
-       
+
        runConformTest(
             new String[] {
 		"T3231sa1Main.java",
@@ -3480,7 +3480,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // the callout-binding uses super to access a feature of the superrole
     // 3.2.31-otjld-super-access-2
     public void test3231_superAccess2() {
-       
+
        runConformTest(
             new String[] {
 		"T3231sa2Main.java",
@@ -3533,7 +3533,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // the callout-bound role method uses super to access a feature of the superrole
     // 3.2.31-otjld-super-access-3
     public void test3231_superAccess3() {
-       
+
        runConformTest(
             new String[] {
 		"T3231sa3Main.java",
@@ -3588,7 +3588,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // the callout-binding uses tsuper to access a feature of the implicit superrole
     // 3.2.32-otjld-tsuper-access-1
     public void test3232_tsuperAccess1() {
-       
+
        runConformTest(
             new String[] {
 		"T3232ta1Main.java",
@@ -3683,7 +3683,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // the callout-binding uses base to access a feature of the base class
     // 3.2.33-otjld-base-use-1
     public void test3233_baseUse1() {
-       
+
        runConformTest(
             new String[] {
 		"Team3233bu1.java",
@@ -3720,7 +3720,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // the callout-binding uses base to access a feature of the base class
     // 3.2.33-otjld-base-use-2
     public void test3233_baseUse2() {
-       
+
        runConformTest(
             new String[] {
 		"Team3233bu2.java",
@@ -3755,7 +3755,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a callout-binding without parameter mapping between parameter-conform role and base methods
     // 3.2.34-otjld-conform-parameter-mapping-1
     public void test3234_conformParameterMapping1() {
-       
+
        runConformTest(
             new String[] {
 		"T3234cpm1Main.java",
@@ -3826,7 +3826,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a callout-binding without parameter mapping between parameter-conform role and base methods
     // 3.2.34-otjld-conform-parameter-mapping-2
     public void test3234_conformParameterMapping2() {
-       
+
        runConformTest(
             new String[] {
 		"T3234cpm2Main.java",
@@ -3868,7 +3868,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a callout-binding without parameter mapping between parameter-conform role and base methods
     // 3.2.34-otjld-conform-parameter-mapping-3
     public void test3234_conformParameterMapping3() {
-       
+
        runConformTest(
             new String[] {
 		"T3234cpm3Main.java",
@@ -3910,7 +3910,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a callout-binding without parameter mapping between parameter-conform role and base methods
     // 3.2.34-otjld-conform-parameter-mapping-4
     public void test3234_conformParameterMapping4() {
-       
+
        runConformTest(
             new String[] {
 		"T3234cpm4Main.java",
@@ -3968,7 +3968,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a callout-binding without parameter mapping between parameter-conform role and base methods
     // 3.2.34-otjld-conform-parameter-mapping-5
     public void test3234_conformParameterMapping5() {
-       
+
        runConformTest(
             new String[] {
 		"T3234cpm5Main.java",
@@ -4023,7 +4023,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a callout-binding without parameter mapping between parameter-conform role and base methods
     // 3.2.34-otjld-conform-parameter-mapping-6
     public void test3234_conformParameterMapping6() {
-       
+
        runConformTest(
             new String[] {
 		"T3234cpm6Main.java",
@@ -4229,7 +4229,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a callout-binding where the role method has more parameters than the base method
     // 3.2.37-otjld-role-has-more-parameters-1
     public void test3237_roleHasMoreParameters1() {
-       
+
        runConformTest(
             new String[] {
 		"T3237rhmp1Main.java",
@@ -4301,7 +4301,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a callout-binding where the role method has more parameters than the base method
     // 3.2.37-otjld-role-has-more-parameters-2
     public void test3237_roleHasMoreParameters2() {
-       
+
        runConformTest(
             new String[] {
 		"T3237rhmp2Main.java",
@@ -4343,7 +4343,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a callout-binding where the role method has less parameters than the base method
     // 3.2.38-otjld-role-has-less-parameters
     public void test3238_roleHasLessParameters() {
-       
+
        runConformTest(
             new String[] {
 		"T3238rhlpMain.java",
@@ -4390,7 +4390,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a callout-binding where the role method has a parameter order that differs from the base method
     // 3.2.39-otjld-different-parameter-order
     public void test3239_differentParameterOrder() {
-       
+
        runConformTest(
             new String[] {
 		"T3239dpoMain.java",
@@ -4437,7 +4437,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a base method appears in an after binding which returns an array type (WITNESS for TPX-278)
     // 3.2.40-otjld-after-binding-with-array-result-1
     public void test3240_afterBindingWithArrayResult1() {
-       
+
        runConformTest(
             new String[] {
 		"Team3240abwar1.java",
@@ -4472,7 +4472,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a base method appears in an after binding with parameter mapping, base method returns an array type
     // 3.2.40-otjld-after-binding-with-array-result-2
     public void test3240_afterBindingWithArrayResult2() {
-       
+
        runConformTest(
             new String[] {
 		"Team3240abwar2.java",
@@ -4515,7 +4515,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
        customOptions.put(CompilerOptions.OPTION_ReportUnusedLabel, CompilerOptions.WARNING);
        customOptions.put(CompilerOptions.OPTION_ReportUnusedImport, CompilerOptions.WARNING);
        customOptions.put(CompilerOptions.OPTION_ReportUnusedLocal, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"T3241iuip1Main.java",
@@ -4569,7 +4569,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     public void test3241_importUsedInParammap2() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportNonExternalizedStringLiteral, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"T3241iuip2Main.java",

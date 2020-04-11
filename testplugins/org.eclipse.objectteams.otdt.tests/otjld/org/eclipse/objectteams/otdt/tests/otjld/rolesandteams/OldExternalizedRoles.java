@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -24,11 +24,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 import junit.framework.Test;
 
 public class OldExternalizedRoles extends AbstractOTJLDTest {
-	
+
 	public OldExternalizedRoles(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -36,7 +36,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -48,7 +48,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // access to a feature of an externalized role object
     // 6.2.1-otjld-access-to-externalized-role-1
     public void test621_accessToExternalizedRole1() {
-       
+
        runConformTest(
             new String[] {
 		"T621ater1Main.java",
@@ -80,7 +80,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // access to a feature of an externalized role object
     // 6.2.1-otjld-access-to-externalized-role-2
     public void test621_accessToExternalizedRole2() {
-       
+
        runConformTest(
             new String[] {
 		"T621ater2Main.java",
@@ -116,7 +116,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // access to a feature of an externalized role object
     // 6.2.1-otjld-access-to-externalized-role-3
     public void test621_accessToExternalizedRole3() {
-       
+
        runConformTest(
             new String[] {
 		"T621ater3Main.java",
@@ -319,7 +319,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // access to a feature of an externalized role object
     // 6.2.1-otjld-access-to-externalized-role-4
     public void test621_accessToExternalizedRole4() {
-       
+
        runConformTest(
             new String[] {
 		"T621ater4Main.java",
@@ -399,7 +399,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // access to a feature of an externalized role object
     // 6.2.1-otjld-access-to-externalized-role-6
     public void test621_accessToExternalizedRole6() {
-       
+
        runConformTest(
             new String[] {
 		"T621ater6Main.java",
@@ -451,7 +451,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // access to a feature of an externalized role object
     // 6.2.1-otjld-access-to-externalized-role-7
     public void test621_accessToExternalizedRole7() {
-       
+
        runConformTest(
             new String[] {
 		"T621ater7Main.java",
@@ -528,7 +528,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // access to a feature of an externalized role object
     // 6.2.1-otjld_testbug-access-to-externalized-role-8
     public void _testbug_test621_accessToExternalizedRole8() {
-       
+
        runConformTest(
             new String[] {
 		"T621ater8Main.java",
@@ -568,7 +568,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // access to a feature of an externalized role object
     // 6.2.1-otjld_testbug-access-to-externalized-role-9
     public void _testbug_test621_accessToExternalizedRole9() {
-       
+
        runConformTest(
             new String[] {
 		"T621ater9Main.java",
@@ -631,7 +631,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // access to a feature of an externalized role object
     // 6.2.1-otjld_testbug-access-to-externalized-role-10
     public void _testbug_test621_accessToExternalizedRole10() {
-       
+
        runConformTest(
             new String[] {
 		"T621ater10Main.java",
@@ -675,7 +675,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // access to a feature of an externalized role object
     // 6.2.1-otjld-access-to-externalized-role-11
     public void test621_accessToExternalizedRole11() {
-       
+
        runConformTest(
             new String[] {
 		"T621ater11Main.java",
@@ -738,7 +738,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // access to a feature of an externalized role object
     // 6.2.1-otjld-access-to-externalized-role-12
     public void test621_accessToExternalizedRole12() {
-       
+
        runConformTest(
             new String[] {
 		"T621ater12Main.java",
@@ -812,7 +812,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // access to a feature of an externalized role object
     // 6.2.1-otjld-access-to-externalized-role-13
     public void test621_accessToExternalizedRole13() {
-       
+
        runConformTest(
             new String[] {
 		"T621ater13Main.java",
@@ -856,7 +856,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // access to a feature of an externalized role object
     // 6.2.1-otjld-access-to-externalized-role-14
     public void test621_accessToExternalizedRole14() {
-       
+
        runConformTest(
             new String[] {
 		"T621ater14Main.java",
@@ -953,7 +953,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // access to a feature of an externalized role object
     // 6.2.1-otjld-access-to-externalized-role-15
     public void test621_accessToExternalizedRole15() {
-       
+
        runConformTest(
             new String[] {
 		"T621ater15Main.java",
@@ -1012,7 +1012,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // an externalized role is declared with a non-final team variable, but never involved in any assignment
     // 6.2.2-otjld-nonfinal-externalized-role-anchor-1
     public void test622_nonfinalExternalizedRoleAnchor1() {
-       
+
        runConformTest(
             new String[] {
 		"Team622nera1_2.java",
@@ -1054,7 +1054,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // an externalized role is declared with a non-final team variable, but never involved in any assignment
     // 6.2.2-otjld-nonfinal-externalized-role-anchor-1a
     public void test622_nonfinalExternalizedRoleAnchor1a() {
-       
+
        runConformTest(
             new String[] {
 		"Team622nera1a_2.java",
@@ -1099,7 +1099,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // an externalized role is declared with a non-final team obtained from a method call, but never involved in any assignment
     // 6.2.2-otjld-nonfinal-externalized-role-anchor-1m
     public void test622_nonfinalExternalizedRoleAnchor1m() {
-       
+
        runConformTest(
             new String[] {
 		"Team622nera1m_2.java",
@@ -1146,7 +1146,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // an externalized role is declared with a non-final team obtained from a method call, but never involved in any assignment
     // 6.2.2-otjld-nonfinal-externalized-role-anchor-1n
     public void test622_nonfinalExternalizedRoleAnchor1n() {
-       
+
        runConformTest(
             new String[] {
 		"Team622nera1n_2.java",
@@ -1376,7 +1376,7 @@ public class OldExternalizedRoles extends AbstractOTJLDTest {
     // access to a feature of an externalized role object that has converted
     // 6.2.5-otjld-different-dynamic-type-externalized-role-1
     public void test625_differentDynamicTypeExternalizedRole1() {
-       
+
        runConformTest(
             new String[] {
 		"T625ddter1Main.java",

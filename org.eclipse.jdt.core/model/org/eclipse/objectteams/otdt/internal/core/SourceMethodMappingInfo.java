@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 		Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -31,7 +31,7 @@ public class SourceMethodMappingInfo extends AnnotatableInfo {
 	private static final int CALLOUT= 4;
 	private static final int GET 	= 5;
 	private static final int SET 	= 6;
-	
+
 	private String[] roleParameterNames;
 	// other bits would change the effective signature
 
@@ -39,28 +39,28 @@ public class SourceMethodMappingInfo extends AnnotatableInfo {
 	private String[][] baseParameterNames;
 	private String[][] baseParameterTypes;
 	private String[] baseReturnTypes;
-	
+
 	private int          _mappingKind=0;
 	private boolean      _hasSignature;
 	private boolean      _isOverride; // callout override.
 	private int			 _declaredModifiers;
-	
+
 	private char[] callinName = null;
-	
+
 	public void setRoleArgumentNames(String[] parameterNames) {
-		this.roleParameterNames = parameterNames;		
+		this.roleParameterNames = parameterNames;
 	}
 
 	public void setBaseArgumentNames(String[][] parameterNames) {
 		checkBaseCount(parameterNames.length);
-		this.baseParameterNames = parameterNames;		
+		this.baseParameterNames = parameterNames;
 	}
 
 	public void setBaseArgumentTypes(String[][] parameterTypes) {
 		checkBaseCount(parameterTypes.length);
 		this.baseParameterTypes = parameterTypes;
 	}
-	
+
 	public void setBaseReturnType(String[] returnTypes) {
 		checkBaseCount(returnTypes.length);
 		this.baseReturnTypes = returnTypes;
@@ -72,27 +72,27 @@ public class SourceMethodMappingInfo extends AnnotatableInfo {
 		else if (this.nBaseMethods != baseCount)
 			throw new IllegalArgumentException("Mismatching array size: "+this.nBaseMethods+" vs. "+baseCount); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	public void setCallinKind(int kind, boolean hasSignature, char[] name) {
 		this._mappingKind = kind;
 		this._hasSignature = hasSignature;
 		this.callinName = name;
 	}
-	
+
 	public void setCalloutKind(boolean override, int declaredModifiers) {
 		this._isOverride = override;
 		this._declaredModifiers = declaredModifiers;
 		this._mappingKind = CALLOUT;
-		
+
 	}
 
 	public void setCalloutKind(boolean override, int declaredModifiers, boolean isSetter) {
 		this._isOverride = override;
 		this._declaredModifiers = declaredModifiers;
 		this._mappingKind = isSetter ? SET : GET;
-		
+
 	}
-	
+
 	public boolean modifiersEqual(SourceMethodMappingInfo other) {
 		if (this._hasSignature != other._hasSignature)
 			return false;
@@ -102,7 +102,7 @@ public class SourceMethodMappingInfo extends AnnotatableInfo {
 			return this._isOverride == other._isOverride && this._declaredModifiers == other._declaredModifiers;
 		return true;
 	}
-	
+
 	public boolean signaturesEqual(SourceMethodMappingInfo other) {
 		if (!Util.equalArraysOrNull(this.roleParameterNames, other.roleParameterNames))
 			return false;

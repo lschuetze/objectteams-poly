@@ -6,7 +6,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  * 	   Technical University Berlin - Initial API and implementation
@@ -34,7 +34,7 @@ import org.junit.runners.JUnit4;
 // structure OT_COPY_PASTE from {@link org.eclipse.jdt.ui.tests.quickfix.ModifierCorrectionsQuickFixTest}
 @RunWith(JUnit4.class)
 public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
-	
+
 	@Rule
     public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
@@ -43,7 +43,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 	public void testRoleCtorCalled1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R {\n");
 		buf.append("        R(){}\n");
@@ -54,17 +54,17 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T.java", buf.toString(), false, null);
 
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R {\n");
 		buf.append("        protected R(){}\n");
@@ -81,7 +81,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 	public void testRoleCtorCalled2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R {\n");
 		buf.append("        R(){}\n");
@@ -94,17 +94,17 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T.java", buf.toString(), false, null);
 
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R {\n");
 		buf.append("        protected R(){}\n");
@@ -117,21 +117,21 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
 	/* calling a non-public role constructor from a sibling role file. */
 	@Test
 	public void testRoleCtorCalled3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		IPackageFragment pack1T= fSourceFolder.createPackageFragment("test1.T", false, null);
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R {\n");
 		buf.append("        R(){}\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("T.java", buf.toString(), false, null);
-		
+
 		buf = new StringBuffer();
 		buf.append("team package test1.T;\n");
 		buf.append("protected class R2 {\n");
@@ -141,17 +141,17 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1T.createCompilationUnit("R2.java", buf.toString(), false, null);
 
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R {\n");
 		buf.append("        protected R(){}\n");
@@ -171,9 +171,9 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("    R2(){}\n");
 		buf.append("}\n");
 		pack1T.createCompilationUnit("R2.java", buf.toString(), false, null);
-		
+
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    protected class R {\n");
 		buf.append("        void foo() {\n");
@@ -183,12 +183,12 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T.java", buf.toString(), false, null);
 
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
@@ -199,20 +199,20 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
 	/* calling a non-public role constructor as externalized. */
 	@Test
 	public void testRoleCtorCalled5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    public class R {\n");
 		buf.append("        R(){}\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("T.java", buf.toString(), false, null);
-		
+
 		buf = new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class Main {\n");
@@ -222,17 +222,17 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("Main.java", buf.toString(), false, null);
 
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, null);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    public class R {\n");
 		buf.append("        public R(){}\n");
@@ -240,20 +240,20 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
 	/* calling a non-public role method on externalized. */
 	@Test
 	public void testRoleMethodCalled() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    public class R {\n");
 		buf.append("        void bar(){}\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("T.java", buf.toString(), false, null);
-		
+
 		buf = new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class Main {\n");
@@ -263,17 +263,17 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("Main.java", buf.toString(), false, null);
 
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T {\n");
 		buf.append("    public class R {\n");
 		buf.append("        public void bar(){}\n");
@@ -281,7 +281,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
 	@Test
 	public void testCalloutToPrivate() throws Exception {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
@@ -291,7 +291,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("    private int foo() { return 0; }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("BaseBar.java", buf.toString(), false, null);
-		
+
 		buf = new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public team class TeamFoo {\n");
@@ -305,12 +305,12 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("TeamFoo.java", buf.toString(), false, null);
 
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
@@ -328,8 +328,8 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
-	
+
+
 	@Test
 	public void testCalloutViaExternalized() throws Exception {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
@@ -339,7 +339,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("    int foo() { return 0; }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("BaseBar.java", buf.toString(), false, null);
-		
+
 		buf = new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public team class TeamFoo {\n");
@@ -352,12 +352,12 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("TeamFoo.java", buf.toString(), false, null);
 
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
@@ -373,7 +373,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
 	/** @SuppressWarnings("bindingconventions") was added a wrong location. */
 	@Test
 	public void testSuppressWarnings1() throws Exception {
@@ -384,7 +384,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("    int foo() { return 0; }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("BaseBar.java", buf.toString(), false, null);
-		
+
 		IPackageFragment pack2 = fSourceFolder.createPackageFragment("test2", false, null);
 		buf = new StringBuffer();
 		buf.append("package test2;\n");
@@ -395,12 +395,12 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack2.createCompilationUnit("TeamFoo.java", buf.toString(), false, null);
 
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
@@ -413,7 +413,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("	}\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
-		
+
 		assertEqualString("Configure problem severity", proposals.get(1).getDisplayString());
 		assertEqualString("\"Change import to 'import base test1...BaseBar;'\"", proposals.get(2).getDisplayString());
 	}

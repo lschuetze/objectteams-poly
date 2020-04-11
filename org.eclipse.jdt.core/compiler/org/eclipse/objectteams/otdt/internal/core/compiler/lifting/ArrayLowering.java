@@ -41,7 +41,7 @@ public class ArrayLowering extends ArrayTranslations {
 	public ArrayLowering(Expression teamExpression) {
 		this._teamExpr = teamExpression;
 	}
-	
+
 	/** API for Lowering. */
 	Expression lowerArray(
 			BlockScope  scope,
@@ -59,7 +59,7 @@ public class ArrayLowering extends ArrayTranslations {
 			this._teamExpr.resolveType(scope);
 		return translateArray(scope, expression, providedType, requiredType, /*isLifting*/false, deferredResolve);
 	}
-	
+
 	@Override
 	public MethodBinding ensureTransformMethod(BlockScope scope, Expression teamExpr, TypeBinding providedType, TypeBinding requiredType, boolean isLifting) {
 		TypeBinding providedLeaf = providedType.leafComponentType();
@@ -67,7 +67,7 @@ public class ArrayLowering extends ArrayTranslations {
 		TypeBinding requiredLeaf = requiredType.leafComponentType();
 		if (TypeBinding.notEquals(matchingBase, requiredLeaf) && matchingBase.isCompatibleWith(requiredLeaf, scope)) {
 			requiredType = scope.environment().createArrayType(matchingBase, requiredType.dimensions());
-		}		
+		}
 		return super.ensureTransformMethod(scope, teamExpr, providedType, requiredType, isLifting);
 	}
 

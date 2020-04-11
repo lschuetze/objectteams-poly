@@ -102,7 +102,7 @@ public class TSuperConstructorInvocation extends Statement implements Invocation
     {
 		super(ast);
 	}
-	
+
 	@Override
 	public ChildListPropertyDescriptor getArgumentsProperty() {
 		return ARGUMENTS_PROPERTY;

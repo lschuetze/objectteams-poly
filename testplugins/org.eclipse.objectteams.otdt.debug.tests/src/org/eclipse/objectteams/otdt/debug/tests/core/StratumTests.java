@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -31,20 +31,20 @@ import org.eclipse.objectteams.otdt.debug.tests.AbstractOTDTDebugTest;
  * Tests strata.
  */
 public class StratumTests extends AbstractOTDTDebugTest {
-	
+
 	public StratumTests(String name) {
 		super(name);
 	}
 
 	/**
 	 * Test available strata on a type.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testAvailableStrata() throws Exception {
 		String typeName = "Breakpoints";
-		createLineBreakpoint(81, typeName);		
-		
+		createLineBreakpoint(81, typeName);
+
 		IJavaThread thread= null;
 		try {
 			thread= launchToBreakpoint(typeName);
@@ -57,18 +57,18 @@ public class StratumTests extends AbstractOTDTDebugTest {
 		} finally {
 			terminateAndRemove(thread);
 			removeAllBreakpoints();
-		}		
+		}
 	}
-	
+
 	/**
 	 * Test default stratum on a type.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testDefaultStratum() throws Exception {
 		String typeName = "Breakpoints";
-		createLineBreakpoint(81, typeName);		
-		
+		createLineBreakpoint(81, typeName);
+
 		IJavaThread thread= null;
 		try {
 			thread= launchToBreakpoint(typeName);
@@ -79,18 +79,18 @@ public class StratumTests extends AbstractOTDTDebugTest {
 		} finally {
 			terminateAndRemove(thread);
 			removeAllBreakpoints();
-		}		
-	}	
+		}
+	}
 
 	/**
 	 * Test set / get default stratum on a java debug target.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testSetGetDefaultStratum() throws Exception {
 		String typeName = "Breakpoints";
-		createLineBreakpoint(81, typeName);		
-		
+		createLineBreakpoint(81, typeName);
+
 		IJavaThread thread= null;
 		try {
 			thread= launchToBreakpoint(typeName);
@@ -104,7 +104,7 @@ public class StratumTests extends AbstractOTDTDebugTest {
 		} finally {
 			terminateAndRemove(thread);
 			removeAllBreakpoints();
-		}		
+		}
 	}
 
 	public void testGetLineInStratum() throws Exception {

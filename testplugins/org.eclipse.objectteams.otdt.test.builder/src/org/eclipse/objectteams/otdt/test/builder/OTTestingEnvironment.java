@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -38,12 +38,12 @@ public team class OTTestingEnvironment {
 
 	/** Better shutdown to allow reinitialization */
 	protected class ModelManager playedBy PluginModelManager {
-		
+
 		ModelManager getInstance() -> PluginModelManager getInstance();
-		
+
 		@SuppressWarnings("decapsulation")
 		void setFModelManager(ModelManager fModelManager) -> set PluginModelManager fModelManager;
-				
+
 		@SuppressWarnings("decapsulation")
 		void shutdown() -> void shutdown();
 
@@ -52,7 +52,7 @@ public team class OTTestingEnvironment {
 			setFModelManager(null);
 			getInstance();
 		}
-		
+
 		protected static void restart() {
 			getInstance().internalRestart();
 		}
@@ -80,16 +80,16 @@ public team class OTTestingEnvironment {
 
 		@SuppressWarnings("decapsulation")
 		addBuilderSpecs <- replace addBuilderSpecs;
-		
+
 	}
-	
+
 	/** Restart PDE's PluginModelManager. */
 	public static void restart() {
 		instance.internalRestart();
 	}
-	
+
 	// need a team instance to invoke a role method:
 	private void internalRestart() {
-		ModelManager.restart();		
+		ModelManager.restart();
 	}
 }

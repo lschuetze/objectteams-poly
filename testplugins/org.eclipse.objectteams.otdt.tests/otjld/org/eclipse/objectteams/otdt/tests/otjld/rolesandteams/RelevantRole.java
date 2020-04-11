@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -23,11 +23,11 @@ import junit.framework.Test;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 public class RelevantRole extends AbstractOTJLDTest {
-	
+
 	public RelevantRole(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -35,7 +35,7 @@ public class RelevantRole extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -43,11 +43,11 @@ public class RelevantRole extends AbstractOTJLDTest {
 	public static Class testClass() {
 		return RelevantRole.class;
 	}
-	
+
     // a role implicitly inherits from an abstract relevant role but has a different constructor
     // 1.8.1-otjld-refining-abstract-role-1
     public void test181_refiningAbstractRole1() {
-       
+
        runConformTest(
             new String[] {
 		"Team181rar1_2.java",
@@ -136,7 +136,7 @@ public class RelevantRole extends AbstractOTJLDTest {
 			    "	\n"
             });
     }
-    
+
     // an abstract relevant role is inherited as a phantom
     // Bug 336420 - [compiler] NPE during reporting "abstract relevant role"
     public void test182_phantomAbstractRole1() {
@@ -152,17 +152,17 @@ public class RelevantRole extends AbstractOTJLDTest {
     	"T182par1.java",
     			"public class T182par1 {}"
     		},
-    		"----------\n" + 
-			"1. ERROR in Team182par1_2.java (at line 1)\n" + 
-			"	public team class Team182par1_2 extends Team182par1_1 {\n" + 
-			"	                                        ^^^^^^^^^^^^^\n" + 
-			"Team Team182par1_2 must be declared abstract, because abstract role R is relevant (OTJLD 2.5(b)).\n" + 
-    		"----------\n" + 
-    		"----------\n" + 
-    		"1. ERROR in Team182par1_1.java (at line 2)\n" + 
-    		"	protected abstract class R playedBy T182par1 {}\n" + 
-    		"	                         ^\n" + 
-    		"Team Team182par1_1 must be declared abstract, because abstract role R is relevant (OTJLD 2.5(b)).\n" + 
+    		"----------\n" +
+			"1. ERROR in Team182par1_2.java (at line 1)\n" +
+			"	public team class Team182par1_2 extends Team182par1_1 {\n" +
+			"	                                        ^^^^^^^^^^^^^\n" +
+			"Team Team182par1_2 must be declared abstract, because abstract role R is relevant (OTJLD 2.5(b)).\n" +
+    		"----------\n" +
+    		"----------\n" +
+    		"1. ERROR in Team182par1_1.java (at line 2)\n" +
+    		"	protected abstract class R playedBy T182par1 {}\n" +
+    		"	                         ^\n" +
+    		"Team Team182par1_1 must be declared abstract, because abstract role R is relevant (OTJLD 2.5(b)).\n" +
     		"----------\n",
     		null, // classLibraries
     		true, // shouldFlushOutputDirectory
@@ -180,11 +180,11 @@ public class RelevantRole extends AbstractOTJLDTest {
     			"public team class Team182par1_2 extends Team182par1_1 {\n" +
     			"}\n",
     		},
-    		"----------\n" + 
-    		"1. ERROR in Team182par1_2.java (at line 1)\n" + 
-    		"	public team class Team182par1_2 extends Team182par1_1 {\n" + 
-    		"	                                        ^^^^^^^^^^^^^\n" + 
-    		"Team Team182par1_2 must be declared abstract, because abstract role R is relevant (OTJLD 2.5(b)).\n" + 
+    		"----------\n" +
+    		"1. ERROR in Team182par1_2.java (at line 1)\n" +
+    		"	public team class Team182par1_2 extends Team182par1_1 {\n" +
+    		"	                                        ^^^^^^^^^^^^^\n" +
+    		"Team Team182par1_2 must be declared abstract, because abstract role R is relevant (OTJLD 2.5(b)).\n" +
     		"----------\n",
     		null, // classLibraries
     		false, // shouldFlushOutputDirectory
@@ -196,7 +196,7 @@ public class RelevantRole extends AbstractOTJLDTest {
     		true // performStatementsRecovery
     	);
     }
-    
+
     // an abstract potentially relevant role is inherited as a phantom
     // Bug 336420 - [compiler] NPE during reporting "abstract relevant role"
     public void test182_phantomAbstractRole2() {
@@ -212,17 +212,17 @@ public class RelevantRole extends AbstractOTJLDTest {
     	"T182par2.java",
     			"public abstract class T182par2 {}"
     		},
-    		"----------\n" + 
-			"1. WARNING in Team182par2_2.java (at line 1)\n" + 
-			"	public team class Team182par2_2 extends Team182par2_1 {\n" + 
-			"	                                        ^^^^^^^^^^^^^\n" + 
-			"[@sup:abstractrelevantrole] Team Team182par2_2 may need to be declared abstract, because irrelevance for abstract role R could not be shown (OTJLD 2.5(b)).\n" + 
-    		"----------\n" + 
-    		"----------\n" + 
-    		"1. WARNING in Team182par2_1.java (at line 2)\n" + 
-    		"	protected abstract class R playedBy T182par2 {}\n" + 
-    		"	                         ^\n" + 
-    		"[@sup:abstractrelevantrole] Team Team182par2_1 may need to be declared abstract, because irrelevance for abstract role R could not be shown (OTJLD 2.5(b)).\n" + 
+    		"----------\n" +
+			"1. WARNING in Team182par2_2.java (at line 1)\n" +
+			"	public team class Team182par2_2 extends Team182par2_1 {\n" +
+			"	                                        ^^^^^^^^^^^^^\n" +
+			"[@sup:abstractrelevantrole] Team Team182par2_2 may need to be declared abstract, because irrelevance for abstract role R could not be shown (OTJLD 2.5(b)).\n" +
+    		"----------\n" +
+    		"----------\n" +
+    		"1. WARNING in Team182par2_1.java (at line 2)\n" +
+    		"	protected abstract class R playedBy T182par2 {}\n" +
+    		"	                         ^\n" +
+    		"[@sup:abstractrelevantrole] Team Team182par2_1 may need to be declared abstract, because irrelevance for abstract role R could not be shown (OTJLD 2.5(b)).\n" +
     		"----------\n",
     		null, // classLibraries
     		true, // shouldFlushOutputDirectory
@@ -240,11 +240,11 @@ public class RelevantRole extends AbstractOTJLDTest {
     			"public team class Team182par2_2 extends Team182par2_1 {\n" +
     			"}\n",
     		},
-    		"----------\n" + 
-    		"1. WARNING in Team182par2_2.java (at line 1)\n" + 
-    		"	public team class Team182par2_2 extends Team182par2_1 {\n" + 
-    		"	                                        ^^^^^^^^^^^^^\n" + 
-    		"[@sup:abstractrelevantrole] Team Team182par2_2 may need to be declared abstract, because irrelevance for abstract role R could not be shown (OTJLD 2.5(b)).\n" + 
+    		"----------\n" +
+    		"1. WARNING in Team182par2_2.java (at line 1)\n" +
+    		"	public team class Team182par2_2 extends Team182par2_1 {\n" +
+    		"	                                        ^^^^^^^^^^^^^\n" +
+    		"[@sup:abstractrelevantrole] Team Team182par2_2 may need to be declared abstract, because irrelevance for abstract role R could not be shown (OTJLD 2.5(b)).\n" +
     		"----------\n",
     		null, // classLibraries
     		false, // shouldFlushOutputDirectory

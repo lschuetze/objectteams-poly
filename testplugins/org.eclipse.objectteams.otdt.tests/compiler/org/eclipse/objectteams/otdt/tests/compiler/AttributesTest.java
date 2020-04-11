@@ -79,13 +79,13 @@ public class AttributesTest extends AbstractOTJLDTest {
 			assertEquals("Wrong contents", expectedOutput, actualOutput);
 		}
 	}
-	
+
 	@Override
 	protected void compileTestFiles(Compiler batchCompiler, String[] testFiles) {
 		super.compileTestFiles(batchCompiler, testFiles);
 		throw new OperationCanceledException("skip running");
 	}
-	
+
 	// https://bugs.eclipse.org/537772 - Attribute OTCompilerVersion should not be set for o.o.Team
 	public void testAttributesInOOTeam() throws Exception {
 		Map<String,String> customOptions = getCompilerOptions();
@@ -102,7 +102,7 @@ public class AttributesTest extends AbstractOTJLDTest {
 		} catch (OperationCanceledException e) {
 			// expected
 		}
-		
+
 		ClassFileBytesDisassembler disassembler = ToolFactory.createDefaultClassFileBytesDisassembler();
 		String path = OUTPUT_DIR + File.separator + "org/objectteams/Team.class";
 		byte[] classFileBytes = org.eclipse.jdt.internal.compiler.util.Util.getFileByteContent(new File(path));
@@ -113,38 +113,38 @@ public class AttributesTest extends AbstractOTJLDTest {
 				ClassFileBytesDisassembler.SYSTEM);
 
 		String expectedOutput =
-				"// Compiled from Team.java ("+versionString+", super bit)\n" + 
-				"public class org.objectteams.Team {\n" + 
-				"  Constant pool:\n" + 
-				"    constant #1 class: #2 org/objectteams/Team\n" + 
-				"    constant #2 utf8: \"org/objectteams/Team\"\n" + 
-				"    constant #3 class: #4 java/lang/Object\n" + 
-				"    constant #4 utf8: \"java/lang/Object\"\n" + 
-				"    constant #5 utf8: \"<init>\"\n" + 
-				"    constant #6 utf8: \"()V\"\n" + 
-				"    constant #7 utf8: \"Code\"\n" + 
-				"    constant #8 method_ref: #3.#9 java/lang/Object.<init> ()V\n" + 
-				"    constant #9 name_and_type: #5.#6 <init> ()V\n" + 
-				"    constant #10 utf8: \"LineNumberTable\"\n" + 
-				"    constant #11 utf8: \"LocalVariableTable\"\n" + 
-				"    constant #12 utf8: \"this\"\n" + 
-				"    constant #13 utf8: \"Lorg/objectteams/Team;\"\n" + 
-				"    constant #14 utf8: \"SourceFile\"\n" + 
-				"    constant #15 utf8: \"Team.java\"\n" + 
-				"    constant #16 utf8: \"OTClassFlags\"\n" + 
-				"  \n" + 
-				"  // Method descriptor #6 ()V\n" + 
-				"  // Stack: 1, Locals: 1\n" + 
-				"  public Team();\n" + 
-				"    0  aload_0 [this]\n" + 
-				"    1  invokespecial java.lang.Object() [8]\n" + 
-				"    4  return\n" + 
-				"      Line numbers:\n" + 
-				"        [pc: 0, line: 2]\n" + 
-				"      Local variable table:\n" + 
-				"        [pc: 0, pc: 5] local: this index: 0 type: org.objectteams.Team\n" + 
-				"\n" + 
-				"  Attribute: OTClassFlags Length: 2\n" + 
+				"// Compiled from Team.java ("+versionString+", super bit)\n" +
+				"public class org.objectteams.Team {\n" +
+				"  Constant pool:\n" +
+				"    constant #1 class: #2 org/objectteams/Team\n" +
+				"    constant #2 utf8: \"org/objectteams/Team\"\n" +
+				"    constant #3 class: #4 java/lang/Object\n" +
+				"    constant #4 utf8: \"java/lang/Object\"\n" +
+				"    constant #5 utf8: \"<init>\"\n" +
+				"    constant #6 utf8: \"()V\"\n" +
+				"    constant #7 utf8: \"Code\"\n" +
+				"    constant #8 method_ref: #3.#9 java/lang/Object.<init> ()V\n" +
+				"    constant #9 name_and_type: #5.#6 <init> ()V\n" +
+				"    constant #10 utf8: \"LineNumberTable\"\n" +
+				"    constant #11 utf8: \"LocalVariableTable\"\n" +
+				"    constant #12 utf8: \"this\"\n" +
+				"    constant #13 utf8: \"Lorg/objectteams/Team;\"\n" +
+				"    constant #14 utf8: \"SourceFile\"\n" +
+				"    constant #15 utf8: \"Team.java\"\n" +
+				"    constant #16 utf8: \"OTClassFlags\"\n" +
+				"  \n" +
+				"  // Method descriptor #6 ()V\n" +
+				"  // Stack: 1, Locals: 1\n" +
+				"  public Team();\n" +
+				"    0  aload_0 [this]\n" +
+				"    1  invokespecial java.lang.Object() [8]\n" +
+				"    4  return\n" +
+				"      Line numbers:\n" +
+				"        [pc: 0, line: 2]\n" +
+				"      Local variable table:\n" +
+				"        [pc: 0, pc: 5] local: this index: 0 type: org.objectteams.Team\n" +
+				"\n" +
+				"  Attribute: OTClassFlags Length: 2\n" +
 				"}";
 
 		assertSubstring(actualOutput, expectedOutput);

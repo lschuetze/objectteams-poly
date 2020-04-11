@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -25,14 +25,14 @@ import junit.framework.Test;
 
 /**
  * Former jacks tests from section regular-role-inheritance (1.4.*)
- * @author stephan 
+ * @author stephan
  */
 public class RegularRoleInheritance extends AbstractOTJLDTest {
-	
+
 	public RegularRoleInheritance(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -40,7 +40,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -48,11 +48,11 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
 	public static Class testClass() {
 		return RegularRoleInheritance.class;
 	}
-	
+
     // a role class extends a role from the same team and uses a feature of it
     // 1.4.1-otjld-same-team-super-role-access-1
     public void test141_sameTeamSuperRoleAccess1() {
-       
+
        runConformTest(
             new String[] {
 		"T141stsra1Main.java",
@@ -93,7 +93,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class extends a implicitly inherited role from the same team and uses a feature of it
     // 1.4.1-otjld-same-team-super-role-access-2
     public void test141_sameTeamSuperRoleAccess2() {
-       
+
        runConformTest(
             new String[] {
 		"T141stsra2Main.java",
@@ -138,7 +138,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class extends an inherited role from the same team and uses a feature of it
     // 1.4.1-otjld-same-team-super-role-access-3
     public void test141_sameTeamSuperRoleAccess3() {
-       
+
        runConformTest(
             new String[] {
 		"T141stsra3Main.java",
@@ -194,7 +194,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class redefines an implicitly inherited role
     // 1.4.2-otjld-role-redefinition-1
     public void test142_roleRedefinition1() {
-       
+
        runConformTest(
             new String[] {
 		"T142rr1Main.java",
@@ -239,7 +239,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class redefines an implicitly inherited role
     // 1.4.2-otjld-role-redefinition-2
     public void test142_roleRedefinition2() {
-       
+
        runConformTest(
             new String[] {
 		"T142rr2Main.java",
@@ -288,7 +288,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class redefines an implicitly inherited role
     // 1.4.2-otjld-role-redefinition-3
     public void test142_roleRedefinition3() {
-       
+
        runConformTest(
             new String[] {
 		"T142rr3Main.java",
@@ -339,7 +339,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class is implicitly cast to its direct base interface
     // 1.4.3-otjld-cast-to-baseinterface-1
     public void test143_castToBaseinterface1() {
-       
+
        runConformTest(
             new String[] {
 		"T143ctb1Main.java",
@@ -376,7 +376,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class is explicitly cast to a base interface inherited from its implicit super role
     // 1.4.3-otjld-cast-to-baseinterface-2
     public void test143_castToBaseinterface2() {
-       
+
        runConformTest(
             new String[] {
 		"T143ctb2Main.java",
@@ -423,7 +423,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class is implicitly cast to a base interface inherited from its explicit super role
     // 1.4.3-otjld-cast-to-baseinterface-3
     public void test143_castToBaseinterface3() {
-       
+
        runConformTest(
             new String[] {
 		"T143ctb3Main.java",
@@ -469,7 +469,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class is implicitly cast to the normal super class of its implicit super role
     // 1.4.4-otjld-cast-to-superclass-1
     public void test144_castToSuperclass1() {
-       
+
        runConformTest(
             new String[] {
 		"T144cts1Main.java",
@@ -512,7 +512,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class is explicitly cast to the normal super class of its explicit super role
     // 1.4.4-otjld-cast-to-superclass-2
     public void test144_castToSuperclass2() {
-       
+
        runConformTest(
             new String[] {
 		"T144cts2Main.java",
@@ -553,7 +553,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class is implicitly cast to the normal super class of a remote super role
     // 1.4.4-otjld-cast-to-superclass-3
     public void test144_castToSuperclass3() {
-       
+
        runConformTest(
             new String[] {
 		"T144cts3Main.java",
@@ -723,7 +723,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class has a normal super class, and invokes the super constructor
     // 1.4.6-otjld-super-constructor-access-1
     public void test146_superConstructorAccess1() {
-       
+
        runConformTest(
             new String[] {
 		"T146sca1Main.java",
@@ -770,7 +770,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class has a normal super class, and invokes a super constructor with a different signature
     // 1.4.6-otjld-super-constructor-access-2
     public void test146_superConstructorAccess2() {
-       
+
        runConformTest(
             new String[] {
 		"T146sca2Main.java",
@@ -817,7 +817,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class accesses a field of its normal super class without using super
     // 1.4.7-otjld-access-to-superclass-feature-1
     public void test147_accessToSuperclassFeature1() {
-       
+
        runConformTest(
             new String[] {
 		"T147atsf1Main.java",
@@ -857,7 +857,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class accesses a method of the normal super class of its implicit superrole without using super
     // 1.4.7-otjld-access-to-superclass-feature-2
     public void test147_accessToSuperclassFeature2() {
-       
+
        runConformTest(
             new String[] {
 		"T147atsf2Main.java",
@@ -905,7 +905,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class accesses a static method of the normal super class of its implicit superrole without using super
     // 1.4.7-otjld-access-to-superclass-feature-2s
     public void test147_accessToSuperclassFeature2s() {
-       
+
        runConformTest(
             new String[] {
 		"T147atsf2sMain.java",
@@ -953,7 +953,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a team class accesses a static method of a role's normal super class of its implicit superrole without using super
     // 1.4.7-otjld_unsupported_access-to-superclass-feature-2t
     public void _unsupported_test147_accessToSuperclassFeature2t() {
-       
+
        runConformTest(
             new String[] {
 		"T147atsf2tMain.java",
@@ -998,7 +998,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a team class accesses a static method of an externalized role's normal super class of its implicit superrole without using super - SYNTAX NOT SUPPORTED
     // 1.4.7-otjld_unsupported_access-to-superclass-feature-2u
     public void _unsupported_test147accessToSuperclassFeature2u() {
-       
+
        runConformTest(
             new String[] {
 		"T147atsf2uMain.java",
@@ -1039,7 +1039,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class accesses a final method of the normal super class
     // 1.4.7-otjld-access-to-superclass-feature-3
     public void test147_accessToSuperclassFeature3() {
-       
+
        runConformTest(
             new String[] {
 		"Team147atsf3.java",
@@ -1109,7 +1109,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role accesses a protected method inherited from its regular super class
     // 1.4.7-otjld-access-to-superclass-feature-4
     public void test147_accessToSuperclassFeature4() {
-       
+
        runConformTest(
             new String[] {
 		"Team147atsf4.java",
@@ -1163,18 +1163,18 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team147atsf5.java (at line 5)\n" + 
-    		"	notVisible();\n" + 
-    		"	^^^^^^^^^^\n" + 
-    		"The method notVisible() from the type T147atsf5 is not visible\n" + 
+            "----------\n" +
+    		"1. ERROR in Team147atsf5.java (at line 5)\n" +
+    		"	notVisible();\n" +
+    		"	^^^^^^^^^^\n" +
+    		"The method notVisible() from the type T147atsf5 is not visible\n" +
     		"----------\n");
     }
 
     // was falsly reporting ambiguity between a local method and a private method from its regular superclass
     // 1.4.7-otjld-access-to-superclass-feature-6
     public void test147_accessToSuperclassFeature6() {
-       
+
        runConformTest(
             new String[] {
 		"Team147atsf6.java",
@@ -1229,14 +1229,14 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team148erfut1_2.java (at line 5)\n" + 
-    		"	public class Role148erfut1_2 extends t.Role148erfut1_1 {}\n" + 
-    		"	                                     ^\n" + 
-    		"t cannot be resolved to a type\n" + 
+            "----------\n" +
+    		"1. ERROR in Team148erfut1_2.java (at line 5)\n" +
+    		"	public class Role148erfut1_2 extends t.Role148erfut1_1 {}\n" +
+    		"	                                     ^\n" +
+    		"t cannot be resolved to a type\n" +
     		"----------\n");
     }
-    
+
     // same as above but using new syntax depdendent type
     public void test148_extendingRoleFromUnrelatedTeam2() {
         runNegativeTest(
@@ -1256,11 +1256,11 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team148erfut2_2.java (at line 5)\n" + 
-    		"	public class Role148erfut2_2 extends Role148erfut2_1<@t> {}\n" + 
-    		"	                                     ^^^^^^^^^^^^^^^\n" + 
-    		"Cannot sub-class an externalized role type (OTJLD 1.2.2(g)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team148erfut2_2.java (at line 5)\n" +
+    		"	public class Role148erfut2_2 extends Role148erfut2_1<@t> {}\n" +
+    		"	                                     ^^^^^^^^^^^^^^^\n" +
+    		"Cannot sub-class an externalized role type (OTJLD 1.2.2(g)).\n" +
     		"----------\n");
     }
 
@@ -1311,7 +1311,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a callout binding overrides a method from the explicit (non-role) superclass - witness for TPX-416
     // 1.4.10-otjld-callout-overrides-explicitly-inheritd-1
     public void test1410_calloutOverridesExplicitlyInheritd1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1410cowi1.java",
@@ -1350,7 +1350,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role class accesses a public field from its regular super class
     // 1.4.11-otjld-field-of-regular-super-1
     public void test1411_fieldOfRegularSuper1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1411fors1.java",
@@ -1388,7 +1388,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a role accesses a public field from its regular super class - different instances
     // 1.4.11-otjld-field-of-regular-super-2
     public void test1411_fieldOfRegularSuper2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1411fors2.java",
@@ -1426,7 +1426,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     // a team accesses a public field from its role's regular super class
     // 1.4.11-otjld-field-of-regular-super-3
     public void test1411_fieldOfRegularSuper3() {
-       
+
        runConformTest(
             new String[] {
 		"Team1411fors3.java",
@@ -1496,24 +1496,24 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     	runConformTest(
     		new String[] {
     			"base/BGraph.java",
-    			"package base;\n" + 
-    			"\n" + 
-    			"public team class BGraph {\n" + 
-    			"	public class BNode { }\n" + 
-    			"	public class BEdge {}\n" + 
+    			"package base;\n" +
+    			"\n" +
+    			"public team class BGraph {\n" +
+    			"	public class BNode { }\n" +
+    			"	public class BEdge {}\n" +
     			"}\n",
     			"features/Features.java",
-    			"package features;\n" + 
-    			"import base base.BGraph;\n" + 
-    			"public team class Features {\n" + 
-    			"	public team class BasicGraph playedBy BGraph {\n" + 
-    			"		public BasicGraph() { base(); }\n" + 
-    			"		public class Edge playedBy BEdge<@base> {\n" + 
-    			"			public Edge() { base(); }\n" + 
-    			"		}\n" + 
-    			"	}\n" + 
-    			"	public team class WeightedGraph extends BasicGraph {\n" + 
-    			"	}\n" + 
+    			"package features;\n" +
+    			"import base base.BGraph;\n" +
+    			"public team class Features {\n" +
+    			"	public team class BasicGraph playedBy BGraph {\n" +
+    			"		public BasicGraph() { base(); }\n" +
+    			"		public class Edge playedBy BEdge<@base> {\n" +
+    			"			public Edge() { base(); }\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	public team class WeightedGraph extends BasicGraph {\n" +
+    			"	}\n" +
     			"}\n"
     		});
     }
@@ -1522,25 +1522,25 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
     	runConformTest(
     		new String[] {
     			"base/BGraph.java",
-    			"package base;\n" + 
-    			"\n" + 
-    			"public team class BGraph {\n" + 
-    			"	public class BNode { }\n" + 
-    			"	public class BEdge {}\n" + 
+    			"package base;\n" +
+    			"\n" +
+    			"public team class BGraph {\n" +
+    			"	public class BNode { }\n" +
+    			"	public class BEdge {}\n" +
     			"}\n",
     			"features/Features.java",
-    			"package features;\n" + 
-    			"import base base.BGraph;\n" + 
-    			"public team class Features {\n" + 
-    			"	public team class BasicGraph playedBy BGraph {\n" + 
-    			"		public BasicGraph() { base(); }\n" + 
-    			"		public class Edge playedBy BEdge<@base> {\n" + 
-    			"			public Edge() { base(); }\n" + 
-    			"		}\n" + 
-    			"	}\n" + 
+    			"package features;\n" +
+    			"import base base.BGraph;\n" +
+    			"public team class Features {\n" +
+    			"	public team class BasicGraph playedBy BGraph {\n" +
+    			"		public BasicGraph() { base(); }\n" +
+    			"		public class Edge playedBy BEdge<@base> {\n" +
+    			"			public Edge() { base(); }\n" +
+    			"		}\n" +
+    			"	}\n" +
     			"	public team class WeightedGraph extends BasicGraph {\n" +
-    			"		@Override public class Edge {}\n" + 
-    			"	}\n" + 
+    			"		@Override public class Edge {}\n" +
+    			"	}\n" +
     			"}\n"
     		});
     }

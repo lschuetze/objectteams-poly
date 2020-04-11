@@ -51,7 +51,7 @@ public boolean belongsTo(String jobFamily) {
 }
 @Override
 public void cancel() {
-	// search job is cancelled through progress 
+	// search job is cancelled through progress
 }
 @Override
 public void ensureReadyToRun() {

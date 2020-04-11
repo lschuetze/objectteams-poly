@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -29,11 +29,11 @@ import junit.framework.Test;
 
 @SuppressWarnings("unchecked")
 public class PlayedByRelation extends AbstractOTJLDTest {
-	
+
 	public PlayedByRelation(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -41,7 +41,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -53,7 +53,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role is bound to an unrelated class
     // 2.1.1-otjld-bound-to-unrelated-class-1
     public void test211_boundToUnrelatedClass1() {
-       
+
        runConformTest(
             new String[] {
 		"T211btuc1Main.java",
@@ -96,7 +96,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role is bound to an inner class of the enclosing normal class
     // 2.1.1-otjld-bound-to-unrelated-class-2
     public void test211_boundToUnrelatedClass2() {
-       
+
        runConformTest(
             new String[] {
 		"T211btuc2Main.java",
@@ -137,7 +137,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role is bound to a nested class of some other normal class
     // 2.1.1-otjld-bound-to-unrelated-class-3
     public void test211_boundToUnrelatedClass3() {
-       
+
        runConformTest(
             new String[] {
 		"T211btuc3Main.java",
@@ -182,7 +182,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role is bound to another team class
     // 2.1.1-otjld-bound-to-unrelated-class-4
     public void test211_boundToUnrelatedClass4() {
-       
+
        runConformTest(
             new String[] {
 		"T211btuc4Main.java",
@@ -240,18 +240,18 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 			    "public class T211btuc5 { }\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team211btuc5.java (at line 3)\n" + 
-    		"	protected class R playedBy T211btuc5 { }\n" + 
-    		"	                           ^^^^^^^^^\n" + 
-    		"Base class T211btuc5 is deprecated.\n" + 
+            "----------\n" +
+    		"1. ERROR in Team211btuc5.java (at line 3)\n" +
+    		"	protected class R playedBy T211btuc5 { }\n" +
+    		"	                           ^^^^^^^^^\n" +
+    		"Base class T211btuc5 is deprecated.\n" +
     		"----------\n");
     }
 
     // a role is bound to its direct superclass
     // 2.1.2-otjld-bound-to-related-class-1
     public void test212_boundToRelatedClass1() {
-       
+
        runConformTest(
             new String[] {
 		"T212btrc1Main.java",
@@ -297,7 +297,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role is bound to its indirect superclass
     // 2.1.2-otjld-bound-to-related-class-2
     public void test212_boundToRelatedClass2() {
-       
+
        runConformTest(
             new String[] {
 		"T212btrc2Main.java",
@@ -374,21 +374,21 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in T212btrc3.java (at line 7)\n" + 
-    		"	public class Role212btrc3 playedBy T212btrc3 {\n" + 
-    		"	                                   ^^^^^^^^^\n" + 
-    		"Base class T212btrc3 is an enclosing type of Role212btrc3; please read the hints in the OT/J Language Definition (OTJLD 2.1.2(b)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in T212btrc3.java (at line 8)\n" + 
-    		"	public String getValue() -> String getValueInternal();\n" + 
-    		"	              ^^^^^^^^\n" + 
-    		"Role T212btrc3.Team212btrc3.Role212btrc3 cannot declare callout bindings because it is playedBy enclosing type T212btrc3 (OTJLD 3.1(a)); please directly access the target method.\n" + 
-    		"----------\n" + 
-    		"3. ERROR in T212btrc3.java (at line 12)\n" + 
-    		"	return obj.getValue();\n" + 
-    		"	           ^^^^^^^^\n" + 
-    		"The method getValue() is undefined for the type Role212btrc3<@tthis[Team212btrc3]>\n" + 
+            "----------\n" +
+    		"1. ERROR in T212btrc3.java (at line 7)\n" +
+    		"	public class Role212btrc3 playedBy T212btrc3 {\n" +
+    		"	                                   ^^^^^^^^^\n" +
+    		"Base class T212btrc3 is an enclosing type of Role212btrc3; please read the hints in the OT/J Language Definition (OTJLD 2.1.2(b)).\n" +
+    		"----------\n" +
+    		"2. ERROR in T212btrc3.java (at line 8)\n" +
+    		"	public String getValue() -> String getValueInternal();\n" +
+    		"	              ^^^^^^^^\n" +
+    		"Role T212btrc3.Team212btrc3.Role212btrc3 cannot declare callout bindings because it is playedBy enclosing type T212btrc3 (OTJLD 3.1(a)); please directly access the target method.\n" +
+    		"----------\n" +
+    		"3. ERROR in T212btrc3.java (at line 12)\n" +
+    		"	return obj.getValue();\n" +
+    		"	           ^^^^^^^^\n" +
+    		"The method getValue() is undefined for the type Role212btrc3<@tthis[Team212btrc3]>\n" +
     		"----------\n",
     		null/*classLibraries*/,
     		true/*shouldFlushOutputDirectory*/,
@@ -409,7 +409,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 			    "    }\n" +
 			    "\n" +
 			    "	 @SuppressWarnings(\"baseclasscycle\")\n" +
-			    "    protected class Role212btrc4 playedBy Team212btrc4 {\n" + 
+			    "    protected class Role212btrc4 playedBy Team212btrc4 {\n" +
 			    "        String getValue() <- replace String getValueInternal();\n" +
 			    "		 callin String getValue() {\n" +
 			    "			return base.getValue() + \"K\";\n" +
@@ -431,7 +431,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // 2.1.2-otjld-bound-to-related-class-5
     // Bug 318815 -  [otjld] [compiler] Support the "Internal Role" pattern
     public void test212_boundToRelatedClass5() {
-       
+
        runNegativeTest(
             new String[] {
 		"T212btrc5Main.java",
@@ -468,16 +468,16 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team212btrc5_2.java (at line 6)\n" + 
-    		"	public String getValue() -> String getValueInternal();\n" + 
-    		"	              ^^^^^^^^\n" + 
-    		"Role Team212btrc5_2.Role212btrc5 cannot declare callout bindings because it is playedBy enclosing type Team212btrc5_1 (OTJLD 3.1(a)); please directly access the target method.\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team212btrc5_2.java (at line 10)\n" + 
-    		"	return obj.getValue();\n" + 
-    		"	           ^^^^^^^^\n" + 
-    		"The method getValue() is undefined for the type Role212btrc5<@tthis[Team212btrc5_2]>\n" + 
+            "----------\n" +
+    		"1. ERROR in Team212btrc5_2.java (at line 6)\n" +
+    		"	public String getValue() -> String getValueInternal();\n" +
+    		"	              ^^^^^^^^\n" +
+    		"Role Team212btrc5_2.Role212btrc5 cannot declare callout bindings because it is playedBy enclosing type Team212btrc5_1 (OTJLD 3.1(a)); please directly access the target method.\n" +
+    		"----------\n" +
+    		"2. ERROR in Team212btrc5_2.java (at line 10)\n" +
+    		"	return obj.getValue();\n" +
+    		"	           ^^^^^^^^\n" +
+    		"The method getValue() is undefined for the type Role212btrc5<@tthis[Team212btrc5_2]>\n" +
     		"----------\n");
     }
 
@@ -491,7 +491,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 		"Team212btrc6_2.java",
 			    "\n" +
 			    "public team class Team212btrc6_2 {\n" +
-			    "    protected class Role212btrc6_2 playedBy Team212btrc6_1 {\n" + 
+			    "    protected class Role212btrc6_2 playedBy Team212btrc6_1 {\n" +
 			    "    }\n" +
 			    "}\n",
 		"Team212btrc6_1.java",
@@ -499,25 +499,25 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 				"	protected class Role212btrc6_1 playedBy Team212btrc6_2 {} \n" +
 				"}\n"
             },
-    		"----------\n" + 
-			"1. ERROR in Team212btrc6_2.java (at line 3)\n" + 
-			"	protected class Role212btrc6_2 playedBy Team212btrc6_1 {\n" + 
-			"	                                        ^^^^^^^^^^^^^^\n" + 
-			"Base class/member type circularity via chain Team212btrc6_2.Role212btrc6_2->Team212btrc6_1->Team212btrc6_1.Role212btrc6_1->Team212btrc6_2;\n" + 
-			"please read the hints in the OT/J Language Definition (OTJLD 2.1.2(b)).\n" + 
-    		"----------\n" + 
-    		"----------\n" + 
-    		"1. ERROR in Team212btrc6_1.java (at line 2)\n" + 
-    		"	protected class Role212btrc6_1 playedBy Team212btrc6_2 {} \n" + 
-    		"	                                        ^^^^^^^^^^^^^^\n" + 
-    		"Base class/member type circularity via chain Team212btrc6_1.Role212btrc6_1->Team212btrc6_2->Team212btrc6_2.Role212btrc6_2->Team212btrc6_1;\n" + 
-    		"please read the hints in the OT/J Language Definition (OTJLD 2.1.2(b)).\n" + 
+    		"----------\n" +
+			"1. ERROR in Team212btrc6_2.java (at line 3)\n" +
+			"	protected class Role212btrc6_2 playedBy Team212btrc6_1 {\n" +
+			"	                                        ^^^^^^^^^^^^^^\n" +
+			"Base class/member type circularity via chain Team212btrc6_2.Role212btrc6_2->Team212btrc6_1->Team212btrc6_1.Role212btrc6_1->Team212btrc6_2;\n" +
+			"please read the hints in the OT/J Language Definition (OTJLD 2.1.2(b)).\n" +
+    		"----------\n" +
+    		"----------\n" +
+    		"1. ERROR in Team212btrc6_1.java (at line 2)\n" +
+    		"	protected class Role212btrc6_1 playedBy Team212btrc6_2 {} \n" +
+    		"	                                        ^^^^^^^^^^^^^^\n" +
+    		"Base class/member type circularity via chain Team212btrc6_1.Role212btrc6_1->Team212btrc6_2->Team212btrc6_2.Role212btrc6_2->Team212btrc6_1;\n" +
+    		"please read the hints in the OT/J Language Definition (OTJLD 2.1.2(b)).\n" +
     		"----------\n",
             null/*classLibraries*/,
             true/*shouldFlushOutputDirectory*/,
             customOptions);
     }
-    
+
     // a role is bound to an interface
     // 2.1.3-otjld-bound-to-interface
     public void test213_boundToInterface_1() {
@@ -550,18 +550,18 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 			    "    }\n" +
 			    "}\n"
             },
-            "----------\n" + 
-    		"1. WARNING in Team213bti1.java (at line 3)\n" + 
-    		"	public class Role213bti1 playedBy I213bti1 {\n" + 
-    		"	                                  ^^^^^^^^\n" + 
+            "----------\n" +
+    		"1. WARNING in Team213bti1.java (at line 3)\n" +
+    		"	public class Role213bti1 playedBy I213bti1 {\n" +
+    		"	                                  ^^^^^^^^\n" +
     		"When binding interface I213bti1 as base of Role213bti1:\n" +
-    		"Note that some features like callin bindings are not yet supported in this situation (OTJLD 2.1.1).\n" + 
+    		"Note that some features like callin bindings are not yet supported in this situation (OTJLD 2.1.1).\n" +
     		"----------\n",
             null/*classLibraries*/,
             true/*shouldFlushOutputDirectory*/,
             customOptions);
     }
-    
+
     // a role is bound to an interface
     // this could work (no method bindings here)
     public void test213_boundToInterface_2() {
@@ -603,7 +603,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     }
 
     // a role is bound to an interface - with callout
-    // 2.1.3-otjld-bound-to-interface 
+    // 2.1.3-otjld-bound-to-interface
     public void test213_boundToInterface_3() {
     	Map customOptions = getCompilerOptions();
     	customOptions.put(CompilerOptions.OPTION_ReportMissingOverrideAnnotationForInterfaceMethodImplementation, CompilerOptions.DISABLED);
@@ -741,11 +741,11 @@ public class PlayedByRelation extends AbstractOTJLDTest {
             true/*shouldFlushOutputDirectory*/,
             customOptions);
     }
-    
+
     // a role is bound to an abstract class
     // 2.1.3-otjld-bound-to-abstract-class
     public void test213_boundToAbstractClass() {
-       
+
        runConformTest(
             new String[] {
 		"T213btacMain.java",
@@ -806,23 +806,23 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 			    "    }\n" +
 			    "}\n"
             },
-            "----------\n" + 
-    		"1. WARNING in Team214btrt1.java (at line 3)\n" + 
-    		"	protected class Role214btrt1 playedBy Team214btrt1 {\n" + 
-    		"	                                      ^^^^^^^^^^^^\n" + 
-    		"Base class Team214btrt1 is an enclosing type of Role214btrt1; please read the hints in the OT/J Language Definition (OTJLD 2.1.2(b)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team214btrt1.java (at line 5)\n" + 
-    		"	base();\n" + 
-    		"	^^^^\n" + 
-    		"Cannot invoke a base constructor because enclosing role Team214btrt1.Role214btrt1 is involved in baseclass circularity (OTJLD 2.4.2). \n" + 
+            "----------\n" +
+    		"1. WARNING in Team214btrt1.java (at line 3)\n" +
+    		"	protected class Role214btrt1 playedBy Team214btrt1 {\n" +
+    		"	                                      ^^^^^^^^^^^^\n" +
+    		"Base class Team214btrt1 is an enclosing type of Role214btrt1; please read the hints in the OT/J Language Definition (OTJLD 2.1.2(b)).\n" +
+    		"----------\n" +
+    		"2. ERROR in Team214btrt1.java (at line 5)\n" +
+    		"	base();\n" +
+    		"	^^^^\n" +
+    		"Cannot invoke a base constructor because enclosing role Team214btrt1.Role214btrt1 is involved in baseclass circularity (OTJLD 2.4.2). \n" +
     		"----------\n");
     }
 
     // a role is bound to its superteam (from which it is implicitly inherited), invokes method of enclosing team that recursively invokes the role method
     // 2.1.4-otjld-bound-to-related-team-2
     public void test214_boundToRelatedTeam2() {
-       
+
        runConformTest(
             new String[] {
 		"T214btrt2Main.java",
@@ -962,7 +962,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role is bound to another role in a different team using an anchored type
     // 2.1.5-otjld-bound-to-role-4
     public void test215_boundToRole4() {
-       
+
        runConformTest(
             new String[] {
 		"Team215btr4_2.java",
@@ -1004,7 +1004,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role is bound to another role in a different team using an anchored type (with package structure)
     // 2.1.5-otjld-bound-to-role-4a
     public void test215_boundToRole4a() {
-       
+
        runConformTest(
             new String[] {
 		"mypackage/Team215btr4a_2.java",
@@ -1048,7 +1048,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role is bound to another role in a different team using an anchored type - after callin
     // 2.1.5-otjld-bound-to-role-5
     public void test215_boundToRole5() {
-       
+
        runConformTest(
             new String[] {
 		"Team215btr5_2.java",
@@ -1103,7 +1103,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role is bound to another role in a different team using an anchored type - replace callin
     // 2.1.5-otjld-bound-to-role-6
     public void test215_boundToRole6() {
-       
+
        runConformTest(
             new String[] {
 		"Team215btr6_2.java",
@@ -1160,7 +1160,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role is bound to another role in a different team using an anchored type - after callin to callin method
     // 2.1.5-otjld-bound-to-role-7
     public void test215_boundToRole7() {
-       
+
        runConformTest(
             new String[] {
 		"Team215btr7_2.java",
@@ -1226,7 +1226,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role is bound to another role in a different team using an anchored type - before callin to after callin
     // 2.1.5-otjld-bound-to-role-8
     public void test215_boundToRole8() {
-       
+
        runConformTest(
             new String[] {
 		"Team215btr8_2.java",
@@ -1279,7 +1279,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // 2.1.5-otjld-bound-to-role-9
     public void test215_boundToRole9() {
        Map customOptions = getCompilerOptions();
-       
+
        runConformTest(
             new String[] {
 		"Team215btr9_2.java",
@@ -1352,7 +1352,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // two instances of lower team exist, only one is adapted by an active team
     // 2.1.5-otjld-bound-to-role-10
     public void test215_boundToRole10() {
-       
+
        runConformTest(
             new String[] {
 		"T215btr10Main.java",
@@ -1405,7 +1405,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // two instances of lower team exist, only one is adapted by an active team -- playedBy from binary
     // 2.1.5-otjld_bound-to-role-11
     public void _bound_test215_toRole11() {
-       
+
        runConformTest(
             new String[] {
 		"T215btr11Main.java",
@@ -1470,7 +1470,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // multilevel baseclass refinement + accumulating base imported bases
     // 2.1.5-otjld_bound-to-role-12
     public void _bound_test215_toRole12() {
-       
+
        runConformTest(
             new String[] {
 		"Team215btr12_4.java",
@@ -1542,7 +1542,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role is bound to the same base class as its implicit super role
     // 2.1.6-otjld-same-player-as-superrole-1
     public void test216_samePlayerAsSuperrole1() {
-       
+
        runConformTest(
             new String[] {
 		"T216spas1Main.java",
@@ -1604,7 +1604,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 			    "            return \"OK\";\n" +
 			    "        }\n" +
 			    "    }\n" +
-			    "}\n"    		   
+			    "}\n"
        		});
        runConformTest(
             new String[] {
@@ -1654,7 +1654,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role is bound to the same base class (an inner class in the same enclosing normal class) as its explicit super role
     // 2.1.6-otjld-same-player-as-superrole-3
     public void test216_samePlayerAsSuperrole3() {
-       
+
        runConformTest(
             new String[] {
 		"T216spas3Main.java",
@@ -1706,7 +1706,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role is bound to the subclass of the base class of its explicit superrole
     // 2.1.7-otjld-bound-to-subclass-1
     public void test217_boundToSubclass1() {
-       
+
        runConformTest(
             new String[] {
 		"T217bts1Main.java",
@@ -1758,7 +1758,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role is bound to the subclass of the base class of its explicit superrole
     // 2.1.7-otjld-bound-to-subclass-2
     public void test217_boundToSubclass2() {
-       
+
        runConformTest(
             new String[] {
 		"T217bts2Main.java",
@@ -1995,7 +1995,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role inherits different, but compatible base classes
     // 2.1.9-otjld-playedby-inheritance-4
     public void test219_playedbyInheritance4() {
-       
+
        runConformTest(
             new String[] {
 		"Team219pi4.java",
@@ -2049,7 +2049,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role implicitly inherits and uses a playedby relation unchanged
     // 2.1.9-otjld-playedby-inheritance-5
     public void test219_playedbyInheritance5() {
-       
+
        runConformTest(
             new String[] {
 		"Team219pi5_2.java",
@@ -2089,7 +2089,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a team imports a base class using a base-import
     // 2.1.10-otjld-base-import-1
     public void test2110_baseImport1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2110bi1.java",
@@ -2124,7 +2124,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a team imports a base class using a base-import - base class decapsulation
     // 2.1.10-otjld-base-import-1d
     public void test2110_baseImport1d() {
-       
+
        runConformTest(
             new String[] {
 		"Team2110bi1d.java",
@@ -2190,7 +2190,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a team imports a base class using a base-import -- using in declared lifting
     // 2.1.10-otjld-base-import-3
     public void test2110_baseImport3() {
-       
+
        runConformTest(
             new String[] {
 		"Team2110bi3.java",
@@ -2260,7 +2260,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 			    "    \n"
             },
             "----------\n" +
-			"1. WARNING in Team2110bi5.java (at line 5)\n" + 
+			"1. WARNING in Team2110bi5.java (at line 5)\n" +
 			"	protected class Role playedBy JFrame {}\n" +
 			"	                              ^^^^^^\n" +
 			"It is recommended that base class JFrame be imported with the modifier \"base\" (OTJLD 2.1.2(d)).\n" +
@@ -2285,25 +2285,25 @@ public class PlayedByRelation extends AbstractOTJLDTest {
             },
             (this.weavingScheme == WeavingScheme.OTDRE || !IS_JRE_8
             ?
-            "----------\n" + 
-    		"1. WARNING in Team2110bi6.java (at line 4)\n" + 
-    		"	protected class Role playedBy JFrame {}\n" + 
-    		"	                              ^^^^^^\n" + 
-    		"Base class javax.swing.JFrame appears to be a system class, which means that load time weaving could possibly fail\n" + 
-    		"if this class is loaded from rt.jar/the bootstrap classpath.\n" + 
+            "----------\n" +
+    		"1. WARNING in Team2110bi6.java (at line 4)\n" +
+    		"	protected class Role playedBy JFrame {}\n" +
+    		"	                              ^^^^^^\n" +
+    		"Base class javax.swing.JFrame appears to be a system class, which means that load time weaving could possibly fail\n" +
+    		"if this class is loaded from rt.jar/the bootstrap classpath.\n" +
     		"----------\n"
     		:
-    		"----------\n" + 
-    		"1. WARNING in Team2110bi6.java (at line 4)\n" + 
-    		"	protected class Role playedBy JFrame {}\n" + 
-    		"	                              ^^^^^^\n" + 
-    		"Base class javax.swing.JFrame has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
-    		"----------\n" + 
-    		"2. WARNING in Team2110bi6.java (at line 4)\n" + 
-    		"	protected class Role playedBy JFrame {}\n" + 
-    		"	                              ^^^^^^\n" + 
-    		"Base class javax.swing.JFrame appears to be a system class, which means that load time weaving could possibly fail\n" + 
-    		"if this class is loaded from rt.jar/the bootstrap classpath.\n" + 
+    		"----------\n" +
+    		"1. WARNING in Team2110bi6.java (at line 4)\n" +
+    		"	protected class Role playedBy JFrame {}\n" +
+    		"	                              ^^^^^^\n" +
+    		"Base class javax.swing.JFrame has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" +
+    		"----------\n" +
+    		"2. WARNING in Team2110bi6.java (at line 4)\n" +
+    		"	protected class Role playedBy JFrame {}\n" +
+    		"	                              ^^^^^^\n" +
+    		"Base class javax.swing.JFrame appears to be a system class, which means that load time weaving could possibly fail\n" +
+    		"if this class is loaded from rt.jar/the bootstrap classpath.\n" +
     		"----------\n"
             ),
     		customOptions);
@@ -2336,11 +2336,11 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. WARNING in Team2110bi7.java (at line 3)\n" + 
-    		"	import base java.util.List;\n" + 
-    		"	            ^^^^^^^^^^^^^^\n" + 
-    		"The import java.util.List is never used\n" + 
+            "----------\n" +
+    		"1. WARNING in Team2110bi7.java (at line 3)\n" +
+    		"	import base java.util.List;\n" +
+    		"	            ^^^^^^^^^^^^^^\n" +
+    		"The import java.util.List is never used\n" +
     		"----------\n",
     		customOptions);
     }
@@ -2405,18 +2405,18 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team2111pwt1f.java (at line 22)\n" + 
-    		"	new Team2111pwt1f().new Mid();\n" + 
-    		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"The constructor Team2111pwt1f.Mid() is undefined\n" + 
+            "----------\n" +
+    		"1. ERROR in Team2111pwt1f.java (at line 22)\n" +
+    		"	new Team2111pwt1f().new Mid();\n" +
+    		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+    		"The constructor Team2111pwt1f.Mid() is undefined\n" +
     		"----------\n");
     }
 
     // a role is playedBy a role of outer enclosing team
     // 2.1.11-otjld-playedBy-within-team-1
     public void test2111_playedByWithinTeam1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2111pwt1.java",
@@ -2451,7 +2451,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a playedBy is refined by implicit inheritence, base is role of same enclosing
     // 2.1.12-otjld-implicitly-refined-playedBy-1
     public void test2112_implicitlyRefinedPlayedBy1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2112irp1_2.java",
@@ -2505,7 +2505,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a playedBy is refined by implicit inheritence, two levels of nesting
     // 2.1.12-otjld-implicitly-refined-playedBy-2
     public void test2112_implicitlyRefinedPlayedBy2() {
-       
+
        runConformTest(
             new String[] {
 		"Team2112irp2_2.java",
@@ -2563,7 +2563,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     // a role migrates to a different base object, same type
     // 2.1.13-otjld-base-migration-1
     public void test2113_baseMigration1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2113bm1.java",
@@ -2644,7 +2644,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
             },
             "not applicable");
     }
-    
+
     // see  https://bugs.eclipse.org/348082
     // [compiler] Internal Role pattern with deeply nested team gives compile error in generated code
     public void test2124_internalRole1() {
@@ -2653,11 +2653,11 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     	"p2124/Team2124ir1.java",
     			"package p2124;\n" +
     			"public team class Team2124ir1 {\n" +
-    			"    protected team class Mid {\n" + 
+    			"    protected team class Mid {\n" +
     			"         protected team class Inner playedBy Mid {\n" +
-    			"\n" + 
-    			"         }\n" + 
-    			"   }\n" + 
+    			"\n" +
+    			"         }\n" +
+    			"   }\n" +
     			"" +
     			"}\n"
     		});

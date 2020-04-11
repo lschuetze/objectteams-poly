@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany, and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -37,7 +37,7 @@ import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
 
 /**
  * Callout to field mapping implementation.
- * 
+ *
  * @author brcan
  */
 public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICalloutToFieldMapping
@@ -53,7 +53,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
 			int sourceEnd,
             int declarationSourceEnd,
             IType role,
-            IMethod correspondingJavaElem, 
+            IMethod correspondingJavaElem,
 			MethodData roleMethodHandle,
             IFieldAccessSpec baseFieldHandle,
             boolean hasSignature,
@@ -65,13 +65,13 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
 	}
 
 	protected CalloutToFieldMapping(
-			int declarationSourceStart, 
+			int declarationSourceStart,
 			int sourceStart,
 			int sourceEnd,
 			int declarationSourceEnd,
 			int elementType,
 			IType parentRole,
-			IMethod correspondingJavaElem, 
+			IMethod correspondingJavaElem,
 			MethodData roleMethodHandle,
 			IFieldAccessSpec baseFieldHandle,
 			boolean hasSignature,
@@ -80,15 +80,15 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
 	{
 		this(declarationSourceStart, sourceStart, sourceEnd, declarationSourceEnd, CALLOUT_TO_FIELD_MAPPING, parentRole, correspondingJavaElem, roleMethodHandle, baseFieldHandle, hasSignature, isOverride, declaredModifiers, true);
 	}
-	
+
 	protected CalloutToFieldMapping(
-			int declarationSourceStart, 
+			int declarationSourceStart,
 			int sourceStart,
 			int sourceEnd,
             int declarationSourceEnd,
 			int elementType,
             IType parentRole,
-            IMethod correspondingJavaElem, 
+            IMethod correspondingJavaElem,
 			MethodData roleMethodHandle,
             IFieldAccessSpec baseFieldHandle,
             boolean hasSignature,
@@ -99,24 +99,24 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
 		super(declarationSourceStart,
 				sourceStart,
 				sourceEnd,
-                declarationSourceEnd, 
-                elementType, 
-                correspondingJavaElem, 
-                parentRole, 
-                roleMethodHandle, 
+                declarationSourceEnd,
+                elementType,
+                correspondingJavaElem,
+                parentRole,
+                roleMethodHandle,
                 hasSignature,
                 addAsChild);
-        
+
 		this.isOverride      = isOverride;
         this.baseFieldHandle = baseFieldHandle;
         this.declaredModifiers = declaredModifiers;
 	}
-    
+
     @Override
 	public boolean isOverride() {
     	return this.isOverride;
     }
-    
+
     @Override
     public int getFlags() throws JavaModelException {
     	return this.declaredModifiers;
@@ -126,10 +126,10 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
 	@SuppressWarnings("nls")
 	public String getElementName()
     {
-		
+
         StringBuffer name = new StringBuffer(super.getElementName());
         name.append(" -> ");
-        
+
         if (hasSignature())
         {
             name.append(this.baseFieldHandle.toString());
@@ -138,7 +138,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
         {
             name.append(this.baseFieldHandle.getSelector());
         }
-        
+
         return name.toString();
     }
 
@@ -146,7 +146,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
 	public int getMappingKind()
     {
         return CALLOUT_TO_FIELD_MAPPING;
-    }   
+    }
 
 	@Override
 	public IField getBoundBaseField() throws JavaModelException
@@ -155,7 +155,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
         {
             this.baseField = findBaseField();
         }
-        
+
         return this.baseField;
     }
 
@@ -176,7 +176,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
 
         return super.equals(obj);
     }
-    
+
     @Override
 	@SuppressWarnings("nls")
 	public String toString()
@@ -191,14 +191,14 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
     {
         IType   baseClass   = getDeclaringRole().getBaseClass();
         IType[] typeParents = TypeHelper.getSuperTypes(baseClass);
-                
+
         return findField(typeParents, this.baseFieldHandle);
     }
-    
+
     /**
      * Tries to find an IField matching the given field handle in a set
      * of types.
-     * 
+     *
      * @return the first matching IField in the set of types or null if
      * nothing found
      */
@@ -213,7 +213,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
             for (int idy = 0; idy < fields.length; idy++)
             {
                 IField tmpField = fields[idy];
-                // check for equal field name                
+                // check for equal field name
                 if (tmpField.getElementName().equals(fieldHandle.getSelector()))
                 {
                     // return immmediately on first match
@@ -223,7 +223,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
         }
         return null;
     }
-    
+
     // ==== memento generation: ====
     @Override
     protected char getMappingKindChar() {
@@ -262,29 +262,29 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
     	return new FieldData(selector, fieldType, isSetter);
     }
     // ====
-    
-	// implementation and alternate API of resolved(Binding)	
+
+	// implementation and alternate API of resolved(Binding)
 	@Override
 	public OTJavaElement resolved(char[] uniqueKey) {
-		ResolvedCalloutToFieldMapping resolvedHandle = 
+		ResolvedCalloutToFieldMapping resolvedHandle =
 			new ResolvedCalloutToFieldMapping(
 					getDeclarationSourceStart(),
 					getSourceStart(),
 					getSourceEnd(),
 			    	getDeclarationSourceEnd(),
 			    	getElementType(),
-			        (IType) getParent(), 
+			        (IType) getParent(),
 			    	getIMethod(),
 			        getRoleMethodHandle(),
-			        this.baseFieldHandle, 
-			        hasSignature(), 		
+			        this.baseFieldHandle,
+			        hasSignature(),
 			        isOverride(),
 			        this.declaredModifiers,
 			        new String(uniqueKey));
 
 		return resolvedHandle;
 	}
-	
+
 	// disable method that does not apply to c-t-f:
 	@Override
 	public String[] getExceptionTypes() throws JavaModelException {

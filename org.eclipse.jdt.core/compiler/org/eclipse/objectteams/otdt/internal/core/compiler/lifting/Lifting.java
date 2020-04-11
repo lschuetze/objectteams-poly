@@ -118,12 +118,12 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 public class Lifting extends SwitchOnBaseTypeGenerator
 					 implements TypeIds, ClassFileConstants, ExtraCompilerModifiers
 {
-	
+
 	public static enum InstantiationPolicy { NEVER, ONDEMAND, SINGLETON, ALWAYS, ERROR;
 		public boolean isAlways() { return this == ALWAYS; }
 		public boolean isOndemand() { return this == ONDEMAND; }
 	}
-	
+
     private RoleModel _boundRootRoleModel = null;
     private AstGenerator _gen = null;
 	private long _sourceLevel;
@@ -278,7 +278,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
                 	}
             );
         gen.addNonNullAnnotation(arg, scope.environment());
-        
+
         RoleModel implicitSuperRole = roleModel.getImplicitSuperRole();
 
 		// default arg name is base.
@@ -493,13 +493,13 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 		} else {
 			// here an (unnecessary) cast to j.l.Object prevents a warning re OTJLD 2.2(f):
 			roleExpression = gen.castExpression(
-								roleExpression, 
-								gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 
+								roleExpression,
+								gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT),
 								CastExpression.RAW);
 		}
 		statements[1] =
 			// OTDYN: Slightly different methods depending on the weaving strategy:
-        	boundRootRoleModel.getWeavingScheme() == WeavingScheme.OTDRE 
+        	boundRootRoleModel.getWeavingScheme() == WeavingScheme.OTDRE
         	? gen.messageSend(
 					gen.castExpression(
 							gen.singleNameReference(_OT_BASE),
@@ -792,9 +792,9 @@ public class Lifting extends SwitchOnBaseTypeGenerator
     	ReferenceBinding roleClassBinding = roleModel.getBinding();
 
     	if (this._boundRootRoleModel.isRoleFile()) {
-			this._gen = MethodModel.setupSourcePositionMapping(liftToMethodDeclaration, 
+			this._gen = MethodModel.setupSourcePositionMapping(liftToMethodDeclaration,
 															   teamBinding._teamModel.getAst(),
-															   roleModel, 
+															   roleModel,
 															   this._gen);
 		}
 
@@ -815,7 +815,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 					// conditional generation (see below)
 					maybeCreateTeamMemberCheck(baseClassBinding),
 
-					(RoleModel.getInstantiationPolicy(roleClassBinding).isOndemand()) 
+					(RoleModel.getInstantiationPolicy(roleClassBinding).isOndemand())
 					// if(!_OT$team_param._OT$cache_OT$RootRole.containsKey(base))
 					? createRoleExistentCheck(
 		                roleClassBinding,
@@ -924,7 +924,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 		return this._gen.block(
 			// (create a role of the best matching type:)
 			new Statement[] {
-			caseObjects.length > 0 
+			caseObjects.length > 0
 				? createSwitchStatement(teamType, roleType, caseObjects, problemId, this._gen)
 				: genLiftingFailedException(BASE, roleType, problemId, this._gen)});
 	}

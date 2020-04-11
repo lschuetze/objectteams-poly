@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -42,12 +42,12 @@ public class SourceElementRequestorTest extends FileBasedModelTest implements IS
 {
 	private char[] source;
 	protected String PROJECT_DIR;
-    
+
     public SourceElementRequestorTest(String testName)
     {
         super(testName);
     }
-    
+
     public static Test suite()
     {
         if (true)
@@ -58,13 +58,13 @@ public class SourceElementRequestorTest extends FileBasedModelTest implements IS
             .getName());
         return suite;
     }
-    
+
     public void setUpSuite() throws Exception
     {
         setTestProjectDir(PROJECT_DIR);
         super.setUpSuite();
     }
-    
+
     protected void setUp() throws Exception
     {
         super.setUp();
@@ -73,16 +73,16 @@ public class SourceElementRequestorTest extends FileBasedModelTest implements IS
     public void fullParse(String src, String fileName)
     {
 	    	this.source = src.toCharArray();
-	    	
+
 	    	// km: ctor with new parameter "reportLocalDeclarations", "optimizeStringLiterals" assuming both to be true
-	    	SourceElementParser parser = 
-	    		new SourceElementParser(this, new DefaultProblemFactory(Locale.getDefault()), new CompilerOptions(), true, true); 
-	
+	    	SourceElementParser parser =
+	    		new SourceElementParser(this, new DefaultProblemFactory(Locale.getDefault()), new CompilerOptions(), true, true);
+
 	    	ICompilationUnit sourceUnit = new CompilationUnit(source, fileName, null);
-	
+
 	    	parser.parseCompilationUnit(sourceUnit, true, null);
     }
-    
+
     public void acceptConstructorReference(char[] typeName, int argCount, int sourcePosition)
     {
     }
@@ -150,7 +150,7 @@ public class SourceElementRequestorTest extends FileBasedModelTest implements IS
     public void enterCallinMapping(CallinInfo callinInfo)
     {
     }
-    
+
     public void exitCallinMapping(int sourceEnd, int declarationSourceEnd)
     {
     }
@@ -167,47 +167,47 @@ public class SourceElementRequestorTest extends FileBasedModelTest implements IS
 
 	public void enterConstructor(MethodInfo methodInfo) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void enterField(FieldInfo fieldInfo) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void enterMethod(MethodInfo methodInfo) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void enterType(TypeInfo typeInfo) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void exitType(int declarationEnd) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void acceptProblem(CategorizedProblem problem) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void acceptImport(int declarationStart, int declarationEnd, char[][] tokens, boolean onDemand, int modifiers) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
-	public void acceptImport(int declarationStart, int declarationEnd, int nameStart, int nameEnd, 
+	public void acceptImport(int declarationStart, int declarationEnd, int nameStart, int nameEnd,
 			char[][] tokens, boolean onDemand, int modifiers) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void acceptAnnotationTypeReference(char[][] annotation, int sourceStart, int sourceEnd) {
-		// TODO Auto-generated method stub		
+		// TODO Auto-generated method stub
 	}
 
 	public void acceptAnnotationTypeReference(char[] annotation, int sourcePosition) {
@@ -219,7 +219,7 @@ public class SourceElementRequestorTest extends FileBasedModelTest implements IS
 	}
 
 	public void exitMethod(int declarationEnd, Expression defaultValue) {
-		// TODO Auto-generated method stub		
+		// TODO Auto-generated method stub
 	}
 
 }

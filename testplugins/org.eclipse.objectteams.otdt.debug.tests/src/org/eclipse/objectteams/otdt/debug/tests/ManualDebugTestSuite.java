@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Display;
  * automated tests.
  */
 public class ManualDebugTestSuite extends TestSuite {
-	
+
 	/**
 	 * Flag that indicates test are in progress
 	 */
@@ -54,11 +54,11 @@ public class ManualDebugTestSuite extends TestSuite {
 	 */
 	public ManualDebugTestSuite() {
 		addTest(new TestSuite(OTProjectCreationDecorator.class));
-		
+
 		addTest(new TestSuite(StratumTests.class));
 
 	}
-	
+
 	/**
 	 * Runs the tests and collects their result in a TestResult.
 	 * The debug tests cannot be run in the UI thread or the event
@@ -75,7 +75,7 @@ public class ManualDebugTestSuite extends TestSuite {
 				  			break;
 						Test test= (Test)e.nextElement();
 						runTest(test, result);
-					}					
+					}
 					fTesting = false;
 					display.wake();
 				}
@@ -85,15 +85,15 @@ public class ManualDebugTestSuite extends TestSuite {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-				
+
 		while (fTesting) {
 			try {
 				if (!display.readAndDispatch())
 					display.sleep();
 			} catch (Throwable e) {
 				e.printStackTrace();
-			}			
-		}		
+			}
+		}
 	}
 
 }

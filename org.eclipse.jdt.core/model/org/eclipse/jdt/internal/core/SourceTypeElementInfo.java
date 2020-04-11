@@ -36,7 +36,7 @@ public class SourceTypeElementInfo extends AnnotatableInfo implements ISourceTyp
 	protected static final SourceType[] NO_TYPES = new SourceType[0];
 
 	protected IJavaElement[] children = JavaElement.NO_ELEMENTS;
-	
+
 	/**
 	 * The name of the superclass for this type. This name
 	 * is fully qualified for binary types and is NOT always
@@ -45,7 +45,7 @@ public class SourceTypeElementInfo extends AnnotatableInfo implements ISourceTyp
 	protected char[] superclassName;
 //{ObjectTeams: addition: baseclass reference
 	/**
-	 * The name of the baseclass for this (role) type, if any. 
+	 * The name of the baseclass for this (role) type, if any.
 	 * This name is fully qualified for binary types and is NOT
 	 * fully qualified for source types.
 	 */
@@ -54,7 +54,7 @@ public class SourceTypeElementInfo extends AnnotatableInfo implements ISourceTyp
 	public char[] getBaseclassName() {
 		return this.baseclassName;
 	}
-	
+
 	protected void setBaseclassName(char[] baseclassName) {
 		this.baseclassName = baseclassName;
 	}

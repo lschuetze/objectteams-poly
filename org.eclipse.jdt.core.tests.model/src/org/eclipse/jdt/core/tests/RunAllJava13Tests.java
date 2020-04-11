@@ -29,7 +29,7 @@ import junit.framework.TestSuite;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class RunAllJava13Tests extends TestCase {
-	
+
 	public RunAllJava13Tests(String name) {
 		super(name);
 	}
@@ -41,7 +41,7 @@ public class RunAllJava13Tests extends TestCase {
 			org.eclipse.jdt.compiler.apt.tests.AllTests.class,
 		};
 	}
-	
+
 	public static Class[] getConverterTestClasses() {
 		return new Class[] {
 				ASTConverter14Test.class,

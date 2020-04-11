@@ -146,7 +146,7 @@ public class FieldAccessSpec extends MethodSpec {
    							}
    						} else if (baseType.isTeam()) {
    							// base class is a team, construct simple anchor
-   							
+
    							ReferenceBinding enclRole = scope.enclosingSourceType();
    							newAnchor = TypeAnalyzer.findField(enclRole, IOTConstants._OT_BASE, /*don't check static*/false, /*outer*/false);
    						} // else fieldLeafType might already be a anchored type,
@@ -161,7 +161,7 @@ public class FieldAccessSpec extends MethodSpec {
 		}
 
    		if (   !baseType.isRole()
-   			&& this.resolvedField.canBeSeenBy(scope.enclosingReceiverType().baseclass(), this, scope)) 
+   			&& this.resolvedField.canBeSeenBy(scope.enclosingReceiverType().baseclass(), this, scope))
    		{
    			// no accessor method needed
    			this.implementationStrategy = ImplementationStrategy.DIRECT;
@@ -432,7 +432,7 @@ public class FieldAccessSpec extends MethodSpec {
 	}
 
 	@Override
-	public int createAccessAttribute(RoleModel roleModel) {		
+	public int createAccessAttribute(RoleModel roleModel) {
 		return roleModel.addAccessedBaseField(this.resolvedField, this.calloutModifier, null);
 	}
 

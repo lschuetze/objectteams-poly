@@ -196,7 +196,7 @@ public class QualifiedTypeReference extends TypeReference {
 		}
 	    PackageBinding packageBinding = binding == null ? null : (PackageBinding) binding;
 	    int typeStart = packageBinding == null ? 0 : packageBinding.compoundName.length;
-	    
+
 	    if (packageBinding != null) {
 	    	PackageBinding uniquePackage = packageBinding.getVisibleFor(scope.module(), false);
 	    	if (uniquePackage instanceof SplitPackageBinding) {
@@ -272,7 +272,7 @@ public class QualifiedTypeReference extends TypeReference {
 	}
 //{ObjectTeams: overridable hook for above
 	protected void reportDeprecatedPathSyntax(Scope scope) {
-		scope.problemReporter().deprecatedPathSyntax(this);		
+		scope.problemReporter().deprecatedPathSyntax(this);
 	}
 // SH}
 

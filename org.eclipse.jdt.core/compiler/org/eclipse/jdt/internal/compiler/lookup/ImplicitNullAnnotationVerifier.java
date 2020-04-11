@@ -105,15 +105,15 @@ public class ImplicitNullAnnotationVerifier {
 			// compatibility & inheritance do not consider constructors / static methods:
 			boolean isInstanceMethod = !currentMethod.isConstructor() && !currentMethod.isStatic();
 			complain &= isInstanceMethod;
-			if (!needToApplyNonNullDefault 
-					&& !complain 
+			if (!needToApplyNonNullDefault
+					&& !complain
 					&& !(this.inheritNullAnnotations && isInstanceMethod)) {
 				return; // short cut, no work to be done
 			}
 
 			if (isInstanceMethod) {
 				List superMethodList = new ArrayList();
-				
+
 				// need super types connected:
 				if (currentType instanceof SourceTypeBinding && !currentType.isHierarchyConnected() && !currentType.isAnonymousType()) {
 					((SourceTypeBinding) currentType).scope.connectTypeHierarchy();
@@ -122,8 +122,8 @@ public class ImplicitNullAnnotationVerifier {
 				int paramLen = currentMethod.parameters.length;
 				findAllOverriddenMethods(currentMethod.original(), currentMethod.selector, paramLen,
 								currentType, new HashSet(), superMethodList);
-				
-				// prepare interim storage for nullness info so we don't pollute currentMethod before we know its conflict-free: 
+
+				// prepare interim storage for nullness info so we don't pollute currentMethod before we know its conflict-free:
 				InheritedNonNullnessInfo[] inheritedNonNullnessInfos = new InheritedNonNullnessInfo[paramLen+1]; // index 0 is for the return type
 				for (int i=0; i<paramLen+1; i++) inheritedNonNullnessInfos[i] = new InheritedNonNullnessInfo();
 
@@ -137,7 +137,7 @@ public class ImplicitNullAnnotationVerifier {
 					checkNullSpecInheritance(currentMethod, srcMethod, needToApplyReturnNonNullDefault, needToApplyParameterNonNullDefault, complain, currentSuper, null, scope, inheritedNonNullnessInfos);
 					needToApplyNonNullDefault = false;
 				}
-				
+
 				// transfer collected information into currentMethod:
 				InheritedNonNullnessInfo info = inheritedNonNullnessInfos[0];
 				if (!info.complained) {
@@ -176,17 +176,17 @@ public class ImplicitNullAnnotationVerifier {
 				else
 					currentMethod.fillInDefaultNonNullness18(srcMethod, scope.environment());
 			}
-		} finally {			
+		} finally {
 			currentMethod.tagBits |= TagBits.IsNullnessKnown;
 		}
 	}
 
-	/* 
+	/*
 	 * Recursively traverse the tree of ancestors but whenever we find a matching method prune the super tree.
 	 * Collect all matching methods in 'result'.
 	 */
-	private void findAllOverriddenMethods(MethodBinding original, char[] selector, int suggestedParameterLength, 
-			ReferenceBinding currentType, Set ifcsSeen, List result) 
+	private void findAllOverriddenMethods(MethodBinding original, char[] selector, int suggestedParameterLength,
+			ReferenceBinding currentType, Set ifcsSeen, List result)
 	{
 		if (currentType.id == TypeIds.T_JavaLangObject)
 			return;
@@ -214,7 +214,7 @@ public class ImplicitNullAnnotationVerifier {
 
 	/* collect matching methods from one supertype. */
 	private void collectOverriddenMethods(MethodBinding original, char[] selector, int suggestedParameterLength,
-			ReferenceBinding superType, Set ifcsSeen, List result) 
+			ReferenceBinding superType, Set ifcsSeen, List result)
 	{
 		MethodBinding [] ifcMethods = superType.unResolvedMethods();
 		int length = ifcMethods.length;
@@ -242,7 +242,7 @@ public class ImplicitNullAnnotationVerifier {
 	 * @param srcMethod AST of 'currentMethod' if present
 	 * @param hasReturnNonNullDefault is a @NonNull default applicable for the return type of currentMethod?
 	 * @param hasParameterNonNullDefault is a @NonNull default applicable for parameters of currentMethod?
-	 * @param shouldComplain should we report any errors found? 
+	 * @param shouldComplain should we report any errors found?
 	 *   (see also comment about flows into this method, below).
 	 * @param inheritedMethod one overridden method from a super type
 	 * @param allInheritedMethods look here to see if nonnull-unannotated conflict already exists in one super type
@@ -251,9 +251,9 @@ public class ImplicitNullAnnotationVerifier {
 	 * 	 interim recording of nullness information from inheritedMethod rather than prematurely updating currentMethod.
 	 *   Index position 0 is used for the return type, positions i+1 for argument i.
 	 */
-	void checkNullSpecInheritance(MethodBinding currentMethod, AbstractMethodDeclaration srcMethod, 
+	void checkNullSpecInheritance(MethodBinding currentMethod, AbstractMethodDeclaration srcMethod,
 			boolean hasReturnNonNullDefault, ParameterNonNullDefaultProvider hasParameterNonNullDefault, boolean shouldComplain,
-			MethodBinding inheritedMethod, MethodBinding[] allInheritedMethods, Scope scope, InheritedNonNullnessInfo[] inheritedNonNullnessInfos) 
+			MethodBinding inheritedMethod, MethodBinding[] allInheritedMethods, Scope scope, InheritedNonNullnessInfo[] inheritedNonNullnessInfos)
 	{
 		if(currentMethod.declaringClass.id == TypeIds.T_JavaLangObject) {
 			// all method implementations in java.lang.Object return non-null results and accept nullable as parameter.
@@ -276,7 +276,7 @@ public class ImplicitNullAnnotationVerifier {
 		boolean useTypeAnnotations = this.environment.usesNullTypeAnnotations();
 		long inheritedNullnessBits = getReturnTypeNullnessTagBits(inheritedMethod, useTypeAnnotations);
 		long currentNullnessBits = getReturnTypeNullnessTagBits(currentMethod, useTypeAnnotations);
-		
+
 		boolean shouldInherit = this.inheritNullAnnotations;
 
 		// return type:
@@ -294,12 +294,12 @@ public class ImplicitNullAnnotationVerifier {
 							// 	still use the inherited bits to avoid incompatibility
 						}
 						if (inheritedNonNullnessInfos != null && srcMethod != null) {
-							recordDeferredInheritedNullness(scope, ((MethodDeclaration) srcMethod).returnType, 
+							recordDeferredInheritedNullness(scope, ((MethodDeclaration) srcMethod).returnType,
 									inheritedMethod, Boolean.valueOf(inheritedNullnessBits == TagBits.AnnotationNonNull), inheritedNonNullnessInfos[0]);
 						} else {
 							// no need to defer, record this info now:
 							applyReturnNullBits(currentMethod, inheritedNullnessBits);
-						}	
+						}
 						break returnType; // compatible by construction, skip complain phase below
 					}
 				}
@@ -366,7 +366,7 @@ public class ImplicitNullAnnotationVerifier {
 		for (int i = 0; i < length; i++) {
 			if (currentMethod.parameters[i].isBaseType()) continue;
 
-			Argument currentArgument = currentArguments == null 
+			Argument currentArgument = currentArguments == null
 										? null : currentArguments[i];
 			Boolean inheritedNonNullNess = getParameterNonNullness(inheritedMethod, i, useTypeAnnotations);
 			Boolean currentNonNullNess = getParameterNonNullness(currentMethod, i, useTypeAnnotations);
@@ -416,7 +416,7 @@ public class ImplicitNullAnnotationVerifier {
 					annotationName = this.environment.getNullableAnnotationName();
 				}
 				if (inheritedNonNullNess != Boolean.TRUE		// super parameter is not restricted to @NonNull
-						&& currentNonNullNess == Boolean.TRUE)	// current parameter is restricted to @NonNull 
+						&& currentNonNullNess == Boolean.TRUE)	// current parameter is restricted to @NonNull
 				{
 					// incompatible
 					if (currentArgument != null) {
@@ -428,10 +428,10 @@ public class ImplicitNullAnnotationVerifier {
 						scope.problemReporter().cannotImplementIncompatibleNullness(scope.referenceContext(), currentMethod, inheritedMethod, false);
 					}
 					continue;
-				} else if (currentNonNullNess == null) 
+				} else if (currentNonNullNess == null)
 				{
 					// unannotated strictly conflicts only with inherited @Nullable
-					if (inheritedNonNullNess == Boolean.FALSE) { 
+					if (inheritedNonNullNess == Boolean.FALSE) {
 						if (currentArgument != null) {
 							scope.problemReporter().parameterLackingNullableAnnotation(
 									currentArgument,
@@ -453,12 +453,12 @@ public class ImplicitNullAnnotationVerifier {
 							scope.problemReporter().parameterLackingNonnullAnnotation(currentArgument, inheritedMethod.declaringClass, annotationName);
 						} else {
 							TypeDeclaration type = scope.classScope().referenceContext;
-							ASTNode location = type.superclass != null ? type.superclass : type; 
+							ASTNode location = type.superclass != null ? type.superclass : type;
 							scope.problemReporter().inheritedParameterLackingNonnullAnnotation(currentMethod, i+1, inheritedMethod.declaringClass, location, annotationName);
 						}
 						continue;
 					}
-				} 
+				}
 				if (useTypeAnnotations) {
 					TypeBinding inheritedParameter = inheritedMethod.parameters[i];
 					TypeBinding substituteParameter = substituteParameters != null ? substituteParameters[i] : null;
@@ -520,12 +520,12 @@ public class ImplicitNullAnnotationVerifier {
 
 	/* check for conflicting annotations and record here the info 'inheritedNonNullness' found in 'inheritedMethod'. */
 	protected void recordDeferredInheritedNullness(Scope scope, ASTNode location,
-			MethodBinding inheritedMethod, Boolean inheritedNonNullness, 
-			InheritedNonNullnessInfo nullnessInfo) 
+			MethodBinding inheritedMethod, Boolean inheritedNonNullness,
+			InheritedNonNullnessInfo nullnessInfo)
 	{
 		if (nullnessInfo.inheritedNonNullness != null && nullnessInfo.inheritedNonNullness != inheritedNonNullness) {
-			scope.problemReporter().conflictingInheritedNullAnnotations(location, 
-					nullnessInfo.inheritedNonNullness.booleanValue(), nullnessInfo.annotationOrigin, 
+			scope.problemReporter().conflictingInheritedNullAnnotations(location,
+					nullnessInfo.inheritedNonNullness.booleanValue(), nullnessInfo.annotationOrigin,
 					inheritedNonNullness.booleanValue(), inheritedMethod);
 			nullnessInfo.complained = true;
 			// leave previous info intact, so subsequent errors are reported against the same first method
@@ -554,7 +554,7 @@ public class ImplicitNullAnnotationVerifier {
 	}
 
 	// ==== minimal set of utility methods previously from MethodVerifier15: ====
-	
+
 //{ObjectTeams: added 3. argument:
 	static boolean areParametersEqual(MethodBinding one, MethodBinding two, LookupEnvironment environment) {
 // SH}
@@ -571,7 +571,7 @@ public class ImplicitNullAnnotationVerifier {
 		int length = oneArgs.length;
 		if (length != twoArgs.length) return false;
 
-		
+
 		// methods with raw parameters are considered equal to inherited methods
 		// with parameterized parameters for backwards compatibility, need a more complex check
 		int i;

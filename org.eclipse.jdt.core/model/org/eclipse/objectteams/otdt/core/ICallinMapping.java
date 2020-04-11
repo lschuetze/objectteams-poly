@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id: ICallinMapping.java 23416 2010-02-03 19:59:31Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.JavaModelException;
 /**
  * Specialized form of a IMethodMapping which provides information about
  * its kind and direct links to (possible) multiple base methods.
- * 
+ *
  * @author jwloka
  * @version $Id: ICallinMapping.java 23416 2010-02-03 19:59:31Z stephan $
  * @noimplement This interface is not intended to be implemented by clients.
@@ -39,16 +39,16 @@ public interface ICallinMapping extends IMethodMapping
 	public static final int KIND_BEFORE  = 1;
 	public static final int KIND_AFTER   = 2;
 	public static final int KIND_REPLACE = 3;
-	
+
 	/**
 	 * Returns the kind of callin e.g. replace
 	 * @return possible return values are: ICallinMapping.KIND_BEFORE
 	 *                                     ICallinMapping.KIND_AFTER
-	 *                                     ICallinMapping.KIND_REPLACE 
+	 *                                     ICallinMapping.KIND_REPLACE
 	 */
     public int getCallinKind();
-    
-    /** 
+
+    /**
      * Returns whether at least one of the bound base method is captured including
      * overrides with covariant return types (marked as "RT+ bm()")
      */
@@ -58,18 +58,18 @@ public interface ICallinMapping extends IMethodMapping
 	 * Dynamically resolves associated base methods from the JavaModel
 	 * @return all JavaModel base method elements, at least there should
 	 *         be one entry
-	 */	
+	 */
 	public IMethod[] getBoundBaseMethods() throws JavaModelException;
 
 	/**
      * Retrieve a handles for the base methods.
-     * 
-     * @return handles representing the base method specs 
+     *
+     * @return handles representing the base method specs
      */
 	public IMethodSpec[] getBaseMethodHandles();
-	
+
 	/**
-	 * Returns whether this callin mapping has a 'callin label'. If false, 
+	 * Returns whether this callin mapping has a 'callin label'. If false,
 	 * getName() will return a generated label.
 	 */
 	public boolean hasName();

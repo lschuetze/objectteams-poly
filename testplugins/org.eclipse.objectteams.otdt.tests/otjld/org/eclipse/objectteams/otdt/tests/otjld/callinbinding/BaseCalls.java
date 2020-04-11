@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -31,11 +31,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 @SuppressWarnings("unchecked") // working with raw map
 public class BaseCalls extends AbstractOTJLDTest {
-	
+
 	public BaseCalls(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -43,7 +43,7 @@ public class BaseCalls extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -51,7 +51,7 @@ public class BaseCalls extends AbstractOTJLDTest {
 	public static Class testClass() {
 		return BaseCalls.class;
 	}
-	
+
 	@Override
 	protected Map getCompilerOptions() {
 		Map options = super.getCompilerOptions();
@@ -62,7 +62,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a role method is callin-bound as 'replace' with a single base call
     // 4.5.1-otjld-single-base-call-1
     public void test451_singleBaseCall1() {
-       
+
        runConformTest(
             new String[] {
 		"T451sbc1Main.java",
@@ -110,7 +110,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a role method is callin-bound as 'replace' with a single base call
     // 4.5.1-otjld-single-base-call-2
     public void test451_singleBaseCall2() {
-       
+
        runConformTest(
             new String[] {
 		"T451sbc2Main.java",
@@ -278,7 +278,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a role method is callin-bound as 'replace' with a single base call
     // 4.5.1-otjld-single-base-call-5
     public void test451_singleBaseCall5() {
-       
+
        runConformTest(
             new String[] {
 		"T451sbc5Main.java",
@@ -325,7 +325,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // two callin methods have compatible but not identical signatures, each issueing a base call
     // 4.5.1-otjld-single-base-call-6
     public void test451_singleBaseCall6() {
-       
+
        runConformTest(
             new String[] {
 		"Team451sbc6.java",
@@ -369,7 +369,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a base call is unbound at the place of its declaration
     // 4.5.2-otjld-unbound-base-call-1
     public void test452_unboundBaseCall1() {
-       
+
        runConformTest(
             new String[] {
 		"Team452ubc1.java",
@@ -402,7 +402,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a base call is unbound at the place of its declaration - tsub overrides - tsubsub binds
     // 4.5.2-otjld-unbound-base-call-2
     public void test452_unboundBaseCall2() {
-       
+
        runConformTest(
             new String[] {
 		"Team452ubc2_3.java",
@@ -578,11 +578,11 @@ public class BaseCalls extends AbstractOTJLDTest {
 			    "}	\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team455ibc3.java (at line 4)\n" + 
-    		"	callin foo() {\n" + 
-    		"	       ^^^^^\n" + 
-    		"Return type for the method is missing\n" + 
+            "----------\n" +
+    		"1. ERROR in Team455ibc3.java (at line 4)\n" +
+    		"	callin foo() {\n" +
+    		"	       ^^^^^\n" +
+    		"Return type for the method is missing\n" +
     		"----------\n");
     }
 
@@ -660,11 +660,11 @@ public class BaseCalls extends AbstractOTJLDTest {
 			    "}   \n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team455ibc6.java (at line 6)\n" + 
-    		"	base.rm2(1);\n" + 
-    		"	^^^^^^^^^^^\n" + 
-    		"Base call \"base.rm2(1)\" does not match the signature of the enclosing callin method (OTJLD 4.3(a)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team455ibc6.java (at line 6)\n" +
+    		"	base.rm2(1);\n" +
+    		"	^^^^^^^^^^^\n" +
+    		"Base call \"base.rm2(1)\" does not match the signature of the enclosing callin method (OTJLD 4.3(a)).\n" +
     		"----------\n");
     }
 
@@ -692,11 +692,11 @@ public class BaseCalls extends AbstractOTJLDTest {
 			    "}   \n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team455ibc7.java (at line 9)\n" + 
-    		"	base.rm2(\"wrong\", true);\n" + 
-    		"	     ^^^\n" + 
-    		"Base call rm2(Integer, boolean) is not applicable for the arguments (String, boolean)\n" + 
+            "----------\n" +
+    		"1. ERROR in Team455ibc7.java (at line 9)\n" +
+    		"	base.rm2(\"wrong\", true);\n" +
+    		"	     ^^^\n" +
+    		"Base call rm2(Integer, boolean) is not applicable for the arguments (String, boolean)\n" +
     		"----------\n");
     }
 
@@ -733,7 +733,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a role method is callin-bound as 'replace' with multiple base call
     // 4.5.6-otjld-multiple-base-calls-2
     public void test456_multipleBaseCalls2() {
-       
+
        runConformTest(
             new String[] {
 		"T456mbc2Main.java",
@@ -779,7 +779,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a role method is callin-bound as 'replace' with multiple base call, binding in sub role
     // 4.5.6-otjld-multiple-base-calls-2a
     public void test456_multipleBaseCalls2a() {
-       
+
        runConformTest(
             new String[] {
 		"T456mbc2aMain.java",
@@ -932,7 +932,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a callin method has no result, base call is potentially missing, therefor the base client receives no result  (base type)
     // 4.5.7-otjld-basecall-result-not-provided-3
     public void test457_basecallResultNotProvided3() {
-       
+
        runConformTest(
             new String[] {
 		"T457brnp3Main.java",
@@ -978,7 +978,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a callin method has no result, base call is potentially missing, therefor the base client receives no result  (base type) - potential achieved by return
     // 4.5.7-otjld-basecall-result-not-provided-3b
     public void test457_basecallResultNotProvided3b() {
-       
+
        runConformTest(
             new String[] {
 		"T457brnp3bMain.java",
@@ -1064,7 +1064,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a callin method has no result, base call is potentially missing, therefor the base client receives no result  (reference type)
     // 4.5.7-otjld-basecall-result-not-provided-4
     public void test457_basecallResultNotProvided4() {
-       
+
        runConformTest(
             new String[] {
 		"T457brnp4Main.java",
@@ -1110,7 +1110,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a callin method has no result, base call is potentially missing, therefor the base client receives no result  (reference type)  - via byte code
     // 4.5.7-otjld-basecall-result-not-provided-5
     public void test457_basecallResultNotProvided5() {
-       
+
        runConformTest(
             new String[] {
 		"T457brnp5Main.java",
@@ -1163,7 +1163,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a base call is potentially executed twice
     // 4.5.8-otjld-duplicate-base-call-1
     public void test458_duplicateBaseCall1() {
-       
+
        runConformTest(
             new String[] {
 		"T458dbc1Main.java",
@@ -1206,7 +1206,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a base call is definitely executed twice
     // 4.5.8-otjld-duplicate-base-call-2
     public void test458_duplicateBaseCall2() {
-       
+
        runConformTest(
             new String[] {
 		"T458dbc2Main.java",
@@ -1285,7 +1285,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // two methods returning void are bound using replace, no basecall
     // 4.5.9-otjld-missing-basecall-in-voidmethod-1
     public void test459_missingBasecallInVoidmethod1() {
-       
+
        runConformTest(
             new String[] {
 		"T459mbiv1Main.java",
@@ -1325,7 +1325,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a callin method calls its tsuper version which has a base call
     // 4.5.10-otjld-tsuper-instead-of-basecall-1
     public void test4510_tsuperInsteadOfBasecall1() {
-       
+
        runConformTest(
             new String[] {
 		"T4510tiob1Main.java",
@@ -1386,7 +1386,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a callin method potentially calls its tsuper version which has a base call
     // 4.5.10-otjld-tsuper-instead-of-basecall-2
     public void test4510_tsuperInsteadOfBasecall2() {
-       
+
        runConformTest(
             new String[] {
 		"T4510tiob2Main.java",
@@ -1448,7 +1448,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a callin method calls its tsuper version which has no base call
     // 4.5.10-otjld-tsuper-instead-of-basecall-3
     public void test4510_tsuperInsteadOfBasecall3() {
-       
+
        runConformTest(
             new String[] {
 		"T4510tiob3Main.java",
@@ -1508,7 +1508,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a callin method creates an instance of a local class, that instance issues a base call
     // 4.5.11-otjld-basecall-in-anonymous-object-1
     public void test4511_basecallInAnonymousObject1() {
-       
+
        runConformTest(
             new String[] {
 		"Team4511biao1.java",
@@ -1555,7 +1555,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a base call from an anonymous object returns a value
     // 4.5.11-otjld-basecall-in-anonymous-object-2
     public void test4511_basecallInAnonymousObject2() {
-       
+
        runConformTest(
             new String[] {
 		"Team4511biao2.java",
@@ -1649,7 +1649,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a base call from an anonymous object returns a value - with copy inheritance
     // 4.5.11-otjld-basecall-in-anonymous-object-4
     public void test4511_basecallInAnonymousObject4() {
-       
+
        runConformTest(
             new String[] {
 		"Team4511biao4_2.java",
@@ -1704,7 +1704,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a base call from an anonymous object returns a value - with copy inheritance , separate compilation
     // 4.5.11-otjld-basecall-in-anonymous-object-4a
     public void test4511_basecallInAnonymousObject4a() {
-       
+
        runConformTest(
             new String[] {
 		"Team4511biao4a_2.java",
@@ -1759,7 +1759,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a base call from an anonymous object returns a value - with two-level copy inheritance , compile in one go
     // 4.5.11-otjld-basecall-in-anonymous-object-5
     public void test4511_basecallInAnonymousObject5() {
-       
+
        runConformTest(
             new String[] {
 		"Team4511biao5_3.java",
@@ -1824,7 +1824,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a base call from an anonymous object returns a value - with two-level copy inheritance , separate compilation
     // 4.5.11-otjld-basecall-in-anonymous-object-5a
     public void test4511_basecallInAnonymousObject5a() {
-       
+
        runConformTest(
             new String[] {
 		"Team4511biao5a_3.java",
@@ -1889,7 +1889,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a base call in a static callin method lowers its argument
     // 4.5.12-otjld-basecall-requires-lowering-1
     public void test4512_basecallRequiresLowering1() {
-       
+
        runConformTest(
             new String[] {
 		"Team4512brl1.java",
@@ -1928,7 +1928,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a base call invokes the super version
     // 4.5.13-otjld-basecall-super-access-1
     public void test4513_basecallSuperAccess1() {
-       
+
        runConformTest(
             new String[] {
 		"Team4513bsa1.java",
@@ -1970,7 +1970,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a base call invokes the super version
     // 4.5.13-otjld-basecall-super-access-2
     public void test4513_basecallSuperAccess2() {
-       
+
        runConformTest(
             new String[] {
 		"Team4513bsa2.java",
@@ -2023,7 +2023,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     	int l = classPaths.length;
     	System.arraycopy(classPaths, 0, classPaths=new String[l+1], 0, l);
 		classPaths[l] = this.outputRootDirectoryPath+"/regression/"+jarFilename;
-		
+
         runNegativeTest(
             new String[] {
 		"T4513bsa3Main.java",
@@ -2038,32 +2038,32 @@ public class BaseCalls extends AbstractOTJLDTest {
             },
             (this.weavingScheme == WeavingScheme.OTRE
             ?
-            "----------\n" + 
-    		"1. ERROR in T4513bsa3Main.java (at line 1)\n" + 
-    		"	\n" + 
-    		"public class T4513bsa3Main {\n" + 
-    		"	^\n" + 
-    		"Class file Team4513bsa3$__OT__R.class has incompatible OT/J byte code version 1.2.3, please consider a full build of the declaring project.\n" + 
-    		"----------\n" + 
-    		"2. ERROR in T4513bsa3Main.java (at line 0)\n" + 
-    		"	\n" + 
-    		"public class T4513bsa3Main {\n" + 
-    		"	^\n" + 
-    		"Class file Team4513bsa3$__OT__Confined.class has incompatible OT/J byte code version 1.2.3, please consider a full build of the declaring project.\n" + 
+            "----------\n" +
+    		"1. ERROR in T4513bsa3Main.java (at line 1)\n" +
+    		"	\n" +
+    		"public class T4513bsa3Main {\n" +
+    		"	^\n" +
+    		"Class file Team4513bsa3$__OT__R.class has incompatible OT/J byte code version 1.2.3, please consider a full build of the declaring project.\n" +
+    		"----------\n" +
+    		"2. ERROR in T4513bsa3Main.java (at line 0)\n" +
+    		"	\n" +
+    		"public class T4513bsa3Main {\n" +
+    		"	^\n" +
+    		"Class file Team4513bsa3$__OT__Confined.class has incompatible OT/J byte code version 1.2.3, please consider a full build of the declaring project.\n" +
     		"----------\n"
     		:
-            "----------\n" + 
-    		"1. ERROR in T4513bsa3Main.java (at line 1)\n" + 
-    		"	\n" + 
-    		"public class T4513bsa3Main {\n" + 
-    		"	^\n" + 
-    		"Class file Team4513bsa3$__OT__R.class has incompatible OT/J byte code version 1.2.3, please consider a full build of the declaring project.\n" + 
-    		"----------\n" + 
-    		"2. ERROR in T4513bsa3Main.java (at line 0)\n" + 
-    		"	\n" + 
-    		"public class T4513bsa3Main {\n" + 
-    		"	^\n" + 
-    		"Class file Team4513bsa3$__OT__R.class has been compiled for incompatible weaving target 'OTRE', please consider a full build of the declaring project.\n" + 
+            "----------\n" +
+    		"1. ERROR in T4513bsa3Main.java (at line 1)\n" +
+    		"	\n" +
+    		"public class T4513bsa3Main {\n" +
+    		"	^\n" +
+    		"Class file Team4513bsa3$__OT__R.class has incompatible OT/J byte code version 1.2.3, please consider a full build of the declaring project.\n" +
+    		"----------\n" +
+    		"2. ERROR in T4513bsa3Main.java (at line 0)\n" +
+    		"	\n" +
+    		"public class T4513bsa3Main {\n" +
+    		"	^\n" +
+    		"Class file Team4513bsa3$__OT__R.class has been compiled for incompatible weaving target 'OTRE', please consider a full build of the declaring project.\n" +
     		"----------\n"
     		),
             classPaths,
@@ -2073,7 +2073,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a callin method has a base super call, same base method is bound by two roles
     // 4.5.13-otjld-basecall-super-access-4
     public void test4513_basecallSuperAccess4() {
-       
+
        runConformTest(
             new String[] {
 		"Team4513bsa4_2.java",
@@ -2126,7 +2126,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a callin method has a base super call, super method is bound by another role
     // 4.5.13-otjld-basecall-super-access-5
     public void test4513_basecallSuperAccess5() {
-       
+
        runConformTest(
             new String[] {
 		"Team4513bsa5_2.java",
@@ -2206,7 +2206,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a role-of-role issues a base call
     // 4.5.14-otjld-basecall-to-lower-role-1
     public void test4514_basecallToLowerRole1() {
-       
+
        runConformTest(
             new String[] {
 		"Team4514btlr1_2.java",
@@ -2249,7 +2249,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a role-of-role issues a base call - base team involves implicit inheritance
     // 4.5.14-otjld-basecall-to-lower-role-2
     public void test4514_basecallToLowerRole2() {
-       
+
        runConformTest(
             new String[] {
 		"Team4514btlr2_2.java",
@@ -2297,7 +2297,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a role-of-role issues a base call - base team involves both kinds of inheritance
     // 4.5.14-otjld-basecall-to-lower-role-3
     public void test4514_basecallToLowerRole3() {
-       
+
        runConformTest(
             new String[] {
 		"Team4514btlr3_2.java",
@@ -2343,7 +2343,7 @@ public class BaseCalls extends AbstractOTJLDTest {
             },
             "R2_1:okR1_1:okK");
     }
-    
+
     // a callin with base call is involved in both explicit and implicit inheritance
     // witness for "Cannot generate method ci(), tsuper method has corrupt byte code"
     public void test4516_inheritedBaseCall1() {
@@ -2387,7 +2387,7 @@ public class BaseCalls extends AbstractOTJLDTest {
     		},
     		"T1.cibm");
     }
-    
+
     // a callin with base call is involved in both explicit and implicit inheritance
     // witness for bogus complaint re missing base call
     public void test4516_inheritedBaseCall2() {
@@ -2483,25 +2483,25 @@ public class BaseCalls extends AbstractOTJLDTest {
     		"}\n"
     		},
     		true,
-    		"----------\n" + 
-    		"1. ERROR in Team4516ibc3_1.java (at line 4)\n" + 
-    		"	callin void ci(boolean f) {\n" + 
-    		"	            ^^^^^^^^^^^^^\n" + 
+    		"----------\n" +
+    		"1. ERROR in Team4516ibc3_1.java (at line 4)\n" +
+    		"	callin void ci(boolean f) {\n" +
+    		"	            ^^^^^^^^^^^^^\n" +
     		"Potentially missing base call in callin method (OTJLD 4.3(b)).\n" +
-    		"----------\n" + 
-    		"2. ERROR in Team4516ibc3_1.java (at line 10)\n" + 
-    		"	callin void ci(boolean f) {\n" + 
-    		"	            ^^^^^^^^^^^^^\n" + 
-    		"Potentially missing base call in callin method (OTJLD 4.3(b)).\n" + 
+    		"----------\n" +
+    		"2. ERROR in Team4516ibc3_1.java (at line 10)\n" +
+    		"	callin void ci(boolean f) {\n" +
+    		"	            ^^^^^^^^^^^^^\n" +
+    		"Potentially missing base call in callin method (OTJLD 4.3(b)).\n" +
     		"----------\n",
     		"R1.ciR0.cibmR1.ciR0.ci",
-    		null/*expectedErrorString*/, 
+    		null/*expectedErrorString*/,
     		true/*forceExecution*/,
     		null/*classLibraries*/,
     		true/*shouldFlushOutputDirectory*/,
     		null/*vmArguments*/,
     		customOptions/*customOptions*/,
-    		null/*requestor*/, 
+    		null/*requestor*/,
     		true/*skipJava*/);
     }
 
@@ -2551,25 +2551,25 @@ public class BaseCalls extends AbstractOTJLDTest {
     		"}\n"
     		},
     		true,
-    		"----------\n" + 
-    		"1. ERROR in Team4516ibc4_1.java (at line 4)\n" + 
-    		"	callin void ci(int i) {\n" + 
-    		"	            ^^^^^^^^^\n" + 
-    		"Potentially missing base call in callin method (OTJLD 4.3(b)).\n" + 
     		"----------\n" +
-    		"2. ERROR in Team4516ibc4_1.java (at line 11)\n" + 
-    		"	callin void ci(int i) {\n" + 
-    		"	            ^^^^^^^^^\n" + 
-    		"Potentially missing base call in callin method (OTJLD 4.3(b)).\n" + 
+    		"1. ERROR in Team4516ibc4_1.java (at line 4)\n" +
+    		"	callin void ci(int i) {\n" +
+    		"	            ^^^^^^^^^\n" +
+    		"Potentially missing base call in callin method (OTJLD 4.3(b)).\n" +
+    		"----------\n" +
+    		"2. ERROR in Team4516ibc4_1.java (at line 11)\n" +
+    		"	callin void ci(int i) {\n" +
+    		"	            ^^^^^^^^^\n" +
+    		"Potentially missing base call in callin method (OTJLD 4.3(b)).\n" +
     		"----------\n",
     		"R1.ciR1.ciR0.ciR1.ciR0.cibm",
-    		null/*expectedErrorString*/, 
+    		null/*expectedErrorString*/,
     		true/*forceExecution*/,
     		null/*classLibraries*/,
     		true/*shouldFlushOutputDirectory*/,
     		null/*vmArguments*/,
     		customOptions/*customOptions*/,
-    		null/*requestor*/, 
+    		null/*requestor*/,
     		true/*skipJava*/);
     }
 
@@ -2600,7 +2600,7 @@ public class BaseCalls extends AbstractOTJLDTest {
 			"		 @Override\n" +
 			"		 callin void ci(int i) {\n" +
 			"			 System.out.print(\"R1.ci\");\n" +
-			"			 base.ci(i);\n" +		// definite 
+			"			 base.ci(i);\n" +		// definite
 			"			 if (i > 0)\n" +
 			"			 	 super.ci(i);\n" + // plus potential -> potentially duplicate
 			"		 }\n" +
@@ -2622,25 +2622,25 @@ public class BaseCalls extends AbstractOTJLDTest {
     		"}\n"
     		},
     		true,
-    		"----------\n" + 
-    		"1. ERROR in Team4516ibc5_1.java (at line 8)\n" + 
-    		"	super.ci(i);\n" + 
-    		"	^^^^^^^^^^^\n" + 
-    		"Potentially duplicate base call (OTJLD 4.3(c)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team4516ibc5_1.java (at line 12)\n" + 
-    		"	callin void ci(int i) {\n" + 
-    		"	            ^^^^^^^^^\n" + 
-    		"Potentially missing base call in callin method (OTJLD 4.3(b)).\n" + 
+    		"----------\n" +
+    		"1. ERROR in Team4516ibc5_1.java (at line 8)\n" +
+    		"	super.ci(i);\n" +
+    		"	^^^^^^^^^^^\n" +
+    		"Potentially duplicate base call (OTJLD 4.3(c)).\n" +
+    		"----------\n" +
+    		"2. ERROR in Team4516ibc5_1.java (at line 12)\n" +
+    		"	callin void ci(int i) {\n" +
+    		"	            ^^^^^^^^^\n" +
+    		"Potentially missing base call in callin method (OTJLD 4.3(b)).\n" +
     		"----------\n",
     		"R1.cibm-R1.cibmR0.ci-R1.cibmR0.cibm",
-    		null/*expectedErrorString*/, 
+    		null/*expectedErrorString*/,
     		true/*forceExecution*/,
     		null/*classLibraries*/,
     		true/*shouldFlushOutputDirectory*/,
     		null/*vmArguments*/,
     		customOptions/*customOptions*/,
-    		null/*requestor*/, 
+    		null/*requestor*/,
     		true/*skipJava*/);
     }
 
@@ -2656,11 +2656,11 @@ public class BaseCalls extends AbstractOTJLDTest {
     			"	}\n" +
     			"}\n"
     		},
-    		"----------\n" + 
-			"1. ERROR in MyTeam.java (at line 4)\n" + 
-			"	base.foo(missing, false);\n" + 
-			"	         ^^^^^^^\n" + 
-			"missing cannot be resolved to a variable\n" + 
+    		"----------\n" +
+			"1. ERROR in MyTeam.java (at line 4)\n" +
+			"	base.foo(missing, false);\n" +
+			"	         ^^^^^^^\n" +
+			"missing cannot be resolved to a variable\n" +
 			"----------\n");
     }
 
@@ -2676,11 +2676,11 @@ public class BaseCalls extends AbstractOTJLDTest {
     			"	}\n" +
     			"}\n"
     		},
-    		"----------\n" + 
-			"1. ERROR in MyTeam.java (at line 4)\n" + 
-			"	base.foo(1, false);\n" + 
-			"	     ^^^\n" + 
-			"Base call foo(int, int) is not applicable for the arguments (int, boolean)\n" + 
+    		"----------\n" +
+			"1. ERROR in MyTeam.java (at line 4)\n" +
+			"	base.foo(1, false);\n" +
+			"	     ^^^\n" +
+			"Base call foo(int, int) is not applicable for the arguments (int, boolean)\n" +
 			"----------\n");
     }
 }

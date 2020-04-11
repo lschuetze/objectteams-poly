@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id: OTSearchEngine.java 23417 2010-02-03 20:13:55Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -38,7 +38,7 @@ import org.eclipse.objectteams.otdt.internal.core.search.matching.TeamTypePatter
 
 /**
  * This class allows for searching all kinds of ObjectTeams specific elements.
- * Note that you can combine the patterns with other patterns, e.g. via 
+ * Note that you can combine the patterns with other patterns, e.g. via
  * SearchPattern.createAndPattern(SearchPattern left, SearchPattern right).
  *
  * @author gis
@@ -46,7 +46,7 @@ import org.eclipse.objectteams.otdt.internal.core.search.matching.TeamTypePatter
 public class OTSearchEngine
 {
     private SearchEngine m_searchEngine = new SearchEngine();
-    
+
     //TODO: check whether this will be synchronous or asynchronous and whether we will keep a cache like AllTypesCache
     // Note that the pattern's limitTo rule does not work in Eclipse 3.0 (see #73696)
     // Work around this by using an appropriate SearchRequestor.
@@ -59,7 +59,7 @@ public class OTSearchEngine
                 requestor,
                 monitor);
     }
-    
+
     /**
      * Optimized search scope for OT elements (not including system libraries, which can't contain OT elements)
      * @param elements pure IJavaElements or IOTJavaElements
@@ -67,19 +67,19 @@ public class OTSearchEngine
     public static IJavaSearchScope createOTSearchScope(IJavaElement[] elements, boolean includeReferencedProjects)
     {
     	IJavaElement[] javaElements = convertOTToJavaElements(elements);
-    	
+
 		int includeMask = IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES;
 		if (includeReferencedProjects) {
 			includeMask |= IJavaSearchScope.REFERENCED_PROJECTS;
 		}
 		return SearchEngine.createJavaSearchScope(javaElements, includeMask);
     }
-    
-	private static IJavaElement[] convertOTToJavaElements(IJavaElement[] elements) 
+
+	private static IJavaElement[] convertOTToJavaElements(IJavaElement[] elements)
 	{
 		IJavaElement[] javaElements = new IJavaElement[elements.length];
 		System.arraycopy(elements, 0, javaElements, 0, elements.length);
-		
+
 		for (int i = 0; i < javaElements.length; i++) {
 			IJavaElement element = javaElements[i];
 			if (element instanceof IOTJavaElement)
@@ -101,7 +101,7 @@ public class OTSearchEngine
     }
 
     public static SearchPattern createTeamTypePattern(
-            char[] pkg, 
+            char[] pkg,
             char[][] enclosingTypeNames,
             char[] simpleName,
             int limitTo,
@@ -123,7 +123,7 @@ public class OTSearchEngine
     }
 
     public static SearchPattern createRoleTypePattern(
-            char[] pkg, 
+            char[] pkg,
             char[][] enclosingTypeNames,
             char[] simpleName,
             int limitTo,

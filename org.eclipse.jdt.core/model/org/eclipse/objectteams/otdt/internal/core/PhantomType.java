@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id: PhantomType.java 23416 2010-02-03 19:59:31Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -60,11 +60,11 @@ import org.eclipse.objectteams.otdt.core.IPhantomType;
  * for roles created by ObjectTeams copy inheritance. A PhantomType wraps
  * its 'nearest' declared (non-phantom) implicit super role,
  * but is located in a different team context.
- * 
+ *
  * A PhantomType wraps it's 'nearest' tsuper in _realType,
- * but may store any number of tsuper types from different levels of team nesting. 
+ * but may store any number of tsuper types from different levels of team nesting.
  * However, only direct tsupers are remembered, not tsupers of tsupers.
- * 
+ *
  * Most methods of this type are forwarded to the nearest real role type
  * or the enclosing team type.
  * A PhantomType (as its wrappee) may also be a nested team.
@@ -77,11 +77,11 @@ public class PhantomType implements IPhantomType
     private IType _realType;
     private IType _enclosingTeam;
     private IType[] _allRealTypes;
-    
+
     public PhantomType(IType enclosingTeam, IType tsuperRole)
     {
         this._enclosingTeam = enclosingTeam;
-        this.setRealType(tsuperRole);        
+        this.setRealType(tsuperRole);
     }
 
     public PhantomType(IType enclosingTeam, IType[] allRealTsuperRoles)
@@ -90,9 +90,9 @@ public class PhantomType implements IPhantomType
         this._realType = allRealTsuperRoles[0];
         this._allRealTypes = allRealTsuperRoles;
     }
-    
+
     // === cannot code complete inside a phantom role for which no source exists: ===
-    
+
     /**
      * @see org.eclipse.jdt.core.IType#codeComplete(char[], int, int, char[][], char[][], int[], boolean, org.eclipse.jdt.core.ICompletionRequestor)
 	 * @deprecated Use {@link #codeComplete(char[],int,int,char[][],char[][],int[],boolean,CompletionRequestor)} instead.
@@ -125,7 +125,7 @@ public class PhantomType implements IPhantomType
 			char[][] localVariableTypeNames, char[][] localVariableNames,
 			int[] localVariableModifiers, boolean isStatic,
 			CompletionRequestor requestor, IProgressMonitor monitor)
-			throws JavaModelException 
+			throws JavaModelException
 	{
 		handleUnsupported();
 	}
@@ -135,11 +135,11 @@ public class PhantomType implements IPhantomType
 			char[][] localVariableTypeNames, char[][] localVariableNames,
 			int[] localVariableModifiers, boolean isStatic,
 			CompletionRequestor requestor, WorkingCopyOwner owner,
-			IProgressMonitor monitor) throws JavaModelException 
+			IProgressMonitor monitor) throws JavaModelException
 	{
 		handleUnsupported();
 	}
-	
+
 	@Override
 	public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, CompletionRequestor requestor) throws JavaModelException {
         handleUnsupported();
@@ -258,7 +258,7 @@ public class PhantomType implements IPhantomType
     {
         return this._enclosingTeam.getFullyQualifiedName(enclosingTypeSeparator)
                + enclosingTypeSeparator
-               + getElementName();        
+               + getElementName();
     }
 
     /* (non-Javadoc)
@@ -315,7 +315,7 @@ public class PhantomType implements IPhantomType
 	private String getSimpleMethodSignature(IMethod method) {
 		String[] params= method.getParameterTypes(); // TODO(SH) types may be type variables (see MethodProposalInfo.isSameMethodSignature)
 		StringBuffer sign = new StringBuffer();
-		for (int i = 0; i < params.length; i++) {			
+		for (int i = 0; i < params.length; i++) {
 			String simpleName= Signature.getSimpleName(params[i]);
 			sign.append(simpleName);
 			if (i>0)
@@ -332,7 +332,7 @@ public class PhantomType implements IPhantomType
     {
         return this._enclosingTeam.getPackageFragment();
     }
-    
+
     /**
      * If the type is a role file decide for the role files CU.
      * @see IMember#getTypeRoot()
@@ -680,10 +680,10 @@ public class PhantomType implements IPhantomType
      */
     @Override
 	public int getFlags() throws JavaModelException
-    {        
+    {
         return this._realType.getFlags();
     }
-    
+
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IMember#getNameRange()
      */
@@ -968,19 +968,19 @@ public class PhantomType implements IPhantomType
     {
         return this._realType.getAdapter(adapter);
     }
- 
+
     @Override
 	@SuppressWarnings("nls")
 	public String toString()
     {
         return "(" + getFullyQualifiedName() + "|" + this._realType.getFullyQualifiedName('.') + ")";
     }
-         
+
     public IType getRealType()
     {
         return this._realType;
     }
-    
+
     private void setRealType(IType type)
     {
         if (type instanceof PhantomType)
@@ -988,13 +988,13 @@ public class PhantomType implements IPhantomType
 		else
 			this._realType = type;
     }
-    
+
 	@Override
 	public int hashCode()
-    {		
+    {
 		return getFullyQualifiedName().hashCode();
 	}
-    
+
 	@Override
 	public boolean equals(Object arg0)
     {
@@ -1002,7 +1002,7 @@ public class PhantomType implements IPhantomType
         {
         	return false;
         }
-        
+
         PhantomType other = (PhantomType)arg0;
 		return this._enclosingTeam.equals(other._enclosingTeam)
                     && (this._realType.equals(other._realType));
@@ -1013,17 +1013,17 @@ public class PhantomType implements IPhantomType
         throw new UnsupportedOperationException("Unsupported operation on PhantomType " //$NON-NLS-1$
                                                 + getFullyQualifiedName());
     }
-	
+
 	@Override
 	public ITypeParameter[] getTypeParameters() throws JavaModelException {
 		return this._realType.getTypeParameters();
 	}
-	
+
 	@Override
 	public boolean isResolved() {
 		return this._realType.isResolved() && this._enclosingTeam.isResolved();
 	}
- 
+
 	// TODO: check whether we need to support any of those methods
 
 	@Override

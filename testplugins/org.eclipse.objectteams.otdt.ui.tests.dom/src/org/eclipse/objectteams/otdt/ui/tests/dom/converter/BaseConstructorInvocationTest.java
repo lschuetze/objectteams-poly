@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -56,19 +56,19 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
 
     private TypeDeclaration _typeDecl;
 	private TypeDeclaration _role;
-	
+
     private BaseConstructorInvocation _testObj;
 
     public BaseConstructorInvocationTest(String name)
 	{
 		super(name);
 	}
-	
+
 	public static Test suite()
 	{
 		return new Suite(BaseConstructorInvocationTest.class);
 	}
-	
+
 	public void setUpSuite() throws Exception
 	{
 		setTestProjectDir(TEST_PROJECT);
@@ -79,12 +79,12 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
 	                                      "src",
 	                                      "baseconstructor.teampkg",
 	                                      "Team1.java");
-        
+
 		ASTParser parser = ASTParser.newParser(JAVA_LANGUAGE_SPEC_LEVEL);
         parser.setResolveBindings(true);
 		parser.setProject( getJavaProject(TEST_PROJECT) );
 		parser.setSource(_teamClass);
-		
+
         ASTNode root = parser.createAST( new NullProgressMonitor() );
 		CompilationUnit compUnit = (CompilationUnit)root;
 		_typeDecl = (TypeDeclaration)compUnit.types().get(0);
@@ -92,7 +92,7 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
         _role = _typeDecl.getTypes()[0];
     }
 
-	protected void setUp() throws Exception 
+	protected void setUp() throws Exception
 	{
 		super.setUp();
 	}
@@ -114,7 +114,7 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
         _testObj = (BaseConstructorInvocation)constructor.getBody().statements().get(0);
 
         int actual = _testObj.getNodeType();
-        
+
         assertEquals("BaseConstructorMessageSend has wrong node type",
                      ASTNode.BASE_CONSTRUCTOR_INVOCATION,
                      actual);
@@ -124,9 +124,9 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
     {
         MethodDeclaration constructor = _role.getMethods()[0];
         _testObj = (BaseConstructorInvocation)constructor.getBody().statements().get(0);
-        
+
         List actual = _testObj.getArguments();
-        
+
         assertEquals("BaseConstructorMessageSend has wrong number of arguments",
                      0,
                      actual.size());
@@ -137,23 +137,23 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
         RoleTypeDeclaration role = _typeDecl.getRoles()[0];
         MethodDeclaration constructor = role.getMethods()[1];
         _testObj = (BaseConstructorInvocation)constructor.getBody().statements().get(0);
-        
+
         List actual = _testObj.getArguments();
-        
+
         assertEquals("BaseConstructorMessageSend has wrong number of arguments",
                      2,
                      actual.size());
     }
 
-    
+
     public void testChildNodesHaveCorrectParent1()
     {
         MethodDeclaration constructor = _role.getMethods()[1];
         _testObj = (BaseConstructorInvocation) constructor.getBody().statements().get(0);
-        
+
         List childNodes = _testObj.getArguments();
 
-        for (Iterator iter = childNodes.iterator(); iter.hasNext();) 
+        for (Iterator iter = childNodes.iterator(); iter.hasNext();)
         {
             Expression curChild = (Expression) iter.next();
             assertEquals("Base call arguments have wrong parent node",
@@ -161,23 +161,23 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
                          curChild.getParent());
         }
     }
-    
+
     public void testSubtreeMatch1()
     {
         MethodDeclaration constructor = _role.getMethods()[1];
         _testObj = (BaseConstructorInvocation)constructor.getBody().statements().get(0);
-        
+
         boolean actual = _testObj.subtreeMatch(new ASTMatcher(), _testObj);
 
         assertTrue("Base constructor calls don't match", actual);
-        
+
     }
 
     public void testtoString1()
     {
         MethodDeclaration constructor = _role.getMethods()[1];
         _testObj = (BaseConstructorInvocation)constructor.getBody().statements().get(0);
-        
+
         String actual = _testObj.toString();
         String expected = "base(dummy0, dummy1);";
 
@@ -193,28 +193,28 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
                 "src",
                 "baseconstructor.teampkg",
                 "Team2.java");
-        
+
 		ASTParser parser = ASTParser.newParser(JAVA_LANGUAGE_SPEC_LEVEL);
         parser.setResolveBindings(true);
 		parser.setProject( getJavaProject(TEST_PROJECT) );
 		parser.setSource(_teamClass);
-		
+
         ASTNode root = parser.createAST( new NullProgressMonitor() );
 		CompilationUnit compUnit = (CompilationUnit)root;
 		TypeDeclaration team2Decl = (TypeDeclaration)compUnit.types().get(0);
 
         TypeDeclaration role2Decl = team2Decl.getTypes()[0];
-        
+
         MethodDeclaration constructor = role2Decl.getMethods()[1];
         _testObj = (BaseConstructorInvocation)constructor.getBody().statements().get(0);
-        
+
         String actual = _testObj.toString();
         String expected = "base(dummy0, dummy1);";
 
         assertEquals("Base constructor call has wrong naive flat string representation",
                 expected, actual);
     }
-    
+
     public void testResolveConstructorBinding()
     {
         RoleTypeDeclaration role = _typeDecl.getRoles()[0];
@@ -224,10 +224,10 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
 
         ITypeBinding baseClass = role.resolveBinding().getBaseClass();
         IMethodBinding baseConstructorBinding = baseClass.getDeclaredMethods()[1];
-        
+
         IMethodBinding expected = baseConstructorBinding;
         IMethodBinding actual = _testObj.resolveConstructorBinding();
-        
+
         assertNotNull(actual);
         assertEquals(expected, actual);
     }

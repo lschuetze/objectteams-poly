@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -28,11 +28,11 @@ import junit.framework.Test;
 
 @SuppressWarnings("unchecked")
 public class Exceptions extends AbstractOTJLDTest {
-	
+
 	public Exceptions(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -40,7 +40,7 @@ public class Exceptions extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -111,7 +111,7 @@ public class Exceptions extends AbstractOTJLDTest {
     // a callout binding redeclares all exceptions that its base method declares
     // 7.5.2-otjld-callout-redeclares-all-base-exceptions-1
     public void test752_calloutRedeclaresAllBaseExceptions1() {
-       
+
        runConformTest(
             new String[] {
 		"T752crabe1Main.java",
@@ -157,7 +157,7 @@ public class Exceptions extends AbstractOTJLDTest {
     // a callout binding redeclares all exceptions needing declaration of what its base method declares
     // 7.5.2-otjld-callout-redeclares-all-base-exceptions-2
     public void test752_calloutRedeclaresAllBaseExceptions2() {
-       
+
        runConformTest(
             new String[] {
 		"T752crabe2Main.java",
@@ -208,7 +208,7 @@ public class Exceptions extends AbstractOTJLDTest {
     // a shorthand callout binding implicitly declares all exceptions needing declaration of what its base method declares
     // 7.5.2-otjld-callout-redeclares-all-base-exceptions-3
     public void test752_calloutRedeclaresAllBaseExceptions3() {
-       
+
        runConformTest(
             new String[] {
 		"T752crabe3Main.java",
@@ -286,7 +286,7 @@ public class Exceptions extends AbstractOTJLDTest {
     public void test752_calloutRedeclaresAllBaseExceptions5() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"T752crabe5Main.java",
@@ -383,7 +383,7 @@ public class Exceptions extends AbstractOTJLDTest {
     // a callout binding redeclares all exceptions that its base method declares, plus additional ones
     // 7.5.3-otjld-callout-declares-additional-exceptions-1
     public void test753_calloutDeclaresAdditionalExceptions1() {
-       
+
        runConformTest(
             new String[] {
 		"T753cdae1Main.java",
@@ -434,7 +434,7 @@ public class Exceptions extends AbstractOTJLDTest {
     // a callout binding redeclares all exceptions that its base method declares, plus additional ones
     // 7.5.3-otjld-callout-declares-additional-exceptions-2
     public void test753_calloutDeclaresAdditionalExceptions2() {
-       
+
        runConformTest(
             new String[] {
 		"T753cdae2Main.java",
@@ -510,7 +510,7 @@ public class Exceptions extends AbstractOTJLDTest {
     // a callin binding redeclares some but not all exceptions that its base method declares
     // 7.5.5-otjld-callin-redeclares-some-base-exceptions-1
     public void test755_callinRedeclaresSomeBaseExceptions1() {
-       
+
        runConformTest(
             new String[] {
 		"T755crsbe1Main.java",
@@ -559,7 +559,7 @@ public class Exceptions extends AbstractOTJLDTest {
     // a callin binding redeclares some but not all exceptions that its base method declares
     // 7.5.5-otjld-callin-redeclares-some-base-exceptions-2
     public void test755_callinRedeclaresSomeBaseExceptions2() {
-       
+
        runConformTest(
             new String[] {
 		"T755crsbe2Main.java",
@@ -610,7 +610,7 @@ public class Exceptions extends AbstractOTJLDTest {
     // a callin binding redeclares all exceptions that its base method declares
     // 7.5.6-otjld-callin-redeclares-all-base-exceptions-1
     public void test756_callinRedeclaresAllBaseExceptions1() {
-       
+
        runConformTest(
             new String[] {
 		"T756crabe1Main.java",
@@ -664,7 +664,7 @@ public class Exceptions extends AbstractOTJLDTest {
     // a callin binding redeclares all exceptions that its base method declares
     // 7.5.6-otjld-callin-redeclares-all-base-exceptions-2
     public void test756_callinRedeclaresAllBaseExceptions2() {
-       
+
        runConformTest(
             new String[] {
 		"T756crabe2Main.java",
@@ -837,7 +837,7 @@ public class Exceptions extends AbstractOTJLDTest {
     // a callin binding catches an exception thrown by its base-call
     // 7.5.8-otjld-callin-declares-other-exceptions-3
     public void test758_callinDeclaresOtherExceptions3() {
-       
+
        runConformTest(
             new String[] {
 		"Team758cdoe3.java",

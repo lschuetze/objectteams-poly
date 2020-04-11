@@ -65,7 +65,7 @@ public int match(TypeReference node, MatchingNodeSet nodeSet) {
 	} else { // QualifiedTypeReference
 		char[][] tokens = ((QualifiedTypeReference) node).tokens;
 		typeRefSimpleName = tokens[tokens.length-1];
-	}				
+	}
 	if (matchesName(this.pattern.superSimpleName, typeRefSimpleName))
 		return nodeSet.addMatch(node, this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
 
@@ -139,7 +139,7 @@ public int resolveLevel(Binding binding) {
 	case SuperTypeReferencePattern.ALL_SUPER_TYPES:
 	case SuperTypeReferencePattern.ONLY_BASE_CLASSES:
 		level = resolveLevelForType(this.pattern.superSimpleName, this.pattern.superQualification, type.baseclass());
-		if (level == ACCURATE_MATCH) return ACCURATE_MATCH;		
+		if (level == ACCURATE_MATCH) return ACCURATE_MATCH;
 	}
 // SH}
 	if (this.pattern.superRefKind != SuperTypeReferencePattern.ONLY_SUPER_INTERFACES) {

@@ -122,7 +122,7 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
     	// ... except for base ctor issues:
     	if (MethodModel.callsBaseCtor(this.binding.copyInheritanceSrc))
     		MethodModel.setCallsBaseCtor(this);
-    	if (   this.arguments == null 
+    	if (   this.arguments == null
     		&& !MethodModel.callsBaseCtor(this.binding)
     		&& roleType.baseclass() != null)
     	{
@@ -165,7 +165,7 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
                 this.scope.problemReporter().baseConstructorCallInLiftingConstructor(this);
         } else {
             if (!calledHere && !calledIndirectly && !Lifting.isLiftingCtor(selfCall)) {
-            	if (!(isDefaultConstructor() && roleType.roleModel != null && roleType.roleModel.hasBaseclassProblem())) // ignore if wrong def.ctor was created 
+            	if (!(isDefaultConstructor() && roleType.roleModel != null && roleType.roleModel.hasBaseclassProblem())) // ignore if wrong def.ctor was created
             		this.scope.problemReporter().missingCallToBaseConstructor(
             				this, this.binding.declaringClass);
             } else if (calledHere && calledIndirectly) {
@@ -202,7 +202,7 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=270446, When the AST built is an abridged version
 		// we don't have all tree nodes we would otherwise expect. (see ASTParser.setFocalPosition)
 		if (this.constructorCall == null)
-			break checkUnused; 
+			break checkUnused;
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=264991, Don't complain about this
 		// constructor being unused if the base class doesn't have a no-arg constructor.
 		// See that a seemingly unused constructor that chains to another constructor with a
@@ -239,7 +239,7 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 		for (int i = 0, length = this.typeParameters.length; i < length; ++i) {
 			TypeParameter typeParameter = this.typeParameters[i];
 			if ((typeParameter.binding.modifiers & ExtraCompilerModifiers.AccLocallyUsed) == 0) {
-				this.scope.problemReporter().unusedTypeParameter(typeParameter);						
+				this.scope.problemReporter().unusedTypeParameter(typeParameter);
 			}
 		}
 	}
@@ -352,7 +352,7 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 						if (!isValueProvidedUsingAnnotation(fieldDecl))
 							this.scope.problemReporter().uninitializedNonNullField(
 								field,
-								((this.bits & ASTNode.IsDefaultConstructor) != 0) 
+								((this.bits & ASTNode.IsDefaultConstructor) != 0)
 									? (ASTNode) fieldDecl
 									: this);
 					}
@@ -386,7 +386,7 @@ protected void checkAndGenerateFieldAssignment(FlowContext flowContext, FlowInfo
 	return;
 }
 boolean isValueProvidedUsingAnnotation(FieldDeclaration fieldDecl) {
-	// a member field annotated with @Inject is considered to be initialized by the injector 
+	// a member field annotated with @Inject is considered to be initialized by the injector
 	if (fieldDecl.annotations != null) {
 		int length = fieldDecl.annotations.length;
 		for (int i = 0; i < length; i++) {
@@ -590,7 +590,7 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 //{ObjectTeams:	treat value parameters similar to enclosing instances:
 			VariableBinding[] syntheticArguments = declaringClass.valueParamSynthArgs();
 			argSlotSize += syntheticArguments.length;
-/* orig:			
+/* orig:
 			this.scope.computeLocalVariablePositions(1 + enumOffset,  codeStream);
   :giro */
 			this.scope.computeLocalVariablePositions(1 + enumOffset + syntheticArguments.length,  codeStream);

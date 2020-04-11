@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -59,19 +59,19 @@ public class LayeredTeamsTests extends RetargetableFileBasedModelTest
             .getName());
         return suite;
     }
-    
+
     public void setUpSuite() throws Exception
     {
         super.setUpSuite();
     }
-       
+
     public void testFieldAnchor() throws Exception
     {
         getTestSetting().setTeamClass("Team_1");
         getTestSetting().setUp();
         performTest("TeamB.java", "TeamB", getTestSetting().getRoleJavaElement());
     }
-    
+
     /** Same as above but using old path syntax. */
     public void testFieldAnchorPath() throws Exception
     {
@@ -79,15 +79,15 @@ public class LayeredTeamsTests extends RetargetableFileBasedModelTest
         getTestSetting().setUp();
         performTest("TeamB.java", "TeamB", getTestSetting().getRoleJavaElement());
     }
-    
-    
+
+
     public void testBaseAnchor() throws Exception
     {
         getTestSetting().setTeamClass("Team_2");
         getTestSetting().setUp();
         performTest("TeamB.java", "TeamB", getAndTestInnerRole());
     }
-    
+
     /** Same as above but using old path syntax. */
     public void testBaseAnchorPath() throws Exception
     {
@@ -95,7 +95,7 @@ public class LayeredTeamsTests extends RetargetableFileBasedModelTest
         getTestSetting().setUp();
         performTest("TeamB.java", "TeamB", getAndTestInnerRole());
     }
-    
+
     public void testQualifiedBaseAnchor() throws Exception
     {
         getTestSetting().setTeamClass("Team_3");
@@ -103,7 +103,7 @@ public class LayeredTeamsTests extends RetargetableFileBasedModelTest
         performTest("TeamB.java", "TeamB", getAndTestInnerRole());
     }
     // no path variant of Team_3: path syntax "SampleRole.base.LowerRole" is illegal.
-    
+
     // witness for IllegalArgumentException in Signature.appendTypeSignature(char[], int, boolean, StringBuffer, boolean)
     // requires capability to handle type anchors in char-encoded signatures
     public void testAnchoredCalloutSignature() throws Exception
@@ -113,14 +113,14 @@ public class LayeredTeamsTests extends RetargetableFileBasedModelTest
         performTest("TeamB.java", "TeamB", getTestSetting().getRoleJavaElement());
         for (IJavaElement member : _roleOTElem.getChildren()) {
         	if (member.getElementType() == IOTJavaElement.CALLOUT_MAPPING) {
-        		assertEquals("Callout signature not as expected", 
+        		assertEquals("Callout signature not as expected",
         					 "isEqual(LowerRole<@teamB>) -> isEqual(LowerRole<@teamB>)",
         					 member.getElementName());
         	}
         }
     }
 
-    
+
 	private IType getAndTestInnerRole() throws JavaModelException {
 		IType roleMid= getTestSetting().getRoleJavaElement();
         assertTrue(roleMid.exists());
@@ -131,10 +131,10 @@ public class LayeredTeamsTests extends RetargetableFileBasedModelTest
         assertEquals(type.getElementName(), "InnerRole");
 		return type;
 	}
-    
-    
-    
-    void performTest(String baseCU, String baseTeam, IType roleJavaElement) 
+
+
+
+    void performTest(String baseCU, String baseTeam, IType roleJavaElement)
     	throws JavaModelException
     {
 		ICompilationUnit baseUnit = getCompilationUnit(
@@ -149,9 +149,9 @@ public class LayeredTeamsTests extends RetargetableFileBasedModelTest
         assertTrue("first child should be the role (IType)", baseChildren[0] instanceof IType);
         IType baseJavaElem= (IType) baseChildren[0];
         assertNotNull(baseJavaElem);
-        assertTrue(baseJavaElem.exists());        
+        assertTrue(baseJavaElem.exists());
         assertEquals(baseJavaElem.getElementName(), "LowerRole");
-        
+
 		assertNotNull(roleJavaElement);
         assertTrue(roleJavaElement.exists());
 
@@ -164,9 +164,9 @@ public class LayeredTeamsTests extends RetargetableFileBasedModelTest
         assertNotNull(baseClassJavaElem);
 
         assertEquals("base class should be expected lower role", baseJavaElem, baseClassJavaElem);
-        
+
         IOTType baseClassOTElem = OTModelManager.getOTElement(baseClassJavaElem);
         assertNotNull(baseClassOTElem);
         assertTrue("base class should be role", baseClassOTElem.isRole());
-    } 
+    }
 }

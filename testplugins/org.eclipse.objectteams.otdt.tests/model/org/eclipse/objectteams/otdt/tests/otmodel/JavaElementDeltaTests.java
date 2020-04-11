@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 		Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -58,7 +58,7 @@ public void testAddOTJavaNature() throws CoreException {
 		addOTJavaNature("P");
 		assertDeltas(
 			"Unexpected delta",
-			"P[*]: {CONTENT}\n" + 
+			"P[*]: {CONTENT}\n" +
 			"	ResourceDelta(/P/.project)[*]"
 		);
 	} finally {
@@ -77,7 +77,7 @@ public void testAddRoleToTeam() throws CoreException {
 		createJavaProject("P", new String[] {"src"}, "bin");
 		addOTJavaNature("P");
 		createFolder("P/src/p1");
-		createFile("/P/src/p1/MyTeam.java", 
+		createFile("/P/src/p1/MyTeam.java",
 					"package p1;\n" +
 					"public team class MyTeam {\n" +
 					"	void foo() {}\n"+
@@ -128,7 +128,7 @@ public void testAddCallinToRole1() throws CoreException {
 					"public class Base {\n" +
 					"    void bar() {}" +
 					"}\n");
-		createFile("/P/src/p1/MyTeam.java", 
+		createFile("/P/src/p1/MyTeam.java",
 					"package p1;\n" +
 					"public team class MyTeam {\n" +
 					"   protected class Role {\n" +
@@ -184,7 +184,7 @@ public void testAddCallinToRole1r() throws CoreException {
 					"public class Base {\n" +
 					"    void bar() {}" +
 					"}\n");
-		createFile("/P/src/p1/MyTeam.java", 
+		createFile("/P/src/p1/MyTeam.java",
 					"package p1;\n" +
 					"public team class MyTeam {\n" +
 					"   protected class Role {\n" +
@@ -223,7 +223,7 @@ public void testAddCallinToRole1r() throws CoreException {
 
 /*
  * add a callin binding to a role class that already has another callin binding.
- * Witness for bogus add+remove deltas for unchanged callin binding. 
+ * Witness for bogus add+remove deltas for unchanged callin binding.
  */
 public void testAddCallinToRole2() throws CoreException {
 	ICompilationUnit copy = null;
@@ -237,7 +237,7 @@ public void testAddCallinToRole2() throws CoreException {
 					"public class Base {\n" +
 					"    void bar() {}" +
 					"}\n");
-		createFile("/P/src/p1/MyTeam.java", 
+		createFile("/P/src/p1/MyTeam.java",
 					"package p1;\n" +
 					"public team class MyTeam {\n" +
 					"   protected class Role {\n" +
@@ -297,14 +297,14 @@ public void testModifyCallin1() throws CoreException {
 					"public class Base {\n" +
 					"    void bar() {}" +
 					"}\n");
-		createFile("/P/src/p1/MyTeam.java", 
+		createFile("/P/src/p1/MyTeam.java",
 					"package p1;\n" +
 					"public team class MyTeam {\n" +
 					"   protected class Role {\n" +
 					"		void foo() {}\n" +
 					"		void foo2() {}\n" +
 					"		foo <- after bar;\n" +
-					"		foo2 <- after bar;\n" + 
+					"		foo2 <- after bar;\n" +
 					"	}\n"+
 				    "}\n");
 
@@ -319,7 +319,7 @@ public void testModifyCallin1() throws CoreException {
 				"		void foo() {}\n" +
 				"		void foo2() {}\n" +
 				"		foo <- before bar;\n" + // <= changed
-				"		foo2 <- after bar;\n" + 
+				"		foo2 <- after bar;\n" +
 				"	}\n"+
 			    "}\n");
 
@@ -358,14 +358,14 @@ public void testModifyCallin2() throws CoreException {
 					"public class Base {\n" +
 					"    void bar() {}" +
 					"}\n");
-		createFile("/P/src/p1/MyTeam.java", 
+		createFile("/P/src/p1/MyTeam.java",
 					"package p1;\n" +
 					"public team class MyTeam {\n" +
 					"   protected class Role {\n" +
 					"		void foo() {}\n" +
 					"		void foo2() {}\n" +
 					"		foo <- after bar;\n" +
-					"		foo2 <- after bar;\n" + 
+					"		foo2 <- after bar;\n" +
 					"	}\n"+
 				    "}\n");
 
@@ -380,7 +380,7 @@ public void testModifyCallin2() throws CoreException {
 				"		void foo() {}\n" +
 				"		void foo2() {}\n" +
 				"		this_one: foo <- after bar;\n" + // <= changed
-				"		foo2 <- after bar;\n" + 
+				"		foo2 <- after bar;\n" +
 				"	}\n"+
 			    "}\n");
 
@@ -419,14 +419,14 @@ public void testModifyCallout1() throws CoreException {
 					"public class Base {\n" +
 					"    void bar() {}" +
 					"}\n");
-		createFile("/P/src/p1/MyTeam.java", 
+		createFile("/P/src/p1/MyTeam.java",
 					"package p1;\n" +
 					"public team class MyTeam {\n" +
 					"   protected class Role {\n" +
 					"		abstract void foo() {}\n" +
 					"		void foo2() {}\n" +
 					"		foo => bar;\n" +
-					"		foo2 <- after bar;\n" + 
+					"		foo2 <- after bar;\n" +
 					"	}\n"+
 				    "}\n");
 
@@ -441,7 +441,7 @@ public void testModifyCallout1() throws CoreException {
 				"		abstract void foo() {}\n" +
 				"		void foo2() {}\n" +
 				"		foo -> bar;\n" + 		// <= changed
-				"		foo2 <- after bar;\n" + 
+				"		foo2 <- after bar;\n" +
 				"	}\n"+
 			    "}\n");
 
@@ -480,13 +480,13 @@ public void testModifyCallout2() throws CoreException {
 					"public class Base {\n" +
 					"    void bar(int i) {}" +
 					"}\n");
-		createFile("/P/src/p1/MyTeam.java", 
+		createFile("/P/src/p1/MyTeam.java",
 					"package p1;\n" +
 					"public team class MyTeam {\n" +
 					"   protected class Role {\n" +
 					"		void foo2() {}\n" +
 					"		void foo(int j) => void bar(int i);\n" +
-					"		foo2 <- after bar;\n" + 
+					"		foo2 <- after bar;\n" +
 					"	}\n"+
 				    "}\n");
 
@@ -500,7 +500,7 @@ public void testModifyCallout2() throws CoreException {
 				"   protected class Role {\n" +
 				"		void foo2() {}\n" +
 				"		void foo(int k) => void bar(int i);\n" +
-				"		foo2 <- after bar;\n" + 
+				"		foo2 <- after bar;\n" +
 				"	}\n"+
 			    "}\n");
 

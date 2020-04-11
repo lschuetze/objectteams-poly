@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -43,26 +43,26 @@ import org.eclipse.objectteams.otdt.ui.tests.refactoring.RefactoringTest;
  * FIXME(SH):
  * Once this test class is reactivated, also check the following conditions which are
  * known not to work currently (e.g., OTDT 1.1.6):
- * + Rename role type: 
- *   - inline (not dialog-based) refactoring links all references of a role type but not: 
- *     - its declaration 
- *     - class literals 
+ * + Rename role type:
+ *   - inline (not dialog-based) refactoring links all references of a role type but not:
+ *     - its declaration
+ *     - class literals
  *     (linked-mode in the Editor).
  *   - class literals in a predicate are not renamed
- * 
+ *
  * @author brcan
- *  
+ *
  */
 @SuppressWarnings({"restriction", "nls"})
 public class RenameTypeTests extends RefactoringTest
 {
     private static final String REFACTORING_PATH = "RenameType/";
-    
+
     private static IPackageFragment _teamPkg;
-    
+
     private RenameProcessor _processor = null;
 
-    
+
     public RenameTypeTests(String name)
     {
         super(name);
@@ -98,7 +98,7 @@ public class RenameTypeTests extends RefactoringTest
     {
         _teamPkg = getRoot().createPackageFragment("p.T1", true, null);
     }
-    
+
     private IPackageFragment getUpdatedTeamPackageFragment() throws Exception
     {
         return getRoot().getPackageFragment("p.T2");
@@ -199,7 +199,7 @@ public class RenameTypeTests extends RefactoringTest
 				{
 		            if (cus[idx].getElementName().startsWith("R") ||
 		                    cus[idx].getElementName().startsWith("TR"))
-		                
+
 		            {
 		                cus[idx] = updatedTeamPackage.getCompilationUnit(cus[idx].getElementName());
 			    		assertEqualLines("invalid renaming!",
@@ -218,7 +218,7 @@ public class RenameTypeTests extends RefactoringTest
 
 		}
     }
-    
+
     protected ICompilationUnit[] createCUs(String[] cuNames) throws Exception
     {
         ICompilationUnit[] cus = new ICompilationUnit[cuNames.length];
@@ -237,7 +237,7 @@ public class RenameTypeTests extends RefactoringTest
         }
         return cus;
     }
-    
+
     /*********** tests ***********/
     //passing
 	public void testRenameTeamclass() throws Exception {
@@ -407,11 +407,11 @@ public class RenameTypeTests extends RefactoringTest
 	public void testShadowedNameOfSubType1() throws Exception {
 		performRenameRefactoring_failing(new String[] { "T1", "T2" }, "R1", "R2", false);
 	}
-		
+
 	public void testNameClashWithRoleFile() throws Exception {
 		performRenameRefactoring_failing(new String[] { "T1", "R2" }, "R1", "R2", true);
 	}
-		
+
 	 public void testShadowedNameRoleFile1() throws Exception {
 		performRenameRefactoring_failing(new String[] { "R1", "T1" }, "R1", "R2", true);
 	}
@@ -431,7 +431,7 @@ public class RenameTypeTests extends RefactoringTest
 	public void testShadowedNameRoleFile6() throws Exception {
 		performRenameRefactoring_failing(new String[] { "T2", "T1", "R2" }, "R1", "R2", true);
 	}
-		
+
 	public void testImplicitOverridingWithRoleFile1() throws Exception {
 		performRenameRefactoring_failing(new String[] { "T2", "T1", "R1" }, "R", "R1", true);
 	}
@@ -439,9 +439,9 @@ public class RenameTypeTests extends RefactoringTest
 	 public void testImplicitOverridingWithRoleFile2() throws Exception {
 		performRenameRefactoring_failing(new String[] { "T", "R1", "T1" }, "R", "R1", true);
 	}
-	
+
 	// failing
-	
+
 	// FIXME(jogeb): phantom roles within phantom roles wont be found by the
 	// OTTypeHierarchy or change strategy in RenameTypeAdapter
 	public void _testShadowedNameOfSubType2() throws Exception {
@@ -451,7 +451,7 @@ public class RenameTypeTests extends RefactoringTest
 	public void _testShadowedNameRoleFile4() throws Exception {
 		performRenameRefactoring_failing(new String[] { "RT", "T1", "T2" }, "R1", "R2", true);
 	}
-	
+
 	public void testRenameBaseClass1() throws Exception {
 		IPackageFragment packB = getRoot().createPackageFragment("b", true, null);
 		ICompilationUnit cuB = packB.createCompilationUnit("B.java", "package b;public class B {}", true, null);
@@ -465,11 +465,11 @@ public class RenameTypeTests extends RefactoringTest
 	        renameTypeProcessor.setUpdateTextualMatches(false);
 			RefactoringStatus result = performRefactoring(refactoring);
 			assertEquals("was supposed to pass", null, result);
-	
+
 			// expect that base import has been updated in cu1:
 			String expectedSource1= "package p;import base b.B1;team class T1{void foo(){}protected class Role playedBy B1{}}";
 			assertEqualLines("source compare failed", expectedSource1, cu1.getSource());
-			
+
 		} finally {
 			performDummySearch();
 		}

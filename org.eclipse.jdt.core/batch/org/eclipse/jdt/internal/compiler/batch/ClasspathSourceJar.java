@@ -25,8 +25,8 @@ import org.eclipse.jdt.internal.compiler.util.Util;
 public class ClasspathSourceJar extends ClasspathJar {
 	private String encoding;
 
-	public ClasspathSourceJar(File file, boolean closeZipFileAtEnd, 
-			AccessRuleSet accessRuleSet, String encoding, 
+	public ClasspathSourceJar(File file, boolean closeZipFileAtEnd,
+			AccessRuleSet accessRuleSet, String encoding,
 			String destinationPath) {
 		super(file, closeZipFileAtEnd, accessRuleSet, destinationPath);
 		this.encoding = encoding;
@@ -41,7 +41,7 @@ public class ClasspathSourceJar extends ClasspathJar {
 		if (sourceEntry != null) {
 			try {
 				InputStream stream = null;
-				char[] contents = null; 
+				char[] contents = null;
 				try {
 					stream = this.zipFile.getInputStream(sourceEntry);
 					contents = Util.getInputStreamAsCharArray(stream, -1, this.encoding);

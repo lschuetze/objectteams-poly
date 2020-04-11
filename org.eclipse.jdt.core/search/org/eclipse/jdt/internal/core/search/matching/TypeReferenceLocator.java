@@ -54,7 +54,7 @@ protected IJavaElement findElement(IJavaElement element, int accuracy) {
 	if (accuracy != SearchMatch.A_ACCURATE) return null;
 
 	// element that references the type must be included in the enclosing element
-	DeclarationOfReferencedTypesPattern declPattern = (DeclarationOfReferencedTypesPattern) this.pattern; 
+	DeclarationOfReferencedTypesPattern declPattern = (DeclarationOfReferencedTypesPattern) this.pattern;
 	while (element != null && !declPattern.enclosingElement.equals(element))
 		element = element.getParent();
 	return element;
@@ -87,7 +87,7 @@ public int match(Reference node, MatchingNodeSet nodeSet) { // interested in Nam
 
 	if (node instanceof SingleNameReference) {
 		if (matchesName(this.pattern.simpleName, ((SingleNameReference) node).token))
-			return nodeSet.addMatch(node, POSSIBLE_MATCH); // resolution is needed to find out if it is a type ref 
+			return nodeSet.addMatch(node, POSSIBLE_MATCH); // resolution is needed to find out if it is a type ref
 	} else {
 		char[][] tokens = ((QualifiedNameReference) node).tokens;
 		for (int i = 0, max = tokens.length; i < max; i++)
@@ -215,9 +215,9 @@ protected void matchLevelAndReportImportRef(ImportReference importRef, Binding b
 		int level = resolveLevel(refBinding);
 		if (level >= INACCURATE_MATCH) {
 			matchReportImportRef(
-				importRef, 
-				binding, 
-				locator.createImportHandle(importRef), 
+				importRef,
+				binding,
+				locator.createImportHandle(importRef),
 				level == ACCURATE_MATCH
 					? SearchMatch.A_ACCURATE
 					: SearchMatch.A_INACCURATE,
@@ -231,7 +231,7 @@ protected void matchLevelAndReportImportRef(ImportReference importRef, Binding b
 protected void matchReportImportRef(ImportReference importRef, Binding binding, IJavaElement element, int accuracy, MatchLocator locator) throws CoreException {
 	if (this.isDeclarationOfReferencedTypesPattern) {
 		if ((element = findElement(element, accuracy)) != null) {
-			SimpleSet knownTypes = ((DeclarationOfReferencedTypesPattern) this.pattern).knownTypes; 
+			SimpleSet knownTypes = ((DeclarationOfReferencedTypesPattern) this.pattern).knownTypes;
 			while (binding instanceof ReferenceBinding) {
 				ReferenceBinding typeBinding = (ReferenceBinding) binding;
 				reportDeclaration(typeBinding, 1, locator, knownTypes);
@@ -245,7 +245,7 @@ protected void matchReportImportRef(ImportReference importRef, Binding binding, 
 	if (this.pattern.hasTypeArguments() && !this.isEquivalentMatch &&!this.isErasureMatch) {
 		return;
 	}
-	
+
 	// Return if fine grain is on and does not concern import reference
 	if ((this.pattern.fineGrain != 0 && (this.pattern.fineGrain & IJavaSearchConstants.IMPORT_DECLARATION_TYPE_REFERENCE) == 0)) {
 		return;
@@ -260,7 +260,7 @@ protected void matchReportImportRef(ImportReference importRef, Binding binding, 
 		// binding is raw => only compatible erasure if pattern has type arguments
 		this.match.setRule(this.match.getRule() & (~SearchPattern.R_FULL_MATCH));
 	}
-	
+
 	// Try to find best selection for match
 	TypeBinding typeBinding = null;
 	boolean lastButOne = false;
@@ -363,7 +363,7 @@ protected void matchReportReference(ASTNode reference, IJavaElement element, IJa
 	} else {
 		accuracy ^= SearchMatch.A_CHECKED;
 	}
-// SH}	
+// SH}
 	// Create search match
 	TypeReferenceMatch refMatch = locator.newTypeReferenceMatch(element, elementBinding, accuracy, reference);
 	refMatch.setLocalElement(localElement);
@@ -411,7 +411,7 @@ protected void matchReportReference(QualifiedNameReference qNameRef, IJavaElemen
 			} else if (binding instanceof ProblemBinding) {
 				typeBinding = ((ProblemBinding) binding).searchType;
 			}
-			break;					
+			break;
 	}
 	if (typeBinding instanceof ProblemReferenceBinding) {
 		ProblemReferenceBinding pbBinding = (ProblemReferenceBinding) typeBinding;
@@ -426,7 +426,7 @@ protected void matchReportReference(QualifiedNameReference qNameRef, IJavaElemen
 
 	// try to match all enclosing types for which the token matches as well.
 	if (typeBinding instanceof ReferenceBinding) {
-		ReferenceBinding refBinding = (ReferenceBinding) typeBinding; 
+		ReferenceBinding refBinding = (ReferenceBinding) typeBinding;
 		while (refBinding != null && lastIndex >= 0) {
 			if (resolveLevelForType(refBinding) == ACCURATE_MATCH) {
 				if (locator.encloses(element)) {
@@ -471,7 +471,7 @@ protected void matchReportReference(QualifiedTypeReference qTypeRef, IJavaElemen
 
 	// try to match all enclosing types for which the token matches as well
 	if (typeBinding instanceof ReferenceBinding) {
-		ReferenceBinding refBinding = (ReferenceBinding) typeBinding; 
+		ReferenceBinding refBinding = (ReferenceBinding) typeBinding;
 		while (refBinding != null && lastIndex >= 0) {
 			if (resolveLevelForType(refBinding) != IMPOSSIBLE_MATCH) {
 				if (locator.encloses(element)) {
@@ -506,7 +506,7 @@ void matchReportReference(Expression expr, int lastIndex, TypeBinding refBinding
 		// Try to refine accuracy
 		ParameterizedTypeBinding parameterizedBinding = (ParameterizedTypeBinding)refBinding;
 		updateMatch(parameterizedBinding, this.pattern.getTypeArguments(), this.pattern.hasTypeParameters(), 0, locator);
-		
+
 		// See whether it is necessary to report or not
 		if (this.match.getRule() == 0) return; // impossible match
 		boolean report = (this.isErasureMatch && this.match.isErasure()) || (this.isEquivalentMatch && this.match.isEquivalent()) || this.match.isExact();
@@ -596,7 +596,7 @@ protected void reportDeclaration(ASTNode reference, IJavaElement element, MatchL
 		typeBinding = (TypeBinding) ((SingleNameReference) reference).binding;
 		maxType = 1;
 	}
-	
+
 	if (typeBinding instanceof ArrayBinding)
 		typeBinding = ((ArrayBinding) typeBinding).leafComponentType;
 	if (typeBinding == null || typeBinding instanceof BaseTypeBinding) return;
@@ -679,7 +679,7 @@ protected int resolveLevel(NameReference nameRef) {
 			return resolveLevelForType((ReferenceBinding) binding);
 		if (((SingleNameReference) nameRef).isLabel)
 			return IMPOSSIBLE_MATCH;
-		
+
 		return binding == null || binding instanceof ProblemBinding ? INACCURATE_MATCH : IMPOSSIBLE_MATCH;
 	}
 
@@ -785,7 +785,7 @@ protected int resolveLevelForTypeOrEnclosingTypes(char[] simpleNamePattern, char
 		while (type != null) {
 			int level = resolveLevelForType(type);
 			if (level != IMPOSSIBLE_MATCH) return level;
-	
+
 			type = type.enclosingType();
 		}
 	}

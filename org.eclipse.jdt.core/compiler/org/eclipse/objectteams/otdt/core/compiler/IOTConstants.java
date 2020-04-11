@@ -182,7 +182,7 @@ public interface IOTConstants
 
 	// OTDYN uses just one method for both:
 	public static final char[] ADD_REMOVE_ROLE = (OT_DOLLAR + "addOrRemoveRole").toCharArray();
-	
+
 // predefined classes and interfaces:
 	public static final char[] ORG = "org".toCharArray();
 	public static final char[] OBJECTTEAMS = "objectteams".toCharArray();
@@ -232,16 +232,16 @@ public interface IOTConstants
 
 	public static final char[][] ROLE_CAST_EXCEPTION 			  = {ORG, OBJECTTEAMS,
 																	 "RoleCastException".toCharArray()};
-	/** 
+	/**
 	 * @since 3.7 (OT 2.0)
 	 */
 	public static final char[] INSTANTIATION = "Instantiation".toCharArray();
-	/** 
+	/**
 	 * @since 3.7 (OT 2.0)
 	 */
 	public static final char[][] ORG_OBJECTTEAMS_INSTANTIATION = {ORG, OBJECTTEAMS,
 		 															 INSTANTIATION};
-	
+
 	public static final char[][] ILLEGAL_ROLE_CREATION_EXCEPTION = {ORG, OBJECTTEAMS,
 		 															 "IllegalRoleCreationException".toCharArray()};
 	public static final char[][] ORG_OBJECTTEAMS_ITEAMMIGRATABLE = {ORG, OBJECTTEAMS,
@@ -251,8 +251,8 @@ public interface IOTConstants
 																	 "IBaseMigratable".toCharArray()};
 	public static final char[] MIGRATE_TO_BASE = "migrateToBase".toCharArray();
 
-	public static final char[][] OTRE_INTERNAL_ERROR = new char[][]{"org".toCharArray(), 
-																	"objectteams".toCharArray(), 
+	public static final char[][] OTRE_INTERNAL_ERROR = new char[][]{"org".toCharArray(),
+																	"objectteams".toCharArray(),
 																	"OTREInternalError".toCharArray()};
 	/**
 	 * @since 3.9 (OT 2.2)
@@ -312,7 +312,7 @@ public interface IOTConstants
 	public static final char[] QUERY_MODULE_SUFFIX = "_Queries__OT__".toCharArray();
 	// decapsulation accessor prefix:
 	public static final char[] OT_DECAPS = "_OT$decaps$".toCharArray();
-	
+
 	// --------- for MethodBinding.otBits: --------------------------
 	/**
 	 * have types been wrapped in the signature?

@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2005-2016 Berlin Institute of Technology, Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	Berlin Institute of Technology - Initial API and implementation
  **********************************************************************/
@@ -33,11 +33,11 @@ import junit.framework.Test;
  */
 @SuppressWarnings("unchecked")
 public class DevelopmentExamples extends AbstractOTJLDTest {
-	
+
 	public DevelopmentExamples(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -45,7 +45,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -57,7 +57,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // corner cases for callin with inheritance
     // X.1.1-otjld-binding-inheritance-1
     public void testX11_bindingInheritance1() {
-       
+
        runConformTest(
             new String[] {
 		"test1/X11bi1Main.java",
@@ -375,50 +375,50 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "SubSub.Role2.hook()\n" + 
-    		"B1.getInt() called!\n" + 
-    		"3\n" + 
-    		"CallinSub.Role2.check(1)\n" + 
-    		"B1.setInt(1) called!\n" + 
-    		"CallinSuper.Role.check(1)\n" + 
-    		"B1.setInt(1) called!\n" + 
-    		"--------------------------------------\n" + 
-    		"SubSub.Role2.hook()\n" + 
-    		"B1.nop() called!\n" + 
-    		"--------------------------------------\n" + 
-    		"SubSubTeam.RoleNOP.nop() called!\n" + 
-    		"B1.nop(int) called!\n" + 
-    		"--------------------------------------\n" + 
-    		"SubSubTeam.RoleX.format: GXeXsXcXhXeXnXkX\n" + 
-    		"B2.print: von SubSubTeam.RoleX\n" + 
-    		"SubSubTeam.Role3.format: Geschenk\n" + 
-    		"B2.print: von SubSubTeam.Role3\n" + 
-    		"CallinSub.Role3.format: G e s c h e n k \n" + 
-    		"B2.print: von CallinSub.Role3\n" + 
-    		"CallinSuper.Role3.format: GESCHENK\n" + 
-    		"B2.print: von CallinSuper.Role3\n" + 
-    		"-------------------- Test for Base-Subclassing ---------------\n" + 
-    		"Person.goToWork()\n" + 
-    		"---- just one sub base (Man) is effected by a callin ------\n" + 
-    		"---- defined in a sub role (BWLStudent):-----------------------\n" + 
-    		"She (Yukiko) gose to work.\n" + 
-    		"Stundent.enterClassroom()\n" + 
-    		"He (Tanaka) gose to work.\n" + 
-    		"----- callins are effective even for inherited base methods in sub bases: ------\n" + 
-    		"Person.haveFun()\n" + 
-    		"Stundent.enterClassroom()\n" + 
-    		"Person.haveFun()\n" + 
-    		"----- callins are inherited to neither redefinded nor rebound base methods: --\n" + 
-    		"Stundent.doHomework()\n" + 
-    		"Person.performWorkstep()\n" + 
-    		"Stundent.doHomework()\n" + 
+            "SubSub.Role2.hook()\n" +
+    		"B1.getInt() called!\n" +
+    		"3\n" +
+    		"CallinSub.Role2.check(1)\n" +
+    		"B1.setInt(1) called!\n" +
+    		"CallinSuper.Role.check(1)\n" +
+    		"B1.setInt(1) called!\n" +
+    		"--------------------------------------\n" +
+    		"SubSub.Role2.hook()\n" +
+    		"B1.nop() called!\n" +
+    		"--------------------------------------\n" +
+    		"SubSubTeam.RoleNOP.nop() called!\n" +
+    		"B1.nop(int) called!\n" +
+    		"--------------------------------------\n" +
+    		"SubSubTeam.RoleX.format: GXeXsXcXhXeXnXkX\n" +
+    		"B2.print: von SubSubTeam.RoleX\n" +
+    		"SubSubTeam.Role3.format: Geschenk\n" +
+    		"B2.print: von SubSubTeam.Role3\n" +
+    		"CallinSub.Role3.format: G e s c h e n k \n" +
+    		"B2.print: von CallinSub.Role3\n" +
+    		"CallinSuper.Role3.format: GESCHENK\n" +
+    		"B2.print: von CallinSuper.Role3\n" +
+    		"-------------------- Test for Base-Subclassing ---------------\n" +
+    		"Person.goToWork()\n" +
+    		"---- just one sub base (Man) is effected by a callin ------\n" +
+    		"---- defined in a sub role (BWLStudent):-----------------------\n" +
+    		"She (Yukiko) gose to work.\n" +
+    		"Stundent.enterClassroom()\n" +
+    		"He (Tanaka) gose to work.\n" +
+    		"----- callins are effective even for inherited base methods in sub bases: ------\n" +
+    		"Person.haveFun()\n" +
+    		"Stundent.enterClassroom()\n" +
+    		"Person.haveFun()\n" +
+    		"----- callins are inherited to neither redefinded nor rebound base methods: --\n" +
+    		"Stundent.doHomework()\n" +
+    		"Person.performWorkstep()\n" +
+    		"Stundent.doHomework()\n" +
     		"Person.performWorkstep()");
     }
 
     // inherit a role method binding declared in the the super-super role of the super-super team
     // X.1.1-otjld-binding-inheritance-2
     public void testX11_bindingInheritance2() {
-       
+
        runConformTest(
             new String[] {
 		"test1/MainX112.java",
@@ -487,7 +487,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // redefine a role method in a sub role in a sub team
     // X.1.1-otjld-binding-inheritance-3
     public void testX11_bindingInheritance3() {
-       
+
        runConformTest(
             new String[] {
 		"test1/MainX113.java",
@@ -544,7 +544,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // redefine a role method in a sub role in a sub team (start compile at Main)
     // X.1.1-otjld-binding-inheritance-3a
     public void testX11_bindingInheritance3a() {
-       
+
        runConformTest(
             new String[] {
 		"test1/MainX113a.java",
@@ -602,7 +602,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // redefine a role method in a sub role in a sub team (default package)
     // X.1.1-otjld-binding-inheritance-3b
     public void testX11_bindingInheritance3b() {
-       
+
        runConformTest(
             new String[] {
 		"MainX113b.java",
@@ -655,7 +655,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // super call in base method - super-super method is adapted too
     // X.1.1-otjld-binding-inheritance-4
     public void testX11_bindingInheritance4() {
-       
+
        runConformTest(
             new String[] {
 		"MainX114.java",
@@ -721,7 +721,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // super call in base method - only super-super method is adapted
     // X.1.1-otjld-binding-inheritance-4a
     public void testX11_bindingInheritance4a() {
-       
+
        runConformTest(
             new String[] {
 		"MainX114a.java",
@@ -782,7 +782,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // super call in base method - only super-super method is adapted, complete explicit super-chain , replace binding
     // X.1.1-otjld-binding-inheritance-4b
     public void testX11_bindingInheritance4b() {
-       
+
        runConformTest(
             new String[] {
 		"MainX114b.java",
@@ -850,7 +850,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // wicked super call interferes with callin binding
     // X.1.1-otjld-binding-inheritance-4c
     public void testX11_bindingInheritance4c() {
-       
+
        runConformTest(
             new String[] {
 		"TeamX114c.java",
@@ -891,7 +891,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 
     // super call in base method - like 4a but with relevant signature
     public void testX11_bindingInheritance4d() {
-       
+
        runConformTest(
             new String[] {
 		"MainX114d.java",
@@ -1040,7 +1040,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // after callin inherited from super role, before callin to the same base method added
     // X.1.1-otjld-binding-inheritance-5
     public void testX11_bindingInheritance5() {
-       
+
        runConformTest(
             new String[] {
 		"MainX115.java",
@@ -1090,7 +1090,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // after callin inherited from super base, before callin added to the same (inherited) base method in sub base
     // X.1.1-otjld-binding-inheritance-6
     public void testX11_bindingInheritance6() {
-       
+
        runConformTest(
             new String[] {
 		"MainX116.java",
@@ -1141,7 +1141,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // callin inherited from a super base, another callin to a different team is added to the same base method in the sub base
     // X.1.1-otjld-binding-inheritance-7
     public void testX11_bindingInheritance7() {
-       
+
        runConformTest(
             new String[] {
 		"MainX117.java",
@@ -1232,7 +1232,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // overridden callin method with non-void return type calls 'tsuper'
     // X.1.1-otjld-binding-inheritance-8
     public void testX11_bindingInheritance8() {
-       
+
        runConformTest(
             new String[] {
 		"MainX118.java",
@@ -1288,7 +1288,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // overridden callin method with non-void basic return type calls 'tsuper'
     // X.1.1-otjld-binding-inheritance-8a
     public void testX11_bindingInheritance8a() {
-       
+
        runConformTest(
             new String[] {
 		"MainX118a.java",
@@ -1344,7 +1344,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a base class which is a role at the same time inherits a binding form its implicit super (role) class
     // X.1.1-otjld-binding-inheritance-9
     public void testX11_bindingInheritance9() {
-       
+
        runConformTest(
             new String[] {
 		"TX11bi9Main.java",
@@ -1429,7 +1429,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a base class which is a role at the same time inherits a binding form its implicit super-super (role) class
     // X.1.1-otjld-binding-inheritance-10
     public void testX11_bindingInheritance10() {
-       
+
        runConformTest(
             new String[] {
 		"TX11bi10Main.java",
@@ -1519,7 +1519,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // A role inherits a replace binding, sub-base is bound to an unrelated role (reported by Marco Mosconi)
     // X.1.1-otjld-binding-inheritance-11
     public void testX11_bindingInheritance11() {
-       
+
        runConformTest(
             new String[] {
 		"TeamX11bi11.java",
@@ -1578,7 +1578,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a super-call bypasses a callin binding
     // X.1.1-otjld-binding-inheritance-12
     public void testX11_bindingInheritance12() {
-       
+
        runConformTest(
             new String[] {
 		"TeamX11bi12.java",
@@ -1620,7 +1620,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a super-call bypasses a callin binding - other team binds super version
     // X.1.1-otjld-binding-inheritance-13
     public void testX11_bindingInheritance13() {
-       
+
        runConformTest(
             new String[] {
 		"TeamX11bi13_2.java",
@@ -1672,7 +1672,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a callin to a private base method does not affect the unrelated version in a sub-base (reported by Oliver Frank)
     // X.1.1-otjld-binding-inheritance-14
     public void testX11_bindingInheritance14() {
-       
+
        runConformTest(
             new String[] {
 		"TeamX11bi14.java",
@@ -1711,7 +1711,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // modeled after a situation in PullUpAdaptor, that could cause StackOverflowError
     // (bug not reproduced, though, due to different loading sequence).
     public void testX11_bindingInheritance15() {
-        
+
         runConformTest(
              new String[] {
  		"TeamX11bi15.java",
@@ -1757,36 +1757,36 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     	runConformTest(
     		new String[] {
     			"MT.java",
-    			"public team class MT {\n" + 
-    			"	public class R playedBy C1A {\n" + 
-    			"		void bm() <- replace void bm();\n" + 
-    			"		callin void bm() {\n" + 
-    			"			System.out.print(\"R\");\n" + 
-    			"			base.bm();\n" + 
-    			"		}\n" + 
-    			"	}\n" + 
-    			"	public static void main(String[] args) {\n" + 
-    			"		new MT().activate();\n" + 
-    			"		new C1B().bm();\n" + 
-    			"	}\n" + 
+    			"public team class MT {\n" +
+    			"	public class R playedBy C1A {\n" +
+    			"		void bm() <- replace void bm();\n" +
+    			"		callin void bm() {\n" +
+    			"			System.out.print(\"R\");\n" +
+    			"			base.bm();\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		new MT().activate();\n" +
+    			"		new C1B().bm();\n" +
+    			"	}\n" +
     			"}\n",
     			"C0.java",
-    			"public class C0 {\n" + 
-    			"	public void bm() {\n" + 
-    			"		System.out.print(\"C0\");\n" + 
-    			"	}\n" + 
+    			"public class C0 {\n" +
+    			"	public void bm() {\n" +
+    			"		System.out.print(\"C0\");\n" +
+    			"	}\n" +
     			"}\n",
     			"C1A.java",
-    			"public class C1A extends C0 {\n" + 
+    			"public class C1A extends C0 {\n" +
     			"}\n",
     			"C1B.java",
-    			"public class C1B extends C0 {\n" + 
-    			"	@Override\n" + 
-    			"	public void bm() {\n" + 
-    			"		System.out.print(\"C1B-\");\n" + 
+    			"public class C1B extends C0 {\n" +
+    			"	@Override\n" +
+    			"	public void bm() {\n" +
+    			"		System.out.print(\"C1B-\");\n" +
     			"		super.bm();\n" + // this super call was confused by the (unrelated) callin binding
-    			"		System.out.print('!');\n" + 
-    			"	}\n" + 
+    			"		System.out.print('!');\n" +
+    			"	}\n" +
     			"}\n"
     		},
     		"C1B-C0!");
@@ -1795,7 +1795,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // base call requires a result lifting
     // X.1.2-otjld-result-lifting-1
     public void testX12_resultLifting1() {
-       
+
        runConformTest(
             new String[] {
 		"test2/X12rl1Main.java",
@@ -1871,11 +1871,11 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 			    "\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in test2\\MyTeamX121a.java (at line 9)\n" + 
-    		"	rm <- bm;\n" + 
-    		"	^^\n" + 
-    		"Callin modifier (before, after or replace) missing for callin-binding rm (OTJLD A.3.3).\n" + 
+            "----------\n" +
+    		"1. ERROR in test2\\MyTeamX121a.java (at line 9)\n" +
+    		"	rm <- bm;\n" +
+    		"	^^\n" +
+    		"Callin modifier (before, after or replace) missing for callin-binding rm (OTJLD A.3.3).\n" +
     		"----------\n");
     }
 
@@ -1923,18 +1923,18 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 			    "\n" +
 			    "        \n"
             },
-            "----------\n" + 
-    		"1. ERROR in test2\\MyTeamX121b.java (at line 9)\n" + 
-    		"	rm <- bm;\n" + 
-    		"	^^\n" + 
-    		"Callin modifier (before, after or replace) missing for callin-binding rm (OTJLD A.3.3).\n" + 
+            "----------\n" +
+    		"1. ERROR in test2\\MyTeamX121b.java (at line 9)\n" +
+    		"	rm <- bm;\n" +
+    		"	^^\n" +
+    		"Callin modifier (before, after or replace) missing for callin-binding rm (OTJLD A.3.3).\n" +
     		"----------\n");
     }
 
     // base call requires a result lifting
     // X.1.2-otjld-result-lifting-1c
     public void testX12_resultLifting1c() {
-       
+
        runConformTest(
             new String[] {
 		"test2/X12rl1cMain.java",
@@ -2015,18 +2015,18 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in test2\\MySuperTeamX122a.java (at line 7)\n" + 
-    		"	return base.m1();\n" + 
-    		"	       ^^^^^^^^^\n" + 
-    		"Illegal method in base call, can only call base version of the enclosing method rm() (OTJLD 4.3(a)).\n" + 
+            "----------\n" +
+    		"1. ERROR in test2\\MySuperTeamX122a.java (at line 7)\n" +
+    		"	return base.m1();\n" +
+    		"	       ^^^^^^^^^\n" +
+    		"Illegal method in base call, can only call base version of the enclosing method rm() (OTJLD 4.3(a)).\n" +
     		"----------\n");
     }
 
     // base call requires a result lifting - team hierarchy
     // X.1.2-otjld-result-lifting-2
     public void testX12_resultLifting2() {
-       
+
        runConformTest(
             new String[] {
 		"test2/MainX122.java",
@@ -2091,7 +2091,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // team hierarchy - creating empty subsub team with empty superteam
     // X.1.2-otjld-result-lifting-3
     public void testX12_resultLifting3() {
-       
+
        runConformTest(
             new String[] {
 		"test2/MainX123.java",
@@ -2149,7 +2149,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // team hierarchy - creating empty subsub team with empty superteam (different compiler invocation)
     // X.1.2-otjld-result-lifting-3a
     public void testX12_resultLifting3a() {
-       
+
        runConformTest(
             new String[] {
 		"test2/MainX123a.java",
@@ -2207,7 +2207,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // desc???
     // X.1.2-otjld-result-lifting-4
     public void testX12_resultLifting4() {
-       
+
        runConformTest(
             new String[] {
 		"test2/Main4.java",
@@ -2291,7 +2291,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // base call result lifting for role in nested team
     // X.1.2-otjld-result-lifting-5
     public void testX12_resultLifting5() {
-       
+
        runConformTest(
             new String[] {
 		"test2/MainX125.java",
@@ -2351,7 +2351,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // callin to callin to callin to base method with base calls
     // X.1.3-otjld-callin-to-callin-1
     public void testX13_callinToCallin1() {
-       
+
        runConformTest(
             new String[] {
 		"test3/MainX131.java",
@@ -2440,7 +2440,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // X.1.3-otjld-callin-to-callin-2
     public void testX13_callinToCallin2() {
        Map customOptions = getCompilerOptions();
-       
+
        runConformTest(
             new String[] {
 		"test3/MainX132.java",
@@ -2545,7 +2545,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // X.1.3-otjld-callin-to-callin-2a
     public void testX13_callinToCallin2a() {
        Map customOptions = getCompilerOptions();
-       
+
        runConformTest(
             new String[] {
 		"test3/MainX132a.java",
@@ -2650,7 +2650,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // X.1.3-otjld-callin-to-callin-3
     public void testX13_callinToCallin3() {
        Map customOptions = getCompilerOptions();
-       
+
        runConformTest(
             new String[] {
 		"test3/MainX133.java",
@@ -2736,7 +2736,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // X.1.3-otjld-static-callin-to-callin-1
     public void testX13_staticCallinToCallin1() {
        Map customOptions = getCompilerOptions();
-       
+
        runConformTest(
             new String[] {
 		"test3/MainX13sctc1.java",
@@ -2829,7 +2829,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // (replace) callin from one role method to two base methods with the same name but different signatures
     // X.1.4-otjld-multiple-signatures-1
     public void testX14_multipleSignatures1() {
-       
+
        runConformTest(
             new String[] {
 		"test4/MainX141.java",
@@ -2884,7 +2884,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // after and before callin to a static role method
     // X.1.5-otjld-callin-to-static-role-method-1
     public void testX15_callinToStaticRoleMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"test5/MainX151.java",
@@ -2932,7 +2932,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // after and before callin to the same role method
     // X.1.5-otjld-after-and-before-callin-1a
     public void testX15_afterAndBeforeCallin1a() {
-       
+
        runConformTest(
             new String[] {
 		"test5/MainX151a.java",
@@ -3012,7 +3012,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // after callin to a static role method
     // X.1.5-otjld-callin-to-static-role-method-3
     public void testX15_callinToStaticRoleMethod3() {
-       
+
        runConformTest(
             new String[] {
 		"test5/MainX153.java",
@@ -3097,7 +3097,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a replace-callin binds a static base method to a static role method without arguments
     // X.1.5-otjld-callin-from-static-base-method-5
     public void testX15_callinFromStaticBaseMethod5() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm5Main.java",
@@ -3135,7 +3135,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a replace-callin binds a static base method with a declared result to a static role method that does not declare a result
     // X.1.5-otjld-callin-from-static-base-method-6
     public void testX15_callinFromStaticBaseMethod6() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm6Main.java",
@@ -3176,7 +3176,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // replace-callin binding to a static role method with argument mapping
     // X.1.5-otjld-callin-from-static-base-method-7
     public void testX15_callinFromStaticBaseMethod7() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm7Main.java",
@@ -3316,7 +3316,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a replace-callin binds an inherited static role method to a static base method
     // X.1.5-otjld-callin-from-static-base-method-12
     public void testX15_callinFromStaticBaseMethod12() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm12Main.java",
@@ -3361,7 +3361,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a replace-callin binds an inherited static role method to a static base method - same team
     // X.1.5-otjld-callin-from-static-base-method-12a
     public void testX15_callinFromStaticBaseMethod12a() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm12aMain.java",
@@ -3401,7 +3401,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a replace-callin binds an inherited static role method to a static base method - method has a role type parameter
     // X.1.5-otjld-callin-from-static-base-method-12b
     public void testX15_callinFromStaticBaseMethod12b() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm12bMain.java",
@@ -3455,7 +3455,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a replace-callin binds an inherited static role method to a static base method - method has a role type parameter -- double compile
     // X.1.5-otjld-callin-from-static-base-method-12c
     public void testX15_callinFromStaticBaseMethod12c() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm12cMain.java",
@@ -3509,7 +3509,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // an after-callin binds an inherited static role method to a static base method
     // X.1.5-otjld-callin-from-static-base-method-13
     public void testX15_callinFromStaticBaseMethod13() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm13Main.java",
@@ -3553,7 +3553,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a before-callin binds an inherited static role method to a static base method
     // X.1.5-otjld-callin-from-static-base-method-14
     public void testX15_callinFromStaticBaseMethod14() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm14Main.java",
@@ -3597,7 +3597,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a replace-callin binds an inherited method (implemented within the super-super team) to a static base method
     // X.1.5-otjld-callin-from-static-base-method-15
     public void testX15_callinFromStaticBaseMethod15() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm15Main.java",
@@ -3661,7 +3661,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // static base call requires a result lifting
     // X.1.5-otjld-callin-from-static-base-method-16
     public void testX15_callinFromStaticBaseMethod16() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm16Main.java",
@@ -3703,7 +3703,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // static base call requires a result lifting; parameter involved
     // X.1.5-otjld-callin-from-static-base-method-16a
     public void testX15_callinFromStaticBaseMethod16a() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm16aMain.java",
@@ -3745,7 +3745,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // replace-callin-binding with parameter mapping (constant value)
     // X.1.5-otjld-callin-from-static-base-method-17
     public void testX15_callinFromStaticBaseMethod17() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm17Main.java",
@@ -3786,7 +3786,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // an inherited static role method is bound in different roles to different static base methods
     // X.1.5-otjld-callin-from-static-base-method-18
     public void testX15_callinFromStaticBaseMethod18() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm18Main.java",
@@ -3847,7 +3847,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // static role methods are bound to same base method
     // X.1.5-otjld-callin-from-static-base-method-19
     public void testX15_callinFromStaticBaseMethod19() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm19Main.java",
@@ -3894,7 +3894,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // static role methods of different roles are bound to same base method - no precedence needed due to different static base classes
     // X.1.5-otjld-callin-from-static-base-method-19r
     public void testX15_callinFromStaticBaseMethod19r() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm19rMain.java",
@@ -3944,7 +3944,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // static replace binding to a base method, base- and team classes are placed in a package
     // X.1.5-otjld-callin-from-static-base-method-20
     public void testX15_callinFromStaticBaseMethod20() {
-       
+
        runConformTest(
             new String[] {
 		"cfsbm20/TX15cfsbm20Main.java",
@@ -3986,7 +3986,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a static and a non-static role methods are bound to same base method
     // X.1.5-otjld-callin-from-static-base-method-21
     public void testX15_callinFromStaticBaseMethod21() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm21Main.java",
@@ -4030,7 +4030,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // an overridden static base method is bound to methods of different role classes
     // X.1.5-otjld-callin-from-static-base-method-22
     public void testX15_callinFromStaticBaseMethod22() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm22Main.java",
@@ -4087,7 +4087,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // an inherited static base method is bound (after) in a sub base class
     // X.1.5-otjld-callin-from-static-base-method-23
     public void testX15_callinFromStaticBaseMethod23() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm23Main.java",
@@ -4126,7 +4126,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 			    "        }\n" +
 			    "    \n"
             },
-            (this.weavingScheme == WeavingScheme.OTRE 
+            (this.weavingScheme == WeavingScheme.OTRE
             ? "OOK"
             : "KK")); // see restriction https://bugs.eclipse.org/435136#c1
     }
@@ -4134,7 +4134,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // an inherited static base method is bound (replace) in a sub base class
     // X.1.5-otjld-callin-from-static-base-method-23a
     public void testX15_callinFromStaticBaseMethod23a() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm23aMain.java",
@@ -4174,7 +4174,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 			    "        }\n" +
 			    "    \n"
             },
-            (this.weavingScheme == WeavingScheme.OTRE 
+            (this.weavingScheme == WeavingScheme.OTRE
             ? "OOK"
             : "KK")); // see restriction https://bugs.eclipse.org/435136#c1
     }
@@ -4182,7 +4182,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a static base method is redefined and rebound (after) to a static (also redefined) role method
     // X.1.5-otjld-callin-from-static-base-method-24
     public void testX15_callinFromStaticBaseMethod24() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm24Main.java",
@@ -4238,7 +4238,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a static base method is redefined and rebound (replace) to a static (also redefined) role method
     // X.1.5-otjld-callin-from-static-base-method-24a
     public void testX15_callinFromStaticBaseMethod24a() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm24aMain.java",
@@ -4296,7 +4296,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // if a static base method is bound in a super base class, a call to this (not redefined!) method at the subclass 'inherits' the callin
     // X.1.5-otjld-callin-from-static-base-method-25
     public void testX15_callinFromStaticBaseMethod25() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm25Main.java",
@@ -4341,7 +4341,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // replace binding of static methods - additional binding to the same role method in a sub role
     // X.1.5-otjld-callin-from-static-base-method-26
     public void testX15_callinFromStaticBaseMethod26() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm26Main.java",
@@ -4390,7 +4390,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // replace binding of static methods - additional binding to the same base method in a sub role
     // X.1.5-otjld-callin-from-static-base-method-27
     public void testX15_callinFromStaticBaseMethod27() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm27Main.java",
@@ -4439,7 +4439,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // replace binding of static methods - redefined role method in a sub role
     // X.1.5-otjld-callin-from-static-base-method-28
     public void testX15_callinFromStaticBaseMethod28() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm28Main.java",
@@ -4485,7 +4485,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a redefined static base method does not inherit a callin binding from its version of the super class
     // X.1.5-otjld-callin-from-static-base-method-29
     public void testX15_callinFromStaticBaseMethod29() {
-       
+
        runConformTest(
             new String[] {
 		"TX15cfsbm29Main.java",
@@ -4533,7 +4533,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // we had a problem with signature weakening in team methods across several levels of inheritance, resulting in an "abstract method" error at run-time
     // X.1.6-otjld-abstract-team-method-1
     public void testX16_abstractTeamMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"X16atmMain1.java",
@@ -4603,7 +4603,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // if a team is referenced only indirect it has to be loaded before its bases too
     // X.1.7-otjld-referenced-teams-1
     public void testX17_referencedTeams1() {
-       
+
        runConformTest(
             new String[] {
 		"X17rtMain1.java",
@@ -4662,7 +4662,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // an after callin passes the base result to the team
     // X.1.8-otjld-after-result-passing-1
     public void testX18_afterResultPassing1() {
-       
+
        runConformTest(
             new String[] {
 		"X18arpMain1.java",
@@ -4720,7 +4720,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     		new String[] {
         "p19/config1.txt",
 			    "\n" +
-			    "p19.TeamX19tcf1\n"});	
+			    "p19.TeamX19tcf1\n"});
        Map customOptions = getCompilerOptions();
        runConformTest(
             new String[] {
@@ -4776,7 +4776,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 		"p19/config2.txt",
 			    "\n" +
 			    "p19.TeamX19tcf2\n" +
-			    "\n"		
+			    "\n"
     		});
        Map customOptions = getCompilerOptions();
        runConformTest(
@@ -4821,11 +4821,11 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "MyTeam.MyRole.rm()\n" + 
-    		"MyBase.bm()\n" + 
-    		"MyTeam.MyRole.rm()\n" + 
-    		"MyTeam.MyRole.rm()\n" + 
-    		"MyBase.bm()\n" + 
+            "MyTeam.MyRole.rm()\n" +
+    		"MyBase.bm()\n" +
+    		"MyTeam.MyRole.rm()\n" +
+    		"MyTeam.MyRole.rm()\n" +
+    		"MyBase.bm()\n" +
     		"NullPointerException caught!",
             null/*classLibraries*/,
             false/*shouldFlushOutputDirectory*/,
@@ -5170,7 +5170,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a sub base is bound to another team
     // X.2.1-otjld-callin-with-base-inheritance-1
     public void testX21_callinWithBaseInheritance1() {
-       
+
        runConformTest(
             new String[] {
 		"TX21cwbi1Main.java",
@@ -5229,7 +5229,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a sub base is bound to another role, the super base should not be affected
     // X.2.1-otjld-callin-with-base-inheritance-2
     public void testX21_callinWithBaseInheritance2() {
-       
+
        runConformTest(
             new String[] {
 		"TX21cwbi2Main.java",
@@ -5280,7 +5280,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // object creation (invokespecial != super) in overridden callin bound base method
     // X.2.1-otjld-callin-with-base-inheritance-3
     public void testX21_callinWithBaseInheritance3() {
-       
+
        runConformTest(
             new String[] {
 		"TX21cwbi3Main.java",
@@ -5330,7 +5330,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // overridden callin bound base method with arguments
     // X.2.1-otjld-callin-with-base-inheritance-4
     public void testX21_callinWithBaseInheritance4() {
-       
+
        runConformTest(
             new String[] {
 		"TX21cwbi4Main.java",
@@ -5382,7 +5382,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // static replace binding with refinement of 'playedBy' in the same team + base method redefinition
     // X.2.2-otjld-played-by-refinement-1
     public void testX22_playedByRefinement1() {
-       
+
        runConformTest(
             new String[] {
 		"TX22pbr1Main.java",
@@ -5438,7 +5438,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // static replace binding with refinement of 'playedBy' in a subteam + base method redefinition
     // X.2.2-otjld-played-by-refinement-2
     public void testX22_playedByRefinement2() {
-       
+
        runConformTest(
             new String[] {
 		"TX22pbr2Main.java",
@@ -5498,7 +5498,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // replace binding with refinement of 'playedBy' in the same team + base method redefinition
     // X.2.2-otjld-played-by-refinement-3
     public void testX22_playedByRefinement3() {
-       
+
        runConformTest(
             new String[] {
 		"TX22pbr3Main.java",
@@ -5553,7 +5553,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // replace binding with refinement of 'playedBy' in a subteam + base method redefinition
     // X.2.2-otjld-played-by-refinement-4
     public void testX22_playedByRefinement4() {
-       
+
        runConformTest(
             new String[] {
 		"TX22pbr4Main.java",
@@ -5613,7 +5613,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // replace binding with refinement of 'playedBy' in a subteam, in an implicit subrole + base method redefinition
     // X.2.2-otjld-played-by-refinement-5
     public void testX22_playedByRefinement5() {
-       
+
        runConformTest(
             new String[] {
 		"TX22pbr5Main.java",
@@ -5715,7 +5715,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
             "4.8");
     }
 
-    
+
     String[] getBookingClassLibraries() {
 		if (this.verifier != null)
 			this.verifier.shutDown();
@@ -6152,7 +6152,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.GENERATE);
        customOptions.put(CompilerOptions.OPTION_LineNumberAttribute, CompilerOptions.GENERATE);
-       customOptions.put(CompilerOptions.OPTION_SourceFileAttribute, CompilerOptions.GENERATE);        
+       customOptions.put(CompilerOptions.OPTION_SourceFileAttribute, CompilerOptions.GENERATE);
        runConformTest(
             new String[] {
 		"TeamX41ter1.java",

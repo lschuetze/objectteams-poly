@@ -153,7 +153,7 @@ public class Lowering implements IOTConstants {
                 	if (unloweredExpression.constant == null)
                 		unloweredExpression.resolveType(scope);
 	                callLower.resolvedType   = roleType.baseclass();
-	
+
 	                callLower.binding =
 	                            StandardElementGenerator.getGetBaseMethod(
 	                            		scope,
@@ -210,7 +210,7 @@ public class Lowering implements IOTConstants {
         }
         return loweringExpr;
 	}
-	
+
 	@NonNull LocalVariableBinding makeNewLocal(BlockScope scope, TypeBinding variableType, int sourceStart, int sourceEnd, boolean deferredResolve) {
 		char[] name = ("_OT$unlowered$"+sourceStart).toCharArray(); //$NON-NLS-1$
 		LocalVariableBinding varBinding = new LocalVariableBinding(name, variableType, 0, false);
@@ -221,10 +221,10 @@ public class Lowering implements IOTConstants {
 		varBinding.useFlag = LocalVariableBinding.USED;
 		return varBinding;
 	}
-	
+
 	/** A conditional expression that checks for null before performing the actual lowering. */
 	static class CheckedLoweringExpression extends ConditionalExpression {
-		
+
 		private final LocalVariableBinding localVar;
 		Expression origExpression;
 		private Expression teamExpression;

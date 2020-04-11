@@ -21,9 +21,9 @@ import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 
 public class FalseLiteral extends MagicLiteral {
-	
+
 	static final char[] source = {'f', 'a', 'l', 's', 'e'};
-	
+
 public FalseLiteral(int s , int e) {
 	super(s,e);
 }
@@ -75,7 +75,7 @@ public char[] source() {
 }
 @Override
 public void traverse(ASTVisitor visitor, BlockScope scope) {
-//{ObjectTeams: hide synthetic nodes from visitors (e.g., inserted into a base call)	
+//{ObjectTeams: hide synthetic nodes from visitors (e.g., inserted into a base call)
 	if (this.isGenerated) return;
 // SH}
 	visitor.visit(this, scope);

@@ -125,7 +125,7 @@ class CompilationUnitResolver extends Compiler {
 	CategorizedProblem abortProblem;
 
 	private IProgressMonitor monitor;
-	
+
 	/**
 	 * Set to <code>true</code> if the receiver was initialized using a java project name environment
 	 */
@@ -191,7 +191,7 @@ class CompilationUnitResolver extends Compiler {
 		SourceTypeElementInfo sourceType = (SourceTypeElementInfo) sourceTypes[0];
 		accept((org.eclipse.jdt.internal.compiler.env.ICompilationUnit) sourceType.getHandle().getCompilationUnit(), accessRestriction);
 	}
-	
+
 	@Override
 	public synchronized void accept(org.eclipse.jdt.internal.compiler.env.ICompilationUnit sourceUnit, AccessRestriction accessRestriction) {
 		super.accept(sourceUnit, accessRestriction);
@@ -582,7 +582,7 @@ class CompilationUnitResolver extends Compiler {
 			}
 		} else {
 				//fill the methods bodies in order for the code to be generated
-				//real parse of the method....			
+				//real parse of the method....
 				org.eclipse.jdt.internal.compiler.ast.TypeDeclaration[] types = compilationUnitDeclaration.types;
 				if (types != null) {
 					for (int j = 0, typeLength = types.length; j < typeLength; j++) {
@@ -1282,10 +1282,10 @@ class CompilationUnitResolver extends Compiler {
 					}
 					// type checking
 					unit.resolve();
-	
+
 					// flow analysis
 					if (analyzeCode) unit.analyseCode();
-	
+
 					// code generation
 					if (generateCode) unit.generateCode();
 */

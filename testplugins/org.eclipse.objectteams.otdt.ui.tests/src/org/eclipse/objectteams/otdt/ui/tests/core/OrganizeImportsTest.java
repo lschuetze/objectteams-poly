@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -58,7 +58,7 @@ import org.osgi.service.prefs.BackingStoreException;
  * <code>org.eclipse.jdt.ui.tests.core.ImportOrganizeTest</code> in the test suite
  * <code>org.eclipse.jdt.ui.tests.refactoring</code> provided by Eclipse as
  * well as new OT-specific tests.
- * 
+ *
  * @author brcan
  */
 @RunWith(JUnit4.class)
@@ -131,7 +131,7 @@ public class OrganizeImportsTest
             }
         };
     }
-    
+
     public static void assertEqualString(String actual, String expected)
     {
         StringAsserts.assertEqualString(actual, expected);
@@ -438,7 +438,7 @@ public class OrganizeImportsTest
                 null);
         buf = new StringBuffer();
         buf.append("package teamPkg;\n");
-        buf.append("import base basePkg.B1;\n"); 
+        buf.append("import base basePkg.B1;\n");
         buf.append("import base basePkg.B1.Inner;\n");
         buf.append("public team class T1 {\n");
         buf.append("    protected class Inner playedBy Inner {\n");
@@ -462,7 +462,7 @@ public class OrganizeImportsTest
 
         buf = new StringBuffer();
         buf.append("package teamPkg;\n");
-        buf.append("import base basePkg.B1;\n"); 
+        buf.append("import base basePkg.B1;\n");
         buf.append("import base basePkg.B1.Inner;\n");
         buf.append("public team class T1 {\n");
         buf.append("    protected class Inner playedBy Inner {\n");
@@ -473,7 +473,7 @@ public class OrganizeImportsTest
         buf.append("}\n");
         assertEqualString(cu.getSource(), buf.toString());
     }
-    
+
     // base import for role file
     @Test
     public void testTypeReferenceInRoleclass7() throws Exception
@@ -673,7 +673,7 @@ public class OrganizeImportsTest
         buf.append("   private static void testB1() { }");
         buf.append("}\n");
         basePkg.createCompilationUnit("B1.java", buf.toString(), false, null);
-        
+
         IPackageFragment teamPkg = sourceFolder.createPackageFragment(
                 "teamPkg",
                 false,
@@ -725,7 +725,7 @@ public class OrganizeImportsTest
         buf.append("   void testB1() { }");
         buf.append("}\n");
         basePkg.createCompilationUnit("B1.java", buf.toString(), false, null);
-        
+
         IPackageFragment teamPkg = sourceFolder.createPackageFragment(
                 "teamPkg",
                 false,
@@ -785,7 +785,7 @@ public class OrganizeImportsTest
         buf.append("public class B1 {\n");
         buf.append("}\n");
         basePkg.createCompilationUnit("B1.java", buf.toString(), false, null);
-        
+
         IPackageFragment teamPkg = sourceFolder.createPackageFragment(
                 "teamPkg",
                 false,
@@ -841,7 +841,7 @@ public class OrganizeImportsTest
 		buf.append("    }\n");
 		buf.append("}\n");
 		basePkg.createCompilationUnit("BaseTeam.java", buf.toString(), false, null);
-		
+
 		IPackageFragment teamPkg = sourceFolder.createPackageFragment(
 		        "teamPkg",
 		        false,
@@ -855,17 +855,17 @@ public class OrganizeImportsTest
 		buf.append("}\n");
 		ICompilationUnit cu = teamPkg.createCompilationUnit("T1.java", buf
 		        .toString(), false, null);
-		
+
 		String[] order = new String[0];
 		IChooseImportQuery query = createQuery(
 		        "T1",
 		        new String[] {},
 		        new int[] {});
-		
+
 		OrganizeImportsOperation op = createOperation(cu, order,
 		        99, false, true, true, query);
 		op.run(null);
-		
+
 		buf = new StringBuffer();
 		buf.append("package teamPkg;\n");
 		buf.append("import basePkg.BaseTeam;\n");
@@ -892,7 +892,7 @@ public class OrganizeImportsTest
 		buf.append("    void m() {}\n");
 		buf.append("}\n");
 		basePkg.createCompilationUnit("Base.java", buf.toString(), false, null);
-		
+
 		IPackageFragment teamPkg = sourceFolder.createPackageFragment(
 		        "teamPkg",
 		        false,
@@ -912,26 +912,26 @@ public class OrganizeImportsTest
 		buf.append("}\n");
 		ICompilationUnit cu = teamPkg.createCompilationUnit("T1.java", buf
 		        .toString(), false, null);
-		
+
 		String[] order = new String[0];
 		IChooseImportQuery query = createQuery(
 		        "T1",
 		        new String[] {},
 		        new int[] {});
-		
+
 		OrganizeImportsOperation op = createOperation(cu, order,
 		        99, false, true, true, query);
 		op.run(null);
-		
+
 		// buf remains unchanged
 		assertEqualString(cu.getSource(), buf.toString());
     }
-    
+
 	private OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean doResolve, IChooseImportQuery chooseImportQuery) throws CoreException, BackingStoreException {
 		setOrganizeImportSettings(order, threshold, threshold, cu.getJavaProject());
 		return new OrganizeImportsOperation(cu, null, ignoreLowerCaseNames, save, doResolve, chooseImportQuery);
 	}
-	
+
 	private  void setOrganizeImportSettings(String[] order, int threshold, int staticThreshold, IJavaProject project) throws BackingStoreException {
 		IEclipsePreferences scope= new ProjectScope(project.getProject()).getNode(JavaUI.ID_PLUGIN);
 		if (order == null) {
@@ -947,5 +947,5 @@ public class OrganizeImportsTest
 			scope.put(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, String.valueOf(threshold));
 		}
 	}
-    
+
 }

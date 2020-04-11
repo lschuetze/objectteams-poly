@@ -35,7 +35,7 @@ public class IndexingParser extends SourceElementParser {
 		super(requestor, problemFactory, options, reportLocalDeclarations,
 				optimizeStringLiterals, useSourceJavadocParser);
 	}
-	
+
 	@Override
 	protected ImportReference newImportReference(char[][] tokens, long[] sourcePositions, boolean onDemand, int mod) {
 		ImportReference ref = this.importReference;
@@ -58,7 +58,7 @@ public class IndexingParser extends SourceElementParser {
 		ref.sourceEnd = (int) positions;
 		return ref;
 	}
-	
+
 	@Override
 	protected QualifiedNameReference newQualifiedNameReference(char[][] tokens, long[] positions, int sourceStart, int sourceEnd) {
 		QualifiedNameReference ref = this.qualifiedNameReference;

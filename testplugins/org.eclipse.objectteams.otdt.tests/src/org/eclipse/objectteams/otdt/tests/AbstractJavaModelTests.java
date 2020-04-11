@@ -125,11 +125,11 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 		 */
 //{ObjectTeams: removed private SH}
 		IJavaElementDelta[] deltas;
-		
+
 		private int eventType;
 
 		private ByteArrayOutputStream stackTraces;
-		
+
 		private boolean gotResourceDelta;
 
 		public DeltaListener() {
@@ -147,7 +147,7 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 				System.arraycopy(this.deltas, 0, copy, 0, this.deltas.length);
 				copy[this.deltas.length]= event.getDelta();
 				this.deltas= copy;
-	
+
 				new Throwable("Caller of IElementChangedListener#elementChanged").printStackTrace(new PrintStream(this.stackTraces));
 			}
 		}
@@ -164,14 +164,14 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 				return delta.getCompilationUnitAST();
 			return null;
 		}
-		
+
 		/**
 		 * Returns the last delta for the given element from the cached delta.
 		 */
 		public IJavaElementDelta getDeltaFor(IJavaElement element) {
 			return getDeltaFor(element, false);
 		}
-		
+
 		/**
 		 * Returns the delta for the given element from the cached delta.
 		 * If the boolean is true returns the first delta found.
@@ -190,7 +190,7 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 			}
 			return result;
 		}
-		
+
 		public synchronized IJavaElementDelta getLastDelta() {
 			return this.deltas[this.deltas.length - 1];
 		}
@@ -298,7 +298,7 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 //{ObjectTeams: avoid problems with performance meter (testcase names are not unique when used with a TestSetting)
 	private boolean _usePerformanceMeter = true;
 //carp}
-	
+
 	protected ILogListener logListener;
 	protected ILog log;
 
@@ -1207,7 +1207,7 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 	protected void createJar(String[] javaPathsAndContents, String jarPath) throws IOException {
 		org.eclipse.jdt.core.tests.util.Util.createJar(javaPathsAndContents, jarPath, "1.4");
 	}
-	
+
 	protected void createJar(String[] javaPathsAndContents, String jarPath, Map options) throws IOException {
 		org.eclipse.jdt.core.tests.util.Util.createJar(javaPathsAndContents, null, jarPath, null, "1.4", options);
 	}
@@ -1468,22 +1468,22 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 			final String compliance,
 			final boolean simulateImport) throws CoreException {
 		return createJavaProject(
-				projectName, 
-				sourceFolders, 
-				libraries, 
-				librariesInclusionPatterns, 
-				librariesExclusionPatterns, 
-				projects, 
-				projectsInclusionPatterns, 
-				projectsExclusionPatterns, 
-				combineAccessRestrictions, 
-				exportedProjects, 
-				projectOutput, 
-				sourceOutputs, 
-				inclusionPatterns, 
-				exclusionPatterns, 
-				compliance, 
-				false, 
+				projectName,
+				sourceFolders,
+				libraries,
+				librariesInclusionPatterns,
+				librariesExclusionPatterns,
+				projects,
+				projectsInclusionPatterns,
+				projectsExclusionPatterns,
+				combineAccessRestrictions,
+				exportedProjects,
+				projectOutput,
+				sourceOutputs,
+				inclusionPatterns,
+				exclusionPatterns,
+				compliance,
+				false,
 				simulateImport);
 	}
 	protected IJavaProject createJavaProject(
@@ -2186,7 +2186,7 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 	 */
 	protected String getPluginDirectoryPath() {
 		try {
-//{ObjectTeams: adjust plugin id from org.eclipse.jdt.core.tests.model to org.eclipse.objectteams.otdt.tests 
+//{ObjectTeams: adjust plugin id from org.eclipse.jdt.core.tests.model to org.eclipse.objectteams.otdt.tests
 			URL platformURL = Platform.getBundle("org.eclipse.objectteams.otdt.tests").getEntry("/");
 //carp}
 			return new File(FileLocator.toFileURL(platformURL).getFile()).getAbsolutePath();
@@ -2472,9 +2472,9 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 		if (patternString.indexOf('*') != -1 || patternString.indexOf('?') != -1)
 			matchRule |= SearchPattern.R_PATTERN_MATCH;
 		SearchPattern pattern = SearchPattern.createPattern(
-			patternString, 
+			patternString,
 			searchFor,
-			limitTo, 
+			limitTo,
 			matchRule);
 // that's why we maintain this copy:
 		MatchLocator.setFocus(pattern, focus);
@@ -2731,7 +2731,7 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 		}
 	}
 //{ObjectTeams: copy jcl at least once per test run:
-	private static boolean forceCopyJCL= true; 
+	private static boolean forceCopyJCL= true;
 // SH}
 	/**
 	 * Check locally for the required JCL files, <jclName>.jar and <jclName>src.zip.
@@ -2923,7 +2923,7 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 						new String[] {"JCL18_FULL", "JCL18_SRC", "JCL_SRCROOT"},
 						new IPath[] {new Path(getExternalJCLPathString("1.8", true)), getExternalJCLSourcePath("1.8"), getExternalJCLRootSourcePath()},
 						null);
-				} 
+				}
 			} else if (JavaCore.getClasspathVariable("JCL18_LIB") == null) {
 						setupExternalJCL("jclMin1.8");
 						JavaCore.setClasspathVariables(
@@ -2968,7 +2968,7 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 		}
 	}
 	protected void setUp () throws Exception {
-//{ObjectTeams: 
+//{ObjectTeams:
 	  if (_usePerformanceMeter)
 //}
 		super.setUp();

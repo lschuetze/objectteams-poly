@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -46,7 +46,7 @@ public class Test5c extends Test5_MethodMappingGeneral
 {
 
     private int _expectedCallinKind;
-    
+
     public Test5c(String name)
     {
         super(name);
@@ -64,42 +64,42 @@ public class Test5c extends Test5_MethodMappingGeneral
             .getName());
         return suite;
     }
-    
+
     public void setUpSuite() throws Exception
     {
         super.setUpSuite();
         getTestSetting().setTeamClass("Team_5c");
     }
-    
+
     protected int getExpectedCallinKind()
     {
         return _expectedCallinKind;
     }
-   
+
     protected void setExpectedCallinKind(int kind)
     {
         _expectedCallinKind = kind;
     }
-    
+
     public void testMappingCallinProperty() throws JavaModelException
     {
         assertNotNull(getTestSetting().getRoleJavaElement());
         assertTrue(getTestSetting().getRoleJavaElement().exists());
-        
+
         IOTType roleOTElem = OTModelManager.getOTElement(getTestSetting().getRoleJavaElement());
         assertNotNull(roleOTElem);
         assertTrue(roleOTElem instanceof IRoleType);
-        IRoleType roleRoleOTElem = (IRoleType) roleOTElem;        
+        IRoleType roleRoleOTElem = (IRoleType) roleOTElem;
 
         IMethodMapping[] mappings = roleRoleOTElem.getMethodMappings();
         assertTrue(mappings.length == 1);
         assertEquals(mappings[0].getElementName(), getMappingName());
-        
+
         assertTrue(mappings[0].getMappingKind() == IOTJavaElement.CALLIN_MAPPING);
         assertTrue(mappings[0] instanceof ICallinMapping);
     }
-    
-    
+
+
     public void testMappingPropertyBoundBaseMethod() throws JavaModelException
     {
         ICompilationUnit baseUnit = getCompilationUnit(
@@ -107,55 +107,55 @@ public class Test5c extends Test5_MethodMappingGeneral
                 "boundtoteam",
                 "boundtoteam.teampkg",
                 "TeamC.java");
-            
+
         IType baseJavaElem = baseUnit.getType("TeamC");
         assertNotNull(baseJavaElem);
         assertTrue(baseJavaElem.exists());
-        
+
         IMethod baseMethod = baseJavaElem.getMethod(getBaseMethodName(), new String[0]);
         assertNotNull(baseMethod);
         assertTrue(baseMethod.exists());
-        
+
         assertNotNull(getTestSetting().getRoleJavaElement());
         assertTrue(getTestSetting().getRoleJavaElement().exists());
-        
+
         IOTType roleOTElem = OTModelManager.getOTElement(getTestSetting().getRoleJavaElement());
         assertNotNull(roleOTElem);
         assertTrue(roleOTElem instanceof IRoleType);
         IRoleType roleRoleOTElem = (IRoleType) roleOTElem;
-        
+
         IMethodMapping[] mappings = roleRoleOTElem.getMethodMappings();
         assertTrue(mappings.length == 1);
         assertTrue(mappings[0] instanceof ICallinMapping);
-        
+
         ICallinMapping callinMapping = (ICallinMapping) mappings[0];
         assertNotNull(callinMapping);
         IMethod[] boundBaseMethods = callinMapping.getBoundBaseMethods();
-        
+
         assertTrue(boundBaseMethods.length == 1);
         assertEquals(boundBaseMethods[0], baseMethod);
     }
-    
+
     public void testCallinKind() throws JavaModelException
     {
         assertNotNull(getTestSetting().getRoleJavaElement());
         assertTrue(getTestSetting().getRoleJavaElement().exists());
-        
+
         IOTType roleOTElem = OTModelManager.getOTElement(getTestSetting().getRoleJavaElement());
         assertNotNull(roleOTElem);
         assertTrue(roleOTElem instanceof IRoleType);
-        IRoleType roleRoleOTElem = (IRoleType) roleOTElem;        
+        IRoleType roleRoleOTElem = (IRoleType) roleOTElem;
 
         IMethodMapping[] mappings = roleRoleOTElem.getMethodMappings();
         assertTrue(mappings.length == 1);
         assertEquals(mappings[0].getElementName(), getMappingName());
-        
+
         assertTrue(mappings[0] instanceof ICallinMapping);
         ICallinMapping callinMapping = (ICallinMapping) mappings[0];
-        
+
         assertTrue(callinMapping.getCallinKind() == getExpectedCallinKind());
     }
-    
+
     public void testRelationRoleToBase() throws JavaModelException
     {
         ICompilationUnit baseUnit = getCompilationUnit(
@@ -165,8 +165,8 @@ public class Test5c extends Test5_MethodMappingGeneral
                 "TeamC.java");
         IType baseJavaElem = baseUnit.getType("TeamC");
         assertNotNull(baseJavaElem);
-        assertTrue(baseJavaElem.exists());        
-        
+        assertTrue(baseJavaElem.exists());
+
         assertNotNull(getTestSetting().getRoleJavaElement());
         assertTrue(getTestSetting().getRoleJavaElement().exists());
 
@@ -174,8 +174,8 @@ public class Test5c extends Test5_MethodMappingGeneral
         assertNotNull(roleOTElem);
         assertTrue(roleOTElem instanceof IRoleType);
         IRoleType roleRoleOTElem = (IRoleType) roleOTElem;
-        
+
         assertEquals(baseJavaElem, roleRoleOTElem.getBaseClass());
-    } 
-    
+    }
+
 }

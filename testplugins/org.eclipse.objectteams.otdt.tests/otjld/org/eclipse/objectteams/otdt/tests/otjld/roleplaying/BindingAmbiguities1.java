@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2014 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -883,8 +883,8 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
              },
-             "org.objectteams.LiftingFailedException: \n" + 
-     		 "Failed to lift \'T731ab7_3\' of class T731ab7_3 to type \'Role731ab7_1\'\n" + 
+             "org.objectteams.LiftingFailedException: \n" +
+     		 "Failed to lift \'T731ab7_3\' of class T731ab7_3 to type \'Role731ab7_1\'\n" +
      		 "(See OT/J definition para. 2.3.4(c)).",
      		null/*classLibs*/,
             true/*shouldFlush*/,
@@ -1009,8 +1009,8 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
              },
-             "org.objectteams.LiftingFailedException: \n" + 
-     		 "Failed to lift \'T731ab8_3\' of class T731ab8_3 to type \'Role731ab8_1\'\n" + 
+             "org.objectteams.LiftingFailedException: \n" +
+     		 "Failed to lift \'T731ab8_3\' of class T731ab8_3 to type \'Role731ab8_1\'\n" +
      		 "(See OT/J definition para. 2.3.4(c)).",
      		null/*classLibs*/,
             true/*shouldFlush*/,
@@ -1112,46 +1112,46 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
              },
              options,
              new String[] { // expect errors on same location in either order
-	     		"----------\n" + 
-				"1. WARNING in Team731ab8e_3.java (at line 1)\n" + 
-				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" + 
-				"	                  ^^^^^^^^^^^^^\n" + 
-				"Potential ambiguity in role binding. The base \'T731ab8e_3\' is bound to the following roles: Team731ab8e_3.Role731ab8e_3,Team731ab8e_3.Role731ab8e_4 (OTJLD 2.3.4(a)).\n" + 
-				"----------\n" + 
-				"2. ERROR in Team731ab8e_3.java (at line 1)\n" + 
-				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" + 
-				"	                  ^^^^^^^^^^^^^\n" + 
-				"Team introduces binding ambiguity for role Role731ab8e_3<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" + 
-				"----------\n" + 
-				"3. ERROR in Team731ab8e_3.java (at line 1)\n" + 
-				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" + 
-				"	                  ^^^^^^^^^^^^^\n" + 
-				"Team introduces binding ambiguity for role Role731ab8e_2<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" + 
-				"----------\n" + 
-				"4. ERROR in Team731ab8e_3.java (at line 1)\n" + 
-				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" + 
-				"	                  ^^^^^^^^^^^^^\n" + 
+	     		"----------\n" +
+				"1. WARNING in Team731ab8e_3.java (at line 1)\n" +
+				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" +
+				"	                  ^^^^^^^^^^^^^\n" +
+				"Potential ambiguity in role binding. The base \'T731ab8e_3\' is bound to the following roles: Team731ab8e_3.Role731ab8e_3,Team731ab8e_3.Role731ab8e_4 (OTJLD 2.3.4(a)).\n" +
+				"----------\n" +
+				"2. ERROR in Team731ab8e_3.java (at line 1)\n" +
+				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" +
+				"	                  ^^^^^^^^^^^^^\n" +
+				"Team introduces binding ambiguity for role Role731ab8e_3<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" +
+				"----------\n" +
+				"3. ERROR in Team731ab8e_3.java (at line 1)\n" +
+				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" +
+				"	                  ^^^^^^^^^^^^^\n" +
+				"Team introduces binding ambiguity for role Role731ab8e_2<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" +
+				"----------\n" +
+				"4. ERROR in Team731ab8e_3.java (at line 1)\n" +
+				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" +
+				"	                  ^^^^^^^^^^^^^\n" +
 				"Team introduces binding ambiguity for role Role731ab8e_1<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n"  +
 				"----------\n",
-	     		"----------\n" + 
-				"1. WARNING in Team731ab8e_3.java (at line 1)\n" + 
-				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" + 
-				"	                  ^^^^^^^^^^^^^\n" + 
-				"Potential ambiguity in role binding. The base \'T731ab8e_3\' is bound to the following roles: Team731ab8e_3.Role731ab8e_3,Team731ab8e_3.Role731ab8e_4 (OTJLD 2.3.4(a)).\n" + 
-				"----------\n" + 
-				"2. ERROR in Team731ab8e_3.java (at line 1)\n" + 
-				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" + 
-				"	                  ^^^^^^^^^^^^^\n" + 
-				"Team introduces binding ambiguity for role Role731ab8e_1<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" + 
-				"----------\n" + 
-				"3. ERROR in Team731ab8e_3.java (at line 1)\n" + 
-				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" + 
-				"	                  ^^^^^^^^^^^^^\n" + 
+	     		"----------\n" +
+				"1. WARNING in Team731ab8e_3.java (at line 1)\n" +
+				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" +
+				"	                  ^^^^^^^^^^^^^\n" +
+				"Potential ambiguity in role binding. The base \'T731ab8e_3\' is bound to the following roles: Team731ab8e_3.Role731ab8e_3,Team731ab8e_3.Role731ab8e_4 (OTJLD 2.3.4(a)).\n" +
+				"----------\n" +
+				"2. ERROR in Team731ab8e_3.java (at line 1)\n" +
+				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" +
+				"	                  ^^^^^^^^^^^^^\n" +
+				"Team introduces binding ambiguity for role Role731ab8e_1<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" +
+				"----------\n" +
+				"3. ERROR in Team731ab8e_3.java (at line 1)\n" +
+				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" +
+				"	                  ^^^^^^^^^^^^^\n" +
 				"Team introduces binding ambiguity for role Role731ab8e_3<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" +
-				"----------\n" + 
-				"4. ERROR in Team731ab8e_3.java (at line 1)\n" + 
-				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" + 
-				"	                  ^^^^^^^^^^^^^\n" + 
+				"----------\n" +
+				"4. ERROR in Team731ab8e_3.java (at line 1)\n" +
+				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" +
+				"	                  ^^^^^^^^^^^^^\n" +
 				"Team introduces binding ambiguity for role Role731ab8e_2<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" +
 				"----------\n"
              } );

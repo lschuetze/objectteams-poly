@@ -35,7 +35,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 		addTypeDeclaration(modifiers, packageName, name, enclosingTypeNames, secondary);
 
 		addIndexEntry(
-			SUPER_REF, 
+			SUPER_REF,
 			SuperTypeReferencePattern.createIndexKey(
 				modifiers, packageName, name, enclosingTypeNames, null, ANNOTATION_TYPE_SUFFIX, CharOperation.concatWith(TypeConstants.JAVA_LANG_ANNOTATION_ANNOTATION, '.'), ANNOTATION_TYPE_SUFFIX));
 	}
@@ -43,11 +43,11 @@ public abstract class AbstractIndexer implements IIndexConstants {
 		addIndexEntry(ANNOTATION_REF, CharOperation.lastSegment(typeName, '.'));
 	}
 	public void addClassDeclaration(
-			int modifiers, 
+			int modifiers,
 			char[] packageName,
-			char[] name, 
-			char[][] enclosingTypeNames, 
-			char[] superclass, 
+			char[] name,
+			char[][] enclosingTypeNames,
+			char[] superclass,
 			char[][] superinterfaces,
 //{ObjectTeams: baseclass
 			char[] baseclass,
@@ -69,13 +69,13 @@ public abstract class AbstractIndexer implements IIndexConstants {
 		{
 		    //addIndexEntry(TYPE_DECL, TypeDeclarationPattern.createIndexKey(name, packageName, enclosingTypeNames, ROLE_SUFFIX));
 			addIndexEntry(ROLE_DECL, otCreateTypeIndexKey(modifiers, name, packageName, enclosingTypeNames, secondary));
-			
+
 		}
 		if (baseclass != null) {
 			// baseclass cannot be generic, but FIXME(SH): requires anchor translation!
 			addTypeReference(baseclass);
 			addIndexEntry(
-					SUPER_REF, 
+					SUPER_REF,
 					SuperTypeReferencePattern.createIndexKey(
 						modifiers, packageName, name, enclosingTypeNames, typeParameterSignatures, CLASS_SUFFIX, baseclass, BASECLASS_SUFFIX));
 		}
@@ -86,7 +86,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 			addTypeReference(superclass);
 		}
 		addIndexEntry(
-			SUPER_REF, 
+			SUPER_REF,
 			SuperTypeReferencePattern.createIndexKey(
 				modifiers, packageName, name, enclosingTypeNames, typeParameterSignatures, CLASS_SUFFIX, superclass, CLASS_SUFFIX));
 //{ObjectTeams: handle team inheriting from possibly non-team:
@@ -94,7 +94,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 			addIndexEntry(
 				SUPER_REF,
 				SuperTypeReferencePattern.createIndexKey(
-					modifiers, packageName, name, enclosingTypeNames, typeParameterSignatures, CLASS_SUFFIX, ITEAM, INTERFACE_SUFFIX));		
+					modifiers, packageName, name, enclosingTypeNames, typeParameterSignatures, CLASS_SUFFIX, ITEAM, INTERFACE_SUFFIX));
 // SH}
 		if (superinterfaces != null) {
 			for (int i = 0, max = superinterfaces.length; i < max; i++) {
@@ -109,7 +109,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 	}
 	private char[] erasure(char[] typeName) {
 		int genericStart = CharOperation.indexOf(Signature.C_GENERIC_START, typeName);
-		if (genericStart > -1) 
+		if (genericStart > -1)
 			typeName = CharOperation.subarray(typeName, 0, genericStart);
 		return typeName;
 	}
@@ -136,7 +136,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 						packageName,
 						typeModifiers,
 						extraFlags));
-	
+
 		if (parameterTypes != null) {
 			for (int i = 0; i < argCount; i++)
 				addTypeReference(parameterTypes[i]);
@@ -164,7 +164,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 		addTypeDeclaration(modifiers, packageName, name, enclosingTypeNames, secondary);
 
 		addIndexEntry(
-			SUPER_REF, 
+			SUPER_REF,
 			SuperTypeReferencePattern.createIndexKey(
 				modifiers, packageName, name, enclosingTypeNames, null, ENUM_SUFFIX, superclass, CLASS_SUFFIX));
 		if (superinterfaces != null) {
@@ -177,7 +177,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 						modifiers, packageName, name, enclosingTypeNames, null, ENUM_SUFFIX, superinterface, INTERFACE_SUFFIX));
 			}
 		}
-	}	
+	}
 	public void addFieldDeclaration(char[] typeName, char[] fieldName) {
 		addIndexEntry(FIELD_DECL, FieldPattern.createIndexKey(fieldName));
 		addTypeReference(typeName);
@@ -240,7 +240,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 	public void addMethodDeclaration(char[] methodName, char[][] parameterTypes, char[] returnType, char[][] exceptionTypes) {
 		int argCount = parameterTypes == null ? 0 : parameterTypes.length;
 		addIndexEntry(METHOD_DECL, MethodPattern.createIndexKey(methodName, argCount));
-	
+
 		if (parameterTypes != null) {
 			for (int i = 0; i < argCount; i++)
 				addTypeReference(parameterTypes[i]);
@@ -281,13 +281,13 @@ public abstract class AbstractIndexer implements IIndexConstants {
 	public void addTypeReference(char[] typeName) {
 		addNameReference(CharOperation.lastSegment(typeName, '.'));
 	}
-	
+
 //{OTDTUI:
 	public void addBaseReference(char[] baseName)
 	{
 		addIndexEntry(BASE_REF, baseName);
 	}
-	
+
 	public void addReferenceToTeamPackage(char[] teamName, char[] roleName)
 	{
 	    // add two index entries (one with role name, one without). See ReferenceToTeamPackagePattern.getIndexKey()
@@ -303,14 +303,14 @@ public abstract class AbstractIndexer implements IIndexConstants {
 	 * i.e. instead of "type/enclosingTypes/package/C" create a key
 	 * "type/enclosingTypes/package/C/123549"
 	 * 123549 would be the type's modifiers, including AccTeam and AccRole.
-	 */ 
+	 */
     private static char[] otCreateTypeIndexKey(int modifiers, char[] name, char[] packageName, char[][] enclosingTypeNames, boolean secondary)
 //                                 int modifiers, char[] typeName, char[] packageName, char[][] enclosingTypeNames, boolean secondary) { //, char typeSuffix) {
     {
         // km: merge: modified signature
     	//            orig: char[] indexKey = TypeDeclarationPattern.createIndexKey(name, packageName, enclosingTypeNames, class_suffix);
     	char[] indexKey = TypeDeclarationPattern.createIndexKey(modifiers, name, packageName, enclosingTypeNames, secondary);
-        
+
         String modifierString = String.valueOf(modifiers);
         char [] otIndexKey = new char[indexKey.length + 1 + modifierString.length()];
         System.arraycopy(indexKey, 0, otIndexKey, 0, indexKey.length);
@@ -320,7 +320,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
         return otIndexKey;
     }
 //carp}
-	
+
 	public abstract void indexDocument();
 	public void indexResolvedDocument() {
 		// subtypes should implement where it makes sense.

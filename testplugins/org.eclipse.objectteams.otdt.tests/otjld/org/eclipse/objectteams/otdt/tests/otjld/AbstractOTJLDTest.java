@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010, 2014 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -56,7 +56,7 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 			this.fVMArguments = getOTVMArgs();
 		}
 		@Override
-		public boolean verifyClassFiles(String sourceFilePath, String className, String expectedOutputString, String expectedErrorStringStart, 
+		public boolean verifyClassFiles(String sourceFilePath, String className, String expectedOutputString, String expectedErrorStringStart,
 										String[] classpaths, String[] programArguments, String[] vmArguments) {
 			vmArguments = mergeArgs(vmArguments);
 			return super.verifyClassFiles(sourceFilePath, className, expectedOutputString, expectedErrorStringStart, classpaths, programArguments, vmArguments);
@@ -79,11 +79,11 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 			}
 		}
 	}
-	
+
 	private static String getOTDTJarPath(String jarName) {
 		return ClasspathUtil.OTDT_PATH + File.separator + "lib" + File.separator + jarName + ".jar";
 	}
-	
+
 	public String[] getOTVMArgs() {
 		String OTRE_MIN_JAR_PATH, OTAGENT_JAR_PATH;
 		OTRE_MIN_JAR_PATH 		= getOTDTJarPath("otre_min");
@@ -117,26 +117,26 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 				"-Dobjectteams.otdre.verify=1"
 		};
 	}
-	
+
 	public static boolean IS_JRE_8;
 	static {
 		String javaVersion = System.getProperty("java.specification.version");
 		IS_JRE_8 = "1.8".equals(javaVersion);
 	}
 	protected String foreach(String elemType) {
-		return (IS_JRE_8 && this.complianceLevel < ClassFileConstants.JDK1_8) 
+		return (IS_JRE_8 && this.complianceLevel < ClassFileConstants.JDK1_8)
 				? "public void forEach(java.util.function.Consumer<? super "+elemType+"> element) {}\n"
 				: "";
 	}
 	protected String spliterator(String elemType) {
-		return (IS_JRE_8 && this.complianceLevel < ClassFileConstants.JDK1_8) 
+		return (IS_JRE_8 && this.complianceLevel < ClassFileConstants.JDK1_8)
 				? "public java.util.Spliterator<"+elemType+"> spliterator() { return null; }\n"
 				: "";
 	}
 	protected String spliteratorCallout() {
 		return (IS_JRE_8 && this.complianceLevel < ClassFileConstants.JDK1_8) ? "spliterator -> spliterator;\n" : "";
 	}
-	
+
 // copy from JDT-orig for visibility's sake
 	protected class Runner {
 		public boolean shouldFlushOutputDirectory = true;
@@ -246,17 +246,17 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 	}
 
 	// ===
-	
+
 	protected static final JavacTestOptions DEFAULT_TEST_OPTIONS = new JavacTestOptions();
 
 	// shall compiler output be matched exactly or using some matching?
 	boolean errorMatching = false;
-	
+
 	// each subarray defines a set of classes to be compiled together:
 	protected String[][] compileOrder;
-	
+
 	protected WeavingScheme weavingScheme = WeavingScheme.OTDRE;
-	
+
 	public AbstractOTJLDTest(String name) {
 		super(name);
 	}
@@ -294,7 +294,7 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 	protected TestVerifier getTestVerifier(boolean reuseVM) {
 		return new OTTestVerifier(reuseVM);
 	}
-	
+
 	@Override
 	protected void tearDown() throws Exception {
 		this.compileOrder = null;
@@ -313,7 +313,7 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 		options.put(CompilerOptions.OPTION_ReportOtreWeavingIntoJava8, CompilerOptions.IGNORE);
 		return options;
 	}
-	
+
 	protected void runNegativeTestMatching(String[] testFiles, String expectedCompilerLog) {
 		this.errorMatching = true;
 		runTest(
@@ -372,7 +372,7 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 	void logTestTitle() {
 		System.out.println(getClass().getName() + '#' + getName());
 	}
-	
+
 	// support explicit compile order in several steps:
 	@Override
 	protected void compileTestFiles(Compiler batchCompiler, String[] testFiles) {
@@ -398,7 +398,7 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 			}
 		}
 	}
-	
+
 	protected INameEnvironment getNameEnvironment(final String[] testFiles, String[] classPaths) {
 		this.classpaths = classPaths == null ? getDefaultClassPaths() : classPaths;
 		// make cleanup weaker:
@@ -411,7 +411,7 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 			}
 		};
 	}
-	
+
 	/** Additional entry for tests expecting a compiler warning and don't run. */
 	protected void runTestExpectingWarnings(String[] files, String expectedWarnings) {
     	Map options = getCompilerOptions();
@@ -428,9 +428,9 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 			null /* do not check output string */,
 			null /* do not check error string */,
 			// javac options
-			JavacTestOptions.Excuse.EclipseHasSomeMoreWarnings /* javac test options */);	
+			JavacTestOptions.Excuse.EclipseHasSomeMoreWarnings /* javac test options */);
 	}
-	
+
 	/** Additional entry for tests expecting a compiler warning and don't run. */
 	protected void runTestExpectingWarnings(String[] files, String expectedWarnings, Map options) {
 		runConformTest(
@@ -446,9 +446,9 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 			null /* do not check output string */,
 			null /* do not check error string */,
 			// javac options
-			JavacTestOptions.Excuse.EclipseHasSomeMoreWarnings /* javac test options */);	
+			JavacTestOptions.Excuse.EclipseHasSomeMoreWarnings /* javac test options */);
 	}
-	
+
 	/** Additional entry for tests expecting a compiler warning and don't run. */
 	protected void runTestExpectingWarnings(String[] files, String expectedWarnings, boolean flushOutputDirectory) {
     	Map options = getCompilerOptions();
@@ -465,7 +465,7 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 			null /* do not check output string */,
 			null /* do not check error string */,
 			// javac options
-			JavacTestOptions.Excuse.EclipseHasSomeMoreWarnings /* javac test options */);	
+			JavacTestOptions.Excuse.EclipseHasSomeMoreWarnings /* javac test options */);
 	}
 	/** Additional entry for tests expecting a compiler warning and run. */
 	protected void runTestExpectingWarnings(String[] files, String expectedWarnings, String expectedOutput) {
@@ -483,7 +483,7 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 			expectedOutput,
 			null /* do not check error string */,
 			// javac options
-			JavacTestOptions.Excuse.EclipseHasSomeMoreWarnings /* javac test options */);	
+			JavacTestOptions.Excuse.EclipseHasSomeMoreWarnings /* javac test options */);
 	}
 
 	protected void myWriteFiles(String[] testFiles) {
@@ -498,7 +498,7 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 			setName(testName);
 		}
 	}
-	
+
 	protected String getTestResourcePath(String filename) {
         try
         {

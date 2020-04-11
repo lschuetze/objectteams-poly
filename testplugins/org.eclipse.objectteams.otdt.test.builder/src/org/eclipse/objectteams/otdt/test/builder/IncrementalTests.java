@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -37,10 +37,10 @@ import static org.eclipse.objectteams.otdt.tests.ClasspathUtil.getOTREPath;
 /**
  * This test class tests incremental compilation of teams and roles.
  */
-@SuppressWarnings("nls")  
+@SuppressWarnings("nls")
 public class IncrementalTests extends OTBuilderTests {
-    	
-    
+
+
 	public IncrementalTests(String name) {
 		super(name);
 	}
@@ -48,12 +48,12 @@ public class IncrementalTests extends OTBuilderTests {
 	public static Test suite() {
 		return buildTestSuite(IncrementalTests.class);
 	}
-	
+
 	/*
 	 */
 	public void testRemoveTeamType() throws JavaModelException {
 		System.out.println("***** testRemoveTeamType() *****");
-		IPath projectPath = env.addProject("Project", "1.5"); 
+		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, getOTREPath(this.weavingScheme));
 
@@ -64,12 +64,12 @@ public class IncrementalTests extends OTBuilderTests {
 		env.setOutputFolder(projectPath, "bin");
 
 		env.addClass(root, "p", "AA",
-			"package p;	\n"+ 
+			"package p;	\n"+
 			"public team class AA {	}");
-			
 
-		IPath pathToAB = env.addClass(root, "p.AA", "R", 
-			"team package p.AA;	\n"+ 
+
+		IPath pathToAB = env.addClass(root, "p.AA", "R",
+			"team package p.AA;	\n"+
 			"   protected class R {}");
 
 
@@ -82,11 +82,11 @@ public class IncrementalTests extends OTBuilderTests {
 		/* build must detect, that R - although unchanged - becomes invalid. */
 		incrementalBuild(projectPath);
 		expectingProblemsFor(pathToAB);
-		expectingSpecificProblemFor(pathToAB, new Problem("", "Enclosing team p.AA not found for role file R (OTJLD 1.2.5(c)).", pathToAB, 13, 17, CategorizedProblem.CAT_TYPE, IMarker.SEVERITY_ERROR)); 
-		
+		expectingSpecificProblemFor(pathToAB, new Problem("", "Enclosing team p.AA not found for role file R (OTJLD 1.2.5(c)).", pathToAB, 13, 17, CategorizedProblem.CAT_TYPE, IMarker.SEVERITY_ERROR));
+
 		/* Restore team AA */
 		env.addClass(root, "p", "AA",
-				"package p;	\n"+ 
+				"package p;	\n"+
 				"public team class AA {}");
 
 		incrementalBuild(projectPath);
@@ -96,7 +96,7 @@ public class IncrementalTests extends OTBuilderTests {
 	 */
 	public void testRemoveRoleType() throws JavaModelException {
 		System.out.println("***** testRemoveRoleType() *****");
-		IPath projectPath = env.addProject("Project", "1.5"); 
+		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, getOTREPath(this.weavingScheme));
 
@@ -128,8 +128,8 @@ public class IncrementalTests extends OTBuilderTests {
 		/* build must detect, that AB - although unchanged - becomes invalid. */
 		incrementalBuild(projectPath);
 		expectingProblemsFor(pathToAB);
-		expectingSpecificProblemFor(pathToAB, new Problem("", "RA cannot be resolved to a type", pathToAB, 75, 77, CategorizedProblem.CAT_TYPE, IMarker.SEVERITY_ERROR)); 
-		
+		expectingSpecificProblemFor(pathToAB, new Problem("", "RA cannot be resolved to a type", pathToAB, 75, 77, CategorizedProblem.CAT_TYPE, IMarker.SEVERITY_ERROR));
+
 		/* Restore role AA.RA */
 		env.addClass(root, "p", "AA",
 				"package p;	\n"+
@@ -141,7 +141,7 @@ public class IncrementalTests extends OTBuilderTests {
 	}
 	public void testRemoveRoleFile() throws JavaModelException {
 		System.out.println("***** testRemoveRoleFile() *****");
-		IPath projectPath = env.addProject("Project", "1.5"); 
+		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, getOTREPath(this.weavingScheme));
 
@@ -173,8 +173,8 @@ public class IncrementalTests extends OTBuilderTests {
 		/* build must detect, that AB - although unchanged - becomes invalid -- but no further errors/exceptions */
 		incrementalBuild(projectPath);
 		expectingProblemsFor(pathToOuterSub);
-		expectingSpecificProblemFor(pathToOuterSub, new Problem("", "Nested cannot be resolved to a type", pathToOuterSub, 58, 64, CategorizedProblem.CAT_TYPE, IMarker.SEVERITY_ERROR)); 
-		
+		expectingSpecificProblemFor(pathToOuterSub, new Problem("", "Nested cannot be resolved to a type", pathToOuterSub, 58, 64, CategorizedProblem.CAT_TYPE, IMarker.SEVERITY_ERROR));
+
 	}
 	/*
 	 */
@@ -223,11 +223,11 @@ public class IncrementalTests extends OTBuilderTests {
 		/* build must detect, that the use of AB - although AB is unchanged - becomes invalid. */
 		incrementalBuild(projectPath);
 		expectingProblemsFor(pathToM);
-		expectingSpecificProblemFor(pathToM, new Problem("", "The method foo() is undefined for the type RA<@tthis[AB]>", pathToM, 68, 71, CategorizedProblem.CAT_MEMBER, IMarker.SEVERITY_ERROR)); 
+		expectingSpecificProblemFor(pathToM, new Problem("", "The method foo() is undefined for the type RA<@tthis[AB]>", pathToM, 68, 71, CategorizedProblem.CAT_MEMBER, IMarker.SEVERITY_ERROR));
 
 		/* Restore method AA.RA.foo */
 		env.addClass(root, "p", "AA",
-				"package p;	\n"+ 
+				"package p;	\n"+
 				"public team class AA {	\n"+
 				"   public class RA { \n"+
 				"       public void foo() {}\n"+
@@ -236,19 +236,19 @@ public class IncrementalTests extends OTBuilderTests {
 		incrementalBuild(projectPath);
 		expectingNoProblems();
 	}
-	
+
 	/*
 	 */
 	public void testModifyTSuperRole1() throws JavaModelException {
 		System.out.println("***** testModifyTSuperRole1() *****");
-		IPath projectPath = env.addProject("Project", "1.5"); 
+		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, getOTREPath(this.weavingScheme));
 
 		// remove old package fragment root so that names don't collide
-		env.removePackageFragmentRoot(projectPath, ""); 
+		env.removePackageFragmentRoot(projectPath, "");
 
-		IPath root = env.addPackageFragmentRoot(projectPath, "src"); 
+		IPath root = env.addPackageFragmentRoot(projectPath, "src");
 		env.setOutputFolder(projectPath, "bin");
 
 		env.addClass(root, "p", "AA",
@@ -279,7 +279,7 @@ public class IncrementalTests extends OTBuilderTests {
 		/* build must detect, that AB - although unchanged - becomes invalid through a self-call. */
 		incrementalBuild(projectPath);
 		expectingProblemsFor(pathToAB);
-		expectingSpecificProblemFor(pathToAB, new Problem("", "The method bar() is undefined for the type AB.R", pathToAB, 94, 97, CategorizedProblem.CAT_MEMBER, IMarker.SEVERITY_ERROR)); 
+		expectingSpecificProblemFor(pathToAB, new Problem("", "The method bar() is undefined for the type AB.R", pathToAB, 94, 97, CategorizedProblem.CAT_MEMBER, IMarker.SEVERITY_ERROR));
 
 		/* Restore method AA.R.bar */
 		env.addClass(root, "p", "AA",
@@ -292,36 +292,36 @@ public class IncrementalTests extends OTBuilderTests {
 		incrementalBuild(projectPath);
 		expectingNoProblems();
 	}
-	
+
 	/*
 	 * The body of a tsuper role is modified.
 	 */
 	public void testModifyTSuperRole2() throws Exception {
 		System.out.println("***** testModifyTSuperRole2() *****");
-		IPath projectPath = env.addProject("Project", "1.5"); 
+		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, getOTREPath(this.weavingScheme));
 
 		// remove old package fragment root so that names don't collide
-		env.removePackageFragmentRoot(projectPath, ""); 
+		env.removePackageFragmentRoot(projectPath, "");
 
-		IPath root = env.addPackageFragmentRoot(projectPath, "src"); 
+		IPath root = env.addPackageFragmentRoot(projectPath, "src");
 		env.setOutputFolder(projectPath, "bin");
 
-		env.addClass(root, "p", "AA", 
-			"package p;	\n"+ 
-			"public team class AA {	\n"+ 
+		env.addClass(root, "p", "AA",
+			"package p;	\n"+
+			"public team class AA {	\n"+
 			"   protected class R {\n" +
 			"       String bar() { return \"NOK\"; }\n"+
 			"}}");
 
 		env.addClass(root, "p", "AB",
-			"package p;	\n"+ 
+			"package p;	\n"+
 			"public team class AB extends AA {\n"+
 			"   protected class R {\n"+
-			"       protected String foo() { return this.bar(); }\n"+ 
-			"   }\n"+ 
-			"   public static String test() {\n"+ 
+			"       protected String foo() { return this.bar(); }\n"+
+			"   }\n"+
+			"   public static String test() {\n"+
 			"      return new AB().new R().foo();\n"+
 			"   }\n"+
 			"}");
@@ -332,16 +332,16 @@ public class IncrementalTests extends OTBuilderTests {
 
 		/* Change method R.bar() */
 		env.addClass(root, "p", "AA",
-			"package p;	\n"+ 
-			"public team class AA {\n" + 
-			"   protected class R {\n" + 
+			"package p;	\n"+
+			"public team class AA {\n" +
+			"   protected class R {\n" +
 			"       String bar() { return \"OK\"; }\n"+
 			"}}");
 
 		/* build must achieve that AB - although unchanged - behaves differently. */
 		incrementalBuild(projectPath);
 		expectingNoProblems();
-		
+
 		IJavaProject project = JavaCore.create(env.getProject("Project"));
 		try (OTLaunchEnvironment launcher = new OTLaunchEnvironment(
 				env.getWorkspaceRootPath(),
@@ -352,7 +352,7 @@ public class IncrementalTests extends OTBuilderTests {
 		// cleanup:
 		System.gc();
 	}
-	
+
 	/*
 	 * The body of a tsuper role is modified -- three levels.
 	 */
@@ -362,7 +362,7 @@ public class IncrementalTests extends OTBuilderTests {
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, getOTREPath(this.weavingScheme));
 
-		// remove old package fragment root so that names don't collide 
+		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, "");
 
 		IPath root = env.addPackageFragmentRoot(projectPath, "src");
@@ -377,10 +377,10 @@ public class IncrementalTests extends OTBuilderTests {
 			"       }\n"+
 			"}}");
 
-		env.addClass(root, "p", "AB", 
+		env.addClass(root, "p", "AB",
 				"package p;	\n"+
 				"public team class AB extends AA {}");
-		
+
 		env.addClass(root, "p", "AC",
 			"package p;	\n"+
 			"public team class AC extends AB {\n"+
@@ -407,7 +407,7 @@ public class IncrementalTests extends OTBuilderTests {
 		/* build must achieve that AB - although unchanged - behaves differently. */
 		incrementalBuild(projectPath);
 		expectingNoProblems();
-		
+
 		IJavaProject project = JavaCore.create(env.getProject("Project"));
 		try (OTLaunchEnvironment launcher = new OTLaunchEnvironment(
 				env.getWorkspaceRootPath(),
@@ -420,18 +420,18 @@ public class IncrementalTests extends OTBuilderTests {
 	}
 
 	/** A playedBy declaration is added to a super role file.
-	 *  Witness for NPE in RoleModel.getBaseclassAttributename. 
+	 *  Witness for NPE in RoleModel.getBaseclassAttributename.
 	 */
 	public void testModifySuperRole1() throws JavaModelException {
 		System.out.println("***** testModifySuperRole1() *****");
-		IPath projectPath = env.addProject("Project", "1.5"); 
+		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, getOTREPath(this.weavingScheme));
 
 		// remove old package fragment root so that names don't collide
-		env.removePackageFragmentRoot(projectPath, ""); 
+		env.removePackageFragmentRoot(projectPath, "");
 
-		IPath root = env.addPackageFragmentRoot(projectPath, "src"); 
+		IPath root = env.addPackageFragmentRoot(projectPath, "src");
 		env.setOutputFolder(projectPath, "bin");
 
 		env.addClass(root, "p", "AA",
@@ -471,20 +471,20 @@ public class IncrementalTests extends OTBuilderTests {
 		incrementalBuild(projectPath);
 		expectingNoProblems();
 	}
-	
-	/** 
-	 * A sibling role is modified causing a binary role to fail generating callins. 
+
+	/**
+	 * A sibling role is modified causing a binary role to fail generating callins.
 	 */
 	public void testModifySiblingRole1() throws JavaModelException {
 		System.out.println("***** testModifySiblingRole1() *****");
-		IPath projectPath = env.addProject("Project", "1.5"); 
+		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, getOTREPath(this.weavingScheme));
 
 		// remove old package fragment root so that names don't collide
-		env.removePackageFragmentRoot(projectPath, ""); 
+		env.removePackageFragmentRoot(projectPath, "");
 
-		IPath root = env.addPackageFragmentRoot(projectPath, "src"); 
+		IPath root = env.addPackageFragmentRoot(projectPath, "src");
 		env.setOutputFolder(projectPath, "bin");
 
 		env.addClass(root, "p", "B",
@@ -526,7 +526,7 @@ public class IncrementalTests extends OTBuilderTests {
 		incrementalBuild(projectPath);
 		expectingNoProblems();
 	}
-	
+
 	/*
 	 * The team with a role file is modified
 	 */
@@ -537,20 +537,20 @@ public class IncrementalTests extends OTBuilderTests {
 		env.addExternalJar(projectPath, getOTREPath(this.weavingScheme));
 
 		// remove old package fragment root so that names don't collide
-		env.removePackageFragmentRoot(projectPath, ""); 
+		env.removePackageFragmentRoot(projectPath, "");
 
 		IPath root = env.addPackageFragmentRoot(projectPath, "src");
 		env.setOutputFolder(projectPath, "bin");
 
-		env.addClass(root, "p", "B", 
-				"package p;	\n"+   
-				"public class B {	\n"+  
+		env.addClass(root, "p", "B",
+				"package p;	\n"+
+				"public class B {	\n"+
 				"    String bar() { return \"NOK\"; }\n"+
 				"}");
 
-		env.addClass(root, "p", "AA", 
-			"package p;	\n"+   
-			"public team class AA {	\n"+  
+		env.addClass(root, "p", "AA",
+			"package p;	\n"+
+			"public team class AA {	\n"+
 			"   public static String test() {\n"+
 			"        new AA();\n"+
 			"        return new B().bar();\n"+
@@ -562,8 +562,8 @@ public class IncrementalTests extends OTBuilderTests {
 			"protected class R playedBy B {\n"+
 			"   @SuppressWarnings(\"basecall\")\n"+
 			"   callin String foo() { return \"OK\"; }\n"+
-			"   foo <- replace bar;\n"+  
-			"}"); 
+			"   foo <- replace bar;\n"+
+			"}");
 
 
 		fullBuild(projectPath);
@@ -571,9 +571,9 @@ public class IncrementalTests extends OTBuilderTests {
 
 		/* add constructor */
 
-		env.addClass(root, "p", "AA", 
-			"package p;	\n"+   
-			"public team class AA {	\n"+  
+		env.addClass(root, "p", "AA",
+			"package p;	\n"+
+			"public team class AA {	\n"+
 			"   public AA() { this.activate(); }\n"+
 			"   public static String test() {\n"+
 			"        new AA();\n"+
@@ -584,7 +584,7 @@ public class IncrementalTests extends OTBuilderTests {
 		/* build must achieve that R - although unchanged - is compiled into AA. */
 		incrementalBuild(projectPath);
 		expectingNoProblems();
-		
+
 		IJavaProject project = JavaCore.create(env.getProject("Project"));
 		try (OTLaunchEnvironment launcher = new OTLaunchEnvironment(
 				env.getWorkspaceRootPath(),
@@ -596,7 +596,7 @@ public class IncrementalTests extends OTBuilderTests {
 		// cleanup:
 		System.gc();
 	}
-	
+
 	public void testAddRoFiToCompiledTeam()
 		throws JavaModelException
 	{
@@ -605,7 +605,7 @@ public class IncrementalTests extends OTBuilderTests {
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, getOTREPath(this.weavingScheme));
 
-		// remove old package fragment root so that names don't collide 
+		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, "");
 
 		IPath root = env.addPackageFragmentRoot(projectPath, "src");
@@ -619,7 +619,7 @@ public class IncrementalTests extends OTBuilderTests {
 			"          return \"NOK\";\n"+
 			"       }\n"+
 			"}}");
-		
+
 		fullBuild(projectPath);
 		expectingNoProblems();
 
@@ -630,7 +630,7 @@ public class IncrementalTests extends OTBuilderTests {
 				"       return \"NOK\";\n"+
 				"    }\n"+
 				"}");
-		
+
 		/* build must achieve that AA - although unchanged - is recompiled. */
 		incrementalBuild(projectPath);
 		expectingNoProblems();
@@ -644,12 +644,12 @@ public class IncrementalTests extends OTBuilderTests {
 				"       return \"OK\";\n"+
 				"    }\n"+
 				"}");
-		
+
 		/* build must(?) achieve that AA - although unchanged - is recompiled. */
 		incrementalBuild(projectPath);
 		expectingNoProblems();
 	}
-	
+
 	public void testAddRoFiToBrokenTeam()
 		throws JavaModelException
 	{
@@ -657,23 +657,23 @@ public class IncrementalTests extends OTBuilderTests {
 		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, getOTREPath(this.weavingScheme));
-	
-		// remove old package fragment root so that names don't collide 
+
+		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, "");
-	
+
 		IPath root = env.addPackageFragmentRoot(projectPath, "src");
 		env.setOutputFolder(projectPath, "bin");
-	
+
 		// a broken team:
 		env.addClass(root, "p", "AA",
 			"package p;	\n"+
 			"public team class AA {	\n"+
 			"   int abstract foo;// syntax error\n"+
 			"}");
-		
+
 		fullBuild(projectPath);
 		expectingProblemsFor(root);
-	
+
 		// add a role file:
 		env.addClass(root, "p/AA", "ExtRole",
 				"team package p.AA;	\n"+
@@ -682,11 +682,11 @@ public class IncrementalTests extends OTBuilderTests {
 				"       return \"NOK\";\n"+
 				"    }\n"+
 				"}");
-		
+
 		/* build must achieve that errors in AA are detected again. */
 		incrementalBuild(projectPath);
 		expectingProblemsFor(root);
-		
+
 		/* also break role file: */
 		IPath rofi = env.addClass(root, "p/AA", "ExtRole",
 				"team package p.AA;	\n"+
@@ -699,7 +699,7 @@ public class IncrementalTests extends OTBuilderTests {
 		/* now everything is broken. */
 		incrementalBuild(projectPath);
 		expectingProblemsFor(root);
-	
+
 		// correct the syntax error:
 		env.addClass(root, "p", "AA",
 				"package p;	\n"+
@@ -711,7 +711,7 @@ public class IncrementalTests extends OTBuilderTests {
 		incrementalBuild(projectPath);
 		expectingProblemsFor(rofi);
 	}
-	
+
 	public void testBreakTeamWithRoFi()
 		throws JavaModelException
 	{
@@ -719,13 +719,13 @@ public class IncrementalTests extends OTBuilderTests {
 		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, getOTREPath(this.weavingScheme));
-	
-		// remove old package fragment root so that names don't collide 
+
+		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, "");
-	
+
 		IPath root = env.addPackageFragmentRoot(projectPath, "src");
 		env.setOutputFolder(projectPath, "bin");
-	
+
 		// team and role w/o errors:
 		env.addClass(root, "p", "AA",
 			"package p;	\n"+
@@ -740,10 +740,10 @@ public class IncrementalTests extends OTBuilderTests {
 				"       return \"OK\";\n"+
 				"    }\n"+
 				"}");
-		
+
 		fullBuild(projectPath);
 		expectingNoProblems();
-	
+
 		// introduce an error to the team:
 		env.addClass(root, "p", "AA",
 				"package p;	\n"+
@@ -754,7 +754,7 @@ public class IncrementalTests extends OTBuilderTests {
 		/* build must achieve that AA - although unchanged - is recompiled. */
 		incrementalBuild(projectPath);
 		expectingProblemsFor(root);
-	
+
 	}
 
 	public void testRoFiExtendsInline()
@@ -765,7 +765,7 @@ public class IncrementalTests extends OTBuilderTests {
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, getOTREPath(this.weavingScheme));
 
-		// remove old package fragment root so that names don't collide 
+		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, "");
 
 		IPath root = env.addPackageFragmentRoot(projectPath, "src");
@@ -781,7 +781,7 @@ public class IncrementalTests extends OTBuilderTests {
 			"}}");
 		// Note: declaring R as a nested team requires to process the predifined roles,
 		//       which caused a StackOverflowError previously.
-		
+
 		fullBuild(projectPath);
 		expectingNoProblems();
 
@@ -792,7 +792,7 @@ public class IncrementalTests extends OTBuilderTests {
 				"       return bar();\n"+
 				"    }\n"+
 				"}");
-		
+
 		// still OK.
 		incrementalBuild(projectPath);
 		expectingNoProblems();
@@ -806,13 +806,13 @@ public class IncrementalTests extends OTBuilderTests {
 				"          return \"OK\";\n"+
 				"       }\n"+
 				"}}");
-		
+
 		// no reason why this should find problems.
 		incrementalBuild(projectPath);
 		expectingNoProblems();
 	}
 	// see http://trac.objectteams.org/ot/ticket/89
-	public void testRemoveBoundBaseMethod() 	
+	public void testRemoveBoundBaseMethod()
 			throws JavaModelException
 	{
 		System.out.println("***** testRemoveBoundBaseMethod() *****");
@@ -820,7 +820,7 @@ public class IncrementalTests extends OTBuilderTests {
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, getOTREPath(this.weavingScheme));
 
-		// remove old package fragment root so that names don't collide 
+		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, "");
 
 		IPath root = env.addPackageFragmentRoot(projectPath, "src");
@@ -840,7 +840,7 @@ public class IncrementalTests extends OTBuilderTests {
 				"       bar <- after foo;\n"+
 				"   }\n"+
 				"}");
-		
+
 		fullBuild(projectPath);
 		expectingNoProblems();
 
@@ -853,11 +853,11 @@ public class IncrementalTests extends OTBuilderTests {
 		env.addClass(root, "p", "T2",
 				"package p;	\n"+
 				"public team class T2 extends T1 {}");
-		
+
 		// must detect, that callin binding in T1 is now invalid
 		incrementalBuild(projectPath);
 		expectingProblemsFor(pathToT1);
-		expectingSpecificProblemFor(pathToT1, new Problem("", "No method foo found in type p0.Base to resolve method designator (OTJLD 4.1(c)).", pathToT1, 137, 140, CategorizedProblem.CAT_MEMBER, IMarker.SEVERITY_ERROR)); 
+		expectingSpecificProblemFor(pathToT1, new Problem("", "No method foo found in type p0.Base to resolve method designator (OTJLD 4.1(c)).", pathToT1, 137, 140, CategorizedProblem.CAT_MEMBER, IMarker.SEVERITY_ERROR));
 
 		// restore:
 		env.addClass(root, "p0", "Base",
@@ -869,7 +869,7 @@ public class IncrementalTests extends OTBuilderTests {
 		expectingNoProblems();
 	}
 	// This scenario was observed to throw a CCE, see https://bugs.eclipse.org/311885
-	public void testPhantomRole() 	
+	public void testPhantomRole()
 			throws JavaModelException
 	{
 		System.out.println("***** testPhantomRole() *****");
@@ -877,7 +877,7 @@ public class IncrementalTests extends OTBuilderTests {
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, getOTREPath(this.weavingScheme));
 
-		// remove old package fragment root so that names don't collide 
+		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, "");
 
 		IPath root = env.addPackageFragmentRoot(projectPath, "src");
@@ -901,11 +901,11 @@ public class IncrementalTests extends OTBuilderTests {
 				"public team class TeamBug311885_2 extends TeamBug311885_1 {\n" +
     			"	public team class T12 {\n" +
     			"		protected class R3 {\n" +
-    			"           void m() {}\n" + 
+    			"           void m() {}\n" +
     			" 		}\n" +
     			" 	}\n" +
     			"}\n");
-		
+
 		fullBuild(projectPath);
 		expectingNoProblems();
 
@@ -915,7 +915,7 @@ public class IncrementalTests extends OTBuilderTests {
 				"public team class TeamBug311885_2 extends TeamBug311885_1 {\n" +
     			"	public team class T12 {\n" +
     			"		protected class R3 {\n" +
-    			"           void m() {	}\n" + 
+    			"           void m() {	}\n" +
     			" 		}\n" +
     			" 	}\n" +
     			"}\n");

@@ -28,10 +28,10 @@ public char[] superQualification;
 public char[] superSimpleName;
 public char superClassOrInterface;
 
-// set to CLASS_SUFFIX for only matching classes 
+// set to CLASS_SUFFIX for only matching classes
 // set to INTERFACE_SUFFIX for only matching interfaces
 // set to TYPE_SUFFIX for matching both classes and interfaces
-public char typeSuffix; 
+public char typeSuffix;
 public char[] pkgName;
 public char[] simpleName;
 public char[] enclosingTypeName;
@@ -64,7 +64,7 @@ public static char[] createIndexKey(
   	  if (Flags.isTeam(modifiers))
 		superTypeName = TEAM;
 	  else
-//MW + AK}	
+//MW + AK}
 		superTypeName = OBJECT;
 	char[] superSimpleName = CharOperation.lastSegment(superTypeName, '.');
 	char[] superQualification = null;
@@ -94,7 +94,7 @@ public static char[] createIndexKey(
 	char[] enclosingTypeName = CharOperation.concatWith(enclosingTypeNames, '$');
 	if (superQualification != null && CharOperation.equals(superQualification, packageName))
 		packageName = ONE_ZERO; // save some space
-	
+
 	char[] typeParameters = CharOperation.NO_CHAR;
 	int typeParametersLength = 0;
 	if (typeParameterSignatures != null) {
@@ -264,16 +264,16 @@ public char[][] getIndexCategories() {
 @Override
 public boolean matchesDecodedKey(SearchPattern decodedPattern) {
 	SuperTypeReferencePattern pattern = (SuperTypeReferencePattern) decodedPattern;
-	if (this.superRefKind == ONLY_SUPER_CLASSES && pattern.enclosingTypeName != ONE_ZERO/*not an anonymous*/) 
+	if (this.superRefKind == ONLY_SUPER_CLASSES && pattern.enclosingTypeName != ONE_ZERO/*not an anonymous*/)
 		// consider enumerations as classes, reject interfaces and annotations
-		if (pattern.superClassOrInterface == INTERFACE_SUFFIX 
-			|| pattern.superClassOrInterface == ANNOTATION_TYPE_SUFFIX) 
+		if (pattern.superClassOrInterface == INTERFACE_SUFFIX
+			|| pattern.superClassOrInterface == ANNOTATION_TYPE_SUFFIX)
 			return false;
 //{ObjectTeams: don't mix baseclass and super references
 	if ((this.superRefKind == ONLY_BASE_CLASSES) != (pattern.superClassOrInterface == BASECLASS_SUFFIX))
 		return false;
 // SH}
-	
+
 	if (pattern.superQualification != null)
 		if (!matchesName(this.superQualification, pattern.superQualification)) return false;
 

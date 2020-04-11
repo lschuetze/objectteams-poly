@@ -68,7 +68,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 	 * This form of ids is then stored in the attribute.
 	 * Stored ids are consumed and translated by OTREDyn to obtain those global IDs that uniquely identify the
 	 * base feature within a generated _OT$access or _OT$accessStatic method.
-	 * 
+	 *
 	 * AccessIds are generated during resolve and stored in these AST nodes:
 	 * - MethodSpec / FieldAccessSpec
 	 *   - From here it is directly picked up by CallinImplementorDyn to insert
@@ -322,7 +322,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
         int M_SIZE = this._weavingScheme == WeavingScheme.OTDRE ? 8 : 6;
         int F_SIZE = this._weavingScheme == WeavingScheme.OTDRE ? 9 : 7;
 		attributeSize += this._decapsulatedMethods.size() * (1+M_SIZE); // 1 byte kind, 3 names (+1 short for otredyn)
-		attributeSize += this._calloutToFields.size() * (1+F_SIZE);		// 1 byte kind, 1 byte flags, 3 names (+1 byte for otredyn) 
+		attributeSize += this._calloutToFields.size() * (1+F_SIZE);		// 1 byte kind, 1 byte flags, 3 names (+1 byte for otredyn)
 		attributeSize += this._superMethods.size() * 9;        			// 1 byte kind, 4 names
 		attributeSize += this._adaptedBaseclasses.size() * 3;  			// 1 name + 1 byte flag
 

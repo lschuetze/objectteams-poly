@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany, and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -43,20 +43,20 @@ import org.eclipse.jdt.internal.formatter.DefaultCodeFormatterOptions;
 import org.eclipse.objectteams.otdt.tests.AbstractJavaModelTests;
 import org.eclipse.text.edits.TextEdit;
 
-/** 
+/**
  * Test infra-structure copied from org.eclipse.jdt.core.tests.formatter.FormatterRegressionTests.
- * 
+ *
  * @author stephan
  */
 public class FormatterTests extends AbstractJavaModelTests {
-		
+
 	public static final int UNKNOWN_KIND = 0;
 	public static final String IN = "_in";
 	public static final String OUT = "_out";
 	public static final boolean DEBUG = false;
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	private long time;
-	
+
 	static {
 //		TESTS_NUMBERS = new int[] { 620 } ;
 //		TESTS_NAMES = new String{ "test005" };
@@ -68,7 +68,7 @@ public class FormatterTests extends AbstractJavaModelTests {
 	public FormatterTests(String name) {
 		super(name);
 	}
-	
+
 	/**
 	 * Returns the OS path to the directory that contains this plugin.
 	 */
@@ -85,7 +85,7 @@ public class FormatterTests extends AbstractJavaModelTests {
 	public String getSourceWorkspacePath() {
 		return getPluginDirectoryPath() +  java.io.File.separator + "workspace";
 	}
-	
+
 	private String runFormatter(CodeFormatter codeFormatter, String source, int kind, int indentationLevel, int offset, int length, String lineSeparator) {
 //		long time = System.currentTimeMillis();
 		TextEdit edit = codeFormatter.format(kind, source, offset, length, indentationLevel, lineSeparator);//$NON-NLS-1$
@@ -122,7 +122,7 @@ public class FormatterTests extends AbstractJavaModelTests {
 		if (DEBUG) {
 			this.time = System.currentTimeMillis();
 		}
-	}	
+	}
 
 	/**
 	 * Reset the jar placeholder and delete project.
@@ -133,7 +133,7 @@ public class FormatterTests extends AbstractJavaModelTests {
 			System.out.println("Time spent = " + (System.currentTimeMillis() - this.time));//$NON-NLS-1$
 		}
 		super.tearDown();
-	}	
+	}
 
 	private String getIn(String compilationUnitName) {
 		assertNotNull(compilationUnitName);
@@ -141,7 +141,7 @@ public class FormatterTests extends AbstractJavaModelTests {
 		assertTrue(dotIndex != -1);
 		return compilationUnitName.substring(0, dotIndex) + IN + compilationUnitName.substring(dotIndex);
 	}
-	
+
 	private String getOut(String compilationUnitName) {
 		assertNotNull(compilationUnitName);
 		int dotIndex = compilationUnitName.indexOf('.');
@@ -207,11 +207,11 @@ public class FormatterTests extends AbstractJavaModelTests {
 	public void test002() {
 		runTest("test002", "T1.java");//$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	public void test003() {
 		runTest("test003", "T1.java");//$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	public void test004() {
 		runTest("test004", "T1.java");//$NON-NLS-1$ //$NON-NLS-2$
 	}
@@ -223,15 +223,15 @@ public class FormatterTests extends AbstractJavaModelTests {
 	public void test006() {
 		runTest("test006", "T1.java");//$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	public void test007() {
 		runTest("test007", "Class1.java");//$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	public void testFlightBonus() {
 		runTest("testFlightBonus", "FlightBonusDialog.java");
 	}
-	
+
 	public void testBaseCall() {
 		runTest("testBaseCall", "MyTeam.java");
 	}

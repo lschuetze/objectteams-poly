@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -55,66 +55,66 @@ public class Test1 extends RetargetableFileBasedModelTest
             .getName());
         return suite;
     }
-    
+
     public void setUpSuite() throws Exception
     {
         super.setUpSuite();
         getTestSetting().setTeamClass("Team_1");
     }
-    
+
     protected void setUp() throws Exception
     {
 		super.setUp();
         getTestSetting().setUp();
     }
-    
+
     public void testExistenceOfTypesInJavaModel() throws JavaModelException
     {
         assertNotNull(getTestSetting().getTeamJavaElement());
         assertTrue(getTestSetting().getTeamJavaElement().exists());
-        
+
         assertNotNull(getTestSetting().getRoleJavaElement());
-        assertTrue(getTestSetting().getRoleJavaElement().exists()); 
+        assertTrue(getTestSetting().getRoleJavaElement().exists());
     }
-    
+
     public void testExistenceofTypeInOTModel() throws JavaModelException
     {
         assertNotNull(getTestSetting().getRoleJavaElement());
         assertTrue(getTestSetting().getRoleJavaElement().exists());
-        
+
         IOTType roleOTElem = OTModelManager.getOTElement(getTestSetting().getRoleJavaElement());
         assertNotNull(roleOTElem);
     }
-    
+
     public void testRoleProperty() throws JavaModelException
     {
         assertNotNull(getTestSetting().getRoleJavaElement());
         assertTrue(getTestSetting().getRoleJavaElement().exists());
-        
+
         IOTType roleOTElem = OTModelManager.getOTElement(getTestSetting().getRoleJavaElement());
         assertNotNull(roleOTElem);
-        
+
         assertTrue(roleOTElem.isRole());
         assertTrue(roleOTElem instanceof IRoleType);
     }
-    
+
     public void testRelationTeamToRole() throws JavaModelException
     {
         assertNotNull(getTestSetting().getTeamJavaElement());
         assertTrue(getTestSetting().getTeamJavaElement().exists());
-        
+
         assertNotNull(getTestSetting().getRoleJavaElement());
         assertTrue(getTestSetting().getRoleJavaElement().exists());
-        
+
         IOTType teamOTElem = OTModelManager.getOTElement(getTestSetting().getTeamJavaElement());
         assertNotNull(teamOTElem);
-        
+
         IOTType roleOTElem = OTModelManager.getOTElement(getTestSetting().getRoleJavaElement());
         assertNotNull(roleOTElem);
 
 //{OTModelUpdate
         IJavaElement[] childrenOfTeam = teamOTElem.getChildren();
-//haebor}        
+//haebor}
         assertNotNull(childrenOfTeam);
         if (roleOTElem instanceof IRoleFileType) // role files are not members of the team!
 	        assertTrue(childrenOfTeam.length == 0);
@@ -123,11 +123,11 @@ public class Test1 extends RetargetableFileBasedModelTest
             assertEquals(childrenOfTeam[0].getElementName(), roleOTElem.getElementName());
         }
 
-//{OTModelUpdate        
+//{OTModelUpdate
         IType[] innerTypesOfTeam = teamOTElem.getInnerTypes();
-//haebor}        
+//haebor}
         assertNotNull(innerTypesOfTeam);
-        
+
         if (roleOTElem instanceof IRoleFileType) // role files are not members of the team!
 	        assertTrue(innerTypesOfTeam.length == 0);
         else {
@@ -135,24 +135,24 @@ public class Test1 extends RetargetableFileBasedModelTest
 	        assertEquals(innerTypesOfTeam[0].getElementName(), roleOTElem.getElementName());
         }
     }
-    
+
     public void testRelationRoleToTeam() throws JavaModelException
     {
         assertNotNull(getTestSetting().getTeamJavaElement());
         assertTrue(getTestSetting().getTeamJavaElement().exists());
-        
+
         assertNotNull(getTestSetting().getRoleJavaElement());
         assertTrue(getTestSetting().getRoleJavaElement().exists());
-        
+
         IOTType teamOTElem = OTModelManager.getOTElement(getTestSetting().getTeamJavaElement());
         assertNotNull(teamOTElem);
-        
+
         IOTType roleOTElem = OTModelManager.getOTElement(getTestSetting().getRoleJavaElement());
         assertNotNull(roleOTElem);
 
         assertTrue(roleOTElem instanceof IRoleType);
         IRoleType roleRoleOTElem = (IRoleType) roleOTElem;
-        
+
         assertEquals(roleRoleOTElem.getTeam(), teamOTElem);
         if (roleRoleOTElem instanceof IRoleFileType) {
             assertFalse(roleRoleOTElem.getParent().equals(teamOTElem)); // role file has CU as parent
@@ -161,20 +161,20 @@ public class Test1 extends RetargetableFileBasedModelTest
             assertEquals(roleRoleOTElem.getParent(), teamOTElem);
         }
     }
-    
+
     public void testGetRoles() throws JavaModelException
     {
         assertNotNull(getTestSetting().getTeamJavaElement());
         assertTrue(getTestSetting().getTeamJavaElement().exists());
-        
+
         IOTType teamOTElem = OTModelManager.getOTElement(getTestSetting().getTeamJavaElement());
         assertNotNull(teamOTElem);
 
         IType[] actual = teamOTElem.getRoleTypes();
         IType[] expected = getTestSetting().getRoleJavaElements();
-        
+
         assertEquals("Different number of roles!", expected.length, actual.length);
         assertTrue("Different set of roles!", compareTypes(expected, actual));
     }
-    
+
 }

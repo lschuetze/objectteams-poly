@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -54,7 +54,7 @@ public class Requestor extends Assert implements ICompilerRequestor {
 	public boolean showWarningToken = false;
 	HashMap<String, int[]> lineNumbers = new HashMap<String, int[]>();
 
-	
+
 public Requestor(boolean forceOutputGeneration, ICompilerRequestor clientRequestor, boolean showCategory, boolean showWarningToken, HashMap<String, int[]> lineNumbers) {
 	this.forceOutputGeneration = forceOutputGeneration;
 	this.clientRequestor = clientRequestor;
@@ -77,7 +77,7 @@ protected void outputClassFiles(CompilationResult unitResult) {
 			// retrieve the key and the corresponding classfile
 			ClassFile classFile = classFiles[i];
 			if (outputPath != null) {
-				String relativeName = 
+				String relativeName =
 					new String(classFile.fileName()).replace('/', File.separatorChar) + ".class";
 				try {
 					org.eclipse.jdt.internal.compiler.util.Util.writeToDisk(true, outputPath, relativeName, classFile);
@@ -106,7 +106,7 @@ protected void outputClassFiles(CompilationResult unitResult) {
 						Assert.assertEquals("wrong number of line numbers", expectedNumbers.length, table.length);
 						for (int n=0; n<expectedNumbers.length; n++)
 							Assert.assertEquals("wrong line number", expectedNumbers[n], table[n][1]);
-					}					
+					}
 				}
 			}
 		}

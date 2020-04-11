@@ -95,7 +95,7 @@ public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
 		RoleModel[] rolesToSort = new RoleModel[caseObjects.length];
 		System.arraycopy(caseObjects, 0, rolesToSort, 0, caseObjects.length);
 		caseObjects = Sorting.sortRoles(rolesToSort);
-		
+
 		Statement[] stmts = new Statement[2];
 	    Expression baseArg = gen.singleNameReference(baseVarName());
 	    ReferenceBinding castType = null;
@@ -107,10 +107,10 @@ public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
 	    	baseArg = gen.castExpression(baseArg, gen.baseTypeReference(castType), CastExpression.RAW);
 	    char[] LOCAL_BASE_NAME = "_OT$local$base".toCharArray(); //$NON-NLS-1$
 		stmts[0] = gen.localVariable(LOCAL_BASE_NAME, gen.baseclassReference(staticBaseType), baseArg);
-		
+
 		IfStatement prevIf = null;
 
-	    /* 
+	    /*
 	     *   if (_OT$local$base instanceof MySubBaseA)
 	     *       <action for MySubRoleA playedBy MySubBaseA>
 	     *   else if (_OT$local$base instanceof MySubBaseB)

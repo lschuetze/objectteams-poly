@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -56,8 +56,8 @@ public void testCompletionBaseclass1() throws JavaModelException {
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 {\n" +
             "public class CompletionRole playedBy CompletionB");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "CompletionB";
@@ -78,8 +78,8 @@ public void testCompletionBaseclass2() throws JavaModelException {
     		"     String toString() => String toString();\n" +
     		"}\n" +
             "public class CompletionRoleB playedBy CompletionB");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "CompletionB";
@@ -99,10 +99,10 @@ public void testCompletionSuperRole() throws JavaModelException {
             "  public class ASuperRole playedBy CompletionBaseclass {\n" +
     		"     String toString() => String toString();\n" +
     		"  }\n" +
-    		"  public interface ASuperRoleIfc {}\n" + // don't match this 
+    		"  public interface ASuperRoleIfc {}\n" + // don't match this
             "  public class CompletionRoleB extends ASuperR {}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "ASuperR";
@@ -124,8 +124,8 @@ public void testCompletionSuperRoleInterface() throws JavaModelException {
     		"  }\n" +
     		"  public class ISuperRoleClass {}\n" + // don't match this
             "  public class CompletionRoleB implements ISuperR {}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "ISuperR";
@@ -147,8 +147,8 @@ public void testCompletionSuperRoles() throws JavaModelException {
     		"  }\n" +
     		"  public class XRoleClass {}\n" +
             "  public class XSubRole extends {}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "extends ";
@@ -170,14 +170,14 @@ public void testCompletionBaseclass_Trac56() throws JavaModelException {
             "public team class Trac56_SubTeam extends Trac56_SuperTeam {\n" +
 			"     public class SubRole playedBy SuperR" +
     		"}\n");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "SuperR";
     int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
-    
+
     // ensure that no illegal playedBy to role of the same (or super) team is proposed:
 	assertResults("", requestor.getResults());
 }
@@ -192,15 +192,15 @@ public void testCompletionBaseGuard1() throws JavaModelException {
 			"        void nothing() {}\n" +
 			"    }\n" +
     		"}\n");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "base.ch";
     int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
-    
-	
+
+
 	assertResults(
 		"check[METHOD_REF]{check(), LCompletionBaseclass;, ()Z, check, null, "+
 		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_EXACT_EXPECTED_TYPE+R_NON_STATIC+R_NON_RESTRICTED)+"}",
@@ -218,15 +218,15 @@ public void testCompletionBaseGuard2() throws JavaModelException {
 			"    {\n" +
 			"    }\n" +
     		"}\n");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "base.ch";
     int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
-    
-	
+
+
 	assertResults(
 		"check[METHOD_REF]{check(), LCompletionBaseclass;, ()Z, check, null, "+
 		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_NON_STATIC+R_NON_RESTRICTED)+"}",
@@ -242,7 +242,7 @@ public void testCompletionBaseclassDecapsulation() throws JavaModelException {
 
 		options.put(JavaCore.CODEASSIST_VISIBILITY_CHECK, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
-	
+
 		this.wc = getWorkingCopy(
 	            "/Completion/src/CompletionTeam3.java",
 	            "public team class CompletionTeam3 {\n" +
@@ -250,14 +250,14 @@ public void testCompletionBaseclassDecapsulation() throws JavaModelException {
 	    		"     String toString() => String toString();\n" +
 	    		"}\n" +
 	            "public class CompletionRoleB playedBy CompletionI");
-	    
-	    
+
+
 	    CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
 	    String str = this.wc.getSource();
 	    String completeBehind = "CompletionI";
 	    int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	    this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 		assertResults(
 			"CompletionInvisibleBaseclass[TYPE_REF]{p.CompletionInvisibleBaseclass, p, Lp.CompletionInvisibleBaseclass;, null, null, "+
 			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED)+"}",
@@ -276,7 +276,7 @@ public void testCompletionBaseclassDecapsulation2() throws JavaModelException {
 
 		options.put(JavaCore.CODEASSIST_VISIBILITY_CHECK, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
-	
+
 		this.wc = getWorkingCopy(
 	            "/Completion/src/CompletionTeam3.java",
 	            "public team class CompletionTeam3 {\n" +
@@ -284,14 +284,14 @@ public void testCompletionBaseclassDecapsulation2() throws JavaModelException {
 	    		"     String toString() => String toString();\n" +
 	    		"  }\n" +
 	            "  public class CompletionInvisibleBaseclass playedBy CompletionI");
-	    
-	    
+
+
 	    CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
 	    String str = this.wc.getSource();
 	    String completeBehind = "CompletionI";
 	    int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	    this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 		assertResults(
 			"CompletionInvisibleBaseclass[TYPE_REF]{p.CompletionInvisibleBaseclass, p, Lp.CompletionInvisibleBaseclass;, null, null, "+
 			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED)+"}",
@@ -309,8 +309,8 @@ public void testCompletionKeywordPlayedBy1() throws JavaModelException {
     		"     String toString() => String toString();\n" +
     		"  }\n" +
             "  public class CompletionRoleB pla");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "pla";
@@ -329,8 +329,8 @@ public void testCompletionKeywordPlayedBy2() throws JavaModelException {
             "/Completion/src/CompletionSuperTeam/ExternalRole.java",
             "team package CompletionSuperTeam;\n"+
             "public class ExternalRole pla");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "pla";
@@ -347,8 +347,8 @@ public void testCompletionKeywordPlayedBy3() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionClassKW3.java",
             "public class CompletionClassKW3 pla");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "pla";
@@ -364,8 +364,8 @@ public void testCompletionKeywordPlayedBy4() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeamKW4.java",
             "public team class CompletionTeamKW4 pla");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "pla";
@@ -386,8 +386,8 @@ public void testCompletionTypeReference1() throws JavaModelException {
             "  public class CompletionTRoleA playedBy CompletionTBaseclass {\n" +
     		"     String toString() => String toString();\n" +
     		"     protected CompletionT");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "CompletionT";
@@ -412,8 +412,8 @@ public void testCompletionTypeReference2() throws JavaModelException {
             "  public class CompletionRoleA playedBy CompletionBaseclass {\n" +
     		"     String toString() => ;\n"+
     		"     protected Seriali");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "Seriali";
@@ -427,14 +427,14 @@ public void testCompletionTypeReference2() throws JavaModelException {
 }
 
 /** A base method spec with return type and beginning of the selector is searched. */
-public void testCompletionMethodSpecLong1() throws JavaModelException {		
+public void testCompletionMethodSpecLong1() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 {\n" +
             "public class CompletionRole playedBy CompletionBaseclass {\n" +
             "  String toString() => String toStr");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "toStr";
@@ -448,15 +448,15 @@ public void testCompletionMethodSpecLong1() throws JavaModelException {
 }
 
 /** A base method spec with return type and beginning of the selector is searched - CALLIN. */
-public void testCompletionMethodSpecLong2() throws JavaModelException {		
+public void testCompletionMethodSpecLong2() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 {\n" +
             "public class CompletionRole playedBy CompletionBaseclass {\n" +
             "  void foo() {}\n "+
             "  void foo() <- after String toStr ");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "toStr";
@@ -470,15 +470,15 @@ public void testCompletionMethodSpecLong2() throws JavaModelException {
 }
 
 /** A base method spec with the beginning of the selector is searched. */
-public void testCompletionMethodSpecLong3() throws JavaModelException {		
+public void testCompletionMethodSpecLong3() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 {\n" +
             "public class CompletionRole playedBy CompletionBaseclass {\n" +
             "  int myHashCode() -> hash\n"+
             "}}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "hash";
@@ -492,14 +492,14 @@ public void testCompletionMethodSpecLong3() throws JavaModelException {
 }
 
 /** A base method spec with the beginning of the selector is searched - callin. */
-public void testCompletionMethodSpecLong4() throws JavaModelException {		
+public void testCompletionMethodSpecLong4() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 {\n" +
             "public class CompletionRole playedBy CompletionBaseclass {\n" +
             "  int myHashCode() <- after hash");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "hash";
@@ -512,7 +512,7 @@ public void testCompletionMethodSpecLong4() throws JavaModelException {
 		requestor.getResults());
 }
 /** A type in a RHS method spec signature is completed. */
-public void testCompletionMethodSpecLong5() throws JavaModelException {		
+public void testCompletionMethodSpecLong5() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 {\n" +
@@ -520,8 +520,8 @@ public void testCompletionMethodSpecLong5() throws JavaModelException {
             "    int myHashCode() <- after void foo(CompletionB\n" +
             "  }\n"+
             "}\n");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "CompletionB";
@@ -534,7 +534,7 @@ public void testCompletionMethodSpecLong5() throws JavaModelException {
 		requestor.getResults());
 }
 /** A callin binding guard is completed. */
-public void testCompletionBindingGuard() throws JavaModelException {		
+public void testCompletionBindingGuard() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 {\n" +
@@ -543,8 +543,8 @@ public void testCompletionBindingGuard() throws JavaModelException {
             "        when (CompletionB"+
             "  }\n"+
             "}\n");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "(CompletionB";
@@ -557,14 +557,14 @@ public void testCompletionBindingGuard() throws JavaModelException {
 		requestor.getResults());
 }
 
-public void testCompletionMethodSpecShort1() throws JavaModelException {		
+public void testCompletionMethodSpecShort1() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 {\n" +
             "public class CompletionRole playedBy CompletionBaseclass {\n" +
             "  toString => toStri");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "toStri";
@@ -578,7 +578,7 @@ public void testCompletionMethodSpecShort1() throws JavaModelException {
 }
 
 /* prefix of base method spec typed. */
-public void testCompletionMethodSpecShort2() throws JavaModelException {		
+public void testCompletionMethodSpecShort2() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 {\n" +
@@ -586,8 +586,8 @@ public void testCompletionMethodSpecShort2() throws JavaModelException {
             "    void bar() {};\n" +
             "    bar <- after fub\n"+
             "}}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "fub";
@@ -601,15 +601,15 @@ public void testCompletionMethodSpecShort2() throws JavaModelException {
 }
 
 
-public void testCompletionCalloutDeclaration1() throws JavaModelException {		
+public void testCompletionCalloutDeclaration1() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 {\n" +
             "public class CompletionRole playedBy CompletionBaseclass {\n" +
             "fub \n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "fub";
@@ -624,15 +624,15 @@ public void testCompletionCalloutDeclaration1() throws JavaModelException {
 		requestor.getResults());
 }
 // same as above but without a typed prefix
-public void testCompletionCalloutDeclaration1a() throws JavaModelException {		
+public void testCompletionCalloutDeclaration1a() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 {\n" +
             "public class CompletionRole playedBy CompletionBaseclass {\n" +
             "/*here*/ \n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "/*here*/ ";
@@ -643,7 +643,7 @@ public void testCompletionCalloutDeclaration1a() throws JavaModelException {
     assertTrue("Expect more than one proposal", results.length > 1);
     for (int i = 0; i < results.length; i++) {
 		if (results[i].startsWith("fubar")) {
-			assertEquals("Expected proposal",  
+			assertEquals("Expected proposal",
 					"fubar[CALLOUT_DECLARATION]{long fubar(int fred, String zork) -> long fubar(int fred, String zork);, LCompletionBaseclass;, (ILjava.lang.String;)J, fubar, (fred, zork), " +
 					(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 					results[i]);
@@ -653,7 +653,7 @@ public void testCompletionCalloutDeclaration1a() throws JavaModelException {
     fail("Expected proposal not found");
 }
 // callout-override
-public void testCompletionCalloutDeclaration2() throws JavaModelException {		
+public void testCompletionCalloutDeclaration2() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 {\n" +
@@ -662,8 +662,8 @@ public void testCompletionCalloutDeclaration2() throws JavaModelException {
             "      fub \n"+
             "   }\n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "fub";
@@ -680,7 +680,7 @@ public void testCompletionCalloutDeclaration2() throws JavaModelException {
 		requestor.getResults());
 }
 //callout-non-override (implicitly inherited abstract method)
-public void testCompletionCalloutDeclaration3() throws JavaModelException {		
+public void testCompletionCalloutDeclaration3() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 extends CompletionSuperTeam {\n" +
@@ -688,8 +688,8 @@ public void testCompletionCalloutDeclaration3() throws JavaModelException {
             "      fub \n"+
             "   }\n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "fub";
@@ -706,15 +706,15 @@ public void testCompletionCalloutDeclaration3() throws JavaModelException {
 		requestor.getResults());
 }
 // static methods
-public void testCompletionCalloutDeclaration4() throws JavaModelException {		
+public void testCompletionCalloutDeclaration4() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 {\n" +
             "public class CompletionRole playedBy CompletionBaseclass {\n" +
             "mySt \n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "mySt";
@@ -729,15 +729,15 @@ public void testCompletionCalloutDeclaration4() throws JavaModelException {
 		requestor.getResults());
 }
 
-public void testCompletionCalloutDeclarationTrac138() throws JavaModelException {		
+public void testCompletionCalloutDeclarationTrac138() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 {\n" +
             "public class CompletionRole playedBy BaseTrac138 {\n" +
             "foo \n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "foo";
@@ -759,8 +759,8 @@ public void testCompletionCalloutToFieldDeclaration() throws JavaModelException 
     		"    getS \n"+
     		"  }\n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(false, false, true);
     String str = this.wc.getSource();
     String completeBehind = "getS";
@@ -774,7 +774,7 @@ public void testCompletionCalloutToFieldDeclaration() throws JavaModelException 
 			+(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_METHOD_OVERIDE)+"}\n"+
 			"getStr[CALLOUT_GET]{String getStr() -> get String str;, LBaseTrac38;, ()Ljava.lang.String;, getStr, [129, 133], " +
 			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
-			requestor.getResults());	
+			requestor.getResults());
 }
 
 public void testCompletionCalloutToFieldDeclarationTrac138() throws JavaModelException {
@@ -786,8 +786,8 @@ public void testCompletionCalloutToFieldDeclarationTrac138() throws JavaModelExc
     		"    getBar \n"+
     		"  }\n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(false, false, true);
     String str = this.wc.getSource();
     String completeBehind = "getBar";
@@ -797,7 +797,7 @@ public void testCompletionCalloutToFieldDeclarationTrac138() throws JavaModelExc
 	assertResults(
 			"getBar[POTENTIAL_METHOD_DECLARATION]{getBar, LCompletionTeamCalloutToField$CompletionRole;, ()V, getBar, [130, 136], "+
 			+(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_METHOD_OVERIDE)+"}",
-			requestor.getResults());	
+			requestor.getResults());
 }
 
 public void testCompletionParamMapping1() throws JavaModelException {
@@ -811,8 +811,8 @@ public void testCompletionParamMapping1() throws JavaModelException {
     		"       }\n"+
     		"  }\n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(false, false, true);
     String str = this.wc.getSource();
     String completeBehind = "str.le";
@@ -822,7 +822,7 @@ public void testCompletionParamMapping1() throws JavaModelException {
 	assertResults(
 			"length[METHOD_REF]{length(), Ljava.lang.String;, ()I, length, [187, 189], "+
 			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_NON_STATIC+R_NON_RESTRICTED)+"}",
-			requestor.getResults());	
+			requestor.getResults());
 }
 public void testCompletionTrac38_1() throws JavaModelException {
 	this.wc = getWorkingCopy(
@@ -836,8 +836,8 @@ public void testCompletionTrac38_1() throws JavaModelException {
     		"    String str() -> get \n"+
     		"  }\n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(false, false, true);
     String str = this.wc.getSource();
     String completeBehind = "get ";
@@ -849,7 +849,7 @@ public void testCompletionTrac38_1() throws JavaModelException {
 			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_EXACT_EXPECTED_TYPE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n"+
 			"str[FIELD_SPEC]{String str;, LBaseTrac38;, Ljava.lang.String;, str, [222, 222], " +
 			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_EXACT_EXPECTED_TYPE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
-			requestor.getResults());	
+			requestor.getResults());
 }
 // same as above but without the space after "get" but still expect the same c-t-f proposals
 public void testCompletionTrac38_2() throws JavaModelException {
@@ -864,8 +864,8 @@ public void testCompletionTrac38_2() throws JavaModelException {
     		"    String str() -> get\n"+
     		"  }\n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(false, false, true);
     String str = this.wc.getSource();
     String completeBehind = "get";
@@ -879,7 +879,7 @@ public void testCompletionTrac38_2() throws JavaModelException {
 			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_EXACT_EXPECTED_TYPE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n"+
 			"str[FIELD_SPEC]{ String str;, LBaseTrac38;, Ljava.lang.String;, str, [221, 221], " +     // yes, proposal starts with blank
 			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_EXACT_EXPECTED_TYPE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
-			requestor.getResults());	
+			requestor.getResults());
 }
 // indicate field name by role method spec naming convention:
 public void testCompletionTrac38_3() throws JavaModelException {
@@ -894,8 +894,8 @@ public void testCompletionTrac38_3() throws JavaModelException {
     		"    String getStr() -> get \n"+
     		"  }\n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(false, false, true);
     String str = this.wc.getSource();
     String completeBehind = "get ";
@@ -907,7 +907,7 @@ public void testCompletionTrac38_3() throws JavaModelException {
 			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_SUBSTRING+R_EXACT_EXPECTED_TYPE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n"+ // no R_CASE, R_EXACT_NAME !
 			"str[FIELD_SPEC]{String str;, LBaseTrac38;, Ljava.lang.String;, str, [225, 225], " +
 			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_EXACT_NAME+R_EXACT_EXPECTED_TYPE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
-			requestor.getResults());	
+			requestor.getResults());
 }
 public void testCompletionCallToCallout1() throws JavaModelException {
 	this.wc = getWorkingCopy(
@@ -920,8 +920,8 @@ public void testCompletionCallToCallout1() throws JavaModelException {
             "       r.fub\n"+
             "   }\n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "fub";
@@ -931,7 +931,7 @@ public void testCompletionCallToCallout1() throws JavaModelException {
 	assertResults(
 		"fubar[METHOD_REF]{fubar(), LCompletionTeam1$CompletionRole;, (ILjava.lang.String;)J, fubar, (fred, zork), " +
 		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_NON_STATIC+R_NON_RESTRICTED)+"}",
-		requestor.getResults());	
+		requestor.getResults());
 }
 // witness for https://svn.objectteams.org/trac/ot/ticket/22
 public void testCompletionCallToCallout2() throws JavaModelException {
@@ -943,8 +943,8 @@ public void testCompletionCallToCallout2() throws JavaModelException {
             "      r.fub\n"+
             "   }\n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "fub";
@@ -954,7 +954,7 @@ public void testCompletionCallToCallout2() throws JavaModelException {
 	assertResults(
 		"fubar[METHOD_REF]{fubar(), LCompletionCalloutTeam$CompletionRole;, (ILjava.lang.String;)J, fubar, (fred, zork), " +
 		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_NON_STATIC+R_NON_RESTRICTED)+"}",
-		requestor.getResults());	
+		requestor.getResults());
 }
 public void testCompletionCallToCallout3() throws JavaModelException {
 	// call to inferred callout?
@@ -967,17 +967,17 @@ public void testCompletionCallToCallout3() throws JavaModelException {
 			"      }\n"+
 			"   }\n"+
 	"}");
-	
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
 	String str = this.wc.getSource();
 	String completeBehind = "fre";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	assertResults(
 			"fred[FIELD_REF]{fred, LCompletionBaseclass;, I, fred, null, " +
 			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
-			requestor.getResults());		
+			requestor.getResults());
 }
 public void testCompletionCallToCallout3this() throws JavaModelException {
 	// call to inferred callout?
@@ -990,8 +990,8 @@ public void testCompletionCallToCallout3this() throws JavaModelException {
             "      }\n"+
             "   }\n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "fre";
@@ -1001,7 +1001,7 @@ public void testCompletionCallToCallout3this() throws JavaModelException {
 	assertResults(
 		"fred[FIELD_REF]{fred, LCompletionBaseclass;, I, fred, null, " +
 		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_NON_STATIC+R_NON_RESTRICTED)+"}",
-		requestor.getResults());		
+		requestor.getResults());
 }
 public void testCompletionCallToCallout3qualified() throws JavaModelException {
 	// call to inferred callout? Not allowed on other role
@@ -1014,7 +1014,7 @@ public void testCompletionCallToCallout3qualified() throws JavaModelException {
             "      }\n"+
             "   }\n"+
             "}");
-    
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "fre";
@@ -1023,7 +1023,7 @@ public void testCompletionCallToCallout3qualified() throws JavaModelException {
 
 	assertResults(
 		"",
-		requestor.getResults());		
+		requestor.getResults());
 }
 public void testCompletionCallToCallout4() throws JavaModelException {
 	// call to inferred callout?
@@ -1036,7 +1036,7 @@ public void testCompletionCallToCallout4() throws JavaModelException {
             "      }\n"+
             "   }\n"+
             "}");
-    
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "fub";
@@ -1046,7 +1046,7 @@ public void testCompletionCallToCallout4() throws JavaModelException {
 	assertResults(
 		"fubar[METHOD_REF]{fubar(), LCompletionBaseclass;, (ILjava.lang.String;)J, fubar, (fred, zork), " +
 		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
-		requestor.getResults());		
+		requestor.getResults());
 }
 public void testCompletionCallToCallout5() throws JavaModelException {
 	// indirect call via inferred callout
@@ -1059,19 +1059,19 @@ public void testCompletionCallToCallout5() throws JavaModelException {
 			"      }\n"+
 			"   }\n"+
 	"}");
-	
+
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
 	String str = this.wc.getSource();
 	String completeBehind = "endsW";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
-	
+
 	assertResults(
 			"endsWith[METHOD_REF]{endsWith(), Ljava.lang.String;, (Ljava.lang.String;)Z, endsWith, (postfix), " +
 			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_NON_STATIC+R_NON_RESTRICTED)+"}",
-			requestor.getResults());		
+			requestor.getResults());
 }
-public void testCompletionOverrideTSuper() throws JavaModelException {		
+public void testCompletionOverrideTSuper() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 extends CompletionSuperTeam {\n" +
@@ -1079,8 +1079,8 @@ public void testCompletionOverrideTSuper() throws JavaModelException {
             "      noth \n"+
             "   }\n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "noth";
@@ -1094,7 +1094,7 @@ public void testCompletionOverrideTSuper() throws JavaModelException {
 		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_METHOD_OVERIDE+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
-public void testCompletionOverrideAbstractTSuper() throws JavaModelException {		
+public void testCompletionOverrideAbstractTSuper() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 extends CompletionSuperTeam {\n" +
@@ -1102,8 +1102,8 @@ public void testCompletionOverrideAbstractTSuper() throws JavaModelException {
             "      fub \n"+
             "   }\n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "fub";
@@ -1117,7 +1117,7 @@ public void testCompletionOverrideAbstractTSuper() throws JavaModelException {
 		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_METHOD_OVERIDE+R_ABSTRACT_METHOD+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
-public void testCompletionDontOverrideLocal() throws JavaModelException {		
+public void testCompletionDontOverrideLocal() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 extends CompletionSuperTeam {\n" +
@@ -1126,8 +1126,8 @@ public void testCompletionDontOverrideLocal() throws JavaModelException {
             "      fub \n"+
             "   }\n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "fub";
@@ -1139,7 +1139,7 @@ public void testCompletionDontOverrideLocal() throws JavaModelException {
 		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
-public void testCompletionCallAbstractTSuper() throws JavaModelException {		
+public void testCompletionCallAbstractTSuper() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 extends CompletionSuperTeam {\n" +
@@ -1149,8 +1149,8 @@ public void testCompletionCallAbstractTSuper() throws JavaModelException {
             "      }\n"+
             "   }\n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "fub";
@@ -1162,7 +1162,7 @@ public void testCompletionCallAbstractTSuper() throws JavaModelException {
 		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
-public void testCompletionCallTSuper() throws JavaModelException {		
+public void testCompletionCallTSuper() throws JavaModelException {
 	this.wc = getWorkingCopy(
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 extends CompletionSuperTeam {\n" +
@@ -1172,8 +1172,8 @@ public void testCompletionCallTSuper() throws JavaModelException {
             "      }\n"+
             "   }\n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "noth";
@@ -1190,11 +1190,11 @@ public void testCompletionOnConfined() throws JavaModelException {
             "/Completion/src/CompletionTeam1.java",
             "public team class CompletionTeam1 {\n" +
             "   void m(IConfined r) { \n"+
-            "       r.\n" + 
+            "       r.\n" +
             "   }\n"+
             "}");
-    
-    
+
+
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
     String completeBehind = "r.";
@@ -1203,7 +1203,7 @@ public void testCompletionOnConfined() throws JavaModelException {
 
 	assertResults(
 		"",
-		requestor.getResults());	
+		requestor.getResults());
 }
 
 }

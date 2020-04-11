@@ -298,7 +298,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	        }
 		} else if (expression instanceof TypeAnchorReference) {
 			bind = (Binding) ((TypeAnchorReference)expression).getResolvedAnchor();
-		}		
+		}
 		if (bind != null && (bind instanceof TeamAnchor))
 			return (TeamAnchor)bind;
 		TypeBinding type = expression.resolvedType;
@@ -790,16 +790,16 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
     	int paramPosition = -1;
     	if (roleBinding instanceof DependentTypeBinding)
     		paramPosition = ((DependentTypeBinding)roleBinding)._valueParamPosition;
-    	
-    	if (roleBinding instanceof RoleTypeBinding) 
+
+    	if (roleBinding instanceof RoleTypeBinding)
     		if (!this.isTeamContainingRole(roleBinding)) // need to switch to outer anchor?
     			return this.asAnchorFor(roleBinding).getDependentTypeBinding(roleBinding, paramPosition, arguments, dimensions, ((RoleTypeBinding)roleBinding).environment);
-    	
+
     	if (roleBinding instanceof WeakenedTypeBinding) {
     		if (((WeakenedTypeBinding)roleBinding)._teamAnchor == this)
     			return roleBinding;
     	}
-    	
+
     	if (roleBinding instanceof ParameterizedTypeBinding)
     		return getDependentTypeBinding(roleBinding, paramPosition, arguments, dimensions, ((ParameterizedTypeBinding)roleBinding).environment);
     	return getDependentTypeBinding(roleBinding, paramPosition, arguments, dimensions);
@@ -834,7 +834,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 			int	            	paramPosition,
 			TypeBinding[] 		arguments,
 			int             	dimensions,
-			LookupEnvironment   env) 
+			LookupEnvironment   env)
 	{
 	    DependentTypeBinding dependentTypeBinding =
 	    	(DependentTypeBinding)env.createParameterizedType(typeBinding, arguments, this, paramPosition, typeBinding.enclosingType(), typeBinding.getTypeAnnotations());

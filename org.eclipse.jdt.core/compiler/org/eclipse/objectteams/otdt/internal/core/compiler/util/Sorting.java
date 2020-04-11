@@ -47,7 +47,7 @@ public class Sorting {
 		ReferenceBinding[] unsorted = new ReferenceBinding[len];
 		ReferenceBinding[] sorted = new ReferenceBinding[len];
 		System.arraycopy(enclosing.memberTypes, 0, unsorted, 0, len);
-		
+
 		int o = 0;
 		for(int i=0; i<len; i++)
 			o = sort(enclosing, unsorted, i, sorted, o);
@@ -99,10 +99,10 @@ public class Sorting {
 	}
 
 	// --- similar for role models:
-	
+
 	public static RoleModel[] sortRoles(RoleModel[] unsorted) {
 		int len = unsorted.length;
-		
+
 		RoleModel[] sorted = new RoleModel[len];
 		int o = 0;
 		for(int i=0; i<len; i++)
@@ -130,17 +130,17 @@ public class Sorting {
 				return 0;
 			}
 		});
-		
+
 		return sorted;
 	}
-	
+
 	// Transfer input[i] and all its supers into output[o] ff.
 	private static int sort(RoleModel[] input, int i,
 							RoleModel[] output, int o)
 	{
 		if (input[i] == null || input[i].getBinding() == null)
 			return o;
-		
+
 		ReferenceBinding inBinding = input[i].getBinding();
 		ReferenceBinding superclass = inBinding.superclass();
 		o = sortSuper(superclass, input, output, o);
@@ -170,7 +170,7 @@ public class Sorting {
 					break;
 				}
 			if (inScope) {
-					
+
 				// search superclass within input:
 				int j = 0;
 				for(j=0; j<input.length; j++)
@@ -184,7 +184,7 @@ public class Sorting {
 		}
 		return o;
 	}
-	
+
 	/** Apply the sorting from member type bindings to their ASTs, too. */
 	public static void sortMemberTypes(TypeDeclaration typeDeclaration) {
 		if (typeDeclaration.memberTypes == null) return;
@@ -194,7 +194,7 @@ public class Sorting {
 		int l = 0;
 		allMembers: for (int i=0; i<bindings.length; i++) {
 			ReferenceBinding current = bindings[i];
-			if (current.isBinaryBinding()) 
+			if (current.isBinaryBinding())
 				continue; // no AST: phantom or reused rofi
 			// find corresponding AST
 			for (int j=0; j<unsorted.length; j++) {

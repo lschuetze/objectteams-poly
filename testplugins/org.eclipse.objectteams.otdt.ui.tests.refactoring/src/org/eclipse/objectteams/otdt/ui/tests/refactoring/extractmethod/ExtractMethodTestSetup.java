@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -52,7 +52,7 @@ public class ExtractMethodTestSetup extends TestSetup
 	private static final String CONTAINER = "src";
 
 //	private IPackageFragment _selectionPackage;
-	
+
     private IPackageFragment _teamClassPackage;
     private IPackageFragment _roleClassPackage;
 	private IPackageFragment _nestedTeamPackage;
@@ -61,12 +61,12 @@ public class ExtractMethodTestSetup extends TestSetup
 	private IPackageFragment _focusTypePackage;
 	private IPackageFragment _overloadingPackage;
 	private IPackageFragment _syntaxPackage;
-	
+
     public ExtractMethodTestSetup(Test test)
     {
         super(test);
     }
-    
+
 	public IPackageFragmentRoot getRoot() {
 		return _root;
 	}
@@ -80,12 +80,12 @@ public class ExtractMethodTestSetup extends TestSetup
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		JavaCore.setOptions(options);
 		TestOptions.initializeCodeGenerationOptions();
-		JavaPlugin.getDefault().getCodeTemplateStore().load();		
-		
+		JavaPlugin.getDefault().getCodeTemplateStore().load();
+
 		_javaProject = JavaProjectHelper.createOTJavaProject("TestProject", "bin");
 		JavaProjectHelper.addRTJar(_javaProject);
 		_root = JavaProjectHelper.addSourceContainer(_javaProject, CONTAINER);
-		
+
 		RefactoringCore.getUndoManager().flush();
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceDescription description = workspace.getDescription();
@@ -110,7 +110,7 @@ public class ExtractMethodTestSetup extends TestSetup
 		JavaProjectHelper.performDummySearch(_javaProject);
 		JavaProjectHelper.delete(_javaProject);
 	}
-	
+
 //	public IPackageFragment getSelectionPackage()
 //	{
 //	    return _selectionPackage;
@@ -125,7 +125,7 @@ public class ExtractMethodTestSetup extends TestSetup
 	{
 	    return _roleClassPackage;
 	}
-	
+
 	public IPackageFragment getNestedTeamPackage()
 	{
 	    return _nestedTeamPackage;
@@ -140,12 +140,12 @@ public class ExtractMethodTestSetup extends TestSetup
 	{
 	    return _rolefileParentPackage;
 	}
-	
+
 	public IPackageFragment getFocusTypePackage()
 	{
 	    return _focusTypePackage;
 	}
-	
+
 	public IPackageFragment getOverloadingPackage()
 	{
 	    return _overloadingPackage;

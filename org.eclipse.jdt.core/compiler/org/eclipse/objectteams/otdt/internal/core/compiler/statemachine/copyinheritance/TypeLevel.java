@@ -76,17 +76,17 @@ public class TypeLevel {
 	    	// in earlier invocations as ClassScope.connectTeamMemberTypes(..) descends depth first
 	        ReferenceBinding tsuperRole = tsuperRoles[tsuperRoles.length-1];
 			assert(tsuperRole.isDirectRole());
-	
+
 			// don't bother with AST, we are called after hierarchies have been connected
 			// at the binding level.
 			mergeSuperinterfaces(superTeam, tsuperRole, destRole);
 		    if (!roleDecl.isInterface())
 		    	copyAdjustSuperclass(tsuperRole, roleDecl, obligations);
 		    copyBaseclass(tsuperRole, roleDecl);
-	
+
 	    } else {
 	    	// no tsupers to merge with, but still need to adjust the super class:
-	    	copyAdjustSuperclass(null, roleDecl, obligations);	    	
+	    	copyAdjustSuperclass(null, roleDecl, obligations);
 	    }
 
 		adjustSuperinterfaces(superTeam, destRole, obligations);
@@ -317,7 +317,7 @@ public class TypeLevel {
 	 *
 	 * @param tsuperRole   may be null
 	 * @param destRoleDecl @pre: !isInterface()
-	 * @param obligations 
+	 * @param obligations
 	 */
 	static void copyAdjustSuperclass(ReferenceBinding tsuperRole, TypeDeclaration destRoleDecl, ArrayList<SupertypeObligation> obligations) {
 		if(tsuperRole != null) {
@@ -346,7 +346,7 @@ public class TypeLevel {
 	 * @param destRoleDecl @pre: !isInterface()
 	 * @param destTeam
 	 * @param tsuperRole (may be null)
-	 * @param obligations record here any sub-type relations that need checking after all roles have been adjusted 
+	 * @param obligations record here any sub-type relations that need checking after all roles have been adjusted
 	 */
 	private static void checkAdjustSuperclass(
 			TypeDeclaration  destRoleDecl,
@@ -373,7 +373,7 @@ public class TypeLevel {
 			&& !refineToTeam	     // an implicit extends to org.objectteams.Team is NOT dropped if the tsuper was not a team
 			&& ((newSuperclass.id == TypeIds.T_JavaLangObject) || destScope.isOrgObjectteamsTeam(newSuperclass))) // otherwise it was copied from a tsuper role
 		{
-			newSuperclass = null; // drop default 'extends java.lang.Object' or o.o.Team			
+			newSuperclass = null; // drop default 'extends java.lang.Object' or o.o.Team
 		}
 
 		// extends __OT_Confined overriding nothing or __OT__Confined is OK:
@@ -438,7 +438,7 @@ public class TypeLevel {
 			// and then only the old node has source positions..
 	    }
 	}
-	
+
 	// don't use TeamModel.strengthenRole because we don't want a RoleTypeBinding.
 	static ReferenceBinding strengthenSuper(ReferenceBinding destTeam, ReferenceBinding superRole) {
 		if (!superRole.isRole())

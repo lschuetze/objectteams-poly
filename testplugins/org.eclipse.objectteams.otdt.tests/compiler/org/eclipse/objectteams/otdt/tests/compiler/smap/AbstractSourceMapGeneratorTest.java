@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany, and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -67,15 +67,15 @@ import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
  */
 public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest implements ICallbackClient, ISourceElementRequestor
 {
-    
+
 	public static final String COMPLIANCE_1_3 = "1.3";
 	public static final String COMPLIANCE_1_4 = "1.4";
 	public static final String COMPLIANCE_1_5 = "1.5";
-	
+
 	private String complianceLevel = COMPLIANCE_1_5;
 	protected String[] classpaths;
 	protected Hashtable <String, List<SmapStratum>>expectedStrata;
-    
+
 	protected String TYPENAME;
 	protected String _enclosingTypename;
 
@@ -83,12 +83,12 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
 	public static long sourceLevel = ClassFileConstants.JDK1_5; //$NON-NLS-1$
 
 	public static String OUTPUT_DIR = Util.getOutputDirectory() + File.separator + "smaptest";
-	
+
 	private WeavingScheme weavingScheme = WeavingScheme.OTRE; // FIXME: test OTDRE, too!
-	
+
 	// the source line within method Team.java:__OT__Confined._OT$getTeam().
 	public static int OT_CONFINED_GET_TEAM_LINE = IOOTBreakPoints.LINE_ConfinedGetTeam;
-    
+
     public AbstractSourceMapGeneratorTest(String testName)
     {
         super(testName);
@@ -110,7 +110,7 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
 	    setTestProjectDir("JSR-045");
 	    super.setUpSuite();
 	}
-	
+
     protected void setUp() throws Exception
     {
         super.setUp();
@@ -169,7 +169,7 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
         options.put(CompilerOptions.OPTION_PreserveUnusedLocal, CompilerOptions.PRESERVE);
         options.put(CompilerOptions.OPTION_PreserveUnusedLocal, CompilerOptions.PRESERVE);
         options.put(CompilerOptions.OPTION_ReportUnnecessaryElse, CompilerOptions.WARNING);
-               
+
         return new CompilerOptions(options);
     }
 
@@ -206,7 +206,7 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
     {
         return new DefaultProblemFactory(Locale.getDefault());
     }
-    
+
     /**
      * @param team
      * @param role
@@ -220,10 +220,10 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
     {
     	return parseAndCompile(units, methodLineNumbers, null, null);
     }
-    public boolean parseAndCompile(org.eclipse.jdt.core.ICompilationUnit[] units, 
+    public boolean parseAndCompile(org.eclipse.jdt.core.ICompilationUnit[] units,
     							   HashMap<String, int[]> methodLineNumbers,
     							   String[] classPaths,
-    							   String outputPath) 
+    							   String outputPath)
     		throws JavaModelException
     {
 		CompilerOptions options =  getCompilerOptions();
@@ -231,21 +231,21 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
                 new DefaultProblemFactory(Locale.getDefault()),
                 options, false, false);
         ICompilationUnit [] cUnits = new ICompilationUnit[units.length];
-        
+
         for (int idx = 0; idx < units.length; idx++)
         {
             org.eclipse.jdt.core.ICompilationUnit unit = units[idx];
-            
+
             String unit_src = unit.getSource();
             IResource unit_res = unit.getCorrespondingResource();
             String unit_fileName = unit_res.toString();
             char[] unit_source = unit_src.toCharArray();
             ICompilationUnit unit_sourceUnit = new CompilationUnit(unit_source,
                     unit_fileName, null);
-            
+
             CompilationUnitDeclaration cuDecl = parser.parseCompilationUnit(
                     unit_sourceUnit, true, null);
-            
+
             if (cuDecl.hasErrors()) {
             	// approximated error reporting:
             	String expectedErrorlog = "Filename : L/JSR-045/src/"+unit_fileName+"\n" +
@@ -256,10 +256,10 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
                 assertEquals("COMPILATION FAILED. Errorlog should be empty.", expectedErrorlog, actualErrorlog);
                 return false;
             }
-            
+
             cUnits[idx] = unit_sourceUnit;
-        } 
-   
+        }
+
         Requestor requestor = new Requestor(
 							false,
 							null, /*no custom requestor */
@@ -285,27 +285,27 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
 		} catch (IOException ioex) {
 			throw new JavaModelException(ioex, IJavaModelStatusConstants.INVALID_CLASSPATH);
 		}
-        
+
         batchCompiler.addCallBack(this);
-        
+
         batchCompiler.compile(cUnits); // compile all files together
-        
+
         boolean hasErrors = requestor.hasErrors;
-        
+
         //errorlog contains errore and warnings, skip warnings
         if (hasErrors)
         {
             String expectedErrorlog = "";
             String actualErrorlog = requestor.problemLog;
             assertEquals("COMPILATION FAILED. Errorlog should be empty.", expectedErrorlog, actualErrorlog);
-        }        
+        }
 
         if (methodLineNumbers != null)
         	requestor.checkAllLineNumbersSeen();
-        
+
         return !hasErrors;
     }
-       
+
     public void acceptConstructorReference(char[] typeName, int argCount, int sourcePosition)
     {
     }
@@ -326,10 +326,10 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
     {
     }
 
-    public void acceptPackage(ImportReference importReference) 
+    public void acceptPackage(ImportReference importReference)
     {
     }
-    
+
     public void acceptProblem(IProblem problem)
     {
     }
@@ -398,10 +398,10 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
     {
     }
 
-    public void exitMethod(int declarationEnd, Expression defaultValue) 
+    public void exitMethod(int declarationEnd, Expression defaultValue)
     {
     }
-    
+
     public void acceptBaseReference(char[][] typeName, int sourceStart, int sourceEnd)
     {
     }
@@ -440,87 +440,87 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
 
 	public void acceptProblem(CategorizedProblem problem) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void enterConstructor(MethodInfo methodInfo) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void enterField(FieldInfo fieldInfo) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void enterMethod(MethodInfo methodInfo) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void enterType(TypeInfo typeInfo) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void exitMethod(int declarationEnd, int defaultValueStart, int defaultValueEnd) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void exitType(int declarationEnd) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void acceptImport(int declarationStart, int declarationEnd, char[][] tokens, boolean onDemand, int modifiers) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	public void acceptAnnotationTypeReference(char[][] annotation,
 			int sourceStart, int sourceEnd) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void acceptAnnotationTypeReference(char[] annotation,
 			int sourcePosition) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
-	public void acceptImport(int declarationStart, int declarationEnd, int nameStart, int nameEnd, char[][] tokens, 
+
+	public void acceptImport(int declarationStart, int declarationEnd, int nameStart, int nameEnd, char[][] tokens,
 			boolean onDemand, int modifiers) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void callback(CompilationUnitDeclaration cuDecl) {
 	    String cuDeclName = String.valueOf(cuDecl.getMainTypeName());
 	    if (!_enclosingTypename.equals(cuDeclName))
 	        return;
-	    
-	    
+
+
 	    TypeDeclaration typeDecl = cuDecl.types[0];
-	    
+
 	    assertNotNull("TypeDeclaration should not be null.", typeDecl);
-	    
+
 	    assertTrue("Membertypes of TypeDeclaration should be greater than 0.", typeDecl.memberTypes.length > 0);
-	    
+
 	    TypeDeclaration [] members = typeDecl.memberTypes;
 	    for (int idx = 0; idx < members.length; idx++)
 	    {
 	        TypeDeclaration decl = members[idx];
 	        String typeName = String.valueOf(decl.name);
-	        
+
 	        if (decl.isRole() && !decl.isInterface() && typeName.equals(TYPENAME))
 	        {
 	            RoleSmapGenerator rolefileSmapGenerator = new RoleSmapGenerator(decl);
 	            rolefileSmapGenerator.addStratum("OTJ");
 	            rolefileSmapGenerator.generate();
 	            List actualStrata = rolefileSmapGenerator.getStrata();
-	            
+
 	            assertEquals("Strata of type \"" + typeName + "\" should be equal.\n", expectedStrata.get(typeName).toString(), actualStrata.toString());
 	        }
 	    }

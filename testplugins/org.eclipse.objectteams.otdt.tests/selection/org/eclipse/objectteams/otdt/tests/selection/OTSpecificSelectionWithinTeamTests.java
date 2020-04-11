@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -25,13 +25,13 @@ import org.eclipse.jdt.core.tests.compiler.parser.AbstractSelectionTest;
 
 /**
  * Testing OT-specific selections within a team class.
- * 
+ *
  * @author jwloka
  * @version $Id: OTSpecificSelectionWithinTeamTests.java 23494 2010-02-05 23:06:44Z stephan $
  */
-public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest 
+public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 {
-	public OTSpecificSelectionWithinTeamTests(String testName) 
+	public OTSpecificSelectionWithinTeamTests(String testName)
 	{
 		super(testName);
 	}
@@ -45,14 +45,14 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 //	 */
 //	public void test01()
 //	{
-//		String str = 
+//		String str =
 //		    "public team class T1 {\n" +
 //			"\n" +
-//			"}\n"; 
-//	
+//			"}\n";
+//
 //		String selectionStartBehind = "class ";
 //		String selectionEndBehind = "T1";
-//		
+//
 //		String expectedCompletionNodeToString = "<SelectOnType:T1>";
 //		String completionIdentifier = "T1";
 //		String expectedUnitDisplayString =
@@ -62,45 +62,45 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 //			"	\n" +
 //			"	}\n" +
 //			"}\n";
-//		
+//
 //		String expectedReplacedSource = "T1";
 //		String testName = "<select team class name of team class declaration>";
-//	
+//
 //		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
 //		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
-//			
+//
 //		this.checkDietParse(
-//			str.toCharArray(), 
+//			str.toCharArray(),
 //			selectionStart,
 //			selectionEnd,
 //			expectedCompletionNodeToString,
 //			expectedUnitDisplayString,
 //			completionIdentifier,
 //			expectedReplacedSource,
-//			testName); 
+//			testName);
 //	}
-//	
+//
 //	/**
 //	 * Select team class name of nested team class declaration.
 //	 */
-//	public void test02() 
+//	public void test02()
 //	{
-//		String str = 
+//		String str =
 //			"public team class T1 {\n" +
 //			"{\n" +
 //			"	public team class TR1 {\n" +
 //			"	\n" +
 //			"	}\n" +
 //			"}\n";
-//	
+//
 //		String selectionStartBehind = "\n{\n\n\tpublic team class ";
 //		String selectionEndBehind = "TR1";
-//		
+//
 //		String expectedCompletionNodeToString = "<SelectOnType:TR1>";
 //		String completionIdentifier = "TR1";
 //		String expectedUnitDisplayString =
 //			"public team class T1 {\n" +
-//			"\n" + 
+//			"\n" +
 //			"	public T1() {\n" +
 //			"	\n" +
 //			"	}\n" +
@@ -108,41 +108,41 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 //			"	\n" +
 //			"	}\n" +
 //			"}\n";
-//		
+//
 //		String expectedReplacedSource = "TR1";
 //		String testName = "<select team class name of nested team class declaration>";
-//	
+//
 //		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
 //		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
-//			
+//
 //		this.checkDietParse(
-//			str.toCharArray(), 
+//			str.toCharArray(),
 //			selectionStart,
 //			selectionEnd,
 //			expectedCompletionNodeToString,
 //			expectedUnitDisplayString,
 //			completionIdentifier,
 //			expectedReplacedSource,
-//			testName); 
+//			testName);
 //}
-	
-	//type references	
+
+	//type references
 	/**
 	 * Select team class name of anchor type.
 	 */
-	public void test03() 
+	public void test03()
 	{
-		String str = 
+		String str =
 			"public team class T1 {\n" +
 			"  T1 t1 = new T1();\n" +
 			"  t1.R1 r1;\n" +
 			"  public class R1 {\n" +
 			"  }\n" +
 			"}\n";
-	
+
 		String selectionStartBehind = "T1 {\n  ";
 		String selectionEndBehind = "  T1";
-		
+
 		String expectedCompletionNodeToString = "<SelectOnType:T1>";
 		String completionIdentifier = "T1";
 		String expectedUnitDisplayString =
@@ -152,24 +152,24 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 			"  <SelectOnType:T1> t1 = new T1();\n" +
 			"  t1.R1 r1;\n" +
 			"  public T1() {\n" +
-			"  }\n" +			
+			"  }\n" +
 			"}\n";
-		
+
 		String expectedReplacedSource = "T1";
 		String testName = "<select team class name of anchored type>";
-	
+
 		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
 		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
-			
+
 		this.checkDietParse(
-			str.toCharArray(), 
+			str.toCharArray(),
 			selectionStart,
 			selectionEnd,
 			expectedCompletionNodeToString,
 			expectedUnitDisplayString,
 			completionIdentifier,
 			expectedReplacedSource,
-			testName); 
+			testName);
 	}
 
 	/**
@@ -177,60 +177,60 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 	 */
 	public void test04()
 	{
-		String str = 
+		String str =
 		    "public team class T1 {\n" +
 		    "  void foo() {\n" +
 			"    within (new T2()) {\n" +
 			"    }\n" +
 			"  }\n" +
 			"}\n";
-	
+
 		String selectionStartBehind = "new ";
 		String selectionEndBehind = "T2";
-		
+
 		String expectedCompletionNodeToString = "<SelectOnAllocationExpression:new T2()>";
 		String completionIdentifier = "T2";
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 			"  public T1() {\n" +
-			"  }\n" +			
+			"  }\n" +
 		    "  void foo() {\n" +
 			"    <SelectOnAllocationExpression:new T2()>;\n" +
 			"  }\n" +
 			"}\n";
-		
+
 		String expectedReplacedSource = "new T2()";
 		String testName = "<select team instantiation in within expression>";
-	
+
 		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
 		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
-			
+
 		this.checkMethodParse(
-			str.toCharArray(), 
+			str.toCharArray(),
 			selectionStart,
 			selectionEnd,
 			expectedCompletionNodeToString,
 			expectedUnitDisplayString,
 			completionIdentifier,
 			expectedReplacedSource,
-			testName); 
+			testName);
 	}
-	
+
 	/**
 	 * Select team class name in <code>playedBy</code>-relation.
 	 */
 	public void test05()
 	{
-		String str = 
+		String str =
 		    "public team class T1 {\n" +
 			"  public class R1 playedBy T2 {\n" +
 			"  \n" +
 			"  }\n" +
-			"}\n"; 
-	
+			"}\n";
+
 		String selectionStartBehind = "playedBy ";
 		String selectionEndBehind = "T2";
-		
+
 		String expectedCompletionNodeToString = "<SelectOnType:T2>";
 		String completionIdentifier = "T2";
 		String expectedUnitDisplayString =
@@ -240,22 +240,22 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 			"  public T1() {\n" +
 			"  }\n" +
 			"}\n";
-		
+
 		String expectedReplacedSource = "T2";
 		String testName = "<select team class name in playedBy relation>";
-	
+
 		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
 		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
-			
+
 		this.checkDietParse(
-			str.toCharArray(), 
+			str.toCharArray(),
 			selectionStart,
 			selectionEnd,
 			expectedCompletionNodeToString,
 			expectedUnitDisplayString,
 			completionIdentifier,
 			expectedReplacedSource,
-			testName); 
+			testName);
 	}
 
 	/**
@@ -263,17 +263,17 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 	 */
 	public void test06()
 	{
-		String str = 
+		String str =
 		    "import x.y.T2\n" +
 		    "public team class T1 {\n" +
 			"  public class R1 playedBy T2 {\n" +
 			"  \n" +
 			"  }\n" +
-			"}\n"; 
-	
+			"}\n";
+
 		String selectionStartBehind = "y.";
 		String selectionEndBehind = "y.T2";
-		
+
 		String expectedCompletionNodeToString = "<SelectOnImport:x.y.T2>";
 		String completionIdentifier = "T2";
 		String expectedUnitDisplayString =
@@ -284,41 +284,41 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 			"  public T1() {\n" +
 			"  }\n" +
 			"}\n";
-		
+
 		String expectedReplacedSource = "x.y.T2";
 		String testName = "<select team class name in import declaration>";
-	
+
 		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
 		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
-			
+
 		this.checkDietParse(
-			str.toCharArray(), 
+			str.toCharArray(),
 			selectionStart,
 			selectionEnd,
 			expectedCompletionNodeToString,
 			expectedUnitDisplayString,
 			completionIdentifier,
 			expectedReplacedSource,
-			testName); 
+			testName);
 	}
-	
+
 	/**
 	 * Select team class name in lifting method (declared lifting).
 	 * The team class is the role class.
 	 */
 	public void test07()
 	{
-		String str = 
+		String str =
 		    "public team class T1 {\n" +
 			"  public void m1(B1 as T2 arg) {\n" +
 			"  }\n" +
 			"  public team class T2 playedBy B1 {\n" +
 			"  }\n" +
-			"}\n"; 
-	
+			"}\n";
+
 		String selectionStartBehind = "as ";
 		String selectionEndBehind = "as T2";
-		
+
 		String expectedCompletionNodeToString = "<SelectOnType:T2>";
 		String completionIdentifier = "T2";
 		String expectedUnitDisplayString =
@@ -329,23 +329,23 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 			"  }\n" +
 			"  public void m1(B1 as <SelectOnType:T2> arg) {\n" +
 			"  }\n" +
-			"}\n"; 
-		
+			"}\n";
+
 		String expectedReplacedSource = "T2";
 		String testName = "<select team class name in lifting method>";
-	
+
 		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
 		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
-			
+
 		this.checkDietParse(
-			str.toCharArray(), 
+			str.toCharArray(),
 			selectionStart,
 			selectionEnd,
 			expectedCompletionNodeToString,
 			expectedUnitDisplayString,
 			completionIdentifier,
 			expectedReplacedSource,
-			testName); 
+			testName);
 	}
 
 	/**
@@ -354,17 +354,17 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 	 */
 	public void test08()
 	{
-		String str = 
+		String str =
 		    "public team class T1 {\n" +
 			"  public void m1(T2 as R1 arg) {\n" +
 			"  }\n" +
 			"  public class R1 playedBy T2 {\n" +
 			"  }\n" +
-			"}\n"; 
-	
+			"}\n";
+
 		String selectionStartBehind = "(";
 		String selectionEndBehind = "(T2";
-		
+
 		String expectedCompletionNodeToString = "<SelectOnType:T2>";
 		String completionIdentifier = "T2";
 		String expectedUnitDisplayString =
@@ -375,40 +375,40 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 			"  }\n" +
 			"  public void m1(<SelectOnType:T2> as R1 arg) {\n" +
 			"  }\n" +
-			"}\n"; 
-		
+			"}\n";
+
 		String expectedReplacedSource = "T2";
 		String testName = "<select team class name in lifting method>";
-	
+
 		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
 		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
-			
+
 		this.checkDietParse(
-			str.toCharArray(), 
+			str.toCharArray(),
 			selectionStart,
 			selectionEnd,
 			expectedCompletionNodeToString,
 			expectedUnitDisplayString,
 			completionIdentifier,
 			expectedReplacedSource,
-			testName); 
+			testName);
 	}
-	
-		
+
+
 	/**
 	 * Select team class name in team-level guard.
 	 */
 	public void test09()
 	{
-		String str = 
+		String str =
 			"public class T2 {\n" +
 		    "  public team class T1 when (T2.this != null) {\n" +
 			"  }\n" +
 			"}\n";
-	
+
 		String selectionStartBehind = "(";
 		String selectionEndBehind = "(T2";
-		
+
 		String expectedCompletionNodeToString = "<SelectOnType:T2>";
 		String completionIdentifier = "T2";
 		String expectedUnitDisplayString =
@@ -416,55 +416,55 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 		    "  public team class T1 {\n" +
 			"    public T1() {\n" +
 			"    }\n" +
-			"    protected synchronized boolean _OT$when() {\n" + 
-			"      return (<SelectOnType:T2>.this != null);\n" + 
-			"    }\n" +			
+			"    protected synchronized boolean _OT$when() {\n" +
+			"      return (<SelectOnType:T2>.this != null);\n" +
+			"    }\n" +
 			"  }\n" +
 			"  public T2() {\n" +
 			"  }\n" +
 			"}\n";
-		
+
 		String expectedReplacedSource = "T2";
 		String testName = "<select team class name in team-level guard>";
-	
+
 		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
 		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
-			
+
 		this.checkDietParse(
-			str.toCharArray(), 
+			str.toCharArray(),
 			selectionStart,
 			selectionEnd,
 			expectedCompletionNodeToString,
 			expectedUnitDisplayString,
 			completionIdentifier,
 			expectedReplacedSource,
-			testName); 
+			testName);
 	}
-	
+
 	//TODO(gbr) select team class name in team package
 
 	//method declarations
 	//NOTE(gbr): method declarations are tested differently than method references
 	//(see org.eclipse.objectteams.otdt.tests.selection.codeselect.CodeSelectionTests).
-	
+
 	//method references
 	/**
 	 * Select team method name in team-level method.
 	 */
 	public void test10()
 	{
-		String str = 
+		String str =
 		    "public team class T1 {\n" +
 		    "  public void m1(int x) {\n" +
-			"  }\n" +		    
+			"  }\n" +
 			"  public void m2(int x) {\n" +
 			"    m1(x);\n" +
 			"  }\n" +
-			"}\n"; 
-	
+			"}\n";
+
 		String selectionStartBehind = "m2(int x) {\n    ";
 		String selectionEndBehind = "    m1";
-		
+
 		String expectedCompletionNodeToString = "<SelectOnMessageSend:m1(x)>";
 		String completionIdentifier = "m1";
 		String expectedUnitDisplayString =
@@ -476,23 +476,23 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 			"  public void m2(int x) {\n" +
 			"    <SelectOnMessageSend:m1(x)>;\n" +
 			"  }\n" +
-			"}\n"; 
-		
+			"}\n";
+
 		String expectedReplacedSource = "m1(x)";
 		String testName = "<select team method name in team-level method>";
-	
+
 		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
 		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
-			
+
 		this.checkMethodParse(
-			str.toCharArray(), 
+			str.toCharArray(),
 			selectionStart,
 			selectionEnd,
 			expectedCompletionNodeToString,
 			expectedUnitDisplayString,
 			completionIdentifier,
 			expectedReplacedSource,
-			testName); 
+			testName);
 	}
 
 	/**
@@ -500,7 +500,7 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 	 */
 	public void test11()
 	{
-		String str = 
+		String str =
 		    "public team class T1 {\n" +
 		    "  public void m1() {\n" +
 			"    within (new T1()) {\n" +
@@ -508,10 +508,10 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 			"    }\n" +
 			"  }\n" +
 			"}\n";
-	
+
 		String selectionStartBehind = "new T1()) {\n      ";
 		String selectionEndBehind = "      m1";
-		
+
 		String expectedCompletionNodeToString = "<SelectOnMessageSend:m1()>";
 		String completionIdentifier = "m1";
 		String expectedUnitDisplayString =
@@ -524,22 +524,22 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 			"    }\n" +
 			"  }\n" +
 			"}\n";
-		
+
 		String expectedReplacedSource = "m1()";
 		String testName = "<select team method name in within-block>";
-	
+
 		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
 		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
-			
+
 		this.checkMethodParse(
-			str.toCharArray(), 
+			str.toCharArray(),
 			selectionStart,
 			selectionEnd,
 			expectedCompletionNodeToString,
 			expectedUnitDisplayString,
 			completionIdentifier,
 			expectedReplacedSource,
-			testName); 
+			testName);
 	}
 
 	/**
@@ -547,94 +547,94 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 	 */
 	public void test12()
 	{
-		String str = 
+		String str =
 		    "public team class T1 when (this.isValid()) {\n" +
 		    "  public boolean isValid() {\n" +
 		    "    return true;" +
 		    "  }\n" +
 			"}\n";
-	
+
 		String selectionStartBehind = "when (this.";
 		String selectionEndBehind = "this.isValid";
-		
+
 		String expectedCompletionNodeToString = "<SelectOnMessageSend:this.isValid()>";
 		String completionIdentifier = "isValid";
 		String expectedUnitDisplayString =
 		    "public team class T1 {\n" +
-			"  public T1() {\n" + 
-			"  }\n" + 
+			"  public T1() {\n" +
+			"  }\n" +
 		    "  public boolean isValid() {\n" +
 		    "  }\n" +
-			"  protected synchronized boolean _OT$when() {\n" + 
-			"    return <SelectOnMessageSend:this.isValid()>;\n" + 
-			"  }\n" + 
+			"  protected synchronized boolean _OT$when() {\n" +
+			"    return <SelectOnMessageSend:this.isValid()>;\n" +
+			"  }\n" +
 			"}\n";
-		
+
 		String expectedReplacedSource = "this.isValid()";
 		String testName = "<select team method name in team-level guard>";
-	
+
 		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
 		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
-			
+
 		this.checkDietParse(
-			str.toCharArray(), 
+			str.toCharArray(),
 			selectionStart,
 			selectionEnd,
 			expectedCompletionNodeToString,
 			expectedUnitDisplayString,
 			completionIdentifier,
 			expectedReplacedSource,
-			testName); 
+			testName);
 	}
 
 	//field declarations
 	//NOTE(gbr): field declarations are tested differently than field references
 	//(see org.eclipse.objectteams.otdt.tests.selection.codeselect.CodeSelectionTests).
-	
+
 	//field references
 	/**
 	 * Select team field name in team-level method.
 	 */
 	public void test13()
 	{
-		String str = 
+		String str =
 		    "public team class T1 {\n" +
 		    "  private int f;\n" +
 			"  public void m2(int y) {\n" +
 			"    f = y;\n" +
 			"  }\n" +
-			"}\n"; 
-	
+			"}\n";
+
 		String selectionStartBehind = "m2(int y) {\n    ";
 		String selectionEndBehind = "    f";
-		
+
 		String expectedCompletionNodeToString = "<SelectOnName:f>";
 		String completionIdentifier = "f";
 		String expectedUnitDisplayString =
 		    "public team class T1 {\n" +
 		    "  private int f;\n" +
-			"  public T1() {\n" + 
-			"  }\n" + 
+			"  public T1() {\n" +
+			"  }\n" +
 			"  public void m2(int y) {\n" +
 			"    <SelectOnName:f>;\n" +
 			"  }\n" +
-			"}\n"; 
-		
+			"}\n";
+
 		String expectedReplacedSource = "f";
 		String testName = "<select team field name in team-level method>";
-	
+
 		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
 		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
-			
+
 		this.checkMethodParse(
-			str.toCharArray(), 
+			str.toCharArray(),
 			selectionStart,
 			selectionEnd,
 			expectedCompletionNodeToString,
 			expectedUnitDisplayString,
 			completionIdentifier,
 			expectedReplacedSource,
-			testName); 
+			testName);
 	}
 
 	/**
@@ -642,7 +642,7 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 	 */
 	public void test14()
 	{
-		String str = 
+		String str =
 		    "public team class T1 {\n" +
 		    "  private int f;\n" +
 		    "  void foo() {\n" +
@@ -651,30 +651,30 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 			"    }\n" +
 			"  }\n" +
 			"}\n";
-	
+
 		String selectionStartBehind = "new T1()) {\n      ";
 		String selectionEndBehind = "      f";
-		
+
 		String expectedCompletionNodeToString = "<SelectOnName:f>";
 		String completionIdentifier = "f";
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 		    "  private int f;\n" +
-			"  public T1() {\n" + 
-			"  }\n" + 
+			"  public T1() {\n" +
+			"  }\n" +
 		    "  void foo() {\n" +
 			"    {\n" +
 			"      <SelectOnName:f>;\n" +
 			"    }\n" +
 			"  }\n" +
 			"}\n";
-		
+
 		String expectedReplacedSource = "f";
 		String testName = "<select team field name in within-block>";
-	
+
 		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
 		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
-			
+
 		this.checkMethodParse(
 			str.toCharArray(),
 			selectionStart,
@@ -691,41 +691,41 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 	 */
 	public void test15()
 	{
-		String str = 
+		String str =
 		    "public team class T1 when (this.f != 0) {\n" +
 		    "  private int f;\n" +
 			"}\n";
-	
+
 		String selectionStartBehind = "(this.";
 		String selectionEndBehind = "this.f";
-		
+
 		String expectedCompletionNodeToString = "<SelectionOnFieldReference:this.f>";
 		String completionIdentifier = "f";
 		String expectedUnitDisplayString =
 		    "public team class T1 {\n" +
 		    "  private int f;\n" +
-			"  public T1() {\n" + 
-			"  }\n" + 
-			"  protected synchronized boolean _OT$when() {\n" + 
-			"    return (<SelectionOnFieldReference:this.f> != 0);\n" + 
-			"  }\n" + 
+			"  public T1() {\n" +
+			"  }\n" +
+			"  protected synchronized boolean _OT$when() {\n" +
+			"    return (<SelectionOnFieldReference:this.f> != 0);\n" +
+			"  }\n" +
 			"}\n";
-		
+
 		String expectedReplacedSource = "this.f";
 		String testName = "<select team field name in team-level guard>";
-	
+
 		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
 		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
-			
+
 		this.checkDietParse(
-			str.toCharArray(), 
+			str.toCharArray(),
 			selectionStart,
 			selectionEnd,
 			expectedCompletionNodeToString,
 			expectedUnitDisplayString,
 			completionIdentifier,
 			expectedReplacedSource,
-			testName); 
+			testName);
 	}
 
 }

@@ -76,7 +76,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 @SuppressWarnings("nls")
 public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, ClassFileConstants
 {
-	
+
 	private final static char[] OBJECT_SIGNATURE = "Ljava/lang/Object;".toCharArray();
 
 	/**
@@ -88,9 +88,9 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 	/** Length of the sublist of enhancing arguments. */
 	public final int ENHANCING_ARG_LEN;
 	public final char[] UNUSED_ARGS;
-	
+
 	public static MethodSignatureEnhancer[] variants = new MethodSignatureEnhancer[WeavingScheme.values().length];
-	
+
 	private WeavingScheme weavingScheme;
 
 // {OT/JamVM support:
@@ -105,8 +105,8 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 		this.weavingScheme = weavingScheme;
 		if (weavingScheme == WeavingScheme.OTDRE) {
 			this.ENHANCING_ARG_NAMES = new char[][] {
-					"_OT$baseArg".toCharArray(), 
-					"_OT$teams".toCharArray(), 
+					"_OT$baseArg".toCharArray(),
+					"_OT$teams".toCharArray(),
 					"_OT$index".toCharArray(),
 					"_OT$callinIds".toCharArray(),
 					"_OT$boundMethodId".toCharArray(),
@@ -132,7 +132,7 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 		this.UNUSED_ARGS = this.ENHANCING_ARG_NAMES[this.ENHANCING_ARG_LEN-1];
 	}
 // SH}
-	
+
 	/** Get Typebindings for all enhancing arguments. */
 	private static TypeBinding[] getEnhancingArgTypes (Scope scope) {
 //{OTDyn: configurable:
@@ -142,8 +142,8 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 				scope.createArrayType(scope.getOrgObjectteamsITeam(), 1),  		// _OT$teams
 				TypeBinding.INT,    	                               	 		// _OT$index
 				scope.createArrayType(TypeBinding.INT, 1),         		 		// _OT$callinIds
-				TypeBinding.INT,   	                                	 		// _OT$boundMethodId 
-				scope.createArrayType(scope.getJavaLangObject(), 1), 	 		// _OT$args				
+				TypeBinding.INT,   	                                	 		// _OT$boundMethodId
+				scope.createArrayType(scope.getJavaLangObject(), 1), 	 		// _OT$args
 			};
 // SH}
 // {OT/JamVM support:
@@ -187,7 +187,7 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 		int fullLen = this.ENHANCING_ARG_LEN;
 		if (arguments != null) fullLen += arguments.length; // source arguments?
 		Argument[] newArgs = new Argument[fullLen];
-		TypeReference[] enhanceTypes = 
+		TypeReference[] enhanceTypes =
 //{OTDyn: configurable:
 			this.weavingScheme == WeavingScheme.OTDRE
 			? new TypeReference[] {
@@ -197,7 +197,7 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 					new ArrayTypeReference(TypeConstants.INT, 1, gen.pos),			// _OT$callinIds
 					gen.singleTypeReference(TypeConstants.INT),						// _OT$boundMethodId
 					gen.qualifiedArrayTypeReference(JAVA_LANG_OBJECT, 1),			// _OT$args
-				} 
+				}
 // SH}
 // {OT/JamVM support:
 			: JAMVM_ASPECTBI
@@ -398,18 +398,18 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 		String typeString = types.toString();
 		String prefix =
 //{OTDyn: configurable:
-			weavingScheme == WeavingScheme.OTDRE 
-			? (makeShort 
+			weavingScheme == WeavingScheme.OTDRE
+			? (makeShort
 				? "IBoundBase2, ITeam[], int, int[], int, Object[]"
 				: "org.objectteams.IBoundBase2, org.objectteams.ITeam[], int, int[], int, java.lang.Object[]")
 // SH}
 // {OT/JamVM support:
 			: JAMVM_ASPECTBI
-			? (makeShort 
+			? (makeShort
 					? "Object, int, int, Object[]"
 							: "java.lang.Object, int, int, java.lang.Object[]")
 // CH}
-			: (makeShort 
+			: (makeShort
 				? "ITeam[], int[], int, int, int, Object[]"
 				: "org.objectteams.ITeam[], int[], int, int, int, java.lang.Object[]");
 		if (typeString.startsWith(prefix)) {

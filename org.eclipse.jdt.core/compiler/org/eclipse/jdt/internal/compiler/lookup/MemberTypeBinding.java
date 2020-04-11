@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -82,10 +82,10 @@ void checkSyntheticArgsAndFields() {
 
 @Override
 public char[] constantPoolName() /* java/lang/Object */ {
-	
+
 	if (this.constantPoolName != null)
 		return this.constantPoolName;
-	
+
 	if (!isPrototype()) {
 		return this.prototype.constantPoolName();
 	}
@@ -292,7 +292,7 @@ private ReferenceBinding checkRefineBase(
     if (next.isCompatibleWith(current)) return next;
     if (current.isRole() && current.roleModel.hasTSuperRole(next.getRealType())) return current;
     if (   RoleTypeBinding.isRoleWithExplicitAnchor(current)
-    	&& RoleTypeBinding.isRoleWithExplicitAnchor(next)) 
+    	&& RoleTypeBinding.isRoleWithExplicitAnchor(next))
     {
     	// check for implicit refinement of base anchored baseclasses (OTJLD 2.7(d)):
     	ITeamAnchor currentAnchor = ((RoleTypeBinding)current).getAnchor();
@@ -306,7 +306,7 @@ private ReferenceBinding checkRefineBase(
     		if (   next.getRealType().isCompatibleWith(current.getRealType())
     			&& nextDeclaringType.isCompatibleWith(currentDeclaringType))
    				return next;
-    	}    	
+    	}
     }
     classScope.problemReporter().incompatibleBaseclasses(
     							classScope.referenceContext, sStart, sEnd, current, next);

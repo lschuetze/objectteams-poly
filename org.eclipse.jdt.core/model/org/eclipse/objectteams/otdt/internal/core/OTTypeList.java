@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id: OTTypeList.java 23416 2010-02-03 19:59:31Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -31,7 +31,7 @@ import org.eclipse.objectteams.otdt.core.IOTType;
 
 /**
  * Hashed list of IOTTypes.
- * 
+ *
  * @author kaiser
  * @version $Id: OTTypeList.java 23416 2010-02-03 19:59:31Z stephan $
  */
@@ -63,7 +63,7 @@ public class OTTypeList
 		{
 			return;
 		}
-		
+
 		this.data.put(elem.getFullyQualifiedName(), elem);
 	}
 
@@ -78,7 +78,7 @@ public class OTTypeList
 			}
 		}
 	}
-	
+
 	public void remove(String simpleName)
 	{
 		if (simpleName == null)
@@ -87,16 +87,16 @@ public class OTTypeList
 		}
 		this.data.remove(simpleName);
 	}
-	
+
 	public int getSize()
 	{
 		return this.data.size();
 	}
-	
+
 	public OTTypeIterator getIterator()
 	{
 		final Iterator<IOTType> _rawIter = this.data.values().iterator();
-    	
+
 		return new OTTypeIterator()
 		{
 			@Override
@@ -104,7 +104,7 @@ public class OTTypeList
 			{
     			return _rawIter.hasNext();
 			}
-			
+
 			@Override
 			public OTType getNext()
 			{

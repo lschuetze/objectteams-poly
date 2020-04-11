@@ -319,7 +319,7 @@ static AnnotationInfo[][] decodeParamAnnotations(int offset, boolean runtimeVisi
  * @param classFileBytes byte[]
  * @param offsets int[]
  * @param offset int
- * @param version class file version 
+ * @param version class file version
  */
 protected MethodInfo (byte classFileBytes[], int offsets[], int offset, long version) {
 	super(classFileBytes, offsets, offset);
@@ -563,7 +563,7 @@ private synchronized void readModifierRelatedAttributes() {
      * @param readOffset
      * @param aStructOffset (subtract when indexing via constantPoolOffsets)
      * @param someConstantPoolOffsets
-     * @return (visibility modifiers | HAVE_OT_MODIFIERS) or 0 
+     * @return (visibility modifiers | HAVE_OT_MODIFIERS) or 0
      */
     long readOTAttribute(
             char[]     attributeName,

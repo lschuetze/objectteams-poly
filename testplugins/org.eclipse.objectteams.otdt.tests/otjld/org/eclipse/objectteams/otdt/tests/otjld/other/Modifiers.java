@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -27,11 +27,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 import junit.framework.Test;
 
 public class Modifiers extends AbstractOTJLDTest {
-	
+
 	public Modifiers(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -39,7 +39,7 @@ public class Modifiers extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -190,7 +190,7 @@ public class Modifiers extends AbstractOTJLDTest {
     // a role implements an inherited abstract method
     // 7.1.3-otjld-role-implements-inherited-abstract-method-1
     public void test713_roleImplementsInheritedAbstractMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"T713riiam1Main.java",
@@ -227,7 +227,7 @@ public class Modifiers extends AbstractOTJLDTest {
     // a role implements an inherited abstract method
     // 7.1.3-otjld-role-implements-inherited-abstract-method-2
     public void test713_roleImplementsInheritedAbstractMethod2() {
-       
+
        runConformTest(
             new String[] {
 		"T713riiam2Main.java",
@@ -265,7 +265,7 @@ public class Modifiers extends AbstractOTJLDTest {
     // a role implements an inherited abstract method
     // 7.1.3-otjld-role-implements-inherited-abstract-method-3
     public void test713_roleImplementsInheritedAbstractMethod3() {
-       
+
        runConformTest(
             new String[] {
 		"T713riiam3Main.java",
@@ -305,7 +305,7 @@ public class Modifiers extends AbstractOTJLDTest {
     // a role implements an inherited abstract method
     // 7.1.3-otjld-role-implements-inherited-abstract-method-4
     public void test713_roleImplementsInheritedAbstractMethod4() {
-       
+
        runConformTest(
             new String[] {
 		"T713riiam4Main.java",
@@ -347,7 +347,7 @@ public class Modifiers extends AbstractOTJLDTest {
     // a non-abstract team has an abstract role and concrete subrole, and does not instantiate the abstract role
     // 7.1.6-otjld-nonabstract-team-with-abstract-role-1
     public void test716_nonabstractTeamWithAbstractRole1() {
-       
+
        runConformTest(
             new String[] {
 		"T716ntwar1Main.java",
@@ -387,7 +387,7 @@ public class Modifiers extends AbstractOTJLDTest {
     // a non-abstract team has an abstract role and concrete subrole, and does not instantiate the abstract role
     // 7.1.6-otjld-nonabstract-team-with-abstract-role-2
     public void test716_nonabstractTeamWithAbstractRole2() {
-       
+
        runConformTest(
             new String[] {
 		"T716ntwar2Main.java",
@@ -466,11 +466,11 @@ public class Modifiers extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team717twarr1.java (at line 13)\n" + 
-    		"	Role717twarr1_1 r = new Role717twarr1_1();\n" + 
-    		"	                    ^^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Team Team717twarr1 must be declared abstract, because abstract role Role717twarr1_1 is relevant (OTJLD 2.5(b)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team717twarr1.java (at line 13)\n" +
+    		"	Role717twarr1_1 r = new Role717twarr1_1();\n" +
+    		"	                    ^^^^^^^^^^^^^^^^^^^^^\n" +
+    		"Team Team717twarr1 must be declared abstract, because abstract role Role717twarr1_1 is relevant (OTJLD 2.5(b)).\n" +
     		"----------\n");
     }
 
@@ -510,7 +510,7 @@ public class Modifiers extends AbstractOTJLDTest {
     // an abstract role class is instantiated and the instantiation is performed in a concrete sub-team of the team definining the role
     // 7.1.9-otjld-abstract-role-class-instantiation-1
     public void test719_abstractRoleClassInstantiation1() {
-       
+
        runConformTest(
             new String[] {
 		"T719arci1Main.java",
@@ -552,7 +552,7 @@ public class Modifiers extends AbstractOTJLDTest {
     // an abstract role class is instantiated and the instantiation is performed in a concrete sub-team of the team definining the role
     // 7.1.9-otjld-abstract-role-class-instantiation-2
     public void test719_abstractRoleClassInstantiation2() {
-       
+
        runConformTest(
             new String[] {
 		"T719arci2Main.java",
@@ -752,11 +752,11 @@ public class Modifiers extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team7112cmonm2.java (at line 4)\n" + 
-    		"	callin void test() {\n" + 
-    		"	^^^^^^^^^^^^^^^^^^\n" + 
-    		"Modifier \"callin\" not allowed here; trying to override a method from T7112cmonm2_1 which is not a callin method (OTJLD 4.2(d)). \n" + 
+            "----------\n" +
+    		"1. ERROR in Team7112cmonm2.java (at line 4)\n" +
+    		"	callin void test() {\n" +
+    		"	^^^^^^^^^^^^^^^^^^\n" +
+    		"Modifier \"callin\" not allowed here; trying to override a method from T7112cmonm2_1 which is not a callin method (OTJLD 4.2(d)). \n" +
     		"----------\n");
     }
 
@@ -914,18 +914,18 @@ public class Modifiers extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team7113nmocm3_2.java (at line 4)\n" + 
-    		"	test => doSomething;\n" + 
-    		"	^^^^\n" + 
-    		"Cannot bind method test() as callout; is a callin method (OTJLD 4.2(d)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team7113nmocm3_2.java (at line 4)\n" +
+    		"	test => doSomething;\n" +
+    		"	^^^^\n" +
+    		"Cannot bind method test() as callout; is a callin method (OTJLD 4.2(d)).\n" +
     		"----------\n");
     }
 
     // a method with a callin modifier overwrites an inherited callin method
     // 7.1.14-otjld-callin-method-overwrites-callin-method-1
     public void test7114_callinMethodOverwritesCallinMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"T7114cmocm1Main.java",
@@ -975,7 +975,7 @@ public class Modifiers extends AbstractOTJLDTest {
     // a method with a callin modifier overwrites an inherited callin method
     // 7.1.14-otjld-callin-method-overwrites-callin-method-2
     public void test7114_callinMethodOverwritesCallinMethod2() {
-       
+
        runConformTest(
             new String[] {
 		"T7114cmocm2Main.java",
@@ -1029,7 +1029,7 @@ public class Modifiers extends AbstractOTJLDTest {
     // a method with a callin modifier redefines an inaccessible non-callin method
     // 7.1.15-otjld-callin-method-redefines-noncallin-method
     public void test7115_callinMethodRedefinesNoncallinMethod() {
-       
+
        runConformTest(
             new String[] {
 		"T7115cmrnmMain.java",
@@ -1090,7 +1090,7 @@ public class Modifiers extends AbstractOTJLDTest {
     // a static role method calls a non-static team method , qualified this reference passed by parameter mapping
     // 7.1.16-otjld-static-role-method-1
     public void test7116_staticRoleMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"Team7116srm1.java",
@@ -1127,7 +1127,7 @@ public class Modifiers extends AbstractOTJLDTest {
     // a static role method accesses the enclosing team instance
     // 7.1.16-otjld-static-role-method-2
     public void test7116_staticRoleMethod2() {
-       
+
        runConformTest(
             new String[] {
 		"Team7116srm2.java",
@@ -1160,7 +1160,7 @@ public class Modifiers extends AbstractOTJLDTest {
     // a static role method accesses the enclosing team instance, invoked via callin
     // 7.1.16-otjld-static-role-method-3
     public void test7116_staticRoleMethod3() {
-       
+
        runConformTest(
             new String[] {
 		"Team7116srm3.java",
@@ -1200,7 +1200,7 @@ public class Modifiers extends AbstractOTJLDTest {
     // a static callin method accesses the enclosing team instance
     // 7.1.16-otjld-static-role-method-4
     public void test7116_staticRoleMethod4() {
-       
+
        runConformTest(
             new String[] {
 		"Team7116srm4.java",
@@ -1246,7 +1246,7 @@ public class Modifiers extends AbstractOTJLDTest {
     // a static callin method calls another static role method (regular)
     // 7.1.16-otjld-static-role-method-5
     public void test7116_staticRoleMethod5() {
-       
+
        runConformTest(
             new String[] {
 		"Team7116srm5.java",
@@ -1284,7 +1284,7 @@ public class Modifiers extends AbstractOTJLDTest {
     // a static callin method accesses an indirect enclosing team instance
     // 7.1.16-otjld-static-role-method-6
     public void test7116_staticRoleMethod6() {
-       
+
        runConformTest(
             new String[] {
 		"Team7116srm6.java",
@@ -1328,7 +1328,7 @@ public class Modifiers extends AbstractOTJLDTest {
     // a static callin method of a nested role accesses the enclosing team instance
     // 7.1.16-otjld-static-role-method-7
     public void test7116_staticRoleMethod7() {
-       
+
        runConformTest(
             new String[] {
 		"Team7116srm7.java",

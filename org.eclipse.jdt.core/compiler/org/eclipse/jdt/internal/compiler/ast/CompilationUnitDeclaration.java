@@ -301,7 +301,7 @@ public void finalizeProblems() {
 		return;
 	}
 	int removed = 0;
-/* 
+/*
 	IrritantSet[] foundIrritants = new IrritantSet[this.suppressWarningsCount];
   :giro */
 // SH}

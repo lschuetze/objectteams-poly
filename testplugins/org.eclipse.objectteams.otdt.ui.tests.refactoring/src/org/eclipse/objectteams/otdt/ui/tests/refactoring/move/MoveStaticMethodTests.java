@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -46,7 +46,7 @@ import org.eclipse.objectteams.otdt.ui.tests.refactoring.RefactoringTest;
  *<code>org.eclipse.jdt.ui.tests.refactoring</code> provided by Eclipse.
  *
  * @author brcan
- *  
+ *
  */
 public class MoveStaticMethodTests extends RefactoringTest
 {
@@ -220,7 +220,7 @@ public class MoveStaticMethodTests extends RefactoringTest
             cuB.delete(false, null);
         }
     }
-    
+
     /********** tests *********/
 	public void test0() throws Exception
     {
@@ -544,7 +544,7 @@ public class MoveStaticMethodTests extends RefactoringTest
                 RefactoringStatus.ERROR,
                 "p.B");
     }
-    
+
     public void testMoveToTeamclass() throws Exception
     {
         methodHelper_passing(new String[] { "m" }, new String[][] { new String[0] }, "B", "T");

@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -47,7 +47,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
      public static Class testClass() {
          return BindingAmbiguities2.class;
      }
-     
+
      @SuppressWarnings("unchecked")
 	 @Override
      protected Map getCompilerOptions() {
@@ -60,7 +60,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.2-otjld_g-ambiguous-binding-1
      public void test732_ambiguousBinding1() {
-        
+
         runConformTest(
              new String[] {
  		"T732ab1Main.java",
@@ -172,7 +172,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.2-otjld_g-ambiguous-binding-2
      public void test732_ambiguousBinding2() {
-        
+
         runConformTest(
              new String[] {
  		"T732ab2Main.java",
@@ -284,7 +284,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.2-otjld_g-ambiguous-binding-3
      public void test732_ambiguousBinding3() {
-        
+
         runConformTest(
              new String[] {
  		"T732ab3Main.java",
@@ -396,7 +396,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.2-otjld_g-ambiguous-binding-4
      public void test732_ambiguousBinding4() {
-        
+
         runConformTest(
              new String[] {
  		"T732ab4Main.java",
@@ -508,7 +508,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.2-otjld_g-ambiguous-binding-5
      public void test732_ambiguousBinding5() {
-        
+
         runConformTest(
              new String[] {
  		"T732ab5Main.java",
@@ -620,7 +620,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.2-otjld_g-ambiguous-binding-6
      public void test732_ambiguousBinding6() {
-        
+
         runConformTest(
              new String[] {
  		"T732ab6Main.java",
@@ -732,7 +732,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.2-otjld_g-ambiguous-binding-7
      public void test732_ambiguousBinding7() {
-        
+
         runConformTest(
              new String[] {
  		"T732ab7Main.java",
@@ -842,7 +842,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
              },
-     		 "org.objectteams.LiftingFailedException: \n" + 
+     		 "org.objectteams.LiftingFailedException: \n" +
              "Failed to lift 'T732ab7_3' of class T732ab7_3 to type 'Role732ab7_1'\n" +
         	 "(See OT/J definition para. 2.3.4(c)).");
      }
@@ -850,7 +850,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.2-otjld_g-ambiguous-binding-8
      public void test732_ambiguousBinding8() {
-        
+
         runConformTest(
              new String[] {
  		"T732ab8Main.java",
@@ -960,7 +960,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
              },
-     		 "org.objectteams.LiftingFailedException: \n" + 
+     		 "org.objectteams.LiftingFailedException: \n" +
              "Failed to lift 'T732ab8_3' of class T732ab8_3 to type 'Role732ab8_1'\n" +
              "(See OT/J definition para. 2.3.4(c)).");
      }

@@ -6,7 +6,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -67,7 +67,7 @@ public class OTCopyToClipboardTests extends RefactoringTest
     private Clipboard              _clipboard;
     private ICompilationUnit       _cuT1;
     private ICompilationUnit       _cuB1;
-	
+
 	public OTCopyToClipboardTests(String name) {
 		super(name);
 	}
@@ -80,8 +80,8 @@ public class OTCopyToClipboardTests extends RefactoringTest
     {
         super.setUp();
         _clipboard = new MockClipboard(Display.getDefault());
-        
-        _cuT1 = createCU(getPackageP(), CU_T1_NAME + ".java", 
+
+        _cuT1 = createCU(getPackageP(), CU_T1_NAME + ".java",
                 "package p;" + "\n" +
                 "import java.util.List;" + "\n" +
                 "public team class T1" + "\n" +
@@ -101,7 +101,7 @@ public class OTCopyToClipboardTests extends RefactoringTest
                 "}" + "\n" +
                 "}");
 
-        _cuB1 = createCU(getPackageP(), CU_B1_NAME + ".java", 
+        _cuB1 = createCU(getPackageP(), CU_B1_NAME + ".java",
                 "package p;" + "\n" +
                 "public class B1" + "\n" +
                 "{" + "\n" +
@@ -110,14 +110,14 @@ public class OTCopyToClipboardTests extends RefactoringTest
                 "}");
 
         _labelProvider = new JavaElementLabelProvider(
-                JavaElementLabelProvider.SHOW_VARIABLE + 
-                JavaElementLabelProvider.SHOW_PARAMETERS + 
+                JavaElementLabelProvider.SHOW_VARIABLE +
+                JavaElementLabelProvider.SHOW_PARAMETERS +
                 JavaElementLabelProvider.SHOW_TYPE);
 
         assertTrue("T1.java does not exist", _cuT1.exists());
         assertTrue("B1.java does not exist", _cuB1.exists());
     }
-    
+
     protected void tearDown() throws Exception
     {
         super.tearDown();
@@ -126,17 +126,17 @@ public class OTCopyToClipboardTests extends RefactoringTest
         _labelProvider.dispose();
         delete(_cuT1);
         delete(_cuB1);
-    }	
-	
+    }
+
 	private static void delete(ISourceManipulation element) {
 		try {
 			if (element != null && ((IJavaElement)element).exists())
 				element.delete(true, null);
 		} catch(JavaModelException e) {
 			//ignore, we must keep going
-		}		
+		}
 	}
-	
+
 	private void checkDisabled(Object[] elements){
 		CopyToClipboardAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements), _clipboard);
 		copyAction.setAutoRepeatOnFailure(true);
@@ -157,10 +157,10 @@ public class OTCopyToClipboardTests extends RefactoringTest
 		IResource[] resourcesCopied= getResources(elementsCopied);
 		IJavaElement[] javaElementsCopied= getJavaElements(elementsCopied);
 		IType[] mainTypesCopied= ReorgUtils.getMainTypes(javaElementsCopied);
-		
+
 		IResource[] resourcesExpected= computeResourcesExpectedInClipboard(resourcesCopied, mainTypesCopied, javaElementsCopied);
 		IJavaElement[] javaElementsExpected= computeJavaElementsExpectedInClipboard(javaElementsCopied, mainTypesCopied);
-		
+
 		String[] clipboardFiles= getClipboardFiles();
 		IResource[] clipboardResources= getClipboardResources();
 		String clipboardText= getClipboardText();
@@ -173,10 +173,10 @@ public class OTCopyToClipboardTests extends RefactoringTest
 		checkElements(resourcesExpected, clipboardResources);
 		checkElements(javaElementsExpected, clipboardJavaElements);
 	}
-	
+
 	private void checkTypedSources(IJavaElement[] javaElementsCopied, TypedSource[] clipboardTypedSources) throws Exception {
 		TypedSource[] typedSources= TypedSource.createTypedSources(javaElementsCopied);
-		assertEquals("different number", typedSources.length, clipboardTypedSources.length);		
+		assertEquals("different number", typedSources.length, clipboardTypedSources.length);
 		TypedSource.sortByType(typedSources);
 		TypedSource.sortByType(clipboardTypedSources);
 		for (int i= 0; i < typedSources.length; i++) {
@@ -247,17 +247,17 @@ public class OTCopyToClipboardTests extends RefactoringTest
 			IJavaElement element= javaElementsCopied[i];
 			if (! ReorgUtils.isInsideCompilationUnit(element)){
 				String name= getName(element);
-				assertTrue("name not in set:" + name, stringLines.contains(name));				
+				assertTrue("name not in set:" + name, stringLines.contains(name));
 			}
 		}
-	}	
-	
+	}
+
 	private static void checkFiles(IResource[] resourcesCopied, IJavaElement[] javaElementsCopied, IType[] mainTypes, String[] clipboardFiles) {
 		int expected= 0;
 		expected += resourcesCopied.length;
 		expected += countResources(javaElementsCopied);
 		expected += mainTypes.length;
-		
+
 		//we cannot compare file names here because they're absolute and depend on the worspace location
 		assertEquals("different number of files in clipboard", expected, clipboardFiles.length);
 	}
@@ -293,49 +293,49 @@ public class OTCopyToClipboardTests extends RefactoringTest
 
 	private IJavaElement[] getClipboardJavaElements() {
 		IJavaElement[] elements= (IJavaElement[])_clipboard.getContents(JavaElementTransfer.getInstance());
-		return elements == null ? new IJavaElement[0]: elements; 
+		return elements == null ? new IJavaElement[0]: elements;
 	}
 
 	private String[] getClipboardFiles() {
 		String[] files= (String[])_clipboard.getContents(FileTransfer.getInstance());
 		return files == null ? new String[0]: files;
 	}
-	
+
 	private IResource[] getClipboardResources() {
 		IResource[] resources= (IResource[])_clipboard.getContents(ResourceTransfer.getInstance());
-		return resources == null ? new IResource[0]: resources; 
+		return resources == null ? new IResource[0]: resources;
 	}
 
 	private TypedSource[] getClipboardTypedSources() {
 		TypedSource[] typedSources= (TypedSource[])_clipboard.getContents(TypedSourceTransfer.getInstance());
-		return typedSources == null ? new TypedSource[0]: typedSources; 
+		return typedSources == null ? new TypedSource[0]: typedSources;
 	}
 
 	private String getClipboardText() {
 		return (String)_clipboard.getContents(TextTransfer.getInstance());
 	}
-	
+
 	///---------tests
 
 	public void testDisabled0() {
 		Object[] elements= {};
 		checkDisabled(elements);
-	}	
+	}
 
 	public void testDisabled1() throws Exception {
 		Object[] elements= {null};
 		checkDisabled(elements);
-	}	
+	}
 
 	public void testDisabled2() throws Exception {
 		Object[] elements= {this};
 		checkDisabled(elements);
-	}	
+	}
 
 	public void testDisabled3() throws Exception {
 		Object[] elements= {RefactoringTestSetup.getProject(), getPackageP()};
 		checkDisabled(elements);
-	}	
+	}
 
 	public void testDisabled4() throws Exception{
 		checkDisabled(new Object[]{getPackageP(), _cuT1});
@@ -354,25 +354,25 @@ public class OTCopyToClipboardTests extends RefactoringTest
 		Object classA= _cuT1.getType("T1");
 		Object[] elements= {fieldF, classA};
 		checkDisabled(elements);
-	}	
+	}
 
 	public void testDisabled16() throws Exception {
 		Object fieldF= _cuT1.getType("T1").getField("x");
 		Object[] elements= {fieldF, _cuT1};
 		checkDisabled(elements);
-	}	
+	}
 
 	public void testDisabled20() throws Exception {
 		Object fieldF= _cuT1.getType("T1").getField("x");
 		Object[] elements= {fieldF, getRoot()};
 		checkDisabled(elements);
-	}	
+	}
 
 	public void testDisabled21() throws Exception {
 		Object fieldF= _cuT1.getType("T1").getField("x");
 		Object[] elements= {fieldF, RefactoringTestSetup.getProject()};
 		checkDisabled(elements);
-	}	
+	}
 
 	public void testDisabled22() throws Exception {
 		Object typeT1= _cuT1.getType("T1");
@@ -380,27 +380,27 @@ public class OTCopyToClipboardTests extends RefactoringTest
 		Object[] elements= {typeT1, typeB1};
 		checkDisabled(elements);
 	}
-	
+
 	public void testEnabled0() throws Exception {
 		Object[] elements= {RefactoringTestSetup.getProject()};
 		checkEnabled(elements);
-	}	
+	}
 
 	public void testEnabled1() throws Exception {
 		Object[] elements= {getPackageP()};
 		checkEnabled(elements);
-	}	
+	}
 
 	public void testEnabled2() throws Exception {
 		Object[] elements= {getRoot()};
 		checkEnabled(elements);
-	}	
+	}
 
 	public void testEnabled3() throws Exception {
 		Object[] elements= {RefactoringTestSetup.getDefaultSourceFolder()};
 		checkEnabled(elements);
 	}
-	
+
 	public void testEnabled5() throws Exception{
 		checkEnabled(new Object[]{getRoot()});
 	}
@@ -412,11 +412,11 @@ public class OTCopyToClipboardTests extends RefactoringTest
 	public void testEnabled7() throws Exception{
 		checkEnabled(new Object[]{getRoot().getJavaProject()});
 	}
-		
+
 	public void testEnabled8() throws Exception{
 		checkEnabled(new Object[]{getPackageP()});
 	}
-	
+
 	public void testEnabled10() throws Exception{
 		Object packDecl= _cuT1.getPackageDeclarations()[0];
 		Object[] elements= {packDecl};
@@ -475,7 +475,7 @@ public class OTCopyToClipboardTests extends RefactoringTest
 		Object[] elements= {classA, packDecl};
 		checkEnabled(elements);
 	}
-	
+
 	public void testEnabledOT0() throws Exception
     {
         IType teamT1 = _cuT1.getType("T1");
@@ -493,7 +493,7 @@ public class OTCopyToClipboardTests extends RefactoringTest
         if (elem instanceof IType)
         {
             IType type = (IType)elem;
-            IRoleType roleR1 = (IRoleType)OTModelManager.getOTElement(type); 
+            IRoleType roleR1 = (IRoleType)OTModelManager.getOTElement(type);
             Object[] elements = { roleR1 };
             checkEnabled(elements);
         }
@@ -538,7 +538,7 @@ public class OTCopyToClipboardTests extends RefactoringTest
         IMethodMapping[] mapping = roleR1.getMethodMappings(IRoleType.CALLINS);
         ICallinMapping callin = (ICallinMapping)mapping[0];
         Object[] elements = { callin };
-        checkEnabled(elements);        
+        checkEnabled(elements);
     }
 
     public void testEnabledOT5() throws Exception
@@ -557,7 +557,7 @@ public class OTCopyToClipboardTests extends RefactoringTest
             }
         }
         Object[] elements = { calloutToField };
-        checkEnabled(elements);        
+        checkEnabled(elements);
     }
 
     public void testEnabledOT6() throws Exception
@@ -569,7 +569,7 @@ public class OTCopyToClipboardTests extends RefactoringTest
         Object[] elements = { fieldX, methodT1m, nestedTeamTR1 };
         checkEnabled(elements);
     }
-	
-	
+
+
 }
 //sko}

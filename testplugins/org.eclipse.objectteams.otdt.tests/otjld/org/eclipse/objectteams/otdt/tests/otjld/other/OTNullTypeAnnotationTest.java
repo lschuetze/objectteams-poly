@@ -28,7 +28,7 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDNullAnnotationTest;
 
 /** Test combination of OT-types with null type annotations. */
 public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
-	
+
 	public OTNullTypeAnnotationTest(String name) {
 		super(name);
 	}
@@ -48,17 +48,17 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 	public static Class testClass() {
 		return OTNullTypeAnnotationTest.class;
 	}
-	
+
 	@Override
 	public void initialize(CompilerTestSetup setUp) {
 		super.initialize(setUp);
 		if (this.weavingScheme == WeavingScheme.OTRE)
 			System.err.println("Running Java8 tests for OTRE weaver will skip most tests");
 	}
-	
+
 
 	// test standard generated methods via basic team-role-base setup
-	// Bug 443306 - [1.8][null] generated method getAllRoles() triggers null pointer warning / error 
+	// Bug 443306 - [1.8][null] generated method getAllRoles() triggers null pointer warning / error
 	public void testBoundRole() {
 		if (this.weavingScheme == WeavingScheme.OTRE) return;
 		runConformTestWithLibs(
@@ -75,8 +75,8 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 				"	}\n" +
 				"	public static void main(String... args) {\n" +
 				"		System.out.print(\"main\");\n" +
-				"		new MyTeam().activate();\n" + 
-				"		new bug443306.b.MyBase().bar();\n" + 
+				"		new MyTeam().activate();\n" +
+				"		new bug443306.b.MyBase().bar();\n" +
 				"	}\n" +
 				"}\n",
 				"bub443306/b/MyBase.java",
@@ -109,8 +109,8 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 				"	}\n" +
 				"	public static void main(String... args) {\n" +
 				"		System.out.print(\"main\");\n" +
-				"		new MyTeam().activate();\n" + 
-				"		new bug443299.b.MyBase().bar();\n" + 
+				"		new MyTeam().activate();\n" +
+				"		new bug443299.b.MyBase().bar();\n" +
 				"	}\n" +
 				"}\n",
 				"bug443299/b/MyBase.java",
@@ -126,7 +126,7 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 			"mainbarMyBase");
 	}
 
-	// Bug 437767 - [java8][null] semantically integrate null type annotations with anchored role types 
+	// Bug 437767 - [java8][null] semantically integrate null type annotations with anchored role types
 	// see comment 1
 	public void testImplicitTeamAnchor1() {
 		if (this.weavingScheme == WeavingScheme.OTRE) return;
@@ -141,10 +141,10 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 				"	protected class MyRole {\n" +
 				"		protected void print() {}\n" +
 				"	}\n" +
-				"	void test() {\n" + 
-				"		List<@NonNull MyRole> someRoles = new ArrayList<>();\n" + 
-				"		@NonNull MyRole role = someRoles.get(0);\n" + 
-				"		role.print();\n" + 
+				"	void test() {\n" +
+				"		List<@NonNull MyRole> someRoles = new ArrayList<>();\n" +
+				"		@NonNull MyRole role = someRoles.get(0);\n" +
+				"		role.print();\n" +
 				"	}\n" +
 				"}\n"
 			},
@@ -163,19 +163,19 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 				"	protected class MyRole {\n" +
 				"		protected void print() {}\n" +
 				"	}\n" +
-				"	void test() {\n" + 
-				"		List<@Nullable MyRole> someRoles = new ArrayList<>();\n" + 
-				"		@NonNull MyRole role = someRoles.get(0);\n" + 
-				"		role.print();\n" + 
+				"	void test() {\n" +
+				"		List<@Nullable MyRole> someRoles = new ArrayList<>();\n" +
+				"		@NonNull MyRole role = someRoles.get(0);\n" +
+				"		role.print();\n" +
 				"	}\n" +
 				"}\n"
 			},
 			getCompilerOptions(),
-			"----------\n" + 
-			"1. ERROR in MyTeam.java (at line 9)\n" + 
-			"	@NonNull MyRole role = someRoles.get(0);\n" + 
-			"	                       ^^^^^^^^^^^^^^^^\n" + 
-			"Null type mismatch (type annotations): required \'MyTeam.@NonNull MyRole\' but this expression has type \'MyTeam.@Nullable MyRole\'\n" + 
+			"----------\n" +
+			"1. ERROR in MyTeam.java (at line 9)\n" +
+			"	@NonNull MyRole role = someRoles.get(0);\n" +
+			"	                       ^^^^^^^^^^^^^^^^\n" +
+			"Null type mismatch (type annotations): required \'MyTeam.@NonNull MyRole\' but this expression has type \'MyTeam.@Nullable MyRole\'\n" +
 			"----------\n");
 	}
 
@@ -188,8 +188,8 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 				"import java.util.*;\n" +
 				"public class Main {\n" +
 				"	void test(final MyTeam t, List<@Nullable MyRole<@t>> someRoles) {\n" +
-				"		@NonNull MyRole<@t> role = someRoles.get(0);\n" + 
-				"		role.print();\n" + 
+				"		@NonNull MyRole<@t> role = someRoles.get(0);\n" +
+				"		role.print();\n" +
 				"	}\n" +
 				"}\n",
 				"MyTeam.java",
@@ -200,11 +200,11 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 				"}\n"
 			},
 			getCompilerOptions(),
-			"----------\n" + 
-			"1. ERROR in Main.java (at line 5)\n" + 
-			"	@NonNull MyRole<@t> role = someRoles.get(0);\n" + 
-			"	                           ^^^^^^^^^^^^^^^^\n" + 
-			"Null type mismatch (type annotations): required \'MyTeam.@NonNull MyRole\' but this expression has type \'MyTeam.@Nullable MyRole\'\n" + 
+			"----------\n" +
+			"1. ERROR in Main.java (at line 5)\n" +
+			"	@NonNull MyRole<@t> role = someRoles.get(0);\n" +
+			"	                           ^^^^^^^^^^^^^^^^\n" +
+			"Null type mismatch (type annotations): required \'MyTeam.@NonNull MyRole\' but this expression has type \'MyTeam.@Nullable MyRole\'\n" +
 			"----------\n");
 	}
 
@@ -224,11 +224,11 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 				"public class MyBase {}\n"
 			},
 			getCompilerOptions(),
-			"----------\n" + 
-			"1. ERROR in MyTeam.java (at line 6)\n" + 
-			"	void test(@Nullable MyBase as @NonNull MyRole r) {}\n" + 
-			"	                    ^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-			"Null type mismatch (type annotations): required \'MyTeam.@NonNull MyRole\' but this expression has type \'@Nullable MyBase\'\n" + 
+			"----------\n" +
+			"1. ERROR in MyTeam.java (at line 6)\n" +
+			"	void test(@Nullable MyBase as @NonNull MyRole r) {}\n" +
+			"	                    ^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+			"Null type mismatch (type annotations): required \'MyTeam.@NonNull MyRole\' but this expression has type \'@Nullable MyBase\'\n" +
 			"----------\n");
 	}
 
@@ -249,16 +249,16 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 				"public class MyBase {}\n"
 			},
 			getCompilerOptions(),
-			"----------\n" + 
-			"1. ERROR in MyTeam.java (at line 6)\n" + 
-			"	void test1(MyBase @Nullable[] as MyRole @NonNull[] r) {}\n" + 
-			"	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-			"Null type mismatch (type annotations): required \'MyTeam.MyRole @NonNull[]\' but this expression has type \'MyBase @Nullable[]\'\n" + 
-			"----------\n" + 
-			"2. ERROR in MyTeam.java (at line 7)\n" + 
-			"	void test2(@Nullable MyBase @NonNull[] as @NonNull MyRole @NonNull[] r) {}\n" + 
-			"	                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-			"Null type mismatch (type annotations): required \'MyTeam.@NonNull MyRole @NonNull[]\' but this expression has type \'@Nullable MyBase @NonNull[]\'\n" + 
+			"----------\n" +
+			"1. ERROR in MyTeam.java (at line 6)\n" +
+			"	void test1(MyBase @Nullable[] as MyRole @NonNull[] r) {}\n" +
+			"	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+			"Null type mismatch (type annotations): required \'MyTeam.MyRole @NonNull[]\' but this expression has type \'MyBase @Nullable[]\'\n" +
+			"----------\n" +
+			"2. ERROR in MyTeam.java (at line 7)\n" +
+			"	void test2(@Nullable MyBase @NonNull[] as @NonNull MyRole @NonNull[] r) {}\n" +
+			"	                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+			"Null type mismatch (type annotations): required \'MyTeam.@NonNull MyRole @NonNull[]\' but this expression has type \'@Nullable MyBase @NonNull[]\'\n" +
 			"----------\n");
 	}
 
@@ -269,12 +269,12 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
     			"import java.util.*;\n" +
     			"import org.eclipse.jdt.annotation.*;\n" +
     			"public class X {\n" +
-    			"  public static <C extends Collection<?>>@NonNull C requireNonEmpty(@Nullable C value) {\n" + 
-    			"  	if ((value == null))\n" + 
-    			"   	   throw new NullPointerException();\n" + 
-    			"  	if (value.isEmpty())\n" + 
-    			"   	   throw new IllegalArgumentException();\n" + 
-    			"  	return value;\n" + 
+    			"  public static <C extends Collection<?>>@NonNull C requireNonEmpty(@Nullable C value) {\n" +
+    			"  	if ((value == null))\n" +
+    			"   	   throw new NullPointerException();\n" +
+    			"  	if (value.isEmpty())\n" +
+    			"   	   throw new IllegalArgumentException();\n" +
+    			"  	return value;\n" +
     			"  }\n" +
     			"}\n"
     		},
@@ -308,11 +308,11 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 			    "    \n"
             },
             getCompilerOptions(),
-            "----------\n" + 
-    		"1. ERROR in TeamIBC.java (at line 9)\n" + 
-    		"	base.rm2(\"wrong\", true);\n" + 
-    		"	     ^^^\n" + 
-    		"Base call rm2(Integer, boolean) is not applicable for the arguments (String, boolean)\n" + 
+            "----------\n" +
+    		"1. ERROR in TeamIBC.java (at line 9)\n" +
+    		"	base.rm2(\"wrong\", true);\n" +
+    		"	     ^^^\n" +
+    		"Base call rm2(Integer, boolean) is not applicable for the arguments (String, boolean)\n" +
     		"----------\n");
     }
 }

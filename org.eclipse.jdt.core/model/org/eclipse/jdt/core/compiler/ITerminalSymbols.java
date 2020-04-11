@@ -32,11 +32,11 @@ public interface ITerminalSymbols {
 	int TokenNameCOMMENT_JAVADOC = 1003;
 
 	/**
-	 * @deprecated With the introduction of "restricted keywords" in Java 9, classification of tokens 
+	 * @deprecated With the introduction of "restricted keywords" in Java 9, classification of tokens
 	 * 	 by a scanner is inherently unreliable. Any token classified as an identifier could still
 	 *   be a "restricted keyword". Future versions of Java will introduce more words that have
 	 *   special syntactical meaning in specific contexts.
-	 *   For reliably detecting an identifier the only real solution is to use a parser instead 
+	 *   For reliably detecting an identifier the only real solution is to use a parser instead
 	 *   (see also the caveat at the top of the	interface documentation of {@link IScanner}).
 	 */
 	@Deprecated
@@ -215,7 +215,7 @@ public interface ITerminalSymbols {
 	TokenNamewhen = 5018,
     TokenNameprecedence = 5019;
     /**
-     * @deprecated Modifier 'readonly' is no longer recognized. It was never truly supported. 
+     * @deprecated Modifier 'readonly' is no longer recognized. It was never truly supported.
      */
     @Deprecated
 	int TokenNamereadonly = 5015;

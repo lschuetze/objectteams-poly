@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -45,12 +45,12 @@ import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 public class SourceElementParserTest extends FileBasedModelTest implements ISourceElementRequestor
 {
 	private char[] source;
-    
+
     public SourceElementParserTest(String testName)
     {
         super(testName);
     }
-    
+
     public static Test suite()
     {
         if (true)
@@ -61,13 +61,13 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
             .getName());
         return suite;
     }
-    
+
     public void setUpSuite() throws Exception
     {
-        setTestProjectDir("ParserTest");        
+        setTestProjectDir("ParserTest");
         super.setUpSuite();
     }
-    
+
     protected void setUp() throws Exception
     {
         super.setUp();
@@ -76,19 +76,19 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
     public void fullParse(String src, String fileName)
     {
 	    	this.source = src.toCharArray();
-	    	
-	    	// km: two new parameter in 32m4: "reportLocalDeclarations","optimizeStringLiterals" 
+
+	    	// km: two new parameter in 32m4: "reportLocalDeclarations","optimizeStringLiterals"
 	    	//     assuming both as true
-	    	SourceElementParser parser = 
-	    		new SourceElementParser(this, new DefaultProblemFactory(Locale.getDefault()), new CompilerOptions(), true, true); 
-	
+	    	SourceElementParser parser =
+	    		new SourceElementParser(this, new DefaultProblemFactory(Locale.getDefault()), new CompilerOptions(), true, true);
+
 	    	ICompilationUnit sourceUnit = new CompilationUnit(source, fileName, null);
-	
+
 	    	parser.parseCompilationUnit(sourceUnit, true, null);
     }
 
 // test-methods following
-    
+
     public void testDeclarationSourceStart() throws JavaModelException
     {
         org.eclipse.jdt.core.ICompilationUnit unit = getCompilationUnit(
@@ -96,21 +96,21 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
                 "src",
                 "sourcelocations",
                 "JdtTestAdaptor.java");
-        
+
         String    src = unit.getSource();
-        IResource res = unit.getCorrespondingResource();        
-                    
+        IResource res = unit.getCorrespondingResource();
+
 	    	String fileName = res.toString();
 	    	fullParse(src, fileName);
     }
-    
+
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.compiler.ISourceElementRequestor#acceptConstructorReference(char[], int, int)
      */
     public void acceptConstructorReference(char[] typeName, int argCount, int sourcePosition)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -119,7 +119,7 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
     public void acceptFieldReference(char[] fieldName, int sourcePosition)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -128,7 +128,7 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
     public void acceptLineSeparatorPositions(int[] positions)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -137,7 +137,7 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
     public void acceptMethodReference(char[] methodName, int argCount, int sourcePosition)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -146,7 +146,7 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
     public void acceptTypeReference(char[][] typeName, int sourceStart, int sourceEnd)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -155,7 +155,7 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
     public void acceptTypeReference(char[] typeName, int sourcePosition)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -164,7 +164,7 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
     public void acceptUnknownReference(char[][] name, int sourceStart, int sourceEnd)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -173,7 +173,7 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
     public void acceptUnknownReference(char[] name, int sourcePosition)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -182,7 +182,7 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
     public void enterCompilationUnit()
     {
         // TODO Auto-generated method stub
-        
+
     }
 
 
@@ -192,7 +192,7 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
     public void enterInitializer(int declarationStart, int modifiers)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -201,7 +201,7 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
     public void exitCompilationUnit(int declarationEnd)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -210,7 +210,7 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
     public void exitConstructor(int declarationEnd)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -219,7 +219,7 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
     public void exitField(int initializationStart, int declarationEnd, int declarationSourceEnd)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -228,7 +228,7 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
     public void exitInitializer(int declarationEnd)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -237,7 +237,7 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
     public void exitCalloutMapping(int sourceEnd, int declarationSourceEnd)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -246,7 +246,7 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
     public void exitCalloutToFieldMapping(int sourceEnd, int declarationSourceEnd)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -255,57 +255,57 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
     public void exitCallinMapping(int sourceEnd, int declarationSourceEnd)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
 
-//  {ObjectTeams: 
+//  {ObjectTeams:
 	public void enterCalloutMapping(CalloutInfo calloutInfo) {}
     public void enterCalloutToFieldMapping(CalloutToFieldInfo calloutInfo) {}
     public void enterCallinMapping(CallinInfo callinInfo) {}
-    
+
     public void acceptBaseReference(char[][] typeName, int sourceStart, int sourceEnd) {}
 //    haebor}
 
 	public void enterConstructor(MethodInfo methodInfo) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void enterField(FieldInfo fieldInfo) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void enterMethod(MethodInfo methodInfo) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void enterType(TypeInfo typeInfo) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void exitType(int declarationEnd) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void acceptProblem(CategorizedProblem problem) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void acceptImport(int declarationStart, int declarationEnd, char[][] tokens, boolean onDemand, int modifiers) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	public void acceptImport(int declarationStart, int declarationEnd, int nameStart, int nameEnd, char[][] tokens,
 			boolean onDemand, int modifiers) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void acceptAnnotationTypeReference(char[][] annotation, int sourceStart, int sourceEnd) {

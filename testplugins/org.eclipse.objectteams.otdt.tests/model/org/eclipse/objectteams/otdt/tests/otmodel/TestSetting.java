@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -46,30 +46,30 @@ public class TestSetting extends FileBasedModelTest
     private String _srcDir;
     private String _teamPkg;
     private String _teamClass;
-    
+
     private IType _teamJavaElem;
-    
+
     public TestSetting(String testPrj, String srcDir, String teamPkg)
     {
         super(createName(testPrj, srcDir, teamPkg));
-        
+
         _testProject = testPrj;
         _srcDir = srcDir;
         _teamPkg = teamPkg;
-        
+
         setUsePerformanceMeter(false);
     }
-    
+
     public static String createName(String testPrj, String srcDir, String teamPkg)
     {
     	StringBuffer buffer = new StringBuffer("TestSetting");
     	buffer.append("/").append(testPrj);
     	buffer.append("/").append(srcDir);
     	buffer.append("/").append(teamPkg);
-    	
+
     	return buffer.toString();
     }
-    
+
     public void resetProjectDirectory(String directory) {
     	this._testProject = directory;
     }
@@ -82,7 +82,7 @@ public class TestSetting extends FileBasedModelTest
             ICompilationUnit teamUnit = getCompilationUnit(
                     _testProject,
                     _srcDir,
-                    _teamPkg, 
+                    _teamPkg,
                     _teamClass + ".java");
 
             _teamJavaElem = teamUnit.getType(_teamClass);
@@ -92,12 +92,12 @@ public class TestSetting extends FileBasedModelTest
             ex.printStackTrace();
         }
     }
-    
-    protected void tearDown() throws Exception 
+
+    protected void tearDown() throws Exception
     {
 		super.tearDown();
     }
-    
+
     public IType getTeamJavaElement()
     {
         return _teamJavaElem;
@@ -107,26 +107,26 @@ public class TestSetting extends FileBasedModelTest
     {
         //TODO(jwl): Fix to parse the Team file for an external role!
         _teamJavaElem.exists();
-        
+
         IOTType teamOTElem = OTModelManager.getOTElement(_teamJavaElem);
         assertNotNull("The team type you're trying to test, seems not to exist for the OTModel!", teamOTElem);
-        
+
         return teamOTElem.getRoleType(getRoleName());
     }
-    
+
     public IType[] getRoleJavaElements()
-    {       
+    {
         if (_roleNames == null)
         {
             return new IType[] { getRoleJavaElement() };
         }
-        
+
         //TODO(jwl): Fix to parse the Team file for an external role!
         _teamJavaElem.exists();
-        
+
         IOTType teamOTElem = OTModelManager.getOTElement(_teamJavaElem);
         assertNotNull("The team type you're trying to test, seems not to exist for the OTModel!", teamOTElem);
-        
+
         List<IType> roles = new LinkedList<IType>();
         for (Iterator<String> roleIter = _roleNames.iterator(); roleIter.hasNext();)
         {
@@ -138,20 +138,20 @@ public class TestSetting extends FileBasedModelTest
                 roles.add(role);
             }
         }
-        
+
         return roles.toArray(new IType[roles.size()]);
     }
-    
+
     public String getTeamClass()
     {
         return _teamClass;
     }
-    
+
     public String getRoleName()
     {
         return SAMPLE_ROLE_NAME;
-    } 
-    
+    }
+
     public String getTestProject()
     {
         return _testProject;
@@ -161,7 +161,7 @@ public class TestSetting extends FileBasedModelTest
     {
         _teamClass = teamName;
     }
-    
+
     public void setRoleNames(String[] names)
     {
         _roleNames = new ArrayList<String>(names.length);

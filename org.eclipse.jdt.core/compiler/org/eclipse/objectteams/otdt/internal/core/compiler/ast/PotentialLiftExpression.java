@@ -61,12 +61,12 @@ public class PotentialLiftExpression extends PotentialTranslationExpression {
     // indeed needed can be propagated via the MethodSpec to the CallinMethodMappingsAttribute.
     // Update (1.3.0M3): This is now done by a registered job (callback):
 	private Runnable liftingConfirmJob;
-	
+
 	private TypeReference expectedTypeReference = null;
 
 	/** Job to perform if analysis confirms that lifting is required. */
 	public void onLiftingRequired(Runnable job) {
-		this.liftingConfirmJob = job;		
+		this.liftingConfirmJob = job;
 	}
 
     /**
@@ -85,7 +85,7 @@ public class PotentialLiftExpression extends PotentialTranslationExpression {
 		this.operator = "lift"; //$NON-NLS-1$
 		this.teamExpr = teamExpr;
 	}
-	
+
     /**
      * Create a wrapper for an expression that might require lifting.
      *
@@ -113,7 +113,7 @@ public class PotentialLiftExpression extends PotentialTranslationExpression {
         	return null; // no chance
         if (providedType.isParameterizedType())
         	providedType = providedType.erasure();
-        
+
         if (this.expectedType == null)
         	this.expectedType = this.expectedTypeReference.resolvedType;
         this.checked = true;

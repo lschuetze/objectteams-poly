@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -40,10 +40,10 @@ import org.eclipse.core.runtime.IPath;
 
 /**
  * @author ike
- * 
+ *
  * Read class file(s) and display its Attributes. Copied and modified from
  * otlistclass.
- * 
+ *
  * $Id: ClassAttributeReader.java 23492 2010-02-05 22:57:56Z stephan $
  */
 public class ClassAttributeReader
@@ -56,7 +56,7 @@ public class ClassAttributeReader
     private Hashtable _classAttributes  = new Hashtable();
     private Hashtable _methodAttributes = new Hashtable();
     private String _error;
-    
+
     public ClassAttributeReader(IPath classFilePath)
     {
         try {
@@ -77,7 +77,7 @@ public class ClassAttributeReader
 			e.printStackTrace();
 		}
     }
-    
+
     public String getError()
     {
         return _error;
@@ -98,26 +98,26 @@ public class ClassAttributeReader
         return null;
     }
 
-    
+
     public boolean isClassAttributeAvailable(String attributeName)
     {
         return _classAttributes.containsKey(attributeName);
     }
-    
+
     public String[] getClassAttributeValues(String attributeName)
     {
         if (isClassAttributeAvailable(attributeName))
             return (String[])_classAttributes.get(attributeName);
         return null;
     }
-    
+
     public void readAndStoreAttributes()
     {
         Attribute[] attributesAsArray = _javaclass.getAttributes();
         ConstantPool cp = _javaclass.getConstantPool();
         String class_name = _javaclass.getClassName();
         Vector values;
-        
+
         for (int k = 0; k < attributesAsArray.length; k++)
         {
             Attribute actAttr = attributesAsArray[k];
@@ -239,7 +239,7 @@ public class ClassAttributeReader
                         String referenced_team = names[0];
                         values.add(new String[]{referenced_team});
                     }
-                    
+
                 }
                 else if (attrName.equals("BaseClassTags"))
                 {
@@ -339,7 +339,7 @@ public class ClassAttributeReader
                     }
                     values.add(new String[]{smap});
                 }
-                
+
                 _classAttributes.put(attrName, values);
             }
 
@@ -399,7 +399,7 @@ public class ClassAttributeReader
     /**
      * combines two int's representing the higher and the lower part of a two
      * byte number.
-     * 
+     *
      * @param first
      *            the first (higer?) byte
      * @param second
@@ -420,7 +420,7 @@ public class ClassAttributeReader
 
     /**
      * Read some strings from a byte array.
-     * 
+     *
      * @param entries
      *            Result array to be provided by caller.
      * @param indizes

@@ -119,7 +119,7 @@ public class ASTRewrite {
 	 * @since 3.1
 	 */
 	private TargetSourceRangeComputer targetSourceRangeComputer = null;
-	
+
 	/**
 	 * Primary field used in representing rewrite properties efficiently.
 	 * If <code>null</code>, this rewrite has no properties.
@@ -128,7 +128,7 @@ public class ASTRewrite {
 	 * If a {@link Map}, this is the table of property name-value
 	 * mappings.
 	 * Initially <code>null</code>.
-	 * 
+	 *
 	 * @see #property2
 	 */
 	private Object property1 = null;
@@ -564,7 +564,7 @@ public class ASTRewrite {
 		Map m = (Map) this.property1;
 		return m.get(propertyName);
 	}
-	
+
 	/**
 	 * Returns an object that tracks the source range of the given node
 	 * across the rewrite to its AST. Upon return, the result object reflects
@@ -624,14 +624,14 @@ public class ASTRewrite {
 		if (!RewriteEventStore.DEBUG) {
 			return;
 		}
-		
+
 		if (value == null) {
 			if (prop.isSimpleProperty() && ((SimplePropertyDescriptor) prop).isMandatory()
 					|| prop.isChildProperty() && ((ChildPropertyDescriptor) prop).isMandatory()) {
 				String message = "Can not remove property " + prop.getId(); //$NON-NLS-1$
 				throw new IllegalArgumentException(message);
 			}
-			
+
 		} else {
 			Class valueType;
 			if (prop.isSimpleProperty()) {

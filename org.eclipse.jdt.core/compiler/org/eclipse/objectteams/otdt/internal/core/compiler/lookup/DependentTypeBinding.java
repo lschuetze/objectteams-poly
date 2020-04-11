@@ -60,7 +60,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfor
  *
  * Current limitations:
  * - Only one value parameter is supported, yet.
- * 
+ *
  * Design note: since 1.3.0 this class is a subclass of ParameterizedTypeBinding in order to
  * support combinations of value parameters and type parameters, specifically, generic role types.
  *
@@ -92,11 +92,11 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 	private ArrayBinding[] _arrayBindings = null;
 
 	/** Public constructor for clients (FIXME: let only environment create us) */
-	public DependentTypeBinding(ReferenceBinding type, TypeBinding[] typeArguments, ITeamAnchor teamAnchor, int paramPosition, ReferenceBinding enclosingType, LookupEnvironment lookupEnvironment) 
+	public DependentTypeBinding(ReferenceBinding type, TypeBinding[] typeArguments, ITeamAnchor teamAnchor, int paramPosition, ReferenceBinding enclosingType, LookupEnvironment lookupEnvironment)
 	{
 		super(type, typeArguments, teamAnchor, enclosingType, lookupEnvironment);
 		initializeFromType(type);
-		initializeDependentType(teamAnchor, paramPosition);		
+		initializeDependentType(teamAnchor, paramPosition);
 	}
 
 	/** For subclasses. Still need to call initializeDependentType afterwards. */
@@ -110,7 +110,7 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 		this.modifiers      = givenType.modifiers;
 		this.tagBits        = givenType.tagBits;
 		this.tagBits 		&= ~(TagBits.AreMethodsSorted|TagBits.AreMethodsComplete); // in case the generic type was already processed
-		
+
 		this.compoundName     	= givenType.compoundName;
 		this.sourceName       	= givenType.sourceName;
 		this.constantPoolName 	= givenType.constantPoolName;
@@ -136,7 +136,7 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 		// registerAnchor();
 	}
 
-	void initializeDependentType(ITeamAnchor anchor, int valueParamPosition) 
+	void initializeDependentType(ITeamAnchor anchor, int valueParamPosition)
 	{
 		// don't store baseclass, will be initialized by baseclass()
 
@@ -152,7 +152,7 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 		else if (anchor instanceof FieldBinding)
 			((FieldBinding)anchor).modifiers |= ExtraCompilerModifiers.AccLocallyUsed; // avoid unused-warning
 	}
-	
+
 	public void updateAnchor(Argument[] methodArguments) {
 		if (this._argumentPosition > -1) {
 			this._teamAnchor = methodArguments[this._argumentPosition].binding;
@@ -249,7 +249,7 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 	public void collectSubstitutes(Scope scope, TypeBinding actualType, InferenceContext inferenceContext, int constraint) {
 		this.transferTypeArguments(this.type).collectSubstitutes(scope, actualType, inferenceContext, constraint);
 	}
-	
+
 
 	// implement new method from Substitution:
 	@Override
@@ -273,7 +273,7 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 			return true; // could be anchored type variable
 		return binding.valueParamSynthArgs() != NO_SYNTH_ARGUMENTS;
 	}
-	
+
 	@Override
 	public boolean isParameterizedType() {
 		return this.arguments != null; // by inheritance we'd be parameterized, but if we don't have arguments, it's only value parameters.
@@ -283,7 +283,7 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
     public DependentTypeBinding asPlainDependentType() {
     	return this;
     }
-    
+
     @Override
     public boolean isPlainDependentType() {
     	return true;
@@ -332,16 +332,16 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 			// for internal casting purposes type anchors can be ignored:
 		return getRealType().isProvablyDistinct(otherType);
 	}
-	
+
 	@Override
 	public int kind() {
 		return (this.arguments != null) ? Binding.PARAMETERIZED_TYPE : this.type.kind();
 	}
 
 	/**
-	 * Re-check lowering ambiguity (OTJLD 2.2(f)) after type checking had detected this situation before. 
+	 * Re-check lowering ambiguity (OTJLD 2.2(f)) after type checking had detected this situation before.
 	 * (see {@link Config#getLoweringPossible()}).
-	 * 
+	 *
 	 * @param otherType declared type to which a value of this type is being attached.
 	 * @param location  AST node for problem reporting
 	 * @param scope     scope for problem reporting
@@ -360,7 +360,7 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 					if (   CharOperation.equals(resolvedMethod.selector, ReflectionGenerator.UNREGISTER_ROLE)
 						&& (   resolvedMethod.parameters.length == 1
 						    || resolvedMethod.parameters.length == 2))
-						return; 
+						return;
 				}
 			}
 			scope.problemReporter().ambiguousUpcastOrLowering(location, otherType, this);
@@ -410,7 +410,7 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 	public ReferenceBinding rawBaseclass() {
 		return this.type.rawBaseclass();
 	}
-	
+
 	@Override
 	public TypeBinding original() {
 		return this.type.original();

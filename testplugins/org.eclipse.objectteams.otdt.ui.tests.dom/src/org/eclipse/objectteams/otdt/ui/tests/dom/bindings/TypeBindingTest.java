@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -50,7 +50,7 @@ public class TypeBindingTest extends FileBasedDOMTest
 {
 	public static final String TEST_PROJECT = "DOM_AST";
 	private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS4;
-	
+
 	private ASTParser _parser;
 	private ICompilationUnit _cuTA;
     private ICompilationUnit _cuTB;
@@ -59,28 +59,28 @@ public class TypeBindingTest extends FileBasedDOMTest
     private RoleTypeDeclaration _roleTAT2R1;
     private RoleTypeDeclaration _roleTBT1R1;
     private RoleTypeDeclaration _roleTBT2R1;
-    
+
     private TypeDeclaration _teamMyTeam;
 
     private RoleTypeDeclaration _focus;
-    
-	public TypeBindingTest(String name) 
+
+	public TypeBindingTest(String name)
 	{
 		super(name);
 	}
-	
+
 	public static Test suite()
 	{
 		return new Suite(TypeBindingTest.class);
 	}
-	
+
 	public void setUpSuite() throws Exception
 	{
 		setTestProjectDir(TEST_PROJECT);
 		super.setUpSuite();
 	}
-	
-	protected void setUp() throws Exception 
+
+	protected void setUp() throws Exception
 	{
 		super.setUp();
 		_cuTA = getCompilationUnit(
@@ -98,12 +98,12 @@ public class TypeBindingTest extends FileBasedDOMTest
                 "src",
                 "roleTypeDeclaration.teampkg",
                 "MyTeam.java");
-        
+
 		_parser = ASTParser.newParser(JAVA_LANGUAGE_SPEC_LEVEL);
 		_parser.setProject(super.getJavaProject(TEST_PROJECT));
         _parser.setResolveBindings(true);
 		_parser.setSource(_cuTA);
-		
+
 		ASTNode root = _parser.createAST( new NullProgressMonitor() );
 		CompilationUnit compUnit = (CompilationUnit) root;
         TypeDeclarationFinder finder = new TypeDeclarationFinder();
@@ -114,7 +114,7 @@ public class TypeBindingTest extends FileBasedDOMTest
 
         _parser.setSource(_cuTB);
         _parser.setResolveBindings(true);
-        
+
         root = _parser.createAST( new NullProgressMonitor() );
         compUnit = (CompilationUnit) root;
 
@@ -124,11 +124,11 @@ public class TypeBindingTest extends FileBasedDOMTest
 
         finder.setName("TB.T2.R1");
         compUnit.accept(finder);
-        _roleTBT2R1 = (RoleTypeDeclaration)finder.getTypeDeclaration();        
+        _roleTBT2R1 = (RoleTypeDeclaration)finder.getTypeDeclaration();
 
         _parser.setSource(_cuMyT);
         _parser.setResolveBindings(true);
-        
+
         root = _parser.createAST( new NullProgressMonitor() );
         compUnit = (CompilationUnit) root;
 
@@ -136,7 +136,7 @@ public class TypeBindingTest extends FileBasedDOMTest
         compUnit.accept(finder);
         _teamMyTeam = finder.getTypeDeclaration();
 	}
-	
+
 	public void testInstanceTypes()
 	{
         assertNotNull(_roleTAT2R1);
@@ -146,12 +146,12 @@ public class TypeBindingTest extends FileBasedDOMTest
         assertTrue(_roleTBT1R1 instanceof RoleTypeDeclaration);
         assertTrue(_roleTBT2R1 instanceof RoleTypeDeclaration);
 	}
-	
+
     public void testGetSuperRoles()
     {
         _focus = _roleTBT2R1;
         ITypeBinding binding = (ITypeBinding)_focus.resolveBinding();
-        
+
         ITypeBinding[] expected = new ITypeBinding[]
                                    {
                                     _roleTBT1R1.resolveBinding(),
@@ -164,7 +164,7 @@ public class TypeBindingTest extends FileBasedDOMTest
         assertEquals(expected[0].getOptimalName(), actual[0].getOptimalName());
         assertEquals(expected[1].getOptimalName(), actual[1].getOptimalName());
     }
-    
+
     public void testDeclaredLiftingType() {
     	MethodDeclaration method = (MethodDeclaration) _teamMyTeam.bodyDeclarations().get(3);
     	SingleVariableDeclaration arg1 = (SingleVariableDeclaration) method.parameters().get(0);
@@ -185,10 +185,10 @@ public class TypeBindingTest extends FileBasedDOMTest
 		parser.setSource(("public class C {\n" +
 				"public bug352605.Sub f;\n" +
 				"}\n").toCharArray());
-		
+
 		ASTNode root = parser.createAST( new NullProgressMonitor() );
 		CompilationUnit compUnit = (CompilationUnit) root;
-        
+
 		TypeDeclaration type = (TypeDeclaration) compUnit.types().get(0);
 		FieldDeclaration field = (FieldDeclaration) type.bodyDeclarations().get(0);
 		Type fieldType = field.getType();

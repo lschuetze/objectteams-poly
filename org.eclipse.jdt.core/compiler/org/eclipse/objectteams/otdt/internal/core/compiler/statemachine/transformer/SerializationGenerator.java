@@ -58,9 +58,9 @@ public class SerializationGenerator {
 	private static final char[] CLASS_ARG_NAME = "clazz".toCharArray(); //$NON-NLS-1$
 	private static final char[] CASTED_ROLE = "castedRole".toCharArray(); //$NON-NLS-1$
 
-	/** 
+	/**
 	 * Generate a restore() and a restoreRole(Class,Object) method.
-	 * The latter remains empty at this point and must be filled later using 
+	 * The latter remains empty at this point and must be filled later using
 	 * {@link #fillRestoreRole(TypeDeclaration,FieldDeclaration[])}.
 	 * @param teamType the AST where to add the methods.
 	 * @param gen AstGenerator with proper positions for generating.
@@ -80,12 +80,12 @@ public class SerializationGenerator {
 					gen.markerAnnotation(TypeConstants.JAVA_LANG_OVERRIDE)
 			};
 		AstEdit.addMethod(teamType, restore);
-		
+
 		MethodDeclaration restoreRole = gen.method(
-				teamType.compilationResult, 
+				teamType.compilationResult,
 				ClassFileConstants.AccProtected,
-				TypeBinding.VOID, 
-				RESTORE_ROLE, 
+				TypeBinding.VOID,
+				RESTORE_ROLE,
 				new Argument[] {
 					gen.argument(CLASS_ARG_NAME, gen.parameterizedQualifiedTypeReference(TypeConstants.JAVA_LANG_CLASS, new TypeReference[]{gen.wildcard(Wildcard.UNBOUND)})),
 					gen.argument(ROLE_ARG_NAME, gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT))
@@ -94,7 +94,7 @@ public class SerializationGenerator {
 			restoreRole.annotations = new Annotation[] {
 					gen.markerAnnotation(TypeConstants.JAVA_LANG_OVERRIDE)
 			};
-		AstEdit.addMethod(teamType, restoreRole);    	
+		AstEdit.addMethod(teamType, restoreRole);
 	}
 
 	/**
@@ -111,14 +111,14 @@ public class SerializationGenerator {
 
 		AstGenerator gen = new AstGenerator(restoreMethod); // re-use position
 		Statement[] statements = new Statement[caches.length+(superIsTeam?1:0)];
-		
+
 		// find the matching cache for argument Class clazz:
 		for (int i = 0; i < caches.length; i++) {
 			// FIXME(SH): unclear if needed after allowing generated qualified role type referneces:
 			TypeReference cacheTypeRef = caches[i].type; // robustness, but with wrong source position
-			
+
 			if (!  cacheTypeRef.resolvedType.isParameterizedType()
-				|| ((ParameterizedTypeBinding)cacheTypeRef.resolvedType).arguments.length != 2) 
+				|| ((ParameterizedTypeBinding)cacheTypeRef.resolvedType).arguments.length != 2)
 			{
 				if (teamType.scope.environment().globalOptions.complianceLevel < ClassFileConstants.JDK1_5) {
 					restoreMethod.statements = new Statement[] { gen.emptyStatement() };
@@ -127,28 +127,28 @@ public class SerializationGenerator {
 				}
 				throw new InternalCompilerError("Unexpected resolved cache type "+cacheTypeRef.resolvedType); //$NON-NLS-1$
 			}
-	
+
 			// reconstruct a type reference from the resolved cache type
 			ParameterizedTypeBinding oldBinding = (ParameterizedTypeBinding)cacheTypeRef.resolvedType;
 			ReferenceBinding roleBinding = (ReferenceBinding)oldBinding.arguments[1];
 			// respect different status for base/role types (scope, decapsulation).
 			cacheTypeRef = gen.getCacheTypeReference(teamType.scope, roleBinding.roleModel);
-			
+
 			statements[i] = gen.ifStatement(
 					// if (Role.class.isAssignableFrom(clazz)) { ...
-					gen.messageSend(gen.classLiteralAccess(gen.typeReference(roleBinding)), 
-									IS_ASSIGNABLE_FROM, 
+					gen.messageSend(gen.classLiteralAccess(gen.typeReference(roleBinding)),
+									IS_ASSIGNABLE_FROM,
 									new Expression[] { gen.singleNameReference(CLASS_ARG_NAME)}),
 				    gen.block(new Statement[] {
-				    	// Role castedRole = (Role) role; 
-				    	gen.localVariable(CASTED_ROLE, roleBinding, 
-				    					  gen.castExpression(gen.singleNameReference(ROLE_ARG_NAME), 
+				    	// Role castedRole = (Role) role;
+				    	gen.localVariable(CASTED_ROLE, roleBinding,
+				    					  gen.castExpression(gen.singleNameReference(ROLE_ARG_NAME),
 				    							  			 gen.typeReference(roleBinding), CastExpression.RAW)),
 				    	// Base base = role._OT$getBase();
 				    	gen.localVariable(IOTConstants.BASE, gen.baseclassReference(roleBinding.baseclass(), true /*erase*/),
 				    					  gen.messageSend(
-				    							  gen.singleNameReference(CASTED_ROLE), 
-				    							  IOTConstants._OT_GETBASE, 
+				    							  gen.singleNameReference(CASTED_ROLE),
+				    							  IOTConstants._OT_GETBASE,
 				    							  null/*arguments*/)),
 				    	// <roleCache[i]>.put(base, castedRole);
 				    	gen.messageSend(
@@ -162,12 +162,12 @@ public class SerializationGenerator {
 				    	// OTDYN: Slightly different methods depending on the weaving strategy:
 				    	teamType.scope.compilerOptions().weavingScheme == WeavingScheme.OTDRE
 				    	 ? gen.messageSend(
-				    		gen.castExpression(gen.singleNameReference(IOTConstants.BASE), 
+				    		gen.castExpression(gen.singleNameReference(IOTConstants.BASE),
 				    						   gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE2), CastExpression.RAW),
 						    IOTConstants.ADD_REMOVE_ROLE,
 						    new Expression[]{gen.singleNameReference(CASTED_ROLE), gen.booleanLiteral(true)})
 				    	 : gen.messageSend(
-				    		gen.castExpression(gen.singleNameReference(IOTConstants.BASE), 
+				    		gen.castExpression(gen.singleNameReference(IOTConstants.BASE),
 				    						   gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE), CastExpression.RAW),
 				    		IOTConstants.ADD_ROLE,
 				    		new Expression[]{gen.singleNameReference(CASTED_ROLE)}),
@@ -175,7 +175,7 @@ public class SerializationGenerator {
 				    	gen.returnStatement(null)
 			}));
 		}
-		
+
 		if (superIsTeam) {
 			// if no suitable cache found so far:
 			// super.restoreRole(clazz, role);

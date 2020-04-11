@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -25,11 +25,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 import junit.framework.Test;
 
 public class GC extends AbstractOTJLDTest {
-	
+
 	public GC(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -37,7 +37,7 @@ public class GC extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -48,7 +48,7 @@ public class GC extends AbstractOTJLDTest {
     // neither base nor role are ever referenced
     // 2.5.1-otjld-garbage-collecting-unreferenced-1
     public void test251_garbageCollectingUnreferenced1() {
-       
+
        runConformTest(
             new String[] {
 		"Team251gcu1.java",
@@ -84,7 +84,7 @@ public class GC extends AbstractOTJLDTest {
     // neither base nor role are ever referenced - role method is static, lifting never takes place
     // 2.5.1-otjld-garbage-collecting-unreferenced-2
     public void test251_garbageCollectingUnreferenced2() {
-       
+
        runConformTest(
             new String[] {
 		"Team251gcu2.java",
@@ -121,7 +121,7 @@ public class GC extends AbstractOTJLDTest {
     // 2.5.2-otjld-garbage-collecting-referenced-1
     public void test252_garbageCollectingReferenced1() {
        Map customOptions = getCompilerOptions();
-       
+
        runConformTest(
             new String[] {
 		"Team252gcr1.java",
@@ -202,7 +202,7 @@ public class GC extends AbstractOTJLDTest {
     // role are first stored then discarded
     // 2.5.2-otjld-garbage-collecting-referenced-2
     public void test252_garbageCollectingReferenced2() {
-       
+
        runConformTest(
             new String[] {
 		"Team252gcr2.java",
@@ -253,7 +253,7 @@ public class GC extends AbstractOTJLDTest {
     // a role is unregistered, after it can be gargabe collected
     // 2.5.3-otjld-garbage-collecting-unregistered-1
     public void test253_garbageCollectingUnregistered1() throws InterruptedException {
-       
+
        runConformTest(
             new String[] {
 		"Team253gcu1.java",

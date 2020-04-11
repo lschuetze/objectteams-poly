@@ -210,7 +210,7 @@ public class StandardElementGenerator {
 		 */
 		boolean shouldWeaken = (teamModel.getState() >= ITranslationStates.STATE_TYPES_ADJUSTED); // weakening for other methods already done?
 		MethodBinding superMethod = null;
-		
+
 		roleType = roleType.getRealType();
 		char[] methodName = CharOperation.concat(CAST_PREFIX, roleType.sourceName());
 		if (dimensions > 0)
@@ -346,7 +346,7 @@ public class StandardElementGenerator {
 		AstEdit.addGeneratedMethod(teamClass, castMethod);
 		if (clearPrivateModifier)
 			castMethod.binding.tagBits = TagBits.ClearPrivateModifier;
-		
+
 		if (superMethod != null)
 			CopyInheritance.weakenSignature(castMethod, superMethod);
 		return castMethod.binding;
@@ -525,7 +525,7 @@ public class StandardElementGenerator {
                     createGetBaseMethod(roleType, baseclass, _OT_GETBASE, AccPublic|AccAbstract|AccSemicolonBody);
                 } else {
                     checkCreateBaseField(roleType, baseclass, true);
-                    
+
 					// all actual base fields are accessible by a corresponding method:
                     // for role classes create two versions (ifc/class)
                     createGetBaseMethod(role.getInterfaceAst(), baseclass, _OT_GETBASE, AccPublic|AccAbstract|AccSemicolonBody);

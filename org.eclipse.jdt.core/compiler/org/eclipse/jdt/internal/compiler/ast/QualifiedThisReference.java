@@ -153,7 +153,7 @@ public class QualifiedThisReference extends ThisReference {
 		if (depth == 0) {
 			checkAccess(scope, null);
 		} // if depth>0, path emulation will diagnose bad scenarii
-		
+
 		MethodScope methodScope = scope.namedMethodScope();
 		if (methodScope != null) {
 			MethodBinding method = methodScope.referenceMethodBinding();
@@ -162,7 +162,7 @@ public class QualifiedThisReference extends ThisReference {
 				while (receiver != null) {
 					if (TypeBinding.equalsEquals(receiver, this.resolvedType))
 						return this.resolvedType = receiver;
-					receiver = receiver.enclosingType();	
+					receiver = receiver.enclosingType();
 				}
 			}
 		}

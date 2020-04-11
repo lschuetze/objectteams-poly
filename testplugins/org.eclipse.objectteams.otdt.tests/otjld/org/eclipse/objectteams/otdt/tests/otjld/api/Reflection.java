@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -27,11 +27,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 @SuppressWarnings("unchecked")
 public class Reflection extends AbstractOTJLDTest {
-	
+
 	public Reflection(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -39,7 +39,7 @@ public class Reflection extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -47,11 +47,11 @@ public class Reflection extends AbstractOTJLDTest {
 	public static Class testClass() {
 		return Reflection.class;
 	}
-	
+
     // hasRole is called, role exists
     // 9.2.1-otjld-has-role-method-1
     public void test921_hasRoleMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"Team921hrm1.java",
@@ -80,7 +80,7 @@ public class Reflection extends AbstractOTJLDTest {
     // hasRole is called, role does not exist
     // 9.2.1-otjld-has-role-method-2
     public void test921_hasRoleMethod2() {
-       
+
        runConformTest(
             new String[] {
 		"Team921hrm2.java",
@@ -109,7 +109,7 @@ public class Reflection extends AbstractOTJLDTest {
     // hasRole is called, no bound role
     // 9.2.1-otjld-has-role-method-3
     public void test921_hasRoleMethod3() {
-       
+
        runConformTest(
             new String[] {
 		"Team921hrm3.java",
@@ -134,7 +134,7 @@ public class Reflection extends AbstractOTJLDTest {
     // hasRole is called, multiple bound roles
     // 9.2.1-otjld-has-role-method-4
     public void test921_hasRoleMethod4() {
-       
+
        runConformTest(
             new String[] {
 		"Team921hrm4.java",
@@ -168,7 +168,7 @@ public class Reflection extends AbstractOTJLDTest {
     // hasRole is called, multiple bound roles with common supertype
     // 9.2.1-otjld-has-role-method-5
     public void test921_hasRoleMethod5() {
-       
+
        runConformTest(
             new String[] {
 		"Team921hrm5.java",
@@ -203,7 +203,7 @@ public class Reflection extends AbstractOTJLDTest {
     // hasRole is called, multiple bound roles with common supertype, class selected
     // 9.2.1-otjld-has-role-method-5c
     public void test921_hasRoleMethod5c() {
-       
+
        runConformTest(
             new String[] {
 		"Team921hrm5c.java",
@@ -300,7 +300,7 @@ public class Reflection extends AbstractOTJLDTest {
     // hasRole is called, multiple bound roles in one hierarchy
     // 9.2.1-otjld-has-role-method-6
     public void test921_hasRoleMethod6() {
-       
+
        runConformTest(
             new String[] {
 		"Team921hrm6.java",
@@ -340,7 +340,7 @@ public class Reflection extends AbstractOTJLDTest {
     // hasRole(Object,Class) called, role exists
     // 9.2.2-otjld-has-role-method-1
     public void test922_hasRoleMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"Team922hrm1.java",
@@ -372,7 +372,7 @@ public class Reflection extends AbstractOTJLDTest {
     // hasRole(Object,Class) called, role exists, but illegal role type
     // 9.2.2-otjld-has-role-method-1f
     public void test922_hasRoleMethod1f() {
-       
+
        runConformTest(
             new String[] {
 		"Team922hrm1f.java",
@@ -406,7 +406,7 @@ public class Reflection extends AbstractOTJLDTest {
     // hasRole(Object,Class) called, role does not exist
     // 9.2.2-otjld-has-role-method-2
     public void test922_hasRoleMethod2() {
-       
+
        runConformTest(
             new String[] {
 		"Team922hrm2.java",
@@ -464,7 +464,7 @@ public class Reflection extends AbstractOTJLDTest {
     // hasRole(Object,Class) called, no bound role
     // 9.2.2-otjld-has-role-method-3
     public void test922_hasRoleMethod3() {
-       
+
        runConformTest(
             new String[] {
 		"Team922hrm3.java",
@@ -494,7 +494,7 @@ public class Reflection extends AbstractOTJLDTest {
     // hasRole(Object,Class) called, multiple bound roles
     // 9.2.2-otjld-has-role-method-4
     public void test922_hasRoleMethod4() {
-       
+
        runConformTest(
             new String[] {
 		"Team922hrm4.java",
@@ -535,7 +535,7 @@ public class Reflection extends AbstractOTJLDTest {
     // hasRole(Object,Class) called, multiple bound roles with common supertype
     // 9.2.2-otjld-has-role-method-5
     public void test922_hasRoleMethod5() {
-       
+
        runConformTest(
             new String[] {
 		"Team922hrm5.java",
@@ -573,7 +573,7 @@ public class Reflection extends AbstractOTJLDTest {
     // hasRole(Object,Class) called, multiple bound roles in one hierarchy
     // 9.2.2-otjld-has-role-method-6
     public void test922_hasRoleMethod6() {
-       
+
        runConformTest(
             new String[] {
 		"Team922hrm6.java",
@@ -616,7 +616,7 @@ public class Reflection extends AbstractOTJLDTest {
     // getRole(Object) called
     // 9.2.3-otjld-get-role-method-1
     public void test923_getRoleMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"Team923grm1.java",
@@ -644,7 +644,7 @@ public class Reflection extends AbstractOTJLDTest {
     // getRole(Object,Class) called
     // 9.2.3-otjld-get-role-method-2
     public void test923_getRoleMethod2() {
-       
+
        runConformTest(
             new String[] {
 		"Team923grm2_2.java",
@@ -682,7 +682,7 @@ public class Reflection extends AbstractOTJLDTest {
     // getRole(Object) called - compile in one go
     // 9.2.3-otjld-get-role-method-2a
     public void test923_getRoleMethod2a() {
-       
+
        runConformTest(
             new String[] {
 		"Team923grm2a_2.java",
@@ -716,7 +716,7 @@ public class Reflection extends AbstractOTJLDTest {
     // getRole(Object,Class) called - old role class literal syntax
     // 9.2.3-otjld-get-role-method-2f
     public void test923_getRoleMethod2f() {
-       
+
        runConformTest(
             new String[] {
 		"T923grm2fMain.java",
@@ -757,7 +757,7 @@ public class Reflection extends AbstractOTJLDTest {
     // getRole(Object,Class) called - generic singature leveraged
     // 9.2.3-otjld-get-role-method-2g
     public void test923_getRoleMethod2g() {
-       
+
        runConformTest(
             new String[] {
 		"T923grm2gMain.java",
@@ -825,21 +825,21 @@ public class Reflection extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team923grm2gp_2.java (at line 7)\n" + 
-    		"	R<@t> r = t.getRole(o, R<@t>.class);\n" + 
-    		"	^\n" + 
-    		"Illegal parameterized use of non-public role R (OTJLD 1.2.3(b)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team923grm2gp_2.java (at line 7)\n" + 
-    		"	R<@t> r = t.getRole(o, R<@t>.class);\n" + 
-    		"	                       ^\n" + 
-    		"Illegal parameterized use of non-public role R (OTJLD 1.2.3(b)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team923grm2gp_2.java (at line 7)\n" +
+    		"	R<@t> r = t.getRole(o, R<@t>.class);\n" +
+    		"	^\n" +
+    		"Illegal parameterized use of non-public role R (OTJLD 1.2.3(b)).\n" +
     		"----------\n" +
-    		"3. ERROR in Team923grm2gp_2.java (at line 8)\n" + 
-    		"	r.print();\n" + 
-    		"	^\n" + 
-    		"The type R is not visible\n" + 
+    		"2. ERROR in Team923grm2gp_2.java (at line 7)\n" +
+    		"	R<@t> r = t.getRole(o, R<@t>.class);\n" +
+    		"	                       ^\n" +
+    		"Illegal parameterized use of non-public role R (OTJLD 1.2.3(b)).\n" +
+    		"----------\n" +
+    		"3. ERROR in Team923grm2gp_2.java (at line 8)\n" +
+    		"	r.print();\n" +
+    		"	^\n" +
+    		"The type R is not visible\n" +
     		"----------\n");
     }
 
@@ -850,7 +850,7 @@ public class Reflection extends AbstractOTJLDTest {
        customOptions.put(CompilerOptions.OPTION_ReportPotentialNullReference, CompilerOptions.WARNING);
        customOptions.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.WARNING);
        customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team923grm3_2.java",
@@ -902,7 +902,7 @@ public class Reflection extends AbstractOTJLDTest {
        customOptions.put(CompilerOptions.OPTION_ReportPotentialNullReference, CompilerOptions.WARNING);
        customOptions.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.WARNING);
        customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team923grm3n_2.java",
@@ -956,7 +956,7 @@ public class Reflection extends AbstractOTJLDTest {
     // getRole(Object) called
     // Bug 351317 - Error in (redundant) cast of anchored type
     public void test923_getRoleMethod4() {
-       
+
        runConformTest(
             new String[] {
 		"Team923grm4.java",
@@ -969,7 +969,7 @@ public class Reflection extends AbstractOTJLDTest {
 			    "    public static void main (String[] args0) {\n" +
 			    "        T923grm4 o = new T923grm4();\n" +
 			    "        final Team923grm4 t = new Team923grm4(o);\n" +
-			    "        R<@t> r = (R<@t>) t.getRole(o, R<@t>.class);\n" + 
+			    "        R<@t> r = (R<@t>) t.getRole(o, R<@t>.class);\n" +
 			    "        System.out.print(r);\n" +
 			    "    }\n" +
 			    "}    \n" +
@@ -984,7 +984,7 @@ public class Reflection extends AbstractOTJLDTest {
     // a replace callin tests the reflective function isExecutingCallin
     // 9.2.4-otjld-is-executing-callin-called-1
     public void test924_isExecutingCallinCalled1() {
-       
+
        runConformTest(
             new String[] {
 		"Team924iscc1.java",
@@ -1021,7 +1021,7 @@ public class Reflection extends AbstractOTJLDTest {
     // a replace callin with result tests the reflective function isExecutingCallin
     // 9.2.4-otjld-is-executing-callin-called-2
     public void test924_isExecutingCallinCalled2() {
-       
+
        runConformTest(
             new String[] {
 		"Team924iscc2.java",
@@ -1057,7 +1057,7 @@ public class Reflection extends AbstractOTJLDTest {
     // an after callin tests the reflective function isExecutingCallin
     // 9.2.4-otjld-is-executing-callin-called-3
     public void test924_isExecutingCallinCalled3() {
-       
+
        runConformTest(
             new String[] {
 		"Team924iscc3.java",
@@ -1092,7 +1092,7 @@ public class Reflection extends AbstractOTJLDTest {
     // a callin method throws an exception, yet the isExecuting flag is reset
     // 9.2.4-otjld-is-executing-callin-called-4
     public void test924_isExecutingCallinCalled4() {
-       
+
        runConformTest(
             new String[] {
 		"Team924iecc4.java",
@@ -1133,7 +1133,7 @@ public class Reflection extends AbstractOTJLDTest {
     // a callin to equals() prevents recursion by a guard using isExecutingCallin
     // 9.2.4-otjld-is-executing-callin-called-5
     public void test924_isExecutingCallinCalled5() {
-       
+
        runConformTest(
             new String[] {
 		"Team924iecc5.java",
@@ -1180,7 +1180,7 @@ public class Reflection extends AbstractOTJLDTest {
     // a role is unregistered between two callins
     // 9.2.5-otjld-role-is-unregistered-1
     public void test925_roleIsUnregistered1() {
-       
+
        runConformTest(
             new String[] {
 		"Team925riu1.java",
@@ -1222,7 +1222,7 @@ public class Reflection extends AbstractOTJLDTest {
     // a role is unregistered between two callins
     // 9.2.5-otjld-role-is-unregistered-2
     public void test925_roleIsUnregistered2() {
-       
+
        runConformTest(
             new String[] {
 		"Team925riu2.java",
@@ -1264,7 +1264,7 @@ public class Reflection extends AbstractOTJLDTest {
     // a class literal for a role class is used in a team method across team inheritance
     // 9.2.6-otjld-role-class-literal-access-1
     public void test926_roleClassLiteralAccess1() {
-       
+
        runConformTest(
             new String[] {
 		"Team926rcla1_2.java",
@@ -1302,7 +1302,7 @@ public class Reflection extends AbstractOTJLDTest {
     // a class literal for a role class is used in a role method across team inheritance
     // 9.2.6-otjld-role-class-literal-access-2
     public void test926_roleClassLiteralAccess2() {
-       
+
        runConformTest(
             new String[] {
 		"Team926rcla2_2.java",
@@ -1337,7 +1337,7 @@ public class Reflection extends AbstractOTJLDTest {
             },
             "OK");
     }
-    
+
     // role class literal in nested team - inconsistent team/role combination
     // see Bug 311201 -  hasRole(Object, Class) call in inner teams ends up in NoSuchMethodError
     public void test926_roleClassLiteralAccess3() {
@@ -1373,12 +1373,12 @@ public class Reflection extends AbstractOTJLDTest {
     		null /*classLibraries*/,
     		true /*shouldFlush*/,
     		null /*customOptions*/,
-    		"java.lang.IllegalArgumentException: No such bound role type in this team: Team926rcla3$__OT__Inner926rcla3$Role926rcla3\n" + 
-    		"	at Team926rcla3.hasRole(Team926rcla3.java:1)\n" + 
-    		"	at Team926rcla3$__OT__Inner926rcla3.test(Team926rcla3.java:6)\n" + 
+    		"java.lang.IllegalArgumentException: No such bound role type in this team: Team926rcla3$__OT__Inner926rcla3$Role926rcla3\n" +
+    		"	at Team926rcla3.hasRole(Team926rcla3.java:1)\n" +
+    		"	at Team926rcla3$__OT__Inner926rcla3.test(Team926rcla3.java:6)\n" +
     		"	at T926rcla3Main.main(T926rcla3Main.java:7)");
     }
-    
+
     // role class literal in nested team
     // see Bug 311201 -  hasRole(Object, Class) call in inner teams ends up in NoSuchMethodError
     public void test926_roleClassLiteralAccess4() {
@@ -1415,7 +1415,7 @@ public class Reflection extends AbstractOTJLDTest {
     // get roles from one role cache
     // 9.2.7-otjld-get-all-roles-1
     public void test927_getAllRoles1() {
-       
+
        runConformTest(
             new String[] {
 		"Team927gar1.java",
@@ -1465,7 +1465,7 @@ public class Reflection extends AbstractOTJLDTest {
     // get roles from all (two) role caches
     // 9.2.7-otjld-get-all-roles-2
     public void test927_getAllRoles2() {
-       
+
        runConformTest(
             new String[] {
 		"Team927gar2.java",
@@ -1515,7 +1515,7 @@ public class Reflection extends AbstractOTJLDTest {
     // selectively get roles of specified type (using super class to actually select all)
     // 9.2.7-otjld-get-all-roles-3
     public void test927_getAllRoles3() {
-       
+
        runConformTest(
             new String[] {
 		"Team927gar3.java",
@@ -1567,7 +1567,7 @@ public class Reflection extends AbstractOTJLDTest {
     // selectively get roles of specified type (only subclass)
     // 9.2.7-otjld-get-all-roles-4
     public void test927_getAllRoles4() {
-       
+
        runConformTest(
             new String[] {
 		"Team927gar4.java",
@@ -1615,7 +1615,7 @@ public class Reflection extends AbstractOTJLDTest {
             },
             "R2");
     }
-    
+
     // challenge concurrent modification exception (see https://bugs.eclipse.org/308181)
     public void test927_getAllRoles5() {
         runConformTest(
@@ -1661,35 +1661,35 @@ public class Reflection extends AbstractOTJLDTest {
              },
              "");
     }
-    // Bug 336152 - [compiler] incompatible cast error if "Object" is hidden by an import 
+    // Bug 336152 - [compiler] incompatible cast error if "Object" is hidden by an import
     public void test927_getAllRoles6() {
     	runConformTest(
     		new String[] {
     	"Team927gar6.java",
-    			"import t927gar6.Object;\n" + 
-    			"\n" + 
-    			"public team class Team927gar6 {\n" + 
-    			"	protected class R playedBy Object {\n" + 
-    			"		protected R() { base(); }\n" + 
-    			"		toString => toString;\n" + 
-    			"		\n" + 
-    			"	}\n" + 
-    			"	public static void main(String[] args) {\n" + 
-    			"		Team927gar6 t = new Team927gar6();\n" + 
-    			"		t.test();\n" + 
-    			"	}\n" + 
-    			"	private void test() {\n" + 
-    			"		System.out.println(new R().toString());\n" + 
-    			"	}\n" + 
+    			"import t927gar6.Object;\n" +
+    			"\n" +
+    			"public team class Team927gar6 {\n" +
+    			"	protected class R playedBy Object {\n" +
+    			"		protected R() { base(); }\n" +
+    			"		toString => toString;\n" +
+    			"		\n" +
+    			"	}\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		Team927gar6 t = new Team927gar6();\n" +
+    			"		t.test();\n" +
+    			"	}\n" +
+    			"	private void test() {\n" +
+    			"		System.out.println(new R().toString());\n" +
+    			"	}\n" +
     			"}\n",
     	"t927gar6/Object.java",
-    			"package t927gar6;\n" + 
-    			"\n" + 
-    			"public class Object {\n" + 
-    			"	@Override\n" + 
-    			"	public String toString() {\n" + 
-    			"		return \"OK\";\n" + 
-    			"	}\n" + 
+    			"package t927gar6;\n" +
+    			"\n" +
+    			"public class Object {\n" +
+    			"	@Override\n" +
+    			"	public String toString() {\n" +
+    			"		return \"OK\";\n" +
+    			"	}\n" +
     			"}\n"
     		},
     		"OK");

@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2012 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany, and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -52,7 +52,7 @@ import org.eclipse.osgi.util.NLS;
 
 /**
  * IRoleType implementation
- * 
+ *
  * @author jwloka
  */
 public class RoleType extends OTType implements IRoleType
@@ -73,7 +73,7 @@ public class RoleType extends OTType implements IRoleType
     }
 
     /**
-	 * A role's team is represented by the element's team 
+	 * A role's team is represented by the element's team
 	 */
     @Override
 	public IOTType getTeam()
@@ -88,7 +88,7 @@ public class RoleType extends OTType implements IRoleType
         // nope.
         return null;
     }
-    
+
     @Override
 	public IType getTeamJavaType() {
     	return ((IType)getCorrespondingJavaElement()).getDeclaringType();
@@ -101,7 +101,7 @@ public class RoleType extends OTType implements IRoleType
 	}
 
 	/**
-	 * @param type An ORed combination of IRoleType.CALLINS and IRoleType.CALLOUTS 
+	 * @param type An ORed combination of IRoleType.CALLINS and IRoleType.CALLOUTS
 	 */
 	@Override
 	public IMethodMapping[] getMethodMappings(int type)
@@ -118,10 +118,10 @@ public class RoleType extends OTType implements IRoleType
                 		NLS.bind("Retrieving callouts of role class ''{0}'' failed!", new Object[] {getElementName()})); //$NON-NLS-1$
 			}
 		}
-		
+
 		return result.toArray(new IMethodMapping[result.size()]);
 	}
-	
+
 	private void filterMethodMappings(IJavaElement[] children, int type, List<IMethodMapping> result) {
 		for (int idx = 0; idx < children.length; idx++) {
 			if (children[idx] instanceof IMethodMapping) {
@@ -149,7 +149,7 @@ public class RoleType extends OTType implements IRoleType
 	{
 	    return false;
 	}
-	
+
 	public void setBaseClass(IType baseClass)
 	{
 		this.baseClass = baseClass;
@@ -164,7 +164,7 @@ public class RoleType extends OTType implements IRoleType
 		if (this.baseClass == null)
 		{
 			JavaModelException jex = null;
-			
+
 			try
             {
 //			    System.out.println("RoleType.getBaseClass(): " + getElementName());
@@ -185,9 +185,9 @@ public class RoleType extends OTType implements IRoleType
             if (this.baseClass == null && (this.baseClassName != null || jex != null))
             {
             	IStatus status = new Status(
-            			IStatus.WARNING, 
-						JavaCore.PLUGIN_ID, 
-						IStatus.OK, 
+            			IStatus.WARNING,
+						JavaCore.PLUGIN_ID,
+						IStatus.OK,
             			NLS.bind("Base class for role {0} not found.",  //$NON-NLS-1$
 							new Object[] { getTypeQualifiedName('.') }),
 						jex
@@ -195,10 +195,10 @@ public class RoleType extends OTType implements IRoleType
             	throw new JavaModelException(new CoreException(status));
             }
 		}
-		
+
 		return this.baseClass;
 	}
-	
+
 	@Override
 	public String getBaseclassName() {
 	    if (this._baseAnchor != null)
@@ -222,20 +222,20 @@ public class RoleType extends OTType implements IRoleType
 		}
 
 		RoleType other = (RoleType)obj;
-		
+
 		// only compare base class name, resolving the class is too expensive and unnecessary.
 		if ((this.baseClassName==null) != (other.baseClassName==null))
 		{
 			return false;
 		}
-		if (this.baseClassName != null && !this.baseClassName.equals(other.baseClassName)) 
+		if (this.baseClassName != null && !this.baseClassName.equals(other.baseClassName))
 		{
 			return false;
 		}
-		
+
 	    return super.equals(other);
 	}
-	
+
     @Override
 	@SuppressWarnings("nls")
 	public String toString()
@@ -245,26 +245,26 @@ public class RoleType extends OTType implements IRoleType
 
 	/**
 	 * Tries to resolve this role's base class in the JavaModel.
-	 * 
-	 * @return resolved JavaModel type or null if nothing found 
+	 *
+	 * @return resolved JavaModel type or null if nothing found
 	 */
     private IType findBaseClass(ITypeHierarchy hierarchy) throws JavaModelException
     {
         if (this.baseClassName == null)
             return findSuperBaseClass(hierarchy);
-        
+
         if (this._baseAnchor != null)
         {
             IOTType baseAnchorType = resolveBaseAnchor();
             if (baseAnchorType == null)
                 return null;
-            
+
             // lookup via the anchor needs simple name:
             String simpleBaseName = this.baseClassName;
             int dotpos = this.baseClassName.lastIndexOf('.');
             if (dotpos != -1)
             	simpleBaseName = this.baseClassName.substring(dotpos+1);
-            
+
             IType[] baseClasses = baseAnchorType.getRoleTypes(IOTType.ALL, simpleBaseName);
             if (baseClasses.length >= 1)
                 return baseClasses[0]; // the bottom-most in the hierarchy
@@ -284,7 +284,7 @@ public class RoleType extends OTType implements IRoleType
             IType baseType = getBaseOf(currentType, hierarchy);
             if (baseType != null)
                 return baseType;
-            currentType = hierarchy.getSuperclass(currentType); // relies on OTTypeHierarchies whereby getSuperclass() produces the full (t)super linearization 
+            currentType = hierarchy.getSuperclass(currentType); // relies on OTTypeHierarchies whereby getSuperclass() produces the full (t)super linearization
         }
 		return null;
     }
@@ -296,7 +296,7 @@ public class RoleType extends OTType implements IRoleType
             IOTType otType = OTModelManager.getOTElement(type);
             if (otType == null) // i.e. non-role superclass
                 return null;
-            
+
             if (otType.isRole())
             {
                 RoleType tsuperRole = (RoleType) otType;
@@ -305,7 +305,7 @@ public class RoleType extends OTType implements IRoleType
                     return tsuperBase;
             }
         }
-        
+
         return null;
     }
 
@@ -313,11 +313,11 @@ public class RoleType extends OTType implements IRoleType
     {
         if (this._baseAnchor == null)
             return null;
-        
+
         IOTType enclosingTeam = getTeam();
         if (enclosingTeam == null || !enclosingTeam.exists())
             return null;
-        
+
         IType currentType= enclosingTeam;
         String anchorField= this._baseAnchor;
         int pos= this._baseAnchor.lastIndexOf('.');
@@ -335,7 +335,7 @@ public class RoleType extends OTType implements IRoleType
 
             IRoleType enclosingRole = (IRoleType)currentOTType;
             assert(enclosingRole != this);
-            
+
             anchorType = enclosingRole.getBaseClass();
         }
         else
@@ -358,13 +358,13 @@ public class RoleType extends OTType implements IRoleType
 	        if (fieldType != null)
 	        	anchorType = resolveInType(enclosingTeam, fieldType);
         }
-        
+
         if (anchorType == null || !anchorType.exists())
             return null;
 
         return OTModelManager.getOTElement(anchorType);
     }
-    
+
     IType resolveInType(IOTType referenceType, String type) throws JavaModelException
     {
     	// perform a search by name in the scope of this type
@@ -375,12 +375,12 @@ public class RoleType extends OTType implements IRoleType
 		{
 			String fqBaseName = Util.concatenateName(qualifiedTypes[0][0], qualifiedTypes[0][1], '.');
 			// get JavaModel element by resolved name
-			return referenceType.getJavaProject().findType(fqBaseName);			
+			return referenceType.getJavaProject().findType(fqBaseName);
 		}
-        
+
 		return null;
     }
-    
+
     @Override
 	public IType[] getTSuperRoles() throws JavaModelException {
     	ArrayList<IType> tsuperRoles = new ArrayList<IType>();
@@ -409,7 +409,7 @@ public class RoleType extends OTType implements IRoleType
     	}
     	// no direct tsuper, search in tsuper-team if some exist:
     	if (teamType.isRole())
-    		for (IType tsuperTeam : ((IRoleType)teamType).getTSuperRoles()) 
+    		for (IType tsuperTeam : ((IRoleType)teamType).getTSuperRoles())
     			checkAddTSuperRole(tsuperTeam.getFullyQualifiedName('.'), tsuperRoles);
     	return tsuperRoles.toArray(new IType[tsuperRoles.size()]);
     }
@@ -439,7 +439,7 @@ public class RoleType extends OTType implements IRoleType
 //		showErrorMessage(ActionMessages.getString("StepIntoSelectionActionDelegate.Step_into_selection_only_available_for_types_in_Java_projects._1")); //$NON-NLS-1$
 //		return null;
 //	}
-//	
+//
 //	IMethod method = null;
 //	try {
 //		IJavaElement[] resolve = codeAssist.codeSelect(textSelection.getOffset(), 0);

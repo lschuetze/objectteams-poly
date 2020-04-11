@@ -236,20 +236,20 @@ public class StateHelper
 			return false;
 		return isReadyToProcess(type.model, state);
 	}
-	
+
 	public static boolean isDefinitelyReadyToProcess(ReferenceBinding type, ReferenceBinding requestingSite, int state) {
-		
+
 		if (!(type instanceof SourceTypeBinding))
 			return false; // most treatment not needed for binary types
 		SourceTypeBinding sourceType = (SourceTypeBinding) type;
-		
-		if (TypeBinding.equalsEquals(sourceType.outermostEnclosingType().erasure(), requestingSite.outermostEnclosingType().erasure()) 
+
+		if (TypeBinding.equalsEquals(sourceType.outermostEnclosingType().erasure(), requestingSite.outermostEnclosingType().erasure())
 				|| CharOperation.equals(type.getFileName(), requestingSite.getFileName()))
 			return false; // could infinitely recurse to the same inclosing of kind
-			
+
 		if (!StateHelper.isReadyToProcess(sourceType, state))
 			return false;
-			
+
 		try {
 			StateMemento unitState = sourceType.scope.compilationUnitScope().referenceContext.state;
 			if (unitState.isReadyToProcess(state))
@@ -257,7 +257,7 @@ public class StateHelper
 		} catch (NullPointerException npe) {
 			// be shy, if any enclosing thing was missing don't risk infinite recursion.
 		}
-		
+
 		return false;
 	}
 

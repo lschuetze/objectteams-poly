@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -102,7 +102,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 			}
 		}
 	}
-	
+
 	@Override
 	public TypeReference augmentTypeWithAdditionalDimensions(int additionalDimensions, Annotation [][] additionalAnnotations, boolean isVarargs) {
 		int totalDimensions = this.dimensions() + additionalDimensions;
@@ -157,12 +157,12 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		}
 		return new char[][]{ name };
 	}
-	
+
 	@Override
 	public TypeReference[][] getTypeArguments() {
 		return new TypeReference[][] { this.typeArguments };
 	}
-	
+
 	/**
      * @see org.eclipse.jdt.internal.compiler.ast.ArrayQualifiedTypeReference#getTypeBinding(org.eclipse.jdt.internal.compiler.lookup.Scope)
      */
@@ -170,7 +170,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 	protected TypeBinding getTypeBinding(Scope scope) {
         return null; // not supported here - combined with resolveType(...)
     }
-    
+
     @Override
 	public boolean isParameterizedTypeReference() {
     	return true;
@@ -231,7 +231,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		    		if (!seg.isFinal())
 		    			scope.problemReporter().anchorPathNotFinal(typeAnchorReference, seg, this.token);
 		    		// proceed to possibly report more errors
-	
+
 		    	// try member type (role) of anchor's type (team):
 				this.resolvedType = anchor.resolveRoleType(this.token, this.dimensions); // FIXME(SH): although contained in a loop only one anchor can win
 				if (this.resolvedType == null) {
@@ -253,7 +253,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 					if (!checkParameterizedRoleVisibility(scope, anchor, (ReferenceBinding) this.resolvedType))
 						return this.resolvedType;
 				}
-	
+
 				if (   shouldAnalyzeRoleReference()
 					&& isIllegalQualifiedUseOfProtectedRole(scope))
 					return this.resolvedType; // problem binding may be in this.resolvedType
@@ -270,7 +270,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 				len = this.typeArguments.length-1;
 				System.arraycopy(this.typeArguments, 1,
 								 this.typeArguments = new TypeReference[len], 0, len); // FIXME(SH): reducing this array conflicts with loop condition
-	
+
 				// note: handling of arrays differs for role and regular types
 				if (len == 0) {
 					resolveAnnotations(scope, location);
@@ -331,7 +331,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		ReferenceBinding currentType;
 		if (enclosingType == null) {
 //:giro
-		  if (importScope != null) 
+		  if (importScope != null)
 			this.resolvedType = importScope.getType(this.token);
 		  if (this.resolvedType == null || this.resolvedType.problemId() == ProblemReasons.NotFound)
 // SH}
@@ -448,7 +448,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 			if (!isDiamond) { // check arity, IsDiamond never set for 1.6-
 				scope.problemReporter().incorrectArityForParameterizedType(this, currentType, argTypes);
 				return null;
-			} 
+			}
 		} else if (!currentType.isStatic()) {
 			ReferenceBinding actualEnclosing = currentType.enclosingType();
 			if (actualEnclosing != null && actualEnclosing.isRawType()){

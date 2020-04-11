@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -62,12 +62,12 @@ public class WithinStatementTest extends FileBasedDOMTest
 	{
 		super(name);
 	}
-	
+
 	public static Test suite()
 	{
 		return new Suite(WithinStatementTest.class);
 	}
-	
+
 	public void setUpSuite() throws Exception
 	{
 		setTestProjectDir(TEST_PROJECT);
@@ -87,7 +87,7 @@ public class WithinStatementTest extends FileBasedDOMTest
 		_typeDecl = (TypeDeclaration)compUnit.types().get(0);
 	}
 
-	protected void setUp() throws Exception 
+	protected void setUp() throws Exception
 	{
 		super.setUp();
 	}
@@ -99,28 +99,28 @@ public class WithinStatementTest extends FileBasedDOMTest
             WithinStatementTest.getMethodDeclarationByName(_typeDecl,
                                                            "withinSimple");
         List statements = methodDecl.getBody().statements();
-        
+
         Statement testObj = (Statement) statements.get(0);
         assertTrue("Statement is not an instance of WithinStatement",
                    testObj instanceof WithinStatement);
     }
 
-    
+
 	public void testGetNodeType()
 	{
 		MethodDeclaration methodDecl =
             WithinStatementTest.getMethodDeclarationByName(_typeDecl,
                                                            "withinSimple");
 		List statements = methodDecl.getBody().statements();
-				
+
 		_testObj = (WithinStatement) statements.get(0);
-	
+
         assertEquals(
             "WithinStatement has wrong NodeType",
-            ASTNode.WITHIN_STATEMENT, 
+            ASTNode.WITHIN_STATEMENT,
             _testObj.getNodeType());
 	}
-	
+
    public void testGetBody_Empty()
    {
 		MethodDeclaration methodDecl =
@@ -128,14 +128,14 @@ public class WithinStatementTest extends FileBasedDOMTest
                                                            "withinSimpleEmptyBody");
 		List statements = methodDecl.getBody().statements();
 		Statement firstStatement = (Statement) statements.get(0);
-		
+
 		_testObj = (WithinStatement) firstStatement;
 
         assertTrue(
             "withing: body block is not empty",
             ((Block)_testObj.getBody()).statements().isEmpty());
    }
-	
+
 	public void testGetBody_NotEmpty()
     {
 		MethodDeclaration methodDecl =
@@ -149,7 +149,7 @@ public class WithinStatementTest extends FileBasedDOMTest
         assertEquals("within: body block is empty",
                     1, ((Block)_testObj.getBody()).statements().size());
 	}
-    
+
     public void testBody_ParentIdentity()
     {
         MethodDeclaration methodDecl = WithinStatementTest.getMethodDeclarationByName(_typeDecl, "withinSimple");
@@ -159,11 +159,11 @@ public class WithinStatementTest extends FileBasedDOMTest
         _testObj = (WithinStatement) firstStatement;
         Block body = (Block)_testObj.getBody();
         ASTNode bodyParent = body.getParent();
-        
+
         assertTrue("within: ", _testObj == bodyParent );
-  
+
     }
-    
+
     /** Tests if body belong to the same AST as the within statement */
     public void testBody_ASTIdentity()
     {
@@ -175,7 +175,7 @@ public class WithinStatementTest extends FileBasedDOMTest
         Block body = (Block)_testObj.getBody();
 
         assertTrue(
-            "within: body (Block) doesn't belong to AST", 
+            "within: body (Block) doesn't belong to AST",
             _testObj.getAST() == body.getAST() );
     }
 
@@ -218,7 +218,7 @@ public class WithinStatementTest extends FileBasedDOMTest
         assertTrue("within: Team expression is not a ClassInstanceCreation",
                    _testObj.getTeamExpression() instanceof ClassInstanceCreation);
     }
-   
+
     public void testGetTeamExpression2_InstanceType()
     {
         MethodDeclaration methodDecl = WithinStatementTest.getMethodDeclarationByName(_typeDecl, "withinSimple");
@@ -238,11 +238,11 @@ public class WithinStatementTest extends FileBasedDOMTest
         Statement firstStatement = (Statement)statements.get(0);
 
         _testObj = (WithinStatement) firstStatement;
-        
+
         assertTrue("within: Team expression is not a SimpleName",
                    _testObj.getTeamExpression() instanceof MethodInvocation);
     }
-    
+
     public void testGetTeamExpression_Parent()
     {
         MethodDeclaration methodDecl = WithinStatementTest.getMethodDeclarationByName(_typeDecl, "withinNewTeam");
@@ -264,11 +264,11 @@ public class WithinStatementTest extends FileBasedDOMTest
 
         _testObj = (WithinStatement) firstStatement;
         ClassInstanceCreation teamExpression = (ClassInstanceCreation)_testObj.getTeamExpression();
-        
+
         assertEquals("within: Team expression is not a SimpleName",
                    "new Team1()", teamExpression.toString());
     }
-    
+
     public void testGetTeamExpression_Identifier2()
     {
         MethodDeclaration methodDecl = WithinStatementTest.getMethodDeclarationByName(_typeDecl, "withinSimple");
@@ -277,7 +277,7 @@ public class WithinStatementTest extends FileBasedDOMTest
 
         _testObj = (WithinStatement) firstStatement;
         SimpleName teamExpression = (SimpleName)_testObj.getTeamExpression();
-        
+
         assertEquals("within: Team expression is not a SimpleName",
                    "myTeam", teamExpression.toString());
     }
@@ -291,17 +291,17 @@ public class WithinStatementTest extends FileBasedDOMTest
         _testObj = (WithinStatement) statements.get(0);
 
         String actual = _testObj.toString();
-        String expected = 
+        String expected =
         	"within(new Team1()) {\n"+
         	"  foo();\n"+
         	"}\n";
-        
+
         assertEquals(
             "within statement: wrong naive flat string representation",
-            expected, 
+            expected,
             actual);
     }
-    
+
     public void testSubtreeMatch1()
     {
         MethodDeclaration methodDecl = WithinStatementTest.getMethodDeclarationByName(_typeDecl, "withinNewTeam");
@@ -313,32 +313,32 @@ public class WithinStatementTest extends FileBasedDOMTest
 
         assertTrue("Within statements don't match", actual);
     }
-    
+
 	/**
      * Helper method to find the named MethodDeclaration
      * in the given TypeDeclaration.
-     * 
+     *
      * @return the found MethodDeclaration or null
      */
 	private static MethodDeclaration getMethodDeclarationByName(TypeDeclaration type, String name)
     {
 		MethodDeclaration[] methods = type.getMethods();
 		int numberOfMethods = methods.length;
-		
+
         if (numberOfMethods == 0)
 		{
 			return null;
 		}
-		
+
         for (int idx = 0; idx < numberOfMethods; idx++)
 		{
 			if (name.equals(methods[idx].getName().getIdentifier()))
 			{
 				return methods[idx];
 			}
-			
+
 		}
-		
+
         return null; // method not found
 	};
 

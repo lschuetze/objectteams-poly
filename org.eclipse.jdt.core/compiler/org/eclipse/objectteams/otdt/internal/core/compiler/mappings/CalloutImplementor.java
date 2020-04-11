@@ -112,7 +112,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  *        set of locals.
  * Where: createCallout links roleMethodSpec and wrapper
  *        getArgument links baseMethodSpec and wrapper (if not parameter mappings are given).
- *        
+ *
  * What:  Callout to private members of a role-as-base require access via two bridges
  * Why:   private methods are not exposed in the ifc-part, implicit inheritance needs
  *        redirection via the team instance, fields need accessors anyway
@@ -323,7 +323,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 		MethodBinding templateBinding,
 		CalloutMappingDeclaration calloutBindingDeclaration)
 	{
-		IProtectable baseFeature = null; 
+		IProtectable baseFeature = null;
 		MethodSpec baseMethodSpec = calloutBindingDeclaration.baseMethodSpec;
 		if (baseMethodSpec != null) // else syntax error?
 			baseFeature = calloutBindingDeclaration.isCalloutToField()
@@ -377,7 +377,7 @@ public class CalloutImplementor extends MethodMappingImplementor
     	}
 
     	if (calloutBindingDeclaration.binding.inferred == InferenceKind.NONE) { // don't advertise inferred callout via the interface.
-    		if (templateBinding.isStatic())		 // no real ifc part for static method, fake it! 
+    		if (templateBinding.isStatic())		 // no real ifc part for static method, fake it!
 	    		createInterfaceFakeStatic(templateBinding, calloutBindingDeclaration);
     		else if (((modifiers & AccPrivate) == 0) && !overridesExplicitNonRole)  // also no ifc part for privates and methods from explicit non-role super
 			    createAbstractRoleMethodDeclarationPart(templateBinding,
@@ -616,8 +616,8 @@ public class CalloutImplementor extends MethodMappingImplementor
 				case DYN_ACCESS:
 					baseAccess = CalloutImplementorDyn.baseAccessExpression(calloutDecl.scope, this._role, baseType, receiver, calloutDecl.baseMethodSpec, arguments, gen);
 					break;
-    		}			
-		}	 
+    		}
+		}
 
         boolean success = true;
         ArrayList<Statement> statements = new ArrayList<Statement>(3);
@@ -926,7 +926,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 	    	if (idx >= implParameters.length) // CLOVER: never true in jacks suite
 	    		return mappedArgExpr; // arg is invisible to receiver, don't lower
 			TypeBinding expectedType = implParameters[idx];
-			
+
 			// if type is anchored to another arg of the same binding, we have to translate:
 			// 1.) is it a param-anchored type?
 			if (expectedType.leafComponentType() instanceof DependentTypeBinding) {
@@ -1323,9 +1323,9 @@ public class CalloutImplementor extends MethodMappingImplementor
 		callout.scope= new CallinCalloutScope(roleClass.scope, callout);
 		CallinCalloutBinding calloutBinding= callout.scope.createBinding(callout);
 		callout.resolveMethodSpecs(roleClass.getRoleModel(), baseclass, true);
-		
+
 		calloutBinding.inferred= isSetter ? InferenceKind.FIELDSET : InferenceKind.FIELDGET;
-		if (callout.baseMethodSpec.resolvedMethod != null) {			
+		if (callout.baseMethodSpec.resolvedMethod != null) {
 			calloutBinding._baseMethods = new MethodBinding[] {callout.baseMethodSpec.resolvedMethod};
 		} else {
 			calloutBinding._baseField = ((FieldAccessSpec)callout.baseMethodSpec).resolvedField;

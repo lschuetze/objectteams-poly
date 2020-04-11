@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -27,11 +27,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 @SuppressWarnings("unchecked")
 public class Predicates extends AbstractOTJLDTest {
-	
+
 	public Predicates(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -39,7 +39,7 @@ public class Predicates extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -51,7 +51,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role class has a predicate
     // 9.1.1-otjld-class-predicate-1
     public void test911_classPredicate1() {
-       
+
        runConformTest(
             new String[] {
 		"T911cp1Main.java",
@@ -96,7 +96,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role class has a base predicate
     // 9.1.1-otjld-class-predicate-2
     public void test911_classPredicate2() {
-       
+
        runConformTest(
             new String[] {
 		"T911cp2Main.java",
@@ -141,7 +141,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a team class has a base predicate
     // 9.1.1-otjld-class-predicate-3
     public void test911_classPredicate3() {
-       
+
        runConformTest(
             new String[] {
 		"T911cp3Main.java",
@@ -187,7 +187,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a nested team has a base predicate - which affects its own callins and those of its roles
     // 9.1.1-otjld-class-predicate-4
     public void test911_classPredicate4() {
-       
+
        runConformTest(
             new String[] {
 		"T911cp4Main.java",
@@ -255,7 +255,7 @@ public class Predicates extends AbstractOTJLDTest {
     // two roles have base predicates - witness of TPX-428 part 2
     // 9.1.1-otjld-class-predicate-5
     public void test911_classPredicate5() {
-       
+
        runConformTest(
             new String[] {
 		"Team911cp5.java",
@@ -492,11 +492,11 @@ public class Predicates extends AbstractOTJLDTest {
             customOptions,
             null/*no custom requestor*/);
     }
-    
+
     // a role class has a base predicate using base in the expression
     // 9.1.2-otjld-base-expression-1
     public void test912_baseExpression1() {
-       
+
        runConformTest(
             new String[] {
 		"T912ba1Main.java",
@@ -541,7 +541,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a team class and a role have predicates
     // 9.1.3-otjld-multiple-predicates-1
     public void test913_multiplePredicates1() {
-       
+
        runConformTest(
             new String[] {
 		"T913mp1Main.java",
@@ -598,7 +598,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a team class and a role have base predicates
     // 9.1.3-otjld-multiple-predicates-2
     public void test913_multiplePredicates2() {
-       
+
        runConformTest(
             new String[] {
 		"T913mp2Main.java",
@@ -657,7 +657,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role class has a predicate, so does its super
     // 9.1.3-otjld-multiple-predicates-3
     public void test913_multiplePredicates3() {
-       
+
        runConformTest(
             new String[] {
 		"T913mp3Main.java",
@@ -716,7 +716,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role class has a base predicate, so does its super
     // 9.1.3-otjld-multiple-predicates-4
     public void test913_multiplePredicates4() {
-       
+
        runConformTest(
             new String[] {
 		"T913mp4Main.java",
@@ -777,7 +777,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role class has a predicate, its super has a base predicate
     // 9.1.3-otjld-multiple-predicates-5
     public void test913_multiplePredicates5() {
-       
+
        runConformTest(
             new String[] {
 		"T913mp5Main.java",
@@ -843,7 +843,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role class has a predicate, so does its tsuper
     // 9.1.3-otjld-multiple-predicates-6
     public void test913_multiplePredicates6() {
-       
+
        runConformTest(
             new String[] {
 		"T913mp6Main.java",
@@ -907,7 +907,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role class has a predicate, its tsuper has a base predicate
     // 9.1.3-otjld-multiple-predicates-7
     public void test913_multiplePredicates7() {
-       
+
        runConformTest(
             new String[] {
 		"T913mp7Main.java",
@@ -971,7 +971,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role class has a base predicate so has its tsuper
     // 9.1.3-otjld-multiple-predicates-8
     public void test913_multiplePredicates8() {
-       
+
        runConformTest(
             new String[] {
 		"T913mp8Main.java",
@@ -1037,7 +1037,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role class has a base predicate, its tsuper has a regulare predicate
     // 9.1.3-otjld-multiple-predicates-9
     public void test913_multiplePredicates9() {
-       
+
        runConformTest(
             new String[] {
 		"T913mp9Main.java",
@@ -1105,7 +1105,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a replace callin binding has a base predicate, the surrounding role class has an additional base predicate
     // 9.1.3-otjld-multiple-predicates-10
     public void test913_multiplePredicates10() {
-       
+
        runConformTest(
             new String[] {
 		"T913mp10Main.java",
@@ -1172,7 +1172,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role method and its binding both have predicates
     // 9.1.3-otjld-multiple-predicates-11
     public void test913_multiplePredicates11() {
-       
+
        runConformTest(
             new String[] {
 		"Team913mp11.java",
@@ -1208,7 +1208,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a callin binding has a guard predicate
     // 9.1.4-otjld-binding-predicate-1
     public void test914_bindingPredicate1() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp1Main.java",
@@ -1255,7 +1255,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a callin binding has a guard predicate and parameter mappings -- role and base have the same name
     // 9.1.4-otjld-binding-predicate-1a
     public void test914_bindingPredicate1a() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp1aMain.java",
@@ -1313,7 +1313,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a callin binding has a base guard predicate
     // 9.1.4-otjld-binding-predicate-2
     public void test914_bindingPredicate2() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp2Main.java",
@@ -1360,7 +1360,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a callin binding with multiple base methods has a base guard predicate - WITNESS for TPX-286
     // 9.1.4-otjld-binding-predicate-2a
     public void test914_bindingPredicate2a() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp2aMain.java",
@@ -1408,7 +1408,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a callin binding with multiple base methods has a base guard predicate - have signatures
     // 9.1.4-otjld-binding-predicate-2b
     public void test914_bindingPredicate2b() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp2bMain.java",
@@ -1456,7 +1456,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a callin binding with multiple base methods has a regular guard predicate
     // 9.1.4-otjld-binding-predicate-2c
     public void test914_bindingPredicate2c() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp2cMain.java",
@@ -1504,7 +1504,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a callin binding has a base guard predicate - static methods
     // 9.1.4-otjld-binding-predicate-2s
     public void test914_bindingPredicate2s() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp2sMain.java",
@@ -1550,7 +1550,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a callin binding has a role guard predicate - static methods
     // 9.1.4-otjld-binding-predicate-2r
     public void test914_bindingPredicate2r() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp2rMain.java",
@@ -1596,7 +1596,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a callin binding has a role guard predicate - static methods with different signatures
     // 9.1.4-otjld-binding-predicate-2R
     public void test914_bindingPredicate2R() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp2RMain.java",
@@ -1643,7 +1643,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a callin binding has a base guard predicate with parameter
     // 9.1.4-otjld-binding-predicate-3
     public void test914_bindingPredicate3() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp3Main.java",
@@ -1689,7 +1689,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a replace callin binding has a base guard predicate with parameter
     // 9.1.4-otjld-binding-predicate-4
     public void test914_bindingPredicate4() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp4Main.java",
@@ -1736,7 +1736,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a before callin binding has a base guard predicate with parameter - no team-level attribute declared
     // 9.1.4-otjld-binding-predicate-5
     public void test914_bindingPredicate5() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp5Main.java",
@@ -1782,7 +1782,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a before callin binding has a regular guard predicate with parameter
     // 9.1.4-otjld-binding-predicate-6
     public void test914_bindingPredicate6() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp6Main.java",
@@ -1827,7 +1827,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a callin binding with base guard predicate is added in a sub team
     // 9.1.4-otjld-binding-predicate-7
     public void test914_bindingPredicate7() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp7Main.java",
@@ -1880,7 +1880,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a callin binding with base guard predicate is repeated in a sub team - named callin
     // 9.1.4-otjld-binding-predicate-7a
     public void test914_bindingPredicate7a() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp7aMain.java",
@@ -1977,7 +1977,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role method is bound after AND before the same base method, both bindings have base guard predicates
     // 9.1.4-otjld-binding-predicate-8
     public void test914_bindingPredicate8() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp8Main.java",
@@ -2027,7 +2027,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role method returning void is bound after a base method returning void using a base guard predicate
     // 9.1.4-otjld-binding-predicate-9
     public void test914_bindingPredicate9() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp9Main.java",
@@ -2069,7 +2069,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role method is bound before a base method  with no arguments using a base guard predicate - the full signatures are used in the binding (vs.  "9.1.4-otjld-binding-predicate-2")
     // 9.1.4-otjld-binding-predicate-10
     public void test914_bindingPredicate10() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp10Main.java",
@@ -2112,7 +2112,7 @@ public class Predicates extends AbstractOTJLDTest {
     // 9.1.4-otjld-binding-predicate-11
     public void test914_bindingPredicate11() {
        Map customOptions = getCompilerOptions();
-       
+
        runConformTest(
             new String[] {
 		"T914bp11Main.java",
@@ -2162,7 +2162,7 @@ public class Predicates extends AbstractOTJLDTest {
     // like "9.1.4-otjld-binding-predicate-11" with signatures in the binding
     // 9.1.4-otjld-binding-predicate-11a
     public void test914_bindingPredicate11a() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp11aMain.java",
@@ -2206,7 +2206,7 @@ public class Predicates extends AbstractOTJLDTest {
     // like "9.1.4-otjld-binding-predicate-11" with signatures in the binding + plus a team predicate
     // 9.1.4-otjld-binding-predicate-12
     public void test914_bindingPredicate12() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp12Main.java",
@@ -2257,7 +2257,7 @@ public class Predicates extends AbstractOTJLDTest {
     // like "9.1.4-otjld-binding-predicate-12" but regular guards only
     // 9.1.4-otjld-binding-predicate-13
     public void test914_bindingPredicate13() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp13Main.java",
@@ -2313,7 +2313,7 @@ public class Predicates extends AbstractOTJLDTest {
     // binding a base method two times to the same role method (predecdence declaration) one is inhibited by a guard predicate (Reported by Henry Sudhof on 5.1.2006)
     // 9.1.4-otjld-binding-predicate-14
     public void test914_bindingPredicate14() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp14Main.java",
@@ -2358,7 +2358,7 @@ public class Predicates extends AbstractOTJLDTest {
     // binding a base method two times to the same role method (predecdence declaration) with replace
     // 9.1.4-otjld-binding-predicate-15
     public void test914_bindingPredicate15() {
-       
+
        runConformTest(
             new String[] {
 		"T914bp15Main.java",
@@ -2404,7 +2404,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a base guard applies base-class decapsulation for its parameters and in an expression
     // 9.1.4-otjld-binding-predicate-16
     public void test914_bindingPredicate16() {
-       
+
        runConformTest(
             new String[] {
 		"p1/T914bp16Main.java",
@@ -2532,7 +2532,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a method guard accesses parameters but the callin binding fails to mention signatures (not a problem)
     // 9.1.4-otjld-binding-predicate-19
     public void test914_bindingPredicate19() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team914bp19.java",
@@ -2578,7 +2578,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a method guard accesses a parameter which is mapped in a parameter mapping
     // 9.1.4-otjld-binding-predicate-20
     public void test914_bindingPredicate20() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team914bp20.java",
@@ -2625,7 +2625,7 @@ public class Predicates extends AbstractOTJLDTest {
             },
             "X");
     }
-    
+
     // unresolved method reference in a base guard, role already has a re-checkable problem
     public void test914_bindingPredicate21() {
     	runNegativeTest(
@@ -2646,11 +2646,11 @@ public class Predicates extends AbstractOTJLDTest {
     			"	void blub() {}\n" +
     			"}\n"
     		},
-    		"----------\n" + 
-    		"1. ERROR in Team914bp21.java (at line 7)\n" + 
-    		"	base when (test(base));\n" + 
-    		"	           ^^^^\n" + 
-    		"The method test(T914bp21) is undefined for the type Team914bp21.R\n" + 
+    		"----------\n" +
+    		"1. ERROR in Team914bp21.java (at line 7)\n" +
+    		"	base when (test(base));\n" +
+    		"	           ^^^^\n" +
+    		"The method test(T914bp21) is undefined for the type Team914bp21.R\n" +
     		"----------\n");
     }
 
@@ -2702,7 +2702,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role method has a guard predicate
     // 9.1.5-otjld-method-predicate-1
     public void test915_methodPredicate1() {
-       
+
        runConformTest(
             new String[] {
 		"T915mp1Main.java",
@@ -2750,7 +2750,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role method has a base guard predicate
     // 9.1.5-otjld-method-predicate-2
     public void test915_methodPredicate2() {
-       
+
        runConformTest(
             new String[] {
 		"T915mp2Main.java",
@@ -2798,7 +2798,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role method has a regular guard predicate with parameter
     // 9.1.5-otjld-method-predicate-3
     public void test915_methodPredicate3() {
-       
+
        runConformTest(
             new String[] {
 		"T915mp3Main.java",
@@ -2844,7 +2844,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a callin role method has a regular guard predicate with parameter
     // 9.1.5-otjld-method-predicate-4
     public void test915_methodPredicate4() {
-       
+
        runConformTest(
             new String[] {
 		"T915mp4Main.java",
@@ -2891,7 +2891,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a callin role method has a regular guard predicate with parameter - also have a role predicate
     // 9.1.5-otjld-method-predicate-5
     public void test915_methodPredicate5() {
-       
+
        runConformTest(
             new String[] {
 		"T915mp5Main.java",
@@ -2943,7 +2943,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a base predicate of an after binding accesses the result of the base method
     // 9.1.6-otjld-base-predicate-accessing-result-1
     public void test916_basePredicateAccessingResult1() {
-       
+
        runConformTest(
             new String[] {
 		"Team916bpar1.java",
@@ -3009,11 +3009,11 @@ public class Predicates extends AbstractOTJLDTest {
             "5.4.1(a)");
     }
 
-    // a predicate is not the first element in a class 
+    // a predicate is not the first element in a class
     // WITNESS for TPX-252 - fixed between 0.8.0 and 0.8.1
     // 9.1.6-otjld-predicate-confusing-the-parser-1
     public void test916_predicateConfusingTheParser1() {
-       
+
        runConformTest(
             new String[] {
 		"Team916pctp1.java",
@@ -3043,7 +3043,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role of role has a base predicate (was bugreport ImplicitMayhem by hsudhof)
     // 9.1.7-otjld-predicate-in-role-of-role-1
     public void test917_predicateInRoleOfRole1() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team917piror1_2.java",
@@ -3091,7 +3091,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a role level base guard blocks lifting of a callin argument
     // 9.1.8-otjld_rejected_feature-base-guard-affecting-argument-lifting-1
     public void _rejected_test918_featureBaseGuardAffectingArgumentLifting1() {
-       
+
        runConformTest(
             new String[] {
 		"Team918bgaal1.java",
@@ -3135,7 +3135,7 @@ public class Predicates extends AbstractOTJLDTest {
     // a binding guard throws an undeclared exception
     // 9.1.9-otjld-exception-in-predicate-1
     public void test919_exceptionInPredicate1() {
-       
+
        runConformTest(
             new String[] {
 		"Team919eip1.java",
@@ -3170,7 +3170,7 @@ public class Predicates extends AbstractOTJLDTest {
     public void test919_exceptionInPredicate2() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportExceptionInGuard, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team919eip2.java",
@@ -3210,38 +3210,38 @@ public class Predicates extends AbstractOTJLDTest {
     	runConformTest(
     		new String[] {
     			"bugxyz/Main.java",
-    			"package bugxyz;\n" + 
+    			"package bugxyz;\n" +
     			"\n" +
-    			"public class Main {\n" + 
-    			"	public static void main(String[] args) {\n" + 
-    			"		new T1().activate();\n" + 
-    			"		new B1().foo();\n" + 
-    			"	}\n" + 
+    			"public class Main {\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		new T1().activate();\n" +
+    			"		new B1().foo();\n" +
+    			"	}\n" +
     			"}\n",
     			"bugxzy/B1.java",
-    			"package bugxyz;\n" + 
-    			"\n" + 
-    			"public class B1 {\n" + 
-    			"	boolean test() { return true; }\n" + 
-    			"	void foo() { }\n" + 
+    			"package bugxyz;\n" +
+    			"\n" +
+    			"public class B1 {\n" +
+    			"	boolean test() { return true; }\n" +
+    			"	void foo() { }\n" +
     			"}\n",
     			"bugxzy/B2.java",
-    			"package bugxyz;\n" + 
-    			"\n" + 
+    			"package bugxyz;\n" +
+    			"\n" +
     			"public class B2 extends B1 {}\n",
     			"bugxyz/T1.java",
-    			"package bugxyz;\n" + 
-    			"\n" + 
-    			"public team class T1 {\n" + 
-    			"	protected class R1 playedBy B1 {\n" + 
-    			"		bar <- before foo\n" + 
-    			"			base when (base.test());\n" + 
-    			"\n" + 
-    			"		private void bar() {\n" + 
-    			"			System.out.println(\"bar\");\n" + 
-    			"		}\n" + 
-    			"	}\n" + 
-    			"	protected class R2 extends R1 playedBy B2 { }\n" + 
+    			"package bugxyz;\n" +
+    			"\n" +
+    			"public team class T1 {\n" +
+    			"	protected class R1 playedBy B1 {\n" +
+    			"		bar <- before foo\n" +
+    			"			base when (base.test());\n" +
+    			"\n" +
+    			"		private void bar() {\n" +
+    			"			System.out.println(\"bar\");\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	protected class R2 extends R1 playedBy B2 { }\n" +
     			"}\n"
     		},
     		"bar");

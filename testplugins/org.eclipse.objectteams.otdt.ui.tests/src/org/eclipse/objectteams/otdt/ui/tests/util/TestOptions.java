@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -30,14 +30,14 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 public class TestOptions {
-	
+
 	public static Hashtable<String,String> getFormatterOptions()
 	{
 		Hashtable<String, String> result= JavaCore.getDefaultOptions();
 		result.putAll(TestFormatterOptions.getSettings());
 		return result;
 	}
-	
+
 	public static void initializeCodeGenerationOptions()
 	{
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -59,7 +59,7 @@ class TestFormatterOptions
 		options.setDefaultSettings();
 		return options.getMap();
 	}
-	
+
 	public int alignment_for_arguments_in_allocation_expression;
 	public int alignment_for_arguments_in_explicit_constructor_call;
 	public int alignment_for_arguments_in_method_invocation;
@@ -76,9 +76,9 @@ class TestFormatterOptions
 	public int alignment_for_superinterfaces_in_type_declaration;
 	public int alignment_for_throws_clause_in_constructor_declaration;
 	public int alignment_for_throws_clause_in_method_declaration;
-	
+
 	public boolean align_type_members_on_columns;
-	
+
 	public String brace_position_for_anonymous_type_declaration;
 	public String brace_position_for_array_initializer;
 	public String brace_position_for_block;
@@ -87,10 +87,10 @@ class TestFormatterOptions
 	public String brace_position_for_method_declaration;
 	public String brace_position_for_type_declaration;
 	public String brace_position_for_switch;
-	
+
 	public int continuation_indentation;
 	public int continuation_indentation_for_array_initializer;
-	
+
 	public int blank_lines_after_imports;
 	public int blank_lines_after_package;
 	public int blank_lines_before_field;
@@ -102,14 +102,14 @@ class TestFormatterOptions
 	public int blank_lines_before_package;
 	public int blank_lines_between_type_declarations;
 	public int blank_lines_at_beginning_of_method_body;
-	
+
 	public boolean indent_statements_compare_to_block;
 	public boolean indent_statements_compare_to_body;
 	public boolean indent_body_declarations_compare_to_type_header;
 	public boolean indent_breaks_compare_to_cases;
 	public boolean indent_switchstatements_compare_to_cases;
 	public boolean indent_switchstatements_compare_to_switch;
-	
+
 	public boolean insert_new_line_after_opening_brace_in_array_initializer;
 	public boolean insert_new_line_before_catch_in_try_statement;
 	public boolean insert_new_line_before_closing_brace_in_array_initializer;
@@ -241,7 +241,7 @@ class TestFormatterOptions
 
 	public int initial_indentation_level;
 	public String line_separator;
-	
+
 	private TestFormatterOptions()
 	{
 		// cannot be instantiated

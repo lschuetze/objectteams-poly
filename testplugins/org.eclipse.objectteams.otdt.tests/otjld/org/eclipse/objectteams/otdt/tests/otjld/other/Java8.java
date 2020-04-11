@@ -50,7 +50,7 @@ public class Java8 extends AbstractOTJLDTest {
 	public static Class<Java8> testClass() {
 		return Java8.class;
 	}
-	
+
 	@Override
 	public void initialize(CompilerTestSetup setUp) {
 		super.initialize(setUp);
@@ -222,15 +222,15 @@ public class Java8 extends AbstractOTJLDTest {
 			},
 			"OK");
 	}
-	
+
 	public void testTypeAnnotationAndTypeAnchor_1() {
 		if (this.weavingScheme == WeavingScheme.OTRE) return;
 		runConformTest(
 			new String[] {
 		"Marker.java",
 			"import java.lang.annotation.*;\n" +
-			"@Retention(RetentionPolicy.CLASS)\n" + 
-			"@Target({ ElementType.TYPE_USE })\n" + 
+			"@Retention(RetentionPolicy.CLASS)\n" +
+			"@Target({ ElementType.TYPE_USE })\n" +
 			"public @interface Marker {}\n",
 		"T1.java,",
 			"public team class T1 {\n" +
@@ -244,7 +244,7 @@ public class Java8 extends AbstractOTJLDTest {
 			"class C2<T> {}\n"
 			});
 	}
-	
+
 	public void testTypeAnnotationAndTypeAnchor_2() {
 		if (this.weavingScheme == WeavingScheme.OTRE) return;
 		runConformTest(
@@ -252,14 +252,14 @@ public class Java8 extends AbstractOTJLDTest {
 		"p1/Marker.java",
 				"package p1;\n" +
 				"import java.lang.annotation.*;\n" +
-				"@Retention(RetentionPolicy.CLASS)\n" + 
-				"@Target({ ElementType.TYPE_USE })\n" + 
+				"@Retention(RetentionPolicy.CLASS)\n" +
+				"@Target({ ElementType.TYPE_USE })\n" +
 				"public @interface Marker {}\n",
 		"p1/Marker2.java",
 				"package p1;\n" +
 				"import java.lang.annotation.*;\n" +
-				"@Retention(RetentionPolicy.CLASS)\n" + 
-				"@Target({ ElementType.TYPE_USE })\n" + 
+				"@Retention(RetentionPolicy.CLASS)\n" +
+				"@Target({ ElementType.TYPE_USE })\n" +
 				"public @interface Marker2 {}\n",
 		"T1.java,",
 			"public team class T1 {\n" +
@@ -292,11 +292,11 @@ public class Java8 extends AbstractOTJLDTest {
 			runNegativeTestNoFlush(
 				teamSource,
 				compilerOptions,
-				"----------\n" + 
-				"1. WARNING in MyTeam.java (at line 2)\n" + 
-				"	protected class R playedBy B {}\n" + 
-				"	                           ^\n" + 
-				"Base class B has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
+				"----------\n" +
+				"1. WARNING in MyTeam.java (at line 2)\n" +
+				"	protected class R playedBy B {}\n" +
+				"	                           ^\n" +
+				"Base class B has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" +
 				"----------\n");
 		else
 			runConformTestNoFlush(teamSource, compilerOptions);
@@ -309,33 +309,33 @@ public class Java8 extends AbstractOTJLDTest {
     		new String[]{
     			"SubTeam.java",
     			"public team class SubTeam extends SuperTeam {\n" +
-    			"	public interface I2  {\n" + 
-    			"		default void bar() { System.out.println(\"subbar\"); }\n" + 
-    			"	}\n" + 
-    			"	protected class R {\n" + 
-    			"		protected void foo() {\n" + 
-    			"			System.out.println(\"foosub\");\n" + 
-    			"		}\n" + 
-    			"	}\n" + 
-    			"	public static void main(String[] args) {\n" + 
-    			"		new SubTeam().test();\n" + 
-    			"	}\n" + 
+    			"	public interface I2  {\n" +
+    			"		default void bar() { System.out.println(\"subbar\"); }\n" +
+    			"	}\n" +
+    			"	protected class R {\n" +
+    			"		protected void foo() {\n" +
+    			"			System.out.println(\"foosub\");\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		new SubTeam().test();\n" +
+    			"	}\n" +
     			"}\n",
     			"SuperTeam.java",
     			"public team class SuperTeam {\n" +
-    			"	public interface I2 {\n" + 
-    			"		default void bar() { System.out.println(\"bar\"); }\n" + 
-    			"	}\n" + 
-    			"	protected class R implements I2 {\n" + 
-    			"		protected void foo() {\n" + 
-    			"			System.out.println(\"foo\");\n" + 
-    			"		}\n" + 
-    			"	}\n" + 
-    			"	protected void test() {\n" + 
-    			"		R r = new R();\n" + 
-    			"		r.foo();\n" + 
-    			"		r.bar();\n" + 
-    			"	}\n" + 
+    			"	public interface I2 {\n" +
+    			"		default void bar() { System.out.println(\"bar\"); }\n" +
+    			"	}\n" +
+    			"	protected class R implements I2 {\n" +
+    			"		protected void foo() {\n" +
+    			"			System.out.println(\"foo\");\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	protected void test() {\n" +
+    			"		R r = new R();\n" +
+    			"		r.foo();\n" +
+    			"		r.bar();\n" +
+    			"	}\n" +
     			"}\n"
     		},
     		"foosub\n" +
@@ -353,44 +353,44 @@ public class Java8 extends AbstractOTJLDTest {
 	    		"	public static void main(String... args) {\n" +
 	    		"		new t.MyT().activate();\n" +
 	    		"		new Base().bm();\n" +
-	    		"	}\n" + 
+	    		"	}\n" +
 	    		"}\n",
 	    		"t/MyT.java",
 	    		"package t;\n" +
-	    		"import base b.Base;\n" + 
-	    		"\n" + 
-	    		"public team class MyT {\n" + 
-	    		"\n" + 
-	    		"	protected class R playedBy Base {\n" + 
+	    		"import base b.Base;\n" +
+	    		"\n" +
+	    		"public team class MyT {\n" +
+	    		"\n" +
+	    		"	protected class R playedBy Base {\n" +
 	    		"		void perform(Runnable r) { r.run(); }\n" +
-	    		"		@SuppressWarnings(\"basecall\")\n" + 
-	    		"		callin void test() {\n" + 
-	    		"			perform(() -> {\n" + 
-	    		"				System.out.print(0);\n" + 
+	    		"		@SuppressWarnings(\"basecall\")\n" +
+	    		"		callin void test() {\n" +
+	    		"			perform(() -> {\n" +
+	    		"				System.out.print(0);\n" +
 	    		"				base.test();\n" +
-	    		"				System.out.print(1);\n" + 
-	    		"				perform(() -> base.test());\n" + 
-	    		"			});\n" + 
-	    		"			new Runnable() {\n" + 
-	    		"				@Override\n" + 
-	    		"				public void run() {\n" + 
+	    		"				System.out.print(1);\n" +
+	    		"				perform(() -> base.test());\n" +
+	    		"			});\n" +
+	    		"			new Runnable() {\n" +
+	    		"				@Override\n" +
+	    		"				public void run() {\n" +
 	    		"					perform(() -> {\n" +
-	    		"						System.out.print(2);\n" + 
-	    		"						base.test(); \n" + 
+	    		"						System.out.print(2);\n" +
+	    		"						base.test(); \n" +
 	    		"					});\n" +
-	    		"					System.out.print(3);\n" + 
-	    		"					base.test();\n" + 
-	    		"					System.out.println(4);\n" + 
-	    		"				}\n" + 
-	    		"			}.run();\n" + 
-	    		"		}\n" + 
-	    		"		test <- replace bm;\n" + 
+	    		"					System.out.print(3);\n" +
+	    		"					base.test();\n" +
+	    		"					System.out.println(4);\n" +
+	    		"				}\n" +
+	    		"			}.run();\n" +
+	    		"		}\n" +
+	    		"		test <- replace bm;\n" +
 	    		"	}\n" +
 	    		"}\n"
     		},
     		"0b1b2b3b4");
     }
-    
+
     public void testBug506747() {
     	Map<String,String> options = getCompilerOptions();
     	options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED); // enable AnnotatableTypeSystem
@@ -407,11 +407,11 @@ public class Java8 extends AbstractOTJLDTest {
     			"	}\n" +
     			"}\n"
     		},
-    		"----------\n" + 
-			"1. ERROR in p\\X.java (at line 7)\n" + 
-			"	X.Inner i;\n" + 
-			"	^^^^^^^\n" + 
-			"X.Inner cannot be resolved to a type\n" + 
+    		"----------\n" +
+			"1. ERROR in p\\X.java (at line 7)\n" +
+			"	X.Inner i;\n" +
+			"	^^^^^^^\n" +
+			"X.Inner cannot be resolved to a type\n" +
 			"----------\n",
 			null, // libs
 			true, // flush
@@ -430,11 +430,11 @@ public class Java8 extends AbstractOTJLDTest {
     			"	}\n" +
     			"}\n"
     		},
-    		"----------\n" + 
-			"1. ERROR in Bug506749.java (at line 4)\n" + 
-			"	Runnable r = () -> base();\n" + 
-			"	                   ^^^^\n" + 
-			"Illegal base constructor call: enclosing '() -> <no expression yet>' is not a constructor of a bound role (OTJLD 2.4.2).\n" + 
+    		"----------\n" +
+			"1. ERROR in Bug506749.java (at line 4)\n" +
+			"	Runnable r = () -> base();\n" +
+			"	                   ^^^^\n" +
+			"Illegal base constructor call: enclosing '() -> <no expression yet>' is not a constructor of a bound role (OTJLD 2.4.2).\n" +
 			"----------\n");
     }
 
@@ -450,16 +450,16 @@ public class Java8 extends AbstractOTJLDTest {
     			"	}\n" +
     			"}\n"
     		},
-    		"----------\n" + 
-			"1. ERROR in Bug506749.java (at line 4)\n" + 
-			"	Runnable r = () -> { base(); };\n" + 
-			"	                     ^^^^\n" + 
-			"Illegal base constructor call: enclosing \'() -> {\n" + 
-			"  <no expression yet>;\n" + 
-			"}\' is not a constructor of a bound role (OTJLD 2.4.2).\n" + 
+    		"----------\n" +
+			"1. ERROR in Bug506749.java (at line 4)\n" +
+			"	Runnable r = () -> { base(); };\n" +
+			"	                     ^^^^\n" +
+			"Illegal base constructor call: enclosing \'() -> {\n" +
+			"  <no expression yet>;\n" +
+			"}\' is not a constructor of a bound role (OTJLD 2.4.2).\n" +
 			"----------\n");
     }
-    
+
     public void testBug541865() {
     	runConformTest(
 			new String[] {

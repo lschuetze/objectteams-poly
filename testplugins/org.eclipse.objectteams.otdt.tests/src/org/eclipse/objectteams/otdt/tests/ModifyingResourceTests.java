@@ -6,7 +6,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -32,7 +32,7 @@ import org.eclipse.objectteams.otdt.tests.AbstractJavaModelTests;
  */
 //{OT_COPY_PASTE: class copied from org.eclipse.jdt.core.tests.model
 public class ModifyingResourceTests extends AbstractJavaModelTests {
-	
+
 public ModifyingResourceTests(String name) {
 	super(name);
 }
@@ -109,7 +109,7 @@ public static void generateClassFile(String className, String javaSource) throws
 			if (read != -1) System.out.print("\t");
 			for (int i = 0; i < read; i++) {
 				System.out.print(buffer[i]);
-				System.out.print(", ");	
+				System.out.print(", ");
 			}
 			if (read != -1) System.out.println();
 		}
@@ -145,7 +145,7 @@ protected IFolder createFolder(String path) throws CoreException {
 			IContainer parent = folder.getParent();
 			if (parent instanceof IFolder && !parent.exists()) {
 				createFolder(parent.getFullPath().toString());
-			} 
+			}
 			folder.create(true, true, null);
 		}
 	},
@@ -165,7 +165,7 @@ protected IFile editFile(String path, String content) throws CoreException {
 	file.setContents(input, IResource.FORCE, null);
 	return file;
 }
-/* 
+/*
  * Expands (i.e. open) the given element and returns a toString() representation
  * of the tree.
  */
@@ -234,18 +234,18 @@ protected String getSortedByProjectDeltas() {
 	for (int i=0, length = this.deltaListener.deltas.length; i<length; i++) {
 		IJavaElementDelta[] projects = this.deltaListener.deltas[i].getAffectedChildren();
 		int projectsLength = projects.length;
-		
+
 		// sort by project
 		IJavaElementDelta[] sorted = new IJavaElementDelta[projectsLength];
 		System.arraycopy(projects, 0, sorted, 0, projectsLength);
 		org.eclipse.jdt.internal.core.util.Util.sort(
-			sorted, 
+			sorted,
 			new  org.eclipse.jdt.internal.core.util.Util.Comparer() {
 				public int compare(Object a, Object b) {
 					return a.toString().compareTo(b.toString());
 				}
 			});
-		
+
 		for (int j=0; j<projectsLength; j++) {
 			buffer.append(sorted[j]);
 			if (j != projectsLength-1) {
@@ -314,7 +314,7 @@ protected IClasspathEntry[] createClasspath(String[] sourceFoldersAndPatterns, b
 				exclusionPatternPaths[j] = new Path(tokenizer.nextToken());
 			}
 		}
-		classpath[i/increment] = JavaCore.newSourceEntry(new Path(src), inclusionPatternPaths, exclusionPatternPaths, null); 
+		classpath[i/increment] = JavaCore.newSourceEntry(new Path(src), inclusionPatternPaths, exclusionPatternPaths, null);
 	}
 	return classpath;
 }

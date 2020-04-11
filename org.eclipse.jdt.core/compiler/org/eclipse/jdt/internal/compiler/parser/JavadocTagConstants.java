@@ -118,7 +118,7 @@ public interface JavadocTagConstants {
 	public static final int TAG_IMPL_SPEC_VALUE = 28;
 	public static final int TAG_IMPL_NOTE_VALUE = 29;
 	public static final int TAG_OTHERS_VALUE = 100;
-	
+
 //{ObjectTeams: role tag
 	public static final char[] TAG_ROLE = "role".toCharArray(); //$NON-NLS-1$
 	public static final int TAG_ROLE_LENGTH = TAG_ROLE.length;
@@ -363,8 +363,8 @@ public interface JavadocTagConstants {
 		TAG_INDEX,
 		TAG_HIDDEN,
 		TAG_SUMMARY,
-		TAG_API_NOTE, 
-		TAG_IMPL_SPEC, 
+		TAG_API_NOTE,
+		TAG_IMPL_SPEC,
 		TAG_IMPL_NOTE,
 	};
 	public static final char[][] METHOD_TAGS = {

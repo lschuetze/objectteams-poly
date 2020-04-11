@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010, 2013 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -22,11 +22,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 import junit.framework.Test;
 
 public class TeamNesting extends AbstractOTJLDTest {
-	
+
 	public TeamNesting(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -34,7 +34,7 @@ public class TeamNesting extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -46,7 +46,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a role inherits features from all possible super roles within nested teams - one level only
     // 1.1.10-otjld-full-inheritance-structure-1
     public void test1110_fullInheritanceStructure1() {
-       
+
        runConformTest(
             new String[] {
 		"T1110fis1.java",
@@ -160,7 +160,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a role inherits features from all possible super roles within nested teams - one compilation
     // 1.1.10-otjld-full-inheritance-structure-2
     public void test1110_fullInheritanceStructure2() {
-       
+
        runConformTest(
             new String[] {
 		"T1110fis2.java",
@@ -318,7 +318,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a role inherits features from all possible super roles within nested teams - separate compilation
     // 1.1.10-otjld-full-inheritance-structure-3
     public void test1110_fullInheritanceStructure3() {
-       
+
        runConformTest(
             new String[] {
 		"T1110fis3.java",
@@ -476,7 +476,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a role inherits features from all possible super roles within nested teams - more combinations - separate compilation
     // 1.1.10-otjld-full-inheritance-structure-4
     public void test1110_fullInheritanceStructure4() {
-       
+
        runConformTest(
             new String[] {
 		"T1110fis4.java",
@@ -598,7 +598,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a role inherits features from all possible super roles within nested teams - super and tsuper tree (note, that some of these are re-bound, so full tree is not possible.
     // 1.1.10-otjld-full-inheritance-structure-5
     public void test1110_fullInheritanceStructure5() {
-       
+
        runConformTest(
             new String[] {
 		"T1110fis5.java",
@@ -687,7 +687,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // use qualified tsuper to achieve order of old tsuper-precedence (pre 0.8M3)
     // 1.1.10-otjld-full-inheritance-structure-5
     public void test1110_fullInheritanceStructure5a() {
-       
+
        runConformTest(
             new String[] {
 		"T1110fis5a.java",
@@ -775,7 +775,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // A role inherits callin bindings from several tsuper classes
     // 1.1.11-otjld-role-inherits-callin-from-tsupers-1
     public void test1111_roleInheritsCallinFromTsupers1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1111ricft1_2.java",
@@ -836,7 +836,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // A role inherits named callin bindings from several tsuper classes
     // 1.1.11-otjld-role-inherits-callin-from-tsupers-2
     public void test1111_roleInheritsCallinFromTsupers2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1111ricft2_2.java",
@@ -897,7 +897,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a nested team overrides a regular role
     // 1.1.12-otjld-team-overrides-regular-1
     public void test1112_teamOverridesRegular1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1112tor1_2.java",
@@ -965,7 +965,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // simple tsuper is used to select the closest version among different tsupers in a nested team
     // 1.1.14-otjld-tsuper-in-nested-1
     public void test1114_tsuperInNested1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1114tin1_2.java",
@@ -1024,7 +1024,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // qualified tsuper is used to select the closest version among different tsupers in a nested team
     // 1.1.14-otjld-tsuper-in-nested-1a
     public void test1114_tsuperInNested1a() {
-       
+
        runConformTest(
             new String[] {
 		"Team1114tin1a_2.java",
@@ -1083,7 +1083,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // qualified tsuper is used to select a version among different tsupers in a nested team
     // 1.1.14-otjld-tsuper-in-nested-2
     public void test1114_tsuperInNested2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1114tin2_2.java",
@@ -1138,7 +1138,7 @@ public class TeamNesting extends AbstractOTJLDTest {
             },
             "OK");
     }
-    
+
     // Bug 330002 - Wrong linearization of tsuper calls in diamond inheritance
     public void _test1114_tsuperInNested3() {
     	runConformTest(
@@ -1150,59 +1150,59 @@ public class TeamNesting extends AbstractOTJLDTest {
     			"    }\n" +
     			"}\n",
     	"Team1114tin3_0.java",
-    			"public team class Team1114tin3_0 {\n" + 
-    			"    protected abstract team class TeamA {\n" + 
-    			"        protected abstract class R {\n" + 
-    			"            protected void print() { System.out.println(\"topR\"); }\n" + 
-    			"        }\n" + 
-    			"        public void test() {\n" + 
-    			"            System.out.println(\"topT\");\n" + 
-    			"            new R().print();\n" + 
-    			"        }\n" + 
-    			"    }\n" + 
-    			"\n" + 
-    			"    protected team class TeamB extends TeamA {\n" + 
-    			"        protected class R {\n" + 
-    			"            protected void print() {\n" + 
-    			"                System.out.println(\"0B\");\n" + 
-    			"                tsuper.print();\n" + 
-    			"            }\n" + 
-    			"        }\n" + 
-    			"        public void test() {\n" + 
-    			"            System.out.println(\"TeamB\");\n" + 
-    			"            super.test();\n" + 
-    			"        }\n" + 
-    			"    }\n" + 
+    			"public team class Team1114tin3_0 {\n" +
+    			"    protected abstract team class TeamA {\n" +
+    			"        protected abstract class R {\n" +
+    			"            protected void print() { System.out.println(\"topR\"); }\n" +
+    			"        }\n" +
+    			"        public void test() {\n" +
+    			"            System.out.println(\"topT\");\n" +
+    			"            new R().print();\n" +
+    			"        }\n" +
+    			"    }\n" +
+    			"\n" +
+    			"    protected team class TeamB extends TeamA {\n" +
+    			"        protected class R {\n" +
+    			"            protected void print() {\n" +
+    			"                System.out.println(\"0B\");\n" +
+    			"                tsuper.print();\n" +
+    			"            }\n" +
+    			"        }\n" +
+    			"        public void test() {\n" +
+    			"            System.out.println(\"TeamB\");\n" +
+    			"            super.test();\n" +
+    			"        }\n" +
+    			"    }\n" +
     			"}",
     	"Team1114tin3_1.java",
-    			"public team class Team1114tin3_1 extends Team1114tin3_0 {\n" + 
-    			"    @Override\n" + 
-    			"    protected team class TeamA {\n" + 
-    			"        @Override\n" + 
-    			"        protected class R {\n" + 
-    			"            @Override\n" + 
-    			"            protected void print() {\n" + 
-    			"                System.out.println(\"1A\");\n" + 
-    			"                tsuper.print();\n" + 
-    			"            }\n" + 
-    			"        }\n" + 
-    			"        @Override\n" + 
-    			"        public void test() {\n" + 
-    			"            System.out.println(\"TeamA\");\n" + 
-    			"            tsuper.test();\n" + 
-    			"        }\n" + 
-    			"    }\n" + 
-    			"    protected team class TeamB {\n" + 
-    			"        protected class R {\n" + 
-    			"            protected void print() {\n" + 
-    			"                System.out.println(\"bottomB\");\n" + 
-    			"                tsuper.print();\n" + 
-    			"            }\n" + 
-    			"        }\n" + 
-    			"    }\n" + 
-    			"    void test() {\n" + 
-    			"        new TeamB().test();\n" + 
-    			"    }\n" + 
+    			"public team class Team1114tin3_1 extends Team1114tin3_0 {\n" +
+    			"    @Override\n" +
+    			"    protected team class TeamA {\n" +
+    			"        @Override\n" +
+    			"        protected class R {\n" +
+    			"            @Override\n" +
+    			"            protected void print() {\n" +
+    			"                System.out.println(\"1A\");\n" +
+    			"                tsuper.print();\n" +
+    			"            }\n" +
+    			"        }\n" +
+    			"        @Override\n" +
+    			"        public void test() {\n" +
+    			"            System.out.println(\"TeamA\");\n" +
+    			"            tsuper.test();\n" +
+    			"        }\n" +
+    			"    }\n" +
+    			"    protected team class TeamB {\n" +
+    			"        protected class R {\n" +
+    			"            protected void print() {\n" +
+    			"                System.out.println(\"bottomB\");\n" +
+    			"                tsuper.print();\n" +
+    			"            }\n" +
+    			"        }\n" +
+    			"    }\n" +
+    			"    void test() {\n" +
+    			"        new TeamB().test();\n" +
+    			"    }\n" +
     			"}"
     		},
     		"TeamB\n" +
@@ -1216,7 +1216,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a nested team extends a toplevel team, role signature contains role
     // 1.1.15-otjld-nested-team-extends-regular-team-1
     public void test1115_nestedTeamExtendsRegularTeam1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1115ntert1.java",
@@ -1255,11 +1255,11 @@ public class TeamNesting extends AbstractOTJLDTest {
             },
             "OK");
     }
-    
+
     // a nested team extends a toplevel team, role signature contains role, constructor not visible
     // 1.1.15-otjld-nested-team-extends-regular-team-1
     public void test1115_nestedTeamExtendsRegularTeam1f() {
-       
+
        runNegativeTest(
             new String[] {
 		"Team1115ntert1f.java",
@@ -1287,16 +1287,16 @@ public class TeamNesting extends AbstractOTJLDTest {
 			    "    }\n" +
 			    "}\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team1115ntert1f.java (at line 5)\n" + 
-    		"	R r1 = new R(\"O\");\n" + 
-    		"	       ^^^^^^^^^^\n" + 
-    		"The role constructor Team1115ntert1f.Team1115ntert1f_2.R(String) is not visible (OTJLD 1.2.1(e)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team1115ntert1f.java (at line 6)\n" + 
-    		"	R r2 = new R(\"K\");\n" + 
-    		"	       ^^^^^^^^^^\n" + 
-    		"The role constructor Team1115ntert1f.Team1115ntert1f_2.R(String) is not visible (OTJLD 1.2.1(e)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team1115ntert1f.java (at line 5)\n" +
+    		"	R r1 = new R(\"O\");\n" +
+    		"	       ^^^^^^^^^^\n" +
+    		"The role constructor Team1115ntert1f.Team1115ntert1f_2.R(String) is not visible (OTJLD 1.2.1(e)).\n" +
+    		"----------\n" +
+    		"2. ERROR in Team1115ntert1f.java (at line 6)\n" +
+    		"	R r2 = new R(\"K\");\n" +
+    		"	       ^^^^^^^^^^\n" +
+    		"The role constructor Team1115ntert1f.Team1115ntert1f_2.R(String) is not visible (OTJLD 1.2.1(e)).\n" +
     		"----------\n");
     }
 
@@ -1516,90 +1516,90 @@ public class TeamNesting extends AbstractOTJLDTest {
         runNegativeTest(
             new String[] {
 		"n1118/Team1118roe2_2.java",
-				"package n1118;\n" + 
-				"public team class Team1118roe2_2 extends Team1118roe2_1 {\n" + 
+				"package n1118;\n" +
+				"public team class Team1118roe2_2 extends Team1118roe2_1 {\n" +
 				"        @Override\n"+
-				"        public team class TB1 {\n" + 
+				"        public team class TB1 {\n" +
 				"                @Override\n"+
-				"                public team class TC1 {\n" + 
+				"                public team class TC1 {\n" +
 				"                        @Override\n"+
-				"                        public class R1 {}\n" + 
-				"                }\n" + 
+				"                        public class R1 {}\n" +
+				"                }\n" +
 				"                @Override\n"+
-				"                public team class TC2 extends TC1 {\n" + 
+				"                public team class TC2 extends TC1 {\n" +
 				"                        @Override\n"+
-				"                        public class R1 extends C2 {}\n" + 
-				"                }\n" + 
-				"        }\n" + 
+				"                        public class R1 extends C2 {}\n" +
+				"                }\n" +
+				"        }\n" +
 				"        @Override\n"+
-				"        public team class TB2 extends TB1 {\n" + 
+				"        public team class TB2 extends TB1 {\n" +
 				"                @Override\n"+
-				"                public team class TC1 {\n" + 
+				"                public team class TC1 {\n" +
 				"                        @Override\n"+
-				"                        public class R1 extends C1 {}\n" + 
-				"                }\n" + 
+				"                        public class R1 extends C1 {}\n" +
+				"                }\n" +
 				"                @Override\n"+
-				"                public team class TC2 {\n" + 
+				"                public team class TC2 {\n" +
 				"                        @Override\n"+
-				"                        public class R1 {}\n" + 
-				"                }\n" + 
-				"        }\n" + 
+				"                        public class R1 {}\n" +
+				"                }\n" +
+				"        }\n" +
 				"}",
 		"n1118/Team1118roe2_1.java",
-				"package n1118;\n" + 
-				"public team class Team1118roe2_1 {\n" + 
-				"        public team class TB1 {\n" + 
-				"                public team class TC1 {\n" + 
-				"                        public class R1 {}\n" + 
-				"                }\n" + 
-				"                public team class TC2 extends TC1 {\n" + 
+				"package n1118;\n" +
+				"public team class Team1118roe2_1 {\n" +
+				"        public team class TB1 {\n" +
+				"                public team class TC1 {\n" +
+				"                        public class R1 {}\n" +
+				"                }\n" +
+				"                public team class TC2 extends TC1 {\n" +
 				"                        @Override\n"+
-				"                        public class R1 {}\n" + 
-				"                }\n" + 
-				"        }\n" + 
-				"        public team class TB2 extends TB1 {\n" + 
+				"                        public class R1 {}\n" +
+				"                }\n" +
+				"        }\n" +
+				"        public team class TB2 extends TB1 {\n" +
 				"                @Override\n"+
-				"                public team class TC1 {\n" + 
+				"                public team class TC1 {\n" +
 				"                        @Override\n"+
-				"                        public class R1 {}\n" + 
-				"                }\n" + 
+				"                        public class R1 {}\n" +
+				"                }\n" +
 				"                @Override\n"+
-				"                public team class TC2 {\n" + 
+				"                public team class TC2 {\n" +
 				"                        @Override\n"+
-				"                        public class R1 extends C3 {}\n" + 
-				"                }\n" + 
-				"        }\n" + 
+				"                        public class R1 extends C3 {}\n" +
+				"                }\n" +
+				"        }\n" +
 				"}",
 		"n1118/C0.java",
-				"package n1118;\n" + 
+				"package n1118;\n" +
 				"public class C0 {}\n",
 		"n1118/C1.java",
-				"package n1118;\n" + 
+				"package n1118;\n" +
 				"public class C1 extends C0 {}\n",
 		"n1118/C2.java",
-				"package n1118;\n" + 
+				"package n1118;\n" +
 				"public class C2 extends C0 {}\n",
 		"n1118/C3.java",
-				"package n1118;\n" + 
+				"package n1118;\n" +
 				"public class C3 extends C0 {}\n",
             },
-            "----------\n" + 
-    		"1. ERROR in n1118\\Team1118roe2_2.java (at line 26)\n" + 
-    		"	public class R1 {}\n" + 
-    		"	             ^^\n" + 
-    		"Role inherits incompatible \'extends\' declarations: C1 is not a sub-type of C2 (\'extends C2\' is inherited is from n1118.Team1118roe2_2.TB1.TC2.R1) (OTJLD 1.3.2(b)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in n1118\\Team1118roe2_2.java (at line 26)\n" + 
-    		"	public class R1 {}\n" + 
-    		"	             ^^\n" + 
-    		"Role inherits incompatible \'extends\' declarations: C1 is not a sub-type of C3 (\'extends C3\' is inherited is from n1118.Team1118roe2_1.TB2.TC2.R1) (OTJLD 1.3.2(b)).\n" + 
+            "----------\n" +
+    		"1. ERROR in n1118\\Team1118roe2_2.java (at line 26)\n" +
+    		"	public class R1 {}\n" +
+    		"	             ^^\n" +
+    		"Role inherits incompatible \'extends\' declarations: C1 is not a sub-type of C2 (\'extends C2\' is inherited is from n1118.Team1118roe2_2.TB1.TC2.R1) (OTJLD 1.3.2(b)).\n" +
+    		"----------\n" +
+    		"2. ERROR in n1118\\Team1118roe2_2.java (at line 26)\n" +
+    		"	public class R1 {}\n" +
+    		"	             ^^\n" +
+    		"Role inherits incompatible \'extends\' declarations: C1 is not a sub-type of C3 (\'extends C3\' is inherited is from n1118.Team1118roe2_1.TB2.TC2.R1) (OTJLD 1.3.2(b)).\n" +
     		"----------\n");
     }
 
     // some roles are missing in the lattice of tsuper types
     // 1.1.19-otjld-incomplete-tsuper-structure-1
     public void test1119_incompleteTsuperStructure1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1119its1_2.java",
@@ -1650,7 +1650,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // some roles are missing in the lattice of tsuper types
     // 1.1.19-otjld-incomplete-tsuper-structure-2
     public void test1119_incompleteTsuperStructure2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1119its2_2.java",
@@ -1730,7 +1730,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // using tsuper in a setting of diamond inheritance
     // 1.1.21-otjld-diamond-inheritance-1
     public void test1121_diamondInheritance1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1121di1_2.java",
@@ -1794,18 +1794,18 @@ public class TeamNesting extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team1121di1f_2.java (at line 7)\n" + 
-    		"	tsuper.test();\n" + 
-    		"	       ^^^^\n" + 
-    		"Indirect tsuper method inherited from Team1121di1f_1.R1 is not visible (OTJLD 1.2.1(e)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team1121di1f_2.java (at line 7)\n" +
+    		"	tsuper.test();\n" +
+    		"	       ^^^^\n" +
+    		"Indirect tsuper method inherited from Team1121di1f_1.R1 is not visible (OTJLD 1.2.1(e)).\n" +
     		"----------\n");
     }
 
     // using tsuper in a setting of diamond inheritance - role R1 reused from byte code
     // 1.1.21-otjld-diamond-inheritance-2
     public void test1121_diamondInheritance2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1121di2_2.java",
@@ -1842,7 +1842,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // callin arg anchored to "base", problem(s) observed in ordertesting.OrderCustomerSC
     // 1.1.22-otjld-layered-teams-1
     public void test1122_layeredTeams1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1122lt1_3.java",
@@ -1907,7 +1907,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a role references a role which the lower team inherits from its super
     // 1.1.22-otjld-layered-teams-2
     public void test1122_layeredTeams2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1122lt2_3.java",
@@ -1952,7 +1952,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a role references a role which the lower team inherits from its super - signature defined in super team
     // 1.1.22-otjld-layered-teams-3
     public void test1122_layeredTeams3() {
-       
+
        runConformTest(
             new String[] {
 		"Team1122lt3_3.java",
@@ -1997,7 +1997,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // callin requires lifting of non-public role to role-of-role
     // 1.1.22-otjld-layered-teams-4
     public void test1122_layeredTeams4() {
-       
+
        runConformTest(
             new String[] {
 		"Team1122lt4_2.java",
@@ -2041,7 +2041,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // callin requires lifting of non-public role to role-of-role - declared lifting at base
     // 1.1.22-otjld-layered-teams-5
     public void test1122_layeredTeams5() {
-       
+
        runConformTest(
             new String[] {
 		"l2/Team1122lt5_3.java",
@@ -2112,7 +2112,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // callin requires lifting of non-public role to role-of-role -  base method spec requires role strengthening for parameter
     // 1.1.22-otjld-layered-teams-6
     public void test1122_layeredTeams6() {
-       
+
        runConformTest(
             new String[] {
 		"Team1122lt6_3.java",
@@ -2202,14 +2202,14 @@ public class TeamNesting extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team1122lt7_2.java (at line 12)\n" + 
-    		"	void testMid(RInner r) <- before void test(R<@base> r);\n" + 
-    		"	                                           ^\n" + 
-    		"Method specifier finds no direct match, argument of closest match is T1122lt7 instead of R<@base> (OTJLD 4.1(c)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team1122lt7_2.java (at line 12)\n" +
+    		"	void testMid(RInner r) <- before void test(R<@base> r);\n" +
+    		"	                                           ^\n" +
+    		"Method specifier finds no direct match, argument of closest match is T1122lt7 instead of R<@base> (OTJLD 4.1(c)).\n" +
     		"----------\n");
     }
-    
+
     // callout to private method of lower role caused "Cannot externalize non-public role R1 (OTJLD 1.2.2(a))"
     // plus 2 follow-up errors.
     public void test1122_layeredTeams8() {
@@ -2250,7 +2250,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     			"		new R1().callTest();\n" +
     			"	}\n" +
     			"}\n"
-    		}, 
+    		},
     		"OK");
     }
 
@@ -2261,17 +2261,17 @@ public class TeamNesting extends AbstractOTJLDTest {
 		"Team1122lt9_2.java",
 			    "\n" +
 			    "public team class Team1122lt9_2 {\n" +
-			    "  public team class T1 {\n" + 
-			    "    protected final Team1122lt9_1 thatTeam = new Team1122lt9_1();\n" + 
+			    "  public team class T1 {\n" +
+			    "    protected final Team1122lt9_1 thatTeam = new Team1122lt9_1();\n" +
 			    "    protected class R playedBy R1<@thatTeam> {" +
 			    "      @SuppressWarnings(\"basecall\")\n" +
 			    "      callin String fixedToString() {\n" +
 			    "        return \"OK\";\n" +
 			    "      }\n" +
-			    "    }\n" + 
+			    "    }\n" +
 			    "  }\n" +
 			    "  public team class T2 extends T1 {\n" +
-			    "    @Override protected class R {\n" + 
+			    "    @Override protected class R {\n" +
 			    "      String fixedToString() <- replace String toString();\n" +
 			    "    }\n" +
 			    "  }\n" +
@@ -2304,7 +2304,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a nested team is played by a regular class, its (inner) role by an inner of the base - (we had a problem with splitting creation methods in conjunction with base class decapsulation )
     // 1.1.23-otjld-team-layered-on-regular-nested-1
     public void test1123_teamLayeredOnRegularNested1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1123tlorn1.java",
@@ -2408,7 +2408,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a nested team is played by a regular class, its (inner) role by an inner of the base - base constructor needs explicit enclosing instance
     // 1.1.23-otjld-team-layered-on-regular-nested-3
     public void test1123_teamLayeredOnRegularNested3() {
-       
+
        runConformTest(
             new String[] {
 		"Team1123tlorn3.java",
@@ -2461,7 +2461,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a reflective method is used on a nested team
     // 1.1.24-otjld-generated-method-of-nested-team-1
     public void test1124_generatedMethodOfNestedTeam1() {
-       
+
        runConformTest(
             new String[] {
 		"p2/T1124gmont1Main.java",
@@ -2495,7 +2495,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a creator method is invoked on an externalized nested team
     // 1.1.24-otjld-generated-method-of-nested-team-2
     public void test1124_generatedMethodOfNestedTeam2() {
-       
+
        runConformTest(
             new String[] {
 		"p2/T1124gmont2Main.java",
@@ -2527,7 +2527,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a cast method is used for a nested role
     // 1.1.24-otjld-generated-method-of-nested-team-3
     public void test1124_generatedMethodOfNestedTeam3() {
-       
+
        runConformTest(
             new String[] {
 		"Team1124gmont3.java",
@@ -2561,7 +2561,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a nested role accesses its outer-outer team
     // 1.1.25-otjld-outer-access-in-nested-team-1
     public void test1125_outerAccessInNestedTeam1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1125oaint1.java",
@@ -2590,7 +2590,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a nested role accesses its outer-outer team - team inheritance
     // 1.1.25-otjld-outer-access-in-nested-team-2
     public void test1125_outerAccessInNestedTeam2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1125oaint2_2.java",
@@ -2624,7 +2624,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a nested role accesses its outer-outer team - team inheritance
     // 1.1.25-otjld-outer-access-in-nested-team-3
     public void test1125_outerAccessInNestedTeam3() {
-       
+
        runConformTest(
             new String[] {
 		"Team1125oaint3_2.java",
@@ -2660,7 +2660,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a nested role accesses a static method of the intermediate enclosing team/role
     // 1.1.25-otjld-outer-access-in-nested-team-4
     public void test1125_outerAccessInNestedTeam4() {
-       
+
        runConformTest(
             new String[] {
 		"Team1125oaint4.java",
@@ -2694,7 +2694,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // nested teams adapt a lower team - with method decapsulation
     // 1.1.26-otjld-nesting-and-layering-1
     public void test1126_nestingAndLayering1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1126nal1_2.java",
@@ -2739,7 +2739,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // nested teams with implicit inheritance adapt a hierarchy of lower teams - with method decapsulation
     // 1.1.26-otjld-nesting-and-layering-2
     public void test1126_nestingAndLayering2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1126nal2_3.java",
@@ -2791,7 +2791,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // nested teams with implicit inheritance adapt a hierarchy of lower teams - with private method decapsulation
     // 1.1.26-otjld-nesting-and-layering-3p
     public void test1126_nestingAndLayering3p() {
-       
+
        runConformTest(
             new String[] {
 		"Team1126nal3p_3.java",
@@ -2845,7 +2845,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // nested teams with implicit inheritance adapt a hierarchy of lower teams - with private method decapsulation - double compile re-using binary role
     // 1.1.26-otjld-nesting-and-layering-3p2
     public void test1126_nestingAndLayering3p2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1126nal3p2_3.java",
@@ -2953,7 +2953,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // nested teams with implicit inheritance adapt a hierarchy of lower teams - method is protected
     // 1.1.26-otjld-nesting-and-layering-3
     public void test1126_nestingAndLayering3() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team1126nal3_3.java",
@@ -3017,7 +3017,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // nested teams with implicit inheritance adapt a hierarchy of lower teams - method is protected - incremenatl (i.e., double) build
     // 1.1.26-otjld-nesting-and-layering-3i
     public void test1126_nestingAndLayering3i() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team1126nal3i_3.java",
@@ -3081,7 +3081,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // nested teams with implicit inheritance adapt a hierarchy of lower teams
     // 1.1.26-otjld-nesting-and-layering-4
     public void test1126_nestingAndLayering4() {
-       
+
        runConformTest(
             new String[] {
 		"Team1126nal4_3.java",
@@ -3139,7 +3139,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // nested teams with implicit inheritance adapt a hierarchy of lower team -- callout to role field
     // 1.1.26-otjld_nesting-and-layering-4f
     public void _nesting_test1126_andLayering4f() {
-       
+
        runConformTest(
             new String[] {
 		"Team1126nal4f_3.java",
@@ -3196,7 +3196,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // nested teams with implicit inheritance adapt a hierarchy of lower teams - callout to private role field
     // 1.1.26-otjld-nesting-and-layering-4pf
     public void test1126_nestingAndLayering4pf() {
-       
+
        runConformTest(
             new String[] {
 		"Team1126nal4pf_3.java",
@@ -3256,7 +3256,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // two-level base anchored types
     // 1.1.26-otjld-nesting-and-layering-5
     public void test1126_nestingAndLayering5() {
-       
+
        runConformTest(
             new String[] {
 		"Team1126nal5_2.java",
@@ -3312,7 +3312,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // the ctor of a nested team assigns a final field - reported by kmeier on 06/10/21
     // 1.1.27-otjld-constructor-of-nested-team-1
     public void test1127_constructorOfNestedTeam1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1127cont1.java",
@@ -3354,7 +3354,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // the ctor of a role in a nested team is duplicated during implicit inheritance (phantom type) - reported by Robin Sedlaczek
     // 1.1.27-otjld-constructor-of-nested-team-2
     public void test1127_constructorOfNestedTeam2() {
-       
+
        runConformTest(
             new String[] {
 		"Team1127cont2_2.java",
@@ -3420,7 +3420,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a callin in a nested role mentions the base class of another toplevel role
     // 1.1.29-otjld-nested-callin-1
     public void test1129_nestedCallin1() {
-       
+
        runConformTest(
             new String[] {
 		"T1129nc1Main.java",
@@ -3479,7 +3479,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a callin in a nested role mentions the base class of another toplevel role - array type - witness for NPE in CallinImplementor
     // 1.1.29-otjld-nested-callin-2
     public void test1129_nestedCallin2() {
-       
+
        runConformTest(
             new String[] {
 		"T1129nc2Main.java",
@@ -3539,7 +3539,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a callin mentions a nested role in its signature - binding without signatures
     // 1.1.29-otjld-nested-callin-3
     public void test1129_nestedCallin3() {
-       
+
        runConformTest(
             new String[] {
 		"Team1129nc3.java",
@@ -3583,7 +3583,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a callin mentions a nested role in its signature - binding with signatures
     // 1.1.29-otjld-nested-callin-4
     public void test1129_nestedCallin4() {
-       
+
        runConformTest(
             new String[] {
 		"Team1129nc4.java",
@@ -3628,7 +3628,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // a third-level role has a callin
     // 1.1.30-otjld-deeply-nested-team-1
     public void test1130_deeplyNestedTeam1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1130dnt1.java",
@@ -3678,7 +3678,7 @@ public class TeamNesting extends AbstractOTJLDTest {
     // role refers to base of sibling role - witness for NPE in TeamAnchor.getStrengthenedRole() resp. AssertionError in RTB.<init>
     // 1.1.31-otjld-stacked-teams-1
     public void test1131_stackedTeams1() {
-       
+
        runConformTest(
             new String[] {
 		"Team1131lt1_2.java",
@@ -3784,25 +3784,25 @@ public class TeamNesting extends AbstractOTJLDTest {
     			"}\n"
     		});
     }
-    
+
     public void testBug411450() {
     	runConformTest(
     		new String[] {
     			"T0.java",
-    			"public team class T0 {\n" + 
-    			"	final Inner inner = new Inner();\n" + 
-    			"	\n" + 
-    			"	public team class Inner {\n" + 
-    			"		protected class R {}\n" + 
-    			"	}\n" + 
+    			"public team class T0 {\n" +
+    			"	final Inner inner = new Inner();\n" +
+    			"	\n" +
+    			"	public team class Inner {\n" +
+    			"		protected class R {}\n" +
+    			"	}\n" +
     			"}",
     			"T1.java",
-    			"public team class T1 {\n" + 
-    			"	final T0 other = new T0();\n" + 
-    			"	\n" + 
-    			"	protected class R1 playedBy R<@other.inner> {\n" + 
-    			"		\n" + 
-    			"	}\n" + 
+    			"public team class T1 {\n" +
+    			"	final T0 other = new T0();\n" +
+    			"	\n" +
+    			"	protected class R1 playedBy R<@other.inner> {\n" +
+    			"		\n" +
+    			"	}\n" +
     			"}"
     		});
     }
@@ -3830,11 +3830,11 @@ public class TeamNesting extends AbstractOTJLDTest {
     			"	public boolean pred() { return true; }\n" +
     			"}\n"
     		},
-    		"----------\n" + 
-			"1. ERROR in T2.java (at line 2)\n" + 
-			"	protected class R extends T11 playedBy B2 {\n" + 
-			"	                          ^^^\n" + 
-			"Illegal \'extends\' for a regular class: superclass T1.T11 is a team (OTJLD 1.3).\n" + 
+    		"----------\n" +
+			"1. ERROR in T2.java (at line 2)\n" +
+			"	protected class R extends T11 playedBy B2 {\n" +
+			"	                          ^^^\n" +
+			"Illegal \'extends\' for a regular class: superclass T1.T11 is a team (OTJLD 1.3).\n" +
 			"----------\n");
     }
 }

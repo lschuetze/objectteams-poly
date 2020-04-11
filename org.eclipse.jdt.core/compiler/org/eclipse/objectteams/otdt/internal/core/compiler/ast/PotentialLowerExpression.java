@@ -62,7 +62,7 @@ public class PotentialLowerExpression extends PotentialTranslationExpression {
     {
     	this(expression, expectedType, null);
     }
-    
+
     public PotentialLowerExpression(
             Expression  expression,
             TypeBinding expectedType,

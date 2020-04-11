@@ -57,7 +57,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
  */
 @Override
 public void generateReturnBytecode(CodeStream codeStream) {
-	
+
 	// output the return bytecode
 	codeStream.return_();
 }
@@ -85,7 +85,7 @@ public void generateStoreSaveValueIfNecessary(Scope scope, CodeStream codeStream
 		}
 
 		// generate wrapper if needed
-		if (this.expression.resolvedType.isBaseType() && this.expression.resolvedType != TypeBinding.NULL) { 
+		if (this.expression.resolvedType.isBaseType() && this.expression.resolvedType != TypeBinding.NULL) {
 			codeStream.generateBoxingConversion(this.expression.resolvedType.id);
 		}
 
@@ -121,7 +121,7 @@ public boolean needValue(){
 }
 @Override
 public void prepareSaveValueLocation(TryStatement targetTryStatement){
-		
+
 	// do nothing: no storage is necessary for snippets
 }
 @Override

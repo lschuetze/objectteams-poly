@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -46,7 +46,7 @@ import org.junit.Test;
  */
 @RunWith(JUnit4.class)
 public class CallinQuickFixTest extends OTQuickFixTest {
-	
+
 	@Rule
     public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
@@ -69,7 +69,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        void foo(){\n");
@@ -82,7 +82,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cuteam);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cuteam, astRoot);
 		assertNumberOfProposals(proposals, 2);
@@ -90,7 +90,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 
 		String[] expectedProposals = new String[2];
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        void foo(){\n");
@@ -121,7 +121,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        @SuppressWarnings(\"basecall\")\n");
@@ -132,7 +132,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cuteam);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cuteam, astRoot);
 		assertNumberOfProposals(proposals, 2);
@@ -140,7 +140,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 
 		String[] expectedProposals = new String[2];
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        @SuppressWarnings(\"basecall\") void foo() {\n");// removed callin modifier
@@ -151,7 +151,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		expectedProposals[0] = buf.toString();
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        @SuppressWarnings(\"basecall\")\n");
@@ -179,7 +179,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        @SuppressWarnings(\"basecall\") void foo() {\n");
@@ -189,7 +189,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		int offset= buf.toString().indexOf("foo() <- after");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -199,7 +199,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 
 		String[] expectedProposals = new String[1];
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        @SuppressWarnings(\"basecall\") void foo() {\n");
@@ -306,7 +306,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        @SuppressWarnings(\"basecall\") <E1, E2> E1 foo(E2 e) {\n");
@@ -316,7 +316,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		int offset= buf.toString().indexOf("foo(E2 e) <- after");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -326,7 +326,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 
 		String[] expectedProposals = new String[1];
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        @SuppressWarnings(\"basecall\") <E1, E2> E1 foo(E2 e) {\n");
@@ -353,7 +353,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        @SuppressWarnings(\"basecall\") void foo(int one, int two) {\n");
@@ -366,7 +366,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		int offset= buf.toString().indexOf("foo(int one,//eol");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -376,7 +376,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 
 		String[] expectedProposals = new String[1];
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        @SuppressWarnings(\"basecall\") void foo(int one, int two) {\n");
@@ -404,7 +404,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        @SuppressWarnings(\"basecall\") void foo() {\n");
@@ -414,7 +414,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		int offset= buf.toString().indexOf("foo <- after");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -424,7 +424,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 
 		String[] expectedProposals = new String[1];
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        @SuppressWarnings(\"basecall\") void foo() {\n");
@@ -450,7 +450,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        @SuppressWarnings(\"basecall\") <E1, E2 extends java.util.List<E1>> E1 foo(E2 val) {\n");
@@ -460,7 +460,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		int offset= buf.toString().indexOf("foo <- after");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -470,7 +470,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 
 		String[] expectedProposals = new String[1];
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        @SuppressWarnings(\"basecall\") <E1, E2 extends java.util.List<E1>> E1 foo(E2 val) {\n");
@@ -497,7 +497,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        void foo() {\n");
@@ -507,7 +507,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		int offset= buf.toString().indexOf("foo <- after");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -517,7 +517,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 
 		String[] expectedProposals = new String[1];
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        void foo() {\n");
@@ -529,8 +529,8 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		expectedProposals[0] = buf.toString();
 
 		assertExpectedExistInProposals(proposals, expectedProposals);
-		
-		
+
+
 		String[] alternatives = {"void foo()", "void foo(String val)"};
 		assertChoices((ICompletionProposal) proposals.get(0), "basemethod", alternatives);
 	}
@@ -550,7 +550,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
 
 		buf = new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        void bar(R r, Number n) {\n");
@@ -560,7 +560,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		int offset= buf.toString().indexOf("bar <- after");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -570,7 +570,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 
 		String[] expectedProposals = new String[1];
 		buf= new StringBuffer();
-		buf.append("package test1;\n");	
+		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
 		buf.append("    protected class R playedBy B1 {\n");
 		buf.append("        void bar(R r, Number n) {\n");
@@ -582,8 +582,8 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		expectedProposals[0] = buf.toString();
 
 		assertExpectedExistInProposals(proposals, expectedProposals);
-		
-		
+
+
 		String[] alternatives = {"void foo(B1 b, Integer val)", "void foo(B1 b, Integer val, int x)"};
 		assertChoices((ICompletionProposal) proposals.get(0), "basemethod", alternatives);
 	}

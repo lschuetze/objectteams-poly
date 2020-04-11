@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -35,52 +35,52 @@ public class TypeDeclarationFinder extends ASTVisitor
     private TypeDeclaration _typeDecl;
     private String[] _path;
     private int _pathIdx;
-    
+
     public TypeDeclarationFinder()
     {
         _typeDecl = null;
         _path = null;
         _pathIdx = 0;
     }
-     
+
     private boolean checkTypeDeclaration(TypeDeclaration node)
     {
         if ( (_path == null) || (_pathIdx >= _path.length))
         {
             return false;
         }
-        
+
         if (!node.getName().getIdentifier().equals(_path[_pathIdx]))
         {
             return false; // wrong path
         }
-        
+
         _pathIdx++;
         if (_pathIdx == _path.length)
         {
             _typeDecl = node;
             return false;
         }
-        
+
         return true;
     }
-    
-    
-    public boolean visit(RoleTypeDeclaration node) 
+
+
+    public boolean visit(RoleTypeDeclaration node)
     {
         return checkTypeDeclaration(node);
     }
-        
+
     public boolean visit(TypeDeclaration node)
     {
         return checkTypeDeclaration(node);
     }
-        
+
     public TypeDeclaration getTypeDeclaration()
     {
         return _typeDecl;
     }
-        
+
     public void setName(String name)
     {
         if (name != null)

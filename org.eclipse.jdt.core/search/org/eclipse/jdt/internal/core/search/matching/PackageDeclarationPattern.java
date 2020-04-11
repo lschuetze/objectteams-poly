@@ -31,7 +31,7 @@ public EntryResult[] queryIn(Index index) {
 @Override
 protected StringBuffer print(StringBuffer output) {
 	output.append("PackageDeclarationPattern: <"); //$NON-NLS-1$
-	if (this.pkgName != null) 
+	if (this.pkgName != null)
 		output.append(this.pkgName);
 	else
 		output.append("*"); //$NON-NLS-1$

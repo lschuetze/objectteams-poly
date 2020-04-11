@@ -97,9 +97,9 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 //{ObjectTeams:
 		this(type, arguments, null, enclosingType, environment);
 	}
-	
+
 	public ParameterizedTypeBinding(ReferenceBinding type, TypeBinding[] arguments,  ITeamAnchor teamAnchor, ReferenceBinding enclosingType, LookupEnvironment environment){
-// orig:		
+// orig:
 		this.environment = environment;
 		this.enclosingType = enclosingType; // never unresolved, but if type is an unresolved nested type, enclosingType is null here but set later in swapUnresolved.
 		if (!type.hasEnclosingInstanceContext() && arguments == null && !(this instanceof RawTypeBinding))
@@ -144,7 +144,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		ReferenceBinding realClass = super.getRealClass();
 		if (TypeBinding.equalsEquals(realClass, this))
 			return this; // no further wrapping if this _is_ the class part
-		return this.environment.createParameterizedType(realClass, this.arguments, this.enclosingType()); 
+		return this.environment.createParameterizedType(realClass, this.arguments, this.enclosingType());
 	}
 // FIXME(SH): this method causes regressions (still looks consistent, though):
 //	@Override
@@ -152,7 +152,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 //		ReferenceBinding realType = super.getRealType();
 //		if (realType == this || isRawType())
 //			return this; // no further wrapping if this _is_ the ifc part
-//		return this.environment.createParameterizedType(realType, this.arguments, realType.enclosingType()); 
+//		return this.environment.createParameterizedType(realType, this.arguments, realType.enclosingType());
 //	}
 	/** {@inheritDoc} */
 	@Override
@@ -210,7 +210,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		ASTNode cud = compilationUnitScope.referenceContext;
 		long sourceLevel = this.environment.globalOptions.sourceLevel;
 		final boolean needUniqueCapture = sourceLevel >= ClassFileConstants.JDK1_8;
-		
+
 		for (int i = 0; i < length; i++) {
 			TypeBinding argument = originalArguments[i];
 			if (argument.kind() == Binding.WILDCARD_TYPE) { // no capture for intersection types
@@ -219,8 +219,8 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 					capturedArguments[i] = wildcard.bound;
 				else if (needUniqueCapture)
 					capturedArguments[i] = this.environment.createCapturedWildcard(wildcard, contextType, start, end, cud, compilationUnitScope.nextCaptureID());
-				else 
-					capturedArguments[i] = new CaptureBinding(wildcard, contextType, start, end, cud, compilationUnitScope.nextCaptureID());	
+				else
+					capturedArguments[i] = new CaptureBinding(wildcard, contextType, start, end, cud, compilationUnitScope.nextCaptureID());
 			} else {
 				capturedArguments[i] = argument;
 			}
@@ -441,7 +441,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	public char[] constantPoolName() {
 		return this.type.constantPoolName(); // erasure
 	}
-	
+
 	@Override
 	public TypeBinding clone(TypeBinding outerType) {
 		return new ParameterizedTypeBinding(this.type, this.arguments, (ReferenceBinding) outerType, this.environment);
@@ -457,7 +457,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	public String debugName() {
 	    if (this.hasTypeAnnotations())
 	    	return annotatedDebugName();
-		StringBuffer nameBuffer = new StringBuffer(10);	
+		StringBuffer nameBuffer = new StringBuffer(10);
 	    if (this.type instanceof UnresolvedReferenceBinding) {
 	    	nameBuffer.append(this.type);
 	    } else {
@@ -473,7 +473,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		}
 	    return nameBuffer.toString();
 	}
-	
+
 	@Override
 	public String annotatedDebugName() {
 		StringBuffer nameBuffer = new StringBuffer(super.annotatedDebugName());
@@ -521,11 +521,11 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	public ReferenceBinding upwardsProjection(Scope scope, TypeBinding[] mentionedTypeVariables) {
     		TypeBinding[] typeVariables = this.arguments;
 		if (typeVariables == null) return this; // How would that be possible?
-		
+
 		TypeBinding[] a_i_primes = new TypeBinding[typeVariables.length];
 		for (int i = 0, length = typeVariables.length; i < length; i++) {
 			TypeBinding a_i = typeVariables[i];
-			
+
 			// If Ai does not mention any restricted type variable, then Ai' = Ai.
 			int typeVariableKind = a_i.kind();
 			if (! a_i.mentionsAny(mentionedTypeVariables, -1)) {
@@ -537,7 +537,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 				TypeVariableBinding[] g_vars = this.type.typeVariables();
 				if (g_vars == null || g_vars.length == 0) return this; // Careful - could be a MissingTypeBinding here
 				TypeBinding b_i = g_vars[i].upperBound();
-								
+
 				// If U is not Object,
 				// and if either
 				//  * the declared bound of the ith parameter of G, Bi, mentions a type parameter of G, or
@@ -557,10 +557,10 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 						a_i_primes[i] = this.environment().createWildcard(genericType(), i, null, null, Wildcard.UNBOUND);
 					}
 				}
-			} else  { 
+			} else  {
 				WildcardBinding wildcard = (WildcardBinding)a_i;
 				if (wildcard.boundKind() == Wildcard.EXTENDS) {
-					// If Ai is an upper-bounded wildcard that mentions a restricted type variable, 
+					// If Ai is an upper-bounded wildcard that mentions a restricted type variable,
 					// then let U be the upward projection of the wildcard bound.
 					TypeBinding u = wildcard.bound().upwardsProjection(scope, mentionedTypeVariables);
 					// Ai' is a wildcard ? extends U.
@@ -584,18 +584,18 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	public ReferenceBinding downwardsProjection(Scope scope, TypeBinding[] mentionedTypeVariables) {
 		TypeBinding[] typeVariables = this.arguments;
 		if (typeVariables == null) return this; // How would that be possible?
-		
+
 		TypeBinding[] a_i_primes = new TypeBinding[typeVariables.length];
 		for (int i = 0, length = typeVariables.length; i < length; i++) {
 			TypeBinding a_i = typeVariables[i];
-			
+
 			// If Ai does not mention any restricted type variable, then Ai' = Ai.
 			int typeVariableKind = a_i.kind();
 			if (! a_i.mentionsAny(mentionedTypeVariables, -1)) {
 				a_i_primes[i] = a_i;
 			} else if (typeVariableKind != Binding.WILDCARD_TYPE) {
 				return null;
-			} else  { 
+			} else  {
 				WildcardBinding wildcard = (WildcardBinding)a_i;
 				if (wildcard.boundKind() == Wildcard.EXTENDS) {
 					// Ai is an upper-bounded wildcard that mentions a restricted type variable,
@@ -621,7 +621,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		}
 		return this.environment.createParameterizedType(this.type, a_i_primes, this.enclosingType);
 	}
- 
+
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#fieldCount()
 	 */
@@ -763,7 +763,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		}
 		return match;
 	}
-	
+
 	 /**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#getExactMethod(char[], TypeBinding[],CompilationUnitScope)
 	 */
@@ -843,7 +843,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		fields(); // ensure fields have been initialized... must create all at once unlike methods
 		return ReferenceBinding.binarySearch(fieldName, this.fields);
 	}
-	 
+
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#getMethods(char[])
 	 */
@@ -1032,7 +1032,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return null;
 	}
 // SH}
-	
+
 	@Override
 	public boolean isBoundParameterizedType() {
 		return (this.tagBits & TagBits.IsBoundParameterizedType) != 0;
@@ -1052,7 +1052,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 
 	    	case Binding.PARAMETERIZED_TYPE :
 	            ParameterizedTypeBinding otherParamType = (ParameterizedTypeBinding) otherType;
-	            if (TypeBinding.notEquals(this.type, otherParamType.type)) 
+	            if (TypeBinding.notEquals(this.type, otherParamType.type))
 	                return false;
 	            if (!isStatic()) { // static member types do not compare their enclosing
 	            	ReferenceBinding enclosing = enclosingType();
@@ -1084,11 +1084,11 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	            return TypeBinding.equalsEquals(erasure(), otherType.erasure());
 	    }
 	    /* With the hybrid 1.4/1.5+ projects modes, while establishing type equivalence, we need to
-	       be prepared for a type such as Map appearing in one of three forms: As (a) a ParameterizedTypeBinding 
-	       e.g Map<String, String>, (b) as RawTypeBinding Map#RAW and finally (c) as a BinaryTypeBinding 
+	       be prepared for a type such as Map appearing in one of three forms: As (a) a ParameterizedTypeBinding
+	       e.g Map<String, String>, (b) as RawTypeBinding Map#RAW and finally (c) as a BinaryTypeBinding
 	       When the usage of a type lacks type parameters, whether we land up with the raw form or not depends
 	       on whether the underlying type was "seen to be" a generic type in the particular build environment or
-	       not. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=328827 
+	       not. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=328827
 	     */
 	    if (TypeBinding.equalsEquals(erasure(), otherType)) {
 	    	return true;
@@ -1128,7 +1128,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 				TypeBinding newArg = oldArg.substituteInferenceVariable(var, substituteType);
 				if (TypeBinding.notEquals(newArg, oldArg)) {
 					if (newArgs == null)
-						System.arraycopy(this.arguments, 0, newArgs = new TypeBinding[length], 0, length); 
+						System.arraycopy(this.arguments, 0, newArgs = new TypeBinding[length], 0, length);
 					newArgs[i] = newArg;
 				}
 			}
@@ -1246,7 +1246,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 				if (j < this.methods.length && this.methods[j].original() == originalMethods[i])
 					newMethods[i] = this.methods[j++];
 				else
-					newMethods[i] = createParameterizedMethod(originalMethods[i]);				
+					newMethods[i] = createParameterizedMethod(originalMethods[i]);
 			}
 			return this.methods = newMethods;
 		}
@@ -1412,7 +1412,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 			   Just as with bounds check below, incremental build will propagate the change and
 			   detect problems in source.
 			 */
-			
+
 //			// arity check
 //			TypeVariableBinding[] refTypeVariables = resolvedType.typeVariables();
 //			if (refTypeVariables == Binding.NO_TYPE_VARIABLES) { // check generic
@@ -1592,7 +1592,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 					 }
 			    	 TypeBinding substitute = currentType.arguments[originalVariable.rank];
 			    	 return originalVariable.combineTypeAnnotations(substitute);
-			    }	
+			    }
 			}
 			// recurse on enclosing type, as it may hold more substitutions to perform
 			if (currentType.isStatic()) break;
@@ -1622,7 +1622,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	        if (genericSuperclass == null) return null; // e.g. interfaces
 		    this.superclass = (ReferenceBinding) Scope.substitute(this, genericSuperclass);
 			this.typeBits |= (this.superclass.typeBits & TypeIds.InheritableBits);
-			if ((this.typeBits & (TypeIds.BitAutoCloseable|TypeIds.BitCloseable)) != 0) // avoid the side-effects of hasTypeBit()! 
+			if ((this.typeBits & (TypeIds.BitAutoCloseable|TypeIds.BitCloseable)) != 0) // avoid the side-effects of hasTypeBit()!
 				this.typeBits |= applyCloseableClassWhitelists(this.environment.globalOptions);
 	    }
 		return this.superclass;
@@ -1640,7 +1640,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
     		if (this.superInterfaces != null) {
 	    		for (int i = this.superInterfaces.length; --i >= 0;) {
 	    			this.typeBits |= (this.superInterfaces[i].typeBits & TypeIds.InheritableBits);
-	    			if ((this.typeBits & (TypeIds.BitAutoCloseable|TypeIds.BitCloseable)) != 0) // avoid the side-effects of hasTypeBit()! 
+	    			if ((this.typeBits & (TypeIds.BitAutoCloseable|TypeIds.BitCloseable)) != 0) // avoid the side-effects of hasTypeBit()!
 	    				this.typeBits |= applyCloseableInterfaceWhitelists();
 	    		}
     		}
@@ -1779,12 +1779,12 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		}
 		return Binding.NO_TYPE_VARIABLES;
 	}
-	
+
 	@Override
 	public TypeBinding[] typeArguments() {
 		return this.arguments;
 	}
-	
+
 	@Override
 	public FieldBinding[] unResolvedFields() {
 		return this.fields;
@@ -1802,7 +1802,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 					TypeVariableBinding [] typeParameters = this.type.typeVariables();
 					for (int j = 0, length = typeParameters.length; j < length; j++) {
 						if (!typeParameters[j].boundCheck(declaringType, types[j], scope, null).isOKbyJLS())
-							return new MethodBinding[] { new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NotAWellFormedParameterizedType) };			
+							return new MethodBinding[] { new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NotAWellFormedParameterizedType) };
 					}
 					return declaringType.getInterfaceAbstractContracts(scope, replaceWildcards, filterDefaultMethods);
 				}
@@ -1813,7 +1813,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	@Override
 	public MethodBinding getSingleAbstractMethod(final Scope scope, boolean replaceWildcards) {
 		return getSingleAbstractMethod(scope, replaceWildcards, -1, -1 /* do not capture */);
-	}	
+	}
 	public MethodBinding getSingleAbstractMethod(final Scope scope, boolean replaceWildcards, int start, int end) {
 		int index = replaceWildcards ? end < 0 ? 0 : 1 : 2; // capturePosition >= 0 IFF replaceWildcard == true
 		if (this.singleAbstractMethod != null) {
@@ -1828,9 +1828,9 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		MethodBinding theAbstractMethod = genericType.getSingleAbstractMethod(scope, replaceWildcards);
 		if (theAbstractMethod == null || !theAbstractMethod.isValidBinding())
 			return this.singleAbstractMethod[index] = theAbstractMethod;
-		
+
 		ParameterizedTypeBinding declaringType = null;
-		TypeBinding [] types = this.arguments; 
+		TypeBinding [] types = this.arguments;
 		if (replaceWildcards) {
 			types = getNonWildcardParameterization(scope);
 			if (types == null)
@@ -1838,7 +1838,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		} else if (types == null) {
 			types = NO_TYPES;
 		}
-		if (end >= 0) { 
+		if (end >= 0) {
 			// caller is going to require the sam's parameters to be treated as argument expressions, post substitution capture will lose identity, where substitution results in fan out
 			// capture first and then substitute.
 			for (int i = 0, length = types.length; i < length; i++) {
@@ -1849,7 +1849,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		TypeVariableBinding [] typeParameters = genericType.typeVariables();
 		for (int i = 0, length = typeParameters.length; i < length; i++) {
 			if (!typeParameters[i].boundCheck(declaringType, types[i], scope, null).isOKbyJLS())
-				return this.singleAbstractMethod[index] = new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NotAWellFormedParameterizedType);			
+				return this.singleAbstractMethod[index] = new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NotAWellFormedParameterizedType);
 		}
 		ReferenceBinding substitutedDeclaringType = (ReferenceBinding) declaringType.findSuperTypeOriginatingFrom(theAbstractMethod.declaringClass);
 		MethodBinding [] choices = substitutedDeclaringType.getMethods(theAbstractMethod.selector);
@@ -1965,7 +1965,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 			} else {
 				newArguments[i] = arg.maybeWrapRoleType(typedNode, updater);
 			}
-			
+
 
 			// must avoid nulls in arguments (no longer observed in otjld-tests):
 			if (newArguments[i] == null) {
@@ -1980,7 +1980,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 			return this;
 
 		// yes, we have a modification
-		return this.environment.createParameterizedType(this.type, newArguments, this.enclosingType()); 
+		return this.environment.createParameterizedType(this.type, newArguments, this.enclosingType());
 	}
 // SH}
 }

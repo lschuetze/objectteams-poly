@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -41,18 +41,18 @@ public class ExternalRoleTest extends TestBase implements IOTConstants{
 	 */
 	public void testExternalRoleWithCompiledTeam()
 	{
-		createFile("MyRole","team package MyTeam;" + 
+		createFile("MyRole","team package MyTeam;" +
 				NL + "public class MyRole {" +
 				NL + "}");
-		
+
 		createFile("MyTeam","public team class MyTeam { " +
                 NL + "      private MyRole r = null;" +
 				NL + "}");
-	
+
 		compileFile("MyTeam");
         assertTrue(isCompilationSuccessful());
 
-		compileFile("MyTeam"+File.separator+"MyRole");			
+		compileFile("MyTeam"+File.separator+"MyRole");
 		assertTrue(isCompilationSuccessful());
 	}
 
@@ -61,15 +61,15 @@ public class ExternalRoleTest extends TestBase implements IOTConstants{
 	 */
 	public void testExternalRoleWithUncompiledTeam()
 	{
-		createFile("MyRole","team package MyTeam;" + 
+		createFile("MyRole","team package MyTeam;" +
 						NL + "public class MyRole {" +
                         NL + "    void foo() { System.out.println(MyTeam.this); }" +
 						NL + "}");
-						
+
 		createFile("MyTeam","public team class MyTeam { " +
                         NL + "      private MyRole r = null;" +
 						NL + "}");
-		
+
 		compileFile("MyTeam"+File.separator+"MyRole");
 		assertTrue(isCompilationSuccessful());
 	}
@@ -79,15 +79,15 @@ public class ExternalRoleTest extends TestBase implements IOTConstants{
 	 */
 	public void testExternalRoleWithQualifiedPackageName()
 	{
-		createFile("MyRole","team package org.eclipse.objectteams.MyTeam;" + 
+		createFile("MyRole","team package org.eclipse.objectteams.MyTeam;" +
 						NL + "public class MyRole {" +
 						NL + "}");
-						
+
 		createFile("MyTeam","package org.eclipse.objectteams;" +
 						NL + "public team class MyTeam { " +
                         NL + "      private MyRole r = null;" +
 						NL + "}");
-		
+
 		compileFile("org"+File.separator+"eclipse"+File.separator+"objectteams"+File.separator+"MyTeam"+File.separator+"MyRole");
         assertTrue(isCompilationSuccessful());
 
@@ -101,32 +101,32 @@ public class ExternalRoleTest extends TestBase implements IOTConstants{
 	 */
 	public void testExternalRoleWithMissingTeamModifier()
 	{
-		createFile("MyRole","team package MyTeam;" + 
+		createFile("MyRole","team package MyTeam;" +
 						NL + "public class MyRole {" +
 						NL + "}");
-						
+
 		createFile("MyTeam","public class MyTeam { " +
                         NL + "      private MyRole r = null;" +
 						NL + "}");
-		
+
 		compileFile("MyTeam"+File.separator+"MyRole");
 		assertFalse(isCompilationSuccessful());
 	}
-	
+
 	/**
 	 * Test for external defined role with special team-package declaration
 	 * Expected Team does not exist
 	 */
 	public void testExternalRoleWithMissingTeam()
 	{
-		createFile("MyRole","team package MyTeam;" + 
+		createFile("MyRole","team package MyTeam;" +
 						NL + "public class MyRole {" +
 						NL + "}");
-								
+
 		compileFile("MyTeam"+File.separator+"MyRole");
 		assertFalse(isCompilationSuccessful());
-	}		
-	
+	}
+
 	//http://nevermind.cs.tu-berlin.de/~gis/ot/2.4.2-otjld-inaccessible-base-class-9.html
 	public void inaccessiblebaseclass()
 	{
@@ -134,20 +134,20 @@ public class ExternalRoleTest extends TestBase implements IOTConstants{
 						NL + "public class MyClass {"+
 						NL + " class InnerClass {}"+
 						NL + "}");
-		
+
 		createFile("MyTeam","package p2;"+
 						NL + "public team class MyTeam {"+
 						NL + "public class MyRole extends p1.MyClass playedBy InnerClass {}"+
 						NL + "}");
-	
+
 		compileFile("p1"+File.separator+"MyClass");
         assertTrue(isCompilationSuccessful());
 
-		compileFile("p2"+File.separator+"MyTeam");			
+		compileFile("p2"+File.separator+"MyTeam");
 		assertFalse(isCompilationSuccessful());
-	
-	}
-	
 
-		
+	}
+
+
+
 }

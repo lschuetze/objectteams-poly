@@ -598,7 +598,7 @@ public void testTypeRefAll_Annotation() throws CoreException {
 	search("*", TYPE, ANNOTATION_TYPE_REFERENCE, getJavaSearchWorkingCopiesScope());
 	assertSearchResults(
 //{ObjectTeams: changed order:
-/* orig:			
+/* orig:
 		"src/all/types/ref/TestTypes.java all.types.ref.TestTypes [@!|Bug|!(num=155013)@70] EXACT_MATCH\n" +
 		"src/all/types/ref/TestTypes.java all.types.ref.TestTypes.field [	@!|Bug|!(comment=\"field\")@127] EXACT_MATCH\n" +
 		"src/all/types/ref/TestTypes.java Types all.types.ref.TestTypes.method(Types) [	@!|Bug|!(comment=\"method\", num=155013)@424] EXACT_MATCH\n" +
@@ -1353,7 +1353,7 @@ public void testTypeRefQualifiedAll_Annotation() throws CoreException {
 	+"\n"+
 		"src/all/types/ref/TestTypes.java all.types.ref.TestTypes [@!|type.def.Bug|!(num=155013)@25] EXACT_MATCH\n" +
 		"src/all/types/ref/TestTypes.java all.types.ref.TestTypes.field [	@!|type.def.Bug|!(comment=\"field\")@100] EXACT_MATCH\n" +
-		"src/all/types/ref/TestTypes.java type.def.Types all.types.ref.TestTypes.method(type.def.Types) [	@!|type.def.Bug|!(comment=\"method\", num=155013)@460] EXACT_MATCH"	
+		"src/all/types/ref/TestTypes.java type.def.Types all.types.ref.TestTypes.method(type.def.Types) [	@!|type.def.Bug|!(comment=\"method\", num=155013)@460] EXACT_MATCH"
 // SH}
 	);
 }

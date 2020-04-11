@@ -84,13 +84,13 @@ public abstract class MethodMappingImplementor {
 	protected MethodMappingImplementor() {
 		// empty
 	}
-	
+
 	MethodSignatureEnhancer getMethodSignatureEnhancer() {
 		if (this.methodSignatureEnhancer == null)
 			this.methodSignatureEnhancer = MethodSignatureEnhancer.variants[this._role.getWeavingScheme().ordinal()];
 		return this.methodSignatureEnhancer;
 	}
-	
+
 	/**
 	 * Make arguments for message send which implements a callout or a callin wrapper.
 	 * For a callout mapping this method is used only if signatures are given
@@ -121,7 +121,7 @@ public abstract class MethodMappingImplementor {
 			if (methodMapping.isReplaceCallin())
 				((CallinMappingDeclaration)methodMapping).checkResultMapping();
 		}
-		
+
 	    Argument[]   wrapperMethodArguments = wrapperMethodDeclaration.arguments;
 	    Expression[] arguments = null;
 
@@ -143,7 +143,7 @@ public abstract class MethodMappingImplementor {
 				 // in decapsulation scenarios OTREDyn uses non-static accessor for non-static fields
 				if (!baseFieldSpec.isSetter())
 					implementationArgLen = 0; // if resolved to a 4-arg _OT$access, don't consider these args during AST gen.
-			} else if (this._role.getWeavingScheme() == WeavingScheme.OTRE 
+			} else if (this._role.getWeavingScheme() == WeavingScheme.OTRE
 					&& !((FieldAccessSpec)methodMapping.getBaseMethodSpecs()[0]).isStatic()) {
 				// for OTRE, non-static field access is mapped to static method with additional first parameter _OT$base:
 				expressionsOffset = 1;
@@ -160,7 +160,7 @@ public abstract class MethodMappingImplementor {
 						gen.baseclassReference(baseType),
 						baseType.isRole() ? CastExpression.NEED_CLASS : CastExpression.RAW); // FIXME (see also CalloutImplementor.makeArguments)
 			}
-		} 
+		}
         if (arguments == null) {
         	arguments = new Expression[implementationArgLen];
         }

@@ -85,7 +85,7 @@ protected boolean buildStructure(OpenableElementInfo info, IProgressMonitor pm, 
 		info.setChildren(JavaElement.NO_ELEMENTS);
 		return false;
 	}
-	
+
 	// Make the type
 //{ObjectTeams: pass the enclosing name and register ot types:
 /* orig:
@@ -245,7 +245,7 @@ private IBinaryType getJarBinaryTypeInfo() throws CoreException, IOException, Cl
 	} else {
 		result = BinaryTypeFactory.readType(descriptor, null);
 	}
-		
+
 	if (result == null) {
 		return null;
 	}
@@ -269,7 +269,7 @@ private IBinaryType getJarBinaryTypeInfo() throws CoreException, IOException, Cl
 			IProject project = javaProject.getProject();
 			IPath externalAnnotationPath = ClasspathEntry.getExternalAnnotationPath(entry, project, false); // unresolved for use in ExternalAnnotationTracker
 			if (externalAnnotationPath != null) {
-				result = setupExternalAnnotationProvider(project, externalAnnotationPath, result, 
+				result = setupExternalAnnotationProvider(project, externalAnnotationPath, result,
 						entryName.substring(0, entryName.length() - SuffixConstants.SUFFIX_CLASS.length));
 			} else if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 				result = new ExternalAnnotationDecorator(result, true);

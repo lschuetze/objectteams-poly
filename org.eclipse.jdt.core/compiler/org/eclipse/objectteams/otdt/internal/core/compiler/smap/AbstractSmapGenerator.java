@@ -40,7 +40,7 @@ public abstract class AbstractSmapGenerator
     protected TypeDeclaration _type;
     protected List <SmapStratum>_strata;
 	private String _defaultStratum;
-	
+
 	private static String DEFAULT_PACKAGE=""; //$NON-NLS-1$
 
     public AbstractSmapGenerator(TypeDeclaration type)
@@ -134,13 +134,13 @@ public abstract class AbstractSmapGenerator
 	    	pkgBinding = toplevelBinding.getPackage();
 	    String pkgName = String.valueOf(pkgBinding.readableName());
 	    pkgName = pkgName.replace('.',ISMAPConstants.OTJ_PATH_DELIMITER_CHAR);
-	
+
 	    if (pkgName != null &&  pkgName.length() > 0)
 	        return pkgName + ISMAPConstants.OTJ_PATH_DELIMITER;
-	
+
 	    return DEFAULT_PACKAGE;
 	}
-	
+
 	protected FileInfo getOrCreateFileInfoForType(SmapStratum stratum, ReferenceBinding typeBinding) {
 		String sourceName = String.valueOf(typeBinding.sourceName()) + ISMAPConstants.OTJ_JAVA_ENDING;
 		String absoluteSourceName = getPackagePathFromRefBinding(typeBinding) + sourceName;

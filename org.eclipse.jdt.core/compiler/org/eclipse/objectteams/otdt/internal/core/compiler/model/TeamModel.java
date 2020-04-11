@@ -93,7 +93,7 @@ public class TeamModel extends TypeModel {
 
 	// can lifting fail due to role abstractness?
     public static final int HasAbstractRelevantRole = ASTNode.Bit10;
-    
+
     // did a nested team require correction of team/role flags?
     public static final int HasClassKindProblem = ASTNode.Bit11;
 
@@ -640,7 +640,7 @@ public class TeamModel extends TypeModel {
 		return anchor.getRoleTypeBinding(roleRefType, dimensions);
 	}
 	/**
-	 * Starting at site look for an enclosing type that is compatible to targetEnclosing. 
+	 * Starting at site look for an enclosing type that is compatible to targetEnclosing.
 	 */
 	public static ReferenceBinding strengthenEnclosing(ReferenceBinding site, ReferenceBinding targetEnclosing) {
 		ReferenceBinding currentEnclosing = site;
@@ -962,7 +962,7 @@ public class TeamModel extends TypeModel {
 				LookupEnvironment environment = this._ast.scope.environment();
 				for (Pair<MethodBinding, Integer> entry : existing) {
 					MethodBinding baseMethod = baseMethodSpec.resolvedMethod;
-					if (baseMethod == entry.first 
+					if (baseMethod == entry.first
 							|| MethodVerifier.doesMethodOverride(baseMethodSpec.resolvedMethod, entry.first, environment)) {
 						return entry.second;
 					}
@@ -1006,7 +1006,7 @@ public class TeamModel extends TypeModel {
 			recordCallinId(((OTDynCallinBindingsAttribute)attr).getCallinIdMax());
 		} else {
 			super.addOrMergeAttribute(attr);
-		}		
+		}
 	}
 // SH}
 	public boolean isAmbiguousLifting(ReferenceBinding staticRole, ReferenceBinding baseBinding) {
@@ -1037,7 +1037,7 @@ public class TeamModel extends TypeModel {
 	public static interface UpdatableAccessId {
 		void update(int offset);
 	}
-	
+
 	public static class UpdatableIntLiteral extends IntLiteral implements UpdatableAccessId {
 		int val;
 		public UpdatableIntLiteral(int val, int start, int end) {
@@ -1064,7 +1064,7 @@ public class TeamModel extends TypeModel {
 	/** Update all recorded accessIds to stay clear of id ranges used by super teams. */
 	public int updateDecapsAccessIds() {
 		if (this.accessIdOffset > -1 || getWeavingScheme() == WeavingScheme.OTRE) return this.accessIdOffset;
-		
+
 		this.accessIdOffset = 0;
 
 		TeamModel superTeam = getSuperTeam();

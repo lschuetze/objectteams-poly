@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.compiler.env.AccessRuleSet;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class PathCollector extends IndexQueryRequestor {
-	
+
 	/* a set of resource paths */
 	public HashSet paths = new HashSet(5);
 

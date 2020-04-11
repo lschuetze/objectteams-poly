@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -43,7 +43,7 @@ import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 public class Test1 extends FileBasedModelTest
 {
     private static final int OTELEMENT_TYPE = IOTType.TEAM;
-    
+
     public Test1(String name)
     {
         super(name);
@@ -59,14 +59,14 @@ public class Test1 extends FileBasedModelTest
             .getName());
         return suite;
     }
-    
+
     public void setUpSuite() throws Exception
     {
         setTestProjectDir(getTestSetting().getTestProject());
         getTestSetting().setTeamClass("EmptyTeam");
         super.setUpSuite();
     }
-    
+
     protected void setUp() throws Exception
     {
     		super.setUp();
@@ -75,7 +75,7 @@ public class Test1 extends FileBasedModelTest
 
     public void testEquals_emptyTeam() throws JavaModelException
     {
-    	IOTType otType1 = createTeamClass("teampkg.EmptyTeam");        
+    	IOTType otType1 = createTeamClass("teampkg.EmptyTeam");
         IOTType otType2 = getOTInstanceViaModelManager("teampkg", "EmptyTeam");
 
         assertFalse(otType1 == otType2);
@@ -84,40 +84,40 @@ public class Test1 extends FileBasedModelTest
 
     public void testEquals_teamWithEmptyRoleClass() throws JavaModelException
     {
-    	IRoleType roleType1 = createRoleClass("teampkg.TeamWithRoleClass.RoleClass", "teampkg", "TeamWithRoleClass");        
+    	IRoleType roleType1 = createRoleClass("teampkg.TeamWithRoleClass.RoleClass", "teampkg", "TeamWithRoleClass");
         IRoleType roleType2 = getRoleClass("teampkg", "TeamWithRoleClass", "RoleClass");
-        
+
         assertFalse(roleType1 == roleType2);
         assertTrue(roleType1.equals(roleType2));
     }
-    
+
     public void testEquals_teamWithRoleClassContainingCalloutMapping()
     {
     }
-    
+
     public void testEquals_teamWithRoleClassContainingCallinMapping()
     {
-        
+
     }
-    
+
     private IOTType createTeamClass(String qualName) throws JavaModelException
     {
         IType type1 = findType(qualName);
-        
+
         return new OTType(
-		            	OTELEMENT_TYPE, 
-		            	type1, 
+		            	OTELEMENT_TYPE,
+		            	type1,
 		            	null, // root element in OTModel
 		            	ClassFileConstants.AccPublic | ExtraCompilerModifiers.AccTeam);
     }
-    
+
     private IRoleType createRoleClass(String qualName,
             						  String pkgName,
             						  String typeName ) throws JavaModelException
     {
         IType type1 = findType(qualName);
         IType parent = getTeamClass(pkgName, typeName);
-        
+
         return new RoleType(type1,
                 			OTModelManager.getOTElement(parent),
                 			ClassFileConstants.AccPublic | ExtraCompilerModifiers.AccRole,
@@ -127,7 +127,7 @@ public class Test1 extends FileBasedModelTest
     private IOTType getOTInstanceViaModelManager(String pkgName, String typeName) throws JavaModelException
     {
         IType type2 = getTeamClass(pkgName, typeName);
-        
+
         assertNotNull(type2);
         assertTrue(type2.exists());
         return OTModelManager.getOTElement(type2);
@@ -140,7 +140,7 @@ public class Test1 extends FileBasedModelTest
                 "src",
                 pkgName,
                 typeName + ".java");
-        
+
         IType type2 = unit.getType(typeName);
         return type2;
     }
@@ -150,14 +150,14 @@ public class Test1 extends FileBasedModelTest
         IType teamClass = getTeamClass(pkgName, typeName);
         return (IRoleType)OTModelManager.getOTElement(teamClass.getType(roleName));
     }
-    
+
     private IType findType(String qualName) throws JavaModelException
     {
         IJavaProject project = getJavaProject(getTestProjectDir());
         IType type1 = project.findType(qualName);
         assertNotNull(type1);
         assertTrue(type1.exists());
-        
+
         return type1;
     }
 }

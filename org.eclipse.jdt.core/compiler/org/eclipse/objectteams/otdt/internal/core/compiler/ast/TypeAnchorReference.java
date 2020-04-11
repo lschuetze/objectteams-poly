@@ -137,13 +137,13 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 		} else if (reference instanceof QualifiedBaseReference) {
 			QualifiedBaseReference baseRef = (QualifiedBaseReference) reference;
 			char[][] tokens = baseRef.qualification.getTypeName();
-			int len = tokens.length; 
+			int len = tokens.length;
 			System.arraycopy(tokens, 0, result=new char[len+1][], 0, len);
 			result[len] = IOTConstants.BASE;
 		} else if (reference instanceof QualifiedThisReference) {
 			QualifiedThisReference thisRef = (QualifiedThisReference) reference;
 			char[][] tokens = thisRef.qualification.getTypeName();
-			int len = tokens.length; 
+			int len = tokens.length;
 			System.arraycopy(tokens, 0, result=new char[len+1][], 0, len);
 			result[len] = "this".toCharArray(); //$NON-NLS-1$
 		} else {
@@ -221,12 +221,12 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 			this.resolvedType = result.getResolvedType();
 		return result;
 	}
-	
+
 	ITeamAnchor resolveAnchor(Scope scope, Reference reference) {
 		ITeamAnchor prefix = null;
 		ITeamAnchor currentAnchor = null;
 		char[] currentToken = null; // for lookup and creation of problem binding
-		
+
 		// be careful not to trigger fields() which may be where we are called from!
 		if (reference instanceof SingleNameReference) {
 			SingleNameReference singleAnchor = (SingleNameReference)reference;
@@ -243,20 +243,20 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 			prefix = resolveAnchor(scope, (Reference)prefixExpr);
 			currentToken = fieldRef.token;
 			// fieldRef holds on to problem binding:
-			fieldRef.binding = TypeAnalyzer.findField(((ReferenceBinding)prefix.getResolvedType()).getRealClass(), currentToken, false/*static*/, true/*outer*/); 
+			fieldRef.binding = TypeAnalyzer.findField(((ReferenceBinding)prefix.getResolvedType()).getRealClass(), currentToken, false/*static*/, true/*outer*/);
 			currentAnchor = checkAnchor(scope, reference, currentToken, reference.sourceStart, reference.sourceEnd, fieldRef.binding);
 		} else if (reference instanceof QualifiedBaseReference) {
 			QualifiedBaseReference baseRef = (QualifiedBaseReference) reference;
 			if (scope instanceof BlockScope)
 				baseRef.resolveType((BlockScope)scope);
-			else 
+			else
 				baseRef.resolveType((ClassScope)scope);
 			currentAnchor = baseRef.baseField;
 		} else if (reference instanceof QualifiedThisReference) {
 			QualifiedThisReference thisRef = (QualifiedThisReference) reference;
 			if (scope instanceof BlockScope)
 				thisRef.resolveType((BlockScope)scope);
-			else 
+			else
 				thisRef.resolveType((ClassScope)scope);
 			if (thisRef.resolvedType.isTeam())
 				currentAnchor = ((ReferenceBinding)thisRef.resolvedType).getTeamModel().getTThis();
@@ -310,7 +310,7 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 							if (fieldType instanceof SourceTypeBinding) {
 								SourceTypeBinding stb = (SourceTypeBinding)fieldType;
 								if ((stb.scope != null)
-									&& (stb.scope.compilationUnitScope() != scope.compilationUnitScope()) 
+									&& (stb.scope.compilationUnitScope() != scope.compilationUnitScope())
 									&& (stb.tagBits & (TagBits.BeginHierarchyCheck|TagBits.EndHierarchyCheck)) == (TagBits.BeginHierarchyCheck|TagBits.EndHierarchyCheck)
 									&& StateHelper.isReadyToProcess(stb, ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS))
 									Dependencies.ensureBindingState(stb, ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS);
@@ -344,7 +344,7 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 		} else if (currentAnchor.isValidBinding()) {
 			if (prefix != null && !(prefix instanceof TThisBinding))
 				currentAnchor = currentAnchor.setPathPrefix(prefix);
-			
+
 			// fill anchor with resolved data:
 			reference.resolvedType = currentAnchor.getResolvedType();
 			reference.bits &= ~RestrictiveFlagMASK;  // clear bits
@@ -458,7 +458,7 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 			else if (reference instanceof FieldReference)
 				scope.problemReporter().invalidField((FieldReference)reference, ((FieldReference)reference).actualReceiverType);
 			return null;
-		}			
+		}
 		if (!anchorBinding.hasValidReferenceType()) {
 			scope.problemReporter().typeAnchorReferenceNotAnObjectRef(start, end);
 			return null;
@@ -487,7 +487,7 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 	{
 		TypeBinding type = typeReference.resolvedType;
 		ITeamAnchor anchorBinding = null;
-		if (this.anchor instanceof NameReference) 
+		if (this.anchor instanceof NameReference)
 			anchorBinding = (ITeamAnchor)((NameReference)this.anchor).binding;
 		else if (this.anchor instanceof FieldReference)
 			anchorBinding = ((FieldReference)this.anchor).binding;
@@ -552,7 +552,7 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 		return this.anchor.printExpression(indent, output);
 	}
 
-	/** 
+	/**
 	 * Fetch a bitset marking all those arguments that are referenced as a type anchor from an argument or type parameter.
      */
 	public static boolean[] fetchAnchorFlags(Argument[] arguments, TypeParameter[] typeParameters) {
@@ -566,7 +566,7 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 		}
 		if (typeParameters != null)
 			for (int i = 0; i < typeParameters.length; i++)
-				if (typeParameters[i].type instanceof TypeAnchorReference) 
+				if (typeParameters[i].type instanceof TypeAnchorReference)
 					checkTypeAnchorXRef((TypeAnchorReference)typeParameters[i].type, arguments, -1, flags);
 		return flags;
 	}
@@ -580,7 +580,7 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 					break;
 				}
 			}
-		}		
+		}
 	}
 
 	// === implement InvocationSite: ===
@@ -617,7 +617,7 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 	public void setFieldIndex(int depth) {
 		// ignored
 	}
-	
+
 	@Override
 	public InferenceContext18 freshInferenceContext(Scope scope) {
 		throw new InternalCompilerError("Method not applicable"); //$NON-NLS-1$

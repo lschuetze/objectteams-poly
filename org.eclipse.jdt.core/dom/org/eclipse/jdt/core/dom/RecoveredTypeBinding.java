@@ -181,7 +181,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public ITypeBinding getErasure() {
 		return this;
@@ -191,7 +191,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	public IMethodBinding getFunctionalInterfaceMethod() {
 		return null;
 	}
-	
+
 	@Override
 	public ITypeBinding[] getInterfaces() {
 		return TypeBinding.NO_TYPE_BINDINGS;
@@ -410,7 +410,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	public boolean isEnum() {
 		return false;
 	}
-	
+
 	@Override
 	public boolean isRecord() {
 		return false;

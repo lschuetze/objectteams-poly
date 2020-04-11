@@ -143,7 +143,7 @@ public class RoleSmapGenerator extends AbstractSmapGenerator
     {
         LineNumberProvider provider = this._type.getRoleModel().getLineNumberProvider();
         FileInfo fileInfo;
-        
+
         List<FileInfo> knownFileInfos = stratum.getFileInfos();
         if (this._type.isPurelyCopied && !knownFileInfos.isEmpty()) {
 			fileInfo = knownFileInfos.get(0); // current type has no source, add special lines to existing fileInfo
@@ -151,7 +151,7 @@ public class RoleSmapGenerator extends AbstractSmapGenerator
 			fileInfo = getOrCreateFileInfoForType(stratum, getCUType(this._type.binding));
 
 	        int[] lineSeparatorPositions = this._type.compilationResult.lineSeparatorPositions;
-			int startLine = lineSeparatorPositions == null 
+			int startLine = lineSeparatorPositions == null
 						? 1
 						: Util.getLineNumber(this._type.sourceStart, lineSeparatorPositions, 0, lineSeparatorPositions.length-1);
 	        for (int idx = startLine; idx <= provider.getSourceEndLineNumber(); idx++)

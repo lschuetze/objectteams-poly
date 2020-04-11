@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2020 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -27,11 +27,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 @SuppressWarnings("unchecked")
 public class CallinMethodBinding extends AbstractOTJLDTest {
-	
+
 	public CallinMethodBinding(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -39,7 +39,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -51,7 +51,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method is callin-bound as 'before' to a method in the direct base class
     // 4.1.1-otjld-before-callin-binding-1
     public void test411_beforeCallinBinding1() {
-       
+
        runConformTest(
             new String[] {
 		"T411bcb1Main.java",
@@ -103,7 +103,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method is callin-bound as 'after' to a method in the base class of the implicit superrole
     // 4.1.1-otjld-before-callin-binding-2
     public void test411_beforeCallinBinding2() {
-       
+
        runConformTest(
             new String[] {
 		"T411bcb2Main.java",
@@ -163,7 +163,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method is callin-bound as 'replace' to a method in the base class of the explicit superrole
     // 4.1.1-otjld-before-callin-binding-3
     public void test411_beforeCallinBinding3() {
-       
+
        runConformTest(
             new String[] {
 		"T411bcb3Main.java",
@@ -217,7 +217,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a replace binding mentions a buggy callin method
     // 4.1.1-otjld-before-callin-binding-3f
     public void test411_beforeCallinBinding3f() {
-        
+
         runNegativeTest(
             new String[] {
 		"p1/T411bcb3f.java",
@@ -259,26 +259,26 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "    }\n" +
 			    "}\n",
             },
-            "----------\n" + 
-    		"1. ERROR in p2\\Team411bcb3f_2.java (at line 11)\n" + 
-    		"	Team411bcb3f_1.this.r= this;\n" + 
-    		"	^^^^^^^^^^^^^^^^^^^\n" + 
-    		"No enclosing instance of the type Team411bcb3f_1 is accessible in scope\n" + 
-    		"----------\n" + 
-    		"2. ERROR in p2\\Team411bcb3f_2.java (at line 11)\n" + 
-    		"	Team411bcb3f_1.this.r= this;\n" + 
-    		"	                    ^\n" + 
-    		"The field Team411bcb3f_1.r is not visible\n" + 
-    		"----------\n" + 
-    		"3. ERROR in p2\\Team411bcb3f_2.java (at line 13)\n" + 
-    		"	Team411bcb3f_1.this.r= null;\n" + 
-    		"	^^^^^^^^^^^^^^^^^^^\n" + 
-    		"No enclosing instance of the type Team411bcb3f_1 is accessible in scope\n" + 
-    		"----------\n" + 
-    		"4. ERROR in p2\\Team411bcb3f_2.java (at line 13)\n" + 
-    		"	Team411bcb3f_1.this.r= null;\n" + 
-    		"	                    ^\n" + 
-    		"The field Team411bcb3f_1.r is not visible\n" + 
+            "----------\n" +
+    		"1. ERROR in p2\\Team411bcb3f_2.java (at line 11)\n" +
+    		"	Team411bcb3f_1.this.r= this;\n" +
+    		"	^^^^^^^^^^^^^^^^^^^\n" +
+    		"No enclosing instance of the type Team411bcb3f_1 is accessible in scope\n" +
+    		"----------\n" +
+    		"2. ERROR in p2\\Team411bcb3f_2.java (at line 11)\n" +
+    		"	Team411bcb3f_1.this.r= this;\n" +
+    		"	                    ^\n" +
+    		"The field Team411bcb3f_1.r is not visible\n" +
+    		"----------\n" +
+    		"3. ERROR in p2\\Team411bcb3f_2.java (at line 13)\n" +
+    		"	Team411bcb3f_1.this.r= null;\n" +
+    		"	^^^^^^^^^^^^^^^^^^^\n" +
+    		"No enclosing instance of the type Team411bcb3f_1 is accessible in scope\n" +
+    		"----------\n" +
+    		"4. ERROR in p2\\Team411bcb3f_2.java (at line 13)\n" +
+    		"	Team411bcb3f_1.this.r= null;\n" +
+    		"	                    ^\n" +
+    		"The field Team411bcb3f_1.r is not visible\n" +
     		"----------\n",
     		null/*classLibraries*/,
     		true/*shouldFlushOutputDirectory*/,
@@ -308,7 +308,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method is callin-bound as 'replace' to a method in the base class of a remote superrole
     // 4.1.1-otjld-before-callin-binding-4
     public void test411_beforeCallinBinding4() {
-       
+
        runConformTest(
             new String[] {
 		"T411bcb4Main.java",
@@ -377,7 +377,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method is callin-bound as 'replace' to a method in the base class of a remote superrole
     // 4.1.1-otjld-before-callin-binding-5
     public void test411_beforeCallinBinding5() {
-       
+
        runConformTest(
             new String[] {
 		"T411bcb5Main.java",
@@ -520,7 +520,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "    public String getValue(String arg) {\n" +
 			    "        return arg;\n" +
 			    "    }\n" +
-			    "}\n"    				
+			    "}\n"
     		});
        runConformTest(
             new String[] {
@@ -618,7 +618,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method is callin-bound as 'replace' and overwrites a replace callin-binding in the superrole, named callin
     // 4.1.3-otjld-overwriting-inherited-callin-binding-1
     public void test413_overwritingInheritedCallinBinding1() {
-       
+
        runConformTest(
             new String[] {
 		"T413oicb1Main.java",
@@ -676,7 +676,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method is callin-bound as 'replace' and adds to a replace callin-binding in the superrole, precedence used
     // 4.1.3-otjld-overwriting-inherited-callin-binding-1a
     public void test413_overwritingInheritedCallinBinding1a() {
-       
+
        runConformTest(
             new String[] {
 		"T413oicb1aMain.java",
@@ -853,12 +853,12 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
             "4.8");
     }
 
-    // a role method is callin-bound as 'replace' and overwrites a name replace callin-binding in the superrole, 
+    // a role method is callin-bound as 'replace' and overwrites a name replace callin-binding in the superrole,
     // NOTE: mapping overriding along 'extends' is not yet defined.
     // Is problematic because both bindings will exist within the same team!
     // 4.1.3-otjld-overwriting-inherited-callin-binding-2
     public void test413_overwritingInheritedCallinBinding2() {
-       
+
        runConformTest(
             new String[] {
 		"T413oicb2Main.java",
@@ -998,7 +998,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method is callin-bound as 'replace' and overwrites a before callin-binding in the remote superrole
     // 4.1.3-otjld-overwriting-inherited-callin-binding-3
     public void test413_overwritingInheritedCallinBinding3() {
-       
+
        runConformTest(
             new String[] {
 		"T413oicb3Main.java",
@@ -1170,7 +1170,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role class callin-binds to a not-accessible base method
     // 4.1.5-otjld-nonexisting-base-method-3a
     public void test415_nonexistingBaseMethod3a() {
-       
+
        runConformTest(
             new String[] {
 		"Team415nbm3a.java",
@@ -1255,7 +1255,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role class callin-binds to a not-accessible base method - with base call - double compile
     // 4.1.5-otjld-nonexisting-base-method-3f
     public void test415_nonexistingBaseMethod3f() {
-       
+
        runConformTest(
             new String[] {
 		"T415nbm3fMain.java",
@@ -1427,7 +1427,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role class callin-binds to a not-accessible base method
     // 4.1.5-otjld-nonexisting-base-method-4
     public void test415_nonexistingBaseMethod4() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team415nbm4.java",
@@ -1496,7 +1496,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role class callin-binds as 'replace' a role method with no return type whereas the base method has one
     // 4.1.5-otjld-nonexisting-base-method-6
     public void test415_nonexistingBaseMethod6() {
-       
+
        runConformTest(
             new String[] {
 		"Team415nbm6.java",
@@ -1773,11 +1773,11 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team415nbm15.java (at line 5)\n" + 
-    		"	test <- replace test(String a);\n" + 
-    		"	        ^^^^^^^\n" + 
-    		"Syntax error on token \"replace\", invalid MethodSpecsShort\n" + 
+            "----------\n" +
+    		"1. ERROR in Team415nbm15.java (at line 5)\n" +
+    		"	test <- replace test(String a);\n" +
+    		"	        ^^^^^^^\n" +
+    		"Syntax error on token \"replace\", invalid MethodSpecsShort\n" +
     		"----------\n");
     }
 
@@ -2091,7 +2091,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role class callin-binds a non-protected role method
     // 4.1.9-otjld-nonexisting-role-method-4
     public void test419_nonexistingRoleMethod4() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team419nrm4_2.java",
@@ -2294,7 +2294,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method is callin-bound as 'before' to multiple base methods
     // 4.1.12-otjld-callin-binding-multiple-base-methods-1
     public void test4112_callinBindingMultipleBaseMethods1() {
-       
+
        runConformTest(
             new String[] {
 		"T4112cbmbm1Main.java",
@@ -2363,7 +2363,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method is callin-bound as 'after' to multiple base methods
     // 4.1.12-otjld-callin-binding-multiple-base-methods-2
     public void test4112_callinBindingMultipleBaseMethods2() {
-       
+
        runConformTest(
             new String[] {
 		"T4112cbmbm2Main.java",
@@ -2451,7 +2451,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method is callin-bound as 'replace' to multiple base methods
     // 4.1.12-otjld-callin-binding-multiple-base-methods-3
     public void test4112_callinBindingMultipleBaseMethods3() {
-       
+
        runConformTest(
             new String[] {
 		"T4112cbmbm3Main.java",
@@ -2520,7 +2520,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method is callin-bound as 'replace' to multiple base methods - this requires exact signature matches
     // 4.1.12-otjld-callin-binding-multiple-base-methods-5
     public void test4112_callinBindingMultipleBaseMethods5() {
-       
+
        runConformTest(
             new String[] {
 		"T4112cbmbm5Main.java",
@@ -2678,7 +2678,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method without a return type is callin-bound as 'before' to a base method with a return type
     // 4.1.13-otjld-base-return-value-1
     public void test4113_baseReturnValue1() {
-       
+
        runConformTest(
             new String[] {
 		"T4113brv1Main.java",
@@ -2723,7 +2723,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method without a return type is callin-bound as 'after' to a base method with a return type
     // 4.1.13-otjld-base-return-value-2
     public void test4113_baseReturnValue2() {
-       
+
        runConformTest(
             new String[] {
 		"T4113brv2Main.java",
@@ -2768,7 +2768,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method without a return type is callin-bound as 'replace' to a base method with a return type , "return" must be translated to return null
     // 4.1.13-otjld-base-return-value-3
     public void test4113_baseReturnValue3() {
-       
+
        runConformTest(
             new String[] {
 		"T4113brv3Main.java",
@@ -2821,7 +2821,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method without a return type is callin-bound as 'replace' to a base method with a base return type
     // 4.1.13-otjld-base-return-value-4
     public void test4113_baseReturnValue4() {
-       
+
        runConformTest(
             new String[] {
 		"T4113brv4Main.java",
@@ -2874,7 +2874,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method a base return type is callin-bound as 'replace', testing boxing/unboxing in translated code
     // 4.1.13-otjld-base-return-value-5
     public void test4113_baseReturnValue5() {
-       
+
        runConformTest(
             new String[] {
 		"T4113brv5Main.java",
@@ -2967,7 +2967,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method with a return type is callin-bound as 'before' to a base method without a return type
     // 4.1.15-otjld-ignore-role-method-return-value-1
     public void test4115_ignoreRoleMethodReturnValue1() {
-       
+
        runConformTest(
             new String[] {
 		"T4115irmrv1Main.java",
@@ -3013,7 +3013,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method with a return type is callin-bound as 'after' to a base method without a return type
     // 4.1.15-otjld-ignore-role-method-return-value-2
     public void test4115_ignoreRoleMethodReturnValue2() {
-       
+
        runConformTest(
             new String[] {
 		"T4115irmrv2Main.java",
@@ -3059,7 +3059,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method with a return type is callin-bound as 'after' to a base method with a matching return type
     // expect warning
     public void test4115_ignoreRoleMethodReturnValue3() {
-       
+
        runTestExpectingWarnings(
             new String[] {
 		"T4115irmrv3.java",
@@ -3085,11 +3085,11 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. WARNING in Team4115irmrv3.java (at line 8)\n" + 
-    		"	test <- after test;\n" + 
-    		"	^^^^\n" + 
-    		"Callin after binding cannot return a value to the base caller, role method return value of type int will be ignored (OTJLD 4.4(a)).\n" + 
+            "----------\n" +
+    		"1. WARNING in Team4115irmrv3.java (at line 8)\n" +
+    		"	test <- after test;\n" +
+    		"	^^^^\n" +
+    		"Callin after binding cannot return a value to the base caller, role method return value of type int will be ignored (OTJLD 4.4(a)).\n" +
     		"----------\n");
     }
 
@@ -3178,11 +3178,11 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team4115irmrv3s.java (at line 8)\n" + 
-    		"	int test() <- after int test();\n" + 
-    		"	^^^\n" + 
-    		"Callin after binding cannot return a value to the base caller, role method return value of type int will be ignored (OTJLD 4.4(a)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team4115irmrv3s.java (at line 8)\n" +
+    		"	int test() <- after int test();\n" +
+    		"	^^^\n" +
+    		"Callin after binding cannot return a value to the base caller, role method return value of type int will be ignored (OTJLD 4.4(a)).\n" +
     		"----------\n",
             null/*classLibraries*/,
             true/*shouldFlushOutputDirectory*/,
@@ -3192,7 +3192,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role method with a return type is callin-bound as 'after' to a base method without a return type
     // warning suppressed
     public void test4115_ignoreRoleMethodReturnValue4() {
-       
+
        runConformTest(
             new String[] {
 		"T4115irmrv4Main.java",
@@ -3377,11 +3377,11 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team4117iuocm2.java (at line 8)\n" + 
-    		"	void test1() <- after void test();\n" + 
-    		"	^^^^^^^^^^^^\n" + 
-    		"Cannot bind callin method test1() using \"after\" (OTJLD 4.2(d)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team4117iuocm2.java (at line 8)\n" +
+    		"	void test1() <- after void test();\n" +
+    		"	^^^^^^^^^^^^\n" +
+    		"Cannot bind callin method test1() using \"after\" (OTJLD 4.2(d)).\n" +
     		"----------\n");
     }
 
@@ -3515,7 +3515,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a callin binding binds an implicitly inherted method which has a role parameter
     // 4.1.22-otjld-binding-tsuper-method-with-signature
     public void test4122_bindingTsuperMethodWithSignature() {
-       
+
        runConformTest(
             new String[] {
 		"Team4122btmws_2.java",
@@ -3642,7 +3642,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a after callin binding maps "result" to an argument
     // 4.1.25-otjld-result-in-after-binding-1
     public void test4125_resultInAfterBinding1() {
-       
+
        runConformTest(
             new String[] {
 		"Team4125riab1.java",
@@ -3709,43 +3709,43 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     	runConformTest(
     		new String[] {
     	"Team4125rims3.java",
-		    	"import java.util.ArrayList;\n" + 
-				"import java.util.List;\n" + 
-				"\n" + 
-				"public team class Team4125rims3 {\n" + 
-				"\n" + 
-				"	protected class R playedBy T4125rims3 {\n" + 
-				"		<T> void safeAppend(T el, List<T> result) <- replace void append(T el, List<T> result);\n" + 
-				"		callin <T> void safeAppend(T el, List<T> result) {\n" + 
-				"			if (el != null)\n" + 
-				"				base.safeAppend(el, result);\n" + 
-				"		}\n" + 
-				"	}\n" + 
-				"	public static void main(String[] args) {\n" + 
-				"		new Team4125rims3().activate();\n" + 
-				"		List<String> strings = new ArrayList<String>();\n" + 
-				"		strings.add(\"O\");\n" + 
-				"		T4125rims3 appender = new T4125rims3();\n" + 
-				"		appender.append(null, strings);\n" + 
-				"		appender.append(\"K\", strings);\n" + 
-				"		for (String string : strings) {\n" + 
-				"			System.out.print(string);\n" + 
-				"		}\n" + 
-				"	}\n" + 
+		    	"import java.util.ArrayList;\n" +
+				"import java.util.List;\n" +
+				"\n" +
+				"public team class Team4125rims3 {\n" +
+				"\n" +
+				"	protected class R playedBy T4125rims3 {\n" +
+				"		<T> void safeAppend(T el, List<T> result) <- replace void append(T el, List<T> result);\n" +
+				"		callin <T> void safeAppend(T el, List<T> result) {\n" +
+				"			if (el != null)\n" +
+				"				base.safeAppend(el, result);\n" +
+				"		}\n" +
+				"	}\n" +
+				"	public static void main(String[] args) {\n" +
+				"		new Team4125rims3().activate();\n" +
+				"		List<String> strings = new ArrayList<String>();\n" +
+				"		strings.add(\"O\");\n" +
+				"		T4125rims3 appender = new T4125rims3();\n" +
+				"		appender.append(null, strings);\n" +
+				"		appender.append(\"K\", strings);\n" +
+				"		for (String string : strings) {\n" +
+				"			System.out.print(string);\n" +
+				"		}\n" +
+				"	}\n" +
 				"}\n",
    		"T4125rims3.java",
-    			"import java.util.List;\n" + 
-    			"\n" + 
-    			"\n" + 
-    			"public class T4125rims3 {\n" + 
-    			"	<T> void append(T el, List<T> result) {\n" + 
-    			"		result.add(el);\n" + 
-    			"	}\n" + 
+    			"import java.util.List;\n" +
+    			"\n" +
+    			"\n" +
+    			"public class T4125rims3 {\n" +
+    			"	<T> void append(T el, List<T> result) {\n" +
+    			"		result.add(el);\n" +
+    			"	}\n" +
     			"}\n",
     		},
     		"OK");
     }
-    
+
     // a callin binding has a label
     // 4.1.26-otjld-name-callin-binding-1
     public void test4126_nameCallinBinding1() {
@@ -3886,7 +3886,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a team has a precedence declaration
     // 4.1.27-otjld-precedence-declaration-1
     public void test4127_precedenceDeclaration1() {
-       
+
        runConformTest(
             new String[] {
 		"Team4127pd1.java",
@@ -3922,7 +3922,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     }
     // a team has a class-level precedence declaration
     public void test4127_precedenceDeclaration1c() {
-       
+
        runConformTest(
             new String[] {
 		"Team4127pd1c.java",
@@ -3962,7 +3962,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a team has two precedence declarations
     // 4.1.27-otjld-precedence-declaration-2
     public void test4127_precedenceDeclaration2() {
-       
+
        runConformTest(
             new String[] {
 		"Team4127pd2.java",
@@ -4005,7 +4005,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role has a precedence declaration
     // 4.1.27-otjld-precedence-declaration-3
     public void test4127_precedenceDeclaration3() {
-       
+
        runConformTest(
             new String[] {
 		"Team4127pd3.java",
@@ -4043,7 +4043,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role has two precedence declarations
     // 4.1.27-otjld-precedence-declaration-4
     public void test4127_precedenceDeclaration4() {
-       
+
        runConformTest(
             new String[] {
 		"Team4127pd4.java",
@@ -4086,7 +4086,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a team has a precedence declaration for replace bindings
     // 4.1.27-otjld-precedence-declaration-5
     public void test4127_precedenceDeclaration5() {
-       
+
        runConformTest(
             new String[] {
 		"Team4127pd5.java",
@@ -4128,7 +4128,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a team has a precedence declaration for replace bindings - base call omitted
     // 4.1.27-otjld-precedence-declaration-6
     public void test4127_precedenceDeclaration6() {
-       
+
        runConformTest(
             new String[] {
 		"T4127pd6Main.java",
@@ -4173,7 +4173,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a team has a precedence declaration for replace bindings - explicitly thrown LiftingVetoException
     // 4.1.27-otjld-precedence-declaration-7
     public void test4127_precedenceDeclaration7() {
-       
+
        runConformTest(
             new String[] {
 		"Team4127pd7.java",
@@ -4222,7 +4222,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a team has a precedence declaration for replace bindings - guard forbids lifting
     // 4.1.27-otjld-precedence-declaration-8
     public void test4127_precedenceDeclaration8() {
-       
+
        runConformTest(
             new String[] {
 		"Team4127pd8.java",
@@ -4264,7 +4264,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // two teams have precedence declarations for replace bindings - guard forbids lifting
     // 4.1.27-otjld-precedence-declaration-9
     public void test4127_precedenceDeclaration9() {
-       
+
        runConformTest(
             new String[] {
 		"Team4127pd9.java",
@@ -4326,7 +4326,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a team has a precedence declaration - subteam adds another one
     // 4.1.27-otjld-precedence-declaration-10
     public void test4127_precedenceDeclaration10() {
-       
+
        runConformTest(
             new String[] {
 		"Team4127pd10_2.java",
@@ -4376,7 +4376,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a team has a precedence declaration - subteam adds another one - within packages
     // 4.1.27-otjld-precedence-declaration-10p
     public void test4127_precedenceDeclaration10p() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team4127pd10p_2.java",
@@ -4429,7 +4429,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a nested team has a precedence declaration
     // 4.1.27-otjld-precedence-declaration-11
     public void test4127_precedenceDeclaration11() {
-       
+
        runConformTest(
             new String[] {
 		"Team4127pd11_2.java",
@@ -4478,7 +4478,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a nested team has a precedence declaration - in a package
     // 4.1.27-otjld-precedence-declaration-11p
     public void test4127_precedenceDeclaration11p() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team4127pd11p_2.java",
@@ -4531,7 +4531,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a nested team has a precedence declaration - in a package - compile in one go
     // 4.1.27-otjld-precedence-declaration-11P
     public void test4127_precedenceDeclaration11P() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team4127pd11P_2.java",
@@ -4584,7 +4584,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a precedence is not needed because lifting has no overlap (witness for TPX-418 comment 2)
     // 4.1.27-otjld-precedence-declaration-12
     public void test4127_precedenceDeclaration12() {
-       
+
        runConformTest(
             new String[] {
 		"Team4127pd12.java",
@@ -4625,7 +4625,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
             },
             "O?K!");
     }
-        
+
     // precedence for two after callin bindings, missing "after" modifier
     public void test4127_precedenceDeclaration13() {
     	runNegativeTest(
@@ -4644,20 +4644,20 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     		"public class T4127pd13 {\n" +
     		"	void test() { System.out.print(\"O\"); }\n" +
     		"}\n"
-    		}, 
-    		"----------\n" + 
-    		"1. ERROR in Team4127pd13.java (at line 7)\n" + 
-    		"	precedence c2, c1;\n" + 
-    		"	           ^^\n" + 
-    		"\'precedence\' declaration for \'after\' binding must be specified as \'precedence after\' (OTJLD 4.8(a)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team4127pd13.java (at line 7)\n" + 
-    		"	precedence c2, c1;\n" + 
-    		"	               ^^\n" + 
-    		"\'precedence\' declaration for \'after\' binding must be specified as \'precedence after\' (OTJLD 4.8(a)).\n" + 
+    		},
+    		"----------\n" +
+    		"1. ERROR in Team4127pd13.java (at line 7)\n" +
+    		"	precedence c2, c1;\n" +
+    		"	           ^^\n" +
+    		"\'precedence\' declaration for \'after\' binding must be specified as \'precedence after\' (OTJLD 4.8(a)).\n" +
+    		"----------\n" +
+    		"2. ERROR in Team4127pd13.java (at line 7)\n" +
+    		"	precedence c2, c1;\n" +
+    		"	               ^^\n" +
+    		"\'precedence\' declaration for \'after\' binding must be specified as \'precedence after\' (OTJLD 4.8(a)).\n" +
     		"----------\n");
     }
-    
+
     // precedence after for two callin bindings, one without the "after" modifier
     public void test4127_precedenceDeclaration14() {
     	runNegativeTest(
@@ -4676,15 +4676,15 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     		"public class T4127pd14 {\n" +
     		"	void test() { System.out.print(\"O\"); }\n" +
     		"}\n"
-    		}, 
-    		"----------\n" + 
-    		"1. ERROR in Team4127pd14.java (at line 7)\n" + 
-    		"	precedence after c2, c1;\n" + 
-    		"	                 ^^\n" + 
-    		"\'precedence after\' declaration cannot refer to \'before\' bindings (OTJLD 4.8(a)).\n" + 
+    		},
+    		"----------\n" +
+    		"1. ERROR in Team4127pd14.java (at line 7)\n" +
+    		"	precedence after c2, c1;\n" +
+    		"	                 ^^\n" +
+    		"\'precedence after\' declaration cannot refer to \'before\' bindings (OTJLD 4.8(a)).\n" +
     		"----------\n");
     }
-    
+
     // merging precedence declarations from two nesting levels:
     public void test4127_precedenceDeclaration15() {
     	runConformTest(
@@ -4804,46 +4804,46 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 				"	}\n" +
 				"}\n"
 			},
-			"----------\n" + 
-			"1. ERROR in Team4127pd17.java (at line 4)\n" + 
-			"	precedence MyRoleB.bl1, MyRoleB.bl2;\n" + 
-			"	           ^^^^^^^^^^^\n" + 
-			"MyRoleB cannot be resolved to a type\n" + 
-			"----------\n" + 
-			"2. ERROR in Team4127pd17.java (at line 4)\n" + 
-			"	precedence MyRoleB.bl1, MyRoleB.bl2;\n" + 
-			"	                        ^^^^^^^^^^^\n" + 
-			"MyRoleB cannot be resolved to a type\n" + 
-			"----------\n" + 
-			"3. ERROR in Team4127pd17.java (at line 8)\n" + 
-			"	bl1: rm <- before bm;\n" + 
-			"	^^^\n" + 
-			"\'before\' callin bindings Team4127pd17.MyRoleB.bl1 and Team4127pd17.MyRoleB.bl2 refer to the same base method; must declare precedence of these bindings (OTJLD 4.8).\n" + 
-			"----------\n" + 
-			"4. ERROR in Team4127pd17.java (at line 18)\n" + 
-			"	rm <- before bm;\n" + 
-			"	^^\n" + 
-			"\'before\' callin bindings Team4127pd17.MyRoleA.<Team4127pd17:18,2> and Team4127pd17.MyRoleB.bl2 refer to the same base method; must declare precedence of these bindings (OTJLD 4.8).\n" + 
+			"----------\n" +
+			"1. ERROR in Team4127pd17.java (at line 4)\n" +
+			"	precedence MyRoleB.bl1, MyRoleB.bl2;\n" +
+			"	           ^^^^^^^^^^^\n" +
+			"MyRoleB cannot be resolved to a type\n" +
+			"----------\n" +
+			"2. ERROR in Team4127pd17.java (at line 4)\n" +
+			"	precedence MyRoleB.bl1, MyRoleB.bl2;\n" +
+			"	                        ^^^^^^^^^^^\n" +
+			"MyRoleB cannot be resolved to a type\n" +
+			"----------\n" +
+			"3. ERROR in Team4127pd17.java (at line 8)\n" +
+			"	bl1: rm <- before bm;\n" +
+			"	^^^\n" +
+			"\'before\' callin bindings Team4127pd17.MyRoleB.bl1 and Team4127pd17.MyRoleB.bl2 refer to the same base method; must declare precedence of these bindings (OTJLD 4.8).\n" +
+			"----------\n" +
+			"4. ERROR in Team4127pd17.java (at line 18)\n" +
+			"	rm <- before bm;\n" +
+			"	^^\n" +
+			"\'before\' callin bindings Team4127pd17.MyRoleA.<Team4127pd17:18,2> and Team4127pd17.MyRoleB.bl2 refer to the same base method; must declare precedence of these bindings (OTJLD 4.8).\n" +
 			"----------\n");
     }
-    
+
     // Bug 332893 - Class Precedence not working between Role callin and SubRole callin
     public void test4127_precedenceDeclaration18 () {
     	runNegativeTest(
     		new String[] {
     			"PrecBug.java",
-    			"public team class PrecBug {\n" + 
-    			"    precedence after RA.RB, RA;\n" + 
-    			"    protected team class RA playedBy A {\n" + 
+    			"public team class PrecBug {\n" +
+    			"    precedence after RA.RB, RA;\n" +
+    			"    protected team class RA playedBy A {\n" +
     			"        void some(String v) <- after void myMethod2()\n" +
-    			"            with { v <- \"RA\" }\n" + 
+    			"            with { v <- \"RA\" }\n" +
     			"        void some(String v) {\n" +
-    			"            System.out.print(\"some\"+v);\n" + 
-    			"        }\n" + 
-    			"        protected class RB playedBy B {\n" + 
+    			"            System.out.print(\"some\"+v);\n" +
+    			"        }\n" +
+    			"        protected class RB playedBy B {\n" +
     			"            void some(String v) <- after void myMethod2()" +
-    			"                with { v <- \"RB\" }\n" + 
-    			"        }\n" + 
+    			"                with { v <- \"RB\" }\n" +
+    			"        }\n" +
     			"    }\n" +
     			"    public PrecBug(A as RA a) {\n" +
     			"        a.activate();\n" +
@@ -4852,7 +4852,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     			"        B b = new B();\n" +
     			"        new PrecBug(b).activate();\n" +
     			"        new B().myMethod2();\n" +
-    			"    }\n" + 
+    			"    }\n" +
     			"}\n",
     			"A.java",
     			"public class A {\n" +
@@ -4861,35 +4861,35 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     			"B.java",
     			"public class B extends A {\n" +
     			"}\n"
-    		}, 
-    		"----------\n" + 
-    		"1. ERROR in PrecBug.java (at line 2)\n" + 
-    		"	precedence after RA.RB, RA;\n" + 
-    		"	                 ^^^^^^^^^^\n" + 
-    		"\'precedence\' declaration can only refer to direct role classes, however PrecBug.RA.RB is a nested role of team PrecBug.RA (OTJLD 4.8).\n" + 
+    		},
+    		"----------\n" +
+    		"1. ERROR in PrecBug.java (at line 2)\n" +
+    		"	precedence after RA.RB, RA;\n" +
+    		"	                 ^^^^^^^^^^\n" +
+    		"\'precedence\' declaration can only refer to direct role classes, however PrecBug.RA.RB is a nested role of team PrecBug.RA (OTJLD 4.8).\n" +
     		"----------\n");
     }
-    
+
     // Bug 335777 - [compiler] don't flag missing precedence if different enclosing teams
     public void test4127_precedenceDeclaration19 () {
     	runConformTest(
     		new String[] {
     			"PrecBug19.java",
-    			"public team class PrecBug19 {\n" + 
-    			"    protected team class RA playedBy A {\n" + 
+    			"public team class PrecBug19 {\n" +
+    			"    protected team class RA playedBy A {\n" +
     			"        void some(String v) <- before void myMethod2()\n" +
-    			"            with { v <- \"RA\" }\n" + 
+    			"            with { v <- \"RA\" }\n" +
     			"        void some(String v) <- after void myMethod2()\n" +
-    			"            with { v <- \"RA\" }\n" + 
+    			"            with { v <- \"RA\" }\n" +
     			"        void some(String v) {\n" +
-    			"            System.out.print(\"some\"+v);\n" + 
-    			"        }\n" + 
-    			"        protected class RB playedBy B {\n" + 
+    			"            System.out.print(\"some\"+v);\n" +
+    			"        }\n" +
+    			"        protected class RB playedBy B {\n" +
     			"            void some(String v) <- before void myMethod2()" +
     			"                with { v <- \"RB\" }\n" +
 				"            void some(String v) <- after void myMethod2()" +
     			"                with { v <- \"RB\" }\n" +
-    			"        }\n" + 
+    			"        }\n" +
     			"    }\n" +
     			"    public PrecBug19(A as RA a) {\n" +
     			"        a.activate();\n" +
@@ -4898,7 +4898,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     			"        B b = new B();\n" +
     			"        new PrecBug19(b).activate();\n" +
     			"        new B().myMethod2();\n" +
-    			"    }\n" + 
+    			"    }\n" +
     			"}\n",
     			"A.java",
     			"public class A {\n" +
@@ -4907,7 +4907,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     			"B.java",
     			"public class B extends A {\n" +
     			"}\n"
-    		}, 
+    		},
     		"someRAsomeRB-someRBsomeRA");
     }
 
@@ -4997,7 +4997,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role has a precedence declaration, so has its super role
     // 4.1.29-otjld-inheritance-of-precedence-declaration-1
     public void test4129_inheritanceOfPrecedenceDeclaration1() {
-       
+
        runConformTest(
             new String[] {
 		"Team4129iopd1.java",
@@ -5042,7 +5042,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a team has a precedence declaration by role class
     // 4.1.30-otjld-class-based-precedence-declaration-1
     public void test4130_classBasedPrecedenceDeclaration1() {
-       
+
        runConformTest(
             new String[] {
 		"Team4130cbpd1.java",
@@ -5106,21 +5106,21 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "}	\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. WARNING in Team4131ilba1.java (at line 2)\n" + 
-    		"	public team class Team4131ilba1 {\n" + 
-    		"	                  ^^^^^^^^^^^^^\n" + 
-    		"Potential ambiguity in role binding. The base \'T4131ilba1\' is bound to the following roles: Team4131ilba1.R1,Team4131ilba1.R2 (OTJLD 2.3.4(a)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team4131ilba1.java (at line 5)\n" + 
-    		"	rm <- after test;\n" + 
-    		"	^^\n" + 
-    		"Unsafe callin binding, because lifting to role Team4131ilba1.R0 may fail due to a reported binding ambiguity (OTJLD 2.3.5(c)).\n" + 
-    		"----------\n" + 
-    		"3. ERROR in Team4131ilba1.java (at line 5)\n" + 
-    		"	rm <- after test;\n" + 
-    		"	^^\n" + 
-    		"Unsafe callin binding, because lifting to role Team4131ilba1.R0 may fail due to a reported binding ambiguity (OTJLD 2.3.5(c)).\n" + 
+            "----------\n" +
+    		"1. WARNING in Team4131ilba1.java (at line 2)\n" +
+    		"	public team class Team4131ilba1 {\n" +
+    		"	                  ^^^^^^^^^^^^^\n" +
+    		"Potential ambiguity in role binding. The base \'T4131ilba1\' is bound to the following roles: Team4131ilba1.R1,Team4131ilba1.R2 (OTJLD 2.3.4(a)).\n" +
+    		"----------\n" +
+    		"2. ERROR in Team4131ilba1.java (at line 5)\n" +
+    		"	rm <- after test;\n" +
+    		"	^^\n" +
+    		"Unsafe callin binding, because lifting to role Team4131ilba1.R0 may fail due to a reported binding ambiguity (OTJLD 2.3.5(c)).\n" +
+    		"----------\n" +
+    		"3. ERROR in Team4131ilba1.java (at line 5)\n" +
+    		"	rm <- after test;\n" +
+    		"	^^\n" +
+    		"Unsafe callin binding, because lifting to role Team4131ilba1.R0 may fail due to a reported binding ambiguity (OTJLD 2.3.5(c)).\n" +
     		"----------\n");
     }
 
@@ -5149,16 +5149,16 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "}	\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. WARNING in Team4131ilba2d.java (at line 2)\n" + 
-    		"	public team class Team4131ilba2d {\n" + 
-    		"	                  ^^^^^^^^^^^^^^\n" + 
-    		"Potential ambiguity in role binding. The base \'T4131ilba2d\' is bound to the following roles: Team4131ilba2d.R1,Team4131ilba2d.R2 (OTJLD 2.3.4(a)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team4131ilba2d.java (at line 7)\n" + 
-    		"	Team4131ilba2d (T4131ilba2d as R0 o) {}\n" + 
-    		"	                ^^^^^^^^^^^^^^^^^\n" + 
-    		"Unhandled exception type LiftingFailedException, caused by an unsafe lifting request (OTJLD 2.3.5).\n" + 
+            "----------\n" +
+    		"1. WARNING in Team4131ilba2d.java (at line 2)\n" +
+    		"	public team class Team4131ilba2d {\n" +
+    		"	                  ^^^^^^^^^^^^^^\n" +
+    		"Potential ambiguity in role binding. The base \'T4131ilba2d\' is bound to the following roles: Team4131ilba2d.R1,Team4131ilba2d.R2 (OTJLD 2.3.4(a)).\n" +
+    		"----------\n" +
+    		"2. ERROR in Team4131ilba2d.java (at line 7)\n" +
+    		"	Team4131ilba2d (T4131ilba2d as R0 o) {}\n" +
+    		"	                ^^^^^^^^^^^^^^^^^\n" +
+    		"Unhandled exception type LiftingFailedException, caused by an unsafe lifting request (OTJLD 2.3.5).\n" +
     		"----------\n");
     }
 
@@ -5203,7 +5203,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a named callin binding is overridden by an implicit sub role
     // 4.1.32-otjld-overriding-of-callin-binding-1
     public void test4132_overridingOfCallinBinding1() {
-       
+
        runConformTest(
             new String[] {
 		"Team4132oocb1_2.java",
@@ -5249,7 +5249,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a named callin binding is overridden by an implicit sub role  - inherited precedence declaration
     // 4.1.32-otjld-overriding-of-callin-binding-1a
     public void test4132_overridingOfCallinBinding1a() {
-       
+
        runConformTest(
             new String[] {
 		"Team4132oocb1a_2.java",
@@ -5300,7 +5300,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a named callin binding is overridden by an explicit sub role in the same team
     // 4.1.32-otjld-overriding-of-callin-binding-2
     public void test4132_overridingOfCallinBinding2() {
-       
+
        runTestExpectingWarnings(
             new String[] {
 		"Team4132oocb2.java",
@@ -5335,11 +5335,11 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "}    \n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. WARNING in Team4132oocb2.java (at line 7)\n" + 
-    		"	b1: rm1 <- before bm;\n" + 
-    		"	^^\n" + 
-    		"Callin \'b1\' is overridden in role \'R2\' within the same team, will have no effect (OTJLD 4.1(e)).\n" + 
+            "----------\n" +
+    		"1. WARNING in Team4132oocb2.java (at line 7)\n" +
+    		"	b1: rm1 <- before bm;\n" +
+    		"	^^\n" +
+    		"Callin \'b1\' is overridden in role \'R2\' within the same team, will have no effect (OTJLD 4.1(e)).\n" +
     		"----------\n",
             "OK!");
     }
@@ -5393,7 +5393,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a named callin binding is overridden by an explicit sub role in a sub team
     // 4.1.32-otjld-overriding-of-callin-binding-3
     public void test4132_overridingOfCallinBinding3() {
-       
+
        runConformTest(
             new String[] {
 		"Team4132oocb3_2.java",
@@ -5439,7 +5439,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a named callin binding is overridden by an explicit sub role in a sub team - inherited precedence declaration
     // 4.1.32-otjld-overriding-of-callin-binding-3a
     public void test4132_overridingOfCallinBinding3a() {
-       
+
        runConformTest(
             new String[] {
 		"Team4132oocb3a_2.java",
@@ -5490,7 +5490,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a named callin binding is overridden by an explicit subsub role in a sub team
     // 4.1.32-otjld-overriding-of-callin-binding-4
     public void test4132_overridingOfCallinBinding4() {
-       
+
        runConformTest(
             new String[] {
 		"Team4132oocb4_2.java",
@@ -5537,7 +5537,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a named callin binding is overridden by an explicit subsub role in a sub team - inherited precedence declaration
     // 4.1.32-otjld-overriding-of-callin-binding-4a
     public void test4132_overridingOfCallinBinding4a() {
-       
+
        runConformTest(
             new String[] {
 		"Team4132oocb4a_2.java",
@@ -5589,7 +5589,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a named callin binding is overridden by an explicit subsub role in the same team
     // 4.1.32-otjld-overriding-of-callin-binding-5
     public void test4132_overridingOfCallinBinding5() {
-       
+
        runConformTest(
             new String[] {
 		"Team4132oocb5.java",
@@ -5631,7 +5631,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a callin binding overrides another, but additionally there is a precedence declaration between them
     // 4.1.32-otjld-overriding-of-callin-binding-6
     public void test4132_overridingOfCallinBinding6() {
-       
+
        runConformTest(
             new String[] {
 		"Team4132oocb6.java",
@@ -5674,7 +5674,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a callin binding overrides another, but additionally there is a precedence declaration between them - different order
     // 4.1.32-otjld-overriding-of-callin-binding-6a
     public void test4132_overridingOfCallinBinding6a() {
-       
+
        runConformTest(
             new String[] {
 		"Team4132oocb6a.java",
@@ -5717,7 +5717,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a callin binding overrides another, but additionally there is a precedence declaration between them
     // 4.1.32-otjld-overriding-of-callin-binding-7
     public void test4132_overridingOfCallinBinding7() {
-       
+
        runConformTest(
             new String[] {
 		"Team4132oocb7.java",
@@ -5824,7 +5824,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a named callin binding is overridden by an explicit sub role in a sub team
     // - more roles and callins
     public void test4132_overridingOfCallinBinding10_source() {
-       
+
        runConformTest(
             new String[] {
    		"Team4132oocb10_2.java",
@@ -5967,7 +5967,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     public void test4133_callinToPrivate2() {
     	//FIXME HACK:
     	//this.verifier = getTestVerifier(true);
-       
+
        runConformTest(
             new String[] {
 		"Team4133ctp2.java",
@@ -6000,7 +6000,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a private static role method is before bound
     // 4.1.33-otjld-callin-to-private-2s
     public void test4133_callinToPrivate2s() {
-       
+
        runConformTest(
             new String[] {
 		"Team4133ctp2s.java",
@@ -6062,7 +6062,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a try-finally block (->'ret' instruction) is used in a callin method
     // 4.1.34-otjld-local-variables-in-callin-methods-1
     public void test4134_localVariablesInCallinMethods1() {
-       
+
        runConformTest(
             new String[] {
 		"Team4134lvicm1.java",
@@ -6103,7 +6103,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a local variable in a callin method is incremented
     // 4.1.34-otjld-local-variables-in-callin-methods-2
     public void test4134_localVariablesInCallinMethods2() {
-       
+
        runConformTest(
             new String[] {
 		"Team4134lvicm2.java",
@@ -6142,7 +6142,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // an exception handler is used in a callin method
     // 4.1.34-otjld-local-variables-in-callin-methods-3
     public void test4134_localVariablesInCallinMethods3() {
-       
+
        runConformTest(
             new String[] {
 		"T4134lvicmMain3.java",
@@ -6188,7 +6188,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // basic type arguments are unused in the role method signaturen
     // 4.1.35-otjld-basic-type-unused-args-1
     public void test4135_basicTypeUnusedArgs1() {
-       
+
        runConformTest(
             new String[] {
 		"Team4135btua1.java",
@@ -6224,7 +6224,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a callin method calls its explicit super method
     // 4.1.36-otjld-callin-method-with-super-1
     public void test4136_callinMethodWithSuper1() {
-       
+
        runConformTest(
             new String[] {
 		"Team4136cmws1.java",
@@ -6263,7 +6263,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a callin method calls its implicit super method
     // 4.1.36-otjld-callin-method-with-super-2
     public void test4136_callinMethodWithSuper2() {
-       
+
        runConformTest(
             new String[] {
 		"Team4136cmws2_2.java",
@@ -6307,7 +6307,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a callin method calls its implicit super method which contains a base-call
     // 4.1.36-otjld-callin-method-with-super-3
     public void test4136_callinMethodWithSuper3() {
-       
+
        runConformTest(
             new String[] {
 		"Team4136cmws3_2.java",
@@ -6421,7 +6421,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a callin binding to an inherited final method; correctly adapting the super-base
     // 4.1.38-otjld-callin-to-final-2
     public void test4138_callinToFinal2() {
-       
+
        runConformTest(
             new String[] {
 		"Team4138ctf2.java",
@@ -6462,7 +6462,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // multiple different callins from different teams to the same base method
     // 4.1.38-otjld-multiple-callin-1
     public void test4138_multipleCallin1() {
-       
+
        runConformTest(
             new String[] {
 		"T4138mc1Main.java",
@@ -6513,7 +6513,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // multiple different callins from different teams to the same base method - base inheritance
     // 4.1.38-otjld-multiple-callin-2
     public void test4138_multipleCallin2() {
-       
+
        runConformTest(
             new String[] {
 		"T4138mc2Main.java",
@@ -6568,7 +6568,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // multiple different callins from different teams to the same base method - base inheritance
     // simplified load order: load base before teams.
     public void test4138_multipleCallin2l() {
-       
+
        runConformTest(
             new String[] {
 		"T4138mc2lMain.java",
@@ -6624,7 +6624,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // multiple replaces ordered by precedence plus before/after - reported by ofrank
     // 4.1.38-otjld-multiple-callin-3
     public void test4138_multipleCallin3() {
-       
+
        runConformTest(
             new String[] {
 		"Team4138mc3.java",
@@ -6706,7 +6706,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a callin binding intercepts a method that has an override with covariant return - static type is super-base
     // 4.1.39-otjld-callin-binding-with-plus-1
     public void test4139_callinBindingWithPlus1() {
-       
+
        runConformTest(
             new String[] {
 		"Team4139cbwp1.java",
@@ -6745,7 +6745,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 
     // a callin binding intercepts a method that has an override with covariant return - static type is super-base - no plus used
     public void test4139_callinBindingWithPlus1a() {
-       
+
        runConformTest(
             new String[] {
 		"Team4139cbwp1a.java",
@@ -6785,7 +6785,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a callin binding intercepts a method that has an override with covariant return - static type is sub-base
     // 4.1.39-otjld-callin-binding-with-plus-2
     public void test4139_callinBindingWithPlus2() {
-       
+
        runConformTest(
             new String[] {
 		"Team4139cbwp2.java",
@@ -6825,7 +6825,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // replace callin to base methods with covariant return types
     // 4.1.39-otjld-callin-binding-with-plus-3
     public void test4139_callinBindingWithPlus3() {
-       
+
        runConformTest(
             new String[] {
 		"Team4139cbwp3.java",
@@ -6867,7 +6867,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // replace callin to base methods with covariant return types, invoked on super-base as the static type
     // 4.1.39-otjld-callin-binding-with-plus-4
     public void test4139_callinBindingWithPlus4() {
-       
+
        runConformTest(
             new String[] {
 		"Team4139cbwp4.java",
@@ -6992,7 +6992,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // replace callin to base methods with covariant return types,  base call result is stored and modified
     // 4.1.39-otjld-callin-binding-with-plus-8
     public void test4139_callinBindingWithPlus8() {
-       
+
        runConformTest(
             new String[] {
 		"Team4139cbwp8.java",
@@ -7041,7 +7041,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // replace callin to base methods with covariant return types - unbounded type variable
     // 4.1.39-otjld-callin-binding-with-plus-9
     public void test4139_callinBindingWithPlus9() {
-       
+
        runConformTest(
             new String[] {
 		"Team4139cbwp9.java",
@@ -7083,7 +7083,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // base call result is lifting-compatible to type bound
     // 4.1.40-otjld-callin-replace-compatibility-5
     public void test4140_callinReplaceCompatibility5() {
-       
+
        runConformTest(
             new String[] {
 		"Team4140crc5.java",
@@ -7123,7 +7123,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // base call result is lifting-compatible to exact type -- reference for previous test
     // 4.1.40-otjld-callin-replace-compatibility-6
     public void test4140_callinReplaceCompatibility6() {
-       
+
        runConformTest(
             new String[] {
 		"Team4140crc6.java",
@@ -7163,7 +7163,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a parameter in a replace binding is lifting compatible
     // 4.1.40-otjld-callin-replace-compatibility-7
     public void test4140_callinReplaceCompatibility7() {
-       
+
        runConformTest(
             new String[] {
 		"Team4140crc7.java",
@@ -7247,7 +7247,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // two different base methods have return types that are compatible to the bound of a type parameter
     // 4.1.40-otjld-callin-replace-compatibility-9
     public void test4140_callinReplaceCompatibility9() {
-       
+
        runConformTest(
             new String[] {
 		"Team4140crc9.java",
@@ -7285,7 +7285,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // two different base methods have return types that are compatible to the bound of a type parameter -- signatureless binding
     // 4.1.40-otjld-callin-replace-compatibility-9s
     public void test4140_callinReplaceCompatibility9s() {
-       
+
        runConformTest(
             new String[] {
 		"Team4140crc9s.java",
@@ -7322,7 +7322,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // two different base methods have parameter types that are compatible to the bound of a type parameter
     // 4.1.40-otjld-callin-replace-compatibility-10
     public void test4140_callinReplaceCompatibility10() {
-       
+
        runConformTest(
             new String[] {
 		"Team4140crc10.java",
@@ -7362,7 +7362,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // two different base methods have parameter types that are compatible to the bound of a type parameter -- signatureless binding
     // 4.1.40-otjld-callin-replace-compatibility-10s
     public void test4140_callinReplaceCompatibility10s() {
-       
+
        runConformTest(
             new String[] {
 		"Team4140crc10s.java",
@@ -7402,7 +7402,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a base method has parameter types that are compatible to the bound of a type parameter, 2 params, with mapping (swap)
     // 4.1.40-otjld-callin-replace-compatibility-11
     public void test4140_callinReplaceCompatibility11() {
-       
+
        runConformTest(
             new String[] {
 		"Team4140crc11.java",
@@ -7458,7 +7458,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a base method has parameter types that are compatible to the bound of a type parameter, 2 params, with partial mapping
     // 4.1.40-otjld-callin-replace-compatibility-12
     public void test4140_callinReplaceCompatibility12() {
-       
+
        runConformTest(
             new String[] {
 		"Team4140crc12.java",
@@ -7611,7 +7611,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a callin binds to method equals - warning suppressed
     // 4.1.41-otjld-dangerous-callin-binding-3
     public void test4141_dangerousCallinBinding3() {
-       
+
        runConformTest(
             new String[] {
 		"Team4141dcb3.java",
@@ -7641,7 +7641,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a callin binding is inherited, read from binary - witness for NPE in SingleValueAttribute.evaluate reported by Marco
     // 4.1.42-otjld-inheritance-of-callin-binding-1
     public void test4142_inheritanceOfCallinBinding1() {
-       
+
        runConformTest(
             new String[] {
 		"T4142iocb1Main.java",
@@ -7707,11 +7707,11 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team4143ctd1.java (at line 5)\n" + 
-    		"	rm <- after test;\n" + 
-    		"	            ^^^^\n" + 
-    		"Bound base method test() is deprecated.\n" + 
+            "----------\n" +
+    		"1. ERROR in Team4143ctd1.java (at line 5)\n" +
+    		"	rm <- after test;\n" +
+    		"	            ^^^^\n" +
+    		"Bound base method test() is deprecated.\n" +
     		"----------\n");
     }
 
@@ -7740,11 +7740,11 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. WARNING in Team4143ctd1w.java (at line 5)\n" + 
-    		"	rm <- after test;\n" + 
-    		"	            ^^^^\n" + 
-    		"Bound base method test() is deprecated.\n" + 
+            "----------\n" +
+    		"1. WARNING in Team4143ctd1w.java (at line 5)\n" +
+    		"	rm <- after test;\n" +
+    		"	            ^^^^\n" +
+    		"Bound base method test() is deprecated.\n" +
     		"----------\n",
     		customOptions);
     }
@@ -7752,7 +7752,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // an after callin binding refers to a team method instead of a role method
     // 4.1.43-otjld-callin-to-team-method-1
     public void test4143_callinToTeamMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"Team4143cttm1.java",
@@ -7786,7 +7786,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // an after callin binding refers to an inherited team method instead of a role method
     // 4.1.43-otjld-callin-to-team-method-2
     public void test4143_callinToTeamMethod2() {
-       
+
        runConformTest(
             new String[] {
 		"Team4143cttm2_2.java",
@@ -7828,7 +7828,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_DocCommentSupport, CompilerOptions.ENABLED);
        customOptions.put(CompilerOptions.OPTION_ReportInvalidJavadoc, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team4143cttm3.java",
@@ -7899,11 +7899,11 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "    }\n" +
 			    "}\n"
             },
-            "----------\n" + 
-    		"1. ERROR in p2\\Team4143cttm4_2.java (at line 5)\n" + 
-    		"	void k(String s) <- after void test()\n" + 
-    		"	     ^\n" + 
-    		"The method k(String) from the type Team4143cttm4_1 is not visible\n" + 
+            "----------\n" +
+    		"1. ERROR in p2\\Team4143cttm4_2.java (at line 5)\n" +
+    		"	void k(String s) <- after void test()\n" +
+    		"	     ^\n" +
+    		"The method k(String) from the type Team4143cttm4_1 is not visible\n" +
     		"----------\n");
     }
 
@@ -7935,11 +7935,11 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "    }\n" +
 			    "}\n"
             },
-            "----------\n" + 
-    		"1. ERROR in p2\\Team4143cttm5_2.java (at line 5)\n" + 
-    		"	k <- before test;\n" + 
-    		"	^\n" + 
-    		"The method k() from the type Team4143cttm5_1 is not visible\n" + 
+            "----------\n" +
+    		"1. ERROR in p2\\Team4143cttm5_2.java (at line 5)\n" +
+    		"	k <- before test;\n" +
+    		"	^\n" +
+    		"The method k() from the type Team4143cttm5_1 is not visible\n" +
     		"----------\n");
     }
 
@@ -7984,7 +7984,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     		},
     		"OK");
     }
-    
+
     // Bug 318309 -  [compiler] warnings re unused exceptions from generated code
     // a role method does not declare the expection that it base method may throw
     public void test4145_baseMethodWithException1() {
@@ -8065,11 +8065,11 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     			"	public void test() { System.out.print('!'); }\n" +
     			"}\n"
     		},
-    		"----------\n" + 
-			"1. ERROR in Team4146ctc1.java (at line 4)\n" + 
-			"	print <- before T4146ctc1;\n" + 
-			"	                ^^^^^^^^^\n" + 
-			"Callin binding to constructor \'T4146ctc1()\' must use the callin modifier \"after\" (OTJLD 4.1(i)). \n" + 
+    		"----------\n" +
+			"1. ERROR in Team4146ctc1.java (at line 4)\n" +
+			"	print <- before T4146ctc1;\n" +
+			"	                ^^^^^^^^^\n" +
+			"Callin binding to constructor \'T4146ctc1()\' must use the callin modifier \"after\" (OTJLD 4.1(i)). \n" +
 			"----------\n");
     }
 
@@ -8185,16 +8185,16 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team724cbam2_2.java (at line 4)\n" + 
-    		"	public class Role724cbam2 playedBy T724cbam2 {\n" + 
-    		"	             ^^^^^^^^^^^^\n" + 
-    		"The abstract method test in type Role724cbam2 can only be defined by an abstract class\n" + 
+            "----------\n" +
+    		"1. ERROR in Team724cbam2_2.java (at line 4)\n" +
+    		"	public class Role724cbam2 playedBy T724cbam2 {\n" +
+    		"	             ^^^^^^^^^^^^\n" +
+    		"The abstract method test in type Role724cbam2 can only be defined by an abstract class\n" +
     		"----------\n" +
     		"2. ERROR in Team724cbam2_2.java (at line 4)\n" +
     		"	public class Role724cbam2 playedBy T724cbam2 {\n" +
     		"	             ^^^^^^^^^^^^\n" +
-    		"The type Team724cbam2_2.Role724cbam2 must implement the inherited abstract method Team724cbam2_2.Role724cbam2.test()\n" + 
+    		"The type Team724cbam2_2.Role724cbam2 must implement the inherited abstract method Team724cbam2_2.Role724cbam2.test()\n" +
     		"----------\n");
     }
 
@@ -8233,16 +8233,16 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team725cbam1_2.java (at line 10)\n" + 
-    		"	public class Role725cbam1_2 extends Role725cbam1_1 playedBy T725cbam1 {\n" + 
-    		"	             ^^^^^^^^^^^^^^\n" + 
-    		"The abstract method test in type Role725cbam1_2 can only be defined by an abstract class\n" + 
+            "----------\n" +
+    		"1. ERROR in Team725cbam1_2.java (at line 10)\n" +
+    		"	public class Role725cbam1_2 extends Role725cbam1_1 playedBy T725cbam1 {\n" +
+    		"	             ^^^^^^^^^^^^^^\n" +
+    		"The abstract method test in type Role725cbam1_2 can only be defined by an abstract class\n" +
     		"----------\n" +
-    		"2. ERROR in Team725cbam1_2.java (at line 10)\n" + 
-    		"	public class Role725cbam1_2 extends Role725cbam1_1 playedBy T725cbam1 {\n" + 
-    		"	             ^^^^^^^^^^^^^^\n" + 
-    		"The type Team725cbam1_2.Role725cbam1_2 must implement the inherited abstract method Team725cbam1_2.Role725cbam1_2.test()\n" + 
+    		"2. ERROR in Team725cbam1_2.java (at line 10)\n" +
+    		"	public class Role725cbam1_2 extends Role725cbam1_1 playedBy T725cbam1 {\n" +
+    		"	             ^^^^^^^^^^^^^^\n" +
+    		"The type Team725cbam1_2.Role725cbam1_2 must implement the inherited abstract method Team725cbam1_2.Role725cbam1_2.test()\n" +
     		"----------\n");
     }
 
@@ -8316,11 +8316,11 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team725cbam2_2.java (at line 4)\n" + 
-    		"	public class Role725cbam2_2 extends Role725cbam2_1 {}\n" + 
-    		"	             ^^^^^^^^^^^^^^\n" + 
-    		"The abstract method test in type Role725cbam2_2 can only be defined by an abstract class\n" + 
+            "----------\n" +
+    		"1. ERROR in Team725cbam2_2.java (at line 4)\n" +
+    		"	public class Role725cbam2_2 extends Role725cbam2_1 {}\n" +
+    		"	             ^^^^^^^^^^^^^^\n" +
+    		"The abstract method test in type Role725cbam2_2 can only be defined by an abstract class\n" +
     		"----------\n");
     }
     // Bug 337413 - [otjld][compiler] consider changing LiftingFailedException to a checked exception
@@ -8487,7 +8487,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
             options,
             null/*requester*/);
     }
-    
+
     // Bug 387996 - "T cannot be resolved or is not a field" error due to field named like package
     public void testBug387996a() {
     	runConformTest(
@@ -8547,22 +8547,22 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     		new String[] {
     			"test495624/MyTeam.java",
     			"package test495624;\n" +
-    			"public team class MyTeam {\n" + 
-    			"	protected class R {\n" + 
-    			"		callin void ci(final boolean b1, final boolean b2) {\n" + 
-    			"			base.ci(b1,b2);\n" + 
-    			"			new Runnable() {\n" + 
-    			"				public void run() {\n" + 
-    			"					if (b1) {\n" + 
-    			"						if (b2)\n" + 
-    			"							return; // (1)\n" + 
-    			"						else\n" + 
-    			"							return; // (2)\n" + 
-    			"					}\n" + 
-    			"				}\n" + 
-    			"			}.run();\n" + 
-    			"		}\n" + 
-    			"	}\n" + 
+    			"public team class MyTeam {\n" +
+    			"	protected class R {\n" +
+    			"		callin void ci(final boolean b1, final boolean b2) {\n" +
+    			"			base.ci(b1,b2);\n" +
+    			"			new Runnable() {\n" +
+    			"				public void run() {\n" +
+    			"					if (b1) {\n" +
+    			"						if (b2)\n" +
+    			"							return; // (1)\n" +
+    			"						else\n" +
+    			"							return; // (2)\n" +
+    			"					}\n" +
+    			"				}\n" +
+    			"			}.run();\n" +
+    			"		}\n" +
+    			"	}\n" +
     			"}\n"
     		},
     		"");

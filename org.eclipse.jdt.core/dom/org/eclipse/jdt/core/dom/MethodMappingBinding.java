@@ -135,7 +135,7 @@ class MethodMappingBinding implements IMethodMappingBinding
 
         return this.baseMethods;
     }
-    
+
     @Override
 	public IVariableBinding getBaseField()
     {

@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -24,11 +24,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 import junit.framework.Test;
 
 public class BaseClassVisibility extends AbstractOTJLDTest {
-	
+
 	public BaseClassVisibility(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -36,7 +36,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -48,7 +48,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // a role class is played by a public top-level class in a different package
     // 2.4.1-otjld-visible-base-class-1
     public void test241_visibleBaseClass1() {
-       
+
        runConformTest(
             new String[] {
 		"T241vbc1Main.java",
@@ -95,7 +95,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // a role class is played by a friendly top-level class in the same package
     // 2.4.1-otjld-visible-base-class-2
     public void test241_visibleBaseClass2() {
-       
+
        runConformTest(
             new String[] {
 		"T241vbc2Main.java",
@@ -291,7 +291,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // a role class is played by another private inner class in the same enclosing class
     // 2.4.1-otjld-visible-base-class-7
     public void test241_visibleBaseClass7() {
-       
+
        runConformTest(
             new String[] {
 		"T241vbc7.java",
@@ -331,7 +331,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // a role class is played by another public nested class in the same enclosing class
     // 2.4.1-otjld-visible-base-class-8
     public void test241_visibleBaseClass8() {
-       
+
        runConformTest(
             new String[] {
 		"T241vbc8.java",
@@ -373,7 +373,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // a role class is played by another protected inner class inherited in the same enclosing class
     // 2.4.1-otjld-visible-base-class-9
     public void test241_visibleBaseClass9() {
-       
+
        runConformTest(
             new String[] {
 		"T241vbc9_2.java",
@@ -417,7 +417,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // a role class is played by another friendly nested class inherited in the same enclosing class
     // 2.4.1-otjld-visible-base-class-10
     public void test241_visibleBaseClass10() {
-       
+
        runConformTest(
             new String[] {
 		"T241vbc10_2.java",
@@ -461,7 +461,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // a role class is played by a protected inner class inherited from the explicit super class
     // 2.4.1-otjld-visible-base-class-11
     public void test241_visibleBaseClass11() {
-       
+
        runConformTest(
             new String[] {
 		"T241vbc11Main.java",
@@ -507,7 +507,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // a role class is played by a protected inner class inherited from the explicit super class
     // 2.4.1-otjld-visible-base-class-12
     public void test241_visibleBaseClass12() {
-       
+
        runConformTest(
             new String[] {
 		"T241vbc12Main.java",
@@ -574,16 +574,16 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team241vbc12f.java (at line 3)\n" + 
-    		"	public class Role241vbc12f playedBy InvalidType {\n" + 
-    		"	                                    ^^^^^^^^^^^\n" + 
-    		"InvalidType cannot be resolved to a type\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team241vbc12f.java (at line 7)\n" + 
-    		"	private String getValue(InvalidType as Role241vbc12f obj) {\n" + 
-    		"	                        ^^^^^^^^^^^\n" + 
-    		"InvalidType cannot be resolved to a type\n" + 
+            "----------\n" +
+    		"1. ERROR in Team241vbc12f.java (at line 3)\n" +
+    		"	public class Role241vbc12f playedBy InvalidType {\n" +
+    		"	                                    ^^^^^^^^^^^\n" +
+    		"InvalidType cannot be resolved to a type\n" +
+    		"----------\n" +
+    		"2. ERROR in Team241vbc12f.java (at line 7)\n" +
+    		"	private String getValue(InvalidType as Role241vbc12f obj) {\n" +
+    		"	                        ^^^^^^^^^^^\n" +
+    		"InvalidType cannot be resolved to a type\n" +
     		"----------\n");
     }
 
@@ -660,7 +660,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // a role class is played by another team
     // 2.4.1-otjld-visible-base-class-15
     public void test241_visibleBaseClass15() {
-       
+
        runConformTest(
             new String[] {
 		"T241vbc15Main.java",
@@ -744,7 +744,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // a role class is played by a public externalized role
     // 2.4.1-otjld-visible-base-class-16
     public void test241_visibleBaseClass16() {
-       
+
        runConformTest(
             new String[] {
 		"T241vbc16Main.java",
@@ -796,7 +796,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // base class is non-static inner class - inner role created by lifting
     // 2.4.1-otjld-visible-base-class-17
     public void test241_visibleBaseClass17() {
-       
+
        runConformTest(
             new String[] {
 		"Team241vbc17.java",
@@ -844,7 +844,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // base class is non-static inner class - RM calls base constructor - inner role created by lifting
     // 2.4.1-otjld-visible-base-class-18
     public void test241_visibleBaseClass18() {
-       
+
        runConformTest(
             new String[] {
 		"Team241vbc18.java",
@@ -938,7 +938,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // base class is non-static inner class - inner base constructor called - inner role instantiated
     // 2.4.1-otjld-visible-base-class-19
     public void test241_visibleBaseClass19() {
-       
+
        runConformTest(
             new String[] {
 		"Team241vbc19.java",
@@ -995,7 +995,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // a non-visible base ctor is called using decapsulation
     // 2.4.1-otjld-visible-base-class-20
     public void test241_visibleBaseClass20() {
-       
+
        runConformTest(
             new String[] {
 		"Team241vbc20.java",
@@ -1055,11 +1055,11 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. WARNING in p2\\Team242ibc1.java (at line 3)\n" + 
-    		"	import base p1.T242ibc1;\n" + 
-    		"	            ^^^^^^^^^^^\n" + 
-    		"Overriding access restriction of base class p1.T242ibc1 (OTJLD 2.1.2(c)).\n" + 
+            "----------\n" +
+    		"1. WARNING in p2\\Team242ibc1.java (at line 3)\n" +
+    		"	import base p1.T242ibc1;\n" +
+    		"	            ^^^^^^^^^^^\n" +
+    		"Overriding access restriction of base class p1.T242ibc1 (OTJLD 2.1.2(c)).\n" +
     		"----------\n");
     }
 
@@ -1384,18 +1384,18 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in p2\\Team242ibc13c_2.java (at line 5)\n" + 
-    		"	public class Role242ibc13c_2 playedBy Role242ibc13c_1<@t> {}\n" + 
-    		"	                                      ^^^^^^^^^^^^^^^\n" + 
-    		"Trying to override access restriction of confined base class Role242ibc13c_1<@t> (OTJLD 2.1.2(c)).\n" + 
+            "----------\n" +
+    		"1. ERROR in p2\\Team242ibc13c_2.java (at line 5)\n" +
+    		"	public class Role242ibc13c_2 playedBy Role242ibc13c_1<@t> {}\n" +
+    		"	                                      ^^^^^^^^^^^^^^^\n" +
+    		"Trying to override access restriction of confined base class Role242ibc13c_1<@t> (OTJLD 2.1.2(c)).\n" +
     		"----------\n");
     }
 
     // a role class is played by a protected externalized role in another package
     // 2.4.2-otjld-inaccessible-base-class-14
     public void test242_inaccessibleBaseClass14() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team242ibc14_2.java",
@@ -1435,7 +1435,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // a role class is played by a private inner class, reported by kmeier
     // 2.4.2-otjld-inaccessible-base-class-15
     public void test242_inaccessibleBaseClass15() {
-       
+
        runConformTest(
             new String[] {
 		"Team242ibc15.java",
@@ -1478,7 +1478,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // role playedBy public inner, accessing list of role - reported by A.Werner
     // 2.4.2-otjld-inaccessible-base-class-16
     public void test242_inaccessibleBaseClass16() {
-       
+
        runConformTest(
             new String[] {
 		"Team242ibc16.java",
@@ -1565,7 +1565,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // role playedBy private inner, accessing list of role - reported by A.Werner
     // 2.4.2-otjld-inaccessible-base-class-17
     public void test242_inaccessibleBaseClass17() {
-       
+
        runConformTest(
             new String[] {
 		"Team242ibc17.java",
@@ -1657,7 +1657,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // role playedBy private inner, accessing list of role - workaround using ILowerable - reported by A.Werner
     // 2.4.2-otjld-inaccessible-base-class-18
     public void test242_inaccessibleBaseClass18() {
-       
+
        runConformTest(
             new String[] {
 		"Team242ibc18.java",
@@ -1740,111 +1740,111 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
             },
             "OK");
     }
-    
+
     // a role nested in a role file is bound to a private static inner class
     // sub-role reported bogus visibility problem re phantom role
     public void test242_inaccessibleBaseClass19() {
     	runConformTest(
     		new String[] {
     	"Team242iabc19.java",
-				"import base p242iabc19.T242iabc19.Inner;\n" + 
-				"\n" + 
-				"@SuppressWarnings(\"decapsulation\")\n" + 
-				"public team class Team242iabc19 {\n" + 
-				"	void test() {\n" + 
-				"		new Mid2().test();\n" + 
-				"	}\n" + 
-				"	public static void main(String[] args) {\n" + 
-				"		new Team242iabc19().test();\n" + 
-				"	}\n" + 
+				"import base p242iabc19.T242iabc19.Inner;\n" +
+				"\n" +
+				"@SuppressWarnings(\"decapsulation\")\n" +
+				"public team class Team242iabc19 {\n" +
+				"	void test() {\n" +
+				"		new Mid2().test();\n" +
+				"	}\n" +
+				"	public static void main(String[] args) {\n" +
+				"		new Team242iabc19().test();\n" +
+				"	}\n" +
 				"}\n",
     	"Team242iabc19/Mid1.java",
-				"team package Team242iabc19;\n" + 
-				"\n" + 
-				"protected team class Mid1 {\n" + 
-				"	protected class Role playedBy Inner {\n" + 
-				"		@SuppressWarnings(\"decapsulation\")\n" + 
-				"		protected Role() { base(); }\n" + 
-				"		@SuppressWarnings(\"decapsulation\")\n" + 
-				"		protected void test() -> void test();\n" + 
-				"	}\n" + 
+				"team package Team242iabc19;\n" +
+				"\n" +
+				"protected team class Mid1 {\n" +
+				"	protected class Role playedBy Inner {\n" +
+				"		@SuppressWarnings(\"decapsulation\")\n" +
+				"		protected Role() { base(); }\n" +
+				"		@SuppressWarnings(\"decapsulation\")\n" +
+				"		protected void test() -> void test();\n" +
+				"	}\n" +
 				"}\n",
     	"Team242iabc19/Mid2.java",
-		    	"team package Team242iabc19;\n" + 
-				"\n" + 
-				"protected team class Mid2 extends Mid1 {\n" + 
-				"	protected void test() {\n" + 
-				"		new Role().test();\n" + 
-				"	}\n" + 
+		    	"team package Team242iabc19;\n" +
+				"\n" +
+				"protected team class Mid2 extends Mid1 {\n" +
+				"	protected void test() {\n" +
+				"		new Role().test();\n" +
+				"	}\n" +
 				"}\n",
     	"p242ibc19/T242iabc19.java",
-		    	"package p242iabc19;\n" + 
-				"\n" + 
-				"public class T242iabc19 {\n" + 
-				"	@SuppressWarnings(\"unused\")\n" + 
-				"	private static class Inner {\n" + 
-				"		void test() {\n" + 
-				"			System.out.print(\"OK\");\n" + 
-				"		}\n" + 
-				"	}\n" + 
+		    	"package p242iabc19;\n" +
+				"\n" +
+				"public class T242iabc19 {\n" +
+				"	@SuppressWarnings(\"unused\")\n" +
+				"	private static class Inner {\n" +
+				"		void test() {\n" +
+				"			System.out.print(\"OK\");\n" +
+				"		}\n" +
+				"	}\n" +
 				"}\n"
     		},
     		"OK");
     }
-    
+
     // a role nested in a role file is bound to a private static inner class
     // sub-role reported bogus visibility problem - inner role is materialized
     public void test242_inaccessibleBaseClass20() {
     	runConformTest(
     		new String[] {
     	"Team242iabc20.java",
-				"import base p242iabc20.T242iabc20.Inner;\n" + 
-				"\n" + 
-				"@SuppressWarnings(\"decapsulation\")\n" + 
-				"public team class Team242iabc20 {\n" + 
-				"	void test() {\n" + 
-				"		new Mid2().test();\n" + 
-				"	}\n" + 
-				"	public static void main(String[] args) {\n" + 
-				"		new Team242iabc20().test();\n" + 
-				"	}\n" + 
+				"import base p242iabc20.T242iabc20.Inner;\n" +
+				"\n" +
+				"@SuppressWarnings(\"decapsulation\")\n" +
+				"public team class Team242iabc20 {\n" +
+				"	void test() {\n" +
+				"		new Mid2().test();\n" +
+				"	}\n" +
+				"	public static void main(String[] args) {\n" +
+				"		new Team242iabc20().test();\n" +
+				"	}\n" +
 				"}\n",
     	"Team242iabc20/Mid1.java",
-				"team package Team242iabc20;\n" + 
-				"\n" + 
-				"protected team class Mid1 {\n" + 
-				"	protected class Role playedBy Inner {\n" + 
-				"		@SuppressWarnings(\"decapsulation\")\n" + 
-				"		protected Role() { base(); }\n" + 
-				"		@SuppressWarnings(\"decapsulation\")\n" + 
-				"		protected void test() -> void test();\n" + 
-				"	}\n" + 
+				"team package Team242iabc20;\n" +
+				"\n" +
+				"protected team class Mid1 {\n" +
+				"	protected class Role playedBy Inner {\n" +
+				"		@SuppressWarnings(\"decapsulation\")\n" +
+				"		protected Role() { base(); }\n" +
+				"		@SuppressWarnings(\"decapsulation\")\n" +
+				"		protected void test() -> void test();\n" +
+				"	}\n" +
 				"}\n",
     	"Team242iabc20/Mid2.java",
-		    	"team package Team242iabc20;\n" + 
-				"\n" + 
+		    	"team package Team242iabc20;\n" +
+				"\n" +
 				"protected team class Mid2 extends Mid1 {\n" +
-				"   @Override\n" + 
-				"	protected class Role playedBy Inner {}\n" + 
-				"	protected void test() {\n" + 
-				"		new Role().test();\n" + 
-				"	}\n" + 
+				"   @Override\n" +
+				"	protected class Role playedBy Inner {}\n" +
+				"	protected void test() {\n" +
+				"		new Role().test();\n" +
+				"	}\n" +
 				"}\n",
     	"p242ibc19/T242iabc20.java",
-		    	"package p242iabc20;\n" + 
-				"\n" + 
-				"public class T242iabc20 {\n" + 
-				"	@SuppressWarnings(\"unused\")\n" + 
-				"	private static class Inner {\n" + 
-				"		void test() {\n" + 
-				"			System.out.print(\"OK\");\n" + 
-				"		}\n" + 
-				"	}\n" + 
+		    	"package p242iabc20;\n" +
+				"\n" +
+				"public class T242iabc20 {\n" +
+				"	@SuppressWarnings(\"unused\")\n" +
+				"	private static class Inner {\n" +
+				"		void test() {\n" +
+				"			System.out.print(\"OK\");\n" +
+				"		}\n" +
+				"	}\n" +
 				"}\n"
     		},
     		"OK");
     }
-    
+
     // a role class is played by a base class that has the same short name
     // 2.4.3-otjld-baseclass-has-same-shortname-1
     public void test243_baseclassHasSameShortname1() {
@@ -1937,7 +1937,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // a role class is played by a public top-level class of the same short name in a different package, and the fully qualified name is used in the playedBy
     // 2.4.6-otjld-baseclass-has-same-shortname
     public void test246_baseclassHasSameShortname() {
-       
+
        runConformTest(
             new String[] {
 		"T246bhssMain.java",
@@ -1982,7 +1982,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // a role and its base have the same name, base import used, callin binding declared
     // 2.4.6-otjld-baseclass-has-same-shortname-2
     public void test246_baseclassHasSameShortname2() {
-       
+
        runConformTest(
             new String[] {
 		"Team246bhss2.java",
@@ -2024,7 +2024,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // a base guard uses a base imported class
     // 2.4.7-otjld-base-import-scope-1
     public void test247_baseImportScope1() {
-       
+
        runConformTest(
             new String[] {
 		"pBase/T247bisMain1.java",
@@ -2067,7 +2067,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
     // a parameter mapping (callout) uses the base import scope
     // 2.4.7-otjld-base-import-scope-2
     public void test247_baseImportScope2() {
-       
+
        runConformTest(
             new String[] {
 		"pTeam/Team247bis2.java",

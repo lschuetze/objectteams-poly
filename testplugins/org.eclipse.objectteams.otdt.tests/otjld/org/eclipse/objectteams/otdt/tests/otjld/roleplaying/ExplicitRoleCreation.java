@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -25,11 +25,11 @@ import org.eclipse.jdt.core.tests.junit.extension.TestCase;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 public class ExplicitRoleCreation extends AbstractOTJLDTest {
-	
+
 	public ExplicitRoleCreation(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -37,7 +37,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -49,7 +49,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // an unbound role without a superroles or -class is created using the default constructor
     // 2.3.1-otjld-creation-of-unbound-role-1
     public void test231_creationOfUnboundRole1() {
-       
+
        runConformTest(
             new String[] {
 		"T231cour1Main.java",
@@ -83,7 +83,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // an unbound role without a superroles or -class is created using a no-arg constructor
     // 2.3.1-otjld-creation-of-unbound-role-2
     public void test231_creationOfUnboundRole2() {
-       
+
        runConformTest(
             new String[] {
 		"T231cour2Main.java",
@@ -122,7 +122,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // an unbound role with a superclass is created
     // 2.3.1-otjld-creation-of-unbound-role-3
     public void test231_creationOfUnboundRole3() {
-       
+
        runConformTest(
             new String[] {
 		"T231cour3Main.java",
@@ -168,7 +168,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // an unbound role with an implicit superrole is created with constructors using this and tsuper
     // 2.3.1-otjld-creation-of-unbound-role-4
     public void test231_creationOfUnboundRole4() {
-       
+
        runConformTest(
             new String[] {
 		"T231cour4Main.java",
@@ -219,7 +219,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // an unbound role with an explicit superrole is created with constructors using this and ssuper
     // 2.3.1-otjld-creation-of-unbound-role-5
     public void test231_creationOfUnboundRole5() {
-       
+
        runConformTest(
             new String[] {
 		"T231cour5Main.java",
@@ -266,7 +266,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role is created externalized with parameterized syntax
     // 2.3.1-otjld-creation-of-unbound-role-6
     public void test231_creationOfUnboundRole6() {
-       
+
        runConformTest(
             new String[] {
 		"T231cour6Main.java",
@@ -294,7 +294,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role directly bound to a baseclass and without a constructor is created
     // 2.3.2-otjld-bound-role-without-constructor-1
     public void test232_boundRoleWithoutConstructor1() {
-       
+
        runConformTest(
             new String[] {
 		"T232brwc1Main.java",
@@ -339,7 +339,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role indirectly bound to a baseclass via its explicit superrole, and without a constructor is created
     // 2.3.2-otjld-bound-role-without-constructor-2
     public void test232_boundRoleWithoutConstructor2() {
-       
+
        runConformTest(
             new String[] {
 		"T232brwc2Main.java",
@@ -386,7 +386,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role indirectly bound to a baseclass via its implicit superrole, and without a constructor is created
     // 2.3.2-otjld-bound-role-without-constructor-3
     public void test232_boundRoleWithoutConstructor3() {
-       
+
        runConformTest(
             new String[] {
 		"T232brwc3Main.java",
@@ -436,7 +436,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role indirectly bound to a baseclass via its indirect superrole, and without a constructor is created
     // 2.3.2-otjld-bound-role-without-constructor-4
     public void test232_boundRoleWithoutConstructor4() {
-       
+
        runConformTest(
             new String[] {
 		"T232brwc4Main.java",
@@ -621,7 +621,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role directly bound to a baseclass has a constructor with a base constructor call
     // 2.3.4-otjld-bound-role-with-noarg-constructor-3
     public void test234_boundRoleWithNoargConstructor3() {
-       
+
        runConformTest(
             new String[] {
 		"Team234brwnc3.java",
@@ -660,7 +660,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role indirectly bound to a baseclass has a no-arg constructor
     // 2.3.4-otjld-bound-role-with-noarg-constructor-4
     public void test234_boundRoleWithNoargConstructor4() {
-       
+
        runConformTest(
             new String[] {
 		"Team234brwnc4_2.java",
@@ -746,7 +746,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role directly bound to a baseclass has a constructor with a base constructor call
     // 2.3.5-otjld-constructor-with-basecall-1
     public void test235_constructorWithBasecall1() {
-       
+
        runConformTest(
             new String[] {
 		"T235cwb1Main.java",
@@ -796,7 +796,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role indirectly bound to a baseclass has a constructor with a base constructor call; base() implicitly includes calling the lift-ctor
     // 2.3.5-otjld-constructor-with-basecall-2
     public void test235_constructorWithBasecall2() {
-       
+
        runConformTest(
             new String[] {
 		"T235cwb2Main.java",
@@ -857,7 +857,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role indirectly bound to a baseclass invokes a base constructor using method invocation conversion
     // 2.3.5-otjld-constructor-with-basecall-3
     public void test235_constructorWithBasecall3() {
-       
+
        runConformTest(
             new String[] {
 		"T235cwb3Main.java",
@@ -906,7 +906,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // constructors declare an exception
     // Bug 322723 -  [compiler] a role constructor with declared exceptions causes bogus compile error
     public void test235_constructorWithBasecall4() {
-       
+
        runConformTest(
             new String[] {
 		"T235cwb4Main.java",
@@ -1013,15 +1013,15 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     			"    T236cwb6(String v) { this.val = v; }\n" +
     			"}\n"
     		},
-    		"----------\n" + 
-    		"1. ERROR in Team236cwb6.java (at line 8)\n" + 
-    		"	Object b = base(v);\n" + 
-    		"	           ^^^^\n" + 
-    		"Base constructor call not allowed in this position, must be first statement or argument to another constructor call (OTJLD 2.4.2(c)).\n" + 
+    		"----------\n" +
+    		"1. ERROR in Team236cwb6.java (at line 8)\n" +
+    		"	Object b = base(v);\n" +
+    		"	           ^^^^\n" +
+    		"Base constructor call not allowed in this position, must be first statement or argument to another constructor call (OTJLD 2.4.2(c)).\n" +
     		"----------\n");
     }
 
-    // 
+    //
     public void test236_constructorWithBasecall7() {
     	runConformTest(
     		new String[]{
@@ -1147,7 +1147,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role directly bound to a baseclass has a constructor with a this call refering to another constructor with a base constructor call
     // 2.3.7-otjld-self-and-base-calls-1
     public void test237_selfAndBaseCalls1() {
-       
+
        runConformTest(
             new String[] {
 		"T237sabc1Main.java",
@@ -1200,7 +1200,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role with an explicit bound superrole class has a constructor with a super call refering to a super constructor with a base constructor call
     // 2.3.7-otjld-self-and-base-calls-2
     public void test237_selfAndBaseCalls2() {
-       
+
        runConformTest(
             new String[] {
 		"T237sabc2Main.java",
@@ -1255,7 +1255,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role with an explicit non-role super class has a constructor with a super call followed by a base call
     // 2.3.7-otjld-self-and-base-calls-3
     public void test237_selfAndBaseCalls3() {
-       
+
        runConformTest(
             new String[] {
 		"T237sabc3Main.java",
@@ -1322,7 +1322,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role with an explicit superrole class bound to a different baseclass, has a constructor with a base call
     // 2.3.7-otjld-self-and-base-calls-4
     public void test237_selfAndBaseCalls4() {
-       
+
        runConformTest(
             new String[] {
 		"T237sabc4Main.java",
@@ -1455,7 +1455,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role with an implicit super role class, has a constructor with a super call to a private tsuper constructor
     // 2.3.10-otjld-inaccessible-super-constructor-1t
     public void test2310_inaccessibleSuperConstructor1t() {
-       
+
        runConformTest(
             new String[] {
 		"Team2310isc1t_2.java",
@@ -1664,7 +1664,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role with an explicit non-role super class has a constructor that refers via this to another constructor that has a super call
     // 2.3.12-otjld-indirect-super-call-1
     public void test2312_indirectSuperCall1() {
-       
+
        runConformTest(
             new String[] {
 		"T2312isc1Main.java",
@@ -1734,7 +1734,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role with an explicit super role class has a constructor that refers via this to another constructor that has a super call
     // 2.3.12-otjld-indirect-super-call-2
     public void test2312_indirectSuperCall2() {
-       
+
        runConformTest(
             new String[] {
 		"T2312isc2Main.java",
@@ -1933,7 +1933,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role with an implicit super role class has a constructor that references a private (accessible!) super constructor via tsuper
     // 2.3.14-otjld-inaccessible-tsuper-constructor-2
     public void test2314_inaccessibleTsuperConstructor2() {
-       
+
        runConformTest(
             new String[] {
 		"Team2314itc2_2.java",
@@ -2096,7 +2096,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role with an implicit super role class has a constructor that refers via tsuper to a super constructor that in turn uses a base call
     // 2.3.15-otjld-tsuper-call-1
     public void test2315_tsuperCall1() {
-       
+
        runConformTest(
             new String[] {
 		"T2315tc1Main.java",
@@ -2156,7 +2156,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role with implicit and explicit super role classes using constructors with this, tsuper, super, and base
     // 2.3.15-otjld-tsuper-call-2
     public void test2315_tsuperCall2() {
-       
+
        runConformTest(
             new String[] {
 		"T2315tc2Main.java",
@@ -3047,7 +3047,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role object is created in a field initializer of a sibling role
     // 2.3.25-otjld-field-initializer-creates-role-1
     public void test2325_fieldInitializerCreatesRole1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2325ficr1.java",
@@ -3103,7 +3103,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a lifting constructor is used with a new expression as argument
     // 2.3.27-otjld-explicit-use-of-lifting-constructor-1
     public void test2327_explicitUseOfLiftingConstructor1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2327euolc1.java",
@@ -3137,7 +3137,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a lifting constructor is used - giving a warning
     // 2.3.27-otjld-explicit-use-of-lifting-constructor-2
     public void test2327_explicitUseOfLiftingConstructor2() {
-       
+
        runConformTest(
             new String[] {
 		"T2327euolc2Main.java",
@@ -3176,7 +3176,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a lifting constructor is used - role already exists
     // 2.3.27-otjld-explicit-use-of-lifting-constructor-3
     public void test2327_explicitUseOfLiftingConstructor3() {
-       
+
        runConformTest(
             new String[] {
 		"T2327euolc3Main.java",
@@ -3221,10 +3221,10 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
             "CAUGHT");
     }
 
-    // 
+    //
     // 2.3.28-otjld-creating-array-of-externalized-role-1
     public void test2328_creatingArrayOfExternalizedRole1() {
-       
+
        runConformTest(
             new String[] {
 		"T2328caoer1Main.java",
@@ -3263,7 +3263,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role creation triggers lifting but the result is discarded (white-box witness for TPX-401)
     // 2.3.29-otjld-creation-as-statement-1
     public void test2329_creationAsStatement1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2329cas1.java",
@@ -3306,7 +3306,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role creation triggers lifting but the result is discarded (white-box witness for TPX-401) -- qualified creation
     // 2.3.29-otjld-creation-as-statement-2
     public void test2329_creationAsStatement2() {
-       
+
        runConformTest(
             new String[] {
 		"Team2329cas2.java",
@@ -3348,7 +3348,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role with base-ctor-call is retrieved from the cache via getAllRoles()
     // 2.3.29-otjld-creation-as-statement-3
     public void test2329_creationAsStatement3() {
-       
+
        runConformTest(
             new String[] {
 		"Team2329cas3.java",
@@ -3446,7 +3446,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a team super-call tries to create a role before the team is initialized - invoked with casted null argument - reported by kmeier
     // 2.3.30-otjld-role-creation-in-supercall-1g
     public void test2330_roleCreationInSupercall1g() {
-       
+
        runConformTest(
             new String[] {
 		"Team2320rcis1g_2.java",
@@ -3477,7 +3477,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a team super-call tries to create a role before the team is initialized - create by declared lifting
     // 2.3.30-otjld-role-creation-in-supercall-2
     public void test2330_roleCreationInSupercall2() {
-       
+
        runConformTest(
             new String[] {
 		"Team2320rcis2_2.java",
@@ -3521,7 +3521,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a team super-call tries to create a role before the team is initialized - abstract role instantiated in super-team
     // 2.3.30-otjld-role-creation-in-supercall-3
     public void test2330_roleCreationInSupercall3() {
-       
+
        runConformTest(
             new String[] {
 		"Team2320rcis3_2.java",
@@ -3559,7 +3559,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a team super-call tries to create a role before the team is initialized - abstract role instantiated in super-team via template method
     // 2.3.30-otjld-role-creation-in-supercall-3f
     public void test2330_roleCreationInSupercall3f() {
-       
+
        runConformTest(
             new String[] {
 		"Team2320rcis3f_2.java",
@@ -3601,7 +3601,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // an unbound role is specialized to a bound role, default constructor becomes invalid
     // 2.3.31-otjld-role-creation-invalidated-by-specialization-1
     public void test2331_roleCreationInvalidatedBySpecialization1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2331rcibs1_2.java",
@@ -3637,7 +3637,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // A static role method creates a role instance
     // 2.3.32-otjld-role-creation-from-static-context-1
     public void test2332_roleCreationFromStaticContext1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2332rcfsc1.java",
@@ -3692,7 +3692,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // the anchor in an explicit role creation has the type of a nested team
     // 2.3.34-otjld-creating-role-of-nested-team-1
     public void test2334_creatingRoleOfNestedTeam1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2334cront1.java",
@@ -3720,7 +3720,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // creating nested team and its role in one step
     // 2.3.34-otjld-creating-role-of-nested-team-2
     public void test2334_creatingRoleOfNestedTeam2() {
-       
+
        runConformTest(
             new String[] {
 		"Team2334cront2.java",
@@ -3746,7 +3746,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role is bound to a regular inner with a non-visible constructor invoked via base()
     // 2.3.35-otjld-creating-role-of-regular-inner-1
     public void test2335_creatingRoleOfRegularInner1() {
-       
+
        runConformTest(
             new String[] {
 		"Team2335crori1.java",
@@ -3791,7 +3791,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role is bound to a lower role with a non-visible constructor invoked via base()
     // 2.3.35-otjld-creating-role-of-regular-inner-2
     public void test2335_creatingRoleOfRegularInner2() {
-       
+
        runConformTest(
             new String[] {
 		"Team2335crori2_2.java",
@@ -3836,7 +3836,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
     // a role is bound to a lower role with a non-visible constructor invoked via base()
     // addition: one more arg (2byte)
     public void test2335_creatingRoleOfRegularInner2b() {
-       
+
        runConformTest(
             new String[] {
 		"Team2335crori2b_2.java",

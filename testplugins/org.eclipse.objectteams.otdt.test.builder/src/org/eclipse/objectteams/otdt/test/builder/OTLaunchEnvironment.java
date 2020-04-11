@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -40,17 +40,17 @@ import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
  * Utility class for launching a program in a controlled environment.
  * Disposing the application's object and the OTLaunchEnvironment
  * should enable the JVM to also dispose all classes loaded in the process.
- * 
+ *
  * @author stephan
  * @version $Id: OTLaunchEnvironment.java 14220 2006-09-04 22:13:40Z stephan $
  */
-public class OTLaunchEnvironment extends URLClassLoader 
+public class OTLaunchEnvironment extends URLClassLoader
 {
 	ObjectTeamsTransformer transformer = null;
 	/** Where to look for class files. */
 	IPath bindir;
 	/**
-	 * Setup a launch environment for the given paths. 
+	 * Setup a launch environment for the given paths.
 	 * @param workspaceRoot path to the workspace root
 	 * @param bindir        absolute workspace path to the output location holding class files.
 	 * @throws MalformedURLException if the OTRE_JAR_PATH is not a valid path.
@@ -60,16 +60,16 @@ public class OTLaunchEnvironment extends URLClassLoader
 		this.bindir = workspaceRoot.append(bindir);
 	}
 	/**
-	 * Same as above but supports the use of OTRE transformers, if `useTransformer == true'  
+	 * Same as above but supports the use of OTRE transformers, if `useTransformer == true'
 	 */
-	OTLaunchEnvironment(IPath workspaceRoot, IPath bindir, boolean useTransformer) 
-			throws MalformedURLException 
+	OTLaunchEnvironment(IPath workspaceRoot, IPath bindir, boolean useTransformer)
+			throws MalformedURLException
 	{
 		this(workspaceRoot, bindir);
 		if (useTransformer)
 			this.transformer = new ObjectTeamsTransformer();
 	}
-	
+
 	static URL getOTREURL() throws MalformedURLException {
 		IClasspathEntry[] entries = new OTREContainer().getClasspathEntries();
 		String url = "file:"+entries[0].getPath();  //$NON-NLS-1$
@@ -92,7 +92,7 @@ public class OTLaunchEnvironment extends URLClassLoader
 		// this will use the URL pointing to the OTRE:
 		return super.findClass(name);
 	}
-	
+
 	@Override
 	public InputStream getResourceAsStream(String name) {
 		File file = new File(bindir.append(name).toOSString());
@@ -101,38 +101,38 @@ public class OTLaunchEnvironment extends URLClassLoader
 				return new FileInputStream(file);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
-			} 
+			}
 		return super.getResourceAsStream(name);
 	}
-	
+
 	/* We found an existing file, load its bytes and define the class. */
-	private Class<?> defineClassFromFile(String name, File file) 
-		throws Exception 
+	private Class<?> defineClassFromFile(String name, File file)
+		throws Exception
 	{
 		try (FileInputStream fis = new FileInputStream(file)) {
 			byte[] bytes = new byte[(int) file.length()];
 			fis.read(bytes);
-			if (transformer != null) 
+			if (transformer != null)
 				bytes = transformer.transform(this, name, null, null, bytes);
 			return defineClass(name, bytes, 0, bytes.length);
 		}
 	}
-	
+
 	/**
 	 * Load class `className' and invoke its method `methodName'.
 	 * The method must be static and without arguments.
-	 *  
+	 *
 	 * @param className
 	 * @param methodName
 	 * @return the methods return (possibly boxed).
-	 * 
+	 *
 	 * @throws Exception too many to list explicitly ;-)
 	 */
-	public Object launch(String className, String methodName) 
-			throws Exception 
+	public Object launch(String className, String methodName)
+			throws Exception
 	{
 		Class<?> clazz = this.loadClass(className);
-		Method method = clazz.getMethod(methodName, new Class[0]);		
+		Method method = clazz.getMethod(methodName, new Class[0]);
 		return method.invoke(null, new Object[0]);
 	}
 }

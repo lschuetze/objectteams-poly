@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id: OTSearchRequestor.java 23416 2010-02-03 19:59:31Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -42,7 +42,7 @@ import org.eclipse.objectteams.otdt.core.OTModelManager;
 public class OTSearchRequestor extends SearchRequestor
 {
     private ArrayList<IOTType> otTypes = null;
-    
+
     public OTSearchRequestor()
     {
         this.otTypes = new ArrayList<IOTType>();
@@ -53,10 +53,10 @@ public class OTSearchRequestor extends SearchRequestor
     {
         IType javaType = null;
         Object element = match.getElement();
-        
+
         if (element instanceof IType)
             javaType = (IType) element;
-        
+
         else if (match.getResource() != null)
         {
             IJavaElement jel = JavaCore.create(match.getResource());
@@ -69,7 +69,7 @@ public class OTSearchRequestor extends SearchRequestor
             IOTType otType = OTModelManager.getOTElement(javaType);
             if (otType == null)
             {
-                try 
+                try
 				{
 					int modifiers = javaType.getFlags();
 					if (Flags.isTeam(modifiers) || Flags.isRole(modifiers)) {
@@ -81,12 +81,12 @@ public class OTSearchRequestor extends SearchRequestor
                 	// ignore -- element probably not present (e.g. because of __OT__RoleClass looking for its source)
 				}
             }
-            
+
             if (otType != null)
                 this.otTypes.add(otType);
         }
     }
-    
+
     public IOTType[] getOTTypes()
     {
         return this.otTypes.toArray(new IOTType[(this.otTypes.size())]);

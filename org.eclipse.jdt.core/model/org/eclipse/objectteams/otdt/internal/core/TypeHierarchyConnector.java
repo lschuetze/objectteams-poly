@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id: TypeHierarchyConnector.java 23416 2010-02-03 19:59:31Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -35,17 +35,17 @@ import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
  * @author anklam
  *
  * This class is used to access the information of a TypeHierarchy.
- * 
+ *
  * @version $Id: TypeHierarchyConnector.java 23416 2010-02-03 19:59:31Z stephan $
  */
 public class TypeHierarchyConnector extends TypeHierarchy
 {
-    
+
     public TypeHierarchyConnector(IType focus, IJavaProject project, boolean computeSubtypes)
 	{
         super(focus, new ICompilationUnit[0], project, computeSubtypes);
 	}
-    
+
     public TypeHierarchyConnector(IType type, IJavaSearchScope scope, boolean computeSubtypes) {
 		super(type, new ICompilationUnit[0], scope, computeSubtypes);
 	}
@@ -55,7 +55,7 @@ public class TypeHierarchyConnector extends TypeHierarchy
     {
         return this.classToSuperclass;
     }
-    
+
     @SuppressWarnings("rawtypes") // accessing super field with raw type
     public Map getTypeToSubtypes()
     {
@@ -73,18 +73,18 @@ public class TypeHierarchyConnector extends TypeHierarchy
     {
     	return this.typeFlags;
     }
-    
+
 	@Override
 	public IType[] getRootClasses()
     {
 		// This is a workaround.
         // because a role focus type is contained as
-        // root class even with a resolved superclass.        
+        // root class even with a resolved superclass.
         if (this.classToSuperclass.keySet().contains(this.focusType))
         {
         	TypeVector result = new TypeVector(super.getRootClasses());
             result.remove(this.focusType);
-        	return result.elements();            
+        	return result.elements();
         }
         else
         {

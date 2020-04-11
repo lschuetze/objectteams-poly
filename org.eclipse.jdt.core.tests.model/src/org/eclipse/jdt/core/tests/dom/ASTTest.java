@@ -1316,7 +1316,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		if (s == null)
 			return AST.JLS12;
 		switch (s) {
-		case JavaCore.VERSION_1_2 : return AST.JLS2; 
+		case JavaCore.VERSION_1_2 : return AST.JLS2;
         case JavaCore.VERSION_1_3: return AST.JLS3;
         case JavaCore.VERSION_1_4: return AST.JLS4;
         case JavaCore.VERSION_1_5: return AST.JLS4;
@@ -1468,16 +1468,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		String[] reserved  =
 				new String[] {
 						"true", "false", "null", // literals //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-//{ObjectTeams: for Some.Team.this.anchor.Role "this" must be usable as an identifier 
+//{ObjectTeams: for Some.Team.this.anchor.Role "this" must be usable as an identifier
 /* orig:
 						"abstract", "default", "if", "private", "this", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-  :giro */						
+  :giro */
 						"abstract", "default", "if", "private", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 						// more keywords:
 						"as", "callin", "playedBy", "precedence", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-						"team", "tsuper", "with", "within", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ 
+						"team", "tsuper", "with", "within", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 						// treated as identifier: "base", "when" (predicate method name)
-// SH}						
+// SH}
 						"boolean", "do", "implements", "protected", "throw", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 						"break", "double", "import", "public", "throws", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 						"byte", "else", "instanceof", "return", "transient", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
@@ -1777,17 +1777,17 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		} catch (RuntimeException e) {
 			// pass
 		}
-		
+
 		// test for 319900
 		x.setLiteralValue("'");
 		assertEquals("", "\"'\"", x.getEscapedValue());
 		assertEquals("", "'", x.getLiteralValue());
-		
+
 		// test for 319900
 		x.setEscapedValue("\"'\"");
 		assertEquals("", "\"'\"", x.getEscapedValue());
 		assertEquals("", "'", x.getLiteralValue());
-		
+
 		// test for bug 442614
 		x.setLiteralValue("\0041");
 		assertEquals("", "\"\\u00041\"", x.getEscapedValue());
@@ -3392,7 +3392,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 						}
 					});
 		}
-		
+
 		genericPropertyTest(x, new Property("Initializer", false, Expression.class) { //$NON-NLS-1$
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
@@ -3493,7 +3493,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 						}
 					});
 		}
-		
+
 		genericPropertyTest(x, new Property("Initializer", false, Expression.class) { //$NON-NLS-1$
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
@@ -3561,9 +3561,9 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(x.getJavadoc() == null);
 		assertTrue(x.parameters().size() == 0);
 		if (this.ast.apiLevel() < getJLS8()) {
-			assertTrue(x.thrownExceptions().size() == 0);			
+			assertTrue(x.thrownExceptions().size() == 0);
 		} else {
-			assertTrue(x.thrownExceptionTypes().size() == 0);			
+			assertTrue(x.thrownExceptionTypes().size() == 0);
 		}
 		assertTrue(x.getBody() == null);
 		assertTrue(x.getNodeType() == ASTNode.METHOD_DECLARATION);
@@ -3699,7 +3699,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 						}
 					});
 		}
-		
+
 		genericPropertyListTest(x, x.parameters(),
 		  new Property("Parameters", true, SingleVariableDeclaration.class) { //$NON-NLS-1$
 			public ASTNode sample(AST targetAst, boolean parented) {
@@ -3735,7 +3735,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 							}
 							return result;
 						}
-					});			
+					});
 		} else {
 			genericPropertyListTest(x, x.thrownExceptionTypes(),
 					  new Property("ThrownExceptionTypes", true, Type.class) { //$NON-NLS-1$
@@ -3746,7 +3746,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 							}
 							return result;
 						}
-					});			
+					});
 		}
 
 		genericPropertyTest(x, new Property("Body", false, Block.class) { //$NON-NLS-1$
@@ -8946,7 +8946,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 			}
 			assertEquals(nodeType, node.getNodeType());
 		}
-		
+
 		// assert that test covers all nodeTypes:
 		Field[] fields = ASTNode.class.getDeclaredFields();
 		HashSet declaredNodeTypes = new HashSet();
@@ -8972,7 +8972,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		}
 		assertEquals("node types missing in test", Collections.EMPTY_SET, declaredNodeTypes);
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	public void testASTLevels() throws Exception {
 		int[] apilLevels = {AST.JLS2, AST.JLS3, AST.JLS4, AST.JLS8, AST.JLS9, AST.JLS10, AST.JLS11, AST.JLS12, AST.JLS13, AST.JLS14};
@@ -8983,8 +8983,8 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				throw new AssertionFailedError("missing support for AST level: " + level);
 			}
 		}
-		
-		
+
+
 	}
 }
 

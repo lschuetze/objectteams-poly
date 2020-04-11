@@ -304,7 +304,7 @@ protected void notifySourceElementRequestor(AbstractMethodDeclaration methodDecl
 	Argument[] arguments = MethodSignatureEnhancer.getSourceArguments(methodDeclaration);
 	boolean [] baseclassFlags = null;
 // SH}
-	ParameterInfo[] parameterInfos = null; 
+	ParameterInfo[] parameterInfos = null;
 	ISourceElementRequestor.MethodInfo methodInfo = new ISourceElementRequestor.MethodInfo();
 	methodInfo.typeAnnotated = ((methodDeclaration.bits & ASTNode.HasTypeAnnotations) != 0);
 
@@ -720,7 +720,7 @@ public void notifySourceElementRequestor(
 				nodes[index++] = types[i];
 			}
 		}
-		
+
 		if (parsedUnit.moduleDeclaration != null)
 			nodes[index++] = parsedUnit.moduleDeclaration;
 
@@ -1080,7 +1080,7 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
 			case 1 :
 				methodIndex++;
 //{ObjectTeams: don't convert generated methods:
-				if (nextMethodDeclaration.isGenerated && !(nextMethodDeclaration instanceof GuardPredicateDeclaration)) 
+				if (nextMethodDeclaration.isGenerated && !(nextMethodDeclaration instanceof GuardPredicateDeclaration))
 					break;
 // SH}
 				notifySourceElementRequestor(nextMethodDeclaration, typeDeclaration, currentPackage);
@@ -1135,7 +1135,7 @@ private void fillModuleInfo(ModuleDeclaration mod, ISourceElementRequestor.Modul
 				}
 			}
 			exps[i] = exp;
-		}					
+		}
 		modInfo.exports = exps;
 	}
 	if (mod.servicesCount > 0) {

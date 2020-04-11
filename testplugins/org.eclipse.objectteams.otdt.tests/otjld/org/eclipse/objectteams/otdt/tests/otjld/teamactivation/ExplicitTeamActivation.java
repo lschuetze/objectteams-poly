@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -28,11 +28,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 @SuppressWarnings("unchecked")
 public class ExplicitTeamActivation extends AbstractOTJLDTest {
-	
+
 	public ExplicitTeamActivation(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -40,7 +40,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -52,7 +52,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // a team is explicitly activated and a callin binding is called in the activation context
     // 5.2.1-otjld-callin-invocation-1
     public void test521_callinInvocation1() {
-       
+
        runConformTest(
             new String[] {
 		"T521ci1Main.java",
@@ -111,7 +111,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // a team is explicitly activated and a callin binding is called in the activation context
     // 5.2.1-otjld-callin-invocation-2
     public void test521_callinInvocation2() {
-       
+
        runConformTest(
             new String[] {
 		"T521ci2Main.java",
@@ -175,7 +175,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // a team is explicitly activated and a callin binding is called in the activation context
     // 5.2.1-otjld-callin-invocation-3
     public void test521_callinInvocation3() {
-       
+
        runConformTest(
             new String[] {
 		"T521ci3Main.java",
@@ -219,7 +219,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // a team is explicitly activated and a callin binding is called in the activation context
     // 5.2.1-otjld-callin-invocation-4
     public void test521_callinInvocation4() {
-       
+
        runConformTest(
             new String[] {
 		"T521ci4Main.java",
@@ -269,7 +269,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // a team is explicitly activated and a callin binding is called in the activation context
     // Bug 326416 -  [compiler] within() not working for team extending non-team
     public void test521_callinInvocation5() {
-       
+
        runConformTest(
             new String[] {
 		"T521ci5Main.java",
@@ -330,7 +330,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // invoking a role method activates the team temporarily
     // 5.2.2-otjld-role-method-invocation-activates-team
     public void test522_roleMethodInvocationActivatesTeam() {
-       
+
        runConformTest(
             new String[] {
 		"T522rmiatMain.java",
@@ -381,7 +381,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // a callin binding is not called when an unrelated team is active
     // 5.2.3-otjld-callin-in-other-team-context-1
     public void test523_callinInOtherTeamContext1() {
-       
+
        runConformTest(
             new String[] {
 		"T523ciotc1Main.java",
@@ -427,7 +427,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // a callin binding is not called when a base team is active
     // 5.2.3-otjld-callin-in-other-team-context-2
     public void test523_callinInOtherTeamContext2() {
-       
+
        runConformTest(
             new String[] {
 		"T523ciotc2Main.java",
@@ -477,7 +477,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // a callin binding is not called when not within a team activation context
     // 5.2.4-otjld-callin-when-team-is-inactive-1
     public void test524_callinWhenTeamIsInactive1() {
-       
+
        runConformTest(
             new String[] {
 		"T524cwtii1Main.java",
@@ -520,7 +520,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // a callin binding is not called when not within a team activation context
     // 5.2.4-otjld-callin-when-team-is-inactive-2
     public void test524_callinWhenTeamIsInactive2() {
-       
+
        runConformTest(
             new String[] {
 		"T524cwtii2Main.java",
@@ -815,7 +815,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // NOTE: still need to define callin overriding along 'extends'
     // 5.2.6-otjld-activation-order
     public void test526_activationOrder() {
-       
+
        runConformTest(
             new String[] {
 		"T526aoMain.java",
@@ -914,7 +914,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // NOTE: still need to define callin overriding along 'extends'
     // 5.2.7-otjld-activation-order
     public void test527_activationOrder() {
-       
+
        runConformTest(
             new String[] {
 		"T527aoMain.java",
@@ -1023,7 +1023,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // in nested activation contexts of the same team instance, deactivating an inner context does not make the team inactive
     // 5.2.8-otjld-nested-activation-contexts-1
     public void test528_nestedActivationContexts1() {
-       
+
        runConformTest(
             new String[] {
 		"T528nac1Main.java",
@@ -1073,7 +1073,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // in nested activation contexts of the same team instance, explicitly deactivating an inner context restores the previous activation state
     // 5.2.8-otjld-nested-activation-contexts-2
     public void test528_nestedActivationContexts2() {
-       
+
        runConformTest(
             new String[] {
 		"T528nac2Main.java",
@@ -1121,7 +1121,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // in nested activation contexts of the same team instance, deactivating an inner context makes the team inactive
     // 5.2.8-otjld-nested-activation-contexts-3
     public void test528_nestedActivationContexts3() {
-       
+
        runConformTest(
             new String[] {
 		"T528nac3Main.java",
@@ -1168,7 +1168,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // in nested activation contexts of the same team instance, deactivating an inner context does not make the team inactive
     // 5.2.8-otjld-nested-activation-contexts-4
     public void test528_nestedActivationContexts4() {
-       
+
        runConformTest(
             new String[] {
 		"T528nac4Main.java",
@@ -1216,7 +1216,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // an exception is thrown in a within activation context that is catched outside of the context
     // 5.2.9-otjld-exception-from-within-activation-context-1
     public void test529_exceptionFromWithinActivationContext1() {
-       
+
        runConformTest(
             new String[] {
 		"T529efwac1Main.java",
@@ -1266,7 +1266,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // an exception is thrown in a activate/deactivate activation context that is catched outside of the context
     // 5.2.9-otjld-exception-from-within-activation-context-2
     public void test529_exceptionFromWithinActivationContext2() {
-       
+
        runConformTest(
             new String[] {
 		"T529efwac2Main.java",
@@ -1326,7 +1326,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // deactivate is called for an inactive team
     // 5.2.10-otjld-deactivate-for-inactive-team-1
     public void test5210_deactivateForInactiveTeam1() {
-       
+
        runConformTest(
             new String[] {
 		"T5210dfit1Main.java",
@@ -1368,7 +1368,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // deactivate is called for an inactive team
     // 5.2.10-otjld-deactivate-for-inactive-team-2
     public void test5210_deactivateForInactiveTeam2() {
-       
+
        runConformTest(
             new String[] {
 		"T5210dfit2Main.java",
@@ -1414,7 +1414,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // deactivate is called for an inactive team
     // 5.2.10-otjld-deactivate-for-inactive-team-3
     public void test5210_deactivateForInactiveTeam3() {
-       
+
        runConformTest(
             new String[] {
 		"T5210dfit3Main.java",
@@ -1460,7 +1460,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // an activation context is closed in the presense of another thread that also works with the object
     // 5.2.11-otjld-activation-context-and-thread
     public void test5211_activationContextAndThread() {
-       
+
        runConformTest(
             new String[] {
 		"T5211acatMain.java",
@@ -1553,7 +1553,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // a within statement is executed while the team is explicitly active
     // 5.2.12-otjld-within-and-other-activation-1
     public void test5212_withinAndOtherActivation1() {
-       
+
        runConformTest(
             new String[] {
 		"T5212waoa1Main.java",
@@ -1601,7 +1601,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // a within statement is executed while the team is implicitly active
     // 5.2.12-otjld-within-and-other-activation-2
     public void test5212_withinAndOtherActivation2() {
-       
+
        runConformTest(
             new String[] {
 		"T5212waoa2Main.java",
@@ -1654,7 +1654,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // a within statement is executed while the team is implicitly active and calls another team method
     // 5.2.12-otjld-within-and-other-activation-3
     public void test5212_withinAndOtherActivation3() {
-       
+
        runConformTest(
             new String[] {
 		"T5212waoa3Main.java",
@@ -1710,7 +1710,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // a within block only activates the team for the current thread
     // 5.2.13-otjld-within-activation-and-threads-1
     public void test5213_withinActivationAndThreads1() {
-       
+
        runConformTest(
             new String[] {
 		"T5213waat1Main.java",
@@ -1766,7 +1766,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // entering a within block while the team has been activated for ALL_THREADS (lazy)
     // 5.2.13-otjld-within-activation-and-threads-2
     public void test5213_withinActivationAndThreads2() {
-       
+
        runConformTest(
             new String[] {
 		"T5213waat2Main.java",
@@ -1825,7 +1825,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // global team deactivation permanently 'overrides' thread local activation
     // 5.2.14-otjld-explicit-per-thread-activation-1
     public void test5214_explicitPerThreadActivation1() {
-       
+
        runConformTest(
             new String[] {
 		"T5214epta1Main.java",
@@ -1905,7 +1905,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // global team activation applies also for later started threads
     // 5.2.15-otjld-explicit-activation-for-all-threads-1
     public void test5215_explicitActivationForAllThreads1() {
-       
+
        runConformTest(
             new String[] {
 		"T5215eaat1Main.java",
@@ -1966,7 +1966,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // global team activation applies also for later started threads - SUPER class of started thread implements 'Runnable'
     // 5.2.15-otjld-explicit-activation-for-all-threads-1a
     public void test5215_explicitActivationForAllThreads1a() {
-       
+
        runConformTest(
             new String[] {
 		"T5215eaat1aMain.java",
@@ -2049,7 +2049,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // deactivating a (lazy) global active team for a thread will activate it for all other threads
     // 5.2.15-otjld-explicit-activation-for-all-threads-2
     public void test5215_explicitActivationForAllThreads2() {
-       
+
        runConformTest(
             new String[] {
 		"T5215eaat2Main.java",
@@ -2132,7 +2132,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // deactivating a (lazy) global active team for a thread will activate it for all other threads
     // 5.2.15-otjld-explicit-activation-for-all-threads-2a
     public void test5215_explicitActivationForAllThreads2a() {
-       
+
        runConformTest(
             new String[] {
 		"T5215eaat2aMain.java",
@@ -2219,7 +2219,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // deactivating a (lazy) global active team for a thread will activate it for all other threads INCLUDING the main thread
     // 5.2.15-otjld-explicit-activation-for-all-threads-3
     public void test5215_explicitActivationForAllThreads3() {
-       
+
        runConformTest(
             new String[] {
 		"T5215eaat3Main.java",
@@ -2285,7 +2285,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
 
     // using a Runnable.run() a thread creation is faked [see also  Bug 316696 -  [otre] OTRE doesn't know about all threads].
     public void test5215_explicitActivationForAllThreads3a() {
-       
+
        runConformTest(
             new String[] {
 		"T5215eaat3aMain.java",
@@ -2312,7 +2312,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
 			    "		 runnable.run();\n" +							// bm() during run(): not active for this thread
 			    "        t.activate();\n" +
 			    "        Thread ot1 = new Thread(runnable);\n" +
-			    "        ot1.start();\n" +								// bm() during run(): inherit activation from current thread 
+			    "        ot1.start();\n" +								// bm() during run(): inherit activation from current thread
 			    "        try {\n" +
 			    "            ot1.join();\n" +
 			    "        } catch (InterruptedException ie) {\n" +
@@ -2348,7 +2348,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // isActive(ALL_THREADS) returns true if the theam has been activated for all threads
     // 5.2.15-otjld-explicit-activation-for-all-threads-4
     public void test5215_explicitActivationForAllThreads4() {
-       
+
        runConformTest(
             new String[] {
 		"T5215eaat4Main.java",
@@ -2400,7 +2400,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // a team registers twice at a super class which is bound by another team - seen in OTPong
     // 5.2.16-otjld-activation-bug-1
     public void test5216_activationBug1() {
-       
+
        runConformTest(
             new String[] {
 		"Team5216_2.java",
@@ -2461,7 +2461,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // internally duplicate attempt to deactivate a team caused an AIOOBE "0" - reported by MWSE students
     // 5.2.16-otjld-activation-bug-2
     public void test5216_activationBug2() {
-       
+
        runConformTest(
             new String[] {
 		"Team5216ab2_2.java",
@@ -2540,7 +2540,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // witness for AIOOBE
     // 5.2.17-otjld-concurrent-activation-1
     public void _test5217_concurrentActivation1() {
-       
+
        runConformTest(
             new String[] {
 		"Team5217ca1.java",
@@ -2605,7 +2605,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // witness for deadlock
     // 5.2.17-otjld-concurrent-activation-2
     public void test5217_concurrentActivation2() {
-       
+
        runConformTest(
             new String[] {
 		"Team5217ca2.java",
@@ -2680,7 +2680,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // a per-thread team inherits this activation to a child thread, see Trac #228
     // 5.2.18-otjld-inheritable-team-activation-1
     public void test5218_inheritableTeamActivation1() {
-       
+
        runConformTest(
             new String[] {
 		"Team5218ita1.java",
@@ -2719,7 +2719,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // a per-thread team does not inherit this activation to a child thread, see Trac #228
     // 5.2.18-otjld-inheritable-team-activation-2
     public void test5218_inheritableTeamActivation2() {
-       
+
        runConformTest(
             new String[] {
 		"Team5218ita2.java",

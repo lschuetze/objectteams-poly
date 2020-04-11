@@ -72,15 +72,15 @@ public PackageBinding(char[][] compoundName, PackageBinding parent, LookupEnviro
 	this.environment = environment;
 	this.knownTypes = null; // initialized if used... class counts can be very large 300-600
 	this.knownPackages = new HashtableOfPackage<PackageBinding>(3); // sub-package counts are typically 0-3
-	
+
 	if (compoundName != CharOperation.NO_CHAR_CHAR)
 		checkIfNullAnnotationPackage();
-	
+
 	if (enclosingModule != null)
 		this.enclosingModule = enclosingModule;
 	else if (parent != null)
 		this.enclosingModule = parent.enclosingModule; // stop-gap for any remaining calls that don't provide an enclosingModule (they should)
-	
+
 	if (this.enclosingModule == null)
 		throw new IllegalStateException("Package should have an enclosing module"); //$NON-NLS-1$
 }
@@ -456,7 +456,7 @@ public String toString() {
 	 * be stripped and one less check during retrieval.
 	 */
 	public static class TeamPackageBinding extends PlainPackageBinding {
-	
+
 		/**
 		 * @param compoundName
 		 * @param parent
@@ -473,7 +473,7 @@ public String toString() {
 				parent.addPackage(this, enclosingModule);
 			enclosingModule.declaredPackages.put(CharOperation.concatWith(compoundName, '.'), this);
 		}
-	
+
 		/** For nested role files the compoundName may contain '$' and '__OT__' delimitors.
 		 *  Delete '__OT__' and split at '$' into a more fine grained compound name.
 		 * @param compoundName
@@ -485,19 +485,19 @@ public String toString() {
 			for (int i = 0; i < compoundName.length; i++)
 				count += CharOperation.occurencesOf('$', compoundName[i]);
 			char[][] result = new char[count][];
-	
+
 			int resultIdx = 0;
 			for (int i = 0; i < compoundName.length; i++) {
 				int currentPos = 0;
 				while (true) {
 					int prevPos = currentPos;
 					currentPos = CharOperation.indexOf('$', compoundName[i], prevPos);
-	
+
 					char[] element = CharOperation.subarray(compoundName[i], prevPos, currentPos); // split at '$'
 					if (RoleSplitter.isClassPartName(element))
 						element = RoleSplitter.getInterfacePartName(element);  // strip '__OT__'
 					result[resultIdx++] = element;
-	
+
 					if (currentPos == -1)
 						break;
 					currentPos++;
@@ -505,7 +505,7 @@ public String toString() {
 			}
 			return result;
 		}
-	
+
 		@Override
 		void addType(ReferenceBinding element) {
 			if (this.knownTypes == null)
@@ -513,7 +513,7 @@ public String toString() {
 			char[][] elementCompoundName = CharOperation.splitOn('$', element.compoundName[element.compoundName.length - 1]);
 			this.knownTypes.put(elementCompoundName[elementCompoundName.length-1], element);
 		}
-	
+
 		/** Similar to PackageBinding.getType(), except that we allow nested types,
 	  	 *  which we search in the parent package.
 		 */
@@ -535,7 +535,7 @@ public String toString() {
 					return null;
 				}
 			}
-	
+
 			if (binding == LookupEnvironment.TheNotFoundType)
 				return null;
 			if (binding instanceof UnresolvedReferenceBinding)

@@ -262,7 +262,7 @@ public class EnclosingMethodAttributeTest extends AbstractComparableTest {
 // orig:
 		ReferenceBinding binaryType = batchCompiler.lookupEnvironment.askForType(new char[][] {new char[0], "X$1".toCharArray()}, batchCompiler.lookupEnvironment.UnNamedModule);
 		assertNotNull("Should not be null", binaryType);
-// :giro		
+// :giro
 	  }
 // SH}
 	}

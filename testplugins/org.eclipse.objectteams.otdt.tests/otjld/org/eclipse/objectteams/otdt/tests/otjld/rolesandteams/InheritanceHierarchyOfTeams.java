@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2015 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -25,14 +25,14 @@ import junit.framework.Test;
 
 /**
  * Former jacks tests from section implicit-hierarchy-of-teams (1.2.*)
- * @author stephan 
+ * @author stephan
  */
 public class InheritanceHierarchyOfTeams extends AbstractOTJLDTest {
 
 	public InheritanceHierarchyOfTeams(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -40,7 +40,7 @@ public class InheritanceHierarchyOfTeams extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -503,7 +503,7 @@ public class InheritanceHierarchyOfTeams extends AbstractOTJLDTest {
 			    "    \n"
             });
     }
-    
+
     // a nested team has a non-team superclass
     public void test127_nonTeamSuperclass3() {
     	runConformTest(

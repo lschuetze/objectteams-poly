@@ -32,7 +32,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 
 /**
  * This visitor replaces SingleNameReference("result") in param mappings
- * with ResultReferences, provided they are on the correct side of the binding token. 
+ * with ResultReferences, provided they are on the correct side of the binding token.
  *
  * @author stephan
  */

@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010, 2016 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -27,11 +27,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 @SuppressWarnings("unchecked")
 public class CalloutToField extends AbstractOTJLDTest {
-	
+
 	public CalloutToField(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -39,7 +39,7 @@ public class CalloutToField extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -52,7 +52,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a getter callout
     // 3.3.1-otjld-callout-get-1
     public void test331_calloutGet1() {
-       
+
        runConformTest(
             new String[] {
 		"Team331cg1.java",
@@ -90,7 +90,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a getter callout to a static field
     // 3.3.1-otjld-callout-get-2
     public void test331_calloutGet2() {
-       
+
        runConformTest(
             new String[] {
 		"Team331cg2.java",
@@ -128,7 +128,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a static getter callout to a static field
     // 3.3.1-otjld-callout-get-2s
     public void test331_calloutGet2s() {
-       
+
        runConformTest(
             new String[] {
 		"Team331cg2s.java",
@@ -166,7 +166,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a getter callout to an inherited field
     // 3.3.1-otjld-callout-get-3
     public void test331_calloutGet3() {
-       
+
        runConformTest(
             new String[] {
 		"Team331cg3.java",
@@ -365,7 +365,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a getter callout with role method return type void
     // 3.3.1-otjld-callout-get-6
     public void test331_calloutGet6() {
-       
+
        runConformTest(
             new String[] {
 		"T331cg6Main.java",
@@ -406,7 +406,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a getter callout with parameter mappings
     // 3.3.1-otjld-callout-get-7
     public void test331_calloutGet7() {
-       
+
        runConformTest(
             new String[] {
 		"Team331cg7.java",
@@ -443,7 +443,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a getter callout to a basic type field
     // 3.3.1-otjld-callout-get-8
     public void test331_calloutGet8() {
-       
+
        runConformTest(
             new String[] {
 		"Team331cg8.java",
@@ -482,7 +482,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a getter callout to a base type with a role in this team (role is NOT public)
     // 3.3.1-otjld-callout-get-9
     public void test331_calloutGet9() {
-       
+
        runConformTest(
             new String[] {
 		"Team331cg9.java",
@@ -525,7 +525,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a normal callout to a base type with a role in this team
     // 3.3.1-otjld-callout-get-9a
     public void test331_calloutGet9a() {
-       
+
        runConformTest(
             new String[] {
 		"Team331cg9a.java",
@@ -571,7 +571,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a getter callout to a base type with a role in this team (role is public)
     // 3.3.1-otjld-callout-get-9b
     public void test331_calloutGet9b() {
-       
+
        runConformTest(
             new String[] {
 		"Team331cg9b.java",
@@ -614,7 +614,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // two getter callouts from one role
     // 3.3.1-otjld-callout-get-10
     public void test331_calloutGet10() {
-       
+
        runConformTest(
             new String[] {
 		"Team331cg10.java",
@@ -652,7 +652,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a getter callout with wrong signature
     // 3.3.1-otjld-callout-get-11
     public void test331_calloutGet11() {
-       
+
        runConformTest(
             new String[] {
 		"Team331cg11.java",
@@ -714,7 +714,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a getter callout to a static field uses abstract declaration and binding with signatures - witness for bogus ambiguous method message
     // 3.3.2-otjld-callout-get-13
     public void test332_calloutGet13() {
-       
+
        runConformTest(
             new String[] {
 		"Team332cg13.java",
@@ -746,7 +746,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a getter callout to a static field uses only a binding with signatures
     // 3.3.2-otjld-callout-get-13s
     public void test332_calloutGet13s() {
-       
+
        runConformTest(
             new String[] {
 		"Team332cg13s.java",
@@ -778,7 +778,7 @@ public class CalloutToField extends AbstractOTJLDTest {
 
     // a getter callout to a static field uses only a binding with signatures, field is visible, but class is not
     public void test332_calloutGet13sc() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team332cg13sc.java",
@@ -809,7 +809,7 @@ public class CalloutToField extends AbstractOTJLDTest {
 
     // a getter callout to a static field uses only a binding with signatures, field is visible
     public void test332_calloutGet13sv() {
-       
+
        runConformTest(
             new String[] {
 		"Team332cg13sv.java",
@@ -879,7 +879,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     			"public class T332cg14 {\n" +
     			"    String f;\n" +
     			"}\n"
-    		}, 
+    		},
     		"----------\n" +
     		"1. ERROR in Team332cg14.java (at line 3)\n" +
     		"	String getF() -> get void f;\n" +
@@ -887,11 +887,11 @@ public class CalloutToField extends AbstractOTJLDTest {
     		"Field specifier \'f\' resolves to type java.lang.String whereas type void is specified (OTJLD 3.5(a)).\n" +
     		"----------\n");
     }
-    
+
     // a setter callout
     // 3.3.2-otjld-callout-set-1
     public void test332_calloutSet1() {
-       
+
        runConformTest(
             new String[] {
 		"Team332cs1.java",
@@ -930,7 +930,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a setter callout to a static field
     // 3.3.2-otjld-callout-set-2
     public void test332_calloutSet2() {
-       
+
        runConformTest(
             new String[] {
 		"Team332cs2.java",
@@ -969,7 +969,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a static setter callout to a static field
     // 3.3.2-otjld-callout-set-2s
     public void test332_calloutSet2s() {
-       
+
        runConformTest(
             new String[] {
 		"Team332cs2s.java",
@@ -1008,7 +1008,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a static setter callout to a static field (shorthand)
     // 3.3.2-otjld-callout-set-2s2
     public void test332_calloutSet2s2() {
-       
+
        runConformTest(
             new String[] {
 		"Team332cs2s2.java",
@@ -1045,7 +1045,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a setter callout to an inherited field
     // 3.3.2-otjld-callout-set-3
     public void test332_calloutSet3() {
-       
+
        runConformTest(
             new String[] {
 		"Team332cs3.java",
@@ -1297,7 +1297,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a setter callout with parameter mappings
     // 3.3.2-otjld-callout-set-7
     public void test332_calloutSet7() {
-       
+
        runConformTest(
             new String[] {
 		"Team332cs7.java",
@@ -1338,7 +1338,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a setter callout to a basic type field
     // 3.3.2-otjld-callout-set-8
     public void test332_calloutSet8() {
-       
+
        runConformTest(
             new String[] {
 		"Team332cs8.java",
@@ -1377,7 +1377,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a setter callout to a base type with a role in this team
     // 3.3.2-otjld-callout-set-9
     public void test332_calloutSet9() {
-       
+
        runConformTest(
             new String[] {
 		"Team332cs9.java",
@@ -1460,7 +1460,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a getter and a setter callout to the same field
     // 3.3.12-otjld-callout-get-and-set-1
     public void test3312_calloutGetAndSet1() {
-       
+
        runConformTest(
             new String[] {
 		"Team3312cgs1.java",
@@ -1498,7 +1498,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a getter and a setter callout to different fields
     // 3.3.12-otjld-callout-get-and-set-2
     public void test3312_calloutGetAndSet2() {
-       
+
        runConformTest(
             new String[] {
 		"Team3312cgs2.java",
@@ -1540,7 +1540,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a role is played by an anchored type, using callout to field
     // 3.3.13-otjld-callout-to-field-of-anchored-1
     public void test3313_calloutToFieldOfAnchored1() {
-       
+
        runConformTest(
             new String[] {
 		"Team3313ctfoa1_2.java",
@@ -1581,7 +1581,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a role is played by an anchored type, using callout to field
     // 3.3.13-otjld-callout-to-field-of-anchored-1b
     public void test3313_calloutToFieldOfAnchored1b() {
-       
+
        runConformTest(
             new String[] {
 		"Team3313ctfoa1b_2.java",
@@ -1619,11 +1619,11 @@ public class CalloutToField extends AbstractOTJLDTest {
             "OK");
     }
 
-    // the anchor used in a callout to field is read from class file 
+    // the anchor used in a callout to field is read from class file
     // WITNESS for TPX-251 - fixed between 0.8.0 and 0.8.1
     // 3.3.13-otjld-callout-to-field-of-anchored-2
     public void test3313_calloutToFieldOfAnchored2() {
-       
+
        runConformTest(
             new String[] {
 		"Team3313ctfoa2_4.java",
@@ -1686,7 +1686,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // the anchor used in a callout to field is read from class file, same as above but new role type syntax
     // 3.3.13-otjld-callout-to-field-of-anchored-2s
     public void test3313_calloutToFieldOfAnchored2s() {
-       
+
        runConformTest(
             new String[] {
 		"Team3313ctfoa2s_4.java",
@@ -1746,11 +1746,11 @@ public class CalloutToField extends AbstractOTJLDTest {
             "OK");
     }
 
-    // the type in a callout to field is an externalized role 
+    // the type in a callout to field is an externalized role
     // WITNESS for TPX-257
     // 3.3.14-otjld-callout-to-field-type-externalized-1
     public void test3314_calloutToFieldTypeExternalized1() {
-       
+
        runConformTest(
             new String[] {
 		"T3314ctfte1Main.java",
@@ -1888,7 +1888,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a callout set to field returns an externalized role (base class decapsulation)
     // 3.3.14-otjld-callout-to-field-type-externalized-3
     public void test3314_calloutToFieldTypeExternalized3() {
-       
+
        runConformTest(
             new String[] {
 		"Team3314ctfte3_2.java",
@@ -1945,7 +1945,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a callout set to field returns an externalized role
     // 3.3.14-otjld-callout-to-field-type-externalized-4
     public void test3314_calloutToFieldTypeExternalized4() {
-       
+
        runConformTest(
             new String[] {
 		"Team3314ctfte4_2.java",
@@ -2003,7 +2003,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a callout set to field returns an externalized role, field is implicitly inherited - saw compile error in OrderSystem
     // 3.3.14-otjld-callout-to-field-type-externalized-5
     public void test3314_calloutToFieldTypeExternalized5() {
-       
+
        runConformTest(
             new String[] {
 		"Team3314ctfte5_3.java",
@@ -2067,7 +2067,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a callout to field overrides an (implicitly) inherited callout to field
     // 3.3.15-otjld-callout-to-field-overrides-1
     public void test3315_calloutToFieldOverrides1() {
-       
+
        runConformTest(
             new String[] {
 		"Team3315ctfo1_2.java",
@@ -2108,7 +2108,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // - same team
     // 3.3.15-otjld-callout-to-field-overrides-2
     public void test3315_calloutToFieldOverrides2() {
-       
+
        runConformTest(
             new String[] {
 		"Team3315ctfo2.java",
@@ -2144,7 +2144,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // set - same team
     // 3.3.15-otjld-callout-to-field-overrides-3
     public void test3315_calloutToFieldOverrides3() {
-       
+
        runConformTest(
             new String[] {
 		"Team3315ctfo3.java",
@@ -2246,7 +2246,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a callout to field is implicitly inherited
     // 3.3.16-otjld-implicitly-inheriting-callout-to-field-1
     public void test3316_implicitlyInheritingCalloutToField1() {
-       
+
        runConformTest(
             new String[] {
 		"Team3316iictf1_2.java",
@@ -2283,7 +2283,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // several teams call out to the same field (occurred in DispositionWorkflow.java)
     // 3.3.17-otjld-multiple-callout-to-same-field-1
     public void test3317_multipleCalloutToSameField1() {
-       
+
        runConformTest(
             new String[] {
 		"Team3317mctsf1_2.java",
@@ -2352,7 +2352,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // several teams call out to the same field (occurred in DispositionWorkflow.java)
     // 3.3.17-otjld-multiple-callout-to-same-field-2
     public void test3317_multipleCalloutToSameField2() {
-       
+
        runConformTest(
             new String[] {
 		"Team3317mctsf2_2.java",
@@ -2425,7 +2425,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a callout to field binds to a field whose type is more specific than the declared role return type
     // 3.3.18-otjld-callout-to-field-compatible-type-1
     public void test3318_calloutToFieldCompatibleType1() {
-       
+
        runConformTest(
             new String[] {
 		"Team3318ctfct1.java",
@@ -2458,7 +2458,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // callout set to array field
     // 3.3.19-otjld-callout-to-array-field-1
     public void test3319_calloutToArrayField1() {
-       
+
        runConformTest(
             new String[] {
 		"Team3319ctaf1.java",
@@ -2543,7 +2543,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField1() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3320ictf1.java",
@@ -2585,7 +2585,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField1s() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3320ictf1s.java",
@@ -2627,7 +2627,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField1s2() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3320ictf1s2.java",
@@ -2669,7 +2669,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField2() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3320ictf2.java",
@@ -2712,7 +2712,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField3() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3320ictf3.java",
@@ -2756,7 +2756,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField3b() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3320ictf3b.java",
@@ -2801,7 +2801,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField4() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3320ictf4.java",
@@ -2844,7 +2844,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField5() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3320ictf5.java",
@@ -2885,7 +2885,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField6() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3320ictf6.java",
@@ -2927,7 +2927,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField7() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3320ictf7.java",
@@ -2978,7 +2978,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField7f() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3320ictf7f.java",
@@ -3025,7 +3025,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField8() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3320ictf8.java",
@@ -3135,7 +3135,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField10() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.IGNORE);
-       
+
        runConformTest(
             new String[] {
 		"Team3320ictf10.java",
@@ -3177,7 +3177,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField11() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.IGNORE);
-       
+
        runConformTest(
     		new String[] {
 		"T3320ictf11.java",
@@ -3186,7 +3186,7 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "    private String val;\n" +
 			    "    T3320ictf11 (String v) { this.val = v; }\n" +
 			    "}\n" +
-			    "    \n"    		
+			    "    \n"
 			    });
        runConformTest(
             new String[] {
@@ -3222,7 +3222,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField12() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.IGNORE);
-       
+
        runConformTest(
             new String[] {
 		"Team3320ictf12.java",
@@ -3361,7 +3361,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField15() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3320ictf15.java",
@@ -3405,7 +3405,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField15f() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runConformTest(
             new String[] {
 		"Team3320ictf15f.java",
@@ -3447,7 +3447,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     public void test3320_inferredCalloutToField16() {
        Map customOptions = getCompilerOptions();
        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
-       
+
        runNegativeTest(
             new String[] {
 		"Team3320ictf16.java",
@@ -3496,7 +3496,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a callout accesses a field in a base-anchored base role (using special syntax new R<@base>()]
     // 3.3.21-otjld_disabled_callout-to-field-anchored-type-1
     public void test3321_calloutToFieldAnchoredType1() {
-       
+
        runConformTest(
             new String[] {
 		"Team3321ctfat1_2.java",
@@ -3536,7 +3536,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // a callout accesses a field in a base-anchored base role
     // 3.3.21-otjld-callout-to-field-anchored-type-2
     public void test3321_calloutToFieldAnchoredType2() {
-       
+
        runConformTest(
             new String[] {
 		"Team3321ctfat2_2.java",
@@ -3580,7 +3580,7 @@ public class CalloutToField extends AbstractOTJLDTest {
     // looks similar to above, but base actually refers to a package
     // 3.3.21-otjld-callout-to-field-anchored-type-3
     public void test3321_calloutToFieldAnchoredType3() {
-       
+
        runConformTest(
             new String[] {
 		"Team3321ctfat3.java",
@@ -3673,40 +3673,40 @@ public class CalloutToField extends AbstractOTJLDTest {
     		},
     		"OK0");
     }
-    
+
     // Bug 387236 - [compiler] type mismatch in signature-less c-t-f with array type causes NPE
     public void testBug387236() {
     	runNegativeTest(new String[] {
     		"b/Base.java",
-    			"package b;\n" + 
-    			"\n" + 
-    			"public class Base {\n" + 
-    			"	Object[] values;\n" + 
+    			"package b;\n" +
+    			"\n" +
+    			"public class Base {\n" +
+    			"	Object[] values;\n" +
     			"}",
     		"t/Team.java",
-	    		"package t;\n" + 
-	    		"\n" + 
-	    		"import base b.Base;\n" + 
-	    		"\n" + 
-	    		"public team class Team {\n" + 
-	    		"	protected abstract class AR {\n" + 
-	    		"		protected abstract String[] getValues();\n" + 
-	    		"	}\n" + 
-	    		"	protected class CR extends AR playedBy Base {\n" + 
-	    		"		@SuppressWarnings(\"decapsulation\") getValues -> get values;\n" + 
-	    		"		\n" + 
-	    		"	}\n" + 
+	    		"package t;\n" +
+	    		"\n" +
+	    		"import base b.Base;\n" +
+	    		"\n" +
+	    		"public team class Team {\n" +
+	    		"	protected abstract class AR {\n" +
+	    		"		protected abstract String[] getValues();\n" +
+	    		"	}\n" +
+	    		"	protected class CR extends AR playedBy Base {\n" +
+	    		"		@SuppressWarnings(\"decapsulation\") getValues -> get values;\n" +
+	    		"		\n" +
+	    		"	}\n" +
 	    		"}\n"
     		},
-    		"----------\n" + 
-			"1. ERROR in t\\Team.java (at line 10)\n" + 
-			"	@SuppressWarnings(\"decapsulation\") getValues -> get values;\n" + 
-			"	                                   ^^^^^^^^^\n" + 
-			"When binding field values via callout to role method getValues():\n" + 
-			"Incompatible types: can\'t convert java.lang.Object[] to java.lang.String[] (OTJLD 3.5(b)).\n" + 
+    		"----------\n" +
+			"1. ERROR in t\\Team.java (at line 10)\n" +
+			"	@SuppressWarnings(\"decapsulation\") getValues -> get values;\n" +
+			"	                                   ^^^^^^^^^\n" +
+			"When binding field values via callout to role method getValues():\n" +
+			"Incompatible types: can\'t convert java.lang.Object[] to java.lang.String[] (OTJLD 3.5(b)).\n" +
 			"----------\n");
     }
-    
+
     // Bug 354480 - VerifyError due to bogus lowering in inferred callout-to-field
     public void testBug354480() {
     	Map options = getCompilerOptions();
@@ -3714,49 +3714,49 @@ public class CalloutToField extends AbstractOTJLDTest {
     	runConformTest(
     		new String[] {
     			"Main.java",
-	    			"import b.Return;\n" + 
-	    			"import b.Scope;\n" + 
-	    			"import t.Team1;\n" + 
-	    			"public class Main {\n" + 
-	    			"	public static void main(String[] args) {\n" + 
-	    			"		new Team1().activate();\n" + 
-	    			"		new Return().analyse(new Scope());\n" + 
-	    			"	}\n" + 
+	    			"import b.Return;\n" +
+	    			"import b.Scope;\n" +
+	    			"import t.Team1;\n" +
+	    			"public class Main {\n" +
+	    			"	public static void main(String[] args) {\n" +
+	    			"		new Team1().activate();\n" +
+	    			"		new Return().analyse(new Scope());\n" +
+	    			"	}\n" +
 	    			"}\n",
     			"b/Expr.java",
 	    			"package b;\n" +
-	    			"public class Expr  {\n" + 
+	    			"public class Expr  {\n" +
 	    			"	public void analyse(Scope scope) {\n" +
 	    			"		System.out.print(\"OK\");\n" +
-	    			"	}\n" + 
+	    			"	}\n" +
 	    			"}\n",
     			"b/Scope.java",
 	    			"package b;\n" +
 	    			"public class Scope {}\n",
     			"b/Return.java",
 	    			"package b;\n" +
-	    			"public class Return  {\n" + 
-	    			"	public Expr expr = new Expr();\n" + 
-	    			"	public void analyse(Scope scope) {\n" + 
-	    			"	}\n" + 
+	    			"public class Return  {\n" +
+	    			"	public Expr expr = new Expr();\n" +
+	    			"	public void analyse(Scope scope) {\n" +
+	    			"	}\n" +
 	    			"}\n",
 	    		"t/Team1.java",
 	    		"package t;\n" +
-	    		"import b.Expr;\n" + 
-	    		"import base b.Return;\n" + 
-	    		"import base b.Scope;\n" + 
-	    		"\n" + 
-	    		"public team class Team1 {\n" + 
-	    		"	protected class Scope playedBy Scope {}\n" + 
-	    		"	protected class Return playedBy Return {\n" + 
-	    		"		Expr getExpr() -> get Expr expr;\n" + 
-	    		"		void analyse(Scope scope) <- replace void analyse(Scope scope);\n" + 
-	    		"		@SuppressWarnings({\"inferredcallout\", \"basecall\"})\n" + 
-	    		"		callin void analyse(Scope scope) {\n" + 
+	    		"import b.Expr;\n" +
+	    		"import base b.Return;\n" +
+	    		"import base b.Scope;\n" +
+	    		"\n" +
+	    		"public team class Team1 {\n" +
+	    		"	protected class Scope playedBy Scope {}\n" +
+	    		"	protected class Return playedBy Return {\n" +
+	    		"		Expr getExpr() -> get Expr expr;\n" +
+	    		"		void analyse(Scope scope) <- replace void analyse(Scope scope);\n" +
+	    		"		@SuppressWarnings({\"inferredcallout\", \"basecall\"})\n" +
+	    		"		callin void analyse(Scope scope) {\n" +
 	    		"			this.expr.analyse(scope);\n" + // expr via c-t-f, scope needs lowering
-	    		"		}\n" + 
-	    		"	}\n" + 
-	    		"}\n"    			
+	    		"		}\n" +
+	    		"	}\n" +
+	    		"}\n"
     		},
     		"OK",
             null/*classLibraries*/,

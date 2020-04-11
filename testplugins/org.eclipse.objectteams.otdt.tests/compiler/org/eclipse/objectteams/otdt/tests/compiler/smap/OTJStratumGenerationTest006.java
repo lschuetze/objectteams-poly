@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -38,11 +38,11 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SmapStratum;
  */
 public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
 {
-	private org.eclipse.jdt.core.ICompilationUnit _superTeam; 
+	private org.eclipse.jdt.core.ICompilationUnit _superTeam;
 	private org.eclipse.jdt.core.ICompilationUnit _subTeam;
 	private org.eclipse.jdt.core.ICompilationUnit _baseClass;
-  
-	
+
+
     public OTJStratumGenerationTest006(String name)
     {
         super(name);
@@ -52,11 +52,11 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
     {
         return buildModelTestSuite(OTJStratumGenerationTest006.class);
     }
-    
+
     protected void setUp() throws Exception
     {
         super.setUp();
-        
+
         _superTeam = getCompilationUnit(
                 getTestProjectDir(),
                 "src",
@@ -68,14 +68,14 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
                 "src",
                 "calloutOverride",
                 "SubTeam.java");
-        
+
         _baseClass = getCompilationUnit(
                 getTestProjectDir(),
                 "src",
                 "calloutOverride",
                 "BaseClass.java");
     }
-    
+
     public void testSmapGeneration1() throws JavaModelException
     {
     	TYPENAME = "__OT__RoleA";
@@ -93,9 +93,9 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
         fileInfo_role1.addLineInfo(lineInfo1_role3);
         List<SmapStratum> strata_role1 = new ArrayList<SmapStratum>();
         strata_role1.add(stratum_role1);
-        
+
         stratum_role1.optimize();
-        
+
         expectedStrata.put(TYPENAME, strata_role1);
 
         try
@@ -107,29 +107,29 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
             fail(e.getMessage());
         }
     }
-    
+
     public void testSmapGeneration2()
     {
         SmapStratum stratum_role2 = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
-        
+
     	FileInfo fileinfo = stratum_role2.getOrCreateFileInfo("Team.java", "org/objectteams/Team.java");
     	LineInfo lineInfo1 = new LineInfo(OT_CONFINED_GET_TEAM_LINE,3);
     	fileinfo.addLineInfo(lineInfo1);
-        
+
         LineInfo lineInfo2 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
         LineInfo lineInfo3 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
         fileinfo.addLineInfo(lineInfo2);
         fileinfo.addLineInfo(lineInfo3);
-        
+
         stratum_role2.optimize();
-        
+
         TYPENAME = "__OT__Confined";
         _enclosingTypename = "SuperTeam";
         List<SmapStratum> strata_role2 = new ArrayList<SmapStratum>();
         strata_role2.add(stratum_role2);
-        
+
         expectedStrata.put(TYPENAME, strata_role2);
-        
+
         try
         {
             parseAndCompile(new org.eclipse.jdt.core.ICompilationUnit[]{_baseClass, _superTeam, _subTeam});
@@ -139,7 +139,7 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
             fail(e.getMessage());
         }
     }
-    
+
     public void testSmapGeneration3() throws JavaModelException
     {
         TYPENAME = "__OT__RoleA";
@@ -154,7 +154,7 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
         LineInfo lineInfo2 = new LineInfo(8,10); // anotherRoleMethod at synth line 10
         lineInfo2.setRepeatCount(2);
         LineInfo lineInfo3 = new LineInfo(4,12); // role ctor at synth line 12
-        
+
         fileInfo1.addLineInfo(lineInfo1);
         fileInfo1.addLineInfo(lineInfo2);
         fileInfo1.addLineInfo(lineInfo3);
@@ -167,12 +167,12 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
         fileInfo2.addLineInfo(lineInfo4);
         fileInfo2.addLineInfo(lineInfo7);
         fileInfo2.addLineInfo(lineInfo8);
-        
+
         stratum_role1.optimize();
 
         List<SmapStratum> strata_role1 = new ArrayList<SmapStratum>();
         strata_role1.add(stratum_role1);
-        
+
         expectedStrata.put(TYPENAME, strata_role1);
 
         try
@@ -184,32 +184,32 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
             fail(e.getMessage());
         }
     }
-    
+
     public void testSmapGeneration4()
     {
         SmapStratum stratum_role2 = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
-    
+
 		FileInfo fileInfo = stratum_role2.getOrCreateFileInfo("Team.java", "org/objectteams/Team.java");
 		LineInfo lineInfo1 = new LineInfo(OT_CONFINED_GET_TEAM_LINE,4);
 		fileInfo.addLineInfo(lineInfo1);
-    
+
         LineInfo lineInfo2 = new LineInfo(2,3);
         fileInfo.addLineInfo(lineInfo2);
-		
+
         LineInfo lineInfo3 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
         LineInfo lineInfo4 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
         fileInfo.addLineInfo(lineInfo3);
         fileInfo.addLineInfo(lineInfo4);
-        
+
         stratum_role2.optimize();
-        
+
         TYPENAME = "__OT__Confined";
         _enclosingTypename = "SubTeam";
         List<SmapStratum> strata_role2 = new ArrayList<SmapStratum>();
         strata_role2.add(stratum_role2);
-        
+
         expectedStrata.put(TYPENAME, strata_role2);
-        
+
         try
         {
             parseAndCompile(new org.eclipse.jdt.core.ICompilationUnit[]{_baseClass, _superTeam, _subTeam});

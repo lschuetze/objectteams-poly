@@ -245,7 +245,7 @@ private void checkAndSetModifiersForMethod(final MethodBinding methodBinding) {
 			}
 			if (reportIllegalModifierCombination) {
 				problemReporter().illegalModifierCombinationForInterfaceMethod((AbstractMethodDeclaration) this.referenceContext);
-			} 
+			}
 			if (sourceLevel >= ClassFileConstants.JDK9 && (methodBinding.modifiers & ClassFileConstants.AccPrivate) != 0) {
 				int remaining = realModifiers & ~expectedModifiers;
 				if (remaining == 0) { // check for the combination of allowed modifiers with private
@@ -274,7 +274,7 @@ private void checkAndSetModifiersForMethod(final MethodBinding methodBinding) {
 		LocalTypeBinding local = (LocalTypeBinding) declaringClass;
 		TypeReference ref = local.scope.referenceContext.allocation.type;
 		if (ref != null && (ref.bits & ASTNode.IsDiamond) != 0) {
-			// 
+			//
 			if ((realModifiers & (ClassFileConstants.AccPrivate | ClassFileConstants.AccStatic )) == 0) {
 				methodBinding.tagBits |= TagBits.AnnotationOverride;
 			}
@@ -320,13 +320,13 @@ private void checkAndSetModifiersForMethod(final MethodBinding methodBinding) {
 		if (!methodBinding.declaringClass.isAbstract())
 //{ObjectTeams: set a re-checker since method abstractness might go during callout transformation.
 /* orig:
-			problemReporter().abstractMethodInAbstractClass((SourceTypeBinding) declaringClass, (AbstractMethodDeclaration) this.referenceContext); 
+			problemReporter().abstractMethodInAbstractClass((SourceTypeBinding) declaringClass, (AbstractMethodDeclaration) this.referenceContext);
   :giro */
 			problemReporter().setRechecker(new IProblemRechecker() { @Override
 			public boolean shouldBeReported(IrritantSet[] foundIrritants) {
 								return methodBinding.isAbstract();
 							  }})
-							 .abstractMethodInAbstractClass((SourceTypeBinding) declaringClass, (AbstractMethodDeclaration) this.referenceContext); 
+							 .abstractMethodInAbstractClass((SourceTypeBinding) declaringClass, (AbstractMethodDeclaration) this.referenceContext);
 //JH & MW & SH}
 	}
 
@@ -409,7 +409,7 @@ public void computeLocalVariablePositions(int initOffset, CodeStream codeStream)
 
 		// record user-defined argument for attribute generation
 		codeStream.record(local);
-		
+
 		// assign variable position
 		local.resolvedPosition = this.offset;
 
@@ -751,14 +751,14 @@ public Binding checkRedundantDefaultNullness(int nullBits, int sourceStart) {
 		AbstractMethodDeclaration method = (AbstractMethodDeclaration)this.referenceContext;
 		return method.isMappingWrapper._callin();
 	}
-	
+
 	public CallinCalloutScope getDeclaringMappingScope() {
 		AbstractMethodDeclaration method = referenceMethod();
 		TypeDeclaration type = referenceType();
 		if (method == null || type == null)
 			return null;
 		if (type.callinCallouts != null) {
-			for (AbstractMethodMappingDeclaration mapping : type.callinCallouts) 
+			for (AbstractMethodMappingDeclaration mapping : type.callinCallouts)
 				if (mapping.isCallout() && mapping.roleMethodSpec.resolvedMethod == method.binding)
 					return mapping.scope;
 		}
@@ -772,7 +772,7 @@ public Binding checkRedundantDefaultNullness(int nullBits, int sourceStart) {
 								for (AbstractMethodDeclaration wrapper : callinMapping.wrappers)
 									if (wrapper == method)
 										return mapping.scope;
-						}				
+						}
 		}
 		return null;
 	}

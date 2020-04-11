@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2019 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -61,10 +61,10 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		}
 		@Override
 		protected String getPluginID() {
-			return "org.eclipse.objectteams.otdt.test.builder"; 
+			return "org.eclipse.objectteams.otdt.test.builder";
 		}
 		@Override // make available locally:
-		protected IJavaProject setUpJavaProject(String projectName) throws CoreException, IOException 
+		protected IJavaProject setUpJavaProject(String projectName) throws CoreException, IOException
 		{
 			IJavaProject jProject = super.setUpJavaProject(projectName);
 
@@ -83,7 +83,7 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 			return jProject;
 		}
 		protected void replaceWorkspaceFile(String src, IJavaProject project, String dest)
-			throws IOException, CoreException 
+			throws IOException, CoreException
 		{
 			File srcFile = new File(getPluginDirectoryPath()+File.separator+"workspace"+File.separator+src);
 			IFile destFile= project.getProject().getFile(dest);
@@ -102,16 +102,16 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		return new OTEquinoxBuilderTests("testBaseImportTwoAspectBindings");
 //*/
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		env.setAutoBuilding(false);
-		
+
 		DEBUG = true;
 
 	}
-	
+
 	IProject reopenProject(String projectName) throws CoreException {
 		final IProject project = fileManager.getWorkspaceRoot().getProject(projectName);
 		IWorkspaceRunnable populate = new IWorkspaceRunnable() {
@@ -126,9 +126,9 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 	}
 
 	public void testForcedExports() throws CoreException, IOException {
-		IJavaProject trac18b= fileManager.setUpJavaProject("Trac18b"); 
+		IJavaProject trac18b= fileManager.setUpJavaProject("Trac18b");
 		env.addProject(trac18b.getProject());
-		IJavaProject trac18a= fileManager.setUpJavaProject("Trac18a"); 
+		IJavaProject trac18a= fileManager.setUpJavaProject("Trac18a");
 		env.addProject(trac18a.getProject());
 		fullBuild();
 		expectingNoProblemsFor(trac18b.getPath());
@@ -144,9 +144,9 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 	}
 
 	public void testForcedExportsMissing() throws CoreException, IOException {
-		IJavaProject trac18b= fileManager.setUpJavaProject("Trac18b"); 
+		IJavaProject trac18b= fileManager.setUpJavaProject("Trac18b");
 		env.addProject(trac18b.getProject());
-		IJavaProject trac18a2= fileManager.setUpJavaProject("Trac18a2"); 
+		IJavaProject trac18a2= fileManager.setUpJavaProject("Trac18a2");
 		env.addProject(trac18a2.getProject());
 		fullBuild();
 		expectingNoProblemsFor(trac18b.getPath());
@@ -160,13 +160,13 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 			getDecapsulationProblem(trac18a2, "trac18b.actions.SampleAction", "trac18a/Team18.java", 163, 175),
 		});
 	}
-	
+
 	/* project Trac18a3 contains a base-ctor call and a callout binding,
 	 * both referring to the force-exported base class.*/
 	public void testForcedExportsGeneratedMethodRefs() throws CoreException, IOException {
-		IJavaProject trac18b= fileManager.setUpJavaProject("Trac18b"); 
+		IJavaProject trac18b= fileManager.setUpJavaProject("Trac18b");
 		env.addProject(trac18b.getProject());
-		IJavaProject trac18a3= fileManager.setUpJavaProject("Trac18a3"); 
+		IJavaProject trac18a3= fileManager.setUpJavaProject("Trac18a3");
 		env.addProject(trac18a3.getProject());
 		fullBuild();
 		expectingNoProblemsFor(trac18b.getPath());
@@ -178,11 +178,11 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 	}
 	/* trying to produce a broken and bogus error message a la Trac #154 (no success yet). */
 	public void testForcedExportTrac154() throws CoreException, IOException {
-		IJavaProject trac154b1= fileManager.setUpJavaProject("Trac154b1"); 
+		IJavaProject trac154b1= fileManager.setUpJavaProject("Trac154b1");
 		env.addProject(trac154b1.getProject());
-		IJavaProject trac154b2= fileManager.setUpJavaProject("Trac154b2"); 
+		IJavaProject trac154b2= fileManager.setUpJavaProject("Trac154b2");
 		env.addProject(trac154b2.getProject());
-		IJavaProject trac154a= fileManager.setUpJavaProject("Trac154a"); 
+		IJavaProject trac154a= fileManager.setUpJavaProject("Trac154a");
 		env.addProject(trac154a.getProject());
 		fullBuild();
 		expectingNoProblemsFor(trac154b1.getPath());
@@ -194,9 +194,9 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 	}
 
 	public void testBaseImportNoAspectBinding () throws CoreException, IOException {
-		IJavaProject trac18b= fileManager.setUpJavaProject("Trac18b"); 
+		IJavaProject trac18b= fileManager.setUpJavaProject("Trac18b");
 		env.addProject(trac18b.getProject());
-		IJavaProject aspectPlugin= fileManager.setUpJavaProject("MissingAspectBinding"); 
+		IJavaProject aspectPlugin= fileManager.setUpJavaProject("MissingAspectBinding");
 		aspectPlugin.setOption("org.eclipse.objectteams.otdt.compiler.problem.binding_conventions", "error");
 		env.addProject(aspectPlugin.getProject());
 		fullBuild();
@@ -213,24 +213,24 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		expectingNoProblemsFor(trac18b.getPath());
 		expectingNoProblemsFor(aspectPlugin.getPath());
 	}
-	
+
 	/* Two aspect bindings refer to the same team, which has base imports referring to two different base bundles. */
 	public void testBaseImportTwoAspectBindings () throws CoreException, IOException {
-		IJavaProject trac213b1= fileManager.setUpJavaProject("Trac213b1"); 
+		IJavaProject trac213b1= fileManager.setUpJavaProject("Trac213b1");
 		env.addProject(trac213b1.getProject());
-		IJavaProject trac213b2= fileManager.setUpJavaProject("Trac213b2"); 
+		IJavaProject trac213b2= fileManager.setUpJavaProject("Trac213b2");
 		env.addProject(trac213b2.getProject());
 		fullBuild();
-		
+
 		// initially only an empty team
-		IJavaProject aspectPlugin= fileManager.setUpJavaProject("Trac213a"); 
+		IJavaProject aspectPlugin= fileManager.setUpJavaProject("Trac213a");
 		aspectPlugin.setOption("org.eclipse.objectteams.otdt.compiler.problem.binding_conventions", "error");
 		env.addProject(aspectPlugin.getProject());
 		fullBuild();
-		
+
 		// now add content to the team, binding to Trac213b1:
 		fileManager.replaceWorkspaceFile("Trac213a/auxil/TheTeam_step1.java", aspectPlugin, "src/trac213a/TheTeam.java");
-		
+
 		incrementalBuild();
 		expectingNoProblemsFor(trac213b1.getPath());
 		expectingNoProblemsFor(trac213b2.getPath());
@@ -239,17 +239,17 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		// now add content to the team, binding to Trac213b2:
 		fileManager.replaceWorkspaceFile("Trac213a/auxil/plugin_step2.xml", aspectPlugin, "plugin.xml");
 		fileManager.replaceWorkspaceFile("Trac213a/auxil/TheTeam_step2.java", aspectPlugin, "src/trac213a/TheTeam.java");
-		
+
 		incrementalBuild();
 		expectingNoProblemsFor(trac213b1.getPath());
 		expectingNoProblemsFor(trac213b2.getPath());
 		expectingNoProblemsFor(aspectPlugin.getPath());
 	}
-	
+
 	public void testWrongBaseImport1() throws CoreException, IOException {
-		IJavaProject trac18b= fileManager.setUpJavaProject("Trac18b"); 
+		IJavaProject trac18b= fileManager.setUpJavaProject("Trac18b");
 		env.addProject(trac18b.getProject());
-		IJavaProject aspectPlugin= fileManager.setUpJavaProject("WrongBaseImport1"); 
+		IJavaProject aspectPlugin= fileManager.setUpJavaProject("WrongBaseImport1");
 		aspectPlugin.setOption("org.eclipse.objectteams.otdt.compiler.problem.binding_conventions", "error");
 		env.addProject(aspectPlugin.getProject());
 		fullBuild();
@@ -259,13 +259,13 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 						aspectPlugin.getPath().append(new Path("src/WrongBaseImportTeam1.java")),
 						12, 63,
 						CategorizedProblem.CAT_CODE_STYLE, IMarker.SEVERITY_ERROR)
-		});		
+		});
 	}
 
 	public void testWrongBaseImport2() throws CoreException, IOException {
-		IJavaProject trac18b= fileManager.setUpJavaProject("Trac18b"); 
+		IJavaProject trac18b= fileManager.setUpJavaProject("Trac18b");
 		env.addProject(trac18b.getProject());
-		IJavaProject aspectPlugin= fileManager.setUpJavaProject("WrongBaseImport2"); 
+		IJavaProject aspectPlugin= fileManager.setUpJavaProject("WrongBaseImport2");
 		aspectPlugin.setOption("org.eclipse.objectteams.otdt.compiler.problem.binding_conventions", "error");
 		env.addProject(aspectPlugin.getProject());
 		fullBuild();
@@ -275,16 +275,16 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 						aspectPlugin.getPath().append(new Path("src/WrongBaseImportTeam2.java")),
 						12, 34,
 						CategorizedProblem.CAT_TYPE, IMarker.SEVERITY_ERROR)
-		});		
+		});
 	}
 
 	public void testBaseImportTrac132 () throws CoreException, IOException {
-		IJavaProject trac132b= fileManager.setUpJavaProject("Trac132b"); 
+		IJavaProject trac132b= fileManager.setUpJavaProject("Trac132b");
 		env.addProject(trac132b.getProject());
-		IJavaProject aspectPlugin1= fileManager.setUpJavaProject("Trac132a1"); 
+		IJavaProject aspectPlugin1= fileManager.setUpJavaProject("Trac132a1");
 		aspectPlugin1.setOption("org.eclipse.objectteams.otdt.compiler.problem.binding_conventions", "error");
 		env.addProject(aspectPlugin1.getProject());
-		IJavaProject aspectPlugin2= fileManager.setUpJavaProject("Trac132a2"); 
+		IJavaProject aspectPlugin2= fileManager.setUpJavaProject("Trac132a2");
 		aspectPlugin2.setOption("org.eclipse.objectteams.otdt.compiler.problem.binding_conventions", "error");
 		env.addProject(aspectPlugin2.getProject());
 		fullBuild();
@@ -294,12 +294,12 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 	}
 
 	public void testBaseImportTrac304 () throws CoreException, IOException {
-		IJavaProject trac304b= fileManager.setUpJavaProject("Trac304b"); 
+		IJavaProject trac304b= fileManager.setUpJavaProject("Trac304b");
 		env.addProject(trac304b.getProject());
 		// the fragment:
-		IJavaProject trac304f= fileManager.setUpJavaProject("Trac304f"); 
+		IJavaProject trac304f= fileManager.setUpJavaProject("Trac304f");
 		env.addProject(trac304f.getProject());
-		IJavaProject trac304ot= fileManager.setUpJavaProject("Trac304ot"); 
+		IJavaProject trac304ot= fileManager.setUpJavaProject("Trac304ot");
 		trac304ot.setOption("org.eclipse.objectteams.otdt.compiler.problem.binding_conventions", "error");
 		env.addProject(trac304ot.getProject());
 		fullBuild();
@@ -308,21 +308,21 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 	}
 
 	public void testIllegalUseOfForcedExport() throws CoreException, IOException {
-		IJavaProject trac18b= fileManager.setUpJavaProject("Trac18b"); 
+		IJavaProject trac18b= fileManager.setUpJavaProject("Trac18b");
 		env.addProject(trac18b.getProject());
-		IJavaProject aspectPlugin= fileManager.setUpJavaProject("IllegalUseOfForcedExport"); 
+		IJavaProject aspectPlugin= fileManager.setUpJavaProject("IllegalUseOfForcedExport");
 		aspectPlugin.setOption("org.eclipse.objectteams.otdt.compiler.problem.binding_conventions", "error");
 		env.addProject(aspectPlugin.getProject());
 		fullBuild();
 		expectingNoProblemsFor(trac18b.getPath());
-		expectingOnlySpecificProblemsFor(aspectPlugin.getPath(), 
+		expectingOnlySpecificProblemsFor(aspectPlugin.getPath(),
 				new Problem[] {
 					getIllegalUseOfForcedExportProblem(aspectPlugin, "trac18b.actions.SampleAction", 88, 100),
 					getIllegalUseOfForcedExportProblem(aspectPlugin, "trac18b.actions.SampleAction", 7, 35)});
 	}
 
 	public void testAccumulatedBases1() throws CoreException, IOException {
-		IJavaProject project= fileManager.setUpJavaProject("AccumulatedBases"); 
+		IJavaProject project= fileManager.setUpJavaProject("AccumulatedBases");
 		project.setOption("org.eclipse.objectteams.otdt.compiler.problem.binding_conventions", "error");
 		env.addProject(project.getProject());
 		fullBuild();
@@ -331,21 +331,21 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		incrementalBuild();
 		expectingNoProblemsFor(project.getPath());
 	}
-	
+
 	public void testBaseImportTrac132_2 () throws CoreException, IOException {
-		IJavaProject trac132b= fileManager.setUpJavaProject("Trac132b"); 
+		IJavaProject trac132b= fileManager.setUpJavaProject("Trac132b");
 		env.addProject(trac132b.getProject());
-		IJavaProject aspectPlugin1= fileManager.setUpJavaProject("Trac132a1"); 
+		IJavaProject aspectPlugin1= fileManager.setUpJavaProject("Trac132a1");
 		aspectPlugin1.setOption("org.eclipse.objectteams.otdt.compiler.problem.binding_conventions", "error");
 		env.addProject(aspectPlugin1.getProject());
-		IJavaProject aspectPlugin2= fileManager.setUpJavaProject("Trac132a2"); 
+		IJavaProject aspectPlugin2= fileManager.setUpJavaProject("Trac132a2");
 		aspectPlugin2.setOption("org.eclipse.objectteams.otdt.compiler.problem.binding_conventions", "error");
 		env.addProject(aspectPlugin2.getProject());
 		fullBuild();
 		expectingNoProblemsFor(trac132b.getPath());
 		expectingNoProblemsFor(aspectPlugin1.getPath());
 		expectingNoProblemsFor(aspectPlugin2.getPath());
-		
+
 		// not needed.
 //		JavaModelManager.getJavaModelManager().removePerProjectInfo((JavaProject) trac132b);
 //		JavaModelManager.getJavaModelManager().removePerProjectInfo((JavaProject) aspectPlugin1);
@@ -354,7 +354,7 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		// doesn't work see :
 		//ResourcesPlugin.getPlugin().getBundle().stop();
 		//ResourcesPlugin.getPlugin().getBundle().start();
-		
+
 		// simulate shutdown (from AbstractJavaModelTests.simulateExitRestart:
 		env.getWorkspace().save(true, null);
 		JavaModelManager.getJavaModelManager().shutdown();
@@ -363,11 +363,11 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		OTTestingEnvironment.restart();
 		JavaModelManager.getJavaModelManager().startup();
 		new JavaCorePreferenceInitializer().initializeDefaultPreferences();
-		
+
 
 		env.openEmptyWorkspace();
 		env.setAutoBuilding(true);
-		
+
 		trac132b= JavaCore.create(reopenProject("Trac132b"));
 		aspectPlugin1= JavaCore.create(reopenProject("Trac132a1"));
 		aspectPlugin2= JavaCore.create(reopenProject("Trac132a2"));
@@ -379,10 +379,10 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 	}
 
 	public void testBug374833() throws CoreException, IOException {
-		IJavaProject pluginPrj= fileManager.setUpJavaProject("UnresolvedBasePlugin"); 
+		IJavaProject pluginPrj= fileManager.setUpJavaProject("UnresolvedBasePlugin");
 		env.addProject(pluginPrj.getProject());
 		fullBuild();
-		expectingOnlySpecificProblemsFor(pluginPrj.getPath(), 
+		expectingOnlySpecificProblemsFor(pluginPrj.getPath(),
 				new Problem[] {
 					new Problem("", "Base plug-in Missing.Plugin cannot be resolved",
 							pluginPrj.getPath().append("plugin.xml"),
@@ -391,32 +391,32 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 	}
 
 	public void testAspectExport () throws CoreException, IOException {
-		IJavaProject aeb= fileManager.setUpJavaProject("AspectExportBase"); 
+		IJavaProject aeb= fileManager.setUpJavaProject("AspectExportBase");
 		env.addProject(aeb.getProject());
-		IJavaProject aea= fileManager.setUpJavaProject("AspectExportAspect"); 
+		IJavaProject aea= fileManager.setUpJavaProject("AspectExportAspect");
 		aea.setOption("org.eclipse.objectteams.otdt.compiler.problem.binding_conventions", "error");
 		env.addProject(aea.getProject());
 		fullBuild();
 		expectingNoProblemsFor(aeb.getPath());
-		expectingOnlySpecificProblemsFor(aea.getPath(), 
+		expectingOnlySpecificProblemsFor(aea.getPath(),
 				new Problem[] {
 					getMissingAspectExportProblem(aea, "aea")});
 	}
-	
+
 	public void testBug419987() throws CoreException, IOException {
-		IJavaProject aeb= fileManager.setUpJavaProject("Base419987"); 
+		IJavaProject aeb= fileManager.setUpJavaProject("Base419987");
 		env.addProject(aeb.getProject());
-		IJavaProject aea= fileManager.setUpJavaProject("Bug419987"); 
+		IJavaProject aea= fileManager.setUpJavaProject("Bug419987");
 		env.addProject(aea.getProject());
 		fullBuild();
 		expectingNoProblemsFor(aeb.getPath());
-		expectingNoProblemsFor(aea.getPath());		
+		expectingNoProblemsFor(aea.getPath());
 	}
 
 	public void testBug484275() throws CoreException, IOException {
-		IJavaProject basePrj= fileManager.setUpJavaProject("Base484275"); 
+		IJavaProject basePrj= fileManager.setUpJavaProject("Base484275");
 		env.addProject(basePrj.getProject());
-		IJavaProject aspPrj= fileManager.setUpJavaProject("Bug484275"); 
+		IJavaProject aspPrj= fileManager.setUpJavaProject("Bug484275");
 		env.addProject(aspPrj.getProject());
 		fullBuild();
 		expectingNoProblemsFor(basePrj.getPath());
@@ -424,22 +424,22 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 			new Problem("", "Team 'teams.MyTeam$Middle' lacks a binding for base package 'internal'",
 					aspPrj.getPath().append(new Path("plugin.xml")),
 						-1, -1, -1, IMarker.SEVERITY_ERROR)
-		});		
+		});
 	}
 
 	public void testBug495489() throws CoreException, IOException {
-		IJavaProject aspPrj= fileManager.setUpJavaProject("Bug495489"); 
+		IJavaProject aspPrj= fileManager.setUpJavaProject("Bug495489");
 		env.addProject(aspPrj.getProject());
 		fullBuild();
 		expectingNoProblemsFor(aspPrj.getPath());
 	}
 
 	public void testBug494254() throws CoreException, IOException {
-		IJavaProject basePrj0= fileManager.setUpJavaProject("Bug494254base0"); 
+		IJavaProject basePrj0= fileManager.setUpJavaProject("Bug494254base0");
 		env.addProject(basePrj0.getProject());
-		IJavaProject basePrj1= fileManager.setUpJavaProject("Bug494254base1"); 
+		IJavaProject basePrj1= fileManager.setUpJavaProject("Bug494254base1");
 		env.addProject(basePrj1.getProject());
-		IJavaProject aspPrj= fileManager.setUpJavaProject("Bug494254aspect"); 
+		IJavaProject aspPrj= fileManager.setUpJavaProject("Bug494254aspect");
 		env.addProject(aspPrj.getProject());
 		fullBuild();
 		expectingNoProblemsFor(basePrj0.getPath());
@@ -469,27 +469,27 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 	// ---------------- HELPERS: ---------------------------
 	private Problem getDecapsulationProblem(IJavaProject project, String baseclassName, String teamPath, int start, int end) {
 		return new Problem("", "Decapsulating base class "+baseclassName+" by means of a forced export. Note, that additionally a corresponing declaration is needed in config.ini (OTJLD 2.1.2(c) + OT/Equinox).",
-				project.getPath().append(new Path("src/"+teamPath)), 
+				project.getPath().append(new Path("src/"+teamPath)),
 				start, end,
 				CategorizedProblem.CAT_RESTRICTION, IMarker.SEVERITY_WARNING);
 	}
 	private Problem getIllegalUseOfForcedExportProblem(IJavaProject project, String className, int start, int end) {
 		return new Problem("", "The forced-exported type "+className+" cannot be accessed other than as a role's base class (OT/Equinox).",
-				project.getPath().append(new Path("src/IllegalUseOfForcedExportTeam.java")), 
+				project.getPath().append(new Path("src/IllegalUseOfForcedExportTeam.java")),
 				start, end,
 				CategorizedProblem.CAT_TYPE, IMarker.SEVERITY_ERROR);
 	}
 	private void expectAccessRestriction(IJavaProject project, String fileName, int start, int end) {
-		expectingSpecificProblemFor(project.getPath(), 
+		expectingSpecificProblemFor(project.getPath(),
 			new Problem("", "Access restriction: The type 'SampleAction' is not API (restriction on required project 'Trac18b')",
-						project.getPath().append(new Path(fileName)), 
-						start, end, 
+						project.getPath().append(new Path(fileName)),
+						start, end,
 						CategorizedProblem.CAT_RESTRICTION, IMarker.SEVERITY_ERROR)
 		);
 	}
 	private Problem getMissingAspectExportProblem(IJavaProject project, String packageName) {
 		return new Problem("", "Package "+packageName+" containing one or more bound teams must be exported.",
-				project.getPath().append(new Path("META-INF/MANIFEST.MF")), 
+				project.getPath().append(new Path("META-INF/MANIFEST.MF")),
 				-1, -1,
 				-1, IMarker.SEVERITY_ERROR);
 	}

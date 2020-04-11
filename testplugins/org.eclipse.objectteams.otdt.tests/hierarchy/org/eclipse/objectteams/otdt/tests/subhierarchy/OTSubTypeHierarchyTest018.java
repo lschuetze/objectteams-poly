@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -32,13 +32,13 @@ import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 
 /**
- * 
+ *
  * @author Michael Krueger (mkr)
- * @version $Id: OTSubTypeHierarchyTest018.java 23494 2010-02-05 23:06:44Z stephan $ 
- * 
+ * @version $Id: OTSubTypeHierarchyTest018.java 23494 2010-02-05 23:06:44Z stephan $
+ *
  */
 public class OTSubTypeHierarchyTest018 extends FileBasedModelTest {
-	
+
 	private ITypeHierarchy _testObj;
 	@SuppressWarnings("unused")
 	private IType _focusType;
@@ -54,22 +54,22 @@ public class OTSubTypeHierarchyTest018 extends FileBasedModelTest {
     private IType _TA2_TB2_R2;
     private IType _TA3_TB2_R2;
 
-    private IType _TZ1_TX1;    
+    private IType _TZ1_TX1;
 
-    private IType _TZ1_TX1_TB2_R2;    
-    private IType _TZ1_TX2_TB2_R2;    
-    private IType _TZ2_TX2_TB2_R1;    
+    private IType _TZ1_TX1_TB2_R2;
+    private IType _TZ1_TX2_TB2_R2;
+    private IType _TZ2_TX2_TB2_R1;
 
-    
+
     @SuppressWarnings("unused")
 	private IType _objectType;
-    
-    
+
+
 	public OTSubTypeHierarchyTest018(String name)
 	{
 		super(name);
 	}
-	
+
 	public static Test suite()
 	{
 		if (true)
@@ -77,16 +77,16 @@ public class OTSubTypeHierarchyTest018 extends FileBasedModelTest {
 			return new Suite(OTSubTypeHierarchyTest018.class);
 		}
 		@SuppressWarnings("unused")
-		junit.framework.TestSuite suite = 
+		junit.framework.TestSuite suite =
 			new Suite(OTSubTypeHierarchyTest018.class.getName());
 		return suite;
 	}
-	
+
 	public void setUpSuite() throws Exception
 	{
 		setTestProjectDir("Hierarchy");
 		super.setUpSuite();
-		
+
 		String srcFolder = "src";
 		String pkg = "test018";
 
@@ -96,7 +96,7 @@ public class OTSubTypeHierarchyTest018 extends FileBasedModelTest {
         _TZ1 = getType(getTestProjectDir(), srcFolder, pkg, "TZ1");
         _TZ2 = getType(getTestProjectDir(), srcFolder, pkg, "TZ2");
 
-        _objectType = 
+        _objectType =
             getType(getTestProjectDir(),
                     "rt.jar",
                     "java.lang",
@@ -117,12 +117,12 @@ public class OTSubTypeHierarchyTest018 extends FileBasedModelTest {
 
     private void initHierarchy(IType focus, boolean computeSubtypes)
             throws JavaModelException
-    {        
+    {
     	_testObj = new TypeHierarchy(focus, null, focus.getJavaProject(), computeSubtypes);
     	_testObj.refresh(new NullProgressMonitor());
         _focusType = focus;
     }
-        
+
 	public void testCreation()
 	{
         assertCreation(_TA1);
@@ -147,7 +147,7 @@ public class OTSubTypeHierarchyTest018 extends FileBasedModelTest {
     public void testGetAllSubtypes_TA1_TB1_R1() throws JavaModelException
     {
         initHierarchy(_TA1_TB1_R1, true);
-        
+
         IType[] expected = new IType[] { _TA2_TB1_R1,
                                          _TA2_TB2_R1,
                                          _TA2_TB2_R2,
@@ -155,14 +155,14 @@ public class OTSubTypeHierarchyTest018 extends FileBasedModelTest {
                                          _TZ1_TX1_TB2_R2,
                                          _TZ1_TX2_TB2_R2,
                                          _TZ2_TX2_TB2_R1
-                                       };    
-        
-        
+                                       };
+
+
         IType[] actual = _testObj.getAllSubtypes(_TA1_TB1_R1);
-        
+
         assertEquals(expected.length, actual.length);
         assertTrue(compareTypes(expected, actual));
     }
 
-    
+
 }

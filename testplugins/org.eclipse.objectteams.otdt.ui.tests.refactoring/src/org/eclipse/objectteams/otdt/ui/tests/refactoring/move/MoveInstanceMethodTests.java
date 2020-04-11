@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -45,7 +45,7 @@ import org.eclipse.objectteams.otdt.ui.tests.refactoring.RefactoringTest;
 
 /**
  * @author brcan
- *  
+ *
  */
 @SuppressWarnings({ "restriction", "nls" })
 public class MoveInstanceMethodTests extends RefactoringTest
@@ -174,12 +174,12 @@ public class MoveInstanceMethodTests extends RefactoringTest
         	}
 	        assertTrue("precondition was supposed to pass", preconditionResult
 	                .isOK());
-	
+
 	        assertFalse("no warnings expected", preconditionResult.hasWarning());
         } else {
         	assertTrue("warning expected", preconditionResult.hasWarning());
         }
-        
+
         performChange(ref, false);
         for (int idx = 0; idx < cus.length; idx++)
         {
@@ -232,7 +232,7 @@ public class MoveInstanceMethodTests extends RefactoringTest
         preconditionResult.merge(ref.checkFinalConditions(new NullProgressMonitor()));
        	assertTrue("expected a warning", preconditionResult.hasInfo());
        	assertEquals("expected specific warning", expectedWarning, preconditionResult.getMessageMatchingSeverity(RefactoringStatus.INFO));
-        
+
         performChange(ref, false);
         for (int idx = 0; idx < cus.length; idx++)
         {
@@ -253,7 +253,7 @@ public class MoveInstanceMethodTests extends RefactoringTest
         Assert.isTrue(selectionCuIndex != -1,
                        "parameter selectionCuQName must match some String in cuQNames.");
         performRefactoring_failing(cuQNames, selectionCuIndex, startLine, startColumn,
-                endLine, endColumn, newReceiverType, newReceiverName, 
+                endLine, endColumn, newReceiverType, newReceiverName,
                 null, inlineDelegator, removeDelegator, errorCode);
     }
 
@@ -307,7 +307,7 @@ public class MoveInstanceMethodTests extends RefactoringTest
 		    assertEquals(errorCode, result.getEntryMatchingSeverity(
 		            RefactoringStatus.ERROR).getCode());
 		}
-    }	
+    }
 
 	private void performConditionChecking_warnings(
 	        String[] cuQNames, String selectionCuQName,
@@ -360,7 +360,7 @@ public class MoveInstanceMethodTests extends RefactoringTest
 		    assertEquals(errorCode, result.getEntryMatchingSeverity(
 		            RefactoringStatus.WARNING).getCode());
 		}
-    }	
+    }
 
     protected ICompilationUnit[] createCUs(String[] qualifiedNames)
     	throws Exception
@@ -426,7 +426,7 @@ public class MoveInstanceMethodTests extends RefactoringTest
     }
 
     /********** tests *********/
-// test method template    
+// test method template
 //  public void test0() throws Exception
 //  {
 //      helper1(new String[] { "p1.A", "p2.B", "p3.C" }, "p1.A", 7, 17, 7, 20,
@@ -434,11 +434,11 @@ public class MoveInstanceMethodTests extends RefactoringTest
 //  }
 //	public void testFail0() throws Exception
 //	{
-//		failHelper1("p1.IA", 5, 17, 5, 20, PARAMETER, "b", true, true, RefactoringStatusCodes.SELECT_METHOD_IMPLEMENTATION);	
+//		failHelper1("p1.IA", 5, 17, 5, 20, PARAMETER, "b", true, true, RefactoringStatusCodes.SELECT_METHOD_IMPLEMENTATION);
 //	}
 
     // TODO(SH): more tests for combinations of inline,removeDelegate!
-    
+
     /* Testing receiver types */
 	public void testFieldNewReceiver() throws Exception {
 		performAndCheckSelectedCU_passing(new String[] { "p.A", "p.B" }, "p.A", 7, 17, 7, 19, FIELD, "b", true, true,
@@ -689,7 +689,7 @@ public class MoveInstanceMethodTests extends RefactoringTest
                 "p.A", 6, 17, 6, 18, PARAMETER, "b",
                 true, true, OTRefactoringStatusCodes.DUPLICATE_METHOD_IN_NEW_RECEIVER);
     }
-    
+
     public void _testDuplicateMethodInNewParameterReceiver2()
     throws Exception
     {
@@ -698,7 +698,7 @@ public class MoveInstanceMethodTests extends RefactoringTest
                 "p.A", 8, 17, 8, 18, PARAMETER, "b",
                 true, true, OTRefactoringStatusCodes.DUPLICATE_METHOD_IN_NEW_RECEIVER);
     }
-    
+
     public void _testTargetMethodIsPrivate()
     	throws Exception
     {
@@ -707,5 +707,5 @@ public class MoveInstanceMethodTests extends RefactoringTest
                 "p.A", 6, 18, 6, 20, PARAMETER, "b",
                 true, true, OTRefactoringStatusCodes.CANNOT_MOVE_PRIVATE);
     }
-    
+
 }

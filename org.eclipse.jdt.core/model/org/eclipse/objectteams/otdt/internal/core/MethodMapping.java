@@ -6,7 +6,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -66,10 +66,10 @@ import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
  * OT_COPY_PASTE from Member.getCategories()
  *               from Member.getJavadocRange()
  *               from SourceRefElement.getOpenableParent()
- *               
+ *
  * Generic Method Mapping, needs to be subclassed to add missing behaviour
  * for IMethodMapping.getMappingKind()
- *  
+ *
  * @author jwloka
  */
 public abstract class MethodMapping extends OTJavaElement implements IMethodMapping
@@ -93,7 +93,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
                          int        type,
                          IMethod	correspondingJavaElem,
                          IType  	parent,
-                         MethodData roleMethodHandle, 
+                         MethodData roleMethodHandle,
 						 boolean    hasSignature)
     {
         super(type, correspondingJavaElem, parent);
@@ -104,7 +104,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
         this.declarationSourceEnd   = declarationSourceEnd;
         this.hasSignature           = hasSignature;
     }
-    
+
     public MethodMapping(int            declarationSourceStart,
 			             int        	sourceStart,
 			             int			sourceEnd,
@@ -112,7 +112,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 			             int        	type,
 			             IMethod		correspondingJavaElem,
 			             IType  		parent,
-			             MethodData 	roleMethodHandle, 
+			             MethodData 	roleMethodHandle,
 			             boolean    	hasSignature,
 			             boolean    	addAsChild)
 	{
@@ -124,7 +124,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 		this.declarationSourceEnd   = declarationSourceEnd;
 		this.hasSignature    		= hasSignature;
 	}
-        
+
     // ==== memento generation: ====
     @Override
     public String getHandleIdentifier() {
@@ -152,14 +152,14 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 		return buff.toString();
     }
     protected void getNameForHandle(StringBuffer buff) { /* default: mapping has no name. */ }
-    /** 
+    /**
      * Answer a char encoding the mapping kind with this information:
-     * callin: a=after, b=before, r=replace; 
+     * callin: a=after, b=before, r=replace;
      * callout: o=regular, g=getter, s=setter [capital=isOverride].
      */
     abstract protected char getMappingKindChar();
     abstract protected void getBaseMethodsForHandle(StringBuffer buff);
-	
+
     protected void getMethodForHandle(IMethodSpec method, StringBuffer buff) {
     	escapeMementoName(buff, method.getSelector());
     	if (this.hasSignature) {
@@ -172,12 +172,12 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
     	}
     	buff.append(OTJavaElement.OTEM_METHODMAPPING);
     }
-    // ==== retreive method spec from memento: === 
+    // ==== retreive method spec from memento: ===
     public static MethodData createMethodData(MementoTokenizer memento, String selector) {
     	String cur = memento.nextToken();
     	if (cur.charAt(0) == JavaElement.JEM_METHOD)
     		cur = memento.nextToken(); // skip initial separator
-    	List<String> argTypes = new ArrayList<String>(); 
+    	List<String> argTypes = new ArrayList<String>();
     	while (cur.charAt(0) != OTJavaElement.OTEM_METHODMAPPING) {
 			StringBuffer buffer = new StringBuffer();
 			while (cur.length() == 1 && Signature.C_ARRAY == cur.charAt(0)) { // backward compatible with 3.0 mementos
@@ -198,7 +198,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
     	return new MethodData(selector, argTypes.toArray(new String[argTypes.size()]), null, returnType, false);
     }
     // ====
-    
+
 	@Override
 	public IMethod getRoleMethod()
     {
@@ -211,7 +211,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
     			this.hasSearchedRoleMethod = true;
     		}
     	}
-    	
+
         return this.roleMethod;
     }
 
@@ -221,7 +221,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
     {
     	return this.roleMethodHandle;
     }
-    
+
     public IMethod getRoleMethodThrowingException() throws JavaModelException
     {
     	if (!this.hasSearchedRoleMethod) {
@@ -231,7 +231,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
     			this.hasSearchedRoleMethod = true;
     		}
     	}
-    	
+
         return this.roleMethod;
     }
 
@@ -239,9 +239,9 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	{
 		this.roleMethod = meth;
 	}
-    
+
     /**
-     * Only returns the role-methods part -- subclasses must override and 
+     * Only returns the role-methods part -- subclasses must override and
      * construct the whole element name!
      */
 	@Override
@@ -260,19 +260,19 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
     {
         return this.declarationSourceStart;
     }
-	
+
 	@Override
 	public int getSourceStart()
 	{
 		return this.sourceStart;
 	}
-	
+
 	@Override
 	public int getSourceEnd()
 	{
 		return this.sourceEnd;
 	}
-	
+
 	@Override
 	public int getDeclarationSourceEnd()
 	{
@@ -283,13 +283,13 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	public boolean equals(Object obj)
 	{
 		MethodMapping other = (MethodMapping)obj;
-		
+
 		return super.equals(other)
 //				&& declarationSourceStart == other.getDeclarationSourceStart()
 //				&& _declarationSourceEnd == other.getDeclarationSourceEnd()
 				&& getElementName().equals(other.getElementName());
 	}
-	
+
     @Override
 	@SuppressWarnings("nls")
 	public String toString()
@@ -309,11 +309,11 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 		// collect all parents in role type hierarchy
 		for (int idx = 0; idx < implicitParents.length; idx++)
 		{
-			IType elem = implicitParents[idx];        	
+			IType elem = implicitParents[idx];
 
 			// build super class hierarchy for element
 			ITypeHierarchy hierarchy =
-						elem.newSupertypeHierarchy( new NullProgressMonitor() );        				
+						elem.newSupertypeHierarchy( new NullProgressMonitor() );
 			IType[] superTypes       = hierarchy.getAllSuperclasses(elem);
 
 			// add implicit parent...
@@ -322,12 +322,12 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 			if (superTypes.length > 0)
 			{
 				allParents.addAll(Arrays.asList(superTypes));
-			} 
+			}
 		}
 		return findMethod(allParents.toArray(new IType[allParents.size()]),
 						  this.roleMethodHandle);
 	}
-    
+
 	protected abstract IRoleType getDeclaringRole();
 
 	/**
@@ -347,7 +347,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 			for (int methIdx = 0; methIdx < methods.length; methIdx++)
 			{
 				IMethod tmpMethod = methods[methIdx];
-				// check for equal method name and signature            	
+				// check for equal method name and signature
 				String selector = tmpMethod.getElementName();
 				if (isEqualMethod(methodHandle, tmpMethod, selector))
 					// return immediately on first match
@@ -359,7 +359,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 					AbstractCalloutMapping tmpMethod = (AbstractCalloutMapping)mapping;
 					if (tmpMethod == this)
 						continue; // callout fakes its own role method, but don't take it for real here!
-					// check for equal method name and signature            	
+					// check for equal method name and signature
 					String selector = tmpMethod.getCorrespondingJavaElement().getElementName();
 					if (isEqualMethod(methodHandle, tmpMethod, selector))
 						// return immediately on first match
@@ -375,7 +375,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 			if (methods != null && methods.length == 1)
 				return methods[0];
 		}
-		return null;		
+		return null;
 	}
 
 	// helper for above to generalize over real methods and callouts:
@@ -386,14 +386,14 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 			return true;
 		return Util.equalArraysOrNull(foundMethodOrCallout.getParameterTypes(), baseMethodHandle.getArgumentTypes());
 	}
-    
+
 //{OT_COPY_PASTE: SourceRefElement, STATE: 3.4 M7
 	/**
 	 * Return the first instance of IOpenable in the hierarchy of this
 	 * type (going up the hierarchy from this type);
 	 */
 	@Override
-	public IOpenable getOpenableParent() 
+	public IOpenable getOpenableParent()
 	{
 		IJavaElement current = getParent();
 		while (current != null){
@@ -407,19 +407,19 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 				IOTType otElement = (IOTType) current;
 				current = otElement.getCorrespondingJavaElement();
 			}
-//haebor}			
+//haebor}
 			current = current.getParent();
 		}
 		return null;
 	}
-	
+
 //{OTModelUpdate : many of this methods shouldn't be delegated
 //                 to the corresponding method. Started with these three.
 //	public String getSource() throws JavaModelException
 //	{
 //	    return getIMethod().getSource();
 //	}
-//	
+//
 //	public ISourceRange getSourceRange() throws JavaModelException
 //	{
 //	    return getIMethod().getSourceRange();
@@ -428,32 +428,32 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 //	{
 //	    return getIMethod().getNameRange();
 //	}
-	
+
 //haebor}
 	/**
 	 * @see ISourceReference
 	 */
 	@Override
-	public String getSource() throws JavaModelException 
+	public String getSource() throws JavaModelException
 	{
 		IOpenable openable = getOpenableParent();
 		IBuffer buffer = openable.getBuffer();
-		if (buffer == null) 
+		if (buffer == null)
 		{
 			return null;
 		}
 		ISourceRange range = getSourceRange();
 		int offset = range.getOffset();
 		int length = range.getLength();
-		if (offset == -1 || length == 0 ) 
+		if (offset == -1 || length == 0 )
 		{
 			return null;
 		}
-		try 
+		try
 		{
 			return buffer.getText(offset, length);
-		} 
-		catch(RuntimeException ex) 
+		}
+		catch(RuntimeException ex)
 		{
 			return null;
 		}
@@ -462,16 +462,16 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	 * @see ISourceReference
 	 */
 	@Override
-	public ISourceRange getSourceRange() throws JavaModelException 
+	public ISourceRange getSourceRange() throws JavaModelException
 	{
 //{ObjectTeams: we don't have an ElementInfo but we know sourcestart, sourceend
 		return new SourceRange(this.declarationSourceStart, this.declarationSourceEnd - this.declarationSourceStart + 1);
-//haebor}		
-//orig:		
+//haebor}
+//orig:
 //		SourceRefElementInfo info = (SourceRefElementInfo) getElementInfo();
 //		return info.getSourceRange();
 	}
-	
+
 //haebor}
 	@Override
 	public ISourceRange getNameRange() throws JavaModelException
@@ -483,18 +483,18 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	protected String getSourceName() {
 		return super.getElementName();
 	}
-	
-//delegates	
+
+//delegates
 	IMethod getIMethod()
 	{
 	    return (IMethod) getCorrespondingJavaElement();
 	}
-	
+
 	public String[] getExceptionTypes() throws JavaModelException
 	{
 	    return getIMethod().getExceptionTypes();
 	}
-	
+
 	/**
 	 * @deprecated (cf. IMethod.getTypeParameterSignatures())
 	 */
@@ -502,12 +502,12 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	{
 	    return getIMethod().getTypeParameterSignatures();
 	}
-	
+
 	public int getNumberOfParameters()
 	{
 	    return getIMethod().getNumberOfParameters();
 	}
-	
+
 	public String[] getParameterNames() throws JavaModelException
 	{
 		if (   this.roleMethodHandle != null
@@ -515,12 +515,12 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 				return this.roleMethodHandle.getArgumentNames();
 	    return getIMethod().getParameterNames();
 	}
-	
+
 	public String[] getParameterTypes()
 	{
 	    return getIMethod().getParameterTypes();
 	}
-	
+
 	public String getReturnType() throws JavaModelException
 	{
 		if (   this.roleMethodHandle != null
@@ -528,61 +528,61 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 			return this.roleMethodHandle.getReturnType();
 	    return getIMethod().getReturnType();
 	}
-	
+
 	public String getSignature() throws JavaModelException
 	{
 	    return getIMethod().getSignature();
 	}
-	
+
 	public boolean isConstructor() throws JavaModelException
 	{
 	    return getIMethod().isConstructor();
 	}
-	
+
 	public boolean isMainMethod() throws JavaModelException
 	{
 	    return getIMethod().isMainMethod();
 	}
-	
+
 	public boolean isLambdaMethod() {
 		return false;
 	}
-	
+
 	public boolean isSimilar(IMethod method)
 	{
 	    return getIMethod().isSimilar(method);
 	}
-	
+
 	@Override
 	public IClassFile getClassFile()
 	{
 	    return getIMethod().getClassFile();
 	}
-	
+
 	@Override
 	public ICompilationUnit getCompilationUnit()
 	{
 	    return getIMethod().getCompilationUnit();
 	}
-	
+
 	@Override
 	public IType getDeclaringType()
 	{
 	    return getIMethod().getDeclaringType();
 	}
-	
+
 	@Override
 	public int getFlags() throws JavaModelException
 	{
 	    return 0; // SH: method mappings have no regular flags. orig: getIMethod().getFlags();
 	}
-	
+
 	@Override
 	public IType getType(String name, int count)
 	{
 	    return getIMethod().getType(name, count);
 	}
-	
+
 	@Override
 	public boolean isBinary()
 	{
@@ -593,31 +593,31 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	{
 	    getIMethod().copy(container, sibling, rename, replace, monitor);
 	}
-	
+
 	@Override
 	public void delete(boolean force, IProgressMonitor monitor) throws JavaModelException
 	{
 	    getIMethod().delete(force, monitor);
 	}
-	
+
 	@Override
 	public void move(IJavaElement container, IJavaElement sibling, String rename, boolean replace, IProgressMonitor monitor) throws JavaModelException
 	{
 	    getIMethod().move(container, sibling, rename, replace, monitor);
 	}
-	
+
 	@Override
 	public void rename(String name, boolean replace, IProgressMonitor monitor) throws JavaModelException
 	{
 	    getIMethod().rename(name, replace, monitor);
 	}
-	
+
     @Override
 	public boolean hasSignature()
     {
         return this.hasSignature;
     }
-    
+
 	@Override
 	public boolean exists()
 	{
@@ -647,16 +647,16 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
         // See exists()
 		return getParent().isStructureKnown();
 	}
-	
+
 	public String getKey() {
 		// km: perhaps: calculating own key would be better
 		return getIMethod().getKey();
 	}
-	
+
 	public ITypeParameter[] getTypeParameters() throws JavaModelException {
 		return NO_TYPE_PARAMETERS; // must not return null!
 	}
-	
+
 	public String[] getRawParameterNames() throws JavaModelException {
 		return EMPTY_STRING_ARRAY;
 	}
@@ -668,7 +668,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	public boolean isResolved() {
 		return false;
 	}
-	
+
 	@Override
 	public String getAttachedJavadoc(IProgressMonitor monitor) throws JavaModelException {
 		return null;
@@ -691,7 +691,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 			return categories;
 		}
 	}
-	
+
 	//OT_COPY_PASTE from Member.getJavadocRange(). STATE: 3.4 M7
 	@Override
 	public ISourceRange getJavadocRange() throws JavaModelException {
@@ -715,7 +715,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 			try {
 				int docOffset= -1;
 				int docEnd= -1;
-				
+
 				int terminal= scanner.getNextToken();
 				loop: while (true) {
 					switch(terminal) {

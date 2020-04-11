@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id: OTType.java 23417 2010-02-03 20:13:55Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -66,20 +66,20 @@ import org.eclipse.objectteams.otdt.internal.core.search.matching.ReferenceToTea
 /**
  * Generic OTType implementation. Actually this instance is only used to
  * represent teams.
- * 
+ *
  * @author jwloka
  * @version $Id: OTType.java 23417 2010-02-03 20:13:55Z stephan $
  */
 public class OTType extends OTJavaElement implements IOTType
 {
 	int flags;
-	
+
 	public OTType(int type, IType correspondingJavaType, IJavaElement parent, int flags)
 	{
 		super(type, correspondingJavaType, parent);
 		this.flags                  = flags;
 	}
-	
+
 	public OTType(int type, IType correspondingJavaType, IJavaElement parent, int flags, boolean addToParent)
 	{
 		super(type, correspondingJavaType, parent, addToParent);
@@ -109,7 +109,7 @@ public class OTType extends OTJavaElement implements IOTType
 		{
 			return ((ICompilationUnit)javaParent).getCorrespondingResource();
 		}
-		
+
 		return null;
 	}
 
@@ -122,38 +122,38 @@ public class OTType extends OTJavaElement implements IOTType
 	{
 		List<IType> result = new LinkedList<IType>();
 		IJavaElement[] children = getChildren();
-		
+
 		for (int idx = 0; idx < children.length; idx++)
 		{
 			if (children[idx] instanceof IOTType)
 			{
 				result.add((IType)children[idx]);
 			}
-		} 
-		
+		}
+
 		return result.toArray(new IType[result.size()]);
-	}	
-    
+	}
+
 	/**
 	 * {@inheritDoc}.
 	 */
 	@Override
-	public IType[] getRoleTypes(int which) throws JavaModelException 
+	public IType[] getRoleTypes(int which) throws JavaModelException
 	{
 	    return getRoleTypes(which, null);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public IType[] getRoleTypes(int which, String roleName) throws JavaModelException 
+	public IType[] getRoleTypes(int which, String roleName) throws JavaModelException
 	{
 	    ArrayList<IType> result = new ArrayList<IType>();
 	    IType[] typesToConsider = null;
-	    
+
 	    final int BOTH_HIERARCHIES_MASK = IMPLICTLY_INHERITED | EXPLICITLY_INHERITED;
-	    
+
 	    if ((which & BOTH_HIERARCHIES_MASK) != 0)
 	    {
 	        ITypeHierarchy hierarchy = ((IType)getCorrespondingJavaElement()).newSupertypeHierarchy(new NullProgressMonitor());
@@ -174,16 +174,16 @@ public class OTType extends OTJavaElement implements IOTType
 
 	    if (typesToConsider == null)
 	        throw new IllegalArgumentException("EXCLUDE_SELF without a hierarchy requested"); //$NON-NLS-1$
-	        
+
 	    typesToConsider = fixTypesToConsider(typesToConsider);
-	    
+
         //TODO(haebor) consider that roles from binaries can't be differentiated since external roles are inlined
 		if ((which & ROLEFILE) != 0)
 		{
 //			packageSearchGetRoleFiles(result);
 		    result.addAll(searchEngineGetRoleFiles(typesToConsider, roleName));
 		}
-	
+
         if ((which & INLINED) != 0)
         {
             for (int i = 0; i < typesToConsider.length; i++)
@@ -197,7 +197,7 @@ public class OTType extends OTJavaElement implements IOTType
                 }
             }
         }
-        
+
         return result.toArray(new IType[result.size()]);
 	}
 
@@ -206,11 +206,11 @@ public class OTType extends OTJavaElement implements IOTType
 		// default case:
 		return hierarchy.getAllSuperclasses(this);
 	}
-	
+
 	private static IType[] fixTypesToConsider(IType[] typesToConsider)
     {
 	    ArrayList<IType> result = new ArrayList<IType>(typesToConsider.length);
-	    
+
 	    for (int i = 0; i < typesToConsider.length; i++)
         {
             IType type = typesToConsider[i];
@@ -221,7 +221,7 @@ public class OTType extends OTJavaElement implements IOTType
                     result.add(role);
             }
         }
-        
+
 	    return result.toArray(new IType[result.size()]);
     }
 
@@ -229,7 +229,7 @@ public class OTType extends OTJavaElement implements IOTType
     {
         final List<IType> searchResult = new ArrayList<IType>();
         char[] role = (roleName == null) ? null : roleName.toCharArray();
-        
+
         try
         {
 
@@ -242,15 +242,15 @@ public class OTType extends OTJavaElement implements IOTType
                     searchResult.add((IType)match.getElement());
                 }
             };
-            
+
             for (int i = 0; i < teamsToConsider.length; i++)
             {
                 IType currentType = teamsToConsider[i];
                 IOTType ottype = OTModelManager.getOTElement(currentType);
                 if (ottype == null || !ottype.isTeam())
                 	continue;
-                
-	            SearchPattern pattern = 
+
+	            SearchPattern pattern =
 	                new ReferenceToTeamPackagePattern(currentType.getFullyQualifiedName().toCharArray(), role,
 	                        SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
 	            searchEngine.search(pattern, scope, requestor, new NullProgressMonitor());
@@ -272,13 +272,13 @@ public class OTType extends OTJavaElement implements IOTType
 	{
 	    return getRoleTypes(IOTType.INLINED | IOTType.ROLEFILE);
 	}
-	
+
 	@Override
 	public int getFlags()
 	{
 		return this.flags;
 	}
-	
+
 	@Override
 	public IType getRoleType(String simpleName)
 	{
@@ -297,10 +297,10 @@ public class OTType extends OTJavaElement implements IOTType
 		    	return null;
 		    }
 	    }
-	    
+
 	    return null;
 	}
-	
+
 	@Override
 	public IType searchRoleType(String simpleName) {
 		try
@@ -308,7 +308,7 @@ public class OTType extends OTJavaElement implements IOTType
 			List<IType> roleFiles = searchEngineGetRoleFiles(new IType[] { this }, simpleName);
 			if (roleFiles.size() > 0)
 				return roleFiles.get(0); // actually there may be more, due to multiple src-folders...
-			
+
 // previous implementation without search engine
 //			    String encTeamName = this.getFullyQualifiedName();
 //			    String qualName	  = encTeamName + "." + simpleName;
@@ -321,20 +321,20 @@ public class OTType extends OTJavaElement implements IOTType
 		catch (JavaModelException ignored) { /* not found */ }
 		return null;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj)
 	{
 		if (obj == this.getCorrespondingJavaElement())
 			return true;
-		
+
 		if(!(obj instanceof OTType))
 		{
 		    return false;
 		}
 
 		OTType other = (OTType)obj;
-		
+
 		return super.equals(other)
 				&& getFlags() == other.getFlags();
 	}
@@ -345,12 +345,12 @@ public class OTType extends OTJavaElement implements IOTType
 	{
 		return "OTType " + getElementName() + " for type: " + getCorrespondingJavaElement().toString();
 	}
-	
+
 	private IType getIType()
 	{
 	    return (IType)super.getCorrespondingJavaElement();
 	}
-	
+
 	/**
 	 * @deprecated Use {@link #codeComplete(char[],int,int,char[][],char[][],int[],boolean,CompletionRequestor)} instead.
 	 */
@@ -369,13 +369,13 @@ public class OTType extends OTJavaElement implements IOTType
     }
     @Override
 	public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, CompletionRequestor requestor, IProgressMonitor monitor)
-    		throws JavaModelException 
+    		throws JavaModelException
     {
-    	getIType().codeComplete(snippet, insertion, position, localVariableTypeNames, localVariableNames, localVariableModifiers, isStatic, requestor, monitor);	
+    	getIType().codeComplete(snippet, insertion, position, localVariableTypeNames, localVariableNames, localVariableModifiers, isStatic, requestor, monitor);
     }
     @Override
 	public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, CompletionRequestor requestor, WorkingCopyOwner owner, IProgressMonitor monitor)
-    		throws JavaModelException 
+    		throws JavaModelException
     {
     	getIType().codeComplete(snippet, insertion, position, localVariableTypeNames, localVariableNames, localVariableModifiers, isStatic, requestor, owner, monitor);
     }
@@ -466,7 +466,7 @@ public class OTType extends OTJavaElement implements IOTType
 	public IAnnotation[] getAnnotations() throws JavaModelException {
     	return getIType().getAnnotations();
     }
-    
+
     @Override
 	public IPackageFragment getPackageFragment()
     {
@@ -677,7 +677,7 @@ public class OTType extends OTJavaElement implements IOTType
 	public ITypeRoot getTypeRoot() {
     	return getIType().getTypeRoot();
     }
-    
+
     @Override
 	public IType getDeclaringType()
     {
@@ -803,7 +803,7 @@ public class OTType extends OTJavaElement implements IOTType
 		super.close();
 		OTModelManager.removeOTElement(this);
 	}
-	
+
 	@Override
 	protected Object createElementInfo() {
 		throw new UnsupportedOperationException("Not yet implemented for OTType");

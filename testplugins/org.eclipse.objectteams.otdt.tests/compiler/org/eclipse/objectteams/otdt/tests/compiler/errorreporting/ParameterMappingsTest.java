@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -25,7 +25,7 @@ import org.eclipse.objectteams.otdt.tests.compiler.TestBase;
 
 /**
  * This class contains tests concerning the parameter mappings in callin and
- * callout bindings. 
+ * callout bindings.
  *
  * @author brcan
  * @version $Id: ParameterMappingsTest.java 23494 2010-02-05 23:06:44Z stephan $
@@ -47,13 +47,13 @@ public class ParameterMappingsTest extends TestBase
 				   "    public int baseMethod() { return 2; }    \r\n"+
 				   "}                                              \r\n"
 		);
-	
+
 		createFile("SuperRoleClass",
 				   "public class SuperRoleClass {                  \r\n"+
 				   "    public int roleMethod() { return 1000; }   \r\n"+
 				   "}                                              \r\n"
 		);
-	
+
 		createFile("MyTeam",
 					"public team class MyTeam {                    \r\n"+
 					"	protected class MyRole extends SuperRoleClass playedBy MyBase {             \r\n"+
@@ -63,10 +63,10 @@ public class ParameterMappingsTest extends TestBase
 					"	}                                          \r\n"+
 					"}											   \r\n"
 		);
-		
+
 		compileFile("MyTeam");
-		
-		assertTrue(isCompilationSuccessful());		
+
+		assertTrue(isCompilationSuccessful());
 	}
 
     /**
@@ -79,7 +79,7 @@ public class ParameterMappingsTest extends TestBase
 				   "    public void baseMethod(boolean valueB) {}    \r\n"+
 				   "}                                              \r\n"
 		);
-	
+
 		createFile("MyTeam",
 					"public team class MyTeam {                    \r\n"+
 					"	protected class MyRole playedBy MyBase {             \r\n"+
@@ -90,10 +90,10 @@ public class ParameterMappingsTest extends TestBase
 					"	}                                          \r\n"+
 					"}											   \r\n"
 		);
-		
+
 		compileFile("MyTeam");
-		
-		assertTrue(isCompilationSuccessful());		
+
+		assertTrue(isCompilationSuccessful());
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class ParameterMappingsTest extends TestBase
 				   "    public void baseMethod(float valueB) {}    \r\n"+
 				   "}                                              \r\n"
 		);
-	
+
 		createFile("MyTeam",
 					"public team class MyTeam {                    \r\n"+
 					"	protected class MyRole playedBy MyBase {             \r\n"+
@@ -118,12 +118,12 @@ public class ParameterMappingsTest extends TestBase
 					"	}                                          \r\n"+
 					"}											   \r\n"
 		);
-		
+
 		compileFile("MyTeam");
-		
-		assertTrue(isCompilationSuccessful());		
+
+		assertTrue(isCompilationSuccessful());
 	}
-	
+
 	/**
 	 * A base method with a parameter list is used in a callout binding.
 	 */
@@ -135,7 +135,7 @@ public class ParameterMappingsTest extends TestBase
 				   "	}										   \r\n"+
 				   "}                                              \r\n"
 		);
-	
+
 		createFile("MyTeam",
 					"public team class MyTeam{					   \r\n"+
 					"	protected class MyRole playedBy MyBase {             \r\n"+
@@ -147,10 +147,10 @@ public class ParameterMappingsTest extends TestBase
 					"	}										   \r\n"+
 					"}											   \r\n"
 		);
-		
+
 		compileFile("MyTeam");
-		
-		assertTrue(isCompilationSuccessful());		
+
+		assertTrue(isCompilationSuccessful());
 	}
 
 	/**
@@ -164,7 +164,7 @@ public class ParameterMappingsTest extends TestBase
 				   "	}										   \r\n"+
 				   "}                                              \r\n"
 		);
-	
+
 		createFile("MyTeam",
 					"public team class MyTeam{					   \r\n"+
 					"	protected class MyRole playedBy MyBase {             \r\n"+
@@ -176,16 +176,16 @@ public class ParameterMappingsTest extends TestBase
 					"	}										   \r\n"+
 					"}											   \r\n"
 		);
-	
+
 		compileFile("MyTeam");
-		
+
 		assertTrue(isCompilationSuccessful());
 	}
 
 
 	/**
 	 * Broken callin-binding:
-	 * the base-method's argument list is different from the one in the binding declaration. 
+	 * the base-method's argument list is different from the one in the binding declaration.
 	 */
 	public void testCallinParameterMappingList2()
 	{
@@ -195,7 +195,7 @@ public class ParameterMappingsTest extends TestBase
 				   "	}										   \r\n"+
 				   "}                                              \r\n"
 		);
-	
+
 		createFile("MyTeam",
 					"public team class MyTeam{					   \r\n"+
 					"	protected class MyRole playedBy MyBase {             \r\n"+
@@ -208,9 +208,9 @@ public class ParameterMappingsTest extends TestBase
 					"	}										   \r\n"+
 					"}											   \r\n"
 		);
-	
+
 		compileFile("MyTeam");
-		
+
 		assertFalse(isCompilationSuccessful());
 	}
 }

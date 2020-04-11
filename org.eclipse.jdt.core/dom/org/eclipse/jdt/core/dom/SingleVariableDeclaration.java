@@ -206,7 +206,7 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	 * The type annotations on the varargs token (element type: {@link Annotation}).
 	 * Null before JLS8. Added in JLS8; defaults to an empty list
 	 * (see constructor).
-	 * 
+	 *
 	 * @since 3.10
 	 */
 	private ASTNode.NodeList varargsAnnotations = null;
@@ -221,7 +221,7 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 
 //{ObjectTeams: emulation for declared lifting:
 	private SingleVariableDeclaration fakedRoleVariable;
-	public static final ChildPropertyDescriptor FAKED_ROLE_VARIABLE = 
+	public static final ChildPropertyDescriptor FAKED_ROLE_VARIABLE =
 			new ChildPropertyDescriptor(SingleVariableDeclaration.class, "fakedRoleVariable", SingleVariableDeclaration.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	SingleVariableDeclaration newFakedRoleVariable(LiftingType liftingType) {
@@ -287,7 +287,7 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	final ChildListPropertyDescriptor internalExtraDimensions2Property() {
 		return EXTRA_DIMENSIONS2_PROPERTY;
 	}
-	
+
 	@Override
 	final ChildPropertyDescriptor internalInitializerProperty() {
 		return INITIALIZER_PROPERTY;
@@ -636,7 +636,7 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	 */
 	public List varargsAnnotations() {
 		if (this.varargsAnnotations == null) {
-			unsupportedIn2_3_4(); 
+			unsupportedIn2_3_4();
 		}
 		return this.varargsAnnotations;
 	}

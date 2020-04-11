@@ -6,7 +6,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  * 	   Fraunhofer FIRST - Initial API and implementation
@@ -55,20 +55,20 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
-/** Structure is OT_COPY_PASTE from {@link org.eclipse.jdt.ui.tests.core.source.AddUnimplementedMethodsTest} 
- * @since 1.2.1 
+/** Structure is OT_COPY_PASTE from {@link org.eclipse.jdt.ui.tests.core.source.AddUnimplementedMethodsTest}
+ * @since 1.2.1
  */
 public class AddUnimplementedMethodsTest extends TestCase {
-	
+
 	private static final Class THIS= AddUnimplementedMethodsTest.class;
-	
+
 	private IJavaProject fJavaProject;
 	private IPackageFragment fPackage;
-	
+
 	public AddUnimplementedMethodsTest(String name) {
 		super(name);
 	}
-		
+
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
@@ -80,24 +80,24 @@ public class AddUnimplementedMethodsTest extends TestCase {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new AddUnimplementedMethodsTest("test1"));
 			return new ProjectTestSetup(suite);
-		}	
+		}
 	}
-	
+
 	protected void setUp() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
-		
+
 		Hashtable<String,String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "999");
 		fJavaProject.setOptions(options);
-		
+
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "${body_statement}\n// TODO", null);
-		
+
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		fPackage= root.createPackageFragment("org.eclispe.objectteams.util", true, null);
-		
+
 		IEclipsePreferences node= new ProjectScope(fJavaProject.getProject()).getNode(JavaUI.ID_PLUGIN);
 		node.putBoolean(PreferenceConstants.CODEGEN_USE_OVERRIDE_ANNOTATION, false);
 		node.putBoolean(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
@@ -121,28 +121,28 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		buf.append("  }\n");
 		buf.append("}\n");
 		fPackage.createCompilationUnit("F.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package org.eclipse.objectteams.util;\n");
 		ICompilationUnit cu= fPackage.createCompilationUnit("F2.java", buf.toString(), false, null);
-		
+
 		IType testClass= cu.createType("public team class F2 extends F {\n\n}\n", null, true, null);
 		testClass = testClass.createType("public class R playedBy Object {\n\n}\n", null, true, null);
-		
+
 		testHelper(testClass);
-		
+
 		IMethod[] methods= testClass.getMethods();
 		checkMethods(new String[] { "b", "equals", "clone", "toString", "finalize", "hashCode" }, methods);
-		
+
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[]{"java.util.Properties"}, imports);
 	}
-	
-	
+
+
 	private void testHelper(IType testClass) throws JavaModelException, CoreException {
 		testHelper(testClass, -1, true);
 	}
-	
+
 	private void testHelper(IType testClass, int insertionPos, boolean implementAllOverridable) throws JavaModelException, CoreException {
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS8);
 		CompilationUnit unit= parser.parse(testClass.getCompilationUnit(), true);
@@ -150,14 +150,14 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		assertNotNull("Could not find type declaration node", declaration);
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);
-		
+
 		IMethodBinding[] overridableMethods= implementAllOverridable ? StubUtility2Core.getOverridableMethods(unit.getAST(), binding, false) : null;
-		
+
 		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(unit, binding, overridableMethods, insertionPos, true, true, true);
 		op.run(new NullProgressMonitor());
 		JavaModelUtil.reconcile(testClass.getCompilationUnit());
 	}
-	
+
 	private void checkMethods(String[] expected, IMethod[] methods) {
 		int nMethods= methods.length;
 		int nExpected= expected.length;
@@ -166,8 +166,8 @@ public class AddUnimplementedMethodsTest extends TestCase {
 			String methName= expected[i];
 			assertTrue("method " + methName + " expected", nameContained(methName, methods));
 		}
-	}			
-	
+	}
+
 	private void checkImports(String[] expected, IImportDeclaration[] imports) {
 		int nImports= imports.length;
 		int nExpected= expected.length;
@@ -197,5 +197,5 @@ public class AddUnimplementedMethodsTest extends TestCase {
 			}
 		}
 		return false;
-	}	
+	}
 }

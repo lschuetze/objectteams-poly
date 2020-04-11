@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -126,7 +126,7 @@ public class OTDeleteTests extends RefactoringTest
         return new MockReorgQueries();
     }
 
-    //---- tests ----    
+    //---- tests ----
     public void testDeleteTeamclass() throws Exception
     {
 //      ParticipantTesting.reset();
@@ -135,9 +135,9 @@ public class OTDeleteTests extends RefactoringTest
         IJavaElement[] elems = new IJavaElement[] { aTeam };
         checkDelete(elems, true);
 //      String[] handles = ParticipantTesting.createHandles(elem0);
-//      ParticipantTesting.testDelete(handles);        
+//      ParticipantTesting.testDelete(handles);
     }
-    
+
     public void testDeleteNestedTeamclass() throws Exception
     {
         loadFileSetup();
@@ -150,7 +150,7 @@ public class OTDeleteTests extends RefactoringTest
     {
     	loadFileSetup();
     	IType type = _cuT.getType("T").getType("R");
-    	IRoleType role = (IRoleType)OTModelManager.getOTElement(type); 
+    	IRoleType role = (IRoleType)OTModelManager.getOTElement(type);
     	IJavaElement[] elems = new IJavaElement[] { role };
     	checkDelete(elems, false);
     }
@@ -160,7 +160,7 @@ public class OTDeleteTests extends RefactoringTest
     {
     	loadFileSetup();
     	IType type = _cuT.getType("T").getType("R");
-    	IRoleType role = (IRoleType)OTModelManager.getOTElement(type); 
+    	IRoleType role = (IRoleType)OTModelManager.getOTElement(type);
     	String message1= ReorgUtils.getName(role);
     	assertEquals("role 'R'", message1);
     }
@@ -169,8 +169,8 @@ public class OTDeleteTests extends RefactoringTest
     {
     	loadFileSetup();
     	IType type = _cuT.getType("T").getType("R");
-    	IRoleType role = (IRoleType)OTModelManager.getOTElement(type); 
-    	IMethodMapping[] mappings = role.getMethodMappings(); 
+    	IRoleType role = (IRoleType)OTModelManager.getOTElement(type);
+    	IMethodMapping[] mappings = role.getMethodMappings();
     	IJavaElement[] elems = new IJavaElement[] { mappings[0] };
     	checkDelete(elems, false);
     }
@@ -179,8 +179,8 @@ public class OTDeleteTests extends RefactoringTest
     {
     	loadFileSetup();
     	IType type = _cuT.getType("T").getType("R");
-    	IRoleType role = (IRoleType)OTModelManager.getOTElement(type); 
-    	IMethodMapping[] mappings = role.getMethodMappings(); 
+    	IRoleType role = (IRoleType)OTModelManager.getOTElement(type);
+    	IMethodMapping[] mappings = role.getMethodMappings();
     	IJavaElement[] elems = new IJavaElement[] { mappings[0] };
     	checkDelete(elems, false);
     }
@@ -189,8 +189,8 @@ public class OTDeleteTests extends RefactoringTest
     {
     	loadFileSetup();
     	IType type = _cuT.getType("T").getType("R");
-    	IRoleType role = (IRoleType)OTModelManager.getOTElement(type); 
-    	IMethodMapping[] mappings = role.getMethodMappings(); 
+    	IRoleType role = (IRoleType)OTModelManager.getOTElement(type);
+    	IMethodMapping[] mappings = role.getMethodMappings();
     	IJavaElement[] elems = new IJavaElement[] { mappings[0] };
     	checkDelete(elems, false);
     }

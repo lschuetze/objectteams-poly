@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2009 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id: BinaryRoleType.java 23417 2010-02-03 20:13:55Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -30,12 +30,12 @@ import org.eclipse.objectteams.otdt.core.IOTType;
 /**
  * @author gis
  */
-public class BinaryRoleType extends RoleType 
+public class BinaryRoleType extends RoleType
 {
 	public BinaryRoleType(
-			IType correspondingJavaType, 
+			IType correspondingJavaType,
 			IJavaElement parent,
-			int flags, 
+			int flags,
 			String baseClassName,
 			String baseClassAnchor)
 	{
@@ -44,10 +44,10 @@ public class BinaryRoleType extends RoleType
 
 	@Override
 	IType resolveInType(IOTType referenceType, String type)
-			throws JavaModelException 
+			throws JavaModelException
 	{
 		// binary type may have resolved type name
-        if (type.indexOf('.') != -1)  // already qualified/resolved (from binary)? 
+        if (type.indexOf('.') != -1)  // already qualified/resolved (from binary)?
         	// directly find the type:
         	return this.getCorrespondingJavaElement().getJavaProject().findType(type);
 

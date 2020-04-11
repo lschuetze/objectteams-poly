@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010, 2016 Stephan Herrmann.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -51,7 +51,7 @@ import org.osgi.framework.Bundle;
 
 /**
  * Testing whether standard Java quickfixes work in OT/J code, too.
- * 
+ *
  * @author stephan
  * @since 0.7.0
  */
@@ -65,7 +65,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 
 	void setupForNullAnnotations(boolean isPlainJava) throws IOException, JavaModelException {
 		if (this.ANNOTATION_JAR_PATH == null) {
-			String version= "[2.0.0,3.0.0)"; 
+			String version= "[2.0.0,3.0.0)";
 			Bundle[] bundles= Platform.getBundles("org.eclipse.jdt.annotation", version);
 			File bundleFile= FileLocator.getBundleFile(bundles[0]);
 			if (bundleFile.isDirectory())
@@ -74,9 +74,9 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 				this.ANNOTATION_JAR_PATH= bundleFile.getPath();
 		}
 		JavaProjectHelper.addLibrary(fJProject1, new Path(ANNOTATION_JAR_PATH));
-		
+
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
-		
+
 		options.put(OTDTPlugin.OT_COMPILER_PURE_JAVA, isPlainJava ? JavaCore.ENABLED : JavaCore.DISABLED);
 
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
@@ -98,7 +98,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 	}
 
 	// the following three test try to reproduce Bug 311890 -  [assist] support "create class" quickfix for OT/J references
-	
+
 	// create a class for an unresolved playedBy declaration
 	@Test
 	public void testCreateClass1() throws Exception {
@@ -110,7 +110,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 6);
@@ -129,7 +129,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		}
 		fail("Expected proposal not found");
 	}
-	
+
 	// create a class for an unresolved playedBy declaration in a nested role
 	@Test
 	public void testCreateClass2() throws Exception {
@@ -143,7 +143,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 7);
@@ -176,7 +176,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		buf.append("    public void foo(B as R o) {}\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, 1, null);
 		assertNumberOfProposals(proposals, 5);
@@ -195,7 +195,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		}
 		fail("Expected proposal not found");
 	}
-	
+
 	// Bug 348574 - [quickfix] implement abstract methods from tsuper
 	@Test
 	public void testAddAbstractMethods1() throws CoreException {
@@ -216,7 +216,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		buf.append("  }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList<IJavaCompletionProposal> proposals1= collectCorrections(cu1, astRoot, 2, 0);
 		assertNumberOfProposals(proposals1, 0);
@@ -234,12 +234,12 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		buf.append("\n");
 		buf.append("    @Override\n");
 		buf.append("    void foo() {\n");
-		buf.append("        // TODO Auto-generated method stub\n"); 
+		buf.append("        // TODO Auto-generated method stub\n");
 		buf.append("        \n");
 		buf.append("    }\n");
 		buf.append("  }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();	
+		String expected1= buf.toString();
 
 
 		proposal= (CUCorrectionProposal) proposals2.get(1);
@@ -251,9 +251,9 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		buf.append("  protected abstract class R {\n");
 		buf.append("  }\n");
 		buf.append("}\n");
-		String expected2= buf.toString();		
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
 	// Bug 348574 - [quickfix] implement abstract methods from tsuper
@@ -277,7 +277,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		buf.append("  }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList<IJavaCompletionProposal> proposals1= collectCorrections(cu1, astRoot, 2, 0);
 		assertNumberOfProposals(proposals1, 0);
@@ -295,12 +295,12 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		buf.append("\n");
 		buf.append("    @Override\n");
 		buf.append("    static void foo() {\n");
-		buf.append("        // TODO Auto-generated method stub\n"); 
+		buf.append("        // TODO Auto-generated method stub\n");
 		buf.append("        \n");
 		buf.append("    }\n");
 		buf.append("  }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();	
+		String expected1= buf.toString();
 
 
 		proposal= (CUCorrectionProposal) proposals2.get(1);
@@ -312,15 +312,15 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		buf.append("  protected abstract class R {\n");
 		buf.append("  }\n");
 		buf.append("}\n");
-		String expected2= buf.toString();		
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
 	@Test
 	public void testExtractPotentiallyNullField1() throws Exception {
 		setupForNullAnnotations(true/*plainJava*/);
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -374,7 +374,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		// secondary
 		ChangeCorrectionProposal otherProposal = (ChangeCorrectionProposal) proposals.get(1);
 		assertEquals("Display String 2", "Add @SuppressWarnings 'null' to 'foo()'", otherProposal.getDisplayString());
-		
+
 		otherProposal = (ChangeCorrectionProposal) proposals.get(2);
 		assertEquals("Display String 3", "Configure problem severity", otherProposal.getDisplayString());
 	}

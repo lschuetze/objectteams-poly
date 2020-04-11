@@ -31,17 +31,17 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 
-/** 
+/**
  * This class represents a reference of the form <code>Type.base</code>
  * for use as a type anchor in a {@link TypeAnchorReference}.
- * 
+ *
  * @author stephan
  * @since 1.4.0
  */
 public class QualifiedBaseReference extends QualifiedThisReference {
 
 	FieldBinding baseField;
-	
+
 	public QualifiedBaseReference(TypeReference name, int sourceStart, int sourceEnd) {
 		super(name, sourceStart, sourceEnd);
 	}
@@ -63,9 +63,9 @@ public class QualifiedBaseReference extends QualifiedThisReference {
 		if (this.baseField == null)
 			this.baseField = new ProblemFieldBinding((ReferenceBinding)this.resolvedType, IOTConstants.BASE, ProblemReasons.NotFound);
 		scope.problemReporter().unboundQualifiedBase((ReferenceBinding)this.qualification.resolvedType, this);
-		return null; 
+		return null;
 	}
-	
+
 	@Override
 	public TypeBinding resolveType(ClassScope scope) {
 		// for baseclass reference we indeed need to resolve from a class scope,
@@ -81,7 +81,7 @@ public class QualifiedBaseReference extends QualifiedThisReference {
 		codeStream.fieldAccess(Opcodes.OPC_getfield, this.baseField, this.baseField.declaringClass);
 		codeStream.recordPositionsFrom(pc, this.sourceStart);
 	}
-	
+
 	@Override
 	public StringBuffer printExpression(int indent, StringBuffer output) {
 		return this.qualification.print(0, output).append(".base"); //$NON-NLS-1$

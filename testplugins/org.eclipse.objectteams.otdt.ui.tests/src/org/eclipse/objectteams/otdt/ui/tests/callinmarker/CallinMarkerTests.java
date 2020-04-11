@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -71,7 +71,7 @@ public class CallinMarkerTests extends FileBasedUITest
     private IType _baseType;
     private IResource _baseResource;
     private MyCallinMarkerCreator _creator;
-    
+
     private class MyCallinMarkerCreator extends CallinMarkerCreator2
     {
         private boolean _finished = false;
@@ -80,7 +80,7 @@ public class CallinMarkerTests extends FileBasedUITest
         {
             return _finished;
         }
-        
+
 		public void reset() {
 			this._finished = false;
 		}
@@ -92,7 +92,7 @@ public class CallinMarkerTests extends FileBasedUITest
 	    		this.annotationHelper = new AnnotationHelper(targetEditor, targetEditor.getEditorInput());
 	        }
         }
-        
+
         protected void schedule(final CallinMarkerJob job,
                 IStatusLineManager statusLine)
         {
@@ -110,7 +110,7 @@ public class CallinMarkerTests extends FileBasedUITest
 			return this._currentJob != null;
 		}
     }
-    
+
     public CallinMarkerTests(String name)
     {
         super(name);
@@ -126,19 +126,19 @@ public class CallinMarkerTests extends FileBasedUITest
 		junit.framework.TestSuite suite = new Suite(CallinMarkerTests.class.getName());
         return suite;
     }
-    
+
     public void setUpSuite() throws Exception
     {
     	enableUiMonitoring(false);
         setTestProjectDir("CallinMarker");
-        
+
         super.setUpSuite();
     }
-    
+
     protected void setUp() throws Exception
     {
         super.setUp();
-        
+
         _creator = new MyCallinMarkerCreator();
         _creator.setEnabled(true);
         System.out.println("Running test: "+this.getName());
@@ -203,9 +203,9 @@ public class CallinMarkerTests extends FileBasedUITest
 				project.open(null);
 			}
 		};
-		getWorkspace().run(populate, null);    	
+		getWorkspace().run(populate, null);
     }
-    
+
     private IType getJavaType(String projectName, String srcFolderName, String pkgName, String typeName) throws JavaModelException
     {
         ICompilationUnit typeUnit = getCompilationUnit(
@@ -214,13 +214,13 @@ public class CallinMarkerTests extends FileBasedUITest
                 pkgName,
                 typeName +".java");
         IType typeJavaElem = typeUnit.getType(typeName);
-       
+
         if ((typeJavaElem != null) && (typeJavaElem.exists()))
         {
             return typeJavaElem;
         }
         return null;
-    }    
+    }
 
     private void synchronousCreateMarkers(IResource resource) throws PartInitException, JavaModelException
     {
@@ -248,22 +248,22 @@ public class CallinMarkerTests extends FileBasedUITest
             fail("Interrupted while waiting for CallinMarkerCreator");
         }
     }
-    
+
     // The markers appear in undefined order, so we need to look them up in a Set
     private void assertMarkers(Set<String> expectedMarkers, IMarker[] markers)
     {
         assertNotNull(markers);
         assertNotNull(expectedMarkers);
-        
+
         assertEquals("Wrong number of markers", expectedMarkers.size(), markers.length);
-        
+
         try {
 	        for (int i = 0; i < markers.length; i++)
 	        {
 	            assertNotNull(markers[i]);
 	            String methodId = (String) markers[i].getAttribute(CallinMarker.ATTR_BASE_ELEMENT);
 	            assertNotNull("CallinMarker without methodId attribute", methodId);
-	            
+
 	            boolean isExpected = expectedMarkers.contains(methodId);
 	            assertTrue("Unexpected marker found for method id: " + methodId, isExpected);
 	        }
@@ -294,7 +294,7 @@ public class CallinMarkerTests extends FileBasedUITest
         _baseResource = _baseType.getResource();
 
         assertNotNull(_baseResource);
-        
+
         synchronousCreateMarkers(_baseResource);
 
         Set<String> expectedMarkers = new HashSet<String>();
@@ -302,11 +302,11 @@ public class CallinMarkerTests extends FileBasedUITest
         expectedMarkers.add("=CallinMarker/src<foo{MyBase.java[MyBase~bm2");
         expectedMarkers.add("=CallinMarker/src<foo{MyBase.java[MyBase~bm3");
         expectedMarkers.add("=CallinMarker/src<foo{MyBase.java[MyBase~bm4");
-        
+
         IMarker[] markers = getCallinMarkers(_baseResource);
         assertMarkers(expectedMarkers, markers);
     }
-    
+
     /** compute marker although one baseclass is missing. */
     public void testMarkers_2() throws JavaModelException, PartInitException
     {
@@ -314,12 +314,12 @@ public class CallinMarkerTests extends FileBasedUITest
         _baseResource = _baseType.getResource();
 
         assertNotNull(_baseResource);
-        
+
         synchronousCreateMarkers(_baseResource);
 
         Set<String> expectedMarkers = new HashSet<String>();
         expectedMarkers.add("=CallinMarker/src<bar{BaseTeam.java[BaseTeam~murx");
-        
+
         IMarker[] markers = getCallinMarkers(_baseResource);
         assertMarkers(expectedMarkers, markers);
     }
@@ -330,16 +330,16 @@ public class CallinMarkerTests extends FileBasedUITest
         _baseResource = _baseType.getResource();
 
         assertNotNull(_baseResource);
-        
+
         synchronousCreateMarkers(_baseResource);
 
         Set<String> expectedMarkers = new HashSet<String>();
         expectedMarkers.add("=CallinMarker/src<cycle{Base1.java[Base1[Inner~foo");
-        
+
         IMarker[] markers = getCallinMarkers(_baseResource);
         assertMarkers(expectedMarkers, markers);
     }
-    
+
     /** Cycle a la https://bugs.eclipse.org/303474 and callin-to-callin */
     public void testMarkers_4() throws JavaModelException, PartInitException
     {
@@ -347,37 +347,37 @@ public class CallinMarkerTests extends FileBasedUITest
         _baseResource = _baseType.getResource();
 
         assertNotNull(_baseResource);
-        
+
         synchronousCreateMarkers(_baseResource);
 
         Set<String> expectedMarkers = new HashSet<String>();
         expectedMarkers.add("=CallinMarker/src<cycle2{B.java[B[R~run");
-        
+
         IMarker[] markers = getCallinMarkers(_baseResource);
         assertMarkers(expectedMarkers, markers);
     }
-    
+
     // see http://trac.objectteams.org/ot/ticket/188
     public void testMarkers_NonJavaPrj1() throws CoreException, IOException, InterruptedException
-    {    	
+    {
     	createNonJavaPrj("NonJavaPrj");
     	MyLogListener myLogListener = new MyLogListener();
     	// can't use startLogListening() because we need to listen to RuntimeLog.
 		RuntimeLog.addLogListener(myLogListener);
-		
+
     	try {
 	        IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
 	        IResource resource = workspaceRoot.findMember(new Path("/NonJavaPrj/folder/File.java"));
-	        
+
 	        synchronousCreateMarkers(resource);
-	        
+
 	        // wait for logging to occur after job is done:
 	        while(this._creator.isCreatingMarkersFor(resource))
 	        	Thread.sleep(100);
-	        
+
 	        if (!myLogListener.status.isEmpty())
 	        	fail("Unexpected Log: "+myLogListener.status.get(0));
-	
+
 	        IMarker[] markers = getCallinMarkers(resource);
 	        assertEquals("Should have no markers", markers.length, 0);
     	} finally {
@@ -385,7 +385,7 @@ public class CallinMarkerTests extends FileBasedUITest
     		deleteProject("NonJavaPrj");
     	}
     }
-    
+
     // see http://trac.objectteams.org/ot/ticket/188
     public void testMarkers_NonJavaPrj2() throws CoreException, IOException, InterruptedException
     {
@@ -393,23 +393,23 @@ public class CallinMarkerTests extends FileBasedUITest
     	MyLogListener myLogListener = new MyLogListener();
     	// can't use startLogListening() because we need to listen to RuntimeLog.
 		RuntimeLog.addLogListener(myLogListener);
-		
+
     	try {
 	        IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
 	        IResource resource = workspaceRoot.findMember(new Path("/NonJavaPrj/folder/File.java"));
-	        
+
 	        // cu pretends to exist when previously opened in a java editor
 	        JavaUI.openInEditor(JavaCore.create(resource));
-	        
+
 	        synchronousCreateMarkers(resource);
-	        
+
 	        // wait for logging to occur after job is done:
 	        while(this._creator.isCreatingMarkersFor(resource))
 	        	Thread.sleep(100);
-	        
+
 	        if (!myLogListener.status.isEmpty())
 	        	fail("Unexpected Log: "+myLogListener.status.get(0));
-	
+
 	        IMarker[] markers = getCallinMarkers(resource);
 	        assertEquals("Should have no markers", markers.length, 0);
     	} finally {
@@ -417,7 +417,7 @@ public class CallinMarkerTests extends FileBasedUITest
     		deleteProject("NonJavaPrj");
     	}
     }
-    
+
     // see http://trac.objectteams.org/ot/ticket/188
     public void testMarkers_NonJavaPrj3() throws CoreException, IOException, InterruptedException
     {
@@ -425,27 +425,27 @@ public class CallinMarkerTests extends FileBasedUITest
     	MyLogListener myLogListener = new MyLogListener();
     	// can't use startLogListening() because we need to listen to RuntimeLog.
 		RuntimeLog.addLogListener(myLogListener);
-		
+
     	try {
 	        IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
 	        // use classfile:
 	        IResource resource = workspaceRoot.findMember(new Path("/NonJavaPrj/bin/folder/File.class"));
-	        
+
 	        // cu pretends to exist when previously opened in a java editor
 	        JavaUI.openInEditor(JavaCore.create(resource));
-	        
+
 	        synchronousCreateMarkers(resource);
-	        
+
 	        // wait for logging to occur after job is done:
 	        while(this._creator.isCreatingMarkersFor(resource))
 	        	Thread.sleep(100);
-	        
+
 	        assertEquals("Unexpeted number of log entries", 1, myLogListener.status.size());
-	        assertEquals("Unexpected Log[0]", 
+	        assertEquals("Unexpected Log[0]",
 	        			 "Status ERROR: org.eclipse.ui code=4 Unable to create part " +
 	        			 "org.eclipse.ui.PartInitException: The class file is not on the classpath",
 	        			 myLogListener.status.get(0).toString());
-	
+
 	        IMarker[] markers = getCallinMarkers(resource);
 	        assertEquals("Should have no markers", markers.length, 0);
     	} finally {

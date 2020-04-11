@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -55,7 +55,7 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
-	
+
 	@Rule
     public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
@@ -83,7 +83,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<? extends ICompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
@@ -103,11 +103,11 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("\n");
 		buf.append("        private int goo(Vector vec, boolean b) {\n");
 		buf.append("            return 0;\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		preview= getPreviewContent(proposal);
 
@@ -123,7 +123,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("\n");
 		buf.append("    public int goo(Vector vec, boolean b) {\n");
 		buf.append("        return 0;\n");
-		buf.append("    }\n");		
+		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
@@ -142,14 +142,14 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("team package test1.T;\n");
 		buf.append("public class R2 {\n");
 		buf.append("}\n");
 		IPackageFragment pack1T= fSourceFolder.createPackageFragment("test1.T", false, null);
 		pack1T.createCompilationUnit("R2.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<? extends ICompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2); // 2nd proposal not really useful (cast to Object??)
@@ -167,11 +167,11 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("\n");
 		buf.append("    public int goo(Vector vec, boolean b) {\n");
 		buf.append("        return 0;\n");
-		buf.append("    }\n");		
+		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
 	/* See Trac #12 */
 	@Test
 	public void testMethodInDifferentClass2() throws Exception {
@@ -183,7 +183,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
@@ -195,7 +195,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T2.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<? extends ICompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2); // 2nd proposal not really useful (cast to Object??)
@@ -214,12 +214,12 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("\n");
 		buf.append("        public int goo(Vector vec, boolean b) {\n");
 		buf.append("            return 0;\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
 	@Test
 	public void testTSuperConstructor() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -241,7 +241,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("  }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList<? extends ICompletionProposal> proposals= collectCorrections(cu1, astRoot);
 		assertNumberOfProposals(proposals, 2);
@@ -256,10 +256,10 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("  protected class R {\n");
 		buf.append("\n");
 		buf.append("    public R(int i) {\n");
-		buf.append("    }\n");		
+		buf.append("    }\n");
 		buf.append("  }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();	
+		String expected1= buf.toString();
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
@@ -273,12 +273,12 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("  }\n");
 		buf.append("}\n");
-		String expected2= buf.toString();		
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 
 	}
-	
+
 	// static callin method created
 	@Test
 	public void testCallinMethod1() throws Exception {
@@ -290,7 +290,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("B.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
@@ -299,7 +299,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<? extends ICompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2); // don't propose to generate into team!!
@@ -316,11 +316,11 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("        void voo(int j) <- replace void foo(int i);\n");
 		buf.append("\n");
 		buf.append("        static callin void voo(int j) {\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		// remove signatures in callin binding voo<-foo
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
@@ -333,8 +333,8 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 	// non-static callin method created
 	@Test
@@ -347,7 +347,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("B.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
@@ -356,7 +356,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<? extends ICompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2); // don't propose to generate into team!!
@@ -374,7 +374,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("\n");
 		buf.append("        callin String voo(int j, Boolean b) {\n");
 		buf.append("            return null;\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -391,8 +391,8 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
 	// non-static non-callin method created (base side)
@@ -405,7 +405,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("public class B {\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("B.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
@@ -413,11 +413,11 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("        String voo(int j, Boolean b) <- replace String foo(int i, Boolean b);\n");
 		buf.append("        callin String voo(int j, Boolean b) {\n");
 		buf.append("            return base.voo(j, b);\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<? extends ICompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
@@ -436,7 +436,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1 = buf.toString();
-		
+
 		// remove signatures from callin voo<-foo
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
@@ -448,12 +448,12 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("        voo <- replace foo;\n");
 		buf.append("        callin String voo(int j, Boolean b) {\n");
 		buf.append("            return base.voo(j, b);\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 	// Bug 329988 - Quickfix method generation on missing replace callin method generates wrong method
 	// callin method created from short callin binding -> need to infer method signature
@@ -467,7 +467,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("B.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
@@ -476,7 +476,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<? extends ICompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1); // don't propose to generate into team!!
@@ -493,7 +493,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("\n");
 		buf.append("        callin String voo(int i, Boolean boolean1) {\n");
 		buf.append("            return null;\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
@@ -509,7 +509,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("public class B {\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("B.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
@@ -517,11 +517,11 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("        voo <- replace foo;\n");
 		buf.append("        callin String voo(int j, Boolean flag) {\n");
 		buf.append("            return base.voo(j, flag);\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<? extends ICompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
@@ -554,7 +554,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("B.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
@@ -564,7 +564,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("	public class R2 playedBy B {}\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<? extends ICompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1); // don't propose to generate into team!!
@@ -581,12 +581,12 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("\n");
 		buf.append("        callin R1 voo(int i, R1 r1) {\n");
 		buf.append("            return null;\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("	public class R2 playedBy B {}\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
-		
+
 		LinkedProposalModel linkedProposalModel = new ProposalAdaptor().getLinkedProposalModel(proposal);
 		assertLinkedTypeProposals(linkedProposalModel, "arg_type_1", new String[]{"R1", "R2", "B"});
 		assertLinkedTypeProposals(linkedProposalModel, "type", new String[]{"R1", "R2", "B"});
@@ -613,7 +613,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("public class B {\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("B.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
@@ -623,7 +623,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<? extends ICompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
@@ -643,7 +643,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
 
 	// Bug 329988 - Quickfix method generation on missing replace callin method generates wrong method
 	// missing base method created (short callout binding) - translation involved
@@ -655,7 +655,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("public class B {\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("B.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public team class T1 {\n");
@@ -665,7 +665,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<? extends ICompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
@@ -721,7 +721,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("        A a= new A(i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();	
+		String expected1= buf.toString();
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
@@ -735,14 +735,14 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("        A a= new A();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected2= buf.toString();		
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
 /* some orig tests for use in OT-variants:
- * 	
-	
+ *
+
 	@Test
 	public void testConstructorInvocation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -754,7 +754,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
 		assertNumberOfProposals(proposals, 1);
@@ -771,14 +771,14 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("    }\n");
 		buf.append("\n");
 		buf.append("    public E(int i, boolean b) {\n");
-		buf.append("    }\n");		
+		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-				
+
 		assertEqualString(preview1, expected1);
 	}
-	
-	
+
+
 	@Test
 	public void testSuperMethodInvocation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -796,7 +796,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("public class A {\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
 		assertNumberOfProposals(proposals, 1);

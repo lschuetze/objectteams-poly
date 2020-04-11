@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -48,12 +48,12 @@ import org.eclipse.objectteams.otdt.ui.tests.FileBasedUITest;
  */
 public class TeamCreationTests extends FileBasedUITest
 {
-    
+
     private static final String SRC_FOLDER_NAME = "teams";
-    
+
     private TeamCreator _teamCreator;
-    
-    
+
+
     public TeamCreationTests(String name)
     {
         super(name);
@@ -70,26 +70,26 @@ public class TeamCreationTests extends FileBasedUITest
         junit.framework.TestSuite suite = new Suite(TeamCreationTests.class);
         return suite;
     }
-    
+
     public void setUpSuite() throws Exception
     {
         setTestProjectDir("CreationTestProject");
-        
+
         super.setUpSuite();
     }
-    
+
     protected void setUp() throws Exception
     {
         super.setUp();
         _teamCreator = new TeamCreator();
     }
-    
+
     @Override
     protected void tearDown() throws Exception {
     	ICompilationUnit[] primaryWCs = JavaModelManager.getJavaModelManager().getWorkingCopies(DefaultWorkingCopyOwner.PRIMARY, false);
     	try {
     		assertEquals("All working copies should be discarded", 0, primaryWCs == null ? 0 : primaryWCs.length);
-    	} finally { 
+    	} finally {
     		if (primaryWCs != null)
     			for (int i = 0; i < primaryWCs.length; i++)
     				primaryWCs[i].discardWorkingCopy();
@@ -105,8 +105,8 @@ public class TeamCreationTests extends FileBasedUITest
 //    {
 //        //don't call super method, so created directory will not be deleted
 //    }
-    
-    
+
+
     private IType getJavaType(String projectName, String srcFolderName, String pkgName, String typeName) throws JavaModelException
     {
         ICompilationUnit typeUnit = getCompilationUnit(
@@ -115,14 +115,14 @@ public class TeamCreationTests extends FileBasedUITest
                 pkgName,
                 typeName +".java");
         IType typeJavaElem = typeUnit.getType(typeName);
-       
+
         if ((typeJavaElem != null) && (typeJavaElem.exists()))
         {
             return typeJavaElem;
         }
         return null;
-    }    
-    
+    }
+
 
     public void testCreation_EmptyTeam() throws JavaModelException,
 																    InterruptedException,
@@ -132,24 +132,24 @@ public class TeamCreationTests extends FileBasedUITest
         IPackageFragment       pkgFrag       = getPackageFragment(getTestProjectDir(), SRC_FOLDER_NAME, "teampkg");
         assertNotNull(pkgFragRoot);
         assertNotNull(pkgFrag);
-        
+
         TypeInfo typeInfo = new TypeInfo("EmptyTeam", pkgFragRoot, pkgFrag);
         typeInfo.setModifier(Flags.AccPublic+Flags.AccTeam);
         typeInfo.setSuperClassName("org.objectteams.Team");
-        
+
         assertNotNull(_teamCreator);
         _teamCreator.setTypeInfo(typeInfo);
         _teamCreator.createType(new NullProgressMonitor());
-        
+
         IType createdJavaType = getJavaType(getTestProjectDir(), SRC_FOLDER_NAME, "teampkg", "EmptyTeam");
         assertNotNull(createdJavaType);
-        
+
         IOTType createdOTType = OTModelManager.getOTElement(createdJavaType);
         assertNotNull(createdOTType);
         assertTrue(createdOTType.isTeam());
 	}
 
-    
+
     public void testCreation_NestedTeam() throws JavaModelException,
 																    InterruptedException,
 																    CoreException
@@ -158,31 +158,31 @@ public class TeamCreationTests extends FileBasedUITest
         IPackageFragment       pkgFrag       = getPackageFragment(getTestProjectDir(), SRC_FOLDER_NAME, "teampkg");
         assertNotNull(pkgFragRoot);
         assertNotNull(pkgFrag);
-        
+
         TypeInfo typeInfo = new TypeInfo("NestedTeam", pkgFragRoot, pkgFrag);
         typeInfo.setModifier(Flags.AccPublic+Flags.AccTeam);
         typeInfo.setEnclosingTypeName("teampkg.TeamForNestedTeam");
 		typeInfo.setInline(true);
 		typeInfo.setCreateAbstractInheritedMethods(true);
-        
+
         assertNotNull(_teamCreator);
         _teamCreator.setTypeInfo(typeInfo);
         _teamCreator.createType(new NullProgressMonitor());
-        
+
         IType enclosingJavaType = getJavaType(getTestProjectDir(), SRC_FOLDER_NAME, "teampkg", "TeamForNestedTeam");
         IType createdJavaType = enclosingJavaType.getType("NestedTeam");
         assertNotNull(createdJavaType);
         assertTrue("created type should exist", createdJavaType.exists());
-        
+
         IOTType createdOTType = OTModelManager.getOTElement(createdJavaType);
         assertNotNull(createdOTType);
         assertTrue(createdOTType.isTeam());
-        
+
         IMethod[] methods = createdJavaType.getMethods();
         assertEquals("Should not have created methods", 0, methods.length);
 	}
 
- 
+
     public void testCreation_TeamWithConstructor() throws JavaModelException,
 																    InterruptedException,
 																    CoreException
@@ -202,20 +202,20 @@ public class TeamCreationTests extends FileBasedUITest
         assertNotNull(_teamCreator);
         _teamCreator.setTypeInfo(typeInfo);
 		_teamCreator.createType(new NullProgressMonitor());
-		
+
 		IType createdJavaType = getJavaType(getTestProjectDir(), SRC_FOLDER_NAME, "teampkg", TEAM_CLASS_NAME);
 		assertNotNull(createdJavaType);
-		
+
 		IOTType createdOTType = OTModelManager.getOTElement(createdJavaType);
 		assertNotNull(createdOTType);
 		assertTrue(createdOTType.isTeam());
-		
+
 		// constructor is a method by the name of the enclosing class:
 		IMethod constructor = createdJavaType.getMethod(TEAM_CLASS_NAME, new String[0]);
 		assertNotNull(constructor);
 		assertTrue(constructor.exists());
-	}    
-    
+	}
+
     public void testCreation_TeamWithMainMethod() throws JavaModelException,
 																		    InterruptedException,
 																		    CoreException
@@ -229,24 +229,24 @@ public class TeamCreationTests extends FileBasedUITest
         typeInfo.setModifier(Flags.AccPublic+Flags.AccTeam);
         typeInfo.setSuperClassName("org.objectteams.Team");
         typeInfo.setCreateMainMethod(true);
-		
+
         assertNotNull(_teamCreator);
         _teamCreator.setTypeInfo(typeInfo);
 		_teamCreator.createType(new NullProgressMonitor());
-		
+
 		IType createdJavaType = getJavaType(getTestProjectDir(), SRC_FOLDER_NAME, "teampkg", "TeamWithMainMethod");
 		assertNotNull(createdJavaType);
-		
+
 		IOTType createdOTType = OTModelManager.getOTElement(createdJavaType);
 		assertNotNull(createdOTType);
 		assertTrue(createdOTType.isTeam());
-		
+
 		String[] paraTypes = {"[QString;"};
 		IMethod method = createdJavaType.getMethod("main", paraTypes);
 		assertNotNull(method);
 		assertTrue(method.exists());
-}    
-    
+}
+
     public void testCreation_EmptyTeamWithEmptySuperTeam() throws JavaModelException,
 																    InterruptedException,
 																    CoreException
@@ -261,23 +261,23 @@ public class TeamCreationTests extends FileBasedUITest
         typeInfo.setModifier(Flags.AccPublic+Flags.AccTeam);
         typeInfo.setSuperClassName("teampkg.EmptyTeam");
 		typeInfo.setCurrentType(pkgFrag.getCompilationUnit(TEAM_CLASS_NAME+".java").getType(TEAM_CLASS_NAME));
-		
+
         assertNotNull(_teamCreator);
         _teamCreator.setTypeInfo(typeInfo);
 		_teamCreator.createType(new NullProgressMonitor());
-		
+
 		IType subTeamJavaElem = getJavaType(getTestProjectDir(), SRC_FOLDER_NAME, "teampkg", "EmptyTeamWithEmptySuperTeam");
 		assertNotNull(subTeamJavaElem);
-		
+
 		IOTType subTeamOTElem = OTModelManager.getOTElement(subTeamJavaElem);
 		assertNotNull(subTeamOTElem);
-		assertTrue(subTeamOTElem.isTeam());	
-		
+		assertTrue(subTeamOTElem.isTeam());
+
 		assertEquals(subTeamOTElem.getSuperclassName(), "EmptyTeam");
 		assertEquals(subTeamOTElem.getSuperclassTypeSignature(), "QEmptyTeam;");
 	}
-    
-    
+
+
     public void testCreation_EmptyTeamWithSuperInterface() throws JavaModelException,
 																    InterruptedException,
 																    CoreException
@@ -285,7 +285,7 @@ public class TeamCreationTests extends FileBasedUITest
 		IType interfaceJavaElem = getJavaType(getTestProjectDir(), SRC_FOLDER_NAME, "ordinarypkg", "InterfaceWithOneMethod");
 		assertNotNull(interfaceJavaElem);
 		assertTrue(interfaceJavaElem.exists());
-        
+
 		IPackageFragmentRoot pkgFragRoot = getPackageFragmentRoot(getTestProjectDir(), SRC_FOLDER_NAME);
 		IPackageFragment       pkgFrag       = getPackageFragment(getTestProjectDir(), SRC_FOLDER_NAME, "teampkg");
 		assertNotNull(pkgFragRoot);
@@ -293,34 +293,34 @@ public class TeamCreationTests extends FileBasedUITest
 
 		ArrayList<String> interfaceNames = new ArrayList<String>();
 		interfaceNames.add("ordinary.InterfaceWithOneMethod");
-		
+
         TypeInfo typeInfo = new TypeInfo("EmptyTeamWithSuperInterface", pkgFragRoot, pkgFrag);
         typeInfo.setModifier(Flags.AccPublic+Flags.AccTeam);
         typeInfo.setSuperInterfacesNames(interfaceNames);
-		
+
         assertNotNull(_teamCreator);
         _teamCreator.setTypeInfo(typeInfo);
 		_teamCreator.createType(new NullProgressMonitor());
-		
+
 		IType createdJavaType = getJavaType(getTestProjectDir(), SRC_FOLDER_NAME, "teampkg", "EmptyTeamWithSuperInterface");
 		assertNotNull(createdJavaType);
-		
+
 		IOTType createdOTType = OTModelManager.getOTElement(createdJavaType);
 		assertNotNull(createdOTType);
 		assertTrue(createdOTType.isTeam());
-		
+
 		String[] interfaces = createdOTType.getSuperInterfaceNames();
 		assertNotNull(interfaces);
 		assertTrue(interfaces.length == 1);
 		assertEquals(interfaces[0], "InterfaceWithOneMethod");
-		
+
 		String[] interfaceSignatures = createdOTType.getSuperInterfaceTypeSignatures();
 		assertNotNull(interfaceSignatures);
 		assertTrue(interfaceSignatures.length == 1);
 		assertEquals(interfaceSignatures[0], "QInterfaceWithOneMethod;");
 	}
-    
-    
+
+
     public void testCreation_TeamWithSuperInterfaceAndInheritedMethod() throws JavaModelException,
 																														    InterruptedException,
 																														    CoreException
@@ -328,9 +328,9 @@ public class TeamCreationTests extends FileBasedUITest
 		IType interfaceJavaElem = getJavaType(getTestProjectDir(), SRC_FOLDER_NAME, "ordinarypkg", "InterfaceWithOneMethod");
 		assertNotNull(interfaceJavaElem);
 		assertTrue(interfaceJavaElem.exists());
-		
+
 		/*creation of team*/
-		
+
 		IPackageFragmentRoot pkgFragRoot = getPackageFragmentRoot(getTestProjectDir(), SRC_FOLDER_NAME);
 		IPackageFragment       pkgFrag       = getPackageFragment(getTestProjectDir(), SRC_FOLDER_NAME, "teampkg");
 		assertNotNull(pkgFragRoot);
@@ -338,41 +338,41 @@ public class TeamCreationTests extends FileBasedUITest
 
 		ArrayList<String> interfaceNames = new ArrayList<String>();
 		interfaceNames.add("ordinarypkg.InterfaceWithOneMethod");
-		
+
 		String TEAM_CLASS_NAME = "TeamWithSuperInterfaceAndInheritedMethod";
         TypeInfo typeInfo = new TypeInfo(TEAM_CLASS_NAME, pkgFragRoot, pkgFrag);
         typeInfo.setModifier(Flags.AccPublic+Flags.AccTeam);
         typeInfo.setSuperInterfacesNames(interfaceNames);
         typeInfo.setCreateAbstractInheritedMethods(true);
 		typeInfo.setCurrentType(pkgFrag.getCompilationUnit(TEAM_CLASS_NAME+".java").getType(TEAM_CLASS_NAME));
-		
+
         assertNotNull(_teamCreator);
         _teamCreator.setTypeInfo(typeInfo);
 		_teamCreator.createType(new NullProgressMonitor());
-		
+
 		IType createdJavaType = getJavaType(getTestProjectDir(), SRC_FOLDER_NAME, "teampkg", "TeamWithSuperInterfaceAndInheritedMethod");
 		assertNotNull(createdJavaType);
-		
+
 		IOTType createdOTType = OTModelManager.getOTElement(createdJavaType);
 		assertNotNull(createdOTType);
 		assertTrue(createdOTType.isTeam());
-		
+
 		String[] interfaces = createdOTType.getSuperInterfaceNames();
 		assertNotNull(interfaces);
 		assertTrue(interfaces.length == 1);
 		assertEquals(interfaces[0], "InterfaceWithOneMethod");
-		
+
 		String[] interfaceSignatures = createdOTType.getSuperInterfaceTypeSignatures();
 		assertNotNull(interfaceSignatures);
 		assertTrue(interfaceSignatures.length == 1);
 		assertEquals(interfaceSignatures[0], "QInterfaceWithOneMethod;");
-		
+
 		IMethod method = createdJavaType.getMethod("methodToImplement", new String[0]);
 		assertNotNull(method);
 		assertTrue(method.exists());
 	}
-    
-    
+
+
     public void testCreation_TeamWithSuperTeamAndInheritedMethod() throws JavaModelException,
 																												    InterruptedException,
 																												    CoreException
@@ -380,14 +380,14 @@ public class TeamCreationTests extends FileBasedUITest
 		IType superTeamJavaElem = getJavaType(getTestProjectDir(), SRC_FOLDER_NAME, "teampkg", "AbstractTeamWithAbstractMethod");
 		assertNotNull(superTeamJavaElem);
 		assertTrue(superTeamJavaElem.exists());
-		
+
 		/*creation of team*/
-		
+
 		IPackageFragmentRoot pkgFragRoot = getPackageFragmentRoot(getTestProjectDir(), SRC_FOLDER_NAME);
 		IPackageFragment       pkgFrag       = getPackageFragment(getTestProjectDir(), SRC_FOLDER_NAME, "teampkg");
 		assertNotNull(pkgFragRoot);
 		assertNotNull(pkgFrag);
-		
+
 		String TEAM_CLASS_NAME = "TeamWithSuperTeamAndInheritedMethod";
 		TypeInfo typeInfo = new TypeInfo(TEAM_CLASS_NAME, pkgFragRoot, pkgFrag);
         typeInfo.setModifier(Flags.AccPublic+Flags.AccTeam);
@@ -398,19 +398,19 @@ public class TeamCreationTests extends FileBasedUITest
 		assertNotNull(_teamCreator);
 		_teamCreator.setTypeInfo(typeInfo);
 		_teamCreator.createType(new NullProgressMonitor());
-		
+
 		IType createdJavaType = getJavaType(getTestProjectDir(), SRC_FOLDER_NAME, "teampkg", "TeamWithSuperTeamAndInheritedMethod");
 		assertNotNull(createdJavaType);
-		
+
 		IOTType createdOTType = OTModelManager.getOTElement(createdJavaType);
 		assertNotNull(createdOTType);
 		assertTrue(createdOTType.isTeam());
-		
+
 		assertEquals(createdJavaType.getSuperclassName(), "AbstractTeamWithAbstractMethod");
 		assertEquals(createdJavaType.getSuperclassTypeSignature(), "QAbstractTeamWithAbstractMethod;");
-		
+
 		IMethod method = createdJavaType.getMethod("methodToImplement", new String[0]);
 		assertNotNull(method);
 		assertTrue(method.exists());
-	}            
+	}
 }

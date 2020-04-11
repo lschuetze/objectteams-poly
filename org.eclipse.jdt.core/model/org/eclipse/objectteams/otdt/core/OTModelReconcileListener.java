@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id: OTModelReconcileListener.java 23416 2010-02-03 19:59:31Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -37,20 +37,20 @@ import org.eclipse.objectteams.otdt.internal.core.OTType;
 /**
  * The OTModelListener performs the necessary updating of the OTM in order
  * to sync with the JavaModel.
- * 
+ *
  * @author kaiser
  * @version $Id: OTModelReconcileListener.java 23416 2010-02-03 19:59:31Z stephan $
  */
 public class OTModelReconcileListener implements IElementChangedListener
-{	
+{
 	/**
 	 * Invoked when some or more JavaModel elements have changed, which may
-	 * require additional changes within the OTM 
+	 * require additional changes within the OTM
 	 * @param event - event describing changes
 	 */
     @Override
 	public void elementChanged(ElementChangedEvent event)
-    {    	
+    {
     	removeAffectedModelElements( new IJavaElementDelta[] { event.getDelta() } );
     }
 
@@ -63,7 +63,7 @@ public class OTModelReconcileListener implements IElementChangedListener
     private void removeAffectedModelElements(IJavaElementDelta[] deltas)
     {
     	assert (deltas != null);
-    	
+
         for (int idx = 0; idx < deltas.length; idx++)
         {
 			IJavaElementDelta delta = deltas[idx];
@@ -72,7 +72,7 @@ public class OTModelReconcileListener implements IElementChangedListener
 			// check for nested deltas
 			if (elem instanceof IParent)
 			{
-				// visit child deltas				
+				// visit child deltas
 				removeAffectedModelElements(delta.getAffectedChildren());
 			}
 
@@ -81,7 +81,7 @@ public class OTModelReconcileListener implements IElementChangedListener
 			{
 				// check for changed modifiers on element-changed deltas because
 				// this means that the JavaModel IType element has been recreated
-				// and old instances need to be removed from the OTM 
+				// and old instances need to be removed from the OTM
 				if ((delta.getKind() == IJavaElementDelta.CHANGED)
 					&& ((delta.getFlags() & IJavaElementDelta.F_MODIFIERS) != 0))
 				{
@@ -119,7 +119,7 @@ public class OTModelReconcileListener implements IElementChangedListener
                     }
 			    }
 			}
-			
+
 			if ((delta.getFlags() & IJavaElementDelta.F_PRIMARY_WORKING_COPY) != 0)
 			{
 				if (!unit.isWorkingCopy() && unit.exists())
@@ -140,7 +140,7 @@ public class OTModelReconcileListener implements IElementChangedListener
 								IOTType t1 = OTModelManager.getOTElement(currentType);
 								IOTType t2 = OTModelManager.getOTElement(wcType);
 							}
-							
+
 							if (otType != null) // need to update the workingcopy
 							{
 							    ICompilationUnit otUnit = otType.getCompilationUnit();

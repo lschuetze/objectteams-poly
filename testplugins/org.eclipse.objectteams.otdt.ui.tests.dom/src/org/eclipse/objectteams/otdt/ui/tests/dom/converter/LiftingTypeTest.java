@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -51,30 +51,30 @@ public class LiftingTypeTest extends FileBasedDOMTest
 
 	private ASTParser _parser;
 	private ICompilationUnit _simpleTeam;
-	
+
 	private TypeDeclaration _typeDecl; // a java class common to all within tests
-	private MethodDeclaration _methodDecl;	
+	private MethodDeclaration _methodDecl;
 	private SingleVariableDeclaration _variableDecl;
-	
+
 	private LiftingType _testObj;
-	
+
 	public LiftingTypeTest(String name)
 	{
 		super(name);
 	}
-	
+
 	public static Test suite()
 	{
 		return new Suite(LiftingTypeTest.class);
 	}
-	
+
 	public void setUpSuite() throws Exception
 	{
 		setTestProjectDir(TEST_PROJECT);
 		super.setUpSuite();
 	}
 
-	protected void setUp() throws Exception 
+	protected void setUp() throws Exception
 	{
 		super.setUp();
 		_simpleTeam = getCompilationUnit(
@@ -82,77 +82,77 @@ public class LiftingTypeTest extends FileBasedDOMTest
 	            "src",
 	            "liftingType.teampkg",
 	            "Team1.java");
-		
+
 		_parser = ASTParser.newParser(JAVA_LANGUAGE_SPEC_LEVEL);
 		_parser.setProject( getJavaProject(TEST_PROJECT) );
 		_parser.setSource(_simpleTeam);
-		
+
 		ASTNode root = _parser.createAST( new NullProgressMonitor() );
 		CompilationUnit compUnit = (CompilationUnit) root;
 		_typeDecl = (TypeDeclaration)compUnit.types().get(0);
-		_methodDecl = (MethodDeclaration)_typeDecl.bodyDeclarations().get(0);	
+		_methodDecl = (MethodDeclaration)_typeDecl.bodyDeclarations().get(0);
 		_variableDecl = (SingleVariableDeclaration)_methodDecl.parameters().get(0);
 	}
 
 	public void testInstanceType1()
 	{
 		Type testObj = _variableDecl.getType();
-		
+
 		assertTrue(testObj instanceof LiftingType);
 	}
-	
+
 	public void testSubtreeMatch1()
 	{
 		_testObj = (LiftingType)_variableDecl.getType();
-		
+
 		boolean actual = _testObj.subtreeMatch(new ASTMatcher(), _testObj);
-		
+
 		assertTrue("LiftingTypes don't match", actual);
 	}
-	
+
 	public void testCopySubtree1()
 	{
-		_testObj = (LiftingType)_variableDecl.getType();		
-		LiftingType clonedTestObject = 
+		_testObj = (LiftingType)_variableDecl.getType();
+		LiftingType clonedTestObject =
 			(LiftingType)ASTNode.copySubtree(AST.newAST(AST.JLS4), _testObj);
-		
+
 		boolean actual = _testObj.subtreeMatch(new ASTMatcher(), clonedTestObject);
 
         assertTrue("Copy of subtree not correct", actual);
 	}
-	
+
 	public void testGetBaseType_MyClass()
 	{
 		_testObj = (LiftingType)_variableDecl.getType();
         Name typeName = ((SimpleType)_testObj.getBaseType()).getName();
-    
+
         String actual = ((SimpleName)typeName).getIdentifier();
-		
+
 		assertEquals("Base type has wrong name ",
                 "MyClass",
                 actual);
 	}
-	
+
 	public void testGetRoleType_MyRole()
 	{
 		_testObj = (LiftingType)_variableDecl.getType();
         Name typeName = ((SimpleType)_testObj.getRoleType()).getName();
-	
+
         String actual = ((SimpleName)typeName).getIdentifier();
-		
+
 		assertEquals("Role type has wrong name ",
                 "MyRole",
                 actual);
 	}
-	
+
 	public void testSignature()
 	{
 		_testObj = (LiftingType)_variableDecl.getType();
         String sig = Util.getSignature(_testObj);
-		
+
 		assertEquals("Base type has wrong name ",
                 "QMyClass;",
                 sig);
 	}
-	
+
 }

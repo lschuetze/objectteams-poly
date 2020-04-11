@@ -58,13 +58,13 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
  */
 public class WithinStatement extends Block implements IOTConstants
 {
-	/** 
+	/**
 	 * This class marks the single name reference refering to the synthetic local variable.
 	 * As such it is actually a substitute for the team expression.
-	 * Used for error reporting (null checks). 
+	 * Used for error reporting (null checks).
 	 */
-	public class SubstitutedReference extends SingleNameReference 
-	{		
+	public class SubstitutedReference extends SingleNameReference
+	{
 		public SubstitutedReference(char[] teamVarName, long pos) {
 			super(teamVarName, pos);
 		}
@@ -217,7 +217,7 @@ public class WithinStatement extends Block implements IOTConstants
     }
 
 	@Override
-	public void traverse(ASTVisitor visitor, BlockScope blockScope) 
+	public void traverse(ASTVisitor visitor, BlockScope blockScope)
 	{
 		if (visitor.visit(this, blockScope)) {
 			this.getTeamExpression().traverse(visitor, blockScope);

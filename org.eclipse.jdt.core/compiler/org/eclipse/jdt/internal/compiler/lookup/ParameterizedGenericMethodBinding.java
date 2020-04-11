@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - extended API and implementation
@@ -70,7 +70,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 	 * <p>
 	 * In 1.8+ if the expected type is not yet available due to this call being an argument to an outer call which is not overload-resolved yet,
 	 * the returned method binding will be a PolyParameterizedGenericMethodBinding.
-	 * </p>  
+	 * </p>
 	 */
 	public static MethodBinding computeCompatibleMethod(MethodBinding originalMethod, TypeBinding[] arguments, Scope scope,	InvocationSite invocationSite)
 	{
@@ -145,7 +145,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
  					if (expectedType != null && !originalMethod.returnType.mentionsAny(originalMethod.parameters, -1)) {
 						TypeBinding uncaptured = methodSubstitute.returnType.uncapture(scope);
 						if (!methodSubstitute.returnType.isCompatibleWith(expectedType) &&
-								expectedType.isCompatibleWith(uncaptured)) { 
+								expectedType.isCompatibleWith(uncaptured)) {
 							InferenceContext oldContext = inferenceContext;
 							inferenceContext = new InferenceContext(originalMethod);
 							// Include additional constraint pertaining to the expected type
@@ -162,7 +162,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 								inferenceContext = oldContext;
 							}
 						}
-					}					
+					}
 				}
 			}
 		}
@@ -184,17 +184,17 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 		for (int i = 0, length = typeVariables.length; i < length; i++) {
 		    TypeVariableBinding typeVariable = typeVariables[i];
 		    TypeBinding substitute = methodSubstitute.typeArguments[i]; // retain for diagnostics
-		    /* https://bugs.eclipse.org/bugs/show_bug.cgi?id=375394, To avoid spurious bounds check failures due to circularity in formal bounds, 
+		    /* https://bugs.eclipse.org/bugs/show_bug.cgi?id=375394, To avoid spurious bounds check failures due to circularity in formal bounds,
 		       we should eliminate only the lingering embedded type variable references after substitution, not alien type variable references
 		       that constitute the inference per se.
-		     */ 
+		     */
 		    TypeBinding substituteForChecks;
 		    if (substitute instanceof TypeVariableBinding) {
 		    	substituteForChecks = substitute;
 		    } else {
 		    	substituteForChecks = Scope.substitute(new LingeringTypeVariableEliminator(typeVariables, null, scope), substitute); // while using this for bounds check
 		    }
-		    
+
 		    if (uncheckedArguments != null && uncheckedArguments[i] == null) continue; // only bound check if inferred through 15.12.2.6
 //{ObjectTeams: methods with generic declared lifting need to be checked in knowledge of the actual receiver type:
 		    ReferenceBinding actualReceiverRefType = null;
@@ -229,13 +229,13 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 	}
 
 	public static MethodBinding computeCompatibleMethod18(MethodBinding originalMethod, TypeBinding[] arguments, final Scope scope, InvocationSite invocationSite) {
-		
+
 		TypeVariableBinding[] typeVariables = originalMethod.typeVariables;
 		if (invocationSite.checkingPotentialCompatibility()) {
 			// Not interested in a solution, only that there could potentially be one.
 			return scope.environment().createParameterizedGenericMethod(originalMethod, typeVariables);
 		}
-		
+
 		ParameterizedGenericMethodBinding methodSubstitute = null;
 		InferenceContext18 infCtx18 = invocationSite.freshInferenceContext(scope);
 		if (infCtx18 == null)
@@ -245,7 +245,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 		boolean invocationTypeInferred = false;
 		boolean requireBoxing = false;
 		boolean allArgumentsAreProper = true;
-		
+
 		// See if we should start in loose inference mode.
 		TypeBinding [] argumentsCopy = new TypeBinding[arguments.length];
 		for (int i = 0, length = arguments.length, parametersLength = parameters.length ; i < length; i++) {
@@ -259,8 +259,8 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 				argumentsCopy[i] = argument;
 			}
 		}
-		arguments = argumentsCopy; // either way, this allows the engine to update arguments without harming the callers. 
-		
+		arguments = argumentsCopy; // either way, this allows the engine to update arguments without harming the callers.
+
 		LookupEnvironment environment = scope.environment();
 		InferenceContext18 previousContext = environment.currentInferenceContext;
 		if (previousContext == null)
@@ -269,7 +269,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 			BoundSet provisionalResult = null;
 			BoundSet result = null;
 			// ---- 18.5.1 (Applicability): ----
-			final boolean isPolyExpression = invocationSite instanceof Expression &&   ((Expression) invocationSite).isTrulyExpression() && 
+			final boolean isPolyExpression = invocationSite instanceof Expression &&   ((Expression) invocationSite).isTrulyExpression() &&
 					((Expression)invocationSite).isPolyExpression(originalMethod);
 			boolean isDiamond = isPolyExpression && originalMethod.isConstructor();
 			if (arguments.length == parameters.length) {
@@ -309,7 +309,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 				if (solutions != null) {
 //{ObjectTeams: validate matching team anchors:
 					// TODO: could this be integrated with TypeVariableBinding.boundCheck(Substitution, TypeBinding, ReferenceBinding, Scope)
-					//        which already uses Substitutation.substituteAnchor(ITeamAnchor,int) internally? 
+					//        which already uses Substitutation.substituteAnchor(ITeamAnchor,int) internally?
 					for (int i = 0; i < solutions.length; i++) {
 						if (solutions[i] instanceof DependentTypeBinding
 								&& typeVariables[i].anchors != null
@@ -345,7 +345,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 								((ReferenceExpression) invocationSite).registerInferenceContext(methodSubstitute, infCtx18); // keep context so we can finish later
 						}
 					}
-					return methodSubstitute; 
+					return methodSubstitute;
 				}
 			}
 			return null;
@@ -357,7 +357,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 			environment.currentInferenceContext = previousContext;
 		}
 	}
-	
+
 	MethodBinding boundCheck18(Scope scope, TypeBinding[] arguments, InvocationSite site) {
 		Substitution substitution = this;
 		ParameterizedGenericMethodBinding methodSubstitute = this;
@@ -366,17 +366,17 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 		for (int i = 0, length = originalTypeVariables.length; i < length; i++) {
 		    TypeVariableBinding typeVariable = originalTypeVariables[i];
 		    TypeBinding substitute = methodSubstitute.typeArguments[i]; // retain for diagnostics
-		    /* https://bugs.eclipse.org/bugs/show_bug.cgi?id=375394, To avoid spurious bounds check failures due to circularity in formal bounds, 
+		    /* https://bugs.eclipse.org/bugs/show_bug.cgi?id=375394, To avoid spurious bounds check failures due to circularity in formal bounds,
 		       we should eliminate only the lingering embedded type variable references after substitution, not alien type variable references
 		       that constitute the inference per se.
-		     */ 
+		     */
 		    TypeBinding substituteForChecks;
 		    if (substitute instanceof TypeVariableBinding) {
 		    	substituteForChecks = substitute;
 		    } else {
 		    	substituteForChecks = Scope.substitute(new LingeringTypeVariableEliminator(originalTypeVariables, null, scope), substitute); // while using this for bounds check
 		    }
-		    
+
 //{ObjectTeams: methods with generic declared lifting need to be checked in knowledge of the actual receiver type:
 		    ReferenceBinding actualReceiverRefType = null;
 		    if (site instanceof MessageSend) {
@@ -678,7 +678,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 
 	TypeBinding getErasure18_5_2(TypeBinding type, LookupEnvironment env, boolean substitute) {
 		// opportunistic interpretation of (JLS 18.5.2):
-		// "If unchecked conversion was necessary ..., then ... 
+		// "If unchecked conversion was necessary ..., then ...
 		// the return type and thrown types of the invocation type of m are given by
 		// the erasure of the return type and thrown types of m's type."
 		if (substitute)
@@ -797,7 +797,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 		   are inferred to be the glb of the published bounds - as there can recursion in the formal bounds, the
 		   inferred bounds would no longer be glb.
 		*/
-		
+
 		this.typeArguments = Scope.substitute(this, this.typeArguments);
 
     	// adjust method types to reflect latest inference
@@ -838,7 +838,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 
 	/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=347600 && https://bugs.eclipse.org/bugs/show_bug.cgi?id=242159
 	   Sometimes due to recursion/circularity in formal bounds, even *published bounds* fail bound check. We need to
-	   break the circularity/self reference in order not to be overly strict during type equivalence checks.  
+	   break the circularity/self reference in order not to be overly strict during type equivalence checks.
 	   See also http://bugs.sun.com/view_bug.do?bug_id=6932571
 	 */
 	private static class LingeringTypeVariableEliminator implements Substitution {
@@ -846,7 +846,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 		final private TypeVariableBinding [] variables;
 		final private TypeBinding [] substitutes; // when null, substitute type variables by unbounded wildcard
 		final private Scope scope;
-		
+
 		/**
 		 * @param variables
 		 * @param substitutes when null, substitute type variable by unbounded wildcard
@@ -864,7 +864,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 				return typeVariable;
 			}
 			if (this.substitutes != null) {
-				return Scope.substitute(new LingeringTypeVariableEliminator(this.variables, null, this.scope), this.substitutes[typeVariable.rank]); 
+				return Scope.substitute(new LingeringTypeVariableEliminator(this.variables, null, this.scope), this.substitutes[typeVariable.rank]);
 			}
 			ReferenceBinding genericType = (ReferenceBinding) (typeVariable.declaringElement instanceof ReferenceBinding ? typeVariable.declaringElement : null);
 			return this.scope.environment().createWildcard(genericType, typeVariable.rank, null, null, Wildcard.UNBOUND, typeVariable.getTypeAnnotations());
@@ -915,7 +915,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 	 * Check if the given variable was the result of substituting a variable from the original method.
 	 * If so answer the corresponding variable of the original method.
 	 * @param specificVariable a type variable from this method's scope.
-	 * @return either a type variable from the original method or the input specificVariable 
+	 * @return either a type variable from the original method or the input specificVariable
 	 */
 	public TypeVariableBinding reverseSubstitute(TypeVariableBinding specificVariable) {
 		int length = this.typeArguments.length;

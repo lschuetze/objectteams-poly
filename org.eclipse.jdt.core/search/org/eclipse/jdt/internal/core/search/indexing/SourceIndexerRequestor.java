@@ -41,7 +41,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor, IIndexCo
 	char[][] enclosingTypeNames = new char[5][];
 	int depth = 0;
 	int methodDepth = 0;
-	
+
 public SourceIndexerRequestor(SourceIndexer indexer) {
 	this.indexer = indexer;
 }
@@ -165,7 +165,7 @@ public void acceptUnknownReference(char[] name, int sourcePosition) {
 
 private void addDefaultConstructorIfNecessary(TypeInfo typeInfo) {
 	boolean hasConstructor = false;
-	
+
 	TypeDeclaration typeDeclaration = typeInfo.node;
 	AbstractMethodDeclaration[] methods = typeDeclaration.methods;
 	int methodCounter = methods == null ? 0 : methods.length;
@@ -176,7 +176,7 @@ private void addDefaultConstructorIfNecessary(TypeInfo typeInfo) {
 			break done;
 		}
 	}
-	
+
 	if (!hasConstructor) {
 		this.indexer.addDefaultConstructorDeclaration(
 				typeInfo.name,
@@ -222,7 +222,7 @@ private void enterClass(TypeInfo typeInfo) {
 	// eliminate possible qualifications, given they need to be fully resolved again
 	if (typeInfo.superclass != null) {
 		typeInfo.superclass = getSimpleName(typeInfo.superclass);
-		
+
 		// add implicit constructor reference to default constructor
 		this.indexer.addConstructorReference(typeInfo.superclass, 0);
 	}
@@ -292,7 +292,7 @@ private void enterEnum(TypeInfo typeInfo) {
 		for (int i = 0, length = typeInfo.superinterfaces.length; i < length; i++){
 			typeInfo.superinterfaces[i] = getSimpleName(typeInfo.superinterfaces[i]);
 		}
-	}	
+	}
 	char[][] typeNames;
 	if (this.methodDepth > 0) {
 		typeNames = ONE_ZERO_CHAR;
@@ -325,7 +325,7 @@ private void enterInterface(TypeInfo typeInfo) {
 		for (int i = 0, length = typeInfo.superinterfaces.length; i < length; i++){
 			typeInfo.superinterfaces[i] = getSimpleName(typeInfo.superinterfaces[i]);
 		}
-	}	
+	}
 	char[][] typeNames;
 	if (this.methodDepth > 0) {
 		typeNames = ONE_ZERO_CHAR;
@@ -356,7 +356,7 @@ public void enterModule(ModuleInfo moduleInfo) {
 		}
 	}
 	enterPackageVisibilityInfo(moduleInfo.exports);
-	enterPackageVisibilityInfo(moduleInfo.opens); 
+	enterPackageVisibilityInfo(moduleInfo.opens);
 	/* note: provides and uses directives processed automatically on IParser (SEParser) */
 }
 private void enterPackageVisibilityInfo(ISourceElementRequestor.PackageExportInfo[] packInfos) {
@@ -418,7 +418,7 @@ private static char[] getDeclaringQualification(TypeDeclaration typeDecl) {
 
 	int l = nlist.size();
 	if (l == 1) return name;
-	
+
 	name = new char[size];
 	int index = 0;
 	for (int i = 0; i < l - 1; ++i) {
@@ -441,13 +441,13 @@ public void enterType(TypeInfo typeInfo) {
 		case TypeDeclaration.CLASS_DECL:
 			enterClass(typeInfo);
 			break;
-		case TypeDeclaration.ANNOTATION_TYPE_DECL: 
+		case TypeDeclaration.ANNOTATION_TYPE_DECL:
 			enterAnnotationType(typeInfo);
 			break;
 		case TypeDeclaration.INTERFACE_DECL:
 			enterInterface(typeInfo);
 			break;
-		case TypeDeclaration.ENUM_DECL: 
+		case TypeDeclaration.ENUM_DECL:
 			enterEnum(typeInfo);
 			break;
 		case TypeDeclaration.RECORD_DECL:
@@ -571,18 +571,18 @@ private void enterOTTypeInfo(char[] name, boolean isRoleFile) {
 public void enterCalloutMapping(CalloutInfo calloutInfo)
 {
 	// TODO(SH): try to use new flag isDeclaration to decide what to do.
-	
+
 	// NOTE(jsv): if method specs without signature are used, we use Integer.MAX_VALUE to mark these methodSpecs
-	// NOTE(jsv): left methodSpec in a calloutMapping semantically represents a method declaration. 
+	// NOTE(jsv): left methodSpec in a calloutMapping semantically represents a method declaration.
 	// 			  To guarantee consistency with MatchLocator we use methodRef category for all methodSpecs
 	// TODO(jsv): use methodDecl category for role methodSpec in a callout mapping -> also change MathchLocator (method declaration should be reported (implementation for TPX-260 is needed!!))
 	// orig
 	//this.indexer.addMethodDeclaration(leftSelector, leftParameterTypes, leftReturnType, null);
-	
-	int argCount= calloutInfo.left.parameterNames != null ? calloutInfo.left.parameterNames.length : Integer.MAX_VALUE;  
+
+	int argCount= calloutInfo.left.parameterNames != null ? calloutInfo.left.parameterNames.length : Integer.MAX_VALUE;
 	this.indexer.addMethodReference(calloutInfo.left.selector, argCount);
-	
-	argCount = calloutInfo.right.parameterNames != null ? calloutInfo.right.parameterNames.length : Integer.MAX_VALUE;  
+
+	argCount = calloutInfo.right.parameterNames != null ? calloutInfo.right.parameterNames.length : Integer.MAX_VALUE;
 	this.indexer.addMethodReference(calloutInfo.right.selector, argCount);
 }
 //must add right selector as field reference to indexer in case of callout to field
@@ -591,7 +591,7 @@ public void enterCalloutToFieldMapping(CalloutToFieldInfo calloutInfo)
 {
 	// TODO(SH): use new argument isDeclaration to decide what to do with left hand side.
 	// TODO(SH): should new argument isSetter be evaluated?
-    int argCount = calloutInfo.left.parameterNames != null ? calloutInfo.left.parameterNames.length : Integer.MAX_VALUE;  
+    int argCount = calloutInfo.left.parameterNames != null ? calloutInfo.left.parameterNames.length : Integer.MAX_VALUE;
     this.indexer.addMethodReference(calloutInfo.left.selector, argCount);
     this.indexer.addFieldReference(calloutInfo.rightSelector);
 }
@@ -600,10 +600,10 @@ public void enterCalloutToFieldMapping(CalloutToFieldInfo calloutInfo)
 public void enterCallinMapping(CallinInfo callinInfo)
 {
 	// TODO(SH): should new argument callinName be evaluated?
-	
-	int argCount = callinInfo.left.parameterNames != null ? callinInfo.left.parameterNames.length : Integer.MAX_VALUE; 
+
+	int argCount = callinInfo.left.parameterNames != null ? callinInfo.left.parameterNames.length : Integer.MAX_VALUE;
 	this.indexer.addMethodReference(callinInfo.left.selector, argCount);
-	
+
 	for (int i = 0; i < callinInfo.right.length; i++) {
 		MethodSpecInfo baseInfo= callinInfo.right[i];
 		argCount = baseInfo.parameterNames != null ? baseInfo.parameterNames.length : Integer.MAX_VALUE;

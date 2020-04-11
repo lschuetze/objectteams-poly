@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -23,11 +23,11 @@ import junit.framework.Test;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 public class CallinWithTranslation extends AbstractOTJLDTest {
-	
+
 	public CallinWithTranslation(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -35,7 +35,7 @@ public class CallinWithTranslation extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -48,7 +48,7 @@ public class CallinWithTranslation extends AbstractOTJLDTest {
     // a callin binding without signatures lifts its parameter
     // 4.4.1-otjld-callin-with-parameter-lifting-1
     public void test441_callinWithParameterLifting1() {
-       
+
        runConformTest(
             new String[] {
 		"Team441cwpl1.java",
@@ -87,7 +87,7 @@ public class CallinWithTranslation extends AbstractOTJLDTest {
     // a callin binding with array result lifting
     // 4.4.1-otjld-callin-with-result-lifting-2
     public void test441_callinWithResultLifting2() {
-       
+
        runConformTest(
             new String[] {
 		"Team441cwrl2.java",
@@ -132,7 +132,7 @@ public class CallinWithTranslation extends AbstractOTJLDTest {
     // a callin binding with array result lifting , base is inner class
     // 4.4.1-otjld-callin-with-result-lifting-2i
     public void test441_callinWithResultLifting2i() {
-       
+
        runConformTest(
             new String[] {
 		"Team441cwrl2i.java",
@@ -235,7 +235,7 @@ public class CallinWithTranslation extends AbstractOTJLDTest {
     // a role method return a result which is lowered for passing back to the base
     // 4.4.3-otjld-callin-with-result-lowering-1
     public void test443_callinWithResultLowering1() {
-       
+
        runConformTest(
             new String[] {
 		"T443cwrl1Main.java",
@@ -282,7 +282,7 @@ public class CallinWithTranslation extends AbstractOTJLDTest {
     // A callin method lifts its arg and passes it (lowered) back to the base call
     // 4.4.4-otjld-callin-replace-lifts-arg-1
     public void test444_callinReplaceLiftsArg1() {
-       
+
        runConformTest(
             new String[] {
 		"Team444crla1_2.java",
@@ -363,7 +363,7 @@ public class CallinWithTranslation extends AbstractOTJLDTest {
     // A callin method casts its arg and passes it (downcasted) back to the base call
     // 4.4.5-otjld-callin-replace-casts-arg-1
     public void test445_callinReplaceCastsArg1() {
-       
+
        runConformTest(
             new String[] {
 		"Team445crca1.java",
@@ -400,7 +400,7 @@ public class CallinWithTranslation extends AbstractOTJLDTest {
     // a callin method lifts an array of bases (inner class)
     // 4.4.6-otjld-callin-array-arg-lifting-1
     public void test446_callinArrayArgLifting1() {
-       
+
        runConformTest(
             new String[] {
 		"Team446caal1.java",
@@ -446,49 +446,49 @@ public class CallinWithTranslation extends AbstractOTJLDTest {
     	runConformTest(
     		new String[] {
     	"t1/MyTeam.java",
-    			"package t1;\n" + 
-    			"\n" + 
-    			"import b1.MyBase;\n" + 
-    			"\n" + 
-    			"public team class MyTeam {\n" + 
-    			"    protected team class Mid { \n" + 
-    			"        \n" + 
-    			"        protected class R playedBy MyBase {\n" + 
-    			"            callin void rm1(R r) {\n" + 
-    			"                System.out.println(\"rm1 \" + r.getClass().getName());\n" + 
-    			"                base.rm1(r);\n" + 
-    			"            }\n" + 
-    			"            callin1: rm1 <- replace id, process;\n" + 
-    			"            callin R rm2(R r) {\n" + 
-    			"                System.out.println(\"rm2\");\n" + 
-    			"                return this;\n" + 
-    			"            }\n" + 
-    			"            callin2: rm2 <- replace id\n" + 
-    			"                base when (false);\n" + 
-    			"\n" + 
-    			"            precedence callin2, callin1;\n" + 
-    			"        }\n" + 
-    			"    }\n" + 
-    			"    \n" + 
-    			"    public static void main(String[] args) {\n" + 
-    			"        new MyTeam().new Mid().activate();\n" + 
-    			"        new MyBase().process(new MyBase());\n" + 
-    			"    }\n" + 
+    			"package t1;\n" +
+    			"\n" +
+    			"import b1.MyBase;\n" +
+    			"\n" +
+    			"public team class MyTeam {\n" +
+    			"    protected team class Mid { \n" +
+    			"        \n" +
+    			"        protected class R playedBy MyBase {\n" +
+    			"            callin void rm1(R r) {\n" +
+    			"                System.out.println(\"rm1 \" + r.getClass().getName());\n" +
+    			"                base.rm1(r);\n" +
+    			"            }\n" +
+    			"            callin1: rm1 <- replace id, process;\n" +
+    			"            callin R rm2(R r) {\n" +
+    			"                System.out.println(\"rm2\");\n" +
+    			"                return this;\n" +
+    			"            }\n" +
+    			"            callin2: rm2 <- replace id\n" +
+    			"                base when (false);\n" +
+    			"\n" +
+    			"            precedence callin2, callin1;\n" +
+    			"        }\n" +
+    			"    }\n" +
+    			"    \n" +
+    			"    public static void main(String[] args) {\n" +
+    			"        new MyTeam().new Mid().activate();\n" +
+    			"        new MyBase().process(new MyBase());\n" +
+    			"    }\n" +
     			"}\n",
     	"b1/MyBase.java",
-    			"package b1;\n" + 
-    			"\n" + 
-    			"public class MyBase {\n" + 
-    			"    MyBase id(MyBase other) { return this; }\n" + 
-    			"    public MyBase process(MyBase other) {\n" + 
-    			"        other = id(other);\n" + 
-    			"        System.out.println(other.getClass().getName());\n" + 
-    			"        return null;\n" + 
-    			"    }\n" + 
+    			"package b1;\n" +
+    			"\n" +
+    			"public class MyBase {\n" +
+    			"    MyBase id(MyBase other) { return this; }\n" +
+    			"    public MyBase process(MyBase other) {\n" +
+    			"        other = id(other);\n" +
+    			"        System.out.println(other.getClass().getName());\n" +
+    			"        return null;\n" +
+    			"    }\n" +
     			"}\n"
     		},
-    		"rm1 t1.MyTeam$__OT__Mid$__OT__R\n" + 
-			"rm1 t1.MyTeam$__OT__Mid$__OT__R\n" + 
+    		"rm1 t1.MyTeam$__OT__Mid$__OT__R\n" +
+			"rm1 t1.MyTeam$__OT__Mid$__OT__R\n" +
 			"b1.MyBase");
     }
 
@@ -521,16 +521,16 @@ public class CallinWithTranslation extends AbstractOTJLDTest {
     			"	}\n" +
     			"}\n"
     		},
-			"----------\n" + 
-			"1. ERROR in t\\Team1.java (at line 6)\n" + 
-			"	<T> T rm() <- replace T m()\n" + 
-			"	      ^^\n" + 
-			"T cannot be resolved to a type\n" + 
-			"----------\n" + 
-			"2. ERROR in t\\Team1.java (at line 6)\n" + 
-			"	<T> T rm() <- replace T m()\n" + 
-			"	      ^^\n" + 
-			"T cannot be resolved to a type\n" + 
+			"----------\n" +
+			"1. ERROR in t\\Team1.java (at line 6)\n" +
+			"	<T> T rm() <- replace T m()\n" +
+			"	      ^^\n" +
+			"T cannot be resolved to a type\n" +
+			"----------\n" +
+			"2. ERROR in t\\Team1.java (at line 6)\n" +
+			"	<T> T rm() <- replace T m()\n" +
+			"	      ^^\n" +
+			"T cannot be resolved to a type\n" +
 			"----------\n");
     }
 }

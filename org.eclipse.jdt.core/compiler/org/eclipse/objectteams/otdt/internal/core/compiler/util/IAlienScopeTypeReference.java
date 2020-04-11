@@ -162,7 +162,7 @@ public interface IAlienScopeTypeReference {
 			return super.resolveType((BlockScope) this.alienScope, checkBounds);
 		}
 	}
-	
+
 	class AlienScopeQualifiedTypeReference extends QualifiedTypeReference implements IAlienScopeTypeReference
 	{
 		Scope alienScope;
@@ -202,7 +202,7 @@ public interface IAlienScopeTypeReference {
 			// no-op, simply suppress this warning.
 		}
 	}
-	
+
 
 	class AlienScopeParameterizedQualifiedTypeReference extends ParameterizedQualifiedTypeReference implements IAlienScopeTypeReference
 	{
@@ -243,8 +243,8 @@ public interface IAlienScopeTypeReference {
 			// no-op, simply suppress this warning.
 		}
 	}
-	
-	
+
+
 	class AlienScopeArrayQualifiedTypeReference extends ArrayQualifiedTypeReference implements IAlienScopeTypeReference
 	{
 		Scope alienScope;

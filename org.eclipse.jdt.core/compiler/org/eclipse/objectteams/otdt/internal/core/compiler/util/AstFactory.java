@@ -57,7 +57,7 @@ public abstract class AstFactory implements ClassFileConstants, ExtraCompilerMod
 		this._sourcePosition = new SourcePosition(this.sourceStart, this.sourceEnd, this.pos);
 	}
 
-	/** 
+	/**
 	 * This method shifts the generators position off by one.
 	 * If adding a @SuppressWarnings annotation with this offset,
 	 * non-generated code will not be affected by that annotation.

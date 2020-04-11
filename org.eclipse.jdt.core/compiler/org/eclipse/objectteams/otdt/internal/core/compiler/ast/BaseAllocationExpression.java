@@ -142,7 +142,7 @@ public class BaseAllocationExpression extends Assignment {
         	if (!isArgOfOtherCtor(enclCtor, scope))
         		scope.problemReporter().baseConstructorExpressionOutsideCtorCall(this);
         } else {
-        	if (enclCtor.statements[0] != this) 
+        	if (enclCtor.statements[0] != this)
         		scope.problemReporter().baseConstructorCallIsNotFirst(this);
         }
 
@@ -313,7 +313,7 @@ public class BaseAllocationExpression extends Assignment {
     			TypeBinding.INT,
     			scope.createArrayType(scope.getJavaLangObject(), 1),
     			scope.getOrgObjectteamsITeam()
-    		}, 
+    		},
     		Binding.NO_EXCEPTIONS,
     		(ReferenceBinding) baseclass);
     	allocSend.binding.returnType = scope.getJavaLangObject();
@@ -329,7 +329,7 @@ public class BaseAllocationExpression extends Assignment {
 
 		IntLiteral opKindLiteral = gen.intLiteral(0);
 		opKindLiteral.resolveType(scope);
-		
+
 		Expression[] boxedArgs = null;
 		if (arguments != null) {
 			boxedArgs = new Expression[arguments.length];
@@ -348,7 +348,7 @@ public class BaseAllocationExpression extends Assignment {
 				boxedArgs[i] = argument;
 			}
 		}
-		ArrayAllocationExpression packedArgs = gen.arrayAllocation(gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 
+		ArrayAllocationExpression packedArgs = gen.arrayAllocation(gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT),
 				boxedArgs != null ? 1 : 0, boxedArgs); // arguments are already resolved at this point
 		ArrayBinding objectArray = scope.createArrayType(scope.getJavaLangObject(), 1);
 		if (packedArgs.initializer != null)
@@ -360,7 +360,7 @@ public class BaseAllocationExpression extends Assignment {
 
 		Reference teamReference = gen.qualifiedThisReference(scope.enclosingSourceType().enclosingType());
 		teamReference.resolveType(scope);
-		
+
 		return new Expression[] { accessIdLiteral, opKindLiteral, packedArgs, teamReference };
 	}
 
@@ -489,7 +489,7 @@ public class BaseAllocationExpression extends Assignment {
 			return super.resolveType(scope);
 		return null;
     }
-    
+
     @Override
     public void computeConversion(Scope scope, TypeBinding runtimeType, TypeBinding compileTimeType) {
     	if (this.isExpression)
@@ -505,7 +505,7 @@ public class BaseAllocationExpression extends Assignment {
 		else
 			super.generateCode(currentScope, codeStream, valueRequired);
     }
-    
+
     @Override
 	public String toString() {
         if (this.expression == null)

@@ -1,8 +1,8 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010, 2014 Stephan Herrmann
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -23,11 +23,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 import junit.framework.Test;
 
 public class ImplicitInheritance extends AbstractOTJLDTest {
-	
+
 	public ImplicitInheritance(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -35,7 +35,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -47,7 +47,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     // implicit sub-role overrides method with role signature
     // 0.c.1-otjld-implicit-overrides-1
     public void test0c1_implicitOverrides1() {
-       
+
        runConformTest(
             new String[] {
 		"T0c112.java",
@@ -84,7 +84,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     // a constructor with self call is copied as tsuper, adjustment required
     // 0.c.2-otjld-tsuper-in-constructor-1
     public void test0c2_tsuperInConstructor1() {
-       
+
        runConformTest(
             new String[] {
 		"Team0c2tic1_2.java",
@@ -130,7 +130,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     // a constructor with self call is copied as tsuper, ctor called in self call not overridden
     // 0.c.2-otjld-tsuper-in-constructor-2
     public void test0c2_tsuperInConstructor2() {
-       
+
        runConformTest(
             new String[] {
 		"Team0c2tic2_2.java",
@@ -173,7 +173,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     // a team overrides a method returning role
     // 0.c.3-otjld-override-method-with-roletype-1
     public void test0c3_overrideMethodWithRoletype1() {
-       
+
        runConformTest(
             new String[] {
 		"T0c3omwr1Main.java",
@@ -219,7 +219,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     // a team overrides a method returning role using super
     // 0.c.3-otjld-override-method-with-roletype-2
     public void test0c3_overrideMethodWithRoletype2() {
-       
+
        runConformTest(
             new String[] {
 		"T0c3omwr2Main.java",
@@ -265,7 +265,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     // a role overrides an implicitly inherited method return a role type
     // 0.c.3-otjld-override-method-with-roletype-3
     public void test0c3_overrideMethodWithRoletype3() {
-       
+
        runConformTest(
             new String[] {
 		"T0c3omwr3Main.java",
@@ -312,7 +312,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     // a role implicitly inherits an abstract method
     // 0.c.4-otjld-copy-abstract-method-1
     public void test0c4_copyAbstractMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"Team0c4cam1_3.java",
@@ -349,7 +349,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     // a role implicitly inherits an abstract method that is called from another method
     // 0.c.4-otjld-copy-abstract-method-2
     public void test0c4_copyAbstractMethod2() {
-       
+
        runConformTest(
             new String[] {
 		"Team0c4cam2_3.java",
@@ -386,7 +386,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
 
     // Bug 355311 - error regarding abstract method in non-abstract role may be displayed at position 0
     public void test0c4_copyAbstractMethod3() {
-       
+
        runNegativeTest(
             new String[] {
 		"Team0c4cam3_1.java",
@@ -406,22 +406,22 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team0c4cam3_2.java (at line 4)\n" + 
-    		"	public class Role {\n" + 
-    		"	             ^^^^\n" + 
-    		"The abstract method getVal in type Role can only be defined by an abstract class\n" + 
+            "----------\n" +
+    		"1. ERROR in Team0c4cam3_2.java (at line 4)\n" +
+    		"	public class Role {\n" +
+    		"	             ^^^^\n" +
+    		"The abstract method getVal in type Role can only be defined by an abstract class\n" +
     		"----------\n" +
-    		"2. ERROR in Team0c4cam3_2.java (at line 4)\n" + 
-    		"	public class Role {\n" + 
-    		"	             ^^^^\n" + 
-    		"The type Team0c4cam3_2.Role must implement the inherited abstract method Team0c4cam3_2.Role.getVal()\n" + 
+    		"2. ERROR in Team0c4cam3_2.java (at line 4)\n" +
+    		"	public class Role {\n" +
+    		"	             ^^^^\n" +
+    		"The type Team0c4cam3_2.Role must implement the inherited abstract method Team0c4cam3_2.Role.getVal()\n" +
     		"----------\n");
     }
 
     // Bug 359894 - [compiler] support @Override for static role methods
     public void test0c4_copyAbstractMethod4() {
-       
+
        runConformTest(
             new String[] {
 		"Team0c4cam4_1.java",
@@ -503,7 +503,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     // a role implicitely inherits a constructor  - changed between compiles - corrected program - change not relevant here
     // 0.c.5-otjld-changes-between-compiles-2
     public void test0c5_changesBetweenCompiles2() {
-       
+
        runConformTest(
             new String[] {
 		"Team0c5cbc2_3.java",
@@ -606,7 +606,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     // a role refines the extends clause, invoking super and base and a role method
     // 0.c.6-otjld-ctor-with-changed-extends-2
     public void test0c6_ctorWithChangedExtends2() {
-       
+
        runConformTest(
             new String[] {
 		"Team0c6cwce2_2.java",
@@ -660,7 +660,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     // a role refines the extends clause, invoking super and base and a final role method
     // 0.c.6-otjld-ctor-with-changed-extends-3
     public void test0c6_ctorWithChangedExtends3() {
-       
+
        runConformTest(
             new String[] {
 		"Team0c6cwce3_2.java",
@@ -716,38 +716,38 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
          "Team0c6cwce4_2.java",
         		"public team class Team0c6cwce4_2 extends Team0c6cwce4_1 {\n" + // should inherit class R1 extends R0
          		"	@Override\n" +
-    			"	protected class R2 extends R1 {\n" + 
-    			"		public R2() {\n" + 
-    			"			super();\n" + 
-    			"		}\n" + 
-    			"	}\n" + 
-    			"	void test() {\n" + 
-    			"		R2 r = new R2();\n" + 
-    			"		System.out.print(r.val);\n" + 
-    			"	}\n" + 
-    			"	public static void main(String[] args) {\n" + 
-    			"		new Team0c6cwce4_2().test();\n" + 
-    			"	}\n" + 
+    			"	protected class R2 extends R1 {\n" +
+    			"		public R2() {\n" +
+    			"			super();\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	void test() {\n" +
+    			"		R2 r = new R2();\n" +
+    			"		System.out.print(r.val);\n" +
+    			"	}\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		new Team0c6cwce4_2().test();\n" +
+    			"	}\n" +
     			"}\n",
     	 "Team0c6cwce4_1.java",
-		    	"public team class Team0c6cwce4_1 {\n" + 
+		    	"public team class Team0c6cwce4_1 {\n" +
 		 		"	protected class R0 {\n" +
-		 		"		public String val;\n" + 
-		 		"\n" + 
-		 		"		public R0(String val) {\n" + 
-		 		"			this.val = val;\n" + 
-		 		"		}		\n" + 
-		 		"	}\n" + 
-		 		"	protected class R1 extends R0 {\n" + 
-		 		"		public R1() {\n" + 
-		 		"			super(\"T1.R1\");\n" + 
-		 		"		}\n" + 
-		 		"	}\n" + 
-		 		"	protected class R2 extends R0 {\n" + 
-		 		"		public R2(String val) {\n" + 
-		 		"			super(val);\n" + 
-		 		"		}		\n" + 
-		 		"	}\n" + 
+		 		"		public String val;\n" +
+		 		"\n" +
+		 		"		public R0(String val) {\n" +
+		 		"			this.val = val;\n" +
+		 		"		}		\n" +
+		 		"	}\n" +
+		 		"	protected class R1 extends R0 {\n" +
+		 		"		public R1() {\n" +
+		 		"			super(\"T1.R1\");\n" +
+		 		"		}\n" +
+		 		"	}\n" +
+		 		"	protected class R2 extends R0 {\n" +
+		 		"		public R2(String val) {\n" +
+		 		"			super(val);\n" +
+		 		"		}		\n" +
+		 		"	}\n" +
 		 		"}\n"
 		 		},
 		 		"T1.R1");
@@ -758,40 +758,40 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
          "Team0c6cwce5_2.java",
          		"public team class Team0c6cwce5_2 extends Team0c6cwce5_1 {\n" +
          		"	@Override\n" +
-         		"   protected class R1 extends R0 {} \n" + // should inherited ctor public R1() 
+         		"   protected class R1 extends R0 {} \n" + // should inherited ctor public R1()
          		"	@Override\n" +
-     			"	protected class R2 extends R1 {\n" + 
-     			"		public R2() {\n" + 
-     			"			super();\n" + 
-     			"		}\n" + 
-     			"	}\n" + 
-     			"	void test() {\n" + 
-     			"		R2 r = new R2();\n" + 
-     			"		System.out.print(r.val);\n" + 
-     			"	}\n" + 
-     			"	public static void main(String[] args) {\n" + 
-     			"		new Team0c6cwce5_2().test();\n" + 
-     			"	}\n" + 
+     			"	protected class R2 extends R1 {\n" +
+     			"		public R2() {\n" +
+     			"			super();\n" +
+     			"		}\n" +
+     			"	}\n" +
+     			"	void test() {\n" +
+     			"		R2 r = new R2();\n" +
+     			"		System.out.print(r.val);\n" +
+     			"	}\n" +
+     			"	public static void main(String[] args) {\n" +
+     			"		new Team0c6cwce5_2().test();\n" +
+     			"	}\n" +
      			"}\n",
      	 "Team0c6cwce5_1.java",
- 		    	"public team class Team0c6cwce5_1 {\n" + 
+ 		    	"public team class Team0c6cwce5_1 {\n" +
  		 		"	protected class R0 {\n" +
- 		 		"		public String val;\n" + 
- 		 		"\n" + 
- 		 		"		public R0(String val) {\n" + 
- 		 		"			this.val = val;\n" + 
- 		 		"		}		\n" + 
- 		 		"	}\n" + 
- 		 		"	protected class R1 extends R0 {\n" + 
- 		 		"		public R1() {\n" + 
- 		 		"			super(\"T1.R1\");\n" + 
- 		 		"		}\n" + 
- 		 		"	}\n" + 
- 		 		"	protected class R2 extends R0 {\n" + 
- 		 		"		public R2(String val) {\n" + 
- 		 		"			super(val);\n" + 
- 		 		"		}		\n" + 
- 		 		"	}\n" + 
+ 		 		"		public String val;\n" +
+ 		 		"\n" +
+ 		 		"		public R0(String val) {\n" +
+ 		 		"			this.val = val;\n" +
+ 		 		"		}		\n" +
+ 		 		"	}\n" +
+ 		 		"	protected class R1 extends R0 {\n" +
+ 		 		"		public R1() {\n" +
+ 		 		"			super(\"T1.R1\");\n" +
+ 		 		"		}\n" +
+ 		 		"	}\n" +
+ 		 		"	protected class R2 extends R0 {\n" +
+ 		 		"		public R2(String val) {\n" +
+ 		 		"			super(val);\n" +
+ 		 		"		}		\n" +
+ 		 		"	}\n" +
  		 		"}\n"
  		 		});
     }
@@ -802,41 +802,41 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
           		"public team class Team0c6cwce6_2 extends Team0c6cwce6_1 {\n" +
           		"	@Override\n" +
           		"   protected class R1 extends R0 {\n" +
-          		"   } \n" +  
+          		"   } \n" +
           		"	@Override\n" +
-      			"	protected class R2 extends R1 {\n" + 
-      			"		public R2() {\n" + 
+      			"	protected class R2 extends R1 {\n" +
+      			"		public R2() {\n" +
       			"			super();\n" +
-      			"			tsuper(\"T2.R2\");\n" + 
-      			"		}\n" + 
-      			"	}\n" + 
-      			"	void test() {\n" + 
-      			"		R2 r = new R2();\n" + 
-      			"		System.out.print(r.val);\n" + 
-      			"	}\n" + 
-      			"	public static void main(String[] args) {\n" + 
-      			"		new Team0c6cwce6_2().test();\n" + 
-      			"	}\n" + 
+      			"			tsuper(\"T2.R2\");\n" +
+      			"		}\n" +
+      			"	}\n" +
+      			"	void test() {\n" +
+      			"		R2 r = new R2();\n" +
+      			"		System.out.print(r.val);\n" +
+      			"	}\n" +
+      			"	public static void main(String[] args) {\n" +
+      			"		new Team0c6cwce6_2().test();\n" +
+      			"	}\n" +
       			"}\n",
       	 "Team0c6cwce6_1.java",
-  		    	"public team class Team0c6cwce6_1 {\n" + 
+  		    	"public team class Team0c6cwce6_1 {\n" +
   		 		"	protected class R0 {\n" +
-  		 		"		public String val;\n" + 
-  		 		"\n" + 
-  		 		"		public R0(String val) {\n" + 
-  		 		"			this.val = val;\n" + 
-  		 		"		}		\n" + 
-  		 		"	}\n" + 
-  		 		"	protected class R1 extends R0 {\n" + 
-  		 		"		public R1() {\n" + 
-  		 		"			super(\"T1.R1\");\n" + 
-  		 		"		}\n" + 
-  		 		"	}\n" + 
-  		 		"	protected class R2 extends R0 {\n" + 
-  		 		"		public R2(String val) {\n" + 
-  		 		"			super(val);\n" + 
-  		 		"		}		\n" + 
-  		 		"	}\n" + 
+  		 		"		public String val;\n" +
+  		 		"\n" +
+  		 		"		public R0(String val) {\n" +
+  		 		"			this.val = val;\n" +
+  		 		"		}		\n" +
+  		 		"	}\n" +
+  		 		"	protected class R1 extends R0 {\n" +
+  		 		"		public R1() {\n" +
+  		 		"			super(\"T1.R1\");\n" +
+  		 		"		}\n" +
+  		 		"	}\n" +
+  		 		"	protected class R2 extends R0 {\n" +
+  		 		"		public R2(String val) {\n" +
+  		 		"			super(val);\n" +
+  		 		"		}		\n" +
+  		 		"	}\n" +
   		 		"}\n"
   		 		},
   		 		"----------\n" +
@@ -906,11 +906,11 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
 			    "}	\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team0c7itcc3_2.java (at line 6)\n" + 
-    		"	tsuper(7);\n" + 
-    		"	^^^^^^^^^^\n" + 
-    		"The constructor Team0c7itcc3_1.R(int) is undefined\n" + 
+            "----------\n" +
+    		"1. ERROR in Team0c7itcc3_2.java (at line 6)\n" +
+    		"	tsuper(7);\n" +
+    		"	^^^^^^^^^^\n" +
+    		"The constructor Team0c7itcc3_1.R(int) is undefined\n" +
     		"----------\n");
     }
 
@@ -967,7 +967,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     // a private method is callin bound, subteam inherits everything. Bug reported by OTS-students working on OTPong
     // 0.c.9-otjld-implicitly-inheriting-callin-to-private-1
     public void test0c9_implicitlyInheritingCallinToPrivate1() {
-       
+
        runConformTest(
             new String[] {
 		"Team0c9iictp1_2.java",
@@ -1023,10 +1023,10 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
             "final");
     }
 
-    // 
+    //
     // 0.c.11-otjld-implicitly-inheriting-static-role-method-1
     public void test0c11_implicitlyInheritingStaticRoleMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"Team0c11iisrm1_2.java",
@@ -1065,7 +1065,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     // a tsuper call initially does not require a marker arg, but byte code copy has to add one
     // 0.c.12-otjld-tsuper-call-rewriting-1
     public void test0c12_tsuperCallRewriting1() {
-       
+
        runConformTest(
             new String[] {
 		"Team0c12tcr1_3.java",
@@ -1112,7 +1112,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     // a class implicitly inherits a super interface declaration - src-level role ifc
     // 0.c.13-otjld-implicitly-inherited-superinterface-1
     public void test0c13_implicitlyInheritedSuperinterface1() {
-       
+
        runConformTest(
             new String[] {
 		"Team0c13iis1_2.java",
@@ -1151,7 +1151,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
             },
             "OK");
     }
-    
+
     // a role implicitly inherits a final field with an initializer.
     // see Bug 315322 -  [compiler] final field with initializer breaks implicit inheritance
     public void test0c14_implicitlyInheritedInitializedField1() {
@@ -1218,7 +1218,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     	"Team0c15obsr1_2.java",
 	    		"public team class Team0c15obsr1_2 extends Team0c15obsr1_1 {\n" +
 	    		"	protected class R playedBy T0c15obsr1_1 {}\n" +
-	    		"}\n"    		
+	    		"}\n"
     		},
     		"mfoo");
     }
@@ -1261,7 +1261,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
 	    		"			tsuper(o);\n" +
 	    		"		}\n" +
 	    		"	}\n" +
-	    		"}\n"    		
+	    		"}\n"
     		},
     		"mfoo");
     }
@@ -1295,12 +1295,12 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     	"Team0c15obsr2_2.java",
 	    		"public team class Team0c15obsr2_2 extends Team0c15obsr2_1 {\n" +
 	    		"	protected class R playedBy T0c15obsr2_1 {}\n" +
-	    		"}\n"    		
+	    		"}\n"
     		},
     		"caught");
     }
 
-    // detect use of inherited illegal role ctor 
+    // detect use of inherited illegal role ctor
     // see Bug 318415 -  Copy inheritance problem
     public void test0c15_overrideBoundSuperRole3() {
     	runConformTest(
@@ -1334,7 +1334,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     	"Team0c15obsr3_2.java",
 	    		"public team class Team0c15obsr3_2 extends Team0c15obsr3_1 {\n" +
 	    		"	public class R playedBy T0c15obsr3_1 {}\n" +
-	    		"}\n"    		
+	    		"}\n"
     		},
     		"caught");
     }
@@ -1363,11 +1363,11 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     			"   protected String test(String u){ return u;}" +
     			"}\n"
     		},
-    		"----------\n" + 
-    		"1. ERROR in Team0c16iir1_1.java (at line 4)\n" + 
-			"	return \"O\"+base.test(u);\n" + 
-			"	           ^^^^^^^^^^^^\n" + 
-			"Cannot use \'base\' in the regular method \'test(String)\' (OTJLD 2.6(c)).\n" + 
+    		"----------\n" +
+    		"1. ERROR in Team0c16iir1_1.java (at line 4)\n" +
+			"	return \"O\"+base.test(u);\n" +
+			"	           ^^^^^^^^^^^^\n" +
+			"Cannot use \'base\' in the regular method \'test(String)\' (OTJLD 2.6(c)).\n" +
 			"----------\n");
     }
 
@@ -1451,11 +1451,11 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     			"	}\n" +
     			"}\n",
     		},
-    		"----------\n" + 
-			"1. ERROR in SubTeam.java (at line 5)\n" + 
-			"	tsuper();\n" + 
-			"	^^^^^^^^^\n" + 
-			"The constructor SuperTeamFI4.R1() is undefined\n" + 
+    		"----------\n" +
+			"1. ERROR in SubTeam.java (at line 5)\n" +
+			"	tsuper();\n" +
+			"	^^^^^^^^^\n" +
+			"The constructor SuperTeamFI4.R1() is undefined\n" +
 			"----------\n");
     }
 
@@ -1579,21 +1579,21 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
 				"	}\n" +
 				"}\n"
     		},
-    		"----------\n" + 
-			"1. ERROR in SubTeamFI3a.java (at line 5)\n" + 
-			"	super();\n" + 
-			"	^^^^^^^^\n" + 
-			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI4FI3.R1\' has field initializations.\n" + 
-			"----------\n" + 
-			"2. ERROR in SubTeamFI3a.java (at line 11)\n" + 
-			"	super();\n" + 
-			"	^^^^^^^^\n" + 
-			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI4FI3.R2\' has field initializations.\n" + 
-			"----------\n" + 
-			"3. ERROR in SubTeamFI3a.java (at line 13)\n" + 
-			"	protected R2(int i) {\n" + 
-			"	          ^^^^^^^^^\n" + 
-			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI4FI3.R2\' has field initializations.\n" + 
+    		"----------\n" +
+			"1. ERROR in SubTeamFI3a.java (at line 5)\n" +
+			"	super();\n" +
+			"	^^^^^^^^\n" +
+			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI4FI3.R1\' has field initializations.\n" +
+			"----------\n" +
+			"2. ERROR in SubTeamFI3a.java (at line 11)\n" +
+			"	super();\n" +
+			"	^^^^^^^^\n" +
+			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI4FI3.R2\' has field initializations.\n" +
+			"----------\n" +
+			"3. ERROR in SubTeamFI3a.java (at line 13)\n" +
+			"	protected R2(int i) {\n" +
+			"	          ^^^^^^^^^\n" +
+			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI4FI3.R2\' has field initializations.\n" +
 			"----------\n");
     }
 
@@ -1637,16 +1637,16 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     			"Base2.java",
     			"public class Base2 {}\n",
     		},
-    		"----------\n" + 
-			"1. ERROR in SubTeamFI4.java (at line 5)\n" + 
-			"	tsuper();\n" + 
-			"	^^^^^^^^^\n" + 
-			"The constructor SuperTeamFI4.R1() is undefined\n" + 
-			"----------\n" + 
-			"2. ERROR in SubTeamFI4.java (at line 10)\n" + 
-			"	protected R2() {\n" + 
-			"	          ^^^^\n" + 
-			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI4.R2\' has field initializations.\n" + 
+    		"----------\n" +
+			"1. ERROR in SubTeamFI4.java (at line 5)\n" +
+			"	tsuper();\n" +
+			"	^^^^^^^^^\n" +
+			"The constructor SuperTeamFI4.R1() is undefined\n" +
+			"----------\n" +
+			"2. ERROR in SubTeamFI4.java (at line 10)\n" +
+			"	protected R2() {\n" +
+			"	          ^^^^\n" +
+			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI4.R2\' has field initializations.\n" +
 			"----------\n");
     }
 
@@ -1681,16 +1681,16 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     			"Base1.java",
     			"public class Base1 {}\n",
     		},
-    		"----------\n" + 
-			"1. ERROR in SubTeamFI5.java (at line 5)\n" + 
-			"	super();\n" + 
-			"	^^^^^^^^\n" + 
-			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI5.R1\' has field initializations.\n" + 
-			"----------\n" + 
-			"2. ERROR in SubTeamFI5.java (at line 11)\n" + 
-			"	super(b);\n" + 
-			"	^^^^^^^^^\n" + 
-			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI5.R2\' has field initializations.\n" + 
+    		"----------\n" +
+			"1. ERROR in SubTeamFI5.java (at line 5)\n" +
+			"	super();\n" +
+			"	^^^^^^^^\n" +
+			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI5.R1\' has field initializations.\n" +
+			"----------\n" +
+			"2. ERROR in SubTeamFI5.java (at line 11)\n" +
+			"	super(b);\n" +
+			"	^^^^^^^^^\n" +
+			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI5.R2\' has field initializations.\n" +
 			"----------\n");
     }
 }

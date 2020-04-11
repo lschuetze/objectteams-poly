@@ -86,20 +86,20 @@ public class AstGenerator extends AstFactory {
 	static final int AccIfcMethod = AccAbstract|AccSemicolonBody;
 	public long sourceLevel = ClassFileConstants.JDK1_5;
 
-	/** 
-	 * If set to non-null, base anchored types matching this anchor are not encoded using the base field 
+	/**
+	 * If set to non-null, base anchored types matching this anchor are not encoded using the base field
 	 * (possibly with static prefix),
 	 * but a simple name "base" is used, representing the base argument in a callin wrapper.
 	 */
 	public ITeamAnchor replaceableBaseAnchor = null;
-	
+
 	/**
 	 * If this reference is non-null, qualifications in qualified this references that refer
-	 * to <code>replaceableEnclosingClass</code>'s super class should be updated to 
+	 * to <code>replaceableEnclosingClass</code>'s super class should be updated to
 	 * <code>replaceableEnclosingClass</code> itself (strengthening during copy).
 	 */
 	public ReferenceBinding replaceableEnclosingClass;
-	
+
 	public AstGenerator(int start, int end) {
 		super(start, end);
 	}
@@ -531,7 +531,7 @@ public class AstGenerator extends AstFactory {
 			compoundName = CharOperation.splitOn('$', tokenString);
 			TypeReference[][] arguments = new TypeReference[compoundName.length][];
 			int argPos = compoundName.length-1;
-			boolean haveArguments = false;			
+			boolean haveArguments = false;
 			do {
 				TypeBinding[] argumentTypes = paramType.arguments;
 				if (argumentTypes != null) {
@@ -725,9 +725,9 @@ public class AstGenerator extends AstFactory {
 		result.sourceEnd   = this.sourceEnd;
 		return result;
 	}
-	
-	public LiftingTypeReference liftingTypeReference(TypeReference baseReference, TypeReference roleReference, 
-													 char[] roleToken, char[][] baseTokens) 
+
+	public LiftingTypeReference liftingTypeReference(TypeReference baseReference, TypeReference roleReference,
+													 char[] roleToken, char[][] baseTokens)
 	{
 		LiftingTypeReference result = new LiftingTypeReference();
 		result.sourceStart   = this.sourceStart;
@@ -740,7 +740,7 @@ public class AstGenerator extends AstFactory {
 		result.roleToken     = roleToken;
 		return result;
 	}
-	
+
 	public FieldDeclaration field(int modifiers, TypeReference typeRef, char[] name, Expression init)
 	{
 		FieldDeclaration field = new FieldDeclaration(name, this.sourceStart, this.sourceEnd);
@@ -804,7 +804,7 @@ public class AstGenerator extends AstFactory {
 	}
 
 	/** If typeBinding has a free type parameter, we need to push this param out as a method parameter. */
-	public void maybeAddTypeParametersToMethod(ReferenceBinding typeBinding, MethodDeclaration methodDecl) 
+	public void maybeAddTypeParametersToMethod(ReferenceBinding typeBinding, MethodDeclaration methodDecl)
 	{
 		if (typeBinding.isParameterizedType()) {
 			TypeBinding[] arguments = ((ParameterizedTypeBinding)typeBinding).arguments;
@@ -877,13 +877,13 @@ public class AstGenerator extends AstFactory {
 				// skip the receiver unless its again a hooked message send:
 				if (this.receiver.getClass() == this.getClass())
 					this.receiver.resolveType(scope);
-				
+
 				this.binding = method;
 				this.resolvedType = method.returnType;
 
 				// the main payload:
 				hook.run(scope);
-				
+
 				this.actualReceiverType = this.binding.declaringClass;
 				return this.resolvedType;
 			}
@@ -919,8 +919,8 @@ public class AstGenerator extends AstFactory {
 	}
 
 	/** Create a message send to a method that will be created by the otre. */
-	public MessageSend fakeMessageSend(Expression receiver, char[] selector, Expression[] parameters, 
-									   final ReferenceBinding receiverType, final TypeBinding resolvedReturn) 
+	public MessageSend fakeMessageSend(Expression receiver, char[] selector, Expression[] parameters,
+									   final ReferenceBinding receiverType, final TypeBinding resolvedReturn)
 	{
 		MessageSend messageSend = new MessageSend() {
 			@Override
@@ -929,7 +929,7 @@ public class AstGenerator extends AstFactory {
 				CheckPoint cp = referenceContext.compilationResult().getCheckPoint(referenceContext);
 				super.resolveType(scope);
 				referenceContext.compilationResult().rollBack(cp);
-				this.binding = new MethodBinding(ClassFileConstants.AccStatic|ClassFileConstants.AccPublic, this.selector, 
+				this.binding = new MethodBinding(ClassFileConstants.AccStatic|ClassFileConstants.AccPublic, this.selector,
 												 resolvedReturn, this.binding.parameters, Binding.NO_EXCEPTIONS, receiverType);
 				return this.resolvedType = resolvedReturn;
 			}
@@ -980,7 +980,7 @@ public class AstGenerator extends AstFactory {
 	}
 
 	public QualifiedAllocationExpression anonymousAllocation(
-			TypeReference superType, Expression[] arguments, TypeDeclaration anonymousType) 
+			TypeReference superType, Expression[] arguments, TypeDeclaration anonymousType)
 	{
 		QualifiedAllocationExpression result = new QualifiedAllocationExpression();
 		result.enclosingInstance = null;
@@ -988,7 +988,7 @@ public class AstGenerator extends AstFactory {
 		result.arguments         = arguments;
 		result.anonymousType = anonymousType;
 		anonymousType.allocation = result;
-		return setPos(result);		
+		return setPos(result);
 	}
 
 	public TypeDeclaration anonymousType(CompilationResult compilationResult) {
@@ -1004,7 +1004,7 @@ public class AstGenerator extends AstFactory {
 		anonymousType.isGenerated = true;
 		return anonymousType;
 	}
-	
+
 	public ExplicitConstructorCall explicitConstructorCall(int accessMode) {
 		ExplicitConstructorCall call = new ExplicitConstructorCall(accessMode);
 		call.sourceStart = this.sourceStart;
@@ -1079,7 +1079,7 @@ public class AstGenerator extends AstFactory {
 	}
 	/**
 	 * Assemble an ifstatement with negated condition, that hides the branch instruction from the debugger,
-	 * even when stepping into the condition. 
+	 * even when stepping into the condition.
 	 */
 	public IfStatement stealthIfNotStatement(final Expression condition, Statement thenStatement) {
 		// mark step-over after the condition:
@@ -1088,7 +1088,7 @@ public class AstGenerator extends AstFactory {
 			public StringBuffer printExpression(int indent, StringBuffer output) { return condition.print(indent, output); }
 			@Override
 			public TypeBinding resolveType(BlockScope scope) {
-				return condition.resolveType(scope); 
+				return condition.resolveType(scope);
 			}
 			@Override
 			public void computeConversion(Scope scope, TypeBinding runtimeType, TypeBinding compileTimeType) {
@@ -1097,10 +1097,10 @@ public class AstGenerator extends AstFactory {
 				this.bits = condition.bits;
 			}
 			@Override
-			public Constant optimizedBooleanConstant() { 
+			public Constant optimizedBooleanConstant() {
 				this.constant = condition.optimizedBooleanConstant();
 				this.bits = condition.bits;
-				return this.constant; 
+				return this.constant;
 			}
 			@Override
 			public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo, boolean valueRequired) {
@@ -1122,7 +1122,7 @@ public class AstGenerator extends AstFactory {
 				new UnaryExpression( // NOT
 						recordingCondition,
 						OperatorIds.NOT),
-				thenStatement, 
+				thenStatement,
 				this.sourceStart, this.sourceEnd);
 	}
 	public ThrowStatement throwStatement(Expression exception) {
@@ -1368,7 +1368,7 @@ public class AstGenerator extends AstFactory {
 			ParameterizedQualifiedTypeReference fieldTypeRef;
 			TypeReference[] typeArguments = new TypeReference[] {
 				baseclassReference(baseTypeBinding, true/*erase*/),
-				singleTypeReference(rootRoleBinding.sourceName())	
+				singleTypeReference(rootRoleBinding.sourceName())
 			};
 			fieldTypeRef = (ParameterizedQualifiedTypeReference)parameterizedQualifiedTypeReference(
 								WEAK_HASH_MAP,
@@ -1428,7 +1428,7 @@ public class AstGenerator extends AstFactory {
 		else
 			return castExpression(expression, alienScopeTypeReference(typeReference(expectedType), originalScope), CastExpression.RAW);
 	}
-	
+
 	// ========= Method Mappings: =========
 	public CalloutMappingDeclaration calloutMappingDeclaration(
 			CompilationResult compilationResult) {
@@ -1483,7 +1483,7 @@ public class AstGenerator extends AstFactory {
 		result.memberValue = arrayInitializer;
 		return result;
 	}
-	
+
 	public NormalAnnotation normalAnnotation(char[][] compoundName, char[][] names, Expression[] values) {
 		assert names.length == values.length : "names and values must have same length"; //$NON-NLS-1$
 		NormalAnnotation result = new NormalAnnotation(qualifiedTypeReference(compoundName), this.sourceStart);
@@ -1496,7 +1496,7 @@ public class AstGenerator extends AstFactory {
 		result.memberValuePairs = pairs;
 		return result;
 	}
-	
+
 	public MarkerAnnotation markerAnnotation(char[][] compoundName) {
 		return new MarkerAnnotation(qualifiedTypeReference(compoundName), this.sourceStart);
 	}
@@ -1530,7 +1530,7 @@ public class AstGenerator extends AstFactory {
 			origScope = ((IAlienScopeTypeReference)original).getAlienScope();
 //		if (origScope.parent.kind == Scope.CLASS_SCOPE)
 //			origScope = (ClassScope)origScope.parent;
-	
+
 		TypeReference result;
 		if (original instanceof ParameterizedSingleTypeReference) {
 			ParameterizedSingleTypeReference pstRef = (ParameterizedSingleTypeReference) original;
@@ -1539,7 +1539,7 @@ public class AstGenerator extends AstFactory {
 		} else if (original instanceof SingleTypeReference) {
 			if (original instanceof ArrayTypeReference && original.dimensions() > 0) { // could be parameterized type reference
 				ArrayTypeReference singleTypeRef = (ArrayTypeReference) original;
-				result = new AlienScopeArrayTypeReference(singleTypeRef.token, this.pos, singleTypeRef.dimensions, origScope);				
+				result = new AlienScopeArrayTypeReference(singleTypeRef.token, this.pos, singleTypeRef.dimensions, origScope);
 			} else {
 				SingleTypeReference singleTypeRef = (SingleTypeReference) original;
 				result = new AlienScopeSingleTypeReference(singleTypeRef.token, this.pos, origScope);
@@ -1547,7 +1547,7 @@ public class AstGenerator extends AstFactory {
 		} else if (original instanceof QualifiedTypeReference) {
 			if (original instanceof ArrayQualifiedTypeReference && original.dimensions() > 0) { // could be parameterized type reference
 				ArrayQualifiedTypeReference qTypeRef= (ArrayQualifiedTypeReference)original;
-				result = new AlienScopeArrayQualifiedTypeReference(qTypeRef.tokens, qTypeRef.sourcePositions, qTypeRef.dimensions(), origScope);				
+				result = new AlienScopeArrayQualifiedTypeReference(qTypeRef.tokens, qTypeRef.sourcePositions, qTypeRef.dimensions(), origScope);
 			} else if (original instanceof ParameterizedQualifiedTypeReference) {
 				ParameterizedQualifiedTypeReference qTypeRef= (ParameterizedQualifiedTypeReference)original;
 				result = new AlienScopeParameterizedQualifiedTypeReference(qTypeRef, origScope);
@@ -1555,7 +1555,7 @@ public class AstGenerator extends AstFactory {
 				QualifiedTypeReference qTypeRef= (QualifiedTypeReference)original;
 				result = new AlienScopeQualifiedTypeReference(qTypeRef.tokens, qTypeRef.sourcePositions, origScope);
 			}
-		} else {			
+		} else {
 			throw new InternalCompilerError("Unexpected type reference: "+original); //$NON-NLS-1$
 		}
 		result.setBaseclassDecapsulation(DecapsulationState.REPORTED);

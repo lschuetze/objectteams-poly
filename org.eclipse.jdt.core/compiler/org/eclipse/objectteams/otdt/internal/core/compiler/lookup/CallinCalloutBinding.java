@@ -313,7 +313,7 @@ public class CallinCalloutBinding extends Binding
 		return CharOperation.concat(theName, currentType.readableName(), '$');
 	}
 	/**
-	 * Answer the name of the role that introduced this callin mapping 
+	 * Answer the name of the role that introduced this callin mapping
 	 * (support for overriding in otredyn).
 	 */
 	public ReferenceBinding introducingRoleClass() {

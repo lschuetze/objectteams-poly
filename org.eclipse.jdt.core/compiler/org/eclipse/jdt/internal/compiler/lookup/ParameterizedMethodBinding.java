@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - extended API and implementation
@@ -61,7 +61,7 @@ public class ParameterizedMethodBinding extends MethodBinding {
 		final int length = originalVariables.length;
 //{ObjectTeams: along the tsuper-link staticness is ignored as methods can still be overridden:
 /* orig:
-		final boolean isStatic = originalMethod.isStatic(); 
+		final boolean isStatic = originalMethod.isStatic();
   :giro */
 		final boolean isStatic = originalMethod.isStatic() && !RoleModel.hasTagBit(parameterizedDeclaringClass, RoleModel.IsViewedAsTSuper);
 // SH}
@@ -376,8 +376,8 @@ public class ParameterizedMethodBinding extends MethodBinding {
 	public MethodBinding original() {
 		return this.originalMethod.original();
 	}
-	
-	
+
+
 	@Override
 	public MethodBinding shallowOriginal() {
 		return this.originalMethod;

@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2010 (c) GK Software AG
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -90,7 +90,7 @@ public class MoveToRileFileTests extends RefactoringTest {
 			MoveToRoleFileRefactoring ref = createMoveToRoleFileRefactoring(roleType);
 
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-	
+
 			RefactoringStatus checkInputResult = ref.checkFinalConditions(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
 			performChange(ref, false);
@@ -109,7 +109,7 @@ public class MoveToRileFileTests extends RefactoringTest {
 				}
 		}
 	}
-	
+
 	private void performMoveToRoleFile_initialChecksFailing(String inputCU, String roleName, String expectedMsg) throws Exception {
 		ICompilationUnit cu = createCUfromTestFile(getPackageP(), inputCU);
 		try {
@@ -147,7 +147,7 @@ public class MoveToRileFileTests extends RefactoringTest {
 //			MoveToRoleFileRefactoring ref = createMoveToRoleFileRefactoring(roleType);
 //
 //			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-//	
+//
 //			RefactoringStatus result = ref.checkFinalConditions(new NullProgressMonitor());
 //			assertNotNull("precondition was supposed to fail.", result);
 //			assertTrue("precondition was supposed to fail.", !result.isOK());
@@ -167,15 +167,15 @@ public class MoveToRileFileTests extends RefactoringTest {
 	/******* tests ******************/
 
 	/* Move To Role File Tests */
-	
+
 	public void testSimpleRole1() throws Exception {
 		performMoveToRoleFile_pass("T", "R", new String[] { "T", "T/R" });
 	}
-	
+
 	public void testWithMoreContents() throws Exception {
 		performMoveToRoleFile_pass("T", "R2", new String[] { "T", "T/R2" });
 	}
-	
+
 	public void testFieldAndRole() throws Exception {
 		performMoveToRoleFile_pass("T2", "R2", new String[] { "T2", "T2/R2" });
 	}

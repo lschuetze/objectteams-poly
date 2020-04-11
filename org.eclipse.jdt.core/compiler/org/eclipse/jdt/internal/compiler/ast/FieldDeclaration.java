@@ -270,7 +270,7 @@ public void resolve(MethodScope initializationScope) {
 				if (!existingField.isStatic() && declaringType.isStatic()) break checkHiding;
 			}
 //{ObjectTeams: never report hiding re _OT$base, _OT$cacheInitTrigger et al
-			if (CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, this.name)) 
+			if (CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, this.name))
 				break checkHiding;
 // SH}
 			// collision with outer field or local variable
@@ -299,7 +299,7 @@ public void resolve(MethodScope initializationScope) {
 				}
 			}
 		}
-		
+
 		// check @Deprecated annotation presence
 		if ((this.binding.getAnnotationTagBits() & TagBits.AnnotationDeprecated) == 0
 				&& (this.binding.modifiers & ClassFileConstants.AccDeprecated) != 0

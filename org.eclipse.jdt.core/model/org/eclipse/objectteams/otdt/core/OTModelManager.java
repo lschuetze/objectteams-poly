@@ -1,20 +1,20 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany, and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -45,25 +45,25 @@ import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
 
 /**
  * Manager provides connection between JavaModel and OTM.
- * 
+ *
  * @author jwloka
  * @version $Id: OTModelManager.java 23416 2010-02-03 19:59:31Z stephan $
  */
 public class OTModelManager
 {
-	
-	/** 
-	 * Expose this constant from {@link ExternalJavaProject} for use by other OT plugins. 
+
+	/**
+	 * Expose this constant from {@link ExternalJavaProject} for use by other OT plugins.
 	 * @since 3.7
 	 */
 	public static final String EXTERNAL_PROJECT_NAME = ExternalJavaProject.EXTERNAL_PROJECT_NAME;
 
 	private final static OTModel MAPPING = OTModel.getSharedInstance();
-	
+
 	private static OTModelManager singleton;
 
     private OTModelReconcileListener reconcileListener;
-	
+
 	protected OTModelManager()
 	{
 		singleton = this;
@@ -71,17 +71,17 @@ public class OTModelManager
 		this.reconcileListener = new OTModelReconcileListener();
 		JavaCore.addElementChangedListener(this.reconcileListener, ElementChangedEvent.POST_RECONCILE);
 	}
-	
+
 	public static OTModelManager getSharedInstance()
 	{
 		if (singleton == null)
 		{
 			new OTModelManager();
 		}
-		
+
 		return singleton;
 	}
-	
+
 	public static void dispose()
 	{
 	    if (singleton != null)
@@ -89,7 +89,7 @@ public class OTModelManager
 	        JavaCore.removeElementChangedListener(singleton.reconcileListener);
 	        OTModel.dispose();
 	    }
-	    
+
 	    singleton = null;
 	}
 
@@ -99,12 +99,12 @@ public class OTModelManager
 	}
 
 	/**
-	 * Add the propriate Object Teams Model element for a given IType 
+	 * Add the propriate Object Teams Model element for a given IType
 	 */
 	public IOTType addType(IType elem, int typeDeclFlags, String baseClassName, String baseClassAnchor, boolean isRoleFile)
 	{
 		IJavaElement parent = elem.getParent();
-		IOTType result = null; 
+		IOTType result = null;
 
 		while (parent != null) {
 			switch (parent.getElementType())
@@ -115,21 +115,21 @@ public class OTModelManager
 					{   //  could also be a teeam, which is handled inside the constructor
 			    		if (elem.isBinary())
 			    		{
-				        	MAPPING.addOTElement( result = new BinaryRoleType(elem, 
-									parent, 
-									typeDeclFlags, 
+				        	MAPPING.addOTElement( result = new BinaryRoleType(elem,
+									parent,
+									typeDeclFlags,
 									baseClassName,
 									baseClassAnchor));
 			    		}
 			    		else
 			    		{
-				        	MAPPING.addOTElement( result = new RoleFileType(elem, 
-									parent, 
-									typeDeclFlags, 
+				        	MAPPING.addOTElement( result = new RoleFileType(elem,
+									parent,
+									typeDeclFlags,
 									baseClassName,
 									baseClassAnchor));
 			    		}
-					} 
+					}
 			    	else if (TypeHelper.isTeam(typeDeclFlags))
 					{
 						MAPPING.addOTElement( result = new OTType(IOTJavaElement.TEAM, elem, null, typeDeclFlags) );
@@ -137,9 +137,9 @@ public class OTModelManager
 					return result;
 			    case IJavaElement.TYPE:
 					IType   encType   = (IType)parent;
-					IOTType otmParent = MAPPING.getOTElement(encType); 
-						
-					return maybeAddRoleType(elem, otmParent, typeDeclFlags, baseClassName, baseClassAnchor);			
+					IOTType otmParent = MAPPING.getOTElement(encType);
+
+					return maybeAddRoleType(elem, otmParent, typeDeclFlags, baseClassName, baseClassAnchor);
 		    	case IJavaElement.METHOD:
 		    		break;
 		    	case IJavaElement.INITIALIZER:
@@ -155,24 +155,24 @@ public class OTModelManager
 		return result;
 	}
 
-	private IOTType maybeAddRoleType(IType elem, IOTType otmParent, 
+	private IOTType maybeAddRoleType(IType elem, IOTType otmParent,
 	        int typeDeclFlags, String baseClassName, String baseClassAnchor)
     {
 		IOTType result = null;
-        if ((otmParent != null) 
-        	&& (TypeHelper.isTeam(otmParent.getFlags()) 
+        if ((otmParent != null)
+        	&& (TypeHelper.isTeam(otmParent.getFlags())
         		|| (TypeHelper.isRole(otmParent.getFlags())) ) )
-        {				
-        	MAPPING.addOTElement( result = new RoleType(elem, 
-        	        							otmParent, 
-        	        							typeDeclFlags, 
+        {
+        	MAPPING.addOTElement( result = new RoleType(elem,
+        	        							otmParent,
+        	        							typeDeclFlags,
         	        							baseClassName,
         	        							baseClassAnchor));
         }
         return result;
     }
 
-	
+
     /**
 	 * @noreference This method is not intended to be referenced by clients.
 	 * @nooverride This method is not intended to be re-implemented or extended by clients.
@@ -180,15 +180,15 @@ public class OTModelManager
     public ICallinMapping addCallinBinding(IType role, MappingElementInfo info)
 	{
 		IOTType otmRole = MAPPING.getOTElement(role);
-		
+
 		if ((otmRole != null) && (otmRole instanceof IRoleType))
 		{
 //{OTModelUpdate
 		    IMethodSpec corrRoleMethData = info.getRoleMethod();
-		    IMethod correspondingRoleMethod = 
-		        role.getMethod(corrRoleMethData.getSelector(), 
-		                       corrRoleMethData.getArgumentTypes()); 
-//haebor}							   
+		    IMethod correspondingRoleMethod =
+		        role.getMethod(corrRoleMethData.getSelector(),
+		                       corrRoleMethData.getArgumentTypes());
+//haebor}
 			return new CallinMapping(info.getDeclarationSourceStart(),
 						      info.getSourceStart(),
 						      info.getSourceEnd(),
@@ -197,13 +197,13 @@ public class OTModelManager
 //{OTModelUpdate
 //orig:	(IMethod) otmRole.getParent(),
 						      correspondingRoleMethod,
-//haebor}							           
+//haebor}
 							  info.getCallinName(),
 							  info.getCallinKind(),
 							  info.getRoleMethod(),
-							  info.getBaseMethods(), info.hasSignature());   
+							  info.getBaseMethods(), info.hasSignature());
 		}
-		
+
 		return null;
 	}
 
@@ -214,15 +214,15 @@ public class OTModelManager
 	public ICalloutMapping addCalloutBinding(IType role, MappingElementInfo info)
 	{
 		IOTType otmRole = MAPPING.getOTElement(role);
-		
+
 		if ((otmRole != null) && (otmRole instanceof IRoleType))
 		{
 //{OTModelUpdate
 		    IMethodSpec corrRoleMethData = info.getRoleMethod();
-		    IMethod correspondingRoleMethod = 
-		        role.getMethod(corrRoleMethData.getSelector(), 
-		                       corrRoleMethData.getArgumentTypes()); 
-//haebor}							   
+		    IMethod correspondingRoleMethod =
+		        role.getMethod(corrRoleMethData.getSelector(),
+		                       corrRoleMethData.getArgumentTypes());
+//haebor}
 			MethodData[] baseMethods = info.getBaseMethods();
 			return new CalloutMapping(info.getDeclarationSourceStart(),
 						       info.getSourceStart(),
@@ -237,10 +237,10 @@ public class OTModelManager
 							   info.getDeclaredModifiers(),
 							   true/*addAsChild*/);
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * @noreference This method is not intended to be referenced by clients.
 	 * @nooverride This method is not intended to be re-implemented or extended by clients.
@@ -248,13 +248,13 @@ public class OTModelManager
     public ICalloutToFieldMapping addCalloutToFieldBinding(IType role, MappingElementInfo info)
     {
         IOTType otmRole = MAPPING.getOTElement(role);
-        
+
         if ((otmRole != null) && (otmRole instanceof IRoleType))
         {
             IMethodSpec corrRoleMethData = info.getRoleMethod();
-            IMethod correspondingRoleMethod = 
-                role.getMethod(corrRoleMethData.getSelector(), 
-                               corrRoleMethData.getArgumentTypes()); 
+            IMethod correspondingRoleMethod =
+                role.getMethod(corrRoleMethData.getSelector(),
+                               corrRoleMethData.getArgumentTypes());
             return new CalloutToFieldMapping(info.getDeclarationSourceStart(),
             		   info.getSourceStart(),
             		   info.getSourceEnd(),
@@ -268,10 +268,10 @@ public class OTModelManager
 					   info.getDeclaredModifiers(),
 					   true/*addAsChild*/);
         }
-        
+
         return null;
     }
-    
+
     public void addOTElement(IOTType otType)
     {
         MAPPING.addOTElement(otType);
@@ -279,7 +279,7 @@ public class OTModelManager
 
 	/**
 	 * Returns associated OTM element for a given type if there is one.
-	 * 
+	 *
 	 * @return corresponding OTM element or null if no such element exists
 	 */
     public static IOTType getOTElement(@Nullable IType type)
@@ -299,20 +299,20 @@ public class OTModelManager
 		}
     	return false;
     }
-        
+
     public static void removeOTElement(IType type)
     {
     	removeOTElement(type, false);
     }
 
 	/**
-	 * @see OTModel#removeOTElement(IType, boolean)  
+	 * @see OTModel#removeOTElement(IType, boolean)
 	 */
 	public static void removeOTElement(IType type, boolean hasChanged)
 	{
 		MAPPING.removeOTElement(type, hasChanged);
 	}
-	
+
 	/**
 	 * Utility function.
 	 * @param type
@@ -322,7 +322,7 @@ public class OTModelManager
 		IOTType ottype = getOTElement(type);
 		return ottype != null && ottype.isRole();
 	}
-	
+
 	/**
 	 * Utility function.
 	 * @param type
@@ -340,13 +340,13 @@ public class OTModelManager
 			return false;
 		}
 	}
-	
+
 	/**
 	 * returns true if this member belongs to a role. Takes binary role-interfaceparts into account.
 	 * FIXME (carp): this is mostly a workaround for binary role-interfaceparts. When this problem is
 	 * fixed conceptually, check and "port" all clients of this method.
 	 */
-	public static boolean belongsToRole(IMember member) 
+	public static boolean belongsToRole(IMember member)
 	{
 		IType enclosing = member.getDeclaringType();
 		if (enclosing != null)
@@ -354,7 +354,7 @@ public class OTModelManager
 			IOTType otType = getOTElement(enclosing);
 			return otType != null && otType.isRole();
 		}
-		
+
 		return false;
 	}
 }

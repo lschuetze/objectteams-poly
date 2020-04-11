@@ -1,17 +1,17 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2016 IT Service Omikron GmbH and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Thomas Dudziak - Initial API and implementation
  * 	  Stephan Herrmann - Initial API and implementation
@@ -29,11 +29,11 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 @SuppressWarnings("unchecked")
 public class OverridingAccessRestrictions extends AbstractOTJLDTest {
-	
+
 	public OverridingAccessRestrictions(String name) {
 		super(name);
 	}
-	
+
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
@@ -41,7 +41,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
-	
+
 	public static Test suite() {
 		return buildComparableTestSuite(testClass());
 	}
@@ -53,7 +53,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a callout binding access a hidden base method
     // 7.4.1-otjld-callout-access-to-hidden-method-1
     public void test741_calloutAccessToHiddenMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"T741cathm1Main.java",
@@ -105,7 +105,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // 7.4.1-otjld-callout-access-to-hidden-method-2
     public void test741_calloutAccessToHiddenMethod2() {
        Map customOptions = getCompilerOptions();
-       
+
        runConformTest(
             new String[] {
 		"T741cathm2Main.java",
@@ -193,7 +193,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // 7.4.1-otjld-callout-access-to-hidden-method-3
     public void test741_calloutAccessToHiddenMethod3() {
        Map customOptions = getCompilerOptions();
-       
+
        runConformTest(
             new String[] {
 		"T741cathm3Main.java",
@@ -241,7 +241,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a callout binding access a hidden static base method
     // 7.4.1-otjld-callout-access-to-hidden-method-4
     public void test741_calloutAccessToHiddenMethod4() {
-       
+
        runConformTest(
             new String[] {
 		"T741cathm4Main.java",
@@ -324,7 +324,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // 7.4.2-otjld-callout-access-to-hidden-method-1
     public void test742_calloutAccessToHiddenMethod1() {
        Map customOptions = getCompilerOptions();
-       
+
        runConformTest(
             new String[] {
 		"p1/T742cathm1_1.java",
@@ -365,7 +365,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // 7.4.2-otjld-callout-access-to-hidden-method-2
     public void test742_calloutAccessToHiddenMethod2() {
        Map customOptions = getCompilerOptions();
-       
+
        runConformTest(
             new String[] {
 		"p1/T742cathm2_1.java",
@@ -405,7 +405,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a callout binding accesses a private method of a base class that is a role itself
     // 7.4.2-otjld-callout-access-to-hidden-method-3
     public void test742_calloutAccessToHiddenMethod3() {
-       
+
        runConformTest(
             new String[] {
 		"Team742cathm3_2.java",
@@ -441,7 +441,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a callout binding accesses a private method of a base class that is a role itself -- externalized creation uses new syntax
     // 7.4.2-otjld-callout-access-to-hidden-method-3f
     public void test742_calloutAccessToHiddenMethod3f() {
-       
+
        runConformTest(
             new String[] {
 		"Team742cathm3f_2.java",
@@ -477,7 +477,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a callout accesses a protected member which its base inherits, sub-base overrides
     // 7.4.2-otjld-callout-access-to-hidden-method-4
     public void test742_calloutAccessToHiddenMethod4() {
-       
+
        runConformTest(
             new String[] {
 		"Team742cathm4.java",
@@ -529,7 +529,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a callout accesses a private method in its direct base - sub base re-declares
     // 7.4.2-otjld-callout-access-to-hidden-method-5
     public void test742_calloutAccessToHiddenMethod5() {
-       
+
        runConformTest(
             new String[] {
 		"Team742cathm5.java",
@@ -575,7 +575,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a callout accesses a private method in its direct base - sub base re-declares
     // 7.4.2-otjld-callout-access-to-hidden-method-6
     public void test742_calloutAccessToHiddenMethod6() {
-       
+
        runConformTest(
             new String[] {
 		"Team742cathm6.java",
@@ -618,7 +618,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a callin binding access a hidden base method
     // 7.4.3-otjld-callin-access-to-hidden-method-1
     public void test743_callinAccessToHiddenMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"T743cathm1Main.java",
@@ -677,7 +677,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a callin binding access a hidden base method
     // 7.4.3-otjld-callin-access-to-hidden-method-2
     public void test743_callinAccessToHiddenMethod2() {
-       
+
        runConformTest(
             new String[] {
 		"T743cathm2Main.java",
@@ -732,7 +732,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a callin binding access a hidden base method
     // 7.4.3-otjld-callin-access-to-hidden-method-3
     public void test743_callinAccessToHiddenMethod3() {
-       
+
        runConformTest(
             new String[] {
 		"T743cathm3Main.java",
@@ -811,7 +811,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a callin binding access a hidden method in a indirect base class
     // 7.4.4-otjld-callin-access-to-hidden-method-1
     public void test744_callinAccessToHiddenMethod1() {
-       
+
        runConformTest(
             new String[] {
 		"p1/T744cathm1_1.java",
@@ -844,7 +844,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a callin binding access a hidden method in a indirect base class
     // 7.4.4-otjld-callin-access-to-hidden-method-2
     public void test744_callinAccessToHiddenMethod2() {
-       
+
        runConformTest(
             new String[] {
 		"p1/T744cathm2_1.java",
@@ -975,7 +975,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a playedBy declaration overrides access restrictions
     // 7.4.6-otjld-baseclass-is-invisible-1
     public void test746_baseclassIsInvisible1() {
-       
+
        runConformTest(
             new String[] {
 		"p1/T746biv1Main.java",
@@ -1020,7 +1020,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a playedBy declaration overrides access restrictions -- warnings suppressed
     // 7.4.6-otjld-baseclass-is-invisible-2
     public void test746_baseclassIsInvisible2() {
-       
+
        runConformTest(
             new String[] {
 		"p1/T746biv2Main.java",
@@ -1066,7 +1066,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // 7.4.6-otjld-baseclass-is-invisible-3
     public void test746_baseclassIsInvisible3() {
        Map customOptions = getCompilerOptions();
-       
+
        runConformTest(
             new String[] {
 		"p1/T746biv3Main.java",
@@ -1139,7 +1139,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // using a base constructor
     // 7.4.6-otjld-baseclass-is-invisible-5
     public void test746_baseclassIsInvisible5() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team746biv5.java",
@@ -1182,7 +1182,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // 7.4.6-otjld-baseclass-is-invisible-6
     public void test746_baseclassIsInvisible6() {
        Map customOptions = getCompilerOptions();
-       
+
        runConformTest(
             new String[] {
 		"p1/T746biv6Main.java",
@@ -1240,7 +1240,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a playedBy declaration overrides access restrictions, used in the signature of a callin-bound base method
     // 7.4.6-otjld-baseclass-is-invisible-7
     public void test746_baseclassIsInvisible7() {
-       
+
        runConformTest(
             new String[] {
 		"p2/Team746biv7.java",
@@ -1315,11 +1315,11 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team746bii8.java (at line 3)\n" + 
-    		"	public class R playedBy T746bii8 {\n" + 
-    		"	                        ^^^^^^^^\n" + 
-    		"PlayedBy binding overrides finalness of base class T746bii8 (OTJLD 2.1.2(c)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team746bii8.java (at line 3)\n" +
+    		"	public class R playedBy T746bii8 {\n" +
+    		"	                        ^^^^^^^^\n" +
+    		"PlayedBy binding overrides finalness of base class T746bii8 (OTJLD 2.1.2(c)).\n" +
     		"----------\n",
             null/*classLibraries*/,
             true/*shouldFlushOutputDirectory*/,
@@ -1329,7 +1329,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a base imported base class is invisible, suppressing at the role suffices
     // 7.4.6-otjld-baseclass-is-invisible-9
     public void test746_baseclassIsInvisible9() {
-       
+
        runConformTest(
             new String[] {
 		"Team746bii9.java",
@@ -1425,7 +1425,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // despite decapsulation a private feature of a super class is not accessible (see TPX-442)
     // 7.4.7-otjld-private-feature-is-not-inherited-3
     public void test747_privateFeatureIsNotInherited3() {
-       
+
        runConformTest(
             new String[] {
 		"Team747pfini3.java",
@@ -1510,7 +1510,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a callout to field causes decapsulation: watch for the effect
     // 7.4.8-otjld-field-decapsulation-2
     public void test748_fieldDecapsulation2() {
-       
+
        runConformTest(
             new String[] {
 		"Team748fd2.java",
@@ -1542,7 +1542,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a callout to field causes decapsulation, multiple declarations in the inheritance hierarchy - see Trac #232
     // 7.4.8-otjld-field-decapsulation-3
     public void test748_fieldDecapsulation3() {
-       
+
        runConformTest(
             new String[] {
 		"Team748fd3.java",
@@ -1711,11 +1711,11 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     			"	void mb(boolean b) {\n" +
     			"		System.out.print(b);\n" +
     			"	}\n" +
-    			"}\n"    				
+    			"}\n"
     		},
     		"42true");
     }
-    
+
     // c-t-f to field of protected static inner
     public void testBug461434() throws Exception {
     	runConformTest(

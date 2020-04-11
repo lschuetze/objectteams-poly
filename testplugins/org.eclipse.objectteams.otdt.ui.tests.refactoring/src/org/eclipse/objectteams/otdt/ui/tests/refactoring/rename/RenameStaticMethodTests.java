@@ -35,8 +35,8 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethod
 /**
  * The tests in this class have initially been copied from the original class
  * <code>RenameStaticMethodTests</code> in the test suite
- *<code>org.eclipse.jdt.ui.tests.refactoring</code> provided by Eclipse. 
- * 
+ *<code>org.eclipse.jdt.ui.tests.refactoring</code> provided by Eclipse.
+ *
  * @author brcan
  */
 @SuppressWarnings("restriction")
@@ -214,81 +214,81 @@ public class RenameStaticMethodTests extends RefactoringTest
 //	{
 //		helper0_passing();
 //	}
-    
+
 	public void testFail0() throws Exception{
 	    performRenamingMtoK_failing();
 	}
-	
+
 	public void testFail1() throws Exception{
 	    performRenamingMtoK_failing();
 	}
-	
+
 	public void testFail2() throws Exception{
 	    performRenamingMtoK_failing();
 	}
-	
+
 	//testFail3 deleted
-	
+
 	public void testFail4() throws Exception{
 	    performRenamingMtoK_failing();
 	}
-	
+
 	public void testFail5() throws Exception{
 	    performRenamingMtoK_failing();
 	}
-	
+
 	public void testFail6() throws Exception{
 	    performRenamingMtoK_failing();
 	}
-	
+
 	public void testFail7() throws Exception{
 	    performRenamingMtoK_failing();
 	}
-	
+
 	public void testFail8() throws Exception{
 	    performRenamingMtoK_failing();
 	}
-	
+
 	public void test0() throws Exception{
 	    performRenaming_passing();
 	}
-	
+
 	public void test1() throws Exception{
 	    performRenaming_passing();
 	}
-	
+
 	public void test2() throws Exception{
 	    performRenaming_passing();
 	}
-	
+
 	public void test3() throws Exception{
 	    performRenaming_passing();
 	}
-	
+
 	public void test4() throws Exception{
 	    performRenaming_passing();
 	}
-	
+
 	public void test5() throws Exception{
 	    performRenaming_passing();
 	}
-	
+
 	public void test6() throws Exception{
 	    performRenaming_passing();
 	}
-	
+
 	public void test7() throws Exception{
 	    performRenameRefactoring_passing2("m", "k", new String[]{Signature.SIG_INT});
 	}
-	
+
 	public void test8() throws Exception{
 	    performRenameRefactoring_passing2("m", "k", new String[]{Signature.SIG_INT});
 	}
-	
+
 	public void test9() throws Exception{
 	    performRenameRefactoring_passing1("m", "k", new String[]{Signature.SIG_INT}, false);
 	}
-	
+
 	public void test10() throws Exception
 	{
 		ICompilationUnit cuA = createCUfromTestFile(getPackageP(), "A");
@@ -317,7 +317,7 @@ public class RenameStaticMethodTests extends RefactoringTest
 		{
 			ICompilationUnit cuA = createCUfromTestFile(packageA, "A");
 			ICompilationUnit cuB = createCUfromTestFile(packageB, "B");
-	
+
 			IType classA = getType(cuA, "A");
 			RenameMethodProcessor processor =
 			    createProcessor(classA.getMethod("method2", new String[0]));
@@ -336,7 +336,7 @@ public class RenameStaticMethodTests extends RefactoringTest
 			packageB.delete(true, new NullProgressMonitor());
 		}
 	}
-	
+
 	public void testUpdateReferenceToBaseMethodInCalloutBinding1() throws Exception {
 		performRenameRefactoring_passing(new String[] { "B", "T" }, "B", "getAmount", "getQuantity", new String[0], true, true);
 	}

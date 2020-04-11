@@ -1,11 +1,11 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 	  Fraunhofer FIRST - Initial API and implementation
  * 	  Technical University Berlin - Initial API and implementation
@@ -42,9 +42,9 @@ import org.eclipse.objectteams.otdt.ui.tests.refactoring.RefactoringTest;
 
 /**
  * Copy of {@link org.eclipse.jdt.ui.tests.refactoring.PushDownTests}.
- * 
+ *
  * @author Johannes Gebauer
- * 
+ *
  */
 @SuppressWarnings({ "nls", "restriction" })
 public class PushDownTests extends RefactoringTest {
@@ -54,11 +54,11 @@ public class PushDownTests extends RefactoringTest {
 	public PushDownTests(String name) {
 		super(name);
 	}
-	
+
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
-	
+
 
 	public static Test suite() {
 		return new MySetup(new TestSuite(PushDownTests.class));
@@ -96,7 +96,7 @@ public class PushDownTests extends RefactoringTest {
 
 		}
 	}
-	
+
 	private void performPushDown_fail(String[] cuNames, String[] methodNames, String[][] signatures, String[] fieldNames, String nameOfDeclaringType)
 			throws Exception {
 		ICompilationUnit[] cus = createCUs(cuNames);
@@ -111,7 +111,7 @@ public class PushDownTests extends RefactoringTest {
 			Refactoring ref = processor.getRefactoring();
 
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			
+
 			RefactoringStatus result = performRefactoring(ref);
 			assertNotNull("precondition was supposed to fail.", result);
 			assertTrue("precondition was supposed to fail.", !result.isOK());
@@ -125,7 +125,7 @@ public class PushDownTests extends RefactoringTest {
 
 		}
 	}
-	
+
 	private static PushDownRefactoringProcessor createRefactoringProcessor(IMember[] methods) throws JavaModelException {
 		if (RefactoringAvailabilityTester.isPullUpAvailable(methods)) {
 			PushDownRefactoringProcessor processor = new PushDownRefactoringProcessor(methods);
@@ -134,40 +134,40 @@ public class PushDownTests extends RefactoringTest {
 		}
 		return null;
 	}
-	
+
 	//--------------------------------------------------------
 	public void testPushDownMethodToImplicitSubclass() throws Exception {
 		performPushDown_pass(new String[] { "TSuper", "T", "B" }, new String[] { "rm" }, new String[][] { new String[0] }, new String[] {}, "R");
 	}
-	
+
 	public void testDeclaringTypeHasADirectPhantomSubRole() throws Exception {
 		performPushDown_fail(new String[] { "TSuper", "T1", "T2" }, new String[] { "rm" }, new String[][] { new String[0] }, new String[] {}, "R");
 	}
-	
+
 	public void testPushedDownMethodReferencedInMethodBinding1() throws Exception {
 		performPushDown_fail(new String[] { "B1", "B2", "T" }, new String[] { "bm" }, new String[][] { new String[0] }, new String[] {}, "B1");
 	}
-	
+
 	public void testPushedDownMethodReferencedInMethodBinding2() throws Exception {
 		performPushDown_fail(new String[] { "B1", "B2", "T" }, new String[] { "bm" }, new String[][] { new String[0] }, new String[] {}, "B1");
 	}
-	
+
 	public void testPushedDownMethodReferencedInMethodBinding3() throws Exception {
 		performPushDown_fail(new String[] { "T1", "T2", "B" }, new String[] { "rm" }, new String[][] { new String[0] }, new String[] {}, "Role");
-	}	
-	
+	}
+
 	public void testPushedDownMethodIsReferencedInRegularGuard1() throws Exception {
 		performPushDown_fail(new String[] { "T", "B" }, new String[] { "b" }, new String[][] { new String[0] }, new String[] {}, "R1");
-	}	
-	
+	}
+
 	public void testPushedDownMethodIsReferencedInRegularGuard2() throws Exception {
 		performPushDown_fail(new String[] { "T", "B" }, new String[] { "b" }, new String[][] { new String[0] }, new String[] {}, "R1");
-	}	
-	
+	}
+
 	public void testPushedDownMethodIsReferencedInBaseGuard1() throws Exception {
 		performPushDown_fail(new String[] { "B1", "B2", "T" }, new String[] { "b" }, new String[][] { new String[0] }, new String[] {}, "B1");
 	}
-	
+
 	public void testPushedDownMethodIsReferencedInBaseGuard2() throws Exception {
 		performPushDown_fail(new String[] { "B1", "B2", "T" }, new String[] { "b" }, new String[][] { new String[0] }, new String[] {}, "B1");
 	}
@@ -175,7 +175,7 @@ public class PushDownTests extends RefactoringTest {
 	public void testPushedDownMethodIsReferencedInBaseGuard3() throws Exception {
 		performPushDown_fail(new String[] { "B1", "B2", "T" }, new String[] { "b" }, new String[][] { new String[0] }, new String[] {}, "B1");
 	}
-	
+
 	public void testPushedDownMethodIsReferencedInParameterMapping1() throws Exception {
 		performPushDown_fail(new String[] { "T", "B" }, new String[] { "f" }, new String[][] { new String[0] }, new String[] {}, "R1");
 	}
@@ -187,24 +187,24 @@ public class PushDownTests extends RefactoringTest {
 	public void testPushedDownMethodIsReferencedInParameterMapping3() throws Exception {
 		performPushDown_fail(new String[] { "T", "B" }, new String[] { "f" }, new String[][] { new String[0] }, new String[] {}, "R1");
 	}
-	
+
 	/* Push Down Field Tests */
 	public void testPushDownFieldToImplicitSubclass() throws Exception {
 		performPushDown_pass(new String[] { "TSuper", "T", "B" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "R");
 	}
-	
+
 	public void testPushedDownFieldReferencedInCalloutToField() throws Exception {
 		performPushDown_fail(new String[] { "B1", "B2", "T" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "B1");
 	}
-	
+
 	public void testPushDownTypeAnchorInstance() throws Exception {
 		performPushDown_fail(new String[] { "T1", "T2", "T3" }, new String[] {}, new String[][] { new String[0] }, new String[] { "anchor" }, "T1");
 	}
-	
+
 	public void testPushedDownFieldWouldShadowAnInheritedField() throws Exception {
 		performPushDown_fail(new String[] { "B", "T1", "T2" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "B");
 	}
-	
+
 	public void testPushedDownFieldIsReferencedInRegularGuard1() throws Exception {
 		performPushDown_fail(new String[] { "T", "B" }, new String[] {}, new String[][] { new String[0] }, new String[] { "b" }, "R1");
 	}
@@ -224,23 +224,23 @@ public class PushDownTests extends RefactoringTest {
 	public void testPushedDownFieldIsReferencedInBaseGuard3() throws Exception {
 		performPushDown_fail(new String[] { "B1", "B2", "T" }, new String[] {}, new String[][] { new String[0] }, new String[] { "b" }, "B1");
 	}
-	
+
 	public void testPushedDownFieldIsReferencedInParameterMapping1() throws Exception {
 		performPushDown_fail(new String[] { "T", "B" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "R1");
 	}
-	
+
 	public void testPushedDownFieldIsReferencedInParameterMapping2() throws Exception {
 		performPushDown_fail(new String[] { "T", "B" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "R1");
 	}
-	
+
 	public void testOverrideImplicitInheritedMethod() throws Exception {
 		performPushDown_fail(new String[] { "A", "T1", "T2" }, new String[] { "m" }, new String[][] { new String[0] }, new String[] {}, "A");
 	}
-	
+
 	public void testOverrideExplicitInheritedMethod() throws Exception {
 		performPushDown_pass(new String[] { "T2", "T1", "A" }, new String[] { "m" }, new String[][] { new String[0] }, new String[] {}, "R");
 	}
-	
+
 	// See Ticket #286
 	public void testPushedDownFieldIsReferencedInParameterMapping3() throws Exception {
 		performPushDown_fail(new String[] { "T", "B" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "R1");

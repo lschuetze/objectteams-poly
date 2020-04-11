@@ -37,10 +37,10 @@ public static char[] createIndexKey(char[] fieldName) {
 }
 
 public FieldPattern(
-	char[] name, 
+	char[] name,
 	char[] declaringQualification,
-	char[] declaringSimpleName,	
-	char[] typeQualification, 
+	char[] declaringSimpleName,
+	char[] typeQualification,
 	char[] typeSimpleName,
 	int limitTo,
 	int matchRule) {
@@ -58,10 +58,10 @@ public FieldPattern(
  * Instantiate a field pattern with additional information for generic search
  */
 public FieldPattern(
-	char[] name, 
+	char[] name,
 	char[] declaringQualification,
-	char[] declaringSimpleName,	
-	char[] typeQualification, 
+	char[] declaringSimpleName,
+	char[] typeQualification,
 	char[] typeSimpleName,
 	String typeSignature,
 	int limitTo,
