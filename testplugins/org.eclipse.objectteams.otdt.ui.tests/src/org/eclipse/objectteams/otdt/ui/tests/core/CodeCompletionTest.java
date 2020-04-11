@@ -28,6 +28,7 @@ import static org.eclipse.jdt.internal.codeassist.RelevanceConstants.R_INTERESTI
 import static org.eclipse.jdt.internal.codeassist.RelevanceConstants.R_METHOD_OVERIDE;
 import static org.eclipse.jdt.internal.codeassist.RelevanceConstants.R_NON_RESTRICTED;
 import static org.eclipse.jdt.internal.codeassist.RelevanceConstants.R_RESOLVED;
+import static org.junit.Assert.*;
 
 import java.util.Hashtable;
 
@@ -82,9 +83,14 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
+import org.eclipse.objectteams.otdt.ui.tests.core.rule.ProjectTestSetup;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Tests for code completion including the UI part
@@ -93,45 +99,27 @@ import junit.framework.TestSuite;
  * @author stephan
  * @since 1.1.8
  */
-public class CodeCompletionTest extends CoreTests {
+public class CodeCompletionTest {
 
 	private static final int CALLOUT_BASE_RELEVANCE = R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_METHOD_OVERIDE+R_NON_RESTRICTED;
 	private static final int INTERESTING_CALLIN_CALLOUT_PROPOSAL = CompletionAdaptor.R_METHOD_MAPPING * CALLOUT_BASE_RELEVANCE;
 	private static final int VERY_INTERESTING_CALLIN_CALLOUT_PROPOSAL = CompletionAdaptor.R_METHOD_MAPPING * (CALLOUT_BASE_RELEVANCE+R_EXPECTED_TYPE);
 
-	private static final Class<CodeCompletionTest> THIS= CodeCompletionTest.class;
+	@Rule
+	public ProjectTestSetup pts = new ProjectTestSetup();
 
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@SuppressWarnings("unused") // dead code inside
-	public static Test suite() {
-		if (true) {
-			return allTests();
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new CodeCompletionTest("testMethodInvocations2"));
-			return new ProjectTestSetup(suite);
-		}
-	}
+	@Rule public TestName name = new TestName();
+	String getName() { return name.getMethodName(); }
 
 	private IJavaProject fJProject1;
-
-	public CodeCompletionTest(String name) {
-		super(name);
-	}
 
 	private void codeComplete(ICompilationUnit cu, int offset, CompletionProposalCollector collector) throws JavaModelException {
 		waitBeforeCoreCompletion(); // ??
 		cu.codeComplete(offset, collector);
 	}
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createOTJavaProject("OTTestProject1", "bin");
 		JavaProjectHelper.addRTJar17(fJProject1);
 		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
@@ -165,7 +153,8 @@ public class CodeCompletionTest extends CoreTests {
 		fWaitBeforeCompleting= false;
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setToDefault(PreferenceConstants.CODEGEN_ADD_COMMENTS);
 		store.setToDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS);
@@ -194,7 +183,9 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/* Legacy style of testing: */
-	public void _testCreateCalloutCompletion() throws Exception {
+	@Ignore
+	@Test
+	public void testCreateCalloutCompletion() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		// create base class:
@@ -261,7 +252,7 @@ public class CodeCompletionTest extends CoreTests {
 			"    }\n" +
 			"}\n" +
 			"");
-		assertEqualString(doc.get(), buf.toString());
+		CoreTests.assertEqualString(doc.get(), buf.toString());
 	}
 	// helpers for above:
 	private CompletionProposalCollector createCollector(ICompilationUnit cu, int offset) throws PartInitException, JavaModelException {
@@ -279,6 +270,7 @@ public class CodeCompletionTest extends CoreTests {
 	// ==== START REAL TESTS: ====
 
 	/** At the empty space within a role one could create a constructor. */
+	@Test
 	public void testCreateRoleConstructor() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
@@ -294,6 +286,7 @@ public class CodeCompletionTest extends CoreTests {
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
 
+	@Test
 	public void testCreateCallout1() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
@@ -308,6 +301,7 @@ public class CodeCompletionTest extends CoreTests {
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
 	// abstract method exists:
+	@Test
 	public void testCreateCallout1a() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
@@ -325,6 +319,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// ROFI
+	@Test
 	public void testCreateCallout2() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertROFIBodyProposal(
@@ -339,6 +334,7 @@ public class CodeCompletionTest extends CoreTests {
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
 
+	@Test
 	public void testCreateCalloutOverride1() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java",
@@ -394,6 +390,7 @@ public class CodeCompletionTest extends CoreTests {
 
 
 	// callout override to field
+	@Test
 	public void testCreateCalloutOverride2() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java",
@@ -447,6 +444,7 @@ public class CodeCompletionTest extends CoreTests {
 
 
 	// Bug 374840 - [assist] callout completion after parameter mapping garbles the code
+	@Test
 	public void testCreateCalloutOverride3() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 
@@ -492,7 +490,7 @@ public class CodeCompletionTest extends CoreTests {
 		assertProposal("toString()  String", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, "String".length()), 0);
 	}
 
-
+	@Test
 	public void testCompleteCallout1() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
@@ -503,6 +501,7 @@ public class CodeCompletionTest extends CoreTests {
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
 
+	@Test
 	public void testCompleteCallout2() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
@@ -514,6 +513,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/* short, no callinModifier, callin-method, follows: short callin. */
+	@Test
 	public void testCompleteCallout3() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
@@ -529,6 +529,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/* short, prefix typed, follows: method */
+	@Test
 	public void testCompleteCallout4() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
@@ -538,6 +539,7 @@ public class CodeCompletionTest extends CoreTests {
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
 
+	@Test
 	public void testCompleteCallout5() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
@@ -552,6 +554,7 @@ public class CodeCompletionTest extends CoreTests {
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
 
+	@Test
 	public void testCompleteCallout6() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertROFIBodyProposal(
@@ -567,6 +570,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// callout to static from ROFI
+	@Test
 	public void testCompleteCallout7() throws Exception {
 		createBaseClass("    public static void foo() {}\n");
 		assertROFIBodyProposal(
@@ -582,6 +586,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// See Bug 395762: this case could trigger the reported hang
+	@Test
 	public void testCompleteParameterMapping1() throws Exception {
 		createBaseClass("    java.util.List<String> names;\n");
 		assertNosuchTypeBodyProposal(
@@ -592,6 +597,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// similar to above, positive case
+	@Test
 	public void testCompleteParameterMapping2() throws Exception {
 		createBaseClass("    java.util.List<String> names;\n");
 		assertTypeBodyProposal(
@@ -604,6 +610,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// Bug 353468 - [completion] completing a method binding inserts nested class by its binary name
+	@Test
 	public void testCreateMethodBinding1() throws Exception {
 		// secondary types:
 		createBaseClass("test1.b1", "B1", "    public class Inner{}\n");
@@ -639,6 +646,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/** A base method spec with return type and beginning of the selector is searched. */
+	@Test
 	public void testCompletionMethodSpecLong1() throws Exception {
 		createBaseClass("");
 		assertTypeBodyProposal(
@@ -650,6 +658,7 @@ public class CodeCompletionTest extends CoreTests {
 
 
 	/** A base method spec without return type and beginning of the selector is searched. */
+	@Test
 	public void testCompletionMethodSpecLong2() throws Exception {
 		createBaseClass("");
 		assertTypeBodyProposal(
@@ -660,6 +669,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/** A base method spec with return type and no selector is searched. */
+	@Test
 	public void testCompletionMethodSpecLong3() throws Exception {
 		createBaseClass("");
 		assertTypeBodyProposal(
@@ -670,6 +680,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/* short, no callinModifier, follows: method */
+	@Test
 	public void testCompleteCallin1() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
@@ -684,6 +695,7 @@ public class CodeCompletionTest extends CoreTests {
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
 	// concrete method exists, create full callin binding (cf. testCreateCallout1a()).
+	@Test
 	public void testCreateCallin1a() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
@@ -702,7 +714,9 @@ public class CodeCompletionTest extends CoreTests {
 
 	// create callin with non-default selections in linked mode
 	// DISABLED because I'm yet to find a way for triggering linked mode selection in a test
-	public void _testCreateCallin2() throws Exception {
+	@Ignore
+	@Test
+	public void testCreateCallin2() throws Exception {
 		createBaseClass("    public String foo() {}\n");
 		assertTypeBodyProposal(
 				"        fo|",
@@ -717,6 +731,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/* short, with callinModifier, follows: callout binding. */
+	@Test
 	public void testCompleteCallin2() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
@@ -733,6 +748,7 @@ public class CodeCompletionTest extends CoreTests {
 
 
 	/* short, with callinModifier, follows: callout binding, non-keyword return type. */
+	@Test
 	public void testCompleteCallin2a() throws Exception {
 		createBaseClass("    public String foo() { return null; }\n");
 		assertTypeBodyProposal(
@@ -748,6 +764,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/* long, with callinModifier, follows: field. */
+	@Test
 	public void testCompleteCallin3() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
@@ -763,6 +780,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/* long, no callinModifier, callin-method, follows: field. */
+	@Test
 	public void testCompleteCallin4() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
@@ -778,6 +796,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/* long, no callinModifier, callin-method, follows: method. */
+	@Test
 	public void testCompleteCallin5() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
@@ -793,6 +812,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/* long, no callinModifier, callin-method, follows: short callin. */
+	@Test
 	public void testCompleteCallin6() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
@@ -808,6 +828,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/* long, no callinModifier, callin-method, follows: short callin. */
+	@Test
 	public void testCompleteCallin7() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
@@ -823,6 +844,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/* short, prefix typed, with callinModifier, follows: callout binding. */
+	@Test
 	public void testCompleteCallin8() throws Exception {
 		createBaseClass("    public void foo() {}\n");
 		assertTypeBodyProposal(
@@ -837,6 +859,7 @@ public class CodeCompletionTest extends CoreTests {
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
 
+	@Test
 	public void testCompleteBasecall1() throws Exception {
 		createBaseClass("    public String getBaseText(Object object) {return null;}\n");
 		assertTypeBodyProposal(
@@ -854,6 +877,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// static case, result ignored - see https://bugs.eclipse.org/bugs/show_bug.cgi?id=331669
+	@Test
 	public void testCompleteBasecall2() throws Exception {
 		createBaseClass("    public static String getBaseText(Object object) {return null;}\n");
 		assertTypeBodyProposal(
@@ -873,6 +897,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// http://bugs.eclipse.org/394061 - [assist] template proposals not working after a base call
+	@Test
 	public void testMethodInvocations1() throws Exception {
 		createBaseClass("    public String getBaseText(Object object) {return null;}\n");
 		assertTypeBodyProposal(
@@ -896,6 +921,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 	// http://bugs.eclipse.org/394061 - [assist] template proposals not working after a base call
 	// variant challenging completion after a tsuper call
+	@Test
 	public void testMethodInvocations2() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -942,6 +968,7 @@ public class CodeCompletionTest extends CoreTests {
 		assertAppliedTemplateProposal(contents, (TemplateProposal)proposal, expectedContents);
 	}
 
+	@Test
 	public void testCompleteTSuperCall1()  throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -985,6 +1012,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// see Trac #126
+	@Test
 	public void testCompleteInCallinMethod1() throws Exception {
 		createBaseClass("    public String getText() { return null; }\n");
 		ICompletionProposal proposal = assertTypeBodyProposal(
@@ -1008,6 +1036,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/* Full c-t-f declaration */
+	@Test
 	public void testCalloutToField1() throws Exception {
 		createBaseClass("public int myField;\n");
 		assertTypeBodyProposal(
@@ -1027,6 +1056,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/* after modifier w/o trailing space */
+	@Test
 	public void testCalloutToField2() throws Exception {
 		createBaseClass("public int myField;\n");
 		assertTypeBodyProposal(
@@ -1042,6 +1072,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/* after modifier w/ trailing space */
+	@Test
 	public void testCalloutToField3() throws Exception {
 		createBaseClass("public int myField;\n");
 		assertTypeBodyProposal(
@@ -1057,6 +1088,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/* after modifier w/ trailing space - multiple base fields */
+	@Test
 	public void testCalloutToField4() throws Exception {
 		createBaseClass("public int myField;\n"+
 				        "public int yourField;\n"+
@@ -1074,6 +1106,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/* after modifier w/ trailing space - multiple base fields, mismatching type */
+	@Test
 	public void testCalloutToField5() throws Exception {
 		createBaseClass("public int myField;\n"+
 				        "public int yourField;\n"+
@@ -1087,6 +1120,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	/* Don't accidentally propose a getter for _OT$base: */
+	@Test
 	public void testCalloutToField6() throws Exception {
 		createBaseClass("public int myField;\n"+
 				        "public int yourField;\n"+
@@ -1099,6 +1133,7 @@ public class CodeCompletionTest extends CoreTests {
 				100);
 	}
 
+	@Test
 	public void testPlayedBy1() throws Exception {
 		createBaseClass("test2", "MyBase", "");
 		fBeforeImports= "";
@@ -1112,6 +1147,7 @@ public class CodeCompletionTest extends CoreTests {
 				0, false);
 	}
 
+	@Test
 	public void testPlayedBy2() throws Exception {
 		createBaseClass("test2", "AClass", "");
 		fBeforeImports= "\n" +
@@ -1131,6 +1167,7 @@ public class CodeCompletionTest extends CoreTests {
 
 	// https://bugs.eclipse.org/460508 - Adopt and adjust new ImportRewriteAnalyzer from JDT/Core
 	// base import for other role already exists, correctly sort in.
+	@Test
 	public void testPlayedBy3() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "test3");
 		pkg.createCompilationUnit("OtherBase.java",
@@ -1163,6 +1200,7 @@ public class CodeCompletionTest extends CoreTests {
 				0, false);
 	}
 
+	@Test
 	public void testBaseGuard1() throws Exception {
 		createBaseClass("test2", "AClass", "public boolean check() { return false; }");
 		fBeforeImports = "import base test2.AClass;";
@@ -1180,6 +1218,7 @@ public class CodeCompletionTest extends CoreTests {
 				0, false);
 	}
 
+	@Test
 	public void testBaseGuard2() throws Exception {
 		createBaseClass("test2", "AClass", "");
 		assertTypeBodyProposal(
@@ -1194,6 +1233,7 @@ public class CodeCompletionTest extends CoreTests {
 				"}\n",
 				0, false);
 	}
+	@Test
 	public void testGuard3() throws Exception {
 		createBaseClass("test2", "AClass", "public boolean check() { return false; }");
 		assertTypeBodyProposal(
@@ -1206,6 +1246,7 @@ public class CodeCompletionTest extends CoreTests {
 				"}\n",
 				0, false);
 	}
+	@Test
 	public void testGuard4() throws Exception {
 		createBaseClass("test2", "AClass", "public String check() { return false; }");
 		assertTypeBodyProposal(
@@ -1221,6 +1262,7 @@ public class CodeCompletionTest extends CoreTests {
 
 	// inside guard of short method binding
 	// Bug 340083 - [assist] cannot complete inside a binding guard
+	@Test
 	public void testGuard5() throws Exception {
 		fBeforeImports = "import base test2.AClass;";
 		fAfterImports = "import base test2.AClass;";
@@ -1240,6 +1282,7 @@ public class CodeCompletionTest extends CoreTests {
 
 	// inside guard of short method binding, field reference
 	// Bug 340083 - [assist] cannot complete inside a binding guard
+	@Test
 	public void testGuard6() throws Exception {
 		fBeforeImports = "import base test2.AClass;";
 		fAfterImports = "import base test2.AClass;";
@@ -1259,6 +1302,7 @@ public class CodeCompletionTest extends CoreTests {
 
 	// inside base guard of short method binding, field reference
 	// Bug 340083 - [assist] cannot complete inside a binding guard
+	@Test
 	public void testGuard7() throws Exception {
 		fBeforeImports = "import base test2.AClass;";
 		fAfterImports = "import base test2.AClass;";
@@ -1278,6 +1322,7 @@ public class CodeCompletionTest extends CoreTests {
 
 	// see https://bugs.eclipse.org/340103 - [assist] FUP of bug 340083
 	// inside base guard of method binding with signatures, field reference
+	@Test
 	public void testGuard8() throws Exception {
 		fBeforeImports = "import base test2.AClass;";
 		fAfterImports = "import base test2.AClass;";
@@ -1295,6 +1340,7 @@ public class CodeCompletionTest extends CoreTests {
 				0, false);
 	}
 
+	@Test
 	public void testRoleTag1() throws Exception {
 		IPackageFragment teamPkg = CompletionTestSetup.getTestPackage(this.fJProject1, "MyTeam");
 		teamPkg.createCompilationUnit("MyRole.java",
@@ -1323,6 +1369,7 @@ public class CodeCompletionTest extends CoreTests {
 		assertProposal("My", null, null, teamContent, new Region(pos, 0), expectedContent, new Region(pos+4, 0), 0); // 4: len(MyRole)-len(My)
 	}
 
+	@Test
 	public void testRoleTag2() throws Exception {
 		IPackageFragment teamPkg = CompletionTestSetup.getTestPackage(this.fJProject1, "MyTeam");
 		teamPkg.createCompilationUnit("MyRole.java",
@@ -1352,6 +1399,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 
+	@Test
 	public void testCreateMethod1() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java",
@@ -1396,6 +1444,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// Bug 362003 - [assist] completion is broken after <B base R> after a base guard
+	@Test
 	public void testCreateMethod2() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("BaseClass.java",
@@ -1465,6 +1514,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// override role, simple case
+	@Test
 	public void testOverrideRole1() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java",
@@ -1499,6 +1549,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// override role, role file with mentioning in the team
+	@Test
 	public void testOverrideRole2() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java",
@@ -1537,6 +1588,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// override role, role file, without mentioning in the team (requires search engine help)
+	@Test
 	public void testOverrideRole3() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java",
@@ -1574,6 +1626,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// Bug 355255 - [assist] NPE during completion if team contains an enum
+	@Test
 	public void testOverrideRole4() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java",
@@ -1610,6 +1663,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// propose creating a team instance:
+	@Test
 	public void testNewExpression1() throws CoreException {
 		createBaseClass("test2", "AClass", "public boolean check() { return false; }");
 		assertTypeBodyProposal(
@@ -1629,6 +1683,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// propose creating a role instance (bound role):
+	@Test
 	public void testNewExpression2() throws CoreException {
 		createBaseClass("test1", "AClass", "public boolean check() { return false; }");
 		assertTypeBodyProposal(
@@ -1648,6 +1703,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// propose creating a role instance (unbound role):
+	@Test
 	public void testNewExpression3() throws CoreException {
 		assertTypeBodyProposal(
 				"protected class ARole {\n" +
@@ -1666,6 +1722,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// propose a regular diamond expression:
+	@Test
 	public void testNewExpression4() throws CoreException {
 		fBeforeImports = "import java.util.Collection;\n" +
 				"import base test2.AClass;\n";
@@ -1696,6 +1753,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// propose methods invoked via a phantom role, simple case
+	@Test
 	public void testMethodInvocation1() throws CoreException {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java",
@@ -1737,6 +1795,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// propose methods invoked via a phantom role, two direct tsuper roles both have the method, pick the nearest version
+	@Test
 	public void testMethodInvocation2() throws CoreException {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java",
@@ -1806,6 +1865,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// propose methods invoked via a phantom role, two direct tsuper roles, only more distant one has the method
+	@Test
 	public void testMethodInvocation3() throws CoreException {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java",
@@ -1874,6 +1934,7 @@ public class CodeCompletionTest extends CoreTests {
 
 
 	// propose methods invoked via a phantom role, simple nested case
+	@Test
 	public void testMethodInvocation4() throws CoreException {
 
 
@@ -1922,6 +1983,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	// propose methods invoked via a phantom role, simple nested case
+	@Test
 	public void testMethodInvocation5() throws CoreException {
 
 		createBaseClass("test1", "B", "public boolean check() { return false; }");
@@ -1962,6 +2024,7 @@ public class CodeCompletionTest extends CoreTests {
 		assertChoices(proposal, new String[][]{new String[]{"arg0", "rarg", "null"}}); // <- this is key: expect "rarg" next to "arg0"!
 	}
 
+	@Test
 	public void testBug416779a() throws CoreException {
 		StringBuffer teamContent = new StringBuffer(
 				"public team class Completion_testBug416779 {\n" +
@@ -1978,6 +2041,7 @@ public class CodeCompletionTest extends CoreTests {
 		assertNosuchProposal("Completion_testBug416779.R()", teamContent, new Region(pos, 0),  0);
 	}
 
+	@Test
 	public void testBug416779b() throws CoreException {
 		StringBuffer teamContent = new StringBuffer(
 				"public team class Completion_testBug416779 {\n" +
