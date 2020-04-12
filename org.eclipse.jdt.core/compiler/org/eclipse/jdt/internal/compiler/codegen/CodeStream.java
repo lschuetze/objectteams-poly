@@ -441,7 +441,12 @@ public void anewarray(TypeBinding typeBinding) {
 	}
 	this.position++;
 	this.bCodeStream[this.classFileOffset++] = Opcodes.OPC_anewarray;
+//{ObjectTeams: type anchor:
+/* orig:
 	writeUnsignedShort(this.constantPool.literalIndexForType(typeBinding));
+  :giro */
+	writeUnsignedShort(recordTypeBinding(typeBinding));
+// SH}
 	pushTypeBinding(1, typeBinding);
 }
 
@@ -4751,7 +4756,12 @@ public void instance_of(TypeReference typeReference, TypeBinding typeBinding) {
 	}
 	this.position++;
 	this.bCodeStream[this.classFileOffset++] = Opcodes.OPC_instanceof;
+//{ObjectTeams: type anchors:
+/* orig:
 	writeUnsignedShort(this.constantPool.literalIndexForType(typeBinding));
+  :giro */
+	writeUnsignedShort(recordTypeBinding(typeBinding));
+// SH}
 	pushTypeBinding(1, TypeBinding.INT);
 }
 
@@ -6196,7 +6206,12 @@ public void ldc(String constant) {
 
 public void ldc(TypeBinding typeBinding) {
 	this.countLabels = 0;
+//{ObjectTeams: type anchor:
+/* orig:
 	int index = this.constantPool.literalIndexForType(typeBinding);
+  :giro */
+	int index = recordTypeBinding(typeBinding);
+// SH}
 	this.stackDepth++;
 	pushTypeBinding(typeBinding);
 	if (this.stackDepth > this.stackMax)
@@ -6748,7 +6763,12 @@ public void multianewarray(
 	}
 	this.position += 2;
 	this.bCodeStream[this.classFileOffset++] = Opcodes.OPC_multianewarray;
+//{ObjectTeams: type anchor:
+/* orig:
 	writeUnsignedShort(this.constantPool.literalIndexForType(typeBinding));
+  :giro */
+	writeUnsignedShort(recordTypeBinding(typeBinding));
+// SH}
 	this.bCodeStream[this.classFileOffset++] = (byte) dimensions;
 }
 
@@ -7909,9 +7929,6 @@ private void pushTypeBinding(char[] typeName) {
 	pushTypeBinding(getPopularBinding(typeName));
 }
 private void pushTypeBinding(TypeBinding typeBinding) {
-//{ObjectTeams:
-	if (typeBinding instanceof ReferenceBinding) recordTypeBinding(typeBinding);
-// SH}
 	if (isSwitchStackTrackingActive()) {
 		assert typeBinding != null;
 		this.switchSaveTypeBindings.push(typeBinding);
@@ -7919,12 +7936,7 @@ private void pushTypeBinding(TypeBinding typeBinding) {
 }
 private void pushTypeBinding(int nPop, TypeBinding typeBinding) {
 	if (!isSwitchStackTrackingActive())
-//{ObjectTeams:
-	{
-		if (typeBinding instanceof ReferenceBinding) recordTypeBinding(typeBinding);
-// SH}
 		return;
-	} // OT
 	popTypeBinding(nPop);
 	pushTypeBinding(typeBinding);
 }
