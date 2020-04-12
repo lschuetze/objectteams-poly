@@ -39,7 +39,7 @@ MAP_FILE_PATH=${BASEDIR}/releng/map/otdt.map
 DROPS4=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
 
 # Configure ANT:
-ANT_HOME=/shared/common/apache-ant-1.7.1/
+ANT_HOME=/shared/common/apache-ant-1.10.5/
 PATH=${ANT_HOME}/bin:${PATH}
 
 # Configure Java:
