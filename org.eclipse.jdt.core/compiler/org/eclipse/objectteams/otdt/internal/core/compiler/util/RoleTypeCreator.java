@@ -1139,7 +1139,7 @@ public class RoleTypeCreator implements TagBits {
 	 * @return valid or null binding.
 	 */
 	public static VariableBinding findResolvedVariable(Scope scope, char[] name) {
-		if (scope.kind == Scope.COMPILATION_UNIT_SCOPE)
+		if (scope.kind == Scope.COMPILATION_UNIT_SCOPE || scope.kind == Scope.MODULE_SCOPE)
 			return null; // no single name variables in compilation unit scopes
 
 		// first try immediate scope:
