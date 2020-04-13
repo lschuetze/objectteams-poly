@@ -685,7 +685,13 @@ public void test05() {
 		"  }\n" +
 		"  void foo() {\n" +
 		"    System.out.println();\n" +
-		"    void baz;\n" +
+		(this.complianceLevel < ClassFileConstants.JDK14
+		?
+		"    new baz() {\n" +
+		"    };\n"
+		:
+		"    void baz;\n"
+		) +
 		"  }\n" +
 		"  void bar() {\n" +
 		"  }\n" +
@@ -7050,7 +7056,18 @@ public void test117() {
 			"        super();\n" +
 			"      }\n" +
 			"    }\n" +
-			"    void foo2;\n" +
+			(this.complianceLevel < ClassFileConstants.JDK14
+			?
+			"    new foo2() {\n" +
+			"    };\n" +
+			"    class Z<T> {\n" +
+			"      Z() {\n" +
+			"        super();\n" +
+			"      }\n" +
+			"    }\n"
+			:
+			"    void foo2;\n"
+			) +
 			"  }\n" +
 			"}\n";
 
@@ -7129,7 +7146,18 @@ public void test117_2() {
 		"        super();\n" +
 		"      }\n" +
 		"    }\n" +
-		"    void foo2;\n" +
+		(this.complianceLevel < ClassFileConstants.JDK14
+		?
+		"    new foo2() {\n" +
+		"    };\n" +
+		"    class Z {\n" +
+		"      Z() {\n" +
+		"        super();\n" +
+		"      }\n" +
+		"    }\n"
+		:
+		"    void foo2;\n"
+		) +
 		"  }\n" +
 		"}\n";
 
