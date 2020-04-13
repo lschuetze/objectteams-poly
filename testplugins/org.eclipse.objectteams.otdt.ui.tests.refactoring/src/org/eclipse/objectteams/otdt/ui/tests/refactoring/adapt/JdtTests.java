@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 
 import base org.eclipse.jdt.ui.tests.refactoring.ChangeSignatureTests;
-import base org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+import base org.eclipse.jdt.ui.tests.refactoring.GenericRefactoringTest;
 
 @SuppressWarnings("restriction")
 public team class JdtTests {
@@ -57,7 +57,7 @@ public team class JdtTests {
 				helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 		}
 
-		protected class ContentPatching playedBy RefactoringTest {
+		protected class ContentPatching playedBy GenericRefactoringTest {
 
 			String getFileContents(String fileName) <- replace String getFileContents(String fileName);
 
