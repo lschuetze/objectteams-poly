@@ -243,9 +243,12 @@ then
 	echo "====Step 11: promote to ${DEST}===="
 	if [ -d ${UPDATES_BASE}/${2} ]
 	then
-		mkdir ${DEST} && \
-			cp -pr ${UPDATES_BASE}/${1}/* ${DEST}/ && \
-			cp -pr * ${DEST}/ && \
+		mkdir ${DEST}
+		if [ "${MASTER}" != "none" ]
+		then
+			cp -pr ${MASTER}/* ${DEST}/
+		fi
+		cp -pr * ${DEST}/ && \
 			chmod -R g+w ${DEST} && \
 			find ${DEST} -type d -exec /bin/ls -ld {} \;
 		ls -latr ${UPDATES_BASE}/${2}
