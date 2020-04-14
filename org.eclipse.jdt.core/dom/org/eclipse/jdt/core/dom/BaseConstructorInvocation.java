@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2020 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -47,7 +47,7 @@ import java.util.List;
  * @author mkr
  * @version $Id: BaseConstructorInvocation.java 23416 2010-02-03 19:59:31Z stephan $
  */
-public class BaseConstructorInvocation extends Statement implements Invocation
+public class BaseConstructorInvocation extends Expression implements Invocation
 {
     /**
      * The "arguments" structural property of this node type.

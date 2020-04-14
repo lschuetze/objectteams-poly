@@ -82,6 +82,7 @@ import org.eclipse.jdt.internal.core.dom.util.DOMASTUtil;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseAllocationExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
@@ -2091,6 +2092,10 @@ class ASTConverter {
 			return convert((org.eclipse.jdt.internal.compiler.ast.CompoundAssignment) expression);
 		}
 		if (expression instanceof org.eclipse.jdt.internal.compiler.ast.Assignment) {
+//{ObjectTeams:
+			if (expression instanceof BaseAllocationExpression)
+				return convert((BaseAllocationExpression) expression);
+// SH}
 			return convert((org.eclipse.jdt.internal.compiler.ast.Assignment) expression);
 		}
 		if (expression instanceof org.eclipse.jdt.internal.compiler.ast.ClassLiteralAccess) {
@@ -3175,7 +3180,8 @@ class ASTConverter {
 //gbr}
 //{ObjectTeams: handle BaseConstructorMessageSend. Note: might be unresolvable, i.e. incomplete rhs!
         if (statement instanceof org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseAllocationExpression) {
-            return convert((org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseAllocationExpression) statement);
+            BaseConstructorInvocation invocation = convert((org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseAllocationExpression) statement);
+            return this.ast.newExpressionStatement(invocation);
         }
 //carp}
 		if (statement instanceof org.eclipse.jdt.internal.compiler.ast.Block) {

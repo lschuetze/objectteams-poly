@@ -36,11 +36,11 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.BaseConstructorInvocation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.objectteams.otdt.ui.tests.dom.FileBasedDOMTest;
 
@@ -52,7 +52,7 @@ import org.eclipse.objectteams.otdt.ui.tests.dom.FileBasedDOMTest;
 public class BaseConstructorInvocationTest extends FileBasedDOMTest
 {
     public static final String TEST_PROJECT = "DOM_AST";
-	private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS4;
+	private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS14;
 
     private TypeDeclaration _typeDecl;
 	private TypeDeclaration _role;
@@ -97,11 +97,16 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
 		super.setUp();
 	}
 
+	private BaseConstructorInvocation getBaseConstructorInvocation(MethodDeclaration constructor) {
+		Object statement = constructor.getBody().statements().get(0);
+		return (BaseConstructorInvocation) ((ExpressionStatement) statement).getExpression();
+	}
+
     public void testInstanceType1()
     {
         MethodDeclaration constructor = _role.getMethods()[0];
 
-        Statement testObj = (Statement)constructor.getBody().statements().get(0);
+        BaseConstructorInvocation testObj = getBaseConstructorInvocation(constructor);
 
         assertTrue("Template for tests, always true",
                    testObj instanceof BaseConstructorInvocation);
@@ -111,7 +116,7 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
     {
         MethodDeclaration constructor = _role.getMethods()[0];
 
-        _testObj = (BaseConstructorInvocation)constructor.getBody().statements().get(0);
+        _testObj = getBaseConstructorInvocation(constructor);
 
         int actual = _testObj.getNodeType();
 
@@ -123,9 +128,9 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
     public void testGetArguments_NoArgs()
     {
         MethodDeclaration constructor = _role.getMethods()[0];
-        _testObj = (BaseConstructorInvocation)constructor.getBody().statements().get(0);
+        _testObj = getBaseConstructorInvocation(constructor);
 
-        List actual = _testObj.getArguments();
+        List<?> actual = _testObj.getArguments();
 
         assertEquals("BaseConstructorMessageSend has wrong number of arguments",
                      0,
@@ -136,9 +141,9 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
     {
         RoleTypeDeclaration role = _typeDecl.getRoles()[0];
         MethodDeclaration constructor = role.getMethods()[1];
-        _testObj = (BaseConstructorInvocation)constructor.getBody().statements().get(0);
+        _testObj = getBaseConstructorInvocation(constructor);
 
-        List actual = _testObj.getArguments();
+        List<?> actual = _testObj.getArguments();
 
         assertEquals("BaseConstructorMessageSend has wrong number of arguments",
                      2,
@@ -149,13 +154,13 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
     public void testChildNodesHaveCorrectParent1()
     {
         MethodDeclaration constructor = _role.getMethods()[1];
-        _testObj = (BaseConstructorInvocation) constructor.getBody().statements().get(0);
+        _testObj = getBaseConstructorInvocation(constructor);
 
-        List childNodes = _testObj.getArguments();
+        List<Expression> childNodes = _testObj.getArguments();
 
-        for (Iterator iter = childNodes.iterator(); iter.hasNext();)
+        for (Iterator<Expression> iter = childNodes.iterator(); iter.hasNext();)
         {
-            Expression curChild = (Expression) iter.next();
+            Expression curChild = iter.next();
             assertEquals("Base call arguments have wrong parent node",
                          _testObj,
                          curChild.getParent());
@@ -165,7 +170,7 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
     public void testSubtreeMatch1()
     {
         MethodDeclaration constructor = _role.getMethods()[1];
-        _testObj = (BaseConstructorInvocation)constructor.getBody().statements().get(0);
+        _testObj = getBaseConstructorInvocation(constructor);
 
         boolean actual = _testObj.subtreeMatch(new ASTMatcher(), _testObj);
 
@@ -176,7 +181,7 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
     public void testtoString1()
     {
         MethodDeclaration constructor = _role.getMethods()[1];
-        _testObj = (BaseConstructorInvocation)constructor.getBody().statements().get(0);
+        _testObj = getBaseConstructorInvocation(constructor);
 
         String actual = _testObj.toString();
         String expected = "base(dummy0, dummy1);";
@@ -206,7 +211,7 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
         TypeDeclaration role2Decl = team2Decl.getTypes()[0];
 
         MethodDeclaration constructor = role2Decl.getMethods()[1];
-        _testObj = (BaseConstructorInvocation)constructor.getBody().statements().get(0);
+        _testObj = getBaseConstructorInvocation(constructor);
 
         String actual = _testObj.toString();
         String expected = "base(dummy0, dummy1);";
@@ -220,7 +225,7 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
         RoleTypeDeclaration role = _typeDecl.getRoles()[0];
         MethodDeclaration constructor = role.getMethods()[1];
 
-        _testObj = (BaseConstructorInvocation)constructor.getBody().statements().get(0);
+        _testObj = getBaseConstructorInvocation(constructor);
 
         ITypeBinding baseClass = role.resolveBinding().getBaseClass();
         IMethodBinding baseConstructorBinding = baseClass.getDeclaredMethods()[1];

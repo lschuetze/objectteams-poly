@@ -2108,10 +2108,12 @@ class DefaultBindingResolver extends BindingResolver {
 					SingleVariableDeclaration fakedVariable = realVariable.newFakedRoleVariable((LiftingType) realVariable.getType());
 					if (fakedVariable != null) { // else a faked variable has already been registered
 						IVariableBinding fakedBinding = getVariableBinding(fakedArgument.binding, variable);
-						this.bindingsToAstNodes.put(fakedBinding, fakedVariable);
-						key = fakedBinding.getKey();
-						if (key != null)
-							this.bindingTables.bindingKeysToBindings.put(key, fakedBinding);
+						if (fakedBinding != null) { // null happens, e.g., if resolving was skipped due to AbortCompilation
+							this.bindingsToAstNodes.put(fakedBinding, fakedVariable);
+							key = fakedBinding.getKey();
+							if (key != null)
+								this.bindingTables.bindingKeysToBindings.put(key, fakedBinding);
+						}
 						// for repeated lookup of fakedVariable (using this same method) we also need the AST mapping:
 						this.newAstToOldAst.put(fakedVariable, fakedArgument);
 					}
