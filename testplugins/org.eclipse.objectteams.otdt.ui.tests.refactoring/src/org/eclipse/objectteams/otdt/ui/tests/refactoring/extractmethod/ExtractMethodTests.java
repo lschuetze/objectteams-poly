@@ -27,9 +27,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -38,7 +35,11 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.junit.Rule;
+import org.junit.Test;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
+
+import static org.junit.Assert.*;
 
 /**
  * @author brcan
@@ -47,18 +48,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring
 @SuppressWarnings({ "nls", "restriction" })
 public class ExtractMethodTests extends AbstractSelectionTestCase
 {
-	private static ExtractMethodTestSetup _testSetup;
-
-    public ExtractMethodTests(String name)
-    {
-        super(name);
-    }
-
-    public static Test suite()
-    {
-		_testSetup = new ExtractMethodTestSetup(new TestSuite(ExtractMethodTests.class));
-		return _testSetup;
-	}
+	@Rule
+	public ExtractMethodTestSetup _testSetup = new ExtractMethodTestSetup();
 
 	protected IPackageFragmentRoot getRoot()
 	{
@@ -193,6 +184,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	//=====================================================================================
 
 	//extract method invocation in team
+	@Test
 	public void testTeamclass1() throws Exception
     {
 	    performTest(
@@ -202,6 +194,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	            "team_out");
     }
 	//extract expression in team
+	@Test
 	public void testTeamclass2() throws Exception
     {
 	    performTest(
@@ -216,6 +209,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	//=====================================================================================
 
 	//extract method invocation in unbound role
+	@Test
 	public void testRoleclass1() throws Exception
     {
 	    performTest(
@@ -225,6 +219,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	            "role_out");
     }
 	//extract expression in unbound role
+	@Test
 	public void testRoleclass2() throws Exception
 	{
 	    performTest(
@@ -240,6 +235,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 
 	/* passing */
 	//extract method invocation in unbound nested team
+	@Test
 	public void testNestedTeam1() throws Exception
     {
 	    performTest(
@@ -249,6 +245,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	            "nestedTeam_out");
     }
 	//extract method invocation in inner role of unbound nested team
+	@Test
 	public void testNestedTeam2() throws Exception
     {
 	    performTest(
@@ -260,6 +257,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 
 	/* failing */
 	//extract method invocation in bound nested team -> ambiguous base method spec
+	@Test
 	public void testNestedTeam3() throws Exception
     {
 		performTest(
@@ -269,6 +267,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        "nestedTeam_out");
     }
 	//extract method invocation in bound nested team -> ambiguous role method spec
+	@Test
 	public void testNestedTeam4() throws Exception
     {
 		performTest(
@@ -279,6 +278,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
     }
 	//extract method invocation in bound inner role of nested team ->
 	//ambiguous base method spec
+	@Test
 	public void testNestedTeam5() throws Exception
     {
 		performTest(
@@ -289,6 +289,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
     }
 	//extract method invocation in bound inner role of nested team ->
 	//ambiguous role method spec
+	@Test
 	public void testNestedTeam6() throws Exception
     {
 		performTest(
@@ -303,6 +304,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	//=====================================================================================
 
 	//extract method invocation in role file (unbound role)
+	@Test
 	public void testRoleFile1() throws Exception
 	{
 		establishTeamCU("TeamWithRoleFile.java");
@@ -315,6 +317,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	}
 
 	//extract expression in role file (unbound role)
+	@Test
 	public void testRoleFile2() throws Exception
 	{
 		establishTeamCU("TeamWithRoleFile.java");
@@ -337,6 +340,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	//	=====================================================================================
 
 	//focus implicit role hierarchy
+	@Test
 	public void testFocusTypeIsSuperroleInRoleHierarchy() throws Exception
     {
 		performTest(
@@ -346,6 +350,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        "focusType_out");
     }
 
+	@Test
 	public void testFocusTypeIsMiddleRoleInRoleHierarchy() throws Exception
     {
 		performTest(
@@ -355,6 +360,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        "focusType_out");
     }
 
+	@Test
 	public void testFocusTypeIsLowestRoleInRoleHierarchy() throws Exception
     {
 		performTest(
@@ -365,6 +371,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
     }
 
 	//focus base hierarchy
+	@Test
 	public void testFocusTypeIsSuperBasetypeInBaseHierarchy() throws Exception
     {
 		performTest(
@@ -374,6 +381,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        "focusType_out");
     }
 
+	@Test
 	public void testFocusTypeIsMiddleBasetypeInBaseHierarchy() throws Exception
     {
 		performTest(
@@ -383,6 +391,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        "focusType_out");
     }
 
+	@Test
 	public void testFocusTypeIsLowestBasetypeInBaseHierarchy() throws Exception
     {
 		performTest(
@@ -393,6 +402,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
     }
 
 	//focus team hierarchy
+	@Test
 	public void testFocusTypeIsSuperteamInTeamHierachy() throws Exception
     {
 		performTest(
@@ -402,6 +412,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        "focusType_out");
     }
 
+	@Test
 	public void testFocusTypeIsMiddleTeamInTeamHierachy() throws Exception
     {
 		performTest(
@@ -411,6 +422,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        "focusType_out");
     }
 
+	@Test
 	public void testFocusTypeIsLowestTeamInTeamHierarchy() throws Exception
     {
 		performTest(
@@ -421,6 +433,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
     }
 
 	// role is a indirect subclass of target class, explicit inheritance only, short methodSpec
+	@Test
 	public void test20() throws Exception
 	{
 		performTest(
@@ -431,6 +444,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	}
 
 	// role is a indirect subclass of target class, explicit + implicit inheritance, short methodSpec
+	@Test
 	public void test21() throws Exception
 	{
 		performTest(
@@ -441,6 +455,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	}
 
 	// role is a indirect subclass of target class, explicit + implicit inheritance, long methodSpec
+	@Test
 	public void test22() throws Exception
 	{
 		performTest(
@@ -451,6 +466,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	}
 
 	// bound base class is target class, short methodSpec
+	@Test
 	public void test23() throws Exception
 	{
 		performTest(
@@ -461,6 +477,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	}
 
 	// bound base class is direct/indirect subclass of target class, short methodSpec
+	@Test
 	public void test24() throws Exception
 	{
 		performTest(
@@ -471,6 +488,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	}
 
 	// base class is subclass of target class, long methodSpec
+	@Test
 	public void test25() throws Exception
 	{
 		performTest(
@@ -485,6 +503,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 	//	=====================================================================================
 
 	// call target is a declared-lifting argument
+	@Test
 	public void testDeclaredLifting1() throws Exception
 	{
 		performTest(

@@ -22,6 +22,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.refactoring.extractmethod;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 /**
  * @author brcan
  *
@@ -35,7 +38,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
+import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractJunit4CUTestCase;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.ltk.core.refactoring.Change;
@@ -46,9 +50,10 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.objectteams.otdt.ui.tests.refactoring.OTRefactoringTestPlugin;
+import org.junit.Rule;
 
 @SuppressWarnings({ "nls", "restriction" })
-public abstract class AbstractSelectionTestCase extends AbstractCUTestCase
+public abstract class AbstractSelectionTestCase extends AbstractJunit4CUTestCase
 {
 	public static final String SQUARE_BRACKET_OPEN = "/*[*/";
 	public static final int    SQUARE_BRACKET_OPEN_LENGTH = SQUARE_BRACKET_OPEN.length();
@@ -59,10 +64,8 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase
 	protected static final int INVALID_SELECTION   = 2;
 	protected static final int COMPARE_WITH_OUTPUT = 3;
 
-	public AbstractSelectionTestCase(String name)
-	{
-		super(name);
-	}
+	@Rule
+	public RefactoringTestSetup rts= new RefactoringTestSetup();
 
 	protected int[] getSelection(String source)
 	{

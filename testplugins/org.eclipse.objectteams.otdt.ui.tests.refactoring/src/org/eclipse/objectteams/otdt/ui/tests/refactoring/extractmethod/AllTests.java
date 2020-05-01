@@ -23,30 +23,20 @@
 package org.eclipse.objectteams.otdt.ui.tests.refactoring.extractmethod;
 
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * @author brcan
  *
  * Runs all OT-specific refactoring tests and corresponding eclipse refactoring tests
  */
-public class AllTests
-{
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.extractmethod.ExtractMethodTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.extractmethod.ExtractMethodRefactoringUtilTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.extractmethod.ExtractTempTests.class,
+})
+public class AllTests {
 
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(AllTests.suite());
-    }
-
-    public static Test suite()
-    {
-        TestSuite suite = new TestSuite(
-                "All OT-Extract-Method-Refactoring Tests");
-
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.extractmethod.ExtractMethodTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.extractmethod.ExtractMethodRefactoringUtilTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.extractmethod.ExtractTempTests.suite());
-        return suite;
-    }
 }

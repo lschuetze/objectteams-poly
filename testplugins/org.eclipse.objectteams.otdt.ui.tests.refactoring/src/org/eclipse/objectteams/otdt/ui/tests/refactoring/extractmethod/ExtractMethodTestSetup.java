@@ -24,28 +24,27 @@ package org.eclipse.objectteams.otdt.ui.tests.refactoring.extractmethod;
 
 import java.util.Hashtable;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper;
 import org.eclipse.objectteams.otdt.ui.tests.util.TestOptions;
+import org.junit.rules.ExternalResource;
 
 /**
  * @author brcan
  */
-@SuppressWarnings({ "nls", "restriction" })
-public class ExtractMethodTestSetup extends TestSetup
+@SuppressWarnings({ "restriction" })
+public class ExtractMethodTestSetup extends ExternalResource
 {
 	private IJavaProject _javaProject;
 	private IPackageFragmentRoot _root;
@@ -62,19 +61,13 @@ public class ExtractMethodTestSetup extends TestSetup
 	private IPackageFragment _overloadingPackage;
 	private IPackageFragment _syntaxPackage;
 
-    public ExtractMethodTestSetup(Test test)
-    {
-        super(test);
-    }
-
 	public IPackageFragmentRoot getRoot() {
 		return _root;
 	}
 
-    @SuppressWarnings("unchecked")
-	protected void setUp() throws Exception
+	protected void before() throws Exception
     {
-		Hashtable options = TestOptions.getFormatterOptions();
+		Hashtable<String, String> options = TestOptions.getFormatterOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "0");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -105,10 +98,16 @@ public class ExtractMethodTestSetup extends TestSetup
 //		_selectionPackage = getRoot().createPackageFragment("selection", true, null);
     }
 
-	protected void tearDown() throws Exception
+	protected void after()
 	{
-		JavaProjectHelper.performDummySearch(_javaProject);
-		JavaProjectHelper.delete(_javaProject);
+		try {
+			JavaProjectHelper.performDummySearch(_javaProject);
+			JavaProjectHelper.delete(_javaProject);
+		} catch (JavaModelException e) {
+			e.printStackTrace();
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
 	}
 
 //	public IPackageFragment getSelectionPackage()

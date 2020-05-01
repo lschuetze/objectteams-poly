@@ -22,8 +22,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.refactoring.extractmethod;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -35,6 +33,10 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.junit.Rule;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author stephan
@@ -43,18 +45,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 @SuppressWarnings("restriction")
 public class ExtractTempTests extends AbstractSelectionTestCase
 {
-	private static ExtractTempTestSetup _testSetup;
-
-    public ExtractTempTests(String name)
-    {
-        super(name);
-    }
-
-    public static Test suite()
-    {
-		_testSetup = new ExtractTempTestSetup(new TestSuite(ExtractTempTests.class));
-		return _testSetup;
-	}
+	@Rule
+	public ExtractTempTestSetup _testSetup = new ExtractTempTestSetup();
 
 	protected IPackageFragmentRoot getRoot()
 	{
@@ -171,6 +163,7 @@ public class ExtractTempTests extends AbstractSelectionTestCase
 	//=====================================================================================
 
 	//extract team instantiation expression "new T_x()" from within.team_expression
+	@Test
 	public void testWithin1() throws Exception
     {
 	    performTest(9, 16, 9, 35,
@@ -178,6 +171,7 @@ public class ExtractTempTests extends AbstractSelectionTestCase
 	            	"statements_out");
     }
 	// body is single statement instead of block
+	@Test
 	public void testWithin2() throws Exception
     {
 	    performTest(9, 16, 9, 35,
@@ -186,6 +180,7 @@ public class ExtractTempTests extends AbstractSelectionTestCase
     }
 
 	// two element path, extracted is a dependent type
+	@Test
 	public void testTypeAnchor1() throws Exception
 	{
 		performTest(15,13,15,18,
@@ -194,6 +189,7 @@ public class ExtractTempTests extends AbstractSelectionTestCase
 	}
 
 	// three element path, extracted is not a dependent type
+	@Test
 	public void testTypeAnchor2() throws Exception
 	{
 		performTest(21,13,21,20,
@@ -202,6 +198,7 @@ public class ExtractTempTests extends AbstractSelectionTestCase
 	}
 
 	// three element path, extracted is a dependent type
+	@Test
 	public void testTypeAnchor3() throws Exception
 	{
 		performTest(19,13,19,20,
