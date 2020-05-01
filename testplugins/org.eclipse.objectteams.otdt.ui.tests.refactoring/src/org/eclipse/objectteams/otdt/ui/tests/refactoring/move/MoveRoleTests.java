@@ -17,39 +17,33 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.refactoring.move;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.ui.tests.refactoring.ParticipantTesting;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
-import org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import base org.eclipse.jdt.ui.tests.refactoring.ccp.MoveTest;
 
 @SuppressWarnings("restriction")
-public team class MoveRoleTests extends TestCase {
+public team class MoveRoleTests extends AbstractMoveTests {
 
+	/**
+	 * Need access to some inaccessible test methods from base, notably:
+	 * verifyEnabled(), verifyValidDestination(), performRefactoring()
+	 */
 	@SuppressWarnings("decapsulation")
-	protected class MoveRole playedBy MoveTest {
-
-		void setUp() -> void setUp();
-
-		void tearDown() -> void tearDown();
-
+	protected class MoveRole extends Move playedBy MoveTest {
+		
 		public MoveRole() {
-			base(MoveRole.class.getName());
+			base();
 		}
 
 		@SuppressWarnings("inferredcallout")
@@ -73,51 +67,36 @@ public team class MoveRoleTests extends TestCase {
 			assertEquals(null, status);
 
 			// expect that base import has been added to cu2:
-			String expectedSource2= "package p;\nimport base b.B;\nteam class T2{protected class Role playedBy B{}\n\nvoid bar(){}}";
+			String expectedSource2= "package p;\n\nimport base b.B;\n\nteam class T2{protected class Role playedBy B{}\n\nvoid bar(){}}";
 			assertEqualLines("source compare failed", expectedSource2, cu2.getSource());
 
 			// expect that base import has been removed from cu1:
-			String expectedSource1= "package p;team class T1{void foo(){}}";
+			String expectedSource1= "package p;\n\nteam class T1{void foo(){}}";
 			assertEqualLines("source compare failed", expectedSource1, cu1.getSource());
 		}
 	}
 
 	private MoveRole mover;
-	private boolean projectInitialized = false;
 
 	public MoveRoleTests() {
 		this.mover = new MoveRole();
 	}
-    public static Test suite() {
-        return new RefactoringTestSetup(new TestSuite(MoveRoleTests.class));
-    }
-
-    public static Test setUpTest(Test someTest) {
-        return new RefactoringTestSetup(someTest);
-    }
-
+	
+	@Before
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		setupProject();
-		this.mover.setUp();
+		this.mover.genericbefore();
 	}
 
+	@After
 	@Override
 	protected void tearDown() throws Exception {
+		this.mover.genericafter();
 		super.tearDown();
-		this.mover.tearDown();
 	}
 
-	void setupProject() throws Exception {
-		if (!this.projectInitialized) {
-			this.projectInitialized = true;
-			IJavaProject javaProj = RefactoringTestSetup.getProject();
-			JavaProjectHelper.addNatureToProject(javaProj.getProject(), JavaCore.OTJ_NATURE_ID, null);
-	        OTREContainer.initializeOTJProject(javaProj.getProject());
-		}
-	}
-
+	@Test
 	public void testDestination_yes_roleTypeToDifferentTeam() throws Exception {
 		this.mover.testDestination_yes_roleTypeToDifferentTeam();
 	}

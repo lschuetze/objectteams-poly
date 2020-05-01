@@ -22,7 +22,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.refactoring.move;
 
-import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -39,6 +38,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 import org.eclipse.objectteams.otdt.ui.tests.refactoring.MySetup;
 import org.eclipse.objectteams.otdt.ui.tests.refactoring.RefactoringTest;
+import org.junit.Test;
 
 /**
  * Part of the tests in this class have been copied from the original class
@@ -57,12 +57,12 @@ public class MoveStaticMethodTests extends RefactoringTest
         super(name);
     }
 
-    public static Test suite()
+    public static junit.framework.Test suite()
     {
         return new MySetup(new TestSuite(MoveStaticMethodTests.class));
     }
 
-    public static Test setUpTest(Test someTest)
+    public static junit.framework.Test setUpTest(junit.framework.Test someTest)
     {
         return new MySetup(someTest);
     }
@@ -222,6 +222,7 @@ public class MoveStaticMethodTests extends RefactoringTest
     }
 
     /********** tests *********/
+	@Test
 	public void test0() throws Exception
     {
         methodHelper_passing(
@@ -231,7 +232,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test1() throws Exception
+    @Test
+	public void test1() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -240,7 +242,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test2() throws Exception
+    @Test
+	public void test2() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -249,7 +252,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test3() throws Exception
+    @Test
+	public void test3() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -258,7 +262,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test4() throws Exception
+    @Test
+	public void test4() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -267,7 +272,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test9() throws Exception
+    @Test
+	public void test9() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -276,7 +282,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test10() throws Exception
+    @Test
+	public void test10() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -285,7 +292,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test11() throws Exception
+    @Test
+	public void test11() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -294,7 +302,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test12() throws Exception
+    @Test
+	public void test12() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -303,7 +312,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test13() throws Exception
+    @Test
+	public void test13() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -312,7 +322,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test14() throws Exception
+    @Test
+	public void test14() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -321,7 +332,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test15() throws Exception
+    @Test
+	public void test15() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -330,7 +342,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test16() throws Exception
+    @Test
+	public void test16() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -339,7 +352,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test17() throws Exception
+    @Test
+	public void test17() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -348,7 +362,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test18() throws Exception
+    @Test
+	public void test18() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -357,7 +372,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test19() throws Exception
+    @Test
+	public void test19() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -366,7 +382,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test20() throws Exception
+    @Test
+	public void test20() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -375,7 +392,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test28() throws Exception
+    @Test
+	public void test28() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m", "n" },
@@ -384,7 +402,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test29() throws Exception
+    @Test
+	public void test29() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -393,7 +412,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void test41() throws Exception
+    @Test
+	public void test41() throws Exception
     {
         methodHelper_passing(
                 new String[] { "m" },
@@ -402,7 +422,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "B");
     }
 
-    public void testFail0() throws Exception
+    @Test
+	public void testFail0() throws Exception
     {
         fieldMethodTypeHelper_failing(
                 new String[0],
@@ -413,7 +434,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "p.B");
     }
 
-    public void testFail1() throws Exception
+    @Test
+	public void testFail1() throws Exception
     {
         fieldMethodTypeHelper_failing(
                 new String[0],
@@ -424,7 +446,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "p.B.X");
     }
 
-    public void testFail2() throws Exception
+    @Test
+	public void testFail2() throws Exception
     {
         fieldMethodTypeHelper_failing(
                 new String[0],
@@ -435,7 +458,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "p.B");
     }
 
-    public void testFail3() throws Exception
+    @Test
+	public void testFail3() throws Exception
     {
         fieldMethodTypeHelper_failing(
                 new String[0],
@@ -446,7 +470,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "p.B");
     }
 
-    public void testFail4() throws Exception
+    @Test
+	public void testFail4() throws Exception
     {
         fieldMethodTypeHelper_failing(
                 new String[0],
@@ -457,7 +482,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "p.B");
     }
 
-    public void testFail5() throws Exception
+    @Test
+	public void testFail5() throws Exception
     {
         fieldMethodTypeHelper_failing(
                 new String[0],
@@ -468,7 +494,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "p.B");
     }
 
-    public void testFail9() throws Exception
+    @Test
+	public void testFail9() throws Exception
     {
         fieldMethodTypeHelper_failing(
                 new String[0],
@@ -479,7 +506,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "p.B");
     }
 
-    public void testFail10() throws Exception
+    @Test
+	public void testFail10() throws Exception
     {
         fieldMethodTypeHelper_failing(
                 new String[0],
@@ -490,7 +518,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "p.B");
     }
 
-    public void testFail13() throws Exception
+    @Test
+	public void testFail13() throws Exception
     {
         fieldMethodTypeHelper_failing(
                 new String[0],
@@ -501,7 +530,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "p.B");
     }
 
-    public void testFail15() throws Exception
+    @Test
+	public void testFail15() throws Exception
     {
         fieldMethodTypeHelper_failing(
                 new String[0],
@@ -512,7 +542,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "p.B");
     }
 
-    public void testFail17() throws Exception
+    @Test
+	public void testFail17() throws Exception
     {
         fieldMethodTypeHelper_failing(
                 new String[0],
@@ -523,7 +554,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "java.lang.Object");
     }
 
-    public void testFail18() throws Exception
+    @Test
+	public void testFail18() throws Exception
     {
         fieldMethodTypeHelper_failing(
                 new String[0],
@@ -534,7 +566,8 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "p.DontExist");
     }
 
-    public void testFail19() throws Exception
+    @Test
+	public void testFail19() throws Exception
     {
         fieldMethodTypeHelper_failing(
                 new String[0],
@@ -545,20 +578,24 @@ public class MoveStaticMethodTests extends RefactoringTest
                 "p.B");
     }
 
-    public void testMoveToTeamclass() throws Exception
+    @Test
+	public void testMoveToTeamclass() throws Exception
     {
         methodHelper_passing(new String[] { "m" }, new String[][] { new String[0] }, "B", "T");
     }
 
-    public void testMoveToNestedTeamclass1() throws Exception
+    @Test
+	public void testMoveToNestedTeamclass1() throws Exception
     {
         methodHelper_passing(new String[] { "m" }, new String[][] { new String[0] }, "B", "T");
     }
-    public void testMoveToNestedTeamclass2() throws Exception
+    @Test
+	public void testMoveToNestedTeamclass2() throws Exception
     {
         methodHelper_passing(new String[] { "m" }, new String[][] { new String[0] }, "B", "T$TR");
     }
-    public void testMoveToRoleclass() throws Exception
+    @Test
+	public void testMoveToRoleclass() throws Exception
     {
         methodHelper_passing(new String[] { "m" }, new String[][] { new String[0] }, "B", "T$R");
     }

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2020 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -12,7 +12,6 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * $Id$
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -23,33 +22,21 @@
 package org.eclipse.objectteams.otdt.ui.tests.refactoring.reorg;
 
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * @author brcan
  *
  * Runs all OT-specific refactoring tests and corresponding eclipse refactoring tests
  */
-public class AllTests
-{
-
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(AllTests.suite());
-    }
-
-    public static Test suite()
-    {
-        TestSuite suite = new TestSuite(
-                "All OT-Reorg Refactoring Tests");
-
-        //copy & paste, delete (cut)
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.reorg.OTCopyToClipboardTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.reorg.OTDeleteTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.reorg.PasteActionTest.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.reorg.OTPasteActionTest.suite());
-
-        return suite;
-    }
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	//copy & paste, delete (cut)
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.reorg.OTCopyToClipboardTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.reorg.OTDeleteTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.reorg.PasteActionTest.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.reorg.OTPasteActionTest.class
+})
+public class AllTests {
 }

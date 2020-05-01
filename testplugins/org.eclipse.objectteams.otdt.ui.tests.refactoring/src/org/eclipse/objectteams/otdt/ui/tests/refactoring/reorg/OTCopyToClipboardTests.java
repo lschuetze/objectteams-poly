@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -16,8 +16,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.junit.Assert.*;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -34,8 +33,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSourceTransfer;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.GenericRefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockClipboard;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -44,6 +42,8 @@ import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.part.ResourceTransfer;
+import org.junit.Rule;
+import org.junit.Test;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping;
@@ -58,7 +58,7 @@ import org.eclipse.objectteams.otdt.ui.tests.refactoring.OTRefactoringTestSetup;
 //        remove tests which won't work with the given OT type declarations
 //		  test enumeration is kept, new OT tests are testEnabledOT0 - testEnabledOT6
 @SuppressWarnings("restriction")
-public class OTCopyToClipboardTests extends RefactoringTest
+public class OTCopyToClipboardTests extends GenericRefactoringTest
 {
     private static final String CU_T1_NAME = "T1";
     private static final String CU_B1_NAME = "B1";
@@ -68,20 +68,15 @@ public class OTCopyToClipboardTests extends RefactoringTest
     private ICompilationUnit       _cuT1;
     private ICompilationUnit       _cuB1;
 
-	public OTCopyToClipboardTests(String name) {
-		super(name);
-	}
+	@Rule
+	public OTRefactoringTestSetup setup = new OTRefactoringTestSetup();
 
-	public static Test suite() {
-		return new OTRefactoringTestSetup(new TestSuite(OTCopyToClipboardTests.class));
-	}
-
-	protected void setUp() throws Exception
+	public void genericbefore() throws Exception
     {
-        super.setUp();
+        super.genericbefore();
         _clipboard = new MockClipboard(Display.getDefault());
 
-        _cuT1 = createCU(getPackageP(), CU_T1_NAME + ".java",
+        _cuT1 = createCU(OTRefactoringTestSetup.getPackageP(), CU_T1_NAME + ".java",
                 "package p;" + "\n" +
                 "import java.util.List;" + "\n" +
                 "public team class T1" + "\n" +
@@ -118,9 +113,10 @@ public class OTCopyToClipboardTests extends RefactoringTest
         assertTrue("B1.java does not exist", _cuB1.exists());
     }
 
-    protected void tearDown() throws Exception
+	@Override
+    public void genericafter() throws Exception
     {
-        super.tearDown();
+        super.genericafter();
         performDummySearch();
         _clipboard.dispose();
         _labelProvider.dispose();
@@ -317,38 +313,46 @@ public class OTCopyToClipboardTests extends RefactoringTest
 
 	///---------tests
 
+	@Test
 	public void testDisabled0() {
 		Object[] elements= {};
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled1() throws Exception {
 		Object[] elements= {null};
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled2() throws Exception {
 		Object[] elements= {this};
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled3() throws Exception {
-		Object[] elements= {RefactoringTestSetup.getProject(), getPackageP()};
+		Object[] elements= {OTRefactoringTestSetup.getProject(), getPackageP()};
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled4() throws Exception{
 		checkDisabled(new Object[]{getPackageP(), _cuT1});
 	}
 
+	@Test
 	public void testDisabled5() throws Exception{
 		checkDisabled(new Object[]{getRoot(), _cuT1});
 	}
 
+	@Test
 	public void testDisabled12() throws Exception{
 		checkDisabled(new Object[]{getRoot().getJavaProject(), _cuT1});
 	}
 
+	@Test
 	public void testDisabled15() throws Exception {
 		Object fieldF= _cuT1.getType("T1").getField("x");
 		Object classA= _cuT1.getType("T1");
@@ -356,24 +360,28 @@ public class OTCopyToClipboardTests extends RefactoringTest
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled16() throws Exception {
 		Object fieldF= _cuT1.getType("T1").getField("x");
 		Object[] elements= {fieldF, _cuT1};
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled20() throws Exception {
 		Object fieldF= _cuT1.getType("T1").getField("x");
 		Object[] elements= {fieldF, getRoot()};
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled21() throws Exception {
 		Object fieldF= _cuT1.getType("T1").getField("x");
-		Object[] elements= {fieldF, RefactoringTestSetup.getProject()};
+		Object[] elements= {fieldF, OTRefactoringTestSetup.getProject()};
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled22() throws Exception {
 		Object typeT1= _cuT1.getType("T1");
 		Object typeB1= _cuB1.getType("B1");
@@ -381,54 +389,65 @@ public class OTCopyToClipboardTests extends RefactoringTest
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testEnabled0() throws Exception {
-		Object[] elements= {RefactoringTestSetup.getProject()};
+		Object[] elements= {OTRefactoringTestSetup.getProject()};
 		checkEnabled(elements);
 	}
 
+	@Test
 	public void testEnabled1() throws Exception {
 		Object[] elements= {getPackageP()};
 		checkEnabled(elements);
 	}
 
+	@Test
 	public void testEnabled2() throws Exception {
 		Object[] elements= {getRoot()};
 		checkEnabled(elements);
 	}
 
+	@Test
 	public void testEnabled3() throws Exception {
-		Object[] elements= {RefactoringTestSetup.getDefaultSourceFolder()};
+		Object[] elements= {OTRefactoringTestSetup.getDefaultSourceFolder()};
 		checkEnabled(elements);
 	}
 
+	@Test
 	public void testEnabled5() throws Exception{
 		checkEnabled(new Object[]{getRoot()});
 	}
 
+	@Test
 	public void testEnabled6() throws Exception{
 		checkEnabled(new Object[]{_cuT1});
 	}
 
+	@Test
 	public void testEnabled7() throws Exception{
 		checkEnabled(new Object[]{getRoot().getJavaProject()});
 	}
 
+	@Test
 	public void testEnabled8() throws Exception{
 		checkEnabled(new Object[]{getPackageP()});
 	}
 
+	@Test
 	public void testEnabled10() throws Exception{
 		Object packDecl= _cuT1.getPackageDeclarations()[0];
 		Object[] elements= {packDecl};
 		checkEnabled(elements);
 	}
 
+	@Test
 	public void testEnabled11() throws Exception{
 		Object importD= _cuT1.getImports()[0];
 		Object[] elements= {importD};
 		checkEnabled(elements);
 	}
 
+	@Test
 	public void testEnabled12() throws Exception{
 //		printTestDisabledMessage("disabled due to bug 37750");
 //		if (true)
@@ -438,24 +457,28 @@ public class OTCopyToClipboardTests extends RefactoringTest
 		checkEnabled(elements);
 	}
 
+	@Test
 	public void testEnabled13() throws Exception{
 		Object classA= _cuT1.getType("T1");
 		Object[] elements= {classA};
 		checkEnabled(elements);
 	}
 
+	@Test
 	public void testEnabled14() throws Exception{
 		Object methodT1m= _cuT1.getType("T1").getMethod("t1m", new String[0]);
 		Object[] elements= {methodT1m};
 		checkEnabled(elements);
 	}
 
+	@Test
 	public void testEnabled15() throws Exception{
 		Object fieldX= _cuT1.getType("T1").getField("x");
 		Object[] elements= {fieldX};
 		checkEnabled(elements);
 	}
 
+	@Test
 	public void testEnabled19() throws Exception{
 //		printTestDisabledMessage("disabled due to bug 37750");
 //		if (true)
@@ -468,6 +491,7 @@ public class OTCopyToClipboardTests extends RefactoringTest
 		checkEnabled(elements);
 	}
 
+	@Test
 	public void testEnabled22() throws Exception{
 //		printTestDisabledMessage("bug 39410");
 		Object classA= _cuT1.getType("T1");
@@ -476,6 +500,7 @@ public class OTCopyToClipboardTests extends RefactoringTest
 		checkEnabled(elements);
 	}
 
+	@Test
 	public void testEnabledOT0() throws Exception
     {
         IType teamT1 = _cuT1.getType("T1");
@@ -485,7 +510,8 @@ public class OTCopyToClipboardTests extends RefactoringTest
         checkEnabled(elements);
     }
 
-    public void testEnabledOT1() throws Exception
+    @Test
+	public void testEnabledOT1() throws Exception
     {
         IType teamT1 = _cuT1.getType("T1");
         IType nestedTeamTR1 = teamT1.getType("TR1");
@@ -499,7 +525,8 @@ public class OTCopyToClipboardTests extends RefactoringTest
         }
     }
 
-    public void testEnabledOT2() throws Exception
+    @Test
+	public void testEnabledOT2() throws Exception
     {
         IType teamT1 = _cuT1.getType("T1");
         IType nestedTeamTR1 = teamT1.getType("TR1");
@@ -510,7 +537,8 @@ public class OTCopyToClipboardTests extends RefactoringTest
         checkEnabled(elements);
     }
 
-    public void testEnabledOT3() throws Exception
+    @Test
+	public void testEnabledOT3() throws Exception
     {
         IType teamT1 = _cuT1.getType("T1");
         IType nestedTeamTR1 = teamT1.getType("TR1");
@@ -529,7 +557,8 @@ public class OTCopyToClipboardTests extends RefactoringTest
         checkEnabled(elements);
     }
 
-    public void testEnabledOT4() throws Exception
+    @Test
+	public void testEnabledOT4() throws Exception
     {
         IType teamT1 = _cuT1.getType("T1");
         IType nestedTeamTR1 = teamT1.getType("TR1");
@@ -541,7 +570,8 @@ public class OTCopyToClipboardTests extends RefactoringTest
         checkEnabled(elements);
     }
 
-    public void testEnabledOT5() throws Exception
+    @Test
+	public void testEnabledOT5() throws Exception
     {
         IType teamT1 = _cuT1.getType("T1");
         IType nestedTeamTR1 = teamT1.getType("TR1");
@@ -560,7 +590,8 @@ public class OTCopyToClipboardTests extends RefactoringTest
         checkEnabled(elements);
     }
 
-    public void testEnabledOT6() throws Exception
+    @Test
+	public void testEnabledOT6() throws Exception
     {
         IType teamT1 = _cuT1.getType("T1");
         IField fieldX = teamT1.getField("x");

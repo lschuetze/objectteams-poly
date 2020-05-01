@@ -22,7 +22,8 @@
          <team
                activation="NONE"
                class="org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveRoleTests"
-               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"
+               superclass="org.eclipse.objectteams.otdt.ui.tests.refactoring.move.AbstractMoveTests">
             <superBase
                   class="junit.framework.TestCase"
                   plugin="org.junit">
@@ -34,7 +35,8 @@
          <team
                activation="NONE"
                class="org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveBaseClassTests"
-               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"
+               superclass="org.eclipse.objectteams.otdt.ui.tests.refactoring.move.AbstractMoveTests">
             <superBase
                   class="junit.framework.TestCase"
                   plugin="org.junit">

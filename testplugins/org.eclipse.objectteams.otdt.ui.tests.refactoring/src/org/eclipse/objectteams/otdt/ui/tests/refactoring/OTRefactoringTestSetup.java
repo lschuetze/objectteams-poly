@@ -26,20 +26,19 @@ import junit.framework.Test;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
+import org.junit.Before;
+
 import base org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 @SuppressWarnings("restriction")
 public team class OTRefactoringTestSetup extends RefactoringTestSetup {
 
-	public OTRefactoringTestSetup(Test test) {
-		super(test);
-	}
-
+	@Before
 	@Override
-	protected void setUp() throws Exception {
+	public void before() throws Exception {
 		within (this)
-			super.setUp();
+			super.before();
 	}
 
 	protected class ProjectHelper playedBy JavaProjectHelper {

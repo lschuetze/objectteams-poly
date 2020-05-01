@@ -22,8 +22,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.refactoring.move;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.junit.Assert.*;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -42,15 +41,18 @@ import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 import org.eclipse.objectteams.otdt.internal.refactoring.corext.base.OTRefactoringStatusCodes;
 import org.eclipse.objectteams.otdt.ui.tests.refactoring.MySetup;
 import org.eclipse.objectteams.otdt.ui.tests.refactoring.RefactoringTest;
+import org.junit.Test;
+
+import junit.framework.TestSuite;
 
 /**
  * @author brcan
  *
  */
-@SuppressWarnings({ "restriction", "nls" })
+@SuppressWarnings({ "restriction" })
 public class MoveInstanceMethodTests extends RefactoringTest
 {
-    private static final String REFACTORING_PATH = "MoveInstanceMethod/";
+	private static final String REFACTORING_PATH = "MoveInstanceMethod/";
 
     private static final int PARAMETER = 0;
     private static final int FIELD = 1;
@@ -62,7 +64,7 @@ public class MoveInstanceMethodTests extends RefactoringTest
         super(name);
     }
 
-    public static Test suite()
+    public static junit.framework.Test suite()
     {
         if (false)
         {
@@ -427,11 +429,13 @@ public class MoveInstanceMethodTests extends RefactoringTest
 
     /********** tests *********/
 // test method template
-//  public void test0() throws Exception
+//  @Test
+//	public void test0() throws Exception
 //  {
 //      helper1(new String[] { "p1.A", "p2.B", "p3.C" }, "p1.A", 7, 17, 7, 20,
 //              PARAMETER, "b", false, false);
 //  }
+//	@Test
 //	public void testFail0() throws Exception
 //	{
 //		failHelper1("p1.IA", 5, 17, 5, 20, PARAMETER, "b", true, true, RefactoringStatusCodes.SELECT_METHOD_IMPLEMENTATION);
@@ -440,34 +444,40 @@ public class MoveInstanceMethodTests extends RefactoringTest
     // TODO(SH): more tests for combinations of inline,removeDelegate!
 
     /* Testing receiver types */
+	@Test
 	public void testFieldNewReceiver() throws Exception {
 		performAndCheckSelectedCU_passing(new String[] { "p.A", "p.B" }, "p.A", 7, 17, 7, 19, FIELD, "b", true, true,
 				true);// warn: change-field-to-default-vis
 	}
 
+	@Test
 	public void testParameterNewReceiver() throws Exception {
 		performAndCheckSelectedCU_passing(new String[] { "p.A", "p.B" }, "p.A", 5, 17, 5, 19, PARAMETER, "b", true,
 				true, false);
 	}
 
 	/* Testing team classes */
+	@Test
 	public void testTeamclass1() throws Exception {
 		performAndCheckSelectedCU_passing(new String[] { "p.T", "p.O" }, "p.O", 7, 17, 7, 20, FIELD, "_t", true, true,
 		true);// warn: change-field-to-default-vis
 	}
 
+	@Test
 	public void testTeamclass2() throws Exception {
 		performAndCheckSelectedCU_passing(new String[] { "p.T", "p.O" }, "p.O", 5, 17, 5, 20, PARAMETER, "t", false,
 				false, false);
 	}
 
 	/* Testing role classes */
+	@Test
 	public void testRoleclass1() throws Exception {
 		// XXX(SH): expect info: The 'Move Instance Method' Refactoring is not yet fully OT-aware!
 		performAndCheckSelectedCU_passing_std_info(new String[] { "p.T", "p.O" }, "p.O", 8, 17, 8, 20, FIELD, "_r", true, false,
 				false);
 	}
 
+	@Test
 	public void testRoleclass2() throws Exception {
 		// XXX(SH): expect info: The 'Move Instance Method' Refactoring is not yet fully OT-aware!
 		performAndCheckSelectedCU_passing_std_info(new String[] { "p.T", "p.O" }, "p.O", 7, 17, 7, 20, PARAMETER, "r", true,
@@ -475,12 +485,14 @@ public class MoveInstanceMethodTests extends RefactoringTest
 	}
 
 	/* Testing nested teams */
+	@Test
 	public void testNestedTeam1() throws Exception {
 		// XXX(SH): expect info: The 'Move Instance Method' Refactoring is not yet fully OT-aware!
 		performAndCheckSelectedCU_passing_std_info(new String[] { "p.T", "p.O" }, "p.O", 8, 17, 8, 20, FIELD, "_nT", true,
 				false, false);
 	}
 
+	@Test
 	public void testNestedTeam2() throws Exception {
 		// XXX(SH): expect info: The 'Move Instance Method' Refactoring is not yet fully OT-aware!
 		performAndCheckSelectedCU_passing_std_info(new String[] { "p.T", "p.O" }, "p.O", 7, 17, 7, 20, PARAMETER, "nT", true,
@@ -489,14 +501,17 @@ public class MoveInstanceMethodTests extends RefactoringTest
 
 	/* Testing role files */
 	// TODO(gbr) implement tests for role files
-	// public void testRoleFile1() throws Exception
+	// @Test
+	//	public void testRoleFile1() throws Exception
 	// {
 	// }
 	//
-	// public void testRoleFile2() throws Exception
+	// @Test
+	//	public void testRoleFile2() throws Exception
 	// {
 	// }
 
+	@Test
 	public void testRoleClassWithLongMethodSpecsInCallinBinding() throws Exception {
 		performConditionChecking_warnings(new String[] { "p.O", "p.S", "p.B", "p.T" }, "p.O", 8, 17, 8, 18, FIELD,
 				"_s", null, true, true,
@@ -505,6 +520,7 @@ public class MoveInstanceMethodTests extends RefactoringTest
 				-1);
 	}
 
+	@Test
 	public void testRoleClassWithLongMethodSpecsInCalloutBinding() throws Exception {
 		performConditionChecking_warnings(new String[] { "p.O", "p.S", "p.B", "p.T" }, "p.O", 8, 17, 8, 18, FIELD,
 				"_s", null, true, true,
@@ -513,6 +529,7 @@ public class MoveInstanceMethodTests extends RefactoringTest
 				-1);
 	}
 
+	@Test
 	public void testExplicitlyInheritedRoleClassWithLongMethodSpecs() throws Exception {
 		performConditionChecking_warnings(new String[] { "p.O", "p.S", "p.B", "p.T" }, "p.O", 8, 17, 8, 18, FIELD,
 				"_s", null, true, true,
@@ -521,6 +538,7 @@ public class MoveInstanceMethodTests extends RefactoringTest
 				-1);
 	}
 
+	@Test
 	public void testImplicitlyInheritedRoleClassWithLongMethodSpecs() throws Exception {
 		performConditionChecking_warnings(new String[] { "p.O", "p.S", "p.B", "p.T1", "p.T2" }, "p.O", 8, 17, 8, 18,
 				FIELD, "_s", null, true, true,
@@ -529,41 +547,48 @@ public class MoveInstanceMethodTests extends RefactoringTest
 				-1);
 	}
 
+	@Test
 	public void testTargetMethodAccessesPrivateFeatureOfEnclosingType1() throws Exception {
 		performAndCheckSelectedCU_passing(new String[] { "p.A", "p.B", "p.C" }, "p.A", 8, 17, 8, 19, FIELD, "_c", true,
 				true, true);// warn: move needs to open visibility of field
 	}
 
+	@Test
 	public void testTargetMethodAccessesPrivateFeatureOfEnclosingType2() throws Exception {
 		performAndCheckSelectedCU_passing(new String[] { "p.A", "p.B", "p.C" }, "p.A", 7, 17, 7, 19, PARAMETER, "c",
 				true, true, true);// warn: move needs to open visibility of
 									// field
 	}
 
+	@Test
 	public void testTargetMethodAccessesProtectedFeatureOfEnclosingType1() throws Exception {
 		performAndCheckSelectedCU_passing(new String[] { "p1.A", "p1.B", "p2.C" }, "p1.A", 10, 17, 10, 19, FIELD, "_c",
 				true, true, true);// warn: move needs to open visibility of
 									// field
 	}
 
+	@Test
 	public void testTargetMethodAccessesProtectedFeatureOfEnclosingType2() throws Exception {
 		performAndCheckSelectedCU_passing(new String[] { "p1.A", "p1.B", "p2.C" }, "p1.A", 9, 17, 9, 19, PARAMETER,
 				"c", true, true, true);// warn: move needs to open visibility of
 										// field
 	}
 
+	@Test
 	public void testTargetMethodAccessesPackageVisibleFeatureOfEnclosingType1() throws Exception {
 		performAndCheckSelectedCU_passing(new String[] { "p1.A", "p1.B", "p2.C" }, "p1.A", 10, 17, 10, 19, FIELD, "_c",
 				true, true, true);// warn: move needs to open visibility of
 									// field
 	}
 
+	@Test
 	public void testTargetMethodAccessesPackageVisibleFeatureOfEnclosingType2() throws Exception {
 		performAndCheckSelectedCU_passing(new String[] { "p1.A", "p1.B", "p2.C" }, "p1.A", 9, 17, 9, 19, PARAMETER,
 				"c", true, true, true);// warn: move needs to open visibility of
 										// field
 	}
     //tests for ambiguity in method specs
+	@Test
 	public void testAmbiguousRoleMethodSpecifierInCallinBinding1()
     	throws Exception
     {
@@ -572,7 +597,8 @@ public class MoveInstanceMethodTests extends RefactoringTest
                 "p.O", 8, 17, 8, 18, FIELD, "_s",
                 true, true, OTRefactoringStatusCodes.AMBIGUOUS_METHOD_SPECIFIER);
     }
-    public void testAmbiguousRoleMethodSpecifierInCallinBinding2()
+    @Test
+	public void testAmbiguousRoleMethodSpecifierInCallinBinding2()
     	throws Exception
     {
         performAndCheckSelectedCU_failing(
@@ -589,7 +615,8 @@ public class MoveInstanceMethodTests extends RefactoringTest
                 false, false,
 				OTRefactoringStatusCodes.AMBIGUOUS_METHOD_SPECIFIER);
     }
-    public void testAmbiguousBaseMethodSpecifierInCallinBinding2()
+    @Test
+	public void testAmbiguousBaseMethodSpecifierInCallinBinding2()
 		throws Exception
 	{
 	    performAndCheckSelectedCU_failing(
@@ -597,7 +624,8 @@ public class MoveInstanceMethodTests extends RefactoringTest
 	            "p.O", 5, 17, 5, 18, PARAMETER, "s",
 	            true, true, OTRefactoringStatusCodes.AMBIGUOUS_METHOD_SPECIFIER);
 	}
-    public void testAmbiguousRoleMethodSpecifierInCalloutBinding1()
+    @Test
+	public void testAmbiguousRoleMethodSpecifierInCalloutBinding1()
     	throws Exception
     {
         performAndCheckSelectedCU_failing(
@@ -605,7 +633,8 @@ public class MoveInstanceMethodTests extends RefactoringTest
                 "p.O", 8, 17, 8, 18, FIELD, "_s",
                 true, true, OTRefactoringStatusCodes.AMBIGUOUS_METHOD_SPECIFIER);
     }
-    public void testAmbiguousRoleMethodSpecifierInCalloutBinding2()
+    @Test
+	public void testAmbiguousRoleMethodSpecifierInCalloutBinding2()
     	throws Exception
 	{
 	    performAndCheckSelectedCU_failing(
@@ -621,7 +650,8 @@ public class MoveInstanceMethodTests extends RefactoringTest
                 "p.O", 8, 17, 8, 18, FIELD, "_s",
                 true, true, OTRefactoringStatusCodes.AMBIGUOUS_METHOD_SPECIFIER);
     }
-    public void testAmbiguousBaseMethodSpecifierInCalloutBinding2()
+    @Test
+	public void testAmbiguousBaseMethodSpecifierInCalloutBinding2()
 		throws Exception
 	{
 	    performAndCheckSelectedCU_failing(
@@ -664,7 +694,8 @@ public class MoveInstanceMethodTests extends RefactoringTest
                 true, true, OTRefactoringStatusCodes.ROLE_METHOD_OVERRIDES_MOVED_METHOD);
 	}
     //tests for duplication
-    public void testDuplicateMethodInNewReceiver()
+    @Test
+	public void testDuplicateMethodInNewReceiver()
     	throws Exception
     {
         performAndCheckSelectedCU_failing(
@@ -672,7 +703,8 @@ public class MoveInstanceMethodTests extends RefactoringTest
                 "p.O", 7, 17, 7, 17, FIELD, "_s",
                 true, true, -1);
     }
-    public void testDuplicateMethodInBaseClassReceiver()
+    @Test
+	public void testDuplicateMethodInBaseClassReceiver()
     	throws Exception
     {
         performAndCheckSelectedCU_failing(

@@ -23,61 +23,48 @@
 package org.eclipse.objectteams.otdt.ui.tests.refactoring;
 
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * @author brcan
  *
  * Runs all OT-specific refactoring tests and corresponding eclipse refactoring tests
  */
-public class AllTests
-{
-
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(AllTests.suite());
-    }
-
-    public static Test suite()
-    {
-        TestSuite suite = new TestSuite(
-                "All Refactoring Tests");
-
-        // util
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.util.AllTests.suite());
-
-        // OTDT refactoring tests
-        // rename
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.rename.RenameMethodInInterfaceTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.rename.RenamePrivateMethodTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.rename.RenameStaticMethodTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.rename.RenameVirtualMethodInClassTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.rename.RenamePrivateFieldTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.rename.RenameTypeTests.suite());
-
-        // move
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveInstanceMethodTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveStaticMethodTests.suite());
-
-        //extract
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.extractmethod.ExtractMethodTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.extractmethod.ExtractMethodRefactoringUtilTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.extractmethod.ExtractTempTests.suite());
-
-        //copy & paste, delete (cut)
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.reorg.OTCopyToClipboardTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.reorg.OTDeleteTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.reorg.OTPasteActionTest.suite());
-
-        // pull & push
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.pullup.PullUpTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.pushdown.PushDownTests.suite());
-
-        // ot refactorings
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.inlinecallin.InlineCallinTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.extractcallin.ExtractCallinTests.suite());
-
-        return suite;
-    }
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.util.AllTests.class,
+	
+	// OTDT refactoring tests
+	// rename
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.rename.RenameMethodInInterfaceTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.rename.RenamePrivateMethodTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.rename.RenameStaticMethodTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.rename.RenameVirtualMethodInClassTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.rename.RenamePrivateFieldTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.rename.RenameTypeTests.class,
+	
+	// move
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveInstanceMethodTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveStaticMethodTests.class,
+	
+	//extract
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.extractmethod.ExtractMethodTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.extractmethod.ExtractMethodRefactoringUtilTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.extractmethod.ExtractTempTests.class,
+	
+	//copy & paste, delete (cut)
+    org.eclipse.objectteams.otdt.ui.tests.refactoring.reorg.OTCopyToClipboardTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.reorg.OTDeleteTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.reorg.OTPasteActionTest.class,
+	
+	// pull & push
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.pullup.PullUpTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.pushdown.PushDownTests.class,
+	
+	// ot refactorings
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.inlinecallin.InlineCallinTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.extractcallin.ExtractCallinTests.class,
+})
+public class AllTests {
 }

@@ -23,6 +23,9 @@
 package org.eclipse.objectteams.otdt.ui.tests.refactoring.move;
 
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -31,24 +34,31 @@ import junit.framework.TestSuite;
  *
  * Runs all OT-specific refactoring tests for this package (move)
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveInstanceMethodTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveStaticMethodTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveRoleTests.class,
+	org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveBaseClassTests.class
+})
 public class AllTests
 {
-
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(AllTests.suite());
-    }
-
-    public static Test suite()
-    {
-        TestSuite suite = new TestSuite(
-                "All OT-Move-Refactoring Tests");
-
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveInstanceMethodTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveStaticMethodTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveRoleTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveBaseClassTests.suite());
-
-        return suite;
-    }
+//
+//    public static void main(String[] args)
+//    {
+//        junit.textui.TestRunner.run(AllTests.suite());
+//    }
+//
+//    public static Test suite()
+//    {
+//        TestSuite suite = new TestSuite(
+//                "All OT-Move-Refactoring Tests");
+//
+//        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveInstanceMethodTests.suite());
+//        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveStaticMethodTests.suite());
+//        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveRoleTests.class);
+//        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveBaseClassTests.suite());
+//
+//        return suite;
+//    }
 }
