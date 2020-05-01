@@ -676,19 +676,19 @@ protected void consumeFieldAccess(boolean isSuperAccess) {
 protected void consumeFormalParameter(boolean isVarArgs) {
 	if (this.indexOfAssistIdentifier() < 0) {
 		super.consumeFormalParameter(isVarArgs);
-		if((!this.diet || this.dietInt != 0) && this.astPtr > -1) {
-			Argument argument = (Argument) this.astStack[this.astPtr];
+// FIXME		if((!this.diet || this.dietInt != 0) && this.astPtr > -1) {
+//			Argument argument = (Argument) this.astStack[this.astPtr];
 //{ObjectTeams: consider lifting type
 /* orig:
 			if(argument.type == this.assistNode) {
   :giro */
-			if (hasAssistNode(argument.type)) {
+//			if (hasAssistNode(argument.type)) {
 // SH}
-				this.isOrphanCompletionNode = true;
-				this.restartRecovery	= true;	// force to restart in recovery mode
-				this.lastIgnoredToken = -1;
-			}
-		}
+//				this.isOrphanCompletionNode = true;
+//				this.restartRecovery	= true;	// force to restart in recovery mode
+//				this.lastIgnoredToken = -1;
+//			}
+//		}
 	} else {
 		boolean isReceiver = this.intStack[this.intPtr--] == 0;
 	    if (isReceiver) {

@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ParameterizedSingleTypeReference;
-import org.eclipse.jdt.internal.compiler.ast.QualifiedAllocationExpression;import org.eclipse.jdt.internal.compiler.ast.RecordDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.QualifiedAllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
@@ -202,7 +202,7 @@ public class ClassScope extends Scope {
 					anonymousType.tagBits |= TagBits.HierarchyHasProblems;
 					anonymousType.setSuperClass(getJavaLangObject());
 				} else if (supertype.erasure().id == TypeIds.T_JavaLangRecord) {
-					if (!(this.referenceContext instanceof RecordDeclaration)) {
+					if (!(this.referenceContext.isRecord())) {
 						problemReporter().recordCannotExtendRecord(anonymousType, typeReference, supertype);
 						anonymousType.tagBits |= TagBits.HierarchyHasProblems;
 						anonymousType.setSuperClass(getJavaLangObject());
@@ -616,7 +616,7 @@ public class ClassScope extends Scope {
 // SH}
 		}
 		if (sourceType.isRecord()) {
-			assert this.referenceContext instanceof RecordDeclaration;
+			assert this.referenceContext.isRecord();
 			methodBindings = sourceType.checkAndAddSyntheticRecordMethods(methodBindings, count);
 			count = methodBindings.length;
 		}
@@ -1002,6 +1002,11 @@ public class ClassScope extends Scope {
 				}
 // SH}
 				return;
+			} else if (sourceType.isRecord()) {
+				if (enclosingType != null && enclosingType.isLocalType()) {
+					problemReporter().illegalLocalTypeDeclaration(this.referenceContext);
+					return;
+				}
 			}
 			if (sourceType.isAnonymousType()) {
 				if (compilerOptions().complianceLevel < ClassFileConstants.JDK9)
@@ -1686,7 +1691,7 @@ public class ClassScope extends Scope {
 			} else if (superclass.erasure().id == TypeIds.T_JavaLangEnum) {
 				problemReporter().cannotExtendEnum(sourceType, superclassRef, superclass);
 			} else if (superclass.erasure().id == TypeIds.T_JavaLangRecord) {
-				if (!(this.referenceContext instanceof RecordDeclaration)) {
+				if (!(this.referenceContext.isRecord())) {
 					problemReporter().recordCannotExtendRecord(sourceType, superclassRef, superclass);
 				} else {
 					return connectRecordSuperclass();

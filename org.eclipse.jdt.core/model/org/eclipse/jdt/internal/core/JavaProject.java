@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -85,6 +85,7 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.eval.IEvaluationContext;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
 import org.eclipse.jdt.internal.compiler.env.AutomaticModuleNaming;
@@ -1963,6 +1964,7 @@ public class JavaProject
 					{
 						manager.deltaState.addClasspathValidation(JavaProject.this);
 					}
+					checkExpireModule(propertyName, event.getOldValue(), event.getNewValue());
 					manager.resetProjectOptions(JavaProject.this);
 					JavaProject.this.resetCaches(); // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=233568
 				}
@@ -1972,6 +1974,24 @@ public class JavaProject
 					JavaProject.this.resetCaches(); // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=233568
 				}
 // SH}
+			}
+
+			void checkExpireModule(String propertyName, Object oldValue, Object newValue) {
+				if (propertyName.equals(JavaCore.COMPILER_SOURCE)) {
+					if (oldValue instanceof String && newValue instanceof String
+						&& CompilerOptions.versionToJdkLevel((String) oldValue) >= ClassFileConstants.JDK9
+						&& CompilerOptions.versionToJdkLevel((String) newValue) < ClassFileConstants.JDK9)
+					{
+						try {
+							// this is a change from modular to non-modular, forget the module if any:
+							IModuleDescription module = getModuleDescription();
+							if (module != null)
+								((JavaElement)module).close();
+						} catch (JavaModelException e) {
+							// ignore
+						}
+					}
+				}
 			}
 		};
 		eclipsePreferences.addPreferenceChangeListener(this.preferencesChangeListener);

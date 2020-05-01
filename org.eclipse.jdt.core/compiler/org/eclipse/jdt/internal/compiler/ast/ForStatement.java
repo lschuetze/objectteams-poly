@@ -404,6 +404,17 @@ public class ForStatement extends Statement {
 
 	@Override
 	public void resolve(BlockScope upperScope) {
+		if (this.condition != null && this.condition.containsPatternVariable()) {
+			this.condition.traverse(new ASTVisitor() {
+				@Override
+				public boolean visit(
+						InstanceOfExpression instanceOfExpression,
+						BlockScope sc) {
+					instanceOfExpression.resolvePatternVariable(upperScope);
+					return true; // We want to resolve all pattern variables if any inside the condition
+				}
+			}, upperScope);
+		}
 //{ObjectTeams: don't discard scope from previous attempt:
 	  if (this.scope == null)
 // SH}
