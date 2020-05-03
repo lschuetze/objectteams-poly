@@ -221,8 +221,10 @@ public void maybeRegister(
 	// (Note(SH): TeamMethodGenerator depends on any team method containing valid bytecodes and offsets,
     //            given the ClassFileReader.initialize() nulls "reference")
     if (!needByteCode) {
-    	initialize(); // ensure this info can be queried without lookup in reference
-		reset();
+    	synchronized (this) { // don't interfer with concurrent initializations
+	    	initialize(); // ensure this info can be queried without lookup in reference
+			reset();
+    	}
 	}
 
     // evaluate method attributes.
