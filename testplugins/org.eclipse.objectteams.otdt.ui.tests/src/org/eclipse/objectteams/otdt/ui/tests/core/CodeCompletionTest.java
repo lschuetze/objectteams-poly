@@ -859,6 +859,22 @@ public class CodeCompletionTest {
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
 
+	/* short, complete binding. */
+	@Test
+	public void testCompleteCallin9() throws Exception {
+		createBaseClass("    public void foo() {}\n");
+		assertTypeBodyProposal(
+				"        callin void bar() {}\n"+
+				"        bar <- before| foo;\n" +
+				"        int zork() {}\n",
+				"foo",
+				"        callin void bar() {}\n" +
+				"        bar <- before| foo, foo;\n" +
+				"        int zork() {}\n" +
+				"",
+				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
+	}
+
 	@Test
 	public void testCompleteBasecall1() throws Exception {
 		createBaseClass("    public String getBaseText(Object object) {return null;}\n");

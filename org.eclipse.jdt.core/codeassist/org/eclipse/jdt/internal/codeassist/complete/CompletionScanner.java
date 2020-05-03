@@ -990,6 +990,14 @@ public int scanIdentifierOrKeyword() {
 		 	while(getNextCharAsJavaIdentifierPart()){/*empty*/}
 			this.eofPosition = temp;
 		}
+//{ObjectTeams: not a good idea to turn these into identifier:
+		switch (id) {
+			case TokenNameafter:
+			case TokenNamebefore:
+			case TokenNamereplace:
+				return id;
+		}
+// SH}
 		// convert completed keyword into an identifier
 		return TokenNameIdentifier;
 	}
