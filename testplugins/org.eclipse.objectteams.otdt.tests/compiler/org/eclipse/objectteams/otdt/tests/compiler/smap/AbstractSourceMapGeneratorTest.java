@@ -366,6 +366,11 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
     {
     }
 
+    @Override
+    public void enterRecordComponent(RecordComponentInfo recordComponentInfo) {
+    	// TODO Auto-generated method stub
+    }
+
     public void enterInitializer(int declarationStart, int modifiers)
     {
     }
@@ -440,60 +445,54 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
 
 	public void acceptProblem(CategorizedProblem problem) {
 		// TODO Auto-generated method stub
-
 	}
 
 	public void enterConstructor(MethodInfo methodInfo) {
 		// TODO Auto-generated method stub
-
 	}
 
 	public void enterField(FieldInfo fieldInfo) {
 		// TODO Auto-generated method stub
-
 	}
 
 	public void enterMethod(MethodInfo methodInfo) {
 		// TODO Auto-generated method stub
-
 	}
 
 	public void enterType(TypeInfo typeInfo) {
 		// TODO Auto-generated method stub
-
 	}
 
 	public void exitMethod(int declarationEnd, int defaultValueStart, int defaultValueEnd) {
 		// TODO Auto-generated method stub
+	}
 
+	@Override
+	public void exitRecordComponent(int declarationEnd, int declarationSourceEnd) {
+		// TODO Auto-generated method stub
 	}
 
 	public void exitType(int declarationEnd) {
 		// TODO Auto-generated method stub
-
 	}
 
 	public void acceptImport(int declarationStart, int declarationEnd, char[][] tokens, boolean onDemand, int modifiers) {
 		// TODO Auto-generated method stub
-
 	}
 
 	public void acceptAnnotationTypeReference(char[][] annotation,
 			int sourceStart, int sourceEnd) {
 		// TODO Auto-generated method stub
-
 	}
 
 	public void acceptAnnotationTypeReference(char[] annotation,
 			int sourcePosition) {
 		// TODO Auto-generated method stub
-
 	}
 
 	public void acceptImport(int declarationStart, int declarationEnd, int nameStart, int nameEnd, char[][] tokens,
 			boolean onDemand, int modifiers) {
 		// TODO Auto-generated method stub
-
 	}
 
 	public void callback(CompilationUnitDeclaration cuDecl) {

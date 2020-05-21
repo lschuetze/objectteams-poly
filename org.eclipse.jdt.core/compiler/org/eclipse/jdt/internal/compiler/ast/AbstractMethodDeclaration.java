@@ -303,6 +303,10 @@ public abstract class AbstractMethodDeclaration
 					paramAnnotations[i] = Binding.NO_ANNOTATIONS;
 				}
 			}
+			if (paramAnnotations == null) {
+				paramAnnotations = getPropagatedRecordComponentAnnotations();
+			}
+
 			if (paramAnnotations != null)
 				this.binding.setParameterAnnotations(paramAnnotations);
 		}
@@ -313,6 +317,10 @@ public abstract class AbstractMethodDeclaration
 			this.scope.addLocalVariable(placeholderArg);
 // SH}
 		}
+	}
+
+	protected AnnotationBinding[][] getPropagatedRecordComponentAnnotations() {
+		return null;
 	}
 
 	/**
@@ -385,6 +393,9 @@ public abstract class AbstractMethodDeclaration
 								flowInfo.markPotentiallyNullBit(methodArguments[i].binding);
 						}
 					}
+				}
+				if (methodArguments[i].duplicateCheckObligation != null) {
+					methodArguments[i].duplicateCheckObligation.accept(flowInfo);
 				}
 				// tag parameters as being set:
 				flowInfo.markAsDefinitelyAssigned(methodArguments[i].binding);
@@ -729,7 +740,7 @@ public abstract class AbstractMethodDeclaration
 		return (this.modifiers & ClassFileConstants.AccNative) != 0;
 	}
 
-	public Argument getRecordComponent() {
+	public RecordComponent getRecordComponent() {
 		return null;
 	}
 

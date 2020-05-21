@@ -282,14 +282,17 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
 
 	}
 
+	@Override
+	public void enterRecordComponent(RecordComponentInfo recordComponentInfo) {
+		// TODO Auto-generated method stub
+	}
+
 	public void enterType(TypeInfo typeInfo) {
 		// TODO Auto-generated method stub
-
 	}
 
 	public void exitType(int declarationEnd) {
 		// TODO Auto-generated method stub
-
 	}
 
 	public void acceptProblem(CategorizedProblem problem) {
@@ -324,4 +327,8 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
 		// TODO Auto-generated method stub
 	}
 
+	@Override
+	public void exitRecordComponent(int declarationEnd, int declarationSourceEnd) {
+		// TODO Auto-generated method stub
+	}
 }

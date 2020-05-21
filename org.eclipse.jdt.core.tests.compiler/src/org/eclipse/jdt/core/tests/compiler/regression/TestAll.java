@@ -173,6 +173,7 @@ public static Test suite() {
 	since_9.add(UnnamedModuleTest.class);
 	since_9.add(NullAnnotationTests9.class);
 	since_9.add(AnnotationTest_9.class);
+	since_9.add(JavadocTestForModule.class);
 
 	// add 10 specific test here (check duplicates)
 	ArrayList since_10 = new ArrayList();
@@ -187,7 +188,6 @@ public static Test suite() {
 
 	// add 12 specific test here (check duplicates)
 	 ArrayList since_12 = new ArrayList();
-	 since_12.add(SwitchExpressionTest.class);
 	 since_12.add(Unicode11Test.class);
 
 		// add 13 specific test here (check duplicates)
@@ -199,6 +199,7 @@ public static Test suite() {
 	 since_14.add(SwitchExpressionsYieldTest.class);
 	 since_14.add(RecordsRestrictedClassTest.class);
 	 since_14.add(PatternMatching14Test.class);
+	 since_14.add(JavadocTestForRecord.class);
 
 	// Build final test suite
 	TestSuite all = new TestSuite(TestAll.class.getName());

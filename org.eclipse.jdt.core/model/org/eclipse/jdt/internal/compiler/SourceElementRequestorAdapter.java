@@ -182,6 +182,10 @@ public class SourceElementRequestorAdapter implements ISourceElementRequestor {
 	}
 
 	@Override
+	public void enterRecordComponent(RecordComponentInfo recordComponentInfo) {
+		// default implementation: do nothing
+	}
+	@Override
 	public void enterType(TypeInfo typeInfo) {
 		// default implementation: do nothing
 	}
@@ -233,6 +237,12 @@ public class SourceElementRequestorAdapter implements ISourceElementRequestor {
 	public void exitType(int declarationEnd) {
 		// default implementation: do nothing
 	}
+
+	@Override
+	public void exitRecordComponent(int declarationEnd, int declarationSourceEnd) {
+		// default implementation: do nothing
+	}
+
 //{OTDTUI: added default implementation to corresponding extension in ISourceElementRequestor
     @Override
 	public void enterCalloutMapping(CalloutInfo calloutInfo)

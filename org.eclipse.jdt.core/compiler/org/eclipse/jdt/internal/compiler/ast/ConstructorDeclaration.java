@@ -693,6 +693,41 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 	classFile.completeMethodInfo(this.binding, methodAttributeOffset, attributeNumber);
 }
 
+@Override
+protected AnnotationBinding[][] getPropagatedRecordComponentAnnotations() {
+
+	if ((this.bits & (ASTNode.IsCanonicalConstructor | ASTNode.IsImplicit)) == 0)
+		return null;
+	if (this.binding == null)
+		return null;
+	AnnotationBinding[][] paramAnnotations = null;
+	ReferenceBinding declaringClass = this.binding.declaringClass;
+	if (declaringClass instanceof SourceTypeBinding) {
+		assert declaringClass.isRecord();
+		RecordComponentBinding[] rcbs = ((SourceTypeBinding) declaringClass).components();
+		for (int i = 0, length = rcbs.length; i < length; i++) {
+			RecordComponentBinding rcb = rcbs[i];
+			RecordComponent recordComponent = rcb.sourceRecordComponent();
+			long rcMask = TagBits.AnnotationForParameter | TagBits.AnnotationForTypeUse;
+			List<AnnotationBinding> relevantAnnotationBindings = new ArrayList<>();
+			Annotation[] relevantAnnotations = ASTNode.getRelevantAnnotations(recordComponent.annotations, rcMask, relevantAnnotationBindings);
+			if (relevantAnnotations != null) {
+				if (paramAnnotations == null) {
+					paramAnnotations = new AnnotationBinding[length][];
+					for (int j=0; j<i; j++) {
+						paramAnnotations[j] = Binding.NO_ANNOTATIONS;
+					}
+				}
+				this.binding.tagBits |= TagBits.HasParameterAnnotations;
+				paramAnnotations[i] = relevantAnnotationBindings.toArray(new AnnotationBinding[0]);
+			} else if (paramAnnotations != null) {
+				paramAnnotations[i] = Binding.NO_ANNOTATIONS;
+			}
+		}
+	}
+	return paramAnnotations;
+}
+
 //{ObjectTeams: ctors are copied for roles and teams:
 @Override
 public void maybeRecordByteCode(ClassFile classFile, int methodAttributeOffset) {

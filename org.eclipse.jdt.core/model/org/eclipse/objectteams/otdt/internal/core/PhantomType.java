@@ -248,6 +248,11 @@ public class PhantomType implements IPhantomType
     }
 
     @Override
+    public IField getRecordComponent(String name) {
+    	return null;
+    }
+
+    @Override
 	public String getFullyQualifiedName()
     {
         return getFullyQualifiedName('$');

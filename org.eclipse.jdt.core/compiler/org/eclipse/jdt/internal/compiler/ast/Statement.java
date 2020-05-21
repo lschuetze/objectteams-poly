@@ -98,7 +98,7 @@ public abstract FlowInfo analyseCode(BlockScope currentScope, FlowContext flowCo
    For blocks, we don't perform intra-reachability analysis. We assume the lambda body is free of intrinsic control flow errors (if such errors
    exist they will not be flagged by this analysis, but are guaranteed to surface later on.)
 
-   @see Block#doesNotCompleteNormally
+   @see Block#doesNotCompleteNormally()
 */
 public boolean doesNotCompleteNormally() {
 	return false;
@@ -112,6 +112,23 @@ public boolean completesByContinue() {
 	return false;
 }
 
+/**
+ * Switch Expression analysis: *Assuming* this is reachable, analyze if this completes normally
+ *  i.e control flow can reach the textually next statement, as per JLS 14 Sec 14.22
+ *  For blocks, we don't perform intra-reachability analysis.
+ *  Note: delinking this from a similar (opposite) {@link #doesNotCompleteNormally()} since that was
+ *  coded for a specific purpose of Lambda Shape Analysis.
+ */
+public boolean canCompleteNormally() {
+	return true;
+}
+/**
+ * The equivalent function of completesByContinue - implements both the rules concerning continue with
+ * and without a label.
+ */
+public boolean continueCompletes() {
+	return false;
+}
 	public static final int NOT_COMPLAINED = 0;
 	public static final int COMPLAINED_FAKE_REACHABLE = 1;
 	public static final int COMPLAINED_UNREACHABLE = 2;
@@ -367,7 +384,8 @@ public int complainIfUnreachable(FlowInfo flowInfo, BlockScope scope, int previo
 		if (flowInfo == FlowInfo.DEAD_END) {
 			if (previousComplaintLevel < COMPLAINED_UNREACHABLE) {
 /* OT: */	  if (shouldReport)
-				scope.problemReporter().unreachableCode(this);
+				if (!this.doNotReportUnreachable())
+					scope.problemReporter().unreachableCode(this);
 				if (endOfBlock)
 					scope.checkUnclosedCloseables(flowInfo, null, null, null);
 			}
@@ -386,6 +404,9 @@ public int complainIfUnreachable(FlowInfo flowInfo, BlockScope scope, int previo
 	return previousComplaintLevel;
 }
 
+protected boolean doNotReportUnreachable() {
+	return false;
+}
 /**
  * Generate invocation arguments, considering varargs methods
  */

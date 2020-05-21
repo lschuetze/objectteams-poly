@@ -90,6 +90,7 @@ public void enterConstructor(MethodInfo methodInfo) {}
  * enterField method comment.
  */
 public void enterField(FieldInfo fieldInfo) {}
+public void enterRecordComponent(RecordComponentInfo recordComponentInfo) {}
 /**
  * enterMethod method comment.
  */
@@ -110,6 +111,7 @@ public void exitConstructor(int declarationEnd) {}
  * exitField method comment.
  */
 public void exitField(int initializationStart, int declarationEnd, int declarationSourceEnd) {}
+public void exitRecordComponent(int declarationEnd, int declarationSourceEnd) {}
 /**
  * exitMethod method comment.
  */

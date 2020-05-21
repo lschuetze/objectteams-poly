@@ -422,6 +422,11 @@ public class OTType extends OTJavaElement implements IOTType
     }
 
     @Override
+    public IField getRecordComponent(String name) {
+    	return null;
+    }
+
+    @Override
 	public String getFullyQualifiedName()
     {
         return getIType().getFullyQualifiedName();

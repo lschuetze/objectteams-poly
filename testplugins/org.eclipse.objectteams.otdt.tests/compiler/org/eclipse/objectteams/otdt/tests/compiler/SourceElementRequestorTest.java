@@ -180,6 +180,12 @@ public class SourceElementRequestorTest extends FileBasedModelTest implements IS
 
 	}
 
+	@Override
+	public void enterRecordComponent(RecordComponentInfo recordComponentInfo) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	public void enterType(TypeInfo typeInfo) {
 		// TODO Auto-generated method stub
 
@@ -221,5 +227,10 @@ public class SourceElementRequestorTest extends FileBasedModelTest implements IS
 	public void exitMethod(int declarationEnd, Expression defaultValue) {
 		// TODO Auto-generated method stub
 	}
-
+	
+	@Override
+	public void exitRecordComponent(int declarationEnd, int declarationSourceEnd) {
+		// TODO Auto-generated method stub
+	}
+	
 }
