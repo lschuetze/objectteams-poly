@@ -512,10 +512,12 @@ private synchronized void readExceptionAttributes() {
 	}
 }
 private synchronized void readModifierRelatedAttributes() {
-	int flags = u2At(0);
 //{ObjectTeams:
+	if (this.accessFlags != -1) // protect concurrency vs. MethodInfo.maybeRegister(..)
+		return;
 	long otFlags = 0;
 // SH}
+	int flags = u2At(0);
 	int attributesCount = u2At(6);
 	int readOffset = 8;
 	for (int i = 0; i < attributesCount; i++) {
