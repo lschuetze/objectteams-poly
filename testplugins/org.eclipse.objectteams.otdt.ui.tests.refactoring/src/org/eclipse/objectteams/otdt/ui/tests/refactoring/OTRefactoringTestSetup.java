@@ -22,8 +22,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
@@ -47,7 +45,7 @@ public team class OTRefactoringTestSetup extends RefactoringTestSetup {
 
 		@SuppressWarnings("basecall")
 		static callin IJavaProject createJavaProject(String projectName, String binFolderName) throws CoreException {
-			return org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper.createOTJavaProject(projectName, binFolderName);
+			return org.eclipse.objectteams.otdt.ui.tests.util.OTJavaProjectHelper.createOTJavaProject(projectName, binFolderName);
 		}
 	}
 }

@@ -107,7 +107,7 @@ public class OTProjectCreationDecorator extends AbstractOTDTDebugTest {
         ResourcesPlugin.getWorkspace().setDescription(wsDescription);
 
         // create & configure project and import source
-        fJavaProject = org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper.createOTJavaProject("DebugTests", "bin");
+        fJavaProject = org.eclipse.objectteams.otdt.ui.tests.util.OTJavaProjectHelper.createOTJavaProject("DebugTests", "bin");
         fJavaProject.setOption(CompilerOptions.OPTION_ReportUncheckedTypeOperation, CompilerOptions.IGNORE);
         fJavaProject.setOption(CompilerOptions.OPTION_ReportRawTypeReference, CompilerOptions.IGNORE);
         fJavaProject.setOption(CompilerOptions.OPTION_ReportDeadCode, CompilerOptions.IGNORE);
@@ -189,7 +189,7 @@ public class OTProjectCreationDecorator extends AbstractOTDTDebugTest {
             pro.delete(true, true, null);
         }
         // create project with two src folders and output locations
-        IJavaProject project = org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper.createOTJavaProject("MultiOutput", (String)null);
+        IJavaProject project = org.eclipse.objectteams.otdt.ui.tests.util.OTJavaProjectHelper.createOTJavaProject("MultiOutput", (String)null);
         JavaProjectHelper.addSourceContainer(project, "src1", "bin1");
         JavaProjectHelper.addSourceContainer(project, "src2", "bin2");
 

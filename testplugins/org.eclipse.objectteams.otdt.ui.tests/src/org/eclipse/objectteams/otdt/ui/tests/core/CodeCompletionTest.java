@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaMethodCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.ParameterGuessingProposal;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -73,7 +74,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.objectteams.otdt.internal.ui.assist.CompletionAdaptor;
-import org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper;
+import org.eclipse.objectteams.otdt.ui.tests.util.OTJavaProjectHelper;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -120,7 +121,7 @@ public class CodeCompletionTest {
 
 	@Before
 	public void setUp() throws Exception {
-		fJProject1= JavaProjectHelper.createOTJavaProject("OTTestProject1", "bin");
+		fJProject1= OTJavaProjectHelper.createOTJavaProject("OTTestProject1", "bin");
 		JavaProjectHelper.addRTJar17(fJProject1);
 		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
 

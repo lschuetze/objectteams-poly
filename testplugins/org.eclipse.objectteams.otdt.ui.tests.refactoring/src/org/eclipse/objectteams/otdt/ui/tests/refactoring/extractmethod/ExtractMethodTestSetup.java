@@ -35,8 +35,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper;
+import org.eclipse.objectteams.otdt.ui.tests.util.OTJavaProjectHelper;
 import org.eclipse.objectteams.otdt.ui.tests.util.TestOptions;
 import org.junit.rules.ExternalResource;
 
@@ -75,7 +76,7 @@ public class ExtractMethodTestSetup extends ExternalResource
 		TestOptions.initializeCodeGenerationOptions();
 		JavaPlugin.getDefault().getCodeTemplateStore().load();
 
-		_javaProject = JavaProjectHelper.createOTJavaProject("TestProject", "bin");
+		_javaProject = OTJavaProjectHelper.createOTJavaProject("TestProject", "bin");
 		JavaProjectHelper.addRTJar(_javaProject);
 		_root = JavaProjectHelper.addSourceContainer(_javaProject, CONTAINER);
 

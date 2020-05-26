@@ -46,7 +46,7 @@ import org.eclipse.objectteams.otdt.ui.tests.TestPlugin;
 /**
  * Helper methods to set up a IJavaProject.
  */
-public class JavaProjectHelper extends org.eclipse.jdt.testplugin.JavaProjectHelper
+public class OTJavaProjectHelper
 {
 
     public static final IPath RT_STUBS = new Path("testresources/rtstubs.jar");

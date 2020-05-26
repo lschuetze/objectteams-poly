@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CallinMappingDeclaration;
 import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper;
+import org.eclipse.objectteams.otdt.ui.tests.util.OTJavaProjectHelper;
 
 
 
@@ -45,7 +45,7 @@ public class AstRewritingDescribingTest
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-        JavaProjectHelper.addNatureToProject(project1.getProject(), JavaCore.OTJ_NATURE_ID, null);
+        OTJavaProjectHelper.addNatureToProject(project1.getProject(), JavaCore.OTJ_NATURE_ID, null);
 	}
 
 	public static RoleTypeDeclaration findRoleTypeDeclaration (TypeDeclaration teamType, String roleName)

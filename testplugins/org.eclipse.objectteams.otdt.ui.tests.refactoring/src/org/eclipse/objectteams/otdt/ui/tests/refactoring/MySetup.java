@@ -35,7 +35,8 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.objectteams.otdt.ui.tests.util.OTJavaProjectHelper;
 import org.eclipse.objectteams.otdt.ui.tests.util.TestOptions;
 
 @SuppressWarnings("restriction")
@@ -83,12 +84,12 @@ public class MySetup extends TestSetup
     protected void setUp() throws Exception
     {
         super.setUp();
-        JavaProjectHelper.setAutoBuilding(false);
+        OTJavaProjectHelper.setAutoBuilding(false);
         if (JavaPlugin.getActivePage() != null)
         {
             JavaPlugin.getActivePage().close();
         }
-        _javaTestProject = JavaProjectHelper.createOTJavaProject("TestProject"
+        _javaTestProject = OTJavaProjectHelper.createOTJavaProject("TestProject"
                 + System.currentTimeMillis(), "bin");
         JavaProjectHelper.addRTJar(_javaTestProject);
         _root = JavaProjectHelper.addSourceContainer(_javaTestProject,

@@ -83,7 +83,7 @@ public class ProjectTestSetup extends ExternalResource {
 		IJavaProject javaProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		javaProject.setRawClasspath(getDefaultClasspath(), null);
   :giro */
-		IJavaProject javaProject= org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper.createOTJavaProject(PROJECT_NAME, "bin");
+		IJavaProject javaProject= org.eclipse.objectteams.otdt.ui.tests.util.OTJavaProjectHelper.createOTJavaProject(PROJECT_NAME, "bin");
         JavaProjectHelper.addRTJar(javaProject);
 //gbr}
 		TestOptions.initializeProjectOptions(javaProject);

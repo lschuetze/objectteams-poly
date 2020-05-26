@@ -80,7 +80,7 @@ public class ProjectTestSetup extends TestSetup {
 		fJProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		fJProject.setRawClasspath(getDefaultClasspath(), null);
   :giro */
-        fJProject = org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper.createOTJavaProject(PROJECT_NAME, "bin");
+        fJProject = org.eclipse.objectteams.otdt.ui.tests.util.OTJavaProjectHelper.createOTJavaProject(PROJECT_NAME, "bin");
         JavaProjectHelper.addRTJar(fJProject);
 //gbr}
 

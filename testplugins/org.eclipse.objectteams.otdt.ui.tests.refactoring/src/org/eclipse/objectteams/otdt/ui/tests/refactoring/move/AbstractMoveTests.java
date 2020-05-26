@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
-import org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper;
+import org.eclipse.objectteams.otdt.ui.tests.util.OTJavaProjectHelper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -62,7 +62,7 @@ public abstract team class AbstractMoveTests extends TestCase {
 		if (!this.projectInitialized) {
 			this.projectInitialized = true;
 			IJavaProject javaProj = RefactoringTestSetup.getProject();
-			JavaProjectHelper.addNatureToProject(javaProj.getProject(), JavaCore.OTJ_NATURE_ID, null);
+			OTJavaProjectHelper.addNatureToProject(javaProj.getProject(), JavaCore.OTJ_NATURE_ID, null);
 	        OTREContainer.initializeOTJProject(javaProj.getProject());
 		}
 	}
