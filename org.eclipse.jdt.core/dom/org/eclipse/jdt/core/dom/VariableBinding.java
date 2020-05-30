@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -237,6 +237,16 @@ class VariableBinding implements IVariableBinding {
 						defaultBindingResolver.getBindingsToNodesMap());
 			}
 			return null;
+		}else if (isRecordComponent()) {
+			if (this.resolver instanceof DefaultBindingResolver) {
+				DefaultBindingResolver defaultBindingResolver = (DefaultBindingResolver) this.resolver;
+				if (!defaultBindingResolver.fromJavaProject) return null;
+				return Util.getUnresolvedJavaElement(
+						(RecordComponentBinding) this.binding,
+						defaultBindingResolver.workingCopyOwner,
+						defaultBindingResolver.getBindingsToNodesMap());
+			}
+			return null;
 		}
 		// local variable
 		if (!(this.resolver instanceof DefaultBindingResolver)) return null;
@@ -436,6 +446,11 @@ class VariableBinding implements IVariableBinding {
 	}
 // SH}
 
+	@Override
+	public boolean isRecordComponent() {
+		return this.binding instanceof RecordComponentBinding;
+	}
+
 	/*
 	 * For debugging purpose only.
 	 * @see java.lang.Object#toString()
@@ -444,4 +459,5 @@ class VariableBinding implements IVariableBinding {
 	public String toString() {
 		return this.binding.toString();
 	}
+
 }
