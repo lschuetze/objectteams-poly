@@ -477,6 +477,11 @@ public boolean isSynthetic() {
 	return (getModifiers() & ClassFileConstants.AccSynthetic) != 0;
 }
 private synchronized void readExceptionAttributes() {
+//{ObjectTeams:
+	if (this.exceptionNames != null) // protect concurrency vs. MethodInfo.maybeRegister(..)
+		return;
+// SH}
+
 	int attributesCount = u2At(6);
 	int readOffset = 8;
 	char[][] names = null;
@@ -635,6 +640,11 @@ protected void toStringContent(StringBuffer buffer) {
 	BinaryTypeFormatter.methodToStringContent(buffer, this);
 }
 private synchronized void readCodeAttribute() {
+//{ObjectTeams:
+	if (this.argumentNames != null) // protect concurrency vs. MethodInfo.maybeRegister(..)
+		return;
+// SH}
+
 	int attributesCount = u2At(6);
 	int readOffset = 8;
 	if (attributesCount != 0) {
