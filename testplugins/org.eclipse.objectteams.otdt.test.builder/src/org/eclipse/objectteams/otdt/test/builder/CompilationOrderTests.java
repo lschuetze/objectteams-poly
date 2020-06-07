@@ -108,8 +108,7 @@ public class CompilationOrderTests extends OTBuilderTests {
 		expectingProblemsFor(ateam);
 		expectingOnlySpecificProblemsFor(ateam,
 				new Problem[] {
-					new Problem("", "The type org.objectteams.Team cannot be resolved. It is indirectly referenced from required .class files", ateam, 30, 35, CategorizedProblem.CAT_BUILDPATH, IMarker.SEVERITY_ERROR),
-					new Problem("", "The constructor Team() is undefined", ateam, 48,56, CategorizedProblem.CAT_MEMBER, IMarker.SEVERITY_ERROR)
+					new Problem("", "org.objectteams.Team cannot be resolved to a type", ateam, 30, 35, CategorizedProblem.CAT_TYPE, IMarker.SEVERITY_ERROR),
 				});
 	}
 }
