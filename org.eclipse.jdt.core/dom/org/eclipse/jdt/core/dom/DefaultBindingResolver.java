@@ -1423,6 +1423,10 @@ class DefaultBindingResolver extends BindingResolver {
 			LiftingTypeReference liftingTypeRef = (LiftingTypeReference)node;
 			return getTypeBinding(liftingTypeRef.resolvedType);
 // SH}
+		} else if (node instanceof org.eclipse.jdt.internal.compiler.ast.RecordComponent) {
+			org.eclipse.jdt.internal.compiler.ast.RecordComponent recordComponent = (org.eclipse.jdt.internal.compiler.ast.RecordComponent) node;
+			org.eclipse.jdt.internal.compiler.lookup.TypeBinding recordComponentType = recordComponent.type.resolvedType;
+			return this.getTypeBinding(recordComponentType);
 		}
 		return null;
 	}
@@ -1712,10 +1716,8 @@ class DefaultBindingResolver extends BindingResolver {
 		} else if (node instanceof org.eclipse.jdt.internal.compiler.ast.ReferenceExpression) {
 			org.eclipse.jdt.internal.compiler.ast.ReferenceExpression referenceExpression = (org.eclipse.jdt.internal.compiler.ast.ReferenceExpression) node;
 			return getMethodBinding(referenceExpression.getMethodBinding());
-		}
 //{ObjectTeams: Resolve bindings for OT-specific elements
-		else if (node instanceof MethodSpec)
-		{
+		} else if (node instanceof MethodSpec) {
 			if (node instanceof FieldAccessSpec) {
 				FieldAccessSpec fieldAccessSpec = (FieldAccessSpec) node;
 				return getVariableBinding(fieldAccessSpec.resolvedField);
@@ -1724,12 +1726,14 @@ class DefaultBindingResolver extends BindingResolver {
 				return getMethodBinding(methodSpec.resolvedMethod);
 			}
 		}
-		else if (node instanceof LiftingTypeReference)
-		{
+		else if (node instanceof LiftingTypeReference) {
 			LiftingTypeReference liftingTypeRef = (LiftingTypeReference)node;
 			return getTypeBinding(liftingTypeRef.resolvedType);
-		}
 //jsv}
+		} else if (node instanceof org.eclipse.jdt.internal.compiler.ast.RecordComponent) {
+			org.eclipse.jdt.internal.compiler.ast.RecordComponent recordComponent = (org.eclipse.jdt.internal.compiler.ast.RecordComponent) node;
+			return this.getVariableBinding(recordComponent.binding);
+		}
 		return null;
 	}
 
