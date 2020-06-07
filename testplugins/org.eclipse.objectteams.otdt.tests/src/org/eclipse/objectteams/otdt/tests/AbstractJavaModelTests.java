@@ -363,9 +363,12 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 		project.setDescription(description, null);
 	}
 
-//{ObjectTeams: new method:
+//{ObjectTeams: new methods:
 	protected void addOTJavaNature(String projectName) throws CoreException {
 		IProject project = getWorkspaceRoot().getProject(projectName);
+		addOTJavaNature(project);
+	}
+	public static void addOTJavaNature(IProject project) throws CoreException {
 		IProjectDescription description = project.getDescription();
 		String[] oldNatures = description.getNatureIds();
 		int l = oldNatures.length;
@@ -374,6 +377,30 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 		newNatures[l] = JavaCore.OTJ_NATURE_ID;
 		description.setNatureIds(newNatures);
 		project.setDescription(description, null);
+	}
+	public static void addContainerEntry(IJavaProject project, IPath container, boolean isModular) throws JavaModelException {
+		IClasspathAttribute[] extraAttributes = isModular 
+				? new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true") }
+				: null;
+		IClasspathEntry cpe = JavaCore.newContainerEntry(container, null, extraAttributes, false);
+		addToClasspath(project, cpe);
+	}
+	static final String JRE_CONTAINER_NAME = "org.eclipse.jdt.launching.JRE_CONTAINER";
+	public static void addToClasspath(IJavaProject jproject, IClasspathEntry cpe) throws JavaModelException {
+		IClasspathEntry[] oldEntries= jproject.getRawClasspath();
+		ArrayList<IClasspathEntry> entries = new ArrayList<>(oldEntries.length);
+		for (int i= 0; i < oldEntries.length; i++) {
+			if (oldEntries[i].equals(cpe)) {
+				return;
+			}
+			IPath oldpath = oldEntries[i].getPath();
+			if(JRE_CONTAINER_NAME.equals(oldpath.segment(0)) && JRE_CONTAINER_NAME.equals(cpe.getPath().segment(0))) {
+				continue;
+			}
+			entries.add(oldEntries[i]);
+		}
+		entries.add(cpe);
+		jproject.setRawClasspath(entries.toArray(new IClasspathEntry[entries.size()]), null);
 	}
 // SH}
 

@@ -18,9 +18,11 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.tests.otmodel;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.*;
-import org.eclipse.objectteams.otdt.tests.ModifyingResourceTests;
+import org.eclipse.objectteams.otdt.tests.AbstractJavaModelTests;
+import org.eclipse.jdt.core.tests.model.ModifyingResourceTests;
 
 import junit.framework.Test;
 
@@ -52,10 +54,11 @@ public JavaElementDeltaTests(String name) {
  */
 public void testAddOTJavaNature() throws CoreException {
 	try {
-		createProject("P");
+		IProject project = createProject("P");
 		addJavaNature("P");
 		startDeltas();
-		addOTJavaNature("P");
+		AbstractJavaModelTests.addOTJavaNature(project);
+
 		assertDeltas(
 			"Unexpected delta",
 			"P[*]: {CONTENT}\n" +
@@ -74,8 +77,8 @@ public void testAddRoleToTeam() throws CoreException {
 	ICompilationUnit copy = null;
 	DeltaListener listener = new DeltaListener(ElementChangedEvent.POST_CHANGE);
 	try {
-		createJavaProject("P", new String[] {"src"}, "bin");
-		addOTJavaNature("P");
+		IJavaProject javaProject = createJavaProject("P", new String[] {"src"}, "bin");
+		AbstractJavaModelTests.addOTJavaNature(javaProject.getProject());
 		createFolder("P/src/p1");
 		createFile("/P/src/p1/MyTeam.java",
 					"package p1;\n" +
@@ -120,8 +123,8 @@ public void testAddCallinToRole1() throws CoreException {
 	ICompilationUnit copy = null;
 	DeltaListener listener = new DeltaListener(ElementChangedEvent.POST_CHANGE);
 	try {
-		createJavaProject("P", new String[] {"src"}, "bin");
-		addOTJavaNature("P");
+		IJavaProject javaProject = createJavaProject("P", new String[] {"src"}, "bin");
+		AbstractJavaModelTests.addOTJavaNature(javaProject.getProject());
 		createFolder("P/src/p1");
 		createFile("/P/src/p1/Base.java",
 					"package p1;\n" +
@@ -176,8 +179,8 @@ public void testAddCallinToRole1r() throws CoreException {
 	ICompilationUnit copy = null;
 	DeltaListener listener = new DeltaListener(ElementChangedEvent.POST_RECONCILE);
 	try {
-		createJavaProject("P", new String[] {"src"}, "bin");
-		addOTJavaNature("P");
+		IJavaProject javaProject = createJavaProject("P", new String[] {"src"}, "bin");
+		AbstractJavaModelTests.addOTJavaNature(javaProject.getProject());
 		createFolder("P/src/p1");
 		createFile("/P/src/p1/Base.java",
 					"package p1;\n" +
@@ -229,8 +232,8 @@ public void testAddCallinToRole2() throws CoreException {
 	ICompilationUnit copy = null;
 	DeltaListener listener = new DeltaListener(ElementChangedEvent.POST_CHANGE);
 	try {
-		createJavaProject("P", new String[] {"src"}, "bin");
-		addOTJavaNature("P");
+		IJavaProject javaProject = createJavaProject("P", new String[] {"src"}, "bin");
+		AbstractJavaModelTests.addOTJavaNature(javaProject.getProject());
 		createFolder("P/src/p1");
 		createFile("/P/src/p1/Base.java",
 					"package p1;\n" +
@@ -289,8 +292,8 @@ public void testModifyCallin1() throws CoreException {
 	ICompilationUnit copy = null;
 	DeltaListener listener = new DeltaListener(ElementChangedEvent.POST_CHANGE);
 	try {
-		createJavaProject("P", new String[] {"src"}, "bin");
-		addOTJavaNature("P");
+		IJavaProject javaProject = createJavaProject("P", new String[] {"src"}, "bin");
+		AbstractJavaModelTests.addOTJavaNature(javaProject.getProject());
 		createFolder("P/src/p1");
 		createFile("/P/src/p1/Base.java",
 					"package p1;\n" +
@@ -350,8 +353,8 @@ public void testModifyCallin2() throws CoreException {
 	ICompilationUnit copy = null;
 	DeltaListener listener = new DeltaListener(ElementChangedEvent.POST_CHANGE);
 	try {
-		createJavaProject("P", new String[] {"src"}, "bin");
-		addOTJavaNature("P");
+		IJavaProject javaProject = createJavaProject("P", new String[] {"src"}, "bin");
+		AbstractJavaModelTests.addOTJavaNature(javaProject.getProject());
 		createFolder("P/src/p1");
 		createFile("/P/src/p1/Base.java",
 					"package p1;\n" +
@@ -411,8 +414,8 @@ public void testModifyCallout1() throws CoreException {
 	ICompilationUnit copy = null;
 	DeltaListener listener = new DeltaListener(ElementChangedEvent.POST_CHANGE);
 	try {
-		createJavaProject("P", new String[] {"src"}, "bin");
-		addOTJavaNature("P");
+		IJavaProject javaProject = createJavaProject("P", new String[] {"src"}, "bin");
+		AbstractJavaModelTests.addOTJavaNature(javaProject.getProject());
 		createFolder("P/src/p1");
 		createFile("/P/src/p1/Base.java",
 					"package p1;\n" +
@@ -472,8 +475,8 @@ public void testModifyCallout2() throws CoreException {
 	ICompilationUnit copy = null;
 	DeltaListener listener = new DeltaListener(ElementChangedEvent.POST_CHANGE);
 	try {
-		createJavaProject("P", new String[] {"src"}, "bin");
-		addOTJavaNature("P");
+		IJavaProject javaProject = createJavaProject("P", new String[] {"src"}, "bin");
+		AbstractJavaModelTests.addOTJavaNature(javaProject.getProject());
 		createFolder("P/src/p1");
 		createFile("/P/src/p1/Base.java",
 					"package p1;\n" +

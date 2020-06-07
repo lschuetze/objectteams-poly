@@ -429,6 +429,11 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 				if (superclassRef != null && superclassRef.resolvedType != null && !superclassRef.resolvedType.isValidBinding()) {
 					rcvHasError = true;
 				}
+//{ObjectTeams: for inaccessible o.o.Team, relevant also for JDT?
+				else if ((receiverType.tagBits & TagBits.HasMissingType) != 0) {
+					rcvHasError = true;
+				}
+// SH}
 			}
 //{ObjectTeams: compiling org.objectteams.Team$__OT__Confined ?
 			if (receiverType == null) {

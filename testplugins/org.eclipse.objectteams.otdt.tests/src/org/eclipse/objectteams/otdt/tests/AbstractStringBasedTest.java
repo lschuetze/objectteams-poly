@@ -28,21 +28,19 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
+import org.eclipse.jdt.core.tests.model.ModifyingResourceTests;
 
 /**
  * @author jwloka
- * @version $Id: StringBasedTest.java 23494 2010-02-05 23:06:44Z stephan $
  *
- * NOTE: Preliminary version of a test suite for testing the OTModel. The creation
- * of test classes will be changed soon!
  */
-public class StringBasedTest extends ModifyingResourceTests
+public class AbstractStringBasedTest extends ModifyingResourceTests
 {
     public static final String TEST_PROJECT = "OTModelTest";
 
     private IJavaProject _testPrj;
 
-    public StringBasedTest(String name)
+    public AbstractStringBasedTest(String name)
     {
         super(name);
     }

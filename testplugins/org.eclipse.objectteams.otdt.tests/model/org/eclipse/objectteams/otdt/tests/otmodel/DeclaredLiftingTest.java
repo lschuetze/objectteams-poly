@@ -26,13 +26,13 @@ import junit.framework.Test;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.objectteams.otdt.tests.StringBasedTest;
+import org.eclipse.objectteams.otdt.tests.AbstractStringBasedTest;
 
 /**
  * @author kaschja
  */
 //TODO (kaschja) create tests by the time declared lifting has been made visible to the OT-Model
-public class DeclaredLiftingTest extends StringBasedTest
+public class DeclaredLiftingTest extends AbstractStringBasedTest
 {
 	public DeclaredLiftingTest()
 	{

@@ -1904,6 +1904,16 @@ public ReferenceBinding getResolvedType(char[][] compoundName, ModuleBinding mod
 	ReferenceBinding type = getType(compoundName, moduleBinding);
 	if (type != null) return type;
 
+//{ObjectTeams: for inaccessible o.o.Team, relevant also for JDT?
+	if (this.problemReporter.referenceContext instanceof ASTNode) {
+		Binding problem = scope.problemType(compoundName, -1, null);
+		if (problem instanceof ProblemReferenceBinding) {
+			this.problemReporter.invalidType((ASTNode) this.problemReporter.referenceContext, (ReferenceBinding) problem);
+			return createMissingType(null, compoundName);
+		}
+	}
+// SH}
+
 	// create a proxy for the missing BinaryType
 	// report the missing class file first
 	this.problemReporter.isClassPathCorrect(
