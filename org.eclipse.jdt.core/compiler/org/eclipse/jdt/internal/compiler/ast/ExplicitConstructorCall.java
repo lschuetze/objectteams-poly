@@ -430,7 +430,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 					rcvHasError = true;
 				}
 //{ObjectTeams: for inaccessible o.o.Team, relevant also for JDT?
-				else if ((receiverType.tagBits & TagBits.HasMissingType) != 0) {
+				else if (receiverType != null && (receiverType.tagBits & TagBits.HasMissingType) != 0) {
 					rcvHasError = true;
 				}
 // SH}
