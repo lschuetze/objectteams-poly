@@ -40,7 +40,7 @@ import org.eclipse.jdt.annotation.*;
  */
 public abstract class AsmBoundClass extends AbstractTeam {
 	
-	public static final int ASM_API = Opcodes.ASM7;
+	public static final int ASM_API = Opcodes.ASM8;
 
 	private static final int DEFAULT_BUFFER_SIZE = 8192;
     private static final int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;

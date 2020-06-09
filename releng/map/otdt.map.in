@@ -24,7 +24,7 @@ plugin@org.eclipse.objectteams.runtime=GIT,repo=git://git.eclipse.org/gitroot/ob
 plugin@org.eclipse.objectteams.otre=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otre,tag=builds/201806120901
 plugin@org.eclipse.objectteams.otredyn=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otredyn
 !the following is also referenced in otdt.doc/buildDoc.xml (plugin-name without version):
-plugin@org.eclipse.objectteams.otequinox=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox,tag=builds/202003100937
+plugin@org.eclipse.objectteams.otequinox=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox
 fragment@org.eclipse.objectteams.otequinox.turbo=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.turbo,tag=builds/201506091717
 plugin@org.eclipse.objectteams.eclipse.monitor=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.eclipse.monitor,tag=builds/201606070956
 
@@ -47,11 +47,11 @@ plugin@org.eclipse.objectteams.otdt.samples=GIT,repo=git://git.eclipse.org/gitro
 !** Consume BCEL from Orbit: **!
 plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400,repository=https://download.eclipse.org/tools/orbit/downloads/drops/S20200406151314/repository
 !** ASM from Orbit: **!
-plugin@org.objectweb.asm,7.2.0=p2IU,id=org.objectweb.asm,version=7.2.0.v20191010-1910,repository=https://download.eclipse.org/tools/orbit/downloads/drops/S20200406151314/repository/
-plugin@org.objectweb.asm.tree,7.2.0=p2IU,id=org.objectweb.asm.tree,version=7.2.0.v20191010-1910,repository=https://download.eclipse.org/tools/orbit/downloads/drops/S20200406151314/repository/
-plugin@org.objectweb.asm.commons,7.2.0=p2IU,id=org.objectweb.asm.commons,version=7.2.0.v20191010-1910,repository=https://download.eclipse.org/tools/orbit/downloads/drops/S20200406151314/repository/
-plugin@org.objectweb.asm.util,7.2.0=p2IU,id=org.objectweb.asm.util,version=7.2.0.v20191010-1910,repository=https://download.eclipse.org/tools/orbit/downloads/drops/S20200406151314/repository/
-plugin@org.objectweb.asm.analysis,7.2.0=p2IU,id=org.objectweb.asm.analysis,version=7.2.0.v20191010-1910,repository=https://download.eclipse.org/tools/orbit/downloads/drops/S20200406151314/repository/
+plugin@org.objectweb.asm,7.2.0=p2IU,id=org.objectweb.asm,version=8.0.1.v20200420-1007,repository=https://download.eclipse.org/tools/orbit/downloads/drops/S20200406151314/repository/
+plugin@org.objectweb.asm.tree,7.2.0=p2IU,id=org.objectweb.asm.tree,version=8.0.1.v20200420-1007,repository=https://download.eclipse.org/tools/orbit/downloads/drops/S20200406151314/repository/
+plugin@org.objectweb.asm.commons,7.2.0=p2IU,id=org.objectweb.asm.commons,version=8.0.1.v20200420-1007,repository=https://download.eclipse.org/tools/orbit/downloads/drops/S20200406151314/repository/
+plugin@org.objectweb.asm.util,7.2.0=p2IU,id=org.objectweb.asm.util,version=8.0.1.v20200420-1007,repository=https://download.eclipse.org/tools/orbit/downloads/drops/S20200406151314/repository/
+plugin@org.objectweb.asm.analysis,7.2.0=p2IU,id=org.objectweb.asm.analysis,version=8.0.1.v20200420-1007,repository=https://download.eclipse.org/tools/orbit/downloads/drops/S20200406151314/repository/
 
 plugin@org.mockito,1.9.5=p2IU,id=org.mockito,version=1.9.5.v201605172210,repository=https://download.eclipse.org/tools/orbit/downloads/drops/S20200406151314/repository/
 plugin@org.hamcrest.core,1.3.0=p2IU,id=org.hamcrest.core,version=1.3.0.v20180420-1519,repository=https://download.eclipse.org/tools/orbit/downloads/drops/S20200406151314/repository/
