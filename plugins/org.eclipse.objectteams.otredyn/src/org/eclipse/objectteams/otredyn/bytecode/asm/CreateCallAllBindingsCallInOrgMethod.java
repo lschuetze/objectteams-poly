@@ -21,11 +21,13 @@ import org.eclipse.objectteams.otredyn.bytecode.Method;
 import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
 import org.eclipse.objectteams.otredyn.util.SMAPConstants;
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -33,31 +35,37 @@ import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 /**
- * This class creates and adds the instructions, that are needed 
- * to call the method callAllBindings to a method.<br/> <br/>
+ * This class creates and adds the instructions, that are needed to call the
+ * method callAllBindings to a method.<br/>
+ * <br/>
  * The instructions looks as follows:<br/>
  * <code>
  * Object[] args = {args1, ..., argsn};<br/>
  * this.callAllBindings(boundMethodId, args);
  * </code>
+ * 
  * @author Oliver Frank
  */
-public class CreateCallAllBindingsCallInOrgMethod extends
-		AbstractTransformableClassNode {
+public class CreateCallAllBindingsCallInOrgMethod extends AbstractTransformableClassNode {
 
-	private Method orgMethod;
-	private int boundMethodId;
+	private final Method orgMethod;
+	private final int boundMethodId;
+	private final int joinpointId;
+	private final String joinpointDesc;
 
-	public CreateCallAllBindingsCallInOrgMethod(Method orgMethod,
-			int boundMethodId) {
+	public CreateCallAllBindingsCallInOrgMethod(final Method orgMethod, final int boundMethodId, final int joinpointId,
+			final String joinpointDesc) {
 		this.orgMethod = orgMethod;
 		this.boundMethodId = boundMethodId;
+		this.joinpointId = joinpointId;
+		this.joinpointDesc = joinpointDesc;
 	}
 
 	@Override
 	public boolean transform() {
 		MethodNode method = getMethod(orgMethod);
-		if (method == null || (method.access & Opcodes.ACC_ABSTRACT) != 0) return false;
+		if (method == null || (method.access & Opcodes.ACC_ABSTRACT) != 0)
+			return false;
 
 		// start of try-block:
 		InsnList newInstructions = new InsnList();
@@ -72,7 +80,7 @@ public class CreateCallAllBindingsCallInOrgMethod extends
 				int last = method.instructions.size();
 				LabelNode callAll = new LabelNode();
 				boolean hasGenerated = true;
-				for (int i=0; i<last; i++) {
+				for (int i = 0; i < last; i++) {
 					AbstractInsnNode returnCandidate = method.instructions.get(i);
 					if (returnCandidate.getOpcode() == Opcodes.RETURN) {
 						method.instructions.set(returnCandidate, callAll);
@@ -103,34 +111,58 @@ public class CreateCallAllBindingsCallInOrgMethod extends
 			if (size == 2)
 				maxArgSize = 2;
 		}
-		method.maxStack = args.length > 0 ? 5+maxArgSize : 3;
-		method.maxLocals = localSlots+1;
-		
+		method.maxStack = args.length > 0 ? 5 + maxArgSize : 3;
+		method.maxLocals = localSlots + 1;
+
 		return true;
 	}
 
+	private static final Handle bootstrapMethodHandle = new Handle(Opcodes.H_INVOKESTATIC, ClassNames.BOOTSTRAP_SLASH,
+			ConstantMembers.bootstrap.getName(), ConstantMembers.bootstrap.getSignature(), false);
+
 	private void generateInvocation(MethodNode method, Type[] args, AbstractInsnNode insertBefore,
 			InsnList newInstructions) {
+		// TODO Lars: invokedynamic to make Team[] array a constant if nothing changed
 		// put this on the stack
 		newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		// put joinpointId on the stack as argument to TeamManager.getTeams[]
+		newInstructions.add(createLoadIntConstant(joinpointId));
+		// put ITeam[] on the stack by calling getTeams with joinpointId
+		addLineNumber(newInstructions, SMAPConstants.STEP_INTO_LINENUMBER);
+		newInstructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ClassNames.TEAM_MANAGER_SLASH,
+				ConstantMembers.getTeams.getName(), ConstantMembers.getTeams.getSignature(), false));
+		addLineNumber(newInstructions, SMAPConstants.STEP_OVER_LINENUMBER);
+		// put starting idx 0 on the stack
+		newInstructions.add(createLoadIntConstant(0));
+		// put joinpointId on the stack as argument to TeamManager.getCallinIds[]
+		newInstructions.add(createLoadIntConstant(joinpointId));
+		// put int[] callinIds on the stack
+		addLineNumber(newInstructions, SMAPConstants.STEP_INTO_LINENUMBER);
+		newInstructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ClassNames.TEAM_MANAGER_SLASH,
+				ConstantMembers.getCallinIds.getName(), ConstantMembers.getCallinIds.getSignature(), false));
+		addLineNumber(newInstructions, SMAPConstants.STEP_OVER_LINENUMBER);
 		// put boundMethodId on the stack
-		if(method.name.equals("<init>")) { // set bit 0x8000000 to signal the ctor
+		if (method.name.equals("<init>")) { // set bit 0x8000000 to signal the ctor
 			newInstructions.add(createLoadIntConstant(0x8000_0000 | boundMethodId));
 		} else {
 			newInstructions.add(createLoadIntConstant(boundMethodId));
 		}
-		// box the arguments
+		// box the arguments to Object[]
 		newInstructions.add(getBoxingInstructions(args, false));
 
-		// this.callAllBindings(boundMethodId, args);
+		// invoke invokedynamic bootstrap
 		addLineNumber(newInstructions, SMAPConstants.STEP_INTO_LINENUMBER);
-		newInstructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-				this.name, ConstantMembers.callAllBindingsClient.getName(),
-				ConstantMembers.callAllBindingsClient.getSignature(), false));
-		Type returnType = Type.getReturnType(method.desc);
-		newInstructions
-				.add(getUnboxingInstructionsForReturnValue(returnType));
+		newInstructions.add(new InvokeDynamicInsnNode(method.name, ConstantMembers.callAllBindingsTeam.getSignature(),
+				bootstrapMethodHandle, 0, joinpointDesc, boundMethodId));
 		addLineNumber(newInstructions, SMAPConstants.STEP_OVER_LINENUMBER);
+//		 this.callAllBindings(boundMethodId, args);
+
+//		newInstructions.add(
+//				new MethodInsnNode(Opcodes.INVOKEVIRTUAL, this.name, ConstantMembers.callAllBindingsClient.getName(),
+//						ConstantMembers.callAllBindingsClient.getSignature(), false));
+		Type returnType = Type.getReturnType(method.desc);
+		// TODO Lars: invokedynamic should unbox on its own
+		newInstructions.add(getUnboxingInstructionsForReturnValue(returnType));
 
 		if (insertBefore != null) {
 			method.instructions.insertBefore(insertBefore, newInstructions);
@@ -152,8 +184,9 @@ public class CreateCallAllBindingsCallInOrgMethod extends
 		// catch (SneakyException e) { e.rethrow(); }
 		LabelNode catchSneaky = new LabelNode();
 		instructions.add(catchSneaky);
-		instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ClassNames.SNEAKY_EXCEPTION_SLASH, ClassNames.RETHROW_SELECTOR, ClassNames.RETHROW_SIGNATURE, false));
-		
+		instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ClassNames.SNEAKY_EXCEPTION_SLASH,
+				ClassNames.RETHROW_SELECTOR, ClassNames.RETHROW_SIGNATURE, false));
+
 		// never reached, just to please the verifier:
 		Type returnType = Type.getReturnType(method.getSignature());
 		instructions.add(getReturnInsn(returnType));

@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.objectteams.ITeam;
 import org.objectteams.ITeamManager;
@@ -57,6 +58,37 @@ public class TeamManager implements ITeamManager {
 	public static void setup(IClassRepository repo) {
 		classRepository = repo;
 		Team.registerTeamManager(new TeamManager()); // install callback
+	}
+	
+	public synchronized static ITeam[] getTeams(final int joinpointId) {
+		List<ITeam> teams = _teams.get(joinpointId);
+		final int size = teams.size();
+		if(size == 0) {
+			return null;
+		}
+		final Thread th = Thread.currentThread();
+		final List<ITeam> active = teams.stream().filter(t -> t.isActive(th)).collect(Collectors.toList());
+		return active.toArray(new ITeam[0]);
+	}
+	
+	public synchronized static int[] getCallinIds(final int joinpointId) {
+		List<ITeam> teams = _teams.get(joinpointId);
+		List<Integer> callinIds = _callinIds.get(joinpointId);
+		final int size = teams.size();
+		if(size == 0) {
+			return null;
+		}
+		final Thread th = Thread.currentThread();
+		final List<Integer> active = new ArrayList<>(size);
+		int count = 0;
+		
+		for(ITeam team : teams) {
+			if(team.isActive(th)) {
+				active.add(callinIds.get(count++));
+			}
+		}
+		
+		return active.stream().mapToInt(i -> i).toArray();
 	}
 
 	/**

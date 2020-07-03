@@ -306,8 +306,8 @@ class AsmWritableBoundClass extends AsmBoundClass {
 	 * @see CreateCallAllBindingsCallInOrgMethod
 	 */
 	@Override
-	protected void createCallAllBindingsCallInOrgMethod(Method boundMethod,
-			int boundMethodId, boolean needToAddMethod) {
+	protected void createCallAllBindingsCallInOrgMethod(final Method boundMethod,
+			final int boundMethodId, final int joinpointId, final String joinpointDesc, final boolean needToAddMethod) {
 		assert (isTransformationActive) : "No transformation active";
 		if (needToAddMethod) {
 			String desc = boundMethod.getSignature();
@@ -317,7 +317,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			nodes.add(new CreateSpecificSuperCallInCallOrigAdapter(this, getInternalSuperClassName(), boundMethod, boundMethodId));
 		}
 		nodes.add(new CreateCallAllBindingsCallInOrgMethod(boundMethod,
-				boundMethodId));
+				boundMethodId, joinpointId, joinpointDesc));
 	}
 
 	@Override

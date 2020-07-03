@@ -43,24 +43,22 @@ import org.objectweb.asm.Opcodes;
 import org.eclipse.jdt.annotation.*;
 
 /**
- * This class represents a java class.
- * It stores the information about a class parsed from the bytecode and
- * it handles callin and decapsulation bindings for the class
+ * This class represents a java class. It stores the information about a class
+ * parsed from the bytecode and it handles callin and decapsulation bindings for
+ * the class
+ * 
  * @author Oliver Frank
  */
 public abstract class AbstractBoundClass implements IBoundClass {
-	
+
 	private static enum WeavingTaskType {
-		WEAVE_BINDING_OF_SUBCLASS,
-		WEAVE_BINDING,
+		WEAVE_BINDING_OF_SUBCLASS, WEAVE_BINDING,
 		/**
-		 * Weaving of bindings for overridden methods whose super version is callin-bound.
-		 * Includes replacement of "wicked super calls" towards those bound super methods.
+		 * Weaving of bindings for overridden methods whose super version is
+		 * callin-bound. Includes replacement of "wicked super calls" towards those
+		 * bound super methods.
 		 */
-		WEAVE_INHERITED_BINDING,
-		WEAVE_METHOD_ACCESS,
-		WEAVE_FIELD_ACCESS,
-		WEAVE_INHERITED_MEMBER_ACCESS,
+		WEAVE_INHERITED_BINDING, WEAVE_METHOD_ACCESS, WEAVE_FIELD_ACCESS, WEAVE_INHERITED_MEMBER_ACCESS,
 		WEAVE_BASE_INFRASTRUCTURE
 	}
 
@@ -69,7 +67,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * and which has to be woven.
 	 */
 	private static class WeavingTask {
-		
+
 		private WeavingTaskType weavingTaskType;
 		private String memberName;
 		private String memberSignature;
@@ -79,7 +77,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		private boolean isHandleCovariantReturn;
 		private boolean requireBaseSuperCall;
 
-		public WeavingTask(WeavingTaskType weavingTaskType, String memberName, String memberSignature, int baseFlags, boolean handleCovariantReturn, boolean requireBaseSuperCall) {
+		public WeavingTask(WeavingTaskType weavingTaskType, String memberName, String memberSignature, int baseFlags,
+				boolean handleCovariantReturn, boolean requireBaseSuperCall) {
 			this.weavingTaskType = weavingTaskType;
 			this.memberName = memberName;
 			this.memberSignature = memberSignature;
@@ -87,13 +86,13 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			this.requireBaseSuperCall = requireBaseSuperCall;
 			this.baseFlags = baseFlags;
 		}
-		
-		public WeavingTask(WeavingTaskType weavingTaskType, Method method, WeavingTask upstream, AbstractBoundClass upstreamClass) {
-			this(weavingTaskType, method.getName(), method.getSignature(),
-					upstream.getBaseFlags(), upstream.isHandleCovariantReturn(), false);
-			if (weavingTaskType == WeavingTaskType.WEAVE_INHERITED_BINDING
-					&& upstream != null && ((upstream.getBaseFlags() & IBinding.PRIVATE_BASE) != 0)
-					&& upstreamClass != null)
+
+		public WeavingTask(WeavingTaskType weavingTaskType, Method method, WeavingTask upstream,
+				AbstractBoundClass upstreamClass) {
+			this(weavingTaskType, method.getName(), method.getSignature(), upstream.getBaseFlags(),
+					upstream.isHandleCovariantReturn(), false);
+			if (weavingTaskType == WeavingTaskType.WEAVE_INHERITED_BINDING && upstream != null
+					&& ((upstream.getBaseFlags() & IBinding.PRIVATE_BASE) != 0) && upstreamClass != null)
 				this.memberPrefixId = upstreamClass.getId();
 		}
 
@@ -103,14 +102,16 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 		/**
 		 * Returns the type of the WeavingTask
+		 * 
 		 * @return
 		 */
 		public WeavingTaskType getType() {
 			return weavingTaskType;
 		}
-		
+
 		/**
 		 * Returns the name of the member, that has to be woven
+		 * 
 		 * @return
 		 */
 		public String getMemberName() {
@@ -119,26 +120,28 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 		/**
 		 * Returns the signature of the member, that has to be woven
+		 * 
 		 * @return
 		 */
 		public String getMemberSignature() {
 			return memberSignature;
 		}
-		
+
 		public String getMethodIdentifier(AbstractBoundClass clazz) {
 			String prefix = memberPrefixId != null ? memberPrefixId : clazz.getId();
 			int close = this.memberSignature.lastIndexOf(')');
-			return prefix + '.' + this.memberName + this.memberSignature.substring(0, close+1);
+			return prefix + '.' + this.memberName + this.memberSignature.substring(0, close + 1);
 		}
 
 		public int getBaseFlags() {
 			return baseFlags;
 		}
-		
+
 		/**
 		 * This information is only needed for callin bindings.
-		 * @return If true, all transformation has to be done, if false,
-		 * only callAllBindings has to be redefined
+		 * 
+		 * @return If true, all transformation has to be done, if false, only
+		 *         callAllBindings has to be redefined
 		 */
 		public boolean doAllTransformations() {
 			return doAllTransformations;
@@ -170,19 +173,20 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	// completed WeavingTasks for callin bindings mapped by the method,
 	// that was woven
 	private Map<Method, WeavingTask> completedBindingTasks;
-	
+
 	// not completed WeavingTasks for callin bindings mapped by the method,
 	// that has to be woven
-	public Map<Method, WeavingTask> openBindingTasks; // NB: this map is used as the monitor for itself & openAccessTasks.
-	
+	public Map<Method, WeavingTask> openBindingTasks; // NB: this map is used as the monitor for itself &
+														// openAccessTasks.
+
 	// completed WeavingTasks for decapsulation bindings mapped by the member,
 	// that was woven
 	private Map<Member, WeavingTask> completedAccessTasks;
-	
+
 	// open WeavingTasks for decapsulation bindings mapped by the member,
 	// that has to be woven
 	private Map<Member, WeavingTask> openAccessTasks;
-	
+
 	private List<ISubclassWiringTask> wiringTasks;
 
 	// while > 0 we are batching modifications before executing handleTaskList()
@@ -190,12 +194,12 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 	protected boolean parsed;
 
-	//FQN (e.g. "foo.bar.MyClass")
+	// FQN (e.g. "foo.bar.MyClass")
 	private @NonNull String name;
-	
-	//internal FQN (e.g. "foo/bar/MyClass.class")
+
+	// internal FQN (e.g. "foo/bar/MyClass.class")
 	private String internalName;
-	
+
 	// A globally unique identifier for the class
 	private String id;
 	private String superClassName;
@@ -206,15 +210,18 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	private Map<String, Method> methods;
 	private Map<String, Field> fields;
 	protected Map<AbstractBoundClass, Object> subclasses;
-	
+
 	// Is the java class, that was represented by the AbstractBoundClass
 	// already loaded by a class loader or not
 	private boolean isLoaded;
 	protected boolean isUnweavable;
 
-	/** Within one base hierarchy, callOrig and callAllBindings may need to propagate to supers. */
+	/**
+	 * Within one base hierarchy, callOrig and callAllBindings may need to propagate
+	 * to supers.
+	 */
 	protected boolean hierarchyIsCallinAffected = false;
-	
+
 	private int modifiers;
 
 	private int otClassFlags;
@@ -226,13 +233,13 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	// callback
 	protected IWeavingContext weavingContext;
 
-
-
 	/**
-	 * No public constructor, beacause only the ClassRepository should
-	 * create AbstractBoundClasses
-	 * @param name dot-separated class name
-	 * @param id unique identifier, able to differentiate same-named classes from different classloaders
+	 * No public constructor, beacause only the ClassRepository should create
+	 * AbstractBoundClasses
+	 * 
+	 * @param name   dot-separated class name
+	 * @param id     unique identifier, able to differentiate same-named classes
+	 *               from different classloaders
 	 * @param loader classloader responsible for loading this class
 	 */
 	protected AbstractBoundClass(@NonNull String name, String id, ClassLoader loader) {
@@ -249,17 +256,17 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		methods = new HashMap<String, Method>();
 		fields = new HashMap<String, Field>();
 		subclasses = new IdentityHashMap<AbstractBoundClass, Object>();
-		
+
 		// don't fetch a anonymous subclass for a anonymous subclass
 		if (!name.equals(ClassRepository.ANONYMOUS_SUBCLASS_NAME)) {
-			AbstractBoundClass anonymousSubclass = ClassRepository
-					.getInstance().getAnonymousSubclass(this);
+			AbstractBoundClass anonymousSubclass = ClassRepository.getInstance().getAnonymousSubclass(this);
 			subclasses.put(anonymousSubclass, null);
 		}
 	}
 
 	/**
 	 * Returns the name of the Class
+	 * 
 	 * @return
 	 */
 	public @NonNull String getName() {
@@ -273,17 +280,19 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	public boolean isAnonymous() {
 		return getName().equals(ClassRepository.ANONYMOUS_SUBCLASS_NAME);
 	}
-	
+
 	/**
 	 * Returns the classloader responsible for loading this class.
+	 * 
 	 * @return
 	 */
 	public ClassLoader getClassLoader() {
 		return this.loader;
 	}
-	
+
 	/**
 	 * Set the name of the super class of this class
+	 * 
 	 * @param superClassName
 	 */
 	public void setSuperClassName(String superClassName) {
@@ -306,23 +315,25 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 	/**
 	 * Is the class a interface?
+	 * 
 	 * @return
 	 */
 	public boolean isInterface() {
 		parseBytecode();
 		return (this.modifiers & Opcodes.ACC_INTERFACE) != 0;
 	}
-	
+
 	/**
 	 * Does this AbstractBoundClass represents a Team.
-	 * @return if true, the method getTeam of the ClassRepository 
-	 * could be called to get an instance of AbstractTeam 
+	 * 
+	 * @return if true, the method getTeam of the ClassRepository could be called to
+	 *         get an instance of AbstractTeam
 	 */
 	public boolean isTeam() {
 		parseBytecode();
 		return (this.otClassFlags & Types.TEAM_FLAG) != 0;
 	}
-	
+
 	/**
 	 * Number of outer instances required in an instance of this class.
 	 */
@@ -331,7 +342,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		if ((this.modifiers & Opcodes.ACC_STATIC) != 0)
 			return 0;
 		if (this.enclosingClass != null)
-			return this.enclosingClass.nestingDepth()+1;
+			return this.enclosingClass.nestingDepth() + 1;
 		return 0;
 	}
 
@@ -343,9 +354,9 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	public void setOTClassFlags(int flags) {
-		this.otClassFlags = flags;		
+		this.otClassFlags = flags;
 	}
-	
+
 	public boolean isRole() {
 		return (this.otClassFlags & Types.ROLE_FLAG) != 0;
 	}
@@ -355,7 +366,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	public void enableImplicitActivation() {
-		this.implicitTeamActivationEnabled = true;		
+		this.implicitTeamActivationEnabled = true;
 	}
 
 	public void registerMethodForImplicitActivation(String methodNameAndDesc) {
@@ -377,14 +388,13 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	/**
-	 * Do all needed transformations needed at load time:
-	 * Add the interface IBoundBase2
-	 * Add the empty method callOrig
-	 * Add the empty method callOrigStatic
-	 * Add the empty method access
-	 * Add the empty method accessStatic
-	 * Add the empty method callAllBindings
-	 * @throws IllegalClassFormatException various bytecode problems, e.g., unexpected RET instruction etc.
+	 * Do all needed transformations needed at load time: Add the interface
+	 * IBoundBase2 Add the empty method callOrig Add the empty method callOrigStatic
+	 * Add the empty method access Add the empty method accessStatic Add the empty
+	 * method callAllBindings
+	 * 
+	 * @throws IllegalClassFormatException various bytecode problems, e.g.,
+	 *                                     unexpected RET instruction etc.
 	 */
 	public void transformAtLoadTime() throws IllegalClassFormatException {
 		handleTaskList(null);
@@ -396,13 +406,13 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	public void setLoaded() {
 		this.isLoaded = true;
 	}
-	
+
 	/**
-	 * Returns an instance of AbstractBoundClass that represents 
-	 * the super class of this class.
-	 * It parses the bytecode, if that has not already been done 
-	 * @return an instance of AbstractBoundClass that represents 
-	 * the super class of this class
+	 * Returns an instance of AbstractBoundClass that represents the super class of
+	 * this class. It parses the bytecode, if that has not already been done
+	 * 
+	 * @return an instance of AbstractBoundClass that represents the super class of
+	 *         this class
 	 */
 	public AbstractBoundClass getSuperclass() {
 		if (superclass == null) {
@@ -410,11 +420,13 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				parseBytecode();
 				String checkedSuperClassName = superClassName;
 				if (checkedSuperClassName != null && superclass == null) {
-					String superclassId = ClassIdentifierProviderFactory.getClassIdentifierProvider().getSuperclassIdentifier(id, internalSuperClassName);
-					
-					//if superclassId is null the class could be "Object" or an interface
+					String superclassId = ClassIdentifierProviderFactory.getClassIdentifierProvider()
+							.getSuperclassIdentifier(id, internalSuperClassName);
+
+					// if superclassId is null the class could be "Object" or an interface
 					if (superclassId != null) {
-						superclass = ClassRepository.getInstance().getBoundClass(checkedSuperClassName, superclassId, loader);
+						superclass = ClassRepository.getInstance().getBoundClass(checkedSuperClassName, superclassId,
+								loader);
 						superclass.addSubclass(this);
 						// FIXME(SH): can we avoid adding all subclasses to j.l.Object?
 					}
@@ -423,32 +435,34 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		}
 		return superclass;
 	}
-	
+
 	/**
 	 * Returns the internal names of all superInterfaces or null.
 	 */
-	public /*@Nullable*/ String[] getSuperInterfaceNames() {
+	public /* @Nullable */ String[] getSuperInterfaceNames() {
 		parseBytecode();
 		return this.internalSuperInterfaces;
 	}
 
 	/**
-	 * Returns an instance of AbstractBoundClass that represents 
-	 * the enclosing class of this class.
-	 * It parses the bytecode, if that has not already been done 
-	 * @return an instance of AbstractBoundClass that represents 
-	 * the enclosing class of this class
+	 * Returns an instance of AbstractBoundClass that represents the enclosing class
+	 * of this class. It parses the bytecode, if that has not already been done
+	 * 
+	 * @return an instance of AbstractBoundClass that represents the enclosing class
+	 *         of this class
 	 */
 	public synchronized AbstractBoundClass getEnclosingClass() {
 		parseBytecode();
 		int pos = this.internalName.lastIndexOf('$');
 		if (pos != -1) {
-			String enclosingClassName = this.internalName.substring(0, pos); 
+			String enclosingClassName = this.internalName.substring(0, pos);
 			// FIXME(SH): do we need a new getEnclosingClassIdentifier?
-			String enclosingClassID = ClassIdentifierProviderFactory.getClassIdentifierProvider().getSuperclassIdentifier(id, enclosingClassName);
-			
+			String enclosingClassID = ClassIdentifierProviderFactory.getClassIdentifierProvider()
+					.getSuperclassIdentifier(id, enclosingClassName);
+
 			if (enclosingClassID != null) {
-				enclosingClass = ClassRepository.getInstance().getBoundClass(enclosingClassName, enclosingClassID, loader);
+				enclosingClass = ClassRepository.getInstance().getBoundClass(enclosingClassName, enclosingClassID,
+						loader);
 				enclosingClass.addSubclass(this);
 			}
 		}
@@ -459,19 +473,20 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		parseBytecode();
 		int pos = this.internalName.lastIndexOf('$');
 		if (pos != -1) {
-			return this.internalName.substring(0, pos); 
+			return this.internalName.substring(0, pos);
 		}
 		return null;
 	}
 
 	/**
-	 * This method parses the bytecode, if that has not already been done 
+	 * This method parses the bytecode, if that has not already been done
 	 */
 	public abstract void parseBytecode();
-	
+
 	/**
-	 * Returns the internal name of the super class of this class
-	 * It parses the bytecode, if that has not already been done
+	 * Returns the internal name of the super class of this class It parses the
+	 * bytecode, if that has not already been done
+	 * 
 	 * @return
 	 */
 	public String getInternalSuperClassName() {
@@ -480,9 +495,10 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	/**
-	 * Returns the internal name of the super class of this class IFF that super class is weavable,
-	 * otherwise it returns {@code null}.
-	 * It parses the bytecode, if that has not already been done
+	 * Returns the internal name of the super class of this class IFF that super
+	 * class is weavable, otherwise it returns {@code null}. It parses the bytecode,
+	 * if that has not already been done
+	 * 
 	 * @return
 	 */
 	public String getInternalWeavableSuperClassName(boolean considerSupers) {
@@ -496,15 +512,17 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 	/**
 	 * Returns the internal name of this class
+	 * 
 	 * @return
 	 */
 	public String getInternalName() {
 		return internalName;
 	}
-	
+
 	/**
-	 * Returns the name of the super class of this class
-	 * It parses the bytecode, if that has not already been done
+	 * Returns the name of the super class of this class It parses the bytecode, if
+	 * that has not already been done
+	 * 
 	 * @return
 	 */
 	public String getSuperClassName() {
@@ -513,17 +531,17 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	/**
-	 * Adds a method to this class.
-	 * This method is intended to be called, 
-	 * while parsing the bytecode
-	 * @param name the name of the field
-	 * @param desc the signature of the method
-	 * @param isStatic is this method static
+	 * Adds a method to this class. This method is intended to be called, while
+	 * parsing the bytecode
+	 * 
+	 * @param name      the name of the field
+	 * @param desc      the signature of the method
+	 * @param isStatic  is this method static
 	 * @param isPrivate is this method private
 	 */
 	public void addMethod(String name, String desc, boolean isStatic, int accessFlags) {
 		if (desc == null) {
-			System.err.println("OTDRE: Method "+name+" in class "+this.name+" has no descriptor");
+			System.err.println("OTDRE: Method " + name + " in class " + this.name + " has no descriptor");
 			return;
 		}
 		String methodKey = getMethodKey(name, desc);
@@ -544,16 +562,16 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	/** Method signature sans the return type. */
 	private String getMethodKey(String name, String desc) {
 		int pos = desc.indexOf(')');
-		return name+desc.substring(0,pos+1);
+		return name + desc.substring(0, pos + 1);
 	}
 
 	/**
-	 * Adds a field to this class.
-	 * This method is intended to be called, 
-	 * while parsing the bytecode
-	 * @param name the name of the field
-	 * @param desc the signature of the field
-	 * @param isStatic is this field static
+	 * Adds a field to this class. This method is intended to be called, while
+	 * parsing the bytecode
+	 * 
+	 * @param name       the name of the field
+	 * @param desc       the signature of the field
+	 * @param isStatic   is this field static
 	 * @param accessFlag ACC_PUBLIC, ACC_PROTECTED, ACC_PRIVATE or 0.
 	 */
 	public void addField(String name, String desc, boolean isStatic, int accessFlags) {
@@ -568,7 +586,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 	public Method getMethod(String name, String desc, int flags, boolean allowCovariantReturn) {
 		if (this.parsed) {
-			// in this state the current class may already be inside synchronized handleTaskList(), try without lock:
+			// in this state the current class may already be inside synchronized
+			// handleTaskList(), try without lock:
 			String methodKey = getMethodKey(name, desc);
 			Method method = methods.get(methodKey);
 			if (method != null) {
@@ -577,7 +596,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				return null;
 			}
 		}
-		synchronized(this) {
+		synchronized (this) {
 			parseBytecode();
 			String methodKey = getMethodKey(name, desc);
 			Method method = methods.get(methodKey);
@@ -586,19 +605,20 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			if (method == null) {
 				// class was not yet loaded
 				int access = 0;
-				if ((flags&IBinding.PRIVATE_BASE) != 0)
+				if ((flags & IBinding.PRIVATE_BASE) != 0)
 					access |= Opcodes.ACC_PRIVATE;
-				else if ((flags&IBinding.PUBLIC_BASE) != 0)
+				else if ((flags & IBinding.PUBLIC_BASE) != 0)
 					access |= Opcodes.ACC_PUBLIC;
-				method = new Method(name, desc, ((flags&IBinding.STATIC_BASE) != 0), access);
+				method = new Method(name, desc, ((flags & IBinding.STATIC_BASE) != 0), access);
 				methods.put(methodKey, method);
 			}
 			return method;
 		}
 	}
-	
+
 	Method getMethod(WeavingTask task) {
-		return getMethod(task.getMemberName(), task.getMemberSignature(), task.getBaseFlags(), task.isHandleCovariantReturn());
+		return getMethod(task.getMemberName(), task.getMemberSignature(), task.getBaseFlags(),
+				task.isHandleCovariantReturn());
 	}
 
 	Method getMethod(Method method, WeavingTask task) {
@@ -621,7 +641,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		boolean actualStatic = method.isStatic();
 		if (name.equals("<init>"))
 			actualStatic = true; // see OTSpecialAccessAttribute.readMethodAccess(..) re static accessor
-		assert actualStatic == isStatic : "Mismatching static/non-static methods "+getName()+'.'+name+desc;
+		assert actualStatic == isStatic : "Mismatching static/non-static methods " + getName() + '.' + name + desc;
 		return method;
 	}
 
@@ -636,15 +656,15 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		return field;
 	}
 
-
 	public String getMethodIdentifier(IMethod method) {
 		String signature = method.getSignature();
 		int close = signature.lastIndexOf(')'); // admit covariant return
-		return getId() + '.' + method.getName() + signature.substring(0, close+1);
+		return getId() + '.' + method.getName() + signature.substring(0, close + 1);
 	}
 
 	/**
 	 * Adds a subclass to this class
+	 * 
 	 * @param subclass
 	 */
 	protected void addSubclass(AbstractBoundClass subclass) {
@@ -652,8 +672,9 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	/**
-	 * Remove subclass from this class. It's only needed
-	 * to remove a anonymous subclass, if a real subclass is loaded
+	 * Remove subclass from this class. It's only needed to remove a anonymous
+	 * subclass, if a real subclass is loaded
+	 * 
 	 * @param subclass
 	 */
 	protected void removeSubclass(AbstractBoundClass subclass) {
@@ -661,8 +682,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	/**
-	 * Returns all subclasses of this class, 
-	 * including the anonymous subclass
+	 * Returns all subclasses of this class, including the anonymous subclass
+	 * 
 	 * @return
 	 */
 	private Collection<AbstractBoundClass> getSubclasses() {
@@ -670,18 +691,22 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	/**
-	 * Handle all open weaving tasks for this class.
-	 * It redefines the class, if it is not called while loading
+	 * Handle all open weaving tasks for this class. It redefines the class, if it
+	 * is not called while loading
+	 * 
 	 * @param definedClass previously defined class if available
-	 * @throws IllegalClassFormatException various bytecode problems, e.g., unexpected RET instruction etc.
+	 * @throws IllegalClassFormatException various bytecode problems, e.g.,
+	 *                                     unexpected RET instruction etc.
 	 */
 	public void handleTaskList(@Nullable Class<?> definedClass) throws IllegalClassFormatException {
-		if (isTransformationActive()) return;
+		if (isTransformationActive())
+			return;
 
 		if (this.isUnweavable)
-			new LinkageError("Class "+this.name+" is requested to be woven, but it is marked as unweavable.").printStackTrace();
+			new LinkageError("Class " + this.name + " is requested to be woven, but it is marked as unweavable.")
+					.printStackTrace();
 
-		synchronized(this) {
+		synchronized (this) {
 			boolean firstIteration = true;
 			while (true) {
 				boolean processingOpenTasks = false;
@@ -700,8 +725,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 					}
 				}
 				firstIteration = false;
-		
-				// Are there not handled callin or decapsulation bindings 
+
+				// Are there not handled callin or decapsulation bindings
 				// for this class
 				if (bindingEntrySet.size() > 0 || accessEntrySet.size() > 0) {
 					// Yes, so start the transformation, parse the bytecode
@@ -724,10 +749,11 @@ public abstract class AbstractBoundClass implements IBoundClass {
 					prepareLiftingParticipant();
 					endTransformation(definedClass);
 				}
-		
-				// collect other classes for which new tasks are recorded, to flush those tasks in bulk at the end
+
+				// collect other classes for which new tasks are recorded, to flush those tasks
+				// in bulk at the end
 				Set<AbstractBoundClass> affectedClasses = new HashSet<AbstractBoundClass>();
-		
+
 				for (Map.Entry<Method, WeavingTask> entry : bindingEntrySet) {
 					WeavingTask task = entry.getValue();
 					Method method = entry.getKey();
@@ -740,11 +766,11 @@ public abstract class AbstractBoundClass implements IBoundClass {
 							// Yes, so weave this class
 							weaveBindingOfSubclass(task);
 						} else {
-							//No, so just delegate the weaving task to the superclass
+							// No, so just delegate the weaving task to the superclass
 							AbstractBoundClass superclass = getSuperclass();
 							// If superclass is null, there is something wrong
 							if (superclass != null) {
-								superclass.addWeavingTask(task, true/*standBy*/);
+								superclass.addWeavingTask(task, true/* standBy */);
 								affectedClasses.add(superclass);
 								weaveSuperCallInCallOrig(task); // ensure we're actually calling that super version
 							}
@@ -759,11 +785,14 @@ public abstract class AbstractBoundClass implements IBoundClass {
 							if (method.isImplemented()) {
 								// So redefine the method
 								weaveBindingInImplementedMethod(task);
-								if (!method.isStatic() && weavingContext.isWeavable(getSuperClassName(), false, false)) {
+								if (!method.isStatic()
+										&& weavingContext.isWeavable(getSuperClassName(), false, false)) {
 									AbstractBoundClass superclass = getSuperclass();
-									Method superMethod = superclass.getMethod(method.getName(), method.getSignature(), true, false);
+									Method superMethod = superclass.getMethod(method.getName(), method.getSignature(),
+											true, false);
 									if (superMethod.isImplemented()) {
-										// binding affects also the super implementation, need to handle wicked super calls:
+										// binding affects also the super implementation, need to handle wicked super
+										// calls:
 										replaceWickedSuperCalls(getSuperclass(), method);
 									}
 								}
@@ -772,11 +801,14 @@ public abstract class AbstractBoundClass implements IBoundClass {
 								weaveBindingInNotImplementedMethod(task, true);
 								AbstractBoundClass superclass = getSuperclass();
 								while (superclass != null && !superclass.isJavaLangObject()) {
-									if (weavingContext.isWeavable(superclass.getName(), false, false)) { // explicitly traversing supers
+									if (weavingContext.isWeavable(superclass.getName(), false, false)) { // explicitly
+																											// traversing
+																											// supers
 										Method superMethod = superclass.getMethod(method, task);
 										if (superMethod != null) {
-											WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS, superMethod, task, null);
-											superclass.addWeavingTask(newTask, true/*standBy*/);
+											WeavingTask newTask = new WeavingTask(
+													WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS, superMethod, task, null);
+											superclass.addWeavingTask(newTask, true/* standBy */);
 											affectedClasses.add(superclass);
 											break;
 										}
@@ -784,25 +816,27 @@ public abstract class AbstractBoundClass implements IBoundClass {
 									superclass = superclass.getSuperclass();
 								}
 							}
-		
-		// Original comment:
-		//   If this method is private, the callin binding is not
-		//   inherited by the subclasses
-		// However, this conflicts with test415_nonexistingBaseMethod3i,
-		// where an empty callAllBindings() was overriding a non-empty one.
-		// see also Method.getId()
-		//					if (!method.isPrivate()) {
-								// Delegate the WeavingTask to the subclasses
-								for (AbstractBoundClass subclass : getSubclasses()) {
-									Method subMethod = subclass.getMethod(method, task);
-									if (subMethod != null) {
-										WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod, task, this);
-										subclass.addWeavingTask(newTask, true/*standBy*/);
-										affectedClasses.add(subclass);
-										TeamManager.mergeJoinpoints(this, subclass, method, subMethod, task.isHandleCovariantReturn());
-									}
+
+							// Original comment:
+							// If this method is private, the callin binding is not
+							// inherited by the subclasses
+							// However, this conflicts with test415_nonexistingBaseMethod3i,
+							// where an empty callAllBindings() was overriding a non-empty one.
+							// see also Method.getId()
+							// if (!method.isPrivate()) {
+							// Delegate the WeavingTask to the subclasses
+							for (AbstractBoundClass subclass : getSubclasses()) {
+								Method subMethod = subclass.getMethod(method, task);
+								if (subMethod != null) {
+									WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING,
+											subMethod, task, this);
+									subclass.addWeavingTask(newTask, true/* standBy */);
+									affectedClasses.add(subclass);
+									TeamManager.mergeJoinpoints(this, subclass, method, subMethod,
+											task.isHandleCovariantReturn());
 								}
-		//					}
+							}
+							// }
 						}
 						break;
 					// Weave Binding inherited from the superclass
@@ -815,42 +849,43 @@ public abstract class AbstractBoundClass implements IBoundClass {
 						} else {
 							weaveBindingInNotImplementedMethod(task, false);
 						}
-		
+
 						// Delegate the WeavingTask to the subclasses
 						for (AbstractBoundClass subclass : getSubclasses()) {
 							Method subMethod = subclass.getMethod(method, task);
-							WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod, task, this);
-							subclass.addWeavingTask(newTask, true/*standBy*/);
+							WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod,
+									task, this);
+							subclass.addWeavingTask(newTask, true/* standBy */);
 							affectedClasses.add(subclass);
-							TeamManager.mergeJoinpoints(this, subclass, method, subMethod, task.isHandleCovariantReturn());
+							TeamManager.mergeJoinpoints(this, subclass, method, subMethod,
+									task.isHandleCovariantReturn());
 						}
-		
+
 						break;
 					}
-					
-					// Mark all WeavingTasks for callin bindings 
+
+					// Mark all WeavingTasks for callin bindings
 					// as completed
 					completedBindingTasks.put(method, task);
 				}
-				
-				//handle all WeavinTasks for decapsulation bindings
+
+				// handle all WeavinTasks for decapsulation bindings
 				for (Map.Entry<Member, WeavingTask> entry : accessEntrySet) {
 					WeavingTask task = entry.getValue();
 					Member member = entry.getKey();
-					
+
 					switch (task.getType()) {
 					// handle decapsulation binding to a field
 					case WEAVE_FIELD_ACCESS:
 						prepareForFirstMemberAccess();
-						Field field = getField(task.getMemberName(), task
-								.getMemberSignature());
+						Field field = getField(task.getMemberName(), task.getMemberSignature());
 						weaveFieldAccess(field, field.getGlobalId(this));
 						if (!field.isStatic()) {
 							// If the field is not static it could be accessed through a subclass
 							// so weave the subclass
 							for (AbstractBoundClass subclass : getSubclasses()) {
 								WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_MEMBER_ACCESS);
-								subclass.addWeavingTask(newTask, true/*standBy*/);
+								subclass.addWeavingTask(newTask, true/* standBy */);
 								affectedClasses.add(subclass);
 							}
 						}
@@ -865,7 +900,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 							// so weave the subclass
 							for (AbstractBoundClass subclass : getSubclasses()) {
 								WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_MEMBER_ACCESS);
-								subclass.addWeavingTask(newTask, true/*standBy*/);
+								subclass.addWeavingTask(newTask, true/* standBy */);
 								affectedClasses.add(subclass);
 							}
 						}
@@ -877,8 +912,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 						prepareForFirstTransformation();
 						break;
 					}
-					
-					// Mark all WeavingTasks for decapsulation bindings 
+
+					// Mark all WeavingTasks for decapsulation bindings
 					// as completed
 					completedAccessTasks.put(member, task);
 				}
@@ -886,14 +921,15 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				for (final AbstractBoundClass affected : affectedClasses)
 					if (affected.isLoaded) {
 						IReweavingTask task = new IReweavingTask() {
-							@Override public void reweave(@Nullable Class<?> definedClass) throws IllegalClassFormatException {
+							@Override
+							public void reweave(@Nullable Class<?> definedClass) throws IllegalClassFormatException {
 								affected.handleTaskList(definedClass);
 							}
 						};
 						if (!weavingContext.scheduleReweaving(affected.name, task))
 							affected.handleTaskList(definedClass);
 					}
-		
+
 				if (processingOpenTasks) {
 					// Weave the class, if the method is not called at load time
 					endTransformation(definedClass);
@@ -905,6 +941,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	protected abstract void createSuperCalls();
+
 	protected abstract void propagateCallinInfraToSubclasses();
 
 	private boolean hierarchyIsCallinAffected() {
@@ -918,8 +955,9 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		return false;
 	}
 
-	<K,V> Set<Entry<K, V>> copyEntrySet(Map<K,V> map) {
-		if (map.isEmpty()) return Collections.emptySet();
+	<K, V> Set<Entry<K, V>> copyEntrySet(Map<K, V> map) {
+		if (map.isEmpty())
+			return Collections.emptySet();
 		Map<K, V> bindingMap = new HashMap<K, V>();
 		for (Entry<K, V> entry : map.entrySet())
 			bindingMap.put(entry.getKey(), entry.getValue());
@@ -943,8 +981,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			task = new WeavingTask(WeavingTaskType.WEAVE_BASE_INFRASTRUCTURE);
 			break;
 		default:
-			throw new RuntimeException("Unknown binding type: "
-					+ binding.getType().name());
+			throw new RuntimeException("Unknown binding type: " + binding.getType().name());
 		}
 // TODO: once needed for test4141_dangerousCallinBinding3, but no longer.
 // Instead it causes the need to redefine classes in OT/Equinox, hence disabled.
@@ -957,18 +994,18 @@ public abstract class AbstractBoundClass implements IBoundClass {
 //				throw new NoClassDefFoundError(e.getMessage());
 //			}
 		if (task == null)
-			task = new WeavingTask(type, binding.getMemberName(), binding.getMemberSignature(), 
-											binding.getBaseFlags(), binding.isHandleCovariantReturn(), binding.requiresBaseSuperCall());
+			task = new WeavingTask(type, binding.getMemberName(), binding.getMemberSignature(), binding.getBaseFlags(),
+					binding.isHandleCovariantReturn(), binding.requiresBaseSuperCall());
 		try {
 			addWeavingTask(task, false);
 		} catch (IllegalClassFormatException e) {
 			e.printStackTrace(); // we're called from TeamManager, which can neither log nor handle exceptions
 		}
 	}
-	
+
 	@Override
 	public synchronized void startTransaction() {
-		this.transactionCount ++;
+		this.transactionCount++;
 	}
 
 	@Override
@@ -982,7 +1019,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			}
 		}
 	}
-	
+
 	private void addWeavingTask(WeavingTask task, boolean standBy) throws IllegalClassFormatException {
 		boolean isNewTask = addWeavingTaskLazy(task);
 
@@ -990,24 +1027,24 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			handleTaskList(null);
 		}
 	}
-	
+
 	private boolean addWeavingTaskLazy(WeavingTask task) {
 		WeavingTaskType type = task.getType();
 		boolean isNewTask = false;
-		if (type == WeavingTaskType.WEAVE_BINDING
-				|| type == WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS
+		if (type == WeavingTaskType.WEAVE_BINDING || type == WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS
 				|| type == WeavingTaskType.WEAVE_INHERITED_BINDING) {
 			isNewTask = addBindingWeavingTask(task);
 		} else {
 			isNewTask = addAccessWeavingTask(task);
 		}
-		
+
 		return isNewTask;
 	}
 
 	/**
-	 * Handle a new WeavingTask for decapsulation and 
-	 * figures out if weaving is needed for this task 
+	 * Handle a new WeavingTask for decapsulation and figures out if weaving is
+	 * needed for this task
+	 * 
 	 * @param task
 	 * @return
 	 */
@@ -1021,7 +1058,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		case WEAVE_METHOD_ACCESS:
 			member = getMethod(task);
 			break;
-			// switch "continued" inside the synchronized block:
+		// switch "continued" inside the synchronized block:
 		}
 		synchronized (this.openBindingTasks) { // sic: openBindingTasks is used as the monitor for both maps
 			switch (type) {
@@ -1030,8 +1067,9 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				openAccessTasks.put(null, task);
 				return true;
 			}
-			if (member == null) return false;
-			
+			if (member == null)
+				return false;
+
 			synchronized (member) {
 				WeavingTask prevTask = completedAccessTasks.get(member);
 				// Is there a already completed task for the member?
@@ -1039,14 +1077,14 @@ public abstract class AbstractBoundClass implements IBoundClass {
 					// No, so check the open tasks
 					prevTask = openAccessTasks.get(member);
 				}
-				
+
 				// Is there a open task for the member?
 				if (prevTask == null) {
 					// No, so weaving is needed
 					openAccessTasks.put(member, task);
 					return true;
 				} else {
-					//Yes, so weaving is not needed
+					// Yes, so weaving is not needed
 					return false;
 				}
 			}
@@ -1054,35 +1092,36 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	/**
-	 * Handle a new WeavingTask for a callin binding and 
-	 * figures out if weaving is needed for this task 
+	 * Handle a new WeavingTask for a callin binding and figures out if weaving is
+	 * needed for this task
+	 * 
 	 * @param task
 	 * @return
 	 */
 	private boolean addBindingWeavingTask(WeavingTask task) {
 		Method method = getMethod(task);
 		synchronized (method) {
-			synchronized (openBindingTasks) {				
+			synchronized (openBindingTasks) {
 				WeavingTask prevTask = completedBindingTasks.get(method);
 				// Is there a already completed task for the method?
 				if (prevTask == null) {
 					// No, so check the open tasks
 					prevTask = openBindingTasks.get(method);
 				}
-				
+
 				// Is there a open task for the member?
 				if (prevTask == null) {
-					//No, so weaving is needed
+					// No, so weaving is needed
 					task.setDoAllTransformations(true);
 					openBindingTasks.put(method, task);
 					return true;
 				}
-				
+
 				switch (prevTask.getType()) {
 				case WEAVE_BINDING:
 					return false;
 				case WEAVE_BINDING_OF_SUBCLASS:
-					// In  this case only the callAllBings was redefined.
+					// In this case only the callAllBings was redefined.
 					if (task.getType() != WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS) {
 						// Do the other transformations, if the new WeavingTask is not the same
 						// as already existing
@@ -1093,22 +1132,22 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				case WEAVE_INHERITED_BINDING:
 					return false;
 				default:
-					throw new RuntimeException("Unknown WeavingTaskType: "
-							+ prevTask.getType().name());
+					throw new RuntimeException("Unknown WeavingTaskType: " + prevTask.getType().name());
 				}
 			}
 		}
 	}
-	
+
 	public void addWeavingOfSubclassTask(String methodName, String signature, boolean isStatic) {
 		int flags = isStatic ? IBinding.STATIC_BASE : 0;
-		addBindingWeavingTask(new WeavingTask(WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS, methodName, signature, flags, true, false));
+		addBindingWeavingTask(
+				new WeavingTask(WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS, methodName, signature, flags, true, false));
 	}
 
 	/**
-	 * Merge tasks of two AbstractBoundClasses (this class and a other).
-	 * This method is called if a currently loaded has to be merged 
-	 * with a anonymous subclass
+	 * Merge tasks of two AbstractBoundClasses (this class and a other). This method
+	 * is called if a currently loaded has to be merged with a anonymous subclass
+	 * 
 	 * @param clazz
 	 * @return
 	 */
@@ -1122,19 +1161,18 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		}
 		for (Map.Entry<Method, WeavingTask> entry : otherBindingTasks) {
 			isNewTask |= addWeavingTaskLazy(entry.getValue());
-		}		
+		}
 		for (Map.Entry<Member, WeavingTask> entry : otherAccessTasks) {
 			isNewTask |= addWeavingTaskLazy(entry.getValue());
 		}
-		
+
 		return isNewTask;
 	}
 
 	private void weaveBindingInStaticMethod(WeavingTask task) {
 		prepareForFirstStaticTransformation();
 		Method method = getMethod(task);
-		int joinpointId = TeamManager
-				.getJoinpointId(getMethodIdentifier(method));
+		int joinpointId = TeamManager.getJoinpointId(getMethodIdentifier(method));
 		int boundMethodId = method.getGlobalId(this);
 
 		moveCodeToCallOrig(method, boundMethodId, false);
@@ -1142,8 +1180,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	/**
-	 * Do all transformations for a method, that is not implemented
-	 * in this class
+	 * Do all transformations for a method, that is not implemented in this class
+	 * 
 	 * @param task
 	 */
 	private void weaveBindingInNotImplementedMethod(WeavingTask task, boolean needToAddMethod) {
@@ -1153,7 +1191,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			prepareForFirstStaticTransformation();
 
 		Method method = getMethod(task);
-		int joinpointId = TeamManager.getJoinpointId(task.getMethodIdentifier(this));
+		final String joinpointDesc = task.getMethodIdentifier(this);
+		final int joinpointId = TeamManager.getJoinpointId(joinpointDesc);
 		int boundMethodId = method.getGlobalId(this);
 		if (task.doAllTransformations()) {
 			createDispatchCodeInCallAllBindings(joinpointId, boundMethodId);
@@ -1167,7 +1206,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				}
 				Method superMethod = superClass.getMethod(task);
 				if (superMethod.isImplemented()) {
-					isWeavable = weavingContext.isWeavable(superClass.getName(), false, false); // explicitly traversing supers
+					isWeavable = weavingContext.isWeavable(superClass.getName(), false, false); // explicitly traversing
+																								// supers
 					break;
 				}
 				superClass = superClass.getSuperclass();
@@ -1176,15 +1216,16 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				createSuperCallInCallOrig(boundMethodId);
 			else
 				// can't weave into the declaring class, add an override here:
-				createCallAllBindingsCallInOrgMethod(method, boundMethodId, needToAddMethod);
+				createCallAllBindingsCallInOrgMethod(method, boundMethodId, joinpointId, joinpointDesc,
+						needToAddMethod);
 		} else {
 			createDispatchCodeInCallAllBindings(joinpointId, boundMethodId);
 		}
 	}
 
-	/** 
-	 * While delegating a task from a sub class to the super class,
- 	 * ensure that the super version is actually called.
+	/**
+	 * While delegating a task from a sub class to the super class, ensure that the
+	 * super version is actually called.
 	 */
 	private void weaveSuperCallInCallOrig(WeavingTask task) {
 		prepareForFirstTransformation();
@@ -1192,40 +1233,43 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		int boundMethodId = method.getGlobalId(this);
 		if (task.doAllTransformations()) {
 			createSuperCallInCallOrig(boundMethodId);
-		}		
+		}
 	}
 
 	/**
-	 * Do all transformations for a method, that is implemented
-	 * in this class
+	 * Do all transformations for a method, that is implemented in this class
+	 * 
 	 * @param task
 	 */
 	private void weaveBindingInImplementedMethod(WeavingTask task) {
 		prepareForFirstTransformation();
 		Method method = getMethod(task);
-		int joinpointId = TeamManager
-				.getJoinpointId(getMethodIdentifier(method));
+		final int joinpointId = TeamManager.getJoinpointId(getMethodIdentifier(method));
 		int boundMethodId = method.getGlobalId(this);
 		if (task.doAllTransformations()) {
+			final String joinpointDescr = getMethodIdentifier(method);
 			moveCodeToCallOrig(method, boundMethodId, task.requiresBaseSuperCall());
 			createDispatchCodeInCallAllBindings(joinpointId, boundMethodId);
-			createCallAllBindingsCallInOrgMethod(method, boundMethodId, false);
+			createCallAllBindingsCallInOrgMethod(method, boundMethodId, joinpointId, joinpointDescr, false);
 		} else {
 			createDispatchCodeInCallAllBindings(joinpointId, joinpointId);
 		}
 	}
 
 	/**
-	 * Do all transformations for a method, that is bound 
-	 * but not implemented in a subclass
+	 * Do all transformations for a method, that is bound but not implemented in a
+	 * subclass
+	 * 
 	 * @param task
 	 */
 	private void weaveBindingOfSubclass(WeavingTask task) {
 		prepareForFirstTransformation();
 		Method method = getMethod(task);
+		final String joinpointDesc = getMethodIdentifier(method);
+		final int joinpointId = TeamManager.getJoinpointId(joinpointDesc);
 		int boundMethodId = method.getGlobalId(this);
 		moveCodeToCallOrig(method, boundMethodId, false);
-		createCallAllBindingsCallInOrgMethod(method, boundMethodId, false);
+		createCallAllBindingsCallInOrgMethod(method, boundMethodId, joinpointId, joinpointDesc, false);
 
 	}
 
@@ -1234,11 +1278,11 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 	@Override
 	public String toString() {
-		return this.name+"["+this.id+"]";
+		return this.name + "[" + this.id + "]";
 	}
 
 	// See AsmBoundClass or AsmWritableBoundClass for documentation
-	
+
 	protected abstract void startTransformation();
 
 	protected abstract void endTransformation(Class<?> definedClass) throws IllegalClassFormatException;
@@ -1253,11 +1297,10 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 	protected abstract void createSuperCallInCallOrig(int boundMethodId);
 
-	protected abstract void createCallAllBindingsCallInOrgMethod(
-			Method boundMethod, int joinpointId, boolean needToAddMethod);
+	protected abstract void createCallAllBindingsCallInOrgMethod(final Method boundMethod, final int boundMethodId,
+			final int joinpointId, final String joinpointDesc, final boolean needToAddMethod);
 
-	protected abstract void createDispatchCodeInCallAllBindings(
-			int joinpointId, int boundMethodId);
+	protected abstract void createDispatchCodeInCallAllBindings(int joinpointId, int boundMethodId);
 
 	protected abstract void moveCodeToCallOrig(Method boundMethod, int boundMethodId, boolean baseSuperRequired);
 
@@ -1267,13 +1310,17 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 	public abstract boolean isFirstTransformation();
 
-	/** During HCR we need to start with a fresh set of bytes and re-perform all transformations. */
+	/**
+	 * During HCR we need to start with a fresh set of bytes and re-perform all
+	 * transformations.
+	 */
 	public abstract void restartTransformation();
 
-	public boolean isLoaded() { return isLoaded; }
+	public boolean isLoaded() {
+		return isLoaded;
+	}
 
-	protected abstract void createDispatchCodeInOrgMethod(Method boundMethod,
-			int joinpointId, int boundMethodId);
+	protected abstract void createDispatchCodeInOrgMethod(Method boundMethod, int joinpointId, int boundMethodId);
 
 	protected abstract void prepareForFirstMemberAccess();
 
@@ -1282,12 +1329,15 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	protected abstract void weaveMethodAccess(Method method, int accessId);
 
 	public abstract boolean isTransformationActive();
-	
+
 	public abstract byte[] getBytecode();
 
-	public void dump(byte[] classfileBuffer, String postfix) {}
+	public void dump(byte[] classfileBuffer, String postfix) {
+	}
 
-	public Collection<@NonNull String> getBoundBaseClasses() { return null; }
+	public Collection<@NonNull String> getBoundBaseClasses() {
+		return null;
+	}
 
 	public abstract int compare(String callinLabel1, String callinLabel2);
 
@@ -1300,7 +1350,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	public void performWiringTasks(AbstractBoundClass superclass, AbstractBoundClass subclass) {
 		if (this.wiringTasks == null)
 			return;
-		synchronized (this.wiringTasks) {			
+		synchronized (this.wiringTasks) {
 			for (ISubclassWiringTask task : this.wiringTasks)
 				task.wire(superclass, subclass);
 			this.wiringTasks.clear();
@@ -1308,7 +1358,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	public boolean needsWeaving() {
-		synchronized (this.openBindingTasks) {			
+		synchronized (this.openBindingTasks) {
 			return !this.openAccessTasks.isEmpty() || !this.openBindingTasks.isEmpty();
 		}
 	}

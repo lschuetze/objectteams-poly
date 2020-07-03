@@ -17,11 +17,15 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.transformer.names;
 
+import java.lang.invoke.CallSite;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.objectteams.IBoundBase2;
+import org.eclipse.objectteams.otredyn.runtime.dynamic.linker.*;
 import org.objectteams.ILiftingParticipant;
 import org.objectteams.ITeam;
 import org.objectteams.ImplicitTeamActivation;
@@ -34,9 +38,16 @@ import org.objectteams.WrongRoleException;
 
 /**
  * Container for class names used in the bytecode manipulating classes
+ * 
  * @author Oliver Frank
  */
 public abstract class ClassNames {
+
+	public final static String CALLSITE_SLASH = CallSite.class.getName().replace('.', '/');
+	public final static String LOOKUP_SLASH = MethodHandles.Lookup.class.getName().replace('.', '/');
+	public final static String METHODTYPE_SLASH = MethodType.class.getName().replace('.', '/');
+	public final static String BOOTSTRAP_SLASH = CallinBootstrap.class.getName().replace('.', '/');
+
 	public final static String I_BOUND_BASE_SLASH = IBoundBase2.class.getName().replace('.', '/');
 	public final static String OBJECT_SLASH = Object.class.getName().replace('.', '/');
 	public final static String CLASS_SLASH = Class.class.getName().replace('.', '/');
@@ -55,8 +66,8 @@ public abstract class ClassNames {
 	public static final String SNEAKY_EXCEPTION_SLASH = SneakyException.class.getName().replace('.', '/');
 	// member of SneakyException:
 	public static final String RETHROW_SELECTOR = "rethrow";
-	public static final String RETHROW_SIGNATURE = "()V"; 
-	
+	public static final String RETHROW_SIGNATURE = "()V";
+
 	public static final String THREAD_SLASH = Thread.class.getName().replace('.', '/');
 	public static final String TEAM_THREAD_MANAGER_SLASH = TeamThreadManager.class.getName().replace('.', '/');
 	public static final String THROWABLE_SLASH = Throwable.class.getName().replace('.', '/');
