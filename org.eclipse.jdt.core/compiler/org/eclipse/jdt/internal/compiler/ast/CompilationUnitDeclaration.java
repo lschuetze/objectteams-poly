@@ -331,9 +331,6 @@ public void finalizeProblems() {
 			if (start < startSuppress) continue nextSuppress;
 			if (end > endSuppress) continue nextSuppress;
 			if (!this.suppressWarningIrritants[iSuppress].isSet(irritant)) {
-				if (problem instanceof DefaultProblem) {
-					((DefaultProblem) problem).reportError();
-				}
 				continue nextSuppress;
 			}
 			// discard suppressed warning

@@ -16227,4 +16227,12 @@ public void recordStaticReferenceToOuterLocalVariable(LocalVariableBinding local
 		node.sourceStart,
 		node.sourceEnd);
 }
+public void recordMissingExplicitConstructorCallInNonCanonicalConstructor(ASTNode location) {
+	this.handle(
+		IProblem.RecordMissingExplicitConstructorCallInNonCanonicalConstructor,
+		NoArgument,
+		NoArgument,
+		location.sourceStart,
+		location.sourceEnd);
+}
 }

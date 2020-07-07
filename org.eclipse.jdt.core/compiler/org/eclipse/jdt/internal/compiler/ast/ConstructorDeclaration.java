@@ -761,6 +761,11 @@ public boolean isConstructor() {
 }
 
 @Override
+public boolean isCanonicalConstructor() {
+	return (this.bits & ASTNode.IsCanonicalConstructor) != 0;
+}
+
+@Override
 public boolean isDefaultConstructor() {
 	return (this.bits & ASTNode.IsDefaultConstructor) != 0;
 }
@@ -914,7 +919,14 @@ public void resolveStatements() {
 				this.scope.problemReporter().cannotUseSuperInJavaLangObject(this.constructorCall);
 			}
 			this.constructorCall = null;
-		} else {
+		} else if (sourceType.isRecord() &&
+				!(this instanceof CompactConstructorDeclaration) && // compact constr should be marked as canonical?
+				(this.binding != null && (this.binding.tagBits & TagBits.IsCanonicalConstructor) == 0) &&
+				this.constructorCall.accessMode != ExplicitConstructorCall.This) {
+			this.scope.problemReporter().recordMissingExplicitConstructorCallInNonCanonicalConstructor(this);
+			this.constructorCall = null;
+		}
+		else {
 //{ObjectTeams: some transformations:
 		  // base() might replace existing constructorCall:
 		  if (   this.statements != null

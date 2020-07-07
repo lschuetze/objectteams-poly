@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
@@ -798,7 +799,7 @@ public final class ImportRewrite {
 
 				String erasureName= Signature.toString(erasureSig);
 				if (erasureSig.charAt(0) == Signature.C_RESOLVED) {
-					erasureName= internalAddImport(erasureName, context);
+					erasureName= internalAddImport(erasureName, context, false);
 				}
 				Type baseType= ast.newSimpleType(ast.newName(erasureName));
 				String[] typeArguments= Signature.getTypeArguments(typeSig);
@@ -910,9 +911,9 @@ public final class ImportRewrite {
 		if (qualifiedName.length() > 0) {
 //{ObjectTeams: silently refuse to import a role type:
 /* orig:
-			String str= internalAddImport(qualifiedName, context);
+			String str= internalAddImport(qualifiedName, context, isTypeInUnnamedPackage(normalizedBinding));
   :giro */
-			String str= importRefusingRole(binding, qualifiedName, context);
+			String str= importRefusingRole(binding, qualifiedName, context, isTypeInUnnamedPackage(normalizedBinding));
 // SH}
 
 			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
@@ -1065,14 +1066,14 @@ public final class ImportRewrite {
 	}
 
 //{ObjectTeams: try to add an import but refuse if binding is a role.
-	private String importRefusingRole(ITypeBinding binding, String qualifiedName, ImportRewriteContext context) {
+	private String importRefusingRole(ITypeBinding binding, String qualifiedName, ImportRewriteContext context, boolean isTypeInUnnamedPackage) {
 		String res= qualifiedName;
 		if (binding.isRole()) { // still need to extract the simple name
 			int pos = qualifiedName.lastIndexOf('.');
 			if (pos > -1)
 				res= qualifiedName.substring(pos+1);
 		} else
-			res= internalAddImport(qualifiedName, context);
+			res= internalAddImport(qualifiedName, context, isTypeInUnnamedPackage);
 		return res;
 	}
 // SH}
@@ -1096,13 +1097,13 @@ public final class ImportRewrite {
 	public String addImport(String qualifiedTypeName, ImportRewriteContext context) {
 		int angleBracketOffset= qualifiedTypeName.indexOf('<');
 		if (angleBracketOffset != -1) {
-			return internalAddImport(qualifiedTypeName.substring(0, angleBracketOffset), context) + qualifiedTypeName.substring(angleBracketOffset);
+			return internalAddImport(qualifiedTypeName.substring(0, angleBracketOffset), context, false) + qualifiedTypeName.substring(angleBracketOffset);
 		}
 		int bracketOffset= qualifiedTypeName.indexOf('[');
 		if (bracketOffset != -1) {
-			return internalAddImport(qualifiedTypeName.substring(0, bracketOffset), context) + qualifiedTypeName.substring(bracketOffset);
+			return internalAddImport(qualifiedTypeName.substring(0, bracketOffset), context, false) + qualifiedTypeName.substring(bracketOffset);
 		}
-		return internalAddImport(qualifiedTypeName, context);
+		return internalAddImport(qualifiedTypeName, context, false);
 	}
 
 	/**
@@ -1246,7 +1247,7 @@ public final class ImportRewrite {
 		return simpleName;
 	}
 
-	private String internalAddImport(String fullTypeName, ImportRewriteContext context) {
+	private String internalAddImport(String fullTypeName, ImportRewriteContext context, boolean isTypeInUnnamedPackage) {
 		int idx= fullTypeName.lastIndexOf('.');
 		String typeContainerName, typeName;
 		if (idx != -1) {
@@ -1265,7 +1266,8 @@ public final class ImportRewrite {
 			context= this.defaultContext;
 
 		int res= context.findInContext(typeContainerName, typeName, ImportRewriteContext.KIND_TYPE);
-		if (res == ImportRewriteContext.RES_NAME_CONFLICT) {
+		if (res == ImportRewriteContext.RES_NAME_CONFLICT
+				|| isTypeInUnnamedPackage) {
 			return fullTypeName;
 		}
 		if (res == ImportRewriteContext.RES_NAME_UNKNOWN) {
@@ -1633,7 +1635,7 @@ public final class ImportRewrite {
 		boolean annotsPresent = annotationBinding != null && annotationBinding.length > 0;
 
 		String qualifiedName= getRawQualifiedName(normalizedBinding);
-		String res = qualifiedName.length() > 0 ? internalAddImport(qualifiedName, context) : getRawName(normalizedBinding);
+		String res = qualifiedName.length() > 0 ? internalAddImport(qualifiedName, context, isTypeInUnnamedPackage(normalizedBinding)) : getRawName(normalizedBinding);
 
 		if (annotsPresent) {
 			int dotIndex = res != null ? res.lastIndexOf('.') : -1;
@@ -1798,5 +1800,16 @@ public final class ImportRewrite {
 		} else {
 			return null;
 		}
+	}
+
+	private static boolean isTypeInUnnamedPackage(ITypeBinding binding) {
+		boolean isInUnnamedPackage= false;
+		if (binding != null) {
+			IPackageBinding pBinding= binding.getPackage();
+			if (pBinding != null) {
+				isInUnnamedPackage= pBinding.isUnnamed();
+			}
+		}
+		return isInUnnamedPackage;
 	}
 }

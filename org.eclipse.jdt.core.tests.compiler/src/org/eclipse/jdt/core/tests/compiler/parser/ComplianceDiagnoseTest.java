@@ -2013,11 +2013,9 @@ public void test0042() {
 			"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
 			"Syntax error on tokens, delete these tokens\n" +
 			"----------\n";
-	@SuppressWarnings("unused")
 	String expected14ProblemLog =
 		expected13ProblemLog;
 
-	@SuppressWarnings("unused")
 	String expected15ProblemLog =
 			"----------\n" +
 			"1. ERROR in X.java (at line 1)\n" +

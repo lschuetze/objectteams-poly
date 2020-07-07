@@ -133,6 +133,7 @@ public class DefaultCodeFormatterOptions {
 	public int alignment_for_arguments_in_explicit_constructor_call;
 	public int alignment_for_arguments_in_method_invocation;
 	public int alignment_for_arguments_in_qualified_allocation_expression;
+	public int alignment_for_assertion_message;
 	public int alignment_for_assignment;
 	public int alignment_for_multiplicative_operator;
 	public int alignment_for_additive_operator;
@@ -508,6 +509,7 @@ public class DefaultCodeFormatterOptions {
 	public int text_block_indentation;
 	public boolean wrap_before_multiplicative_operator;
 	public boolean wrap_before_additive_operator;
+	public boolean wrap_before_assertion_message_operator;
 	public boolean wrap_before_string_concatenation;
 	public boolean wrap_before_shift_operator;
 	public boolean wrap_before_relational_operator;
@@ -564,6 +566,7 @@ public class DefaultCodeFormatterOptions {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_EXPLICIT_CONSTRUCTOR_CALL, getAlignment(this.alignment_for_arguments_in_explicit_constructor_call));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_METHOD_INVOCATION, getAlignment(this.alignment_for_arguments_in_method_invocation));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_QUALIFIED_ALLOCATION_EXPRESSION, getAlignment(this.alignment_for_arguments_in_qualified_allocation_expression));
+		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ASSERTION_MESSAGE, getAlignment(this.alignment_for_assertion_message));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ASSIGNMENT, getAlignment(this.alignment_for_assignment));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_MULTIPLICATIVE_OPERATOR ,getAlignment(this.alignment_for_multiplicative_operator));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ADDITIVE_OPERATOR ,getAlignment(this.alignment_for_additive_operator));
@@ -950,6 +953,7 @@ public class DefaultCodeFormatterOptions {
 
 		options.put(DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_MULTIPLICATIVE_OPERATOR, this.wrap_before_multiplicative_operator ? DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_ADDITIVE_OPERATOR, this.wrap_before_additive_operator ? DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_ASSERTION_MESSAGE_OPERATOR, this.wrap_before_assertion_message_operator ? DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_STRING_CONCATENATION, this.wrap_before_string_concatenation ? DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_SHIFT_OPERATOR, this.wrap_before_shift_operator ? DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_RELATIONAL_OPERATOR, this.wrap_before_relational_operator ? DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
@@ -1023,6 +1027,8 @@ public class DefaultCodeFormatterOptions {
 				this.alignment_for_arguments_in_qualified_allocation_expression = Alignment.M_COMPACT_SPLIT;
 			}
 		}
+		setInt(settings, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ASSERTION_MESSAGE,
+				v -> this.alignment_for_assertion_message = v);
 		final Object alignmentForAssignmentOption = settings.get(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ASSIGNMENT);
 		if (alignmentForAssignmentOption != null) {
 			try {
@@ -2508,6 +2514,8 @@ public class DefaultCodeFormatterOptions {
 		}
 		setBoolean(settings, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_MULTIPLICATIVE_OPERATOR, DefaultCodeFormatterConstants.TRUE,
 				v -> this.wrap_before_multiplicative_operator = v);
+		setBoolean(settings, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_ASSERTION_MESSAGE_OPERATOR, DefaultCodeFormatterConstants.TRUE,
+				v -> this.wrap_before_assertion_message_operator = v);
 		setBoolean(settings, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_ADDITIVE_OPERATOR, DefaultCodeFormatterConstants.TRUE,
 				v -> this.wrap_before_additive_operator = v);
 		setBoolean(settings, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_STRING_CONCATENATION, DefaultCodeFormatterConstants.TRUE,
@@ -2899,6 +2907,7 @@ public class DefaultCodeFormatterOptions {
 		this.alignment_for_arguments_in_explicit_constructor_call = Alignment.M_COMPACT_SPLIT;
 		this.alignment_for_arguments_in_method_invocation = Alignment.M_COMPACT_SPLIT;
 		this.alignment_for_arguments_in_qualified_allocation_expression = Alignment.M_COMPACT_SPLIT;
+		this.alignment_for_assertion_message = Alignment.M_COMPACT_SPLIT;
 		this.alignment_for_assignment = Alignment.M_NO_ALIGNMENT;
 		this.alignment_for_multiplicative_operator = Alignment.M_COMPACT_SPLIT;
 		this.alignment_for_additive_operator = Alignment.M_COMPACT_SPLIT;
@@ -3254,6 +3263,7 @@ public class DefaultCodeFormatterOptions {
 		this.text_block_indentation = Alignment.M_INDENT_DEFAULT;
 		this.wrap_before_multiplicative_operator = true;
 		this.wrap_before_additive_operator = true;
+		this.wrap_before_assertion_message_operator = true;
 		this.wrap_before_string_concatenation = true;
 		this.wrap_before_shift_operator = true;
 		this.wrap_before_relational_operator = true;
@@ -3285,6 +3295,7 @@ public class DefaultCodeFormatterOptions {
 		this.alignment_for_arguments_in_explicit_constructor_call = Alignment.M_COMPACT_SPLIT;
 		this.alignment_for_arguments_in_method_invocation = Alignment.M_COMPACT_SPLIT;
 		this.alignment_for_arguments_in_qualified_allocation_expression = Alignment.M_COMPACT_SPLIT;
+		this.alignment_for_assertion_message = Alignment.M_COMPACT_SPLIT;
 		this.alignment_for_assignment = Alignment.M_NO_ALIGNMENT;
 		this.alignment_for_multiplicative_operator = Alignment.M_COMPACT_SPLIT;
 		this.alignment_for_additive_operator = Alignment.M_COMPACT_SPLIT;
@@ -3640,6 +3651,7 @@ public class DefaultCodeFormatterOptions {
 		this.text_block_indentation = Alignment.M_INDENT_DEFAULT;
 		this.wrap_before_multiplicative_operator = true;
 		this.wrap_before_additive_operator = true;
+		this.wrap_before_assertion_message_operator = true;
 		this.wrap_before_string_concatenation = true;
 		this.wrap_before_shift_operator = true;
 		this.wrap_before_relational_operator = true;
