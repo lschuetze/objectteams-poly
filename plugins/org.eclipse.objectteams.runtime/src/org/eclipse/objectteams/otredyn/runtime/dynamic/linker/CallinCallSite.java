@@ -8,7 +8,7 @@ import jdk.dynalink.support.ChainedCallSite;
 
 public class CallinCallSite extends ChainedCallSite {
 
-	public CallinCallSite(CallSiteDescriptor descriptor) {
+	CallinCallSite(CallSiteDescriptor descriptor) {
 		super(descriptor);
 	}
 

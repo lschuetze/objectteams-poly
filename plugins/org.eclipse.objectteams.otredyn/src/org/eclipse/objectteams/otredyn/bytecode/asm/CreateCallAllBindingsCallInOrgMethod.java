@@ -129,7 +129,7 @@ public class CreateCallAllBindingsCallInOrgMethod extends AbstractTransformableC
 		newInstructions.add(createLoadIntConstant(joinpointId));
 		// put ITeam[] on the stack by calling getTeams with joinpointId
 		addLineNumber(newInstructions, SMAPConstants.STEP_INTO_LINENUMBER);
-		newInstructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ClassNames.TEAM_MANAGER_SLASH,
+		newInstructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ClassNames.TEAM_MANAGER_SLASH,
 				ConstantMembers.getTeams.getName(), ConstantMembers.getTeams.getSignature(), false));
 		addLineNumber(newInstructions, SMAPConstants.STEP_OVER_LINENUMBER);
 		// put starting idx 0 on the stack
@@ -138,7 +138,7 @@ public class CreateCallAllBindingsCallInOrgMethod extends AbstractTransformableC
 		newInstructions.add(createLoadIntConstant(joinpointId));
 		// put int[] callinIds on the stack
 		addLineNumber(newInstructions, SMAPConstants.STEP_INTO_LINENUMBER);
-		newInstructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ClassNames.TEAM_MANAGER_SLASH,
+		newInstructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ClassNames.TEAM_MANAGER_SLASH,
 				ConstantMembers.getCallinIds.getName(), ConstantMembers.getCallinIds.getSignature(), false));
 		addLineNumber(newInstructions, SMAPConstants.STEP_OVER_LINENUMBER);
 		// put boundMethodId on the stack

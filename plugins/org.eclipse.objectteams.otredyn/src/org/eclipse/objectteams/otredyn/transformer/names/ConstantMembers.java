@@ -36,10 +36,10 @@ public abstract class ConstantMembers {
 
 	// bootstrap method
 	public static final Method bootstrap = new Method("bootstrap",
-			Types.getTypeStringForMethod(ClassNames.CALLSITE_SLASH,
+			Types.getTypeStringForMethod(Types.getAsInternalType(ClassNames.CALLSITE_SLASH),
 					new String[] { Types.getAsInternalType(ClassNames.LOOKUP_SLASH),
-							Types.getAsInternalType(String.class),
-							Types.getAsInternalType(ClassNames.METHODTYPE_SLASH) }));
+							Types.getAsInternalType(String.class), Types.getAsInternalType(ClassNames.METHODTYPE_SLASH),
+							Types.INT, Types.getAsInternalType(String.class), Types.INT }));
 
 	// predefined methods
 	public static final Method callOrig = new Method("_OT$callOrig",
