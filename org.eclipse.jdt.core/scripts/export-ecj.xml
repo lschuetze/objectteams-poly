@@ -80,7 +80,7 @@
 			</fileset>
 		</copy>
 <!-- {ObjectTeams: add apt and tool: -->
-		<property name="compiler.apt" value="${build.root.dir}/eclipse/plugins/${jdt.compiler.apt}"/>
+		<property name="compiler.apt" value="${build.root.dir}/plugins/${jdt.compiler.apt}"/>
 		<echo message="compiler.apt=${compiler.apt}"/>
 		<unzip src="${compiler.apt}" dest="${ecj-temp-folder}">
 		    <patternset>
@@ -88,7 +88,7 @@
 		        <include name="**/*.properties"/>
 		    </patternset>
 		</unzip>
-		<property name="compiler.tool" value="${build.root.dir}/eclipse/plugins/${jdt.compiler.tool}"/>
+		<property name="compiler.tool" value="${build.root.dir}/plugins/${jdt.compiler.tool}"/>
 		<echo message="compiler.tool=${compiler.tool}"/>
 		<unzip src="${compiler.tool}" dest="${ecj-temp-folder}">
 		    <patternset>
