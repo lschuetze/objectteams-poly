@@ -11,6 +11,7 @@
         </sealing>
     </manifest>
     <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
+        <javaElement handleIdentifier="=org.eclipse.objectteams.runtime/src&lt;org.eclipse.objectteams.otredyn.runtime.dynamic.linker.util"/>
         <javaElement handleIdentifier="=org.eclipse.objectteams.otredyn/src"/>
         <javaElement handleIdentifier="=org.eclipse.objectteams.runtime/src&lt;org.eclipse.objectteams.otredyn.runtime.dynamic.linker"/>
     </selectedElements>

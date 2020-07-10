@@ -462,4 +462,33 @@ public class TeamManager implements ITeamManager {
 			}
 		}
 	}
+	
+	public static List<IBinding> getPrecedenceSortedCallinBindings(ITeam team, String joinpoint) {
+		IClassIdentifierProvider provider = ClassIdentifierProviderFactory.getClassIdentifierProvider();
+		Class<? extends ITeam> teamClass = team.getClass();
+		String teamId = provider.getClassIdentifier(teamClass);
+		IBoundTeam boundTeam = classRepository.getTeam(teamClass.getName(), teamId, teamClass.getClassLoader());
+
+		@SuppressWarnings("unlikely-arg-type")
+		List<IBinding> result = boundTeam.getBindings().stream()
+				.filter(b -> IBinding.BindingType.CALLIN_BINDING.equals(b.getType()))
+				.filter(b -> joinpoint.equals(getBindingJoinpoint(b, teamClass)))
+				.collect(Collectors.toList());
+				
+		return result;
+	}
+
+	private static String getBindingJoinpoint(IBinding binding, Class<?> teamClass) {
+		IClassIdentifierProvider provider = ClassIdentifierProviderFactory.getClassIdentifierProvider();
+		// OTDRE cannot add methods into a sub base, hence we have to use the declaring
+		// base class for static methods:
+		// (see https://bugs.eclipse.org/435136#c1)
+		String boundClassName = ((binding.getBaseFlags() & IBinding.STATIC_BASE) != 0)
+				? binding.getDeclaringBaseClassName()
+				: binding.getBoundClass();
+		String boundClassIdentifier = provider.getBoundClassIdentifier(teamClass, boundClassName);
+		String bindingJoinpoint = boundClassIdentifier + "." + binding.getMemberName() + binding.getMemberSignature();
+		bindingJoinpoint = bindingJoinpoint.substring(0, bindingJoinpoint.indexOf(')') + 1);
+		return bindingJoinpoint;
+	}
 }

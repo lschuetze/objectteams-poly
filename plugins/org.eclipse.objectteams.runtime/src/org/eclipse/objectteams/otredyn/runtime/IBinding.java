@@ -26,12 +26,9 @@ package org.eclipse.objectteams.otredyn.runtime;
 public interface IBinding {
 
 	public static enum BindingType {
-		CALLIN_BINDING,
-		FIELD_ACCESS,
-		METHOD_ACCESS,
-		ROLE_BASE_BINDING
+		CALLIN_BINDING, FIELD_ACCESS, METHOD_ACCESS, ROLE_BASE_BINDING
 	}
-	
+
 	public final static short CALLIN_BASE = 1;
 	public final static short STATIC_BASE = 2;
 	public final static short FINAL_BASE = 4;
@@ -52,6 +49,12 @@ public interface IBinding {
 	/** Signature (JVM encoding) of the bound base member. */
 	String getMemberSignature();
 
+	String getRoleClassName();
+
+	String getRoleMethodName();
+
+	String getRoleMethodSignature();
+
 	/** Answer flags describing the base method (static, private, final, callin). */
 	int getBaseFlags();
 
@@ -62,8 +65,11 @@ public interface IBinding {
 	boolean isHandleCovariantReturn();
 
 	/**
-	 * Does the bound role method issue a base super call (needing to be handled in __OT$callOrig)?
+	 * Does the bound role method issue a base super call (needing to be handled in
+	 * __OT$callOrig)?
+	 * 
 	 * @since 2.5
 	 */
 	boolean requiresBaseSuperCall();
+
 }

@@ -17,13 +17,13 @@ public final class OTCallSiteDescriptor extends CallSiteDescriptor {
 
 	private static final int OPERATION_MASK = 0b1;
 
-	private static final ClassValue<ConcurrentMap<OTCallSiteDescriptor, OTCallSiteDescriptor>> canonicals = new ClassValue<ConcurrentMap<OTCallSiteDescriptor, OTCallSiteDescriptor>>() {
-
-		@Override
-		protected ConcurrentMap<OTCallSiteDescriptor, OTCallSiteDescriptor> computeValue(Class<?> type) {
-			return new ConcurrentHashMap<>();
-		}
-	};
+//	private static final ClassValue<ConcurrentMap<OTCallSiteDescriptor, OTCallSiteDescriptor>> canonicals = new ClassValue<ConcurrentMap<OTCallSiteDescriptor, OTCallSiteDescriptor>>() {
+//
+//		@Override
+//		protected ConcurrentMap<OTCallSiteDescriptor, OTCallSiteDescriptor> computeValue(Class<?> type) {
+//			return new ConcurrentHashMap<>();
+//		}
+//	};
 
 	// TODO: Add operations and OP caches
 	private static final Operation[] OPERATIONS = new Operation[] { StandardOperation.CALL };
@@ -45,13 +45,22 @@ public final class OTCallSiteDescriptor extends CallSiteDescriptor {
 	}
 
 	private static OTCallSiteDescriptor get(Lookup lookup, Operation baseOp, MethodType type, int flags) {
-		OTCallSiteDescriptor csd = new OTCallSiteDescriptor(lookup, baseOp, type, flags);
-		final OTCallSiteDescriptor canonical = canonicals.get(lookup.lookupClass()).putIfAbsent(csd, csd);
-		return canonical != null ? canonical : csd;
+//		OTCallSiteDescriptor csd = 
+		return new OTCallSiteDescriptor(lookup, baseOp, type, flags);
+//		final OTCallSiteDescriptor canonical = canonicals.get(lookup.lookupClass()).putIfAbsent(csd, csd);
+//		return canonical != null ? canonical : csd;
 	}
 
 	public int getFlags() {
 		return boundMethodId;
+	}
+
+	public String getJoinpointDesc() {
+		if (getOperation() instanceof NamedOperation) {
+			final NamedOperation namedOp = (NamedOperation) getOperation();
+			return namedOp.getName().toString();
+		}
+		return "";
 	}
 
 }

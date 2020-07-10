@@ -115,6 +115,8 @@ class AsmClassVisitor extends ClassVisitor {
 			MultiBinding[] multiBindings = attr.getBindings();
 			for (int i=multiBindings.length-1; i>=0; i--) { // reverse loop to ensure proper overwriting:
 				String roleClassName = multiBindings[i].getRoleClassName();
+				String roleMethodName = multiBindings[i].getRoleMethodName();
+				String roleMethodSignature = multiBindings[i].getRoleMethodSignature();
 				String callinLabel = multiBindings[i].getCallinLabel();
 				String baseClassName = multiBindings[i].getBaseClassName();
 				clazz.boundBaseClasses.add(baseClassName.replace('/', '.'));
@@ -129,7 +131,7 @@ class AsmClassVisitor extends ClassVisitor {
 				for (int j = 0; j < baseMethodNames.length; j++) {
 					String declaringBaseClassName = declaringBaseClassNames[j];
 					String weavableBaseClass = (baseFlags[j] & (STATIC | FINAL)) != 0 ? declaringBaseClassName : baseClassName;
-					Binding binding = new Binding(clazz, roleClassName, callinLabel, baseClassName, 
+					Binding binding = new Binding(clazz, roleClassName, roleMethodName, roleMethodSignature, callinLabel, baseClassName, 
 												  baseMethodNames[j], baseMethodSignatures[j], weavableBaseClass,
 												  callinModifier, callinIds[j], baseFlags[j], handleCovariantReturn, requireBaseSuperCall);
 					clazz.addBinding(binding);

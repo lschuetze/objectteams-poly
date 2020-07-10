@@ -38,6 +38,9 @@ public class Binding implements Comparable<Binding>, IBinding {
 	private String memberName;
 	private String memberSignature;
 	private String weavableBaseClassName;
+	private String roleName;
+	private String roleMethodName;
+	private String roleMethodSignature;
 	private int callinModifier;
 	/**
 	 * Locally unique id for (an element in) this binding:
@@ -58,8 +61,8 @@ public class Binding implements Comparable<Binding>, IBinding {
 	 * Create a callin binding.
 	 */
 	public Binding(AbstractBoundClass teamClass,
-			String roleClassName, String callinLabel, String boundClassName, 
-			String memberName, String memberSignature, String weavableBaseClassName, 
+			String roleClassName, String roleMethodName, String roleMethodSignature, String callinLabel, String boundClassName, 
+			String memberName, String memberSignature, String weavableBaseClassName,
 			int callinModifier, int callinId, int baseFlags, boolean handleCovariantReturn, boolean requireBaseSuperCall) 
 	{
 		this.teamClass = teamClass;
@@ -74,6 +77,9 @@ public class Binding implements Comparable<Binding>, IBinding {
 		this.type = IBinding.BindingType.CALLIN_BINDING;
 		this.isHandleCovariantReturn = handleCovariantReturn;
 		this.requireBaseSuperCall = requireBaseSuperCall;
+		this.roleName = roleClassName;
+		this.roleMethodName = roleMethodName;
+		this.roleMethodSignature = roleMethodSignature;
 	}
 
 	/**
@@ -192,5 +198,23 @@ public class Binding implements Comparable<Binding>, IBinding {
 		buf.append(this.memberName);
 		buf.append(this.memberSignature);
 		return buf.toString();
+	}
+
+	@Override
+	public String getRoleClassName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getRoleMethodName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getRoleMethodSignature() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
