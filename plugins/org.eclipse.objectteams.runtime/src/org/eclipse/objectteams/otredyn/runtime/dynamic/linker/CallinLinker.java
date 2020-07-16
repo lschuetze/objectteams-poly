@@ -191,8 +191,10 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 
 //		return new GuardedInvocation(result);
 
-		MethodHandle result = null;
 		boolean stopSearch = false;
+
+		MethodHandle beforeComposition = null;
+		MethodHandle replace = null;
 
 		CallSiteContext ctx = CallSiteContext.contexts.get(joinpointDesc);
 		for (ITeam team : ctx) {
@@ -205,10 +207,11 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 
 			switch (binding.getCallinModifier()) {
 			case BEFORE:
-				if (result == null) {
-					result = handleBefore(desc, team, binding, ctx);
+				if (beforeComposition == null) {
+					beforeComposition = handleBefore(desc, team, binding, ctx);
 				} else {
-					result = MethodHandles.foldArguments(result, handleBefore(desc, team, binding, ctx));
+					beforeComposition = MethodHandles.foldArguments(beforeComposition,
+							handleBefore(desc, team, binding, ctx));
 				}
 				break;
 			case AFTER:
@@ -216,6 +219,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 				break;
 
 			case REPLACE:
+				replace = handleReplace(desc, team, binding, ctx);
 				stopSearch = true;
 				break;
 			}
@@ -226,7 +230,26 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 
 		}
 
+		MethodHandle result = null;
+
+		result = (replace == null) ? handleOrig(desc, ctx) : replace;
+		if (beforeComposition != null) {
+			result = MethodHandles.foldArguments(result, beforeComposition);
+		}
+
 		return new GuardedInvocation(result);
+	}
+
+	private static MethodHandle handleOrig(OTCallSiteDescriptor desc, CallSiteContext ctx) {
+		final MethodHandle orig = ObjectTeamsTypeUtilities.findOrig(desc.getLookup(), ctx.baseClass);
+		final MethodHandle result = MethodHandles.dropArguments(orig, 1, ITeam[].class, int.class, int[].class);
+		return result;
+	}
+
+	private static MethodHandle handleReplace(OTCallSiteDescriptor desc, ITeam team1, IBinding binding,
+			CallSiteContext ctx) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private static MethodHandle handleBefore(final OTCallSiteDescriptor desc, final ITeam team, final IBinding binding,

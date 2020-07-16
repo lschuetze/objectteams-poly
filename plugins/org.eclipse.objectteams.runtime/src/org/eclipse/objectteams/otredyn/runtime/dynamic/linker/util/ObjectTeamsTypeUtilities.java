@@ -11,6 +11,8 @@ import org.objectteams.ITeam;
 
 public final class ObjectTeamsTypeUtilities {
 
+	private static final MethodType CallOrigType = MethodType.methodType(Object.class, int.class, Object[].class);
+
 	private static final String ROLE_TYPE_SEP = "$__OT__";
 	private static final String ROLE_ITF_SEP = "$";
 
@@ -50,6 +52,20 @@ public final class ObjectTeamsTypeUtilities {
 			throw ee;
 		}
 		return clazz;
+	}
+
+	public static MethodHandle findOrig(MethodHandles.Lookup lookup, Class<?> baseClass) {
+		try {
+			return lookup.findVirtual(baseClass, "_OT$callOrig", CallOrigType);
+		} catch (NoSuchMethodException e) {
+			NoSuchMethodError ee = new NoSuchMethodError();
+			ee.initCause(e);
+			throw ee;
+		} catch (IllegalAccessException e) {
+			IllegalAccessError ee = new IllegalAccessError();
+			ee.initCause(e);
+			throw ee;
+		}
 	}
 
 	public static IBinding getBindingFromId(final String joinpointDesc, final ITeam team, final int callinId) {
