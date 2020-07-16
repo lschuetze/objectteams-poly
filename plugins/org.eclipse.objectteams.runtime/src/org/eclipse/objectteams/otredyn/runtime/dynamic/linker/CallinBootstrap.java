@@ -31,6 +31,15 @@ public final class CallinBootstrap {
 
 	public static CallSite bootstrap(final Lookup lookup, final String name, final MethodType type, final int flags,
 			final String joinpointDesc, final int boundMethodId) {
+		final CallSiteContext context = new CallSiteContext(joinpointDesc, boundMethodId, lookup.lookupClass());
+		context.updateTeams();
+		CallSiteContext.contexts.put(joinpointDesc, context);
+		return createDynamicLinker(lookup.lookupClass().getClassLoader(), unstableRelinkThreshold)
+				.link(CallinCallSite.newCallinCallSite(lookup, name, type, flags, joinpointDesc, boundMethodId));
+	}
+
+	public static CallSite callNext(final Lookup lookup, final String name, final MethodType type, final int flags,
+			final String joinpointDesc, final int boundMethodId) {
 		return createDynamicLinker(lookup.lookupClass().getClassLoader(), unstableRelinkThreshold)
 				.link(CallinCallSite.newCallinCallSite(lookup, name, type, flags, joinpointDesc, boundMethodId));
 	}

@@ -183,6 +183,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 			buf.append("playedBy: ").append(this.boundClass);
 			return buf.toString();
 		}
+		buf.append(this.callinModifier);
 		buf.append('{');
 		buf.append(this.perTeamId);
 		buf.append("} ");

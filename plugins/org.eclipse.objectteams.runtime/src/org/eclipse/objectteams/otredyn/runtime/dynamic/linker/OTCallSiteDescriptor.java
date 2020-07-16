@@ -50,8 +50,8 @@ public final class OTCallSiteDescriptor extends CallSiteDescriptor {
 //		final OTCallSiteDescriptor canonical = canonicals.get(lookup.lookupClass()).putIfAbsent(csd, csd);
 //		return canonical != null ? canonical : csd;
 	}
-
-	public int getFlags() {
+	
+	public int boundMethodId() {
 		return boundMethodId;
 	}
 

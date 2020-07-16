@@ -469,7 +469,6 @@ public class TeamManager implements ITeamManager {
 		String teamId = provider.getClassIdentifier(teamClass);
 		IBoundTeam boundTeam = classRepository.getTeam(teamClass.getName(), teamId, teamClass.getClassLoader());
 
-		@SuppressWarnings("unlikely-arg-type")
 		List<IBinding> result = boundTeam.getBindings().stream()
 				.filter(b -> IBinding.BindingType.CALLIN_BINDING.equals(b.getType()))
 				.filter(b -> joinpoint.equals(getBindingJoinpoint(b, teamClass)))

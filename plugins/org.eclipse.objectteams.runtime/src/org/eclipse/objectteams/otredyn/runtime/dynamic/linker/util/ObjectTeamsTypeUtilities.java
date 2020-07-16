@@ -14,10 +14,10 @@ public final class ObjectTeamsTypeUtilities {
 	private static final String ROLE_TYPE_SEP = "$__OT__";
 	private static final String ROLE_ITF_SEP = "$";
 
-	public static Class<?> getBaseClass(final String baseClassName, final ClassLoader baseClassLoader) {
+	public static Class<?> getBaseClass(final String baseClassName) {
 		final Class<?> clazz;
 		try {
-			clazz = Class.forName(baseClassName.replace('/', '.'), true, baseClassLoader);
+			clazz = Class.forName(baseClassName.replace('/', '.'));
 		} catch (ClassNotFoundException e) {
 			final NoSuchMethodError ee = new NoSuchMethodError();
 			ee.initCause(e);
