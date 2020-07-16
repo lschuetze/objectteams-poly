@@ -263,16 +263,31 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		// (Team, Base)Role
 		final MethodHandle lift = lift(desc.getLookup(), desc.getJoinpointDesc(), team, binding, base);
 		out("lift", lift.toString());
-		final MethodHandle liftSpreader = lift.asSpreader(Object[].class, 2);
+		final MethodHandle liftSpreader = lift.asSpreader(0, Object[].class, 2);
 		out("liftSpreader", liftSpreader.toString());
 		final MethodHandle liftToRole = MethodHandles.filterArguments(rm, 0, liftSpreader);
 		out("liftToRole", liftToRole.toString());
-		final MethodType collectedTypes = MethodType.methodType(void.class, team.getClass(), base);
-		final MethodHandle liftToRoleCollect = liftToRole.asCollector(Object[].class, 2).asType(collectedTypes);
+		MethodType collectedTypes = MethodType.methodType(void.class, team.getClass(), base);
+		if (rm.type().parameterCount() > 1) {
+			collectedTypes = collectedTypes.appendParameterTypes(rm.type().dropParameterTypes(0, 1).parameterList());
+		}
+		final MethodHandle liftToRoleCollect = liftToRole.asCollector(0, Object[].class, 2).asType(collectedTypes);
 		out("liftToRoleCollect", liftToRoleCollect.toString());
 		// TODO Lars: check for arguments (trailing Object[])
-		final MethodType swapType = MethodType.methodType(void.class, base, team.getClass());
-		final MethodHandle swapped = MethodHandles.permuteArguments(liftToRoleCollect, swapType, 1, 0);
+		MethodType swapType = MethodType.methodType(void.class, base, team.getClass());
+		final MethodHandle swapped;
+		if (rm.type().parameterCount() > 1) {
+			swapType = swapType.appendParameterTypes(rm.type().dropParameterTypes(0, 1).parameterList());
+			int[] reorder = new int[swapType.parameterCount()];
+			reorder[0] = 1;
+			reorder[1] = 0;
+			for (int i = 2; i < reorder.length; i++) {
+				reorder[i] = i;
+			}
+			swapped = MethodHandles.permuteArguments(liftToRoleCollect, swapType, reorder);
+		} else {
+			swapped = MethodHandles.permuteArguments(liftToRoleCollect, swapType, 1, 0);
+		}
 		out("swapped", swapped.toString());
 		final MethodHandle unpackTeam = MethodHandles
 				.insertArguments(MethodHandles.arrayElementGetter(ITeam[].class), 1, ctx.getIndex())
@@ -280,8 +295,13 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		out("unpackTeam", unpackTeam.toString());
 		final MethodHandle unpacked = MethodHandles.filterArguments(swapped, 1, unpackTeam);
 		out("unpacked", unpacked.toString());
-		final MethodHandle dropped = MethodHandles.dropArguments(unpacked, 2, int.class, int[].class, int.class,
-				Object[].class);
+		final MethodHandle dropped;
+		if (rm.type().parameterCount() > 1) {
+			final MethodHandle unpackedArgs = unpacked.asSpreader(Object[].class, rm.type().parameterCount() - 1);
+			dropped = MethodHandles.dropArguments(unpackedArgs, 2, int.class, int[].class, int.class);
+		} else {
+			dropped = MethodHandles.dropArguments(unpacked, 2, int.class, int[].class, int.class, Object[].class);
+		}
 		out("dropped", dropped.toString());
 		return dropped;
 	}
