@@ -3,8 +3,11 @@ package org.eclipse.objectteams.otredyn.runtime.dynamic.linker;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.objectteams.otredyn.runtime.IBinding;
+import org.eclipse.objectteams.otredyn.runtime.IBinding.CallinModifier;
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.eclipse.objectteams.otredyn.runtime.dynamic.linker.util.ObjectTeamsTypeUtilities;
 import org.objectteams.IBoundBase2;
@@ -22,21 +25,37 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 	private final static MethodHandle FIND_ROLE_METHOD;
 	private final static MethodHandle LIFT;
 
+	private final static MethodHandle LOOP_BODY_BEFORE;
+	// TODO Lars: after and replace
+	private final static MethodHandle LOOP_START;
+	private final static MethodHandle LOOP_END;
+
+	static {
+		FIND_ROLE_METHOD = Lookup.findOwnStatic(MethodHandles.lookup(), "findRoleMethod", MethodHandle.class,
+				MethodHandles.Lookup.class, String.class, ITeam.class, IBinding.class);
+		LIFT = Lookup.findOwnStatic(MethodHandles.lookup(), "lift", MethodHandle.class, MethodHandles.Lookup.class,
+				String.class, ITeam.class, IBinding.class, Class.class);
+
+		LOOP_BODY_BEFORE = Lookup.findOwnStatic(MethodHandles.lookup(), "loopBodyBefore", MethodHandle.class,
+				MethodHandles.Lookup.class, String.class, MethodHandle.class, int.class, IBoundBase2.class,
+				ITeam[].class, int.class, int[].class, int.class, Object[].class);
+
+		LOOP_START = Lookup.findOwnStatic(MethodHandles.lookup(), "loopStart", int.class, IBoundBase2.class,
+				ITeam[].class, int.class, int[].class, int.class, Object[].class);
+
+		LOOP_END = Lookup.findOwnStatic(MethodHandles.lookup(), "loopEnd", int.class, String.class, IBoundBase2.class,
+				ITeam[].class, int.class, int[].class, int.class, Object[].class);
+	}
+
 	private static MethodHandle LIFT(final MethodHandles.Lookup lookup, final String joinpointDesc) {
 		return MethodHandles.insertArguments(LIFT, 0, lookup, joinpointDesc);
 	}
 
 	@SuppressWarnings("unused")
-	private static MethodHandle lift(final MethodHandles.Lookup lookup, final String joinpointDesc, final ITeam[] teams,
-			final int index) {
-		// Retrieve the binding for the current callin
-		final int bindingIndex = ObjectTeamsTypeUtilities.getTeamRepeatCount(teams, index);
-		final ITeam team = teams[index];
-		final IBinding binding = ObjectTeamsTypeUtilities.getBindingFromIndex(joinpointDesc, team, bindingIndex);
-
+	private static MethodHandle lift(final MethodHandles.Lookup lookup, final String joinpointDesc, final ITeam team,
+			final IBinding binding, final Class<?> baseClass) {
 		// Retrieve the lifting method for the current binding
-		final Class<?> baseClass = ObjectTeamsTypeUtilities.getBaseClass(binding.getBoundClass());
-		final String liftingMethod = "$_OT$liftTo$" + binding.getRoleClassName();
+		final String liftingMethod = "_OT$liftTo$" + binding.getRoleClassName();
 		final MethodHandle lift = ObjectTeamsTypeUtilities.findVirtual(lookup, team.getClass(), liftingMethod,
 				MethodType.methodType(
 						ObjectTeamsTypeUtilities.getRoleItfType(team.getClass(), binding.getRoleClassName()),
@@ -56,15 +75,11 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 
 	@SuppressWarnings("unused")
 	private static MethodHandle findRoleMethod(final MethodHandles.Lookup lookup, final String joinpointDesc,
-			final ITeam[] teams, final int index) {
-		final int bindingIndex = ObjectTeamsTypeUtilities.getTeamRepeatCount(teams, index);
-		final IBinding binding = ObjectTeamsTypeUtilities.getBindingFromIndex(joinpointDesc, teams[index],
-				bindingIndex);
-		final Class<?> roleClass = ObjectTeamsTypeUtilities.getRoleImplType(teams[index].getClass(),
+			final ITeam team, final IBinding binding) {
+		final Class<?> roleClass = ObjectTeamsTypeUtilities.getRoleImplType(team.getClass(),
 				binding.getRoleClassName());
 		final MethodType mt = MethodType.fromMethodDescriptorString(binding.getRoleMethodSignature(),
 				roleClass.getClassLoader());
-
 		try {
 			return lookup.findVirtual(roleClass, binding.getRoleMethodName(), mt);
 		} catch (NoSuchMethodException | IllegalAccessException e) {
@@ -74,12 +89,77 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		}
 	}
 
-	static {
-		FIND_ROLE_METHOD = Lookup.findOwnStatic(MethodHandles.lookup(), "findRoleMethod", MethodHandle.class,
-				MethodHandles.Lookup.class, String.class, ITeam[].class, int.class);
-		LIFT = Lookup.findOwnStatic(MethodHandles.lookup(), "lift", MethodHandle.class, MethodHandles.Lookup.class,
-				String.class, ITeam[].class, int.class);
+	@SuppressWarnings("unused")
+	private static final int loopStart(final IBoundBase2 base, final ITeam[] teams, final int index, final int[] ids,
+			final int boundMethodId, final Object[] args) {
+		return index;
 	}
+
+	private static MethodHandle LOOP_END(final String joinpointDesc) {
+		return MethodHandles.insertArguments(LOOP_END, 0, joinpointDesc);
+	}
+
+	@SuppressWarnings("unused")
+	private static final int loopEnd(final String joinpointDesc, final IBoundBase2 base, final ITeam[] teams,
+			final int index, final int[] ids, final int boundMethodId, final Object[] args) {
+		boolean end = false;
+		int i = index;
+		while (!end) {
+			final IBinding binding = ObjectTeamsTypeUtilities.getBindingFromId(joinpointDesc, teams[i], ids[i]);
+			if (binding.getCallinModifier() == CallinModifier.REPLACE) {
+				end = true;
+			} else {
+				i++;
+			}
+		}
+		return i;
+	}
+
+	private static MethodHandle LOOP_BODY_BEFORE(final MethodHandles.Lookup lookup, final String joinpointDesc) {
+		return MethodHandles.insertArguments(LOOP_BODY_BEFORE, 0, lookup, joinpointDesc);
+	}
+
+	// TODO Lars: a before/after callin is treated differently than a replace callin
+	@SuppressWarnings("unused")
+	private static final MethodHandle loopBodyBefore(final MethodHandles.Lookup lookup, final String joinpointDesc,
+			final MethodHandle result, final int currentIndex, final IBoundBase2 base, final ITeam[] teams,
+			final int index, final int[] ids, final int boundMethodId, final Object[] args) {
+		final IBinding binding = ObjectTeamsTypeUtilities.getBindingFromId(joinpointDesc, teams[currentIndex],
+				ids[currentIndex]);
+		// Find the role method that is going to be called
+		// (Role, Args)Ret
+		final MethodHandle rm = findRoleMethod(lookup, joinpointDesc, teams[currentIndex], binding);
+		out("role function", rm.toString());
+		// Find the lifting function to lift BaseClass to RoleClass
+		// (Team, Base)Role
+		final MethodHandle lift = lift(lookup, joinpointDesc, teams[currentIndex], binding, base.getClass());
+		out("lift", lift.toString());
+		final MethodHandle liftSpreader = lift.asSpreader(Object[].class, 2);
+		out("liftSpreader", liftSpreader.toString());
+		final MethodHandle liftToRole = MethodHandles.filterArguments(rm, 0, liftSpreader);
+		out("liftToRole", liftToRole.toString());
+		final MethodType collectedTypes = MethodType.methodType(void.class, teams[currentIndex].getClass(),
+				base.getClass());
+		final MethodHandle liftToRoleCollect = liftToRole.asCollector(Object[].class, 2).asType(collectedTypes);
+		out("liftToRoleCollect", liftToRoleCollect.toString());
+		// TODO Lars: check for arguments (trailing Object[])
+		final MethodType swapType = MethodType.methodType(void.class, base.getClass(), teams[currentIndex].getClass());
+		final MethodHandle swapped = MethodHandles.permuteArguments(liftToRoleCollect, swapType, 1, 0);
+		out("swapped", swapped.toString());
+		final MethodHandle unpackTeam = MethodHandles
+				.insertArguments(MethodHandles.arrayElementGetter(ITeam[].class), 1, currentIndex)
+				.asType(MethodType.methodType(teams[currentIndex].getClass(), ITeam[].class));
+		out("unpackTeam", unpackTeam.toString());
+		final MethodHandle unpacked = MethodHandles.filterArguments(swapped, 1, unpackTeam);
+		out("unpacked", unpacked.toString());
+		final MethodHandle dropped = MethodHandles.dropArguments(unpacked, 2, int.class, int[].class, int.class,
+				Object[].class);
+		out("dropped", dropped.toString());
+		
+		return dropped;
+	}
+	
+	
 
 	@Override
 	public boolean canLinkType(final Class<?> type) {
@@ -90,20 +170,35 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 	public GuardedInvocation getGuardedInvocation(final LinkRequest linkRequest, final LinkerServices linkerServices)
 			throws Exception {
 		final CallSiteDescriptor desc = linkRequest.getCallSiteDescriptor();
-		return CallinBootstrap.asTypeSafeReturn(getGuardedInvocation(linkRequest, desc), linkerServices, desc);
-	}
-
-	static GuardedInvocation getGuardedInvocation(final LinkRequest request, final CallSiteDescriptor desc) {
 		if (!(desc instanceof OTCallSiteDescriptor)) {
 			throw new LinkageError("CallSiteDescriptor is no OTCallSiteDescriptor");
 		}
+		final OTCallSiteDescriptor otdesc = (OTCallSiteDescriptor) desc;
+//		return CallinBootstrap.asTypeSafeReturn(getGuardedInvocation(linkRequest, otdesc), linkerServices, otdesc);
+		return getGuardedInvocation(linkRequest, otdesc);
+	}
+
+	static GuardedInvocation getGuardedInvocation(final LinkRequest request, final OTCallSiteDescriptor desc) {
 		final OTCallSiteDescriptor csd = (OTCallSiteDescriptor) desc;
 		final int joinpointId = TeamManager.getJoinpointId(csd.getJoinpointDesc());
 
-		final MethodHandle roleMethod = FIND_ROLE_METHOD(desc.getLookup(), csd.getJoinpointDesc());
-		final MethodHandle lift = LIFT(desc.getLookup(), csd.getJoinpointDesc());
+		// Get the data from the call site
+		// (base, team[], int, int[], int, Object[])
+		// iterate over team[], int[] and increase int
+		// in each iteration retrieve role method and lifting
+		// construct a call graph until replace callin
+		// call callin with updated index !
 
-		throw new UnsupportedOperationException("getGuardedInvocation");
+		out("joinpoint", csd.getJoinpointDesc());
+
+		final MethodHandle result = MethodHandles.countedLoop(LOOP_START, LOOP_END(desc.getJoinpointDesc()), null,
+				LOOP_BODY_BEFORE(desc.getLookup(), desc.getJoinpointDesc()));
+		return new GuardedInvocation(result);
+	}
+
+	private static void out(final String name, final String value) {
+		final String format = "%-40s%s%n";
+		System.out.printf(format, name, value);
 	}
 
 }

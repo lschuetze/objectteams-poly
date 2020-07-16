@@ -23,6 +23,7 @@ import org.eclipse.objectteams.otredyn.bytecode.Binding;
 import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes.CallinBindingsAttribute;
 import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes.OTClassFlagsAttribute;
 import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes.RoleBaseBindingsAttribute;
+import org.eclipse.objectteams.otredyn.runtime.IBinding.CallinModifier;
 import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes.CallinBindingsAttribute.MultiBinding;
 import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes.CallinPrecedenceAttribute;
 import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes.OTSpecialAccessAttribute;
@@ -123,7 +124,7 @@ class AsmClassVisitor extends ClassVisitor {
 				String[] baseMethodNames = multiBindings[i].getBaseMethodNames();
 				String[] baseMethodSignatures = multiBindings[i].getBaseMethodSignatures();
 				String[] declaringBaseClassNames = multiBindings[i].getDeclaringBaseClassName();
-				int callinModifier = multiBindings[i].getCallinModifier();
+				CallinModifier callinModifier = multiBindings[i].getCallinModifier();
 				int[] callinIds = multiBindings[i].getCallinIds();
 				int[] baseFlags = multiBindings[i].getBaseFlags();
 				boolean handleCovariantReturn = multiBindings[i].isHandleCovariantReturn();

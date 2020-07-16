@@ -18,6 +18,7 @@
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
 import org.eclipse.objectteams.otredyn.bytecode.Method;
+import org.eclipse.objectteams.otredyn.bytecode.Types;
 import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
 import org.eclipse.objectteams.otredyn.util.SMAPConstants;
@@ -152,8 +153,9 @@ public class CreateCallAllBindingsCallInOrgMethod extends AbstractTransformableC
 
 		// invoke invokedynamic bootstrap
 		addLineNumber(newInstructions, SMAPConstants.STEP_INTO_LINENUMBER);
-		newInstructions.add(new InvokeDynamicInsnNode(method.name, ConstantMembers.callAllBindingsTeam.getSignature(),
-				bootstrapMethodHandle, 0, joinpointDesc, boundMethodId));
+		newInstructions.add(new InvokeDynamicInsnNode(method.name.replaceAll("[<>]", ""),
+				ConstantMembers.callAllBindingsTeam.getSignature(), bootstrapMethodHandle, 0, joinpointDesc,
+				boundMethodId));
 		addLineNumber(newInstructions, SMAPConstants.STEP_OVER_LINENUMBER);
 //		 this.callAllBindings(boundMethodId, args);
 

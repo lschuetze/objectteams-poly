@@ -35,6 +35,33 @@ public interface IBinding {
 	public final static short PRIVATE_BASE = 8;
 	public final static short PUBLIC_BASE = 16;
 
+	public static enum CallinModifier {
+		BEFORE(1), REPLACE(2), AFTER(3);
+
+		private final int ord;
+
+		CallinModifier(int ord) {
+			this.ord = ord;
+		}
+
+		public static CallinModifier fromString(final String s) {
+			switch (s) {
+			case "before":
+				return BEFORE;
+			case "after":
+				return AFTER;
+			case "replace":
+				return REPLACE;
+			}
+			// Should not reach
+			throw new IllegalArgumentException("Invalid callin modifier string in bytecode: " + s);
+		}
+
+		public int getCallinModifierValue() {
+			return ord;
+		}
+	}
+
 	BindingType getType();
 
 	/** The base class as declared in the source level playedBy clause. */
@@ -54,6 +81,8 @@ public interface IBinding {
 	String getRoleMethodName();
 
 	String getRoleMethodSignature();
+
+	CallinModifier getCallinModifier();
 
 	/** Answer flags describing the base method (static, private, final, callin). */
 	int getBaseFlags();

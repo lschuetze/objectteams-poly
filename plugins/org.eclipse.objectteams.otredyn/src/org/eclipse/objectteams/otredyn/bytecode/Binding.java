@@ -25,13 +25,6 @@ import org.eclipse.objectteams.otredyn.runtime.IBinding;
  */
 public class Binding implements Comparable<Binding>, IBinding {
 	
-	/** The callin modifier 'before' */
-	public static final int BEFORE = 1;
-	/** The callin modifier 'replace' */
-	public static final int REPLACE = 2;
-	/** The callin modifier 'after' */
-	public static final int AFTER = 3;
-	
 	AbstractBoundClass teamClass;
 	private String callinLabel;
 	private String boundClass;
@@ -41,7 +34,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 	private String roleName;
 	private String roleMethodName;
 	private String roleMethodSignature;
-	private int callinModifier;
+	private CallinModifier callinModifier;
 	/**
 	 * Locally unique id for (an element in) this binding:
 	 * For CALLIN_BINDING this is the callinId,
@@ -63,7 +56,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 	public Binding(AbstractBoundClass teamClass,
 			String roleClassName, String roleMethodName, String roleMethodSignature, String callinLabel, String boundClassName, 
 			String memberName, String memberSignature, String weavableBaseClassName,
-			int callinModifier, int callinId, int baseFlags, boolean handleCovariantReturn, boolean requireBaseSuperCall) 
+			CallinModifier callinModifier, int callinId, int baseFlags, boolean handleCovariantReturn, boolean requireBaseSuperCall) 
 	{
 		this.teamClass = teamClass;
 		this.callinLabel = callinLabel;
@@ -164,9 +157,9 @@ public class Binding implements Comparable<Binding>, IBinding {
 		} else {
 			if (this.callinModifier != other.callinModifier) {
 				// replace has lower priority than before/after:
-				if (this.callinModifier == REPLACE)
+				if (this.callinModifier == CallinModifier.REPLACE)
 					return -1;
-				else if (other.callinModifier == REPLACE)
+				else if (other.callinModifier == CallinModifier.REPLACE)
 					return 1;
 			}
 			// the following comparison respects precedence:
@@ -202,19 +195,21 @@ public class Binding implements Comparable<Binding>, IBinding {
 
 	@Override
 	public String getRoleClassName() {
-		// TODO Auto-generated method stub
-		return null;
+		return roleName;
 	}
 
 	@Override
 	public String getRoleMethodName() {
-		// TODO Auto-generated method stub
-		return null;
+		return roleMethodName;
 	}
 
 	@Override
 	public String getRoleMethodSignature() {
-		// TODO Auto-generated method stub
-		return null;
+		return roleMethodSignature;
+	}
+
+	@Override
+	public CallinModifier getCallinModifier() {
+		return callinModifier;
 	}
 }

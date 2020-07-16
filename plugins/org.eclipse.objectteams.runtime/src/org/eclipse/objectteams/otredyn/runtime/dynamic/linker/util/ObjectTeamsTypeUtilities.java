@@ -14,10 +14,10 @@ public final class ObjectTeamsTypeUtilities {
 	private static final String ROLE_TYPE_SEP = "$__OT__";
 	private static final String ROLE_ITF_SEP = "$";
 
-	public static Class<?> getBaseClass(final String baseClassName) {
+	public static Class<?> getBaseClass(final String baseClassName, final ClassLoader baseClassLoader) {
 		final Class<?> clazz;
 		try {
-			clazz = Class.forName(baseClassName.replace('/', '.'));
+			clazz = Class.forName(baseClassName.replace('/', '.'), true, baseClassLoader);
 		} catch (ClassNotFoundException e) {
 			final NoSuchMethodError ee = new NoSuchMethodError();
 			ee.initCause(e);
@@ -52,27 +52,13 @@ public final class ObjectTeamsTypeUtilities {
 		return clazz;
 	}
 
-	public static IBinding getBindingFromIndex(final String joinpointDesc, final ITeam team, final int index) {
+	public static IBinding getBindingFromId(final String joinpointDesc, final ITeam team, final int callinId) {
 		final List<IBinding> bindings = TeamManager.getPrecedenceSortedCallinBindings(team, joinpointDesc);
-		return bindings.get(index);
-	}
-
-	public static int getTeamRepeatCount(final ITeam[] teams, int index) {
-		final ITeam team = teams[index];
-		int count = 0;
-		while (index >= 0) {
-			if (teams[index--] == team) {
-				count++;
-			} else {
-				return count;
-			}
-		}
-		return count;
+		return bindings.stream().filter(b -> b.getPerTeamId() == callinId).findFirst().get();
 	}
 
 	public static MethodHandle findVirtual(MethodHandles.Lookup lookup, Class<?> declaringClass, String name,
 			MethodType type) {
-		// TODO error
 		try {
 			return lookup.findVirtual(declaringClass, name, type);
 		} catch (NoSuchMethodException e) {

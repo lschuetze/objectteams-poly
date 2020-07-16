@@ -26,6 +26,7 @@ import org.eclipse.objectteams.otredyn.bytecode.Binding;
 import org.eclipse.objectteams.otredyn.bytecode.ClassRepository;
 import org.eclipse.objectteams.otredyn.runtime.ClassIdentifierProviderFactory;
 import org.eclipse.objectteams.otredyn.runtime.IBinding;
+import org.eclipse.objectteams.otredyn.runtime.IBinding.CallinModifier;
 import org.eclipse.objectteams.otredyn.runtime.IClassIdentifierProvider;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassReader;
@@ -85,7 +86,7 @@ public abstract class Attributes {
 			private String[] baseMethodNames;
 			private String[] baseMethodSignatures;
 			private String[] declaringBaseClassNames;
-			private int      callinModifier;
+			private CallinModifier      callinModifier;
 			private int[]    callinIds;
 			private int[]    baseFlags;
 			private boolean  isHandleCovariantReturn;
@@ -93,7 +94,7 @@ public abstract class Attributes {
 			MultiBinding(String roleName, String roleMethodName, String roleMethodSignature, String callinLabel,
 						 String baseClassName, 
 						 String[] baseMethodNames, String[] baseMethodSignatures, String[] declaringBaseClassNames,
-						 int callinModifier, int[] callinIds, int[] baseFlags, int flags) 
+						 CallinModifier callinModifier, int[] callinIds, int[] baseFlags, int flags) 
 			{
 				this.roleClassName = roleName;
 				this.roleMethodName = roleMethodName;
@@ -133,7 +134,7 @@ public abstract class Attributes {
 				return baseMethodSignatures;
 			}
 			
-			protected int getCallinModifier() {
+			protected CallinModifier getCallinModifier() {
 				return this.callinModifier;
 			}
 
@@ -170,13 +171,7 @@ public abstract class Attributes {
 				                String baseClassName, 
 				                String[] baseMethodNames, String[] baseMethodSignatures, String[] declaringBaseClassNames,
 				                String callinModifierName, int[] callinIds, int[] baseFlags, int flags) {
-			int callinModifier = 0;
-			if ("before".equals(callinModifierName))
-				callinModifier = Binding.BEFORE;
-			else if ("after".equals(callinModifierName))
-				callinModifier = Binding.AFTER;
-			else
-				callinModifier = Binding.REPLACE;
+			CallinModifier callinModifier = CallinModifier.fromString(callinModifierName);
 			this.bindings[i] = new MultiBinding(roleName, roleMethodName, roleMethodSignature, callinLabel,
 					                            baseClassName, 
 					                            baseMethodNames, baseMethodSignatures, declaringBaseClassNames,
