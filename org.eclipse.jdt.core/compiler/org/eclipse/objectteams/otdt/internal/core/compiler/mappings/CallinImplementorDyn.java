@@ -100,7 +100,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	public static final char[] OT_CALL_AFTER   = "_OT$callAfter".toCharArray(); //$NON-NLS-1$
 	public static final char[] OT_CALL_REPLACE = "_OT$callReplace".toCharArray(); //$NON-NLS-1$
 	// used for base calls:
-	public static final char[] OT_CALL_NEXT        = "_OT$callNext".toCharArray(); //$NON-NLS-1$
+//	public static final char[] OT_CALL_NEXT        = "_OT$callNext".toCharArray(); //$NON-NLS-1$
+	public static final char[] OT_CALL_NEXT        = "callNext".toCharArray(); //$NON-NLS-1$
 	//  - both the team version (II[Object;) and the base version (I[Object;)
 	public static final char[] OT_CALL_ORIG_STATIC = "_OT$callOrigStatic".toCharArray(); //$NON-NLS-1$
 

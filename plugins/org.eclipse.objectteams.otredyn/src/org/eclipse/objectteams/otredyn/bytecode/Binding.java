@@ -151,16 +151,16 @@ public class Binding implements Comparable<Binding>, IBinding {
 		if (this.callinLabel == null || other.callinLabel == null) {
 			// at least one binding is a decaps binding
 			if (this.callinLabel != null)
-				return 1;
-			else if (other.callinLabel != null)
 				return -1;
+			else if (other.callinLabel != null)
+				return 1;
 		} else {
 			if (this.callinModifier != other.callinModifier) {
 				// replace has lower priority than before/after:
 				if (this.callinModifier == CallinModifier.REPLACE)
-					return -1;
-				else if (other.callinModifier == CallinModifier.REPLACE)
 					return 1;
+				else if (other.callinModifier == CallinModifier.REPLACE)
+					return -1;
 			}
 			// the following comparison respects precedence:
 			compare = this.teamClass.compare(this.callinLabel, other.callinLabel);

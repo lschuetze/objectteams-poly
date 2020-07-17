@@ -63,8 +63,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 			throw new LinkageError("CallSiteDescriptor is no OTCallSiteDescriptor");
 		}
 		final OTCallSiteDescriptor otdesc = (OTCallSiteDescriptor) desc;
-//		return CallinBootstrap.asTypeSafeReturn(getGuardedInvocation(linkRequest, otdesc), linkerServices, otdesc);
-		return getGuardedInvocation(linkRequest, otdesc);
+		return CallinBootstrap.asTypeSafeReturn(getGuardedInvocation(linkRequest, otdesc), linkerServices, otdesc);
 	}
 
 	static GuardedInvocation getGuardedInvocation(final LinkRequest request, final OTCallSiteDescriptor desc) {

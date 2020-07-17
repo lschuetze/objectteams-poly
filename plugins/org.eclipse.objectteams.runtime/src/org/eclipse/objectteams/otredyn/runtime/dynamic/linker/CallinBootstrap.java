@@ -29,6 +29,7 @@ public final class CallinBootstrap {
 		return inv == null ? null : inv.asTypeSafeReturn(linkerServices, desc.getMethodType());
 	}
 
+	// TODO Lars: remove boundMethodId
 	public static CallSite bootstrap(final Lookup lookup, final String name, final MethodType type, final int flags,
 			final String joinpointDesc, final int boundMethodId) {
 		final CallSiteContext context = new CallSiteContext(joinpointDesc, boundMethodId, lookup.lookupClass());
