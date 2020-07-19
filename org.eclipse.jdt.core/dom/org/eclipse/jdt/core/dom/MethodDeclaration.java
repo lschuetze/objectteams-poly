@@ -302,6 +302,9 @@ public class MethodDeclaration extends BodyDeclaration
 		addProperty(PARAMETERS_PROPERTY, propertyList);
 		addProperty(EXTRA_DIMENSIONS2_PROPERTY, propertyList);
 		addProperty(THROWN_EXCEPTION_TYPES_PROPERTY, propertyList);
+//{ObjectTeams:
+        addProperty(GUARD_PROPERTY, propertyList);
+// SH}
 		addProperty(BODY_PROPERTY, propertyList);
 		addProperty(COMPACT_CONSTRUCTOR_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_9_0 = reapPropertyList(propertyList);

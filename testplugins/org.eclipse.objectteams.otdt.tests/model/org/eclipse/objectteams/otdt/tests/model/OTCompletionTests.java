@@ -65,8 +65,10 @@ public void testCompletionBaseclass1() throws JavaModelException {
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
+		"CompletionInvisibleBaseclass[TYPE_REF]{p.CompletionInvisibleBaseclass, p, Lp.CompletionInvisibleBaseclass;, null, null, "+
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_SUBWORD+R_NON_RESTRICTED)+"}\n" +
 		"CompletionBaseclass[TYPE_REF]{CompletionBaseclass, , LCompletionBaseclass;, null, null, "+
-		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
 
@@ -87,8 +89,10 @@ public void testCompletionBaseclass2() throws JavaModelException {
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
+		"CompletionInvisibleBaseclass[TYPE_REF]{p.CompletionInvisibleBaseclass, p, Lp.CompletionInvisibleBaseclass;, null, null, "+
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_SUBWORD+R_NON_RESTRICTED)+"}\n" +
 		"CompletionBaseclass[TYPE_REF]{CompletionBaseclass, , LCompletionBaseclass;, null, null, "+
-		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
 
@@ -395,12 +399,16 @@ public void testCompletionTypeReference1() throws JavaModelException {
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
-		"CompletionTBase[TYPE_REF]{CompletionTBase, , LCompletionTBase;, null, null, " +
-		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n" +
+		"CompletionCalloutTeam[TYPE_REF]{CompletionCalloutTeam, , LCompletionCalloutTeam;, null, null, " +
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_SUBWORD+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n" +
+		"CompletionSuperTeam[TYPE_REF]{CompletionSuperTeam, , LCompletionSuperTeam;, null, null, " +
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_SUBWORD+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n" +
+		"CompletionTBase[TYPE_REF]{CompletionTBase, , LCompletionTBase;, null, null, "+
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n" +
 		"CompletionTeam2[TYPE_REF]{CompletionTeam2, , LCompletionTeam2;, null, null, "+
-		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n" +
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n" +
 		"CompletionTeam2.CompletionTRoleA[TYPE_REF]{CompletionTRoleA, , LCompletionTeam2$CompletionTRoleA;, null, null, "+
-		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
 
@@ -529,8 +537,10 @@ public void testCompletionMethodSpecLong5() throws JavaModelException {
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
+		"CompletionInvisibleBaseclass[TYPE_REF]{p.CompletionInvisibleBaseclass, p, Lp.CompletionInvisibleBaseclass;, null, null, "+
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_SUBWORD+R_NON_RESTRICTED)+"}\n" +
 		"CompletionBaseclass[TYPE_REF]{CompletionBaseclass, , LCompletionBaseclass;, null, null, "+
-		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
 /** A callin binding guard is completed. */
@@ -552,8 +562,10 @@ public void testCompletionBindingGuard() throws JavaModelException {
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
+		"CompletionInvisibleBaseclass[TYPE_REF]{p.CompletionInvisibleBaseclass, p, Lp.CompletionInvisibleBaseclass;, null, null, "+
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_SUBWORD+R_NON_RESTRICTED)+"}\n" +
 		"CompletionBaseclass[TYPE_REF]{CompletionBaseclass, , LCompletionBaseclass;, null, null, "+
-		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
 
