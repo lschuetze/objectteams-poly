@@ -132,7 +132,7 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 			if (args.length == 0) {
 				args = new Expression[] { gen.nullLiteral(), baseCallFlags };
 			} else {
-				int enhLen = MethodSignatureEnhancer.getEnhancingArgLen(weavingScheme);
+				int enhLen = MethodSignatureEnhancer.getEnhancingArgLen(weavingScheme); // enhLen = 6
 				if (enclosingMethod.arguments.length - enhLen != args.length) {
 					scope.problemReporter().baseCallDoesntMatchRoleMethodSignature(this);
 					return;
@@ -156,6 +156,7 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 					}
 					boxedArgs[i] = args[i];
 				}
+				// TODO Lars: enhance arguments
 				args = new Expression[] {
 					gen.arrayAllocation(gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 1, boxedArgs),
 					baseCallFlags

@@ -67,10 +67,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
-import static org.eclipse.jdt.internal.compiler.ast.ExpressionContext.*;
+import static org.eclipse.jdt.internal.compiler.ast.ExpressionContext.ASSIGNMENT_CONTEXT;
+import static org.eclipse.jdt.internal.compiler.ast.ExpressionContext.INVOCATION_CONTEXT;
+import static org.eclipse.jdt.internal.compiler.ast.ExpressionContext.VANILLA_CONTEXT;
 import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.CALLIN_FLAG_DEFINITELY_MISSING_BASECALL;
 import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.CALLIN_FLAG_POTENTIALLY_MISSING_BASECALL;
-import static org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticOTTargetMethod.OTDREMethodDecapsulation;
 
 import java.util.HashMap;
 import java.util.function.BiConsumer;
@@ -85,10 +86,10 @@ import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.flow.UnconditionalFlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
-import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
@@ -129,6 +130,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticOTTargetMethod.OTDREMethodDecapsulation;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleBridgeMethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImplementor;
@@ -716,6 +718,19 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 	// generate arguments
 	generateArguments(this.binding, this.arguments, currentScope, codeStream);
 	pc = codeStream.position;
+//	TODO Lars: begin
+	if(this.receiver instanceof BaseReference) {
+//		System.out.println(this.binding);
+//		for(Expression e : arguments) System.out.println(e);
+		CallNextInvokeDynamicExpression expr = new CallNextInvokeDynamicExpression((BaseReference) this.receiver, this.binding, codegenBinding);
+		final int bootstrapIndex = codeStream.classFile.recordBootstrapMethod(expr);
+		char[] baseClassSelector = "callNext".toCharArray(); //$NON-NLS-1$
+//		for(int i = 0; i < codegenBinding.parameters.length; i++)
+//			System.out.println(codegenBinding.parameters[i]);
+//		System.out.println(this.binding.signature());
+		codeStream.invokeDynamic(bootstrapIndex, codegenBinding.parameters.length, 1, baseClassSelector, this.binding.signature(), 0, codegenBinding.receiver);
+	} else {
+//	TODO Lars: end
 	// actual message invocation
 	if (this.syntheticAccessor == null){
 		TypeBinding constantPoolDeclaringClass = CodeStream.getConstantPoolDeclaringClass(currentScope, codegenBinding, this.actualReceiverType, this.receiver.isImplicitThis());
@@ -752,6 +767,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 		}
 	} else {
 		codeStream.invoke(Opcodes.OPC_invokestatic, this.syntheticAccessor, null /* default declaringClass */, this.typeArguments);
+	}
 	}
 	// required cast must occur even if no value is required
 	if (this.valueCast != null) codeStream.checkcast(this.valueCast);

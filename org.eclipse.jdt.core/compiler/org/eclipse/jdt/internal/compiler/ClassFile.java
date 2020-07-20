@@ -44,6 +44,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -53,6 +54,7 @@ import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.AnnotationMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.ArrayInitializer;
+import org.eclipse.jdt.internal.compiler.ast.CallNextInvokeDynamicExpression;
 import org.eclipse.jdt.internal.compiler.ast.ClassLiteralAccess;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ExportsStatement;
@@ -123,6 +125,7 @@ import org.eclipse.jdt.internal.compiler.problem.ShouldNotImplement;
 import org.eclipse.jdt.internal.compiler.util.Messages;
 import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.ModelElement;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
@@ -3748,13 +3751,68 @@ public class ClassFile implements TypeConstants, TypeIds {
 	private int generateLambdaMetaFactoryBootStrapMethods(List functionalExpressionList,
 			int localContentsOffset, final int contentsEntries) {
 		ReferenceBinding javaLangInvokeLambdaMetafactory = this.referenceBinding.scope.getJavaLangInvokeLambdaMetafactory();
+
+		ReferenceBinding objectTeamsCallNextBootstrap = this.referenceBinding.scope.getOrgObjectteamsCallinBoostrap();
+
 		int numberOfBootstraps = functionalExpressionList.size();
 
 		// Depending on the complexity of the expression it may be necessary to use the altMetafactory() rather than the metafactory()
 		int indexForMetaFactory = 0;
 		int indexForAltMetaFactory = 0;
+		int indexForCallNext = 0;
 
 		for (int i = 0; i < numberOfBootstraps; i++) {
+
+			if(functionalExpressionList.get(i) instanceof CallNextInvokeDynamicExpression) {
+				CallNextInvokeDynamicExpression expr = (CallNextInvokeDynamicExpression) functionalExpressionList.get(i);
+
+				if(contentsEntries + localContentsOffset >= this.contents.length) {
+					resizeContents(contentsEntries);
+				}
+
+				char[] SIGNATURE = "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;ILjava/lang/String;)Ljava/lang/invoke/CallSite;".toCharArray(); //$NON-NLS-1$
+				char[] NAME = "callNext".toCharArray(); //$NON-NLS-1$
+
+				if(indexForCallNext == 0) {
+					indexForCallNext = this.constantPool.literalIndexForMethodHandle(ClassFileConstants.MethodHandleRefKindInvokeStatic, objectTeamsCallNextBootstrap,
+							NAME, SIGNATURE, false);
+				}
+
+				this.contents[localContentsOffset++] = (byte) (indexForCallNext >> 8);
+				this.contents[localContentsOffset++] = (byte) indexForCallNext;
+
+				// u2 num_bootstrap_arguments
+				this.contents[localContentsOffset++] = 0;
+				this.contents[localContentsOffset++] = (byte) 2;
+
+				// flags
+				int flagsIndex = this.constantPool.literalIndex(0b0); // CALL
+				this.contents[localContentsOffset++] = (byte) (flagsIndex >> 8);
+				this.contents[localContentsOffset++] = (byte) flagsIndex;
+
+				// joinpoint Descriptor
+				final ReferenceBinding roleBinding = expr.base.outerCallinMethod.binding.declaringClass;
+				char[] baseClassSelector = null;
+				char[] baseClassSignature = null;
+				char[] returnTypeName = null;
+				for(CallinCalloutBinding ccb : roleBinding.callinCallouts) {
+					if(ccb.isCallin() && ccb._declaringRoleClass.isEquivalentTo(roleBinding)) {
+						baseClassSelector = ccb._baseMethods[0].selector;
+						baseClassSignature = ccb._baseMethods[0].signature();
+						returnTypeName = ccb._baseMethods[0].returnType.signature();
+					}
+				}
+				System.out.println(baseClassSignature);
+				System.out.println(returnTypeName);
+				final String baseClassSignatureExt = String.valueOf(baseClassSignature).substring(0, baseClassSignature.length - returnTypeName.length);
+				final String baseClassName = String.valueOf(roleBinding.baseclass.signableName()).replace('.', '/');
+				final String joinpointDesc = baseClassName + "." + String.valueOf(baseClassSelector) + baseClassSignatureExt;
+				System.out.println(joinpointDesc);
+				int index = this.constantPool.literalIndex(joinpointDesc);
+				this.contents[localContentsOffset++] = (byte) (index >> 8);
+				this.contents[localContentsOffset++] = (byte) index;
+
+			} else {
 			FunctionalExpression functional = (FunctionalExpression) functionalExpressionList.get(i);
 			MethodBinding [] bridges = functional.getRequiredBridges();
 			TypeBinding[] markerInterfaces = null;
@@ -3864,6 +3922,7 @@ public class ClassFile implements TypeConstants, TypeIds {
 				int methodTypeIndex = this.constantPool.literalIndexForMethodType(instantiatedSignature);
 				this.contents[localContentsOffset++] = (byte) (methodTypeIndex >> 8);
 				this.contents[localContentsOffset++] = (byte) methodTypeIndex;
+			}
 			}
 		}
 		return localContentsOffset;
@@ -6236,6 +6295,25 @@ public class ClassFile implements TypeConstants, TypeIds {
 		}
 		this.missingTypes = null;
 		this.visitedTypes = null;
+	}
+
+	public int recordBootstrapMethod(CallNextInvokeDynamicExpression reference) {
+		if(this.bootstrapMethods == null) {
+			this.bootstrapMethods = new ArrayList();
+		}
+
+		for(int i = 0; i < this.bootstrapMethods.size(); i++) {
+			Object expression = this.bootstrapMethods.get(i);
+			if(expression instanceof CallNextInvokeDynamicExpression) {
+				CallNextInvokeDynamicExpression bref = (CallNextInvokeDynamicExpression) expression;
+				if(bref.equals(reference)) {
+					return i;
+				}
+			}
+		}
+
+		this.bootstrapMethods.add(reference);
+		return this.bootstrapMethods.size() -1;
 	}
 
 	/**

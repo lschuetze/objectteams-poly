@@ -32,6 +32,7 @@ public final class CallinBootstrap {
 	// TODO Lars: remove boundMethodId
 	public static CallSite bootstrap(final Lookup lookup, final String name, final MethodType type, final int flags,
 			final String joinpointDesc, final int boundMethodId) {
+		System.out.println(joinpointDesc);
 		final CallSiteContext context = new CallSiteContext(joinpointDesc, boundMethodId, lookup.lookupClass());
 		context.updateTeams();
 		CallSiteContext.contexts.put(joinpointDesc, context);
@@ -40,9 +41,10 @@ public final class CallinBootstrap {
 	}
 
 	public static CallSite callNext(final Lookup lookup, final String name, final MethodType type, final int flags,
-			final String joinpointDesc, final int boundMethodId) {
+			final String joinpointDesc) {
+		System.out.println(joinpointDesc);
 		return createDynamicLinker(lookup.lookupClass().getClassLoader(), unstableRelinkThreshold)
-				.link(CallinCallSite.newCallinCallSite(lookup, name, type, flags, joinpointDesc, boundMethodId));
+				.link(CallinCallSite.newCallinCallSite(lookup, name, type, flags, joinpointDesc, 0));
 	}
 
 	public static DynamicLinker createDynamicLinker(final ClassLoader classLoader, final int unstableRelinkThreshold) {
