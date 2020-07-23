@@ -5,7 +5,6 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 import org.eclipse.objectteams.otredyn.runtime.IBinding;
-import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.eclipse.objectteams.otredyn.runtime.dynamic.linker.util.ObjectTeamsTypeUtilities;
 import org.objectteams.IBoundBase2;
 import org.objectteams.ITeam;
@@ -73,7 +72,9 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		MethodHandle replace = null;
 		CallSiteContext ctx = CallSiteContext.contexts.get(joinpointDesc);
 		for (ITeam team : ctx) {
+			out("team", team.toString());
 			final int callinId = ctx.nextCallinId();
+			out("callinId", Integer.valueOf(callinId).toString());
 			final IBinding binding = ObjectTeamsTypeUtilities.getBindingFromId(joinpointDesc, team, callinId);
 			out("binding", binding.toString());
 			switch (binding.getCallinModifier()) {
@@ -101,8 +102,17 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 	}
 
 	private static MethodHandle handleOrig(OTCallSiteDescriptor desc, CallSiteContext ctx) {
+		System.out.println("handleOrig");
 		final MethodHandle orig = ObjectTeamsTypeUtilities.findOrig(desc.getLookup(), ctx.baseClass);
-		final MethodHandle result = MethodHandles.dropArguments(orig, 1, ITeam[].class, int.class, int[].class);
+		out("orig", orig.toString());
+		MethodHandle result = MethodHandles.dropArguments(orig, 1, ITeam[].class, int.class, int[].class);
+		out("result", result.toString());
+		if (desc.isCallNext()) {
+			// might make the super call from last int
+			result = MethodHandles.dropArguments(result, 5, Object[].class);
+			result = MethodHandles.dropArguments(result, 7, int.class);
+			out("result2", result.toString());
+		}
 		return result;
 	}
 
@@ -147,8 +157,9 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 			swapped = MethodHandles.permuteArguments(liftToRoleCollect, swapType, 1, 0);
 		}
 		out("swapped", swapped.toString());
+		// TODO Lars: A way without insertArgument of index?
 		final MethodHandle unpackTeam = MethodHandles
-				.insertArguments(MethodHandles.arrayElementGetter(ITeam[].class), 1, ctx.getIndex())
+				.insertArguments(MethodHandles.arrayElementGetter(ITeam[].class), 1, ctx.getIndex() - 1)
 				.asType(MethodType.methodType(team.getClass(), ITeam[].class));
 		out("unpackTeam", unpackTeam.toString());
 		final MethodHandle unpacked = MethodHandles.filterArguments(swapped, 1, unpackTeam);
@@ -169,7 +180,15 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		final MethodHandle doubleBaseAndTeam = MethodHandles.permuteArguments(expanded, doubleBaseAndTeamType, 0, 1, 0,
 				1, 2, 3, 4, 5, 5);
 		out("doubleBaseAndTeam", doubleBaseAndTeam.toString());
-		return doubleBaseAndTeam;
+		if (desc.isCallAllBindings()) {
+			return doubleBaseAndTeam;
+		} else {
+			final MethodHandle dropObjectParams = MethodHandles.dropArguments(doubleBaseAndTeam, 6, Object[].class);
+			out("dropObjectParams", dropObjectParams.toString());
+			final MethodHandle dropBaseId = MethodHandles.dropArguments(dropObjectParams, 7, int.class);
+			out("dropBaseId", dropBaseId.toString());
+			return dropBaseId;
+		}
 	}
 
 	private static MethodHandle handleBefore(final OTCallSiteDescriptor desc, final ITeam team, final IBinding binding,
@@ -206,7 +225,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		}
 		out("swapped", swapped.toString());
 		final MethodHandle unpackTeam = MethodHandles
-				.insertArguments(MethodHandles.arrayElementGetter(ITeam[].class), 1, ctx.getIndex())
+				.insertArguments(MethodHandles.arrayElementGetter(ITeam[].class), 1, ctx.getIndex() - 1)
 				.asType(MethodType.methodType(team.getClass(), ITeam[].class));
 		out("unpackTeam", unpackTeam.toString());
 		final MethodHandle unpacked = MethodHandles.filterArguments(swapped, 1, unpackTeam);
@@ -219,7 +238,15 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 			dropped = MethodHandles.dropArguments(unpacked, 2, int.class, int[].class, int.class, Object[].class);
 		}
 		out("dropped", dropped.toString());
-		return dropped;
+		if (desc.isCallAllBindings()) {
+			return dropped;
+		} else {
+			final MethodHandle dropObjectParams = MethodHandles.dropArguments(dropped, 6, Object[].class);
+			out("dropObjectParams", dropObjectParams.toString());
+			final MethodHandle dropBaseId = MethodHandles.dropArguments(dropObjectParams, 7, int.class);
+			out("dropBaseId", dropBaseId.toString());
+			return dropBaseId;
+		}
 	}
 
 	private static void out(final String name, final String value) {

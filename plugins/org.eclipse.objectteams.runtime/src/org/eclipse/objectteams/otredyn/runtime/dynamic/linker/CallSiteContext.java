@@ -58,6 +58,8 @@ public class CallSiteContext implements Iterable<ITeam> {
 
 		@Override
 		public ITeam next() {
+			System.out.println(index);
+			System.out.println(teams[index]);
 			return teams[index++];
 		}
 
