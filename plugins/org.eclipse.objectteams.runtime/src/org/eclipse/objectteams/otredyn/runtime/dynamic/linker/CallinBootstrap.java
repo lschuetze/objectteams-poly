@@ -33,7 +33,7 @@ public final class CallinBootstrap {
 	public static CallSite bootstrap(final Lookup lookup, final String name, final MethodType type, final int flags,
 			final String joinpointDesc, final int boundMethodId) {
 //		System.out.println(joinpointDesc);
-		System.out.println("callAllBindings");
+//		System.out.println("callAllBindings");
 		final CallSiteContext context = new CallSiteContext(joinpointDesc, boundMethodId, lookup.lookupClass());
 		context.updateTeams();
 		final int newFlags = flags | OTCallSiteDescriptor.CALL_ALL_BINDINGS;
@@ -45,7 +45,7 @@ public final class CallinBootstrap {
 	public static CallSite callNext(final Lookup lookup, final String name, final MethodType type, final int flags,
 			final String joinpointDesc) {
 //		System.out.println(joinpointDesc);
-		System.out.println("callNext");
+//		System.out.println("callNext");
 		final int newFlags = flags | OTCallSiteDescriptor.CALL_NEXT;
 		return createDynamicLinker(lookup.lookupClass().getClassLoader(), unstableRelinkThreshold)
 				.link(CallinCallSite.newCallinCallSite(lookup, name, type, newFlags, joinpointDesc, 0));

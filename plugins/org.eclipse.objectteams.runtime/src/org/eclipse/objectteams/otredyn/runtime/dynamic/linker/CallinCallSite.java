@@ -20,7 +20,6 @@ public class CallinCallSite extends ChainedCallSite {
 			final int flags, final String joinpointDesc, final int boundMethodId) {
 		final OTCallSiteDescriptor desc = OTCallSiteDescriptor.get(lookup, name, type, flags, joinpointDesc,
 				boundMethodId);
-
 		return new CallinCallSite(desc);
 	}
 }
