@@ -7987,7 +7987,10 @@ public class ASTConverterTestAST3_2 extends ConverterTestSetup {
 				"public class TestCharset extends Charset {\n" +
 				"  public CharsetDecoder newDecoder(){\n" +
 				"    return new CharsetDecoder(this,2.0,2.0){\n" +
-				"      void CharsetDecoder();\n" +
+//{ObjectTeams: incidentally better recovered ast:
+				"      void CharsetDecoder(){\n" +
+				"      }\n" +
+// orig:
 				"      protected CoderResult decodeLoop(      ByteBuffer in,      CharBuffer out){\n" +
 				"        return null;\n" +
 				"      }\n" +
@@ -8038,35 +8041,29 @@ public class ASTConverterTestAST3_2 extends ConverterTestSetup {
 				"	return new CharsetDecoder(this, 2.0, 2.0) {\n" +
 				"	           ^^^^^^^^^^^^^^\n" +
 				"CharsetDecoder cannot be resolved to a type\n" +
+// :giro
 				"10. ERROR in /Converter/src/TestCharset.java (at line 10)\n" +
+				"	CharsetDecoder(CharSet\n" +
+				"	^^^^^^^^^^^^^^^^^^^^^^\n" +
+				"Syntax error on token(s), misplaced construct(s)\n" +
+				"11. ERROR in /Converter/src/TestCharset.java (at line 10)\n" +
 				"	CharsetDecoder(CharSet\n" +
 				"	^^^^^^^^^^^^^^^\n" +
 				"Return type for the method is missing\n" +
-				"11. ERROR in /Converter/src/TestCharset.java (at line 10)\n" +
-				"	CharsetDecoder(CharSet\n" +
-				"	               ^^^^^^^\n" +
-				"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameter\n" +
-				"12. ERROR in /Converter/src/TestCharset.java (at line 10)\n" +
-				"	CharsetDecoder(CharSet\n" +
-				"	               ^^^^^^^\n" +
-				"Syntax error, insert \")\" to complete ConstructorDeclaration\n" +
-				"13. ERROR in /Converter/src/TestCharset.java (at line 10)\n" +
-				"	CharsetDecoder(CharSet\n" +
-				"	               ^^^^^^^\n" +
-				"Syntax error, insert \";\" to complete ClassBodyDeclarations\n" +
-				"14. ERROR in /Converter/src/TestCharset.java (at line 11)\n" +
+				"12. ERROR in /Converter/src/TestCharset.java (at line 11)\n" +
 				"	protected CoderResult decodeLoop(ByteBuffer in,\n" +
 				"	          ^^^^^^^^^^^\n" +
 				"CoderResult cannot be resolved to a type\n" +
-				"15. ERROR in /Converter/src/TestCharset.java (at line 11)\n" +
+				"13. ERROR in /Converter/src/TestCharset.java (at line 11)\n" +
 				"	protected CoderResult decodeLoop(ByteBuffer in,\n" +
 				"	                                 ^^^^^^^^^^\n" +
 				"ByteBuffer cannot be resolved to a type\n" +
-				"16. ERROR in /Converter/src/TestCharset.java (at line 12)\n" +
+				"14. ERROR in /Converter/src/TestCharset.java (at line 12)\n" +
 				"	CharBuffer out) {\n" +
 				"	^^^^^^^^^^\n" +
 				"CharBuffer cannot be resolved to a type\n" +
-				"17. ERROR in /Converter/src/TestCharset.java (at line 17)\n" +
+				"15. ERROR in /Converter/src/TestCharset.java (at line 17)\n" +
+// SH}
 				"	public CharsetEncoder newEncoder() {\n" +
 				"	       ^^^^^^^^^^^^^^\n" +
 				"CharsetEncoder cannot be resolved to a type\n",
