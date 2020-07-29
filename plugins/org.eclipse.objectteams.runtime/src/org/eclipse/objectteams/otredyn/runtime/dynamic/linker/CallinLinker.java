@@ -51,7 +51,6 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 
 	@Override
 	public boolean canLinkType(final Class<?> type) {
-		System.out.println("canLinkType");
 		return IBoundBase2.class.isAssignableFrom(type);
 	}
 
