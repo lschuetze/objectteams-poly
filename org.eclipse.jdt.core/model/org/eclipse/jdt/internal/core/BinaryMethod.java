@@ -14,9 +14,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.core;
 
+import java.util.Arrays;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IAnnotation;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
@@ -64,6 +67,27 @@ protected BinaryMethod(JavaElement parent, String name, String[] paramTypes) {
 	if (paramTypes == null) {
 		this.parameterTypes= CharOperation.NO_STRINGS;
 	} else {
+//{ObjectTeams: retrench some signatures
+		IType type = (IType) parent.getAncestor(IJavaElement.TYPE);
+		try {
+			if (paramTypes.length >= 6 && Flags.isRole(type.getFlags())) {
+				if (paramTypes[0].equals("Lorg.objectteams.IBoundBase2;")) //$NON-NLS-1$
+					paramTypes = Arrays.copyOfRange(paramTypes, 6, paramTypes.length);
+			} else if (paramTypes.length >= 2 && paramTypes[0].equals("I")) { //$NON-NLS-1$
+				IType outerType = type.getDeclaringType();
+				if (outerType != null) {
+					if (paramTypes[1].charAt(0) == Signature.C_RESOLVED
+							? Signature.toString(paramTypes[1]).equals(outerType.getFullyQualifiedName('$'))
+							: Signature.toString(paramTypes[1]).equals(outerType.getElementName())) {
+						// we're taking a guess that this might be a static role method, but getFlags() should not be called here
+						paramTypes = Arrays.copyOfRange(paramTypes, 2, paramTypes.length);
+					}
+				}
+			}
+		} catch (JavaModelException e) {
+			// ignore
+		}
+// SH}
 		this.parameterTypes= paramTypes;
 	}
 }

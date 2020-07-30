@@ -111,27 +111,30 @@ public class OTModelManager
 			{
 			    case IJavaElement.COMPILATION_UNIT:
 			    case IJavaElement.CLASS_FILE:
-			    	if(isRoleFile)
-					{   //  could also be a teeam, which is handled inside the constructor
-			    		if (elem.isBinary())
-			    		{
-				        	MAPPING.addOTElement( result = new BinaryRoleType(elem,
-									parent,
-									typeDeclFlags,
-									baseClassName,
-									baseClassAnchor));
+			    	if (TypeHelper.isRole(typeDeclFlags)) {
+			    		if (elem.isBinary()) {
+			    			MAPPING.addOTElement( result = new BinaryRoleType(elem,
+			    					parent,
+			    					typeDeclFlags,
+			    					baseClassName,
+			    					baseClassAnchor));
+			    		} else {
+			    			if(isRoleFile) {
+								//  could also be a teeam, which is handled inside the constructor
+				    			MAPPING.addOTElement( result = new RoleFileType(elem,
+				    					parent,
+				    					typeDeclFlags,
+				    					baseClassName,
+				    					baseClassAnchor));
+							} else {
+								MAPPING.addOTElement( result = new RoleType(elem,
+				    					parent,
+				    					typeDeclFlags,
+				    					baseClassName,
+				    					baseClassAnchor));
+							}
 			    		}
-			    		else
-			    		{
-				        	MAPPING.addOTElement( result = new RoleFileType(elem,
-									parent,
-									typeDeclFlags,
-									baseClassName,
-									baseClassAnchor));
-			    		}
-					}
-			    	else if (TypeHelper.isTeam(typeDeclFlags))
-					{
+			    	} else if (TypeHelper.isTeam(typeDeclFlags)) {
 						MAPPING.addOTElement( result = new OTType(IOTJavaElement.TEAM, elem, null, typeDeclFlags) );
 					}
 					return result;

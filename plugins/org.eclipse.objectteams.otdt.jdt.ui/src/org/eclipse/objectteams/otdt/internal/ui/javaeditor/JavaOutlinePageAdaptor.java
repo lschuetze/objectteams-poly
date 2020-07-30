@@ -17,9 +17,22 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.ui.javaeditor;
 
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Item;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.objectteams.otdt.core.IOTType;
+import org.eclipse.objectteams.otdt.core.OTModelManager;
+import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 import org.eclipse.objectteams.otdt.ui.Util;
 
 import base org.eclipse.jdt.internal.ui.javaeditor.JavaOutlinePage.JavaOutlineViewer;
@@ -48,11 +61,48 @@ public team class JavaOutlinePageAdaptor
 	}
 	protected class Viewer playedBy JavaOutlineViewer 
 	{
+		ISelection getSelection() -> ISelection getSelection();
+		Object getInput() -> Object getInput();
+
 		void unwrapOTType(Object element) <- replace void associate(Object element, Item item)
 			base when (element instanceof IOTType); 
 
 		callin void unwrapOTType(Object element) {
 			base.unwrapOTType(((IOTType)element).getCorrespondingJavaElement());
-		}		
+		}
+
+		void handleOpen(SelectionEvent event) <- replace void handleOpen(SelectionEvent event);
+
+		@SuppressWarnings("basecall")
+		callin void handleOpen(SelectionEvent event) {
+			ISelection selection = getSelection();
+			if (selection instanceof IStructuredSelection) {
+				Object firstElement = ((IStructuredSelection) selection).getFirstElement();
+				if (firstElement instanceof IJavaElement) {
+					IJavaElement selectedElement = (IJavaElement) firstElement;
+					IType selectedType = (IType) selectedElement.getAncestor(IJavaElement.TYPE);
+					try {
+						if (selectedType != null && Flags.isRole(selectedType.getFlags())) {
+							IClassFile selectedRoot = (IClassFile) selectedElement.getAncestor(IJavaElement.CLASS_FILE);
+							if (selectedRoot != null && OTModelManager.isRole((IType)selectedElement.getAncestor(IJavaElement.TYPE))) {
+								Object input = getInput();
+								if (input instanceof ITypeRoot) {
+									if (!selectedRoot.equals(input)) {
+										IEditorPart editor = EditorUtility.openInEditor(firstElement, true);
+										EditorUtility.revealInEditor(editor, selectedElement);
+										return;
+									}
+								}
+							}
+						}
+					} catch (PartInitException e) {
+						OTDTPlugin.logException("Failed to open element in editor", e); //$NON-NLS-1$
+					} catch (JavaModelException e) {
+						OTDTPlugin.logException("Failed access flags of type "+selectedElement.getElementName(), e); //$NON-NLS-1$
+					}
+				}
+			}
+			base.handleOpen(event);
+		}
 	}
 }

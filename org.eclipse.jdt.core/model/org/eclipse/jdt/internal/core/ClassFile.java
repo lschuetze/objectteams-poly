@@ -506,6 +506,10 @@ public boolean isInterface() throws JavaModelException {
 protected IBuffer openBuffer(IProgressMonitor pm, Object info) throws JavaModelException {
 	// Check the cache for the top-level type first
 	IType outerMostEnclosingType = getOuterMostEnclosingType();
+//{ObjectTeams:
+	if (Flags.isRole(getType().getFlags()))
+		outerMostEnclosingType = getType(); // revert to direct type to account for role files
+// SH}
 	IBuffer buffer = getBufferManager().getBuffer(outerMostEnclosingType.getClassFile());
 	if (buffer == null) {
 		SourceMapper mapper = getSourceMapper();

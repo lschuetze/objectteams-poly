@@ -41,6 +41,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -73,6 +74,8 @@ import org.eclipse.jdt.internal.compiler.util.JRTUtil;
 import org.eclipse.jdt.internal.compiler.util.SuffixConstants;
 import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.jdt.internal.core.util.ReferenceInfoAdapter;
+import org.eclipse.objectteams.otdt.core.TypeHelper;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 
 /**
  * A SourceMapper maps source code in a ZIP file to binary types or
@@ -826,7 +829,12 @@ public class SourceMapper
 				this.types[this.typeDepth] = getType(new String(typeInfo.name));
 			}
 		} else {
+//{ObjectTeams: pass modifiers, so we can dispatch between role parts:
+/* orig:
 			this.types[this.typeDepth] = getType(new String(typeInfo.name));
+  :giro */
+			this.types[this.typeDepth] = getType(new String(typeInfo.name), typeInfo.modifiers);
+// SH}
 		}
 		this.typeNameRanges[this.typeDepth] =
 			new SourceRange(typeInfo.nameSourceStart, typeInfo.nameSourceEnd - typeInfo.nameSourceStart + 1);
@@ -1164,7 +1172,22 @@ public class SourceMapper
 	public char[] findSource(IType type, String simpleSourceFileName) {
 		PackageFragment pkgFrag = (PackageFragment) type.getPackageFragment();
 		String name = org.eclipse.jdt.internal.core.util.Util.concatWith(pkgFrag.names, simpleSourceFileName, '/');
+//ObjectTeams: RoFi?
+/* orig:
 		return internalFindSource((NamedMember) type, name);
+  :giro */
+		char[] source = internalFindSource((NamedMember) type, name);
+		try {
+			if (source == null && Flags.isRole(type.getFlags())) {
+				simpleSourceFileName = type.getDeclaringType().getElementName()+'/'+simpleSourceFileName;
+				name = org.eclipse.jdt.internal.core.util.Util.concatWith(pkgFrag.names, simpleSourceFileName, '/');
+				return internalFindSource((NamedMember) type, name);
+			}
+		} catch (JavaModelException e) {
+			JavaCore.getJavaCore().getLog().log(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, "couldn't access type "+type.getElementName(), e)); //$NON-NLS-1$
+		}
+		return source;
+// SH}
 	}
 
 	/**
@@ -1425,6 +1448,11 @@ public class SourceMapper
 	 * as well.
 	 */
 	protected IType getType(String typeName) {
+//{ObjectTeams: additional parameter:
+		return getType(typeName, 0);
+	}
+	protected IType getType(String typeName, int modifiers) {
+// SH}
 		if (!(this.binaryTypeOrModule instanceof IType))
 			return null;
 		IType type = (IType) this.binaryTypeOrModule;
@@ -1441,7 +1469,15 @@ public class SourceMapper
 		} else if (type.getElementName().equals(typeName))
 			return type;
 		else
+//{ObjectTeams: prefer class file of role class over synth interface
+		{
+			if (TypeHelper.isRole(modifiers) && !Flags.isInterface(modifiers) && !typeName.startsWith(IOTConstants.OT_DELIM))
+				typeName = IOTConstants.OT_DELIM+typeName;
+// orig:
 			return ((this.typeDepth <= 1) ? type : this.types[this.typeDepth - 1]).getType(typeName);
+// :giro
+		}
+// SH}
 	}
 
 	/**

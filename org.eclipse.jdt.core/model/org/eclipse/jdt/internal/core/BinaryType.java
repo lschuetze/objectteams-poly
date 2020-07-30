@@ -33,7 +33,6 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.IBinaryAnnotation;
 import org.eclipse.jdt.internal.compiler.env.IBinaryType;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
-import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.util.SuffixConstants;
 import org.eclipse.jdt.internal.core.JavaModelManager.PerProjectInfo;
 import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
@@ -62,14 +61,9 @@ public class BinaryType extends BinaryMember implements IType, SuffixConstants {
 	// ((IBinaryType) getElementInfo()).getEnclosingTypeName();
 	private boolean enclosingNameSet = false;
 	private char[] storedEnclosingTypeName = null;
-	private boolean isRole = false;
 
 	protected BinaryType(char[] enclosingTypeName, JavaElement parent, String name) {
 		this(parent, name);
-		if (name.startsWith(IOTConstants.OT_DELIM)) {
-			this.isRole = true;
-			this.name = this.name.substring(IOTConstants.OT_DELIM_LEN);
-		}
 		this.storedEnclosingTypeName = enclosingTypeName;
 		this.enclosingNameSet = true;
 	}
@@ -77,7 +71,6 @@ public class BinaryType extends BinaryMember implements IType, SuffixConstants {
 	void updateEnclosingTypeName(@NonNull char[] enclosingTypeName) {
 		if (!this.enclosingNameSet && this.storedEnclosingTypeName == null) {
 			if (this.name.startsWith(IOTConstants.OT_DELIM)) {
-				this.isRole = true;
 				this.name = this.name.substring(IOTConstants.OT_DELIM_LEN);
 			}
 			this.storedEnclosingTypeName = enclosingTypeName;
@@ -87,7 +80,7 @@ public class BinaryType extends BinaryMember implements IType, SuffixConstants {
 // SH}
 
 protected BinaryType(JavaElement parent, String name) {
-	super(parent, name);
+	super(parent, name.startsWith(IOTConstants.OT_DELIM) ? name.substring(IOTConstants.OT_DELIM_LEN) : name);
 }
 /*
  * Remove my cached children from the Java Model
@@ -200,6 +193,22 @@ public IType createType(String contents, IJavaElement sibling, boolean force, IP
 @Override
 public boolean equals(Object o) {
 	if (!(o instanceof BinaryType)) return false;
+//{ObjectTeams:
+	// note: typeNames are already normalized, what's not normalized is the containing ClassFile
+	BinaryType yourType = (BinaryType) o;
+	String myName = getClassFile().getElementName();
+	String yourName = yourType.getClassFile().getElementName();
+	if (myName.contains(IOTConstants.OT_DELIM) != yourName.contains(IOTConstants.OT_DELIM)) {
+		myName = myName.contains(IOTConstants.OT_DELIM) ? myName.substring(IOTConstants.OT_DELIM_LEN) : myName;
+		yourName = yourName.contains(IOTConstants.OT_DELIM) ? yourName.substring(IOTConstants.OT_DELIM_LEN) : yourName;
+		if (myName.equals(yourName)) {
+			if (this.occurrenceCount != yourType.occurrenceCount)
+				return false;
+			// skip different ClassFiles:
+			return getPackageFragment().equals(yourType.getPackageFragment());
+		}
+	}
+// SH}
 	return super.equals(o);
 }
 
@@ -386,10 +395,7 @@ public IField getRecordComponent(String compName) {
 @Override
 public int getFlags() throws JavaModelException {
 	IBinaryType info = (IBinaryType) getElementInfo();
-	return info.getModifiers() & ~ClassFileConstants.AccSuper
-//{ObjectTeams: do we know this is a role?
-		| (this.isRole ? ExtraCompilerModifiers.AccRole : 0);
-// SH}
+	return info.getModifiers() & ~ClassFileConstants.AccSuper;
 }
 
 @Override

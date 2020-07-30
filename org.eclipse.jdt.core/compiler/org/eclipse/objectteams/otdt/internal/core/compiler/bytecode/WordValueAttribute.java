@@ -245,8 +245,8 @@ public class WordValueAttribute
 		}
 	}
 
-	private static WeavingScheme weavingSchemeFromCompilerVersion(int version) {
-		if ((version & OTDRE_FLAG) != 0)
+	public WeavingScheme weavingSchemeFromCompilerVersion() {
+		if ((this._value & OTDRE_FLAG) != 0)
 			return WeavingScheme.OTDRE;
 		return WeavingScheme.OTRE;
 	}
@@ -316,12 +316,7 @@ public class WordValueAttribute
         {
             checkBindingMismatch(binding, 0);
             BinaryTypeBinding type = (BinaryTypeBinding)binding;
-            if ((this._value & OT_CLASS_ROLE) != 0)
-            	type.modifiers |= ExtraCompilerModifiers.AccRole;
-            if ((this._value & OT_CLASS_TEAM) != 0)
-            	type.modifiers |= ExtraCompilerModifiers.AccTeam;
-            if ((this._value & OT_CLASS_FLAG_HAS_TSUPER) != 0)
-            	type.modifiers |= ExtraCompilerModifiers.AccOverriding;
+            type.modifiers |= classFlagsToModifiers();
             if ((this._value & OT_CLASS_ROLE_LOCAL) != 0)
             	type.setIsRoleLocal();
             if ((this._value & (OT_CLASS_ROLE_FILE|OT_CLASS_PURELY_COPIED)) != 0)
@@ -347,9 +342,9 @@ public class WordValueAttribute
         	checkBindingMismatch(binding, 0);
             BinaryTypeBinding type = (BinaryTypeBinding)binding;
         	if (type.isRole())
-        		type.roleModel.setCompilerVersion(this._value, weavingSchemeFromCompilerVersion(this._value));
+        		type.roleModel.setCompilerVersion(this._value, weavingSchemeFromCompilerVersion());
         	if (type.isTeam())
-        		type.getTeamModel().setCompilerVersion(this._value, weavingSchemeFromCompilerVersion(this._value));
+        		type.getTeamModel().setCompilerVersion(this._value, weavingSchemeFromCompilerVersion());
         	if (this._value < IOTConstants.OTVersion.getCompilerVersionMin())
         		environment.problemReporter.incompatibleOTJByteCodeVersion(((BinaryTypeBinding)binding).getFileName(), getBytecodeVersionString(this._value));
         	if ((type.isRole() || type.isTeam())
@@ -371,6 +366,17 @@ public class WordValueAttribute
 			}
         }
     }
+
+	public int classFlagsToModifiers() {
+		int modifiers = 0;
+		if ((this._value & OT_CLASS_ROLE) != 0)
+			modifiers |= ExtraCompilerModifiers.AccRole;
+		if ((this._value & OT_CLASS_TEAM) != 0)
+			modifiers |= ExtraCompilerModifiers.AccTeam;
+		if ((this._value & OT_CLASS_FLAG_HAS_TSUPER) != 0)
+			modifiers |= ExtraCompilerModifiers.AccOverriding;
+		return modifiers;
+	}
 
 
     /** can only transfer some flags once we have the method binding */

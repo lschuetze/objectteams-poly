@@ -1029,6 +1029,14 @@ public int getModifiers() {
 	} else {
 		modifiers = this.accessFlags;
 	}
+//{ObjectTeams:
+	for (AbstractAttribute attribute : getOTAttributes()) {
+		if (attribute.nameEquals(IOTConstants.OT_CLASS_FLAGS)) {
+			modifiers |= ((WordValueAttribute) attribute).classFlagsToModifiers();
+			break;
+		}
+	}
+// SH}
 	return modifiers;
 }
 

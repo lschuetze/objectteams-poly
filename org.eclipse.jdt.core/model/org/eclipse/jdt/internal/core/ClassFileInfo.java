@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.compiler.env.IBinaryField;
 import org.eclipse.jdt.internal.compiler.env.IBinaryMethod;
 import org.eclipse.jdt.internal.compiler.env.IBinaryNestedType;
 import org.eclipse.jdt.internal.compiler.env.IBinaryType;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.util.SuffixConstants;
@@ -41,6 +42,7 @@ import org.eclipse.objectteams.otdt.internal.core.MappingElementInfo;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CallinMethodMappingsAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CalloutMappingsAttribute;
+import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.WordValueAttribute;
 import org.eclipse.objectteams.otdt.internal.core.util.FieldData;
 import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
 
@@ -271,24 +273,22 @@ private void generateInnerClassHandles(IType type, IBinaryType typeInfo, ArrayLi
 	// If the current type is an inner type, innerClasses returns
 	// an extra entry for the current type.  This entry must be removed.
 	// Can also return an entry for the enclosing type of an inner type.
-//{ObjectTeams: is outer a team?
-	boolean isTeam = Flags.isTeam(typeInfo.getModifiers()); // note that OTModelManager.isTeam() may trigger getElementInfo.
-// SH}
 	IBinaryNestedType[] innerTypes = typeInfo.getMemberTypes();
 	if (innerTypes != null) {
 		IPackageFragment pkg = (IPackageFragment) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 		for (int i = 0, typeCount = innerTypes.length; i < typeCount; i++) {
 			IBinaryNestedType binaryType = innerTypes[i];
 			IClassFile parentClassFile= pkg.getClassFile(new String(ClassFile.unqualifiedName(binaryType.getName())) + SUFFIX_STRING_class);
-//{ObjectTeams: added first parameter:
-			IType innerType = new BinaryType(typeInfo.getName(), (JavaElement)parentClassFile, ClassFile.simpleName(binaryType.getName()));
-// SH}
-//{ObjectTeams: maybe wrap:
+//{ObjectTeams: various tweaks for roles
 			int flags = binaryType.getModifiers(); // note that innerType.getFlags() would trigger getElementInfo.
-			// TODO(SH): static is workaround for unavailabel synth.-flag
+			// TODO(SH): static is workaround for unavailable synth.-flag
 			if ((flags & (ClassFileConstants.AccStatic|ClassFileConstants.AccInterface)) == (ClassFileConstants.AccStatic|ClassFileConstants.AccInterface))
 				continue; // skip synthetic interfaces
-			if (isTeam)
+// almost orig (added first parameter):
+			IType innerType = new BinaryType(typeInfo.getName(), (JavaElement)parentClassFile, ClassFile.simpleName(binaryType.getName()));
+//
+			// maybe wrap:
+			if (Flags.isTeam(typeInfo.getModifiers())) // note that OTModelManager.isTeam() would trigger getElementInfo.
 				flags |= ExtraCompilerModifiers.AccRole;
 			String baseclassName = null;
 			String baseclassAnchor = null;
@@ -302,14 +302,14 @@ private void generateInnerClassHandles(IType type, IBinaryType typeInfo, ArrayLi
 					}
 				}
 			}
-			OTModelManager.getSharedInstance().addType(innerType, flags, baseclassName, baseclassAnchor, isTeam);
+			OTModelManager.getSharedInstance().addType(innerType, flags, baseclassName, baseclassAnchor, false); // role file considered irrelevant for binary types
 // SH}
 			childrenHandles.add(innerType);
 		}
 	}
 }
 //{ObjectTeams: retrieve method mappings from OT-attributes:
-private void evaluateAttribute(CalloutMappingsAttribute attr, IType type, List<IJavaElement> childrenHandles) {
+private void evaluateAttribute(CalloutMappingsAttribute attr, IType type, List<IJavaElement> childrenHandles, WeavingScheme scheme) {
 	for (int i=0; i<attr.getNumMappings(); i++) {
 		MappingElementInfo calloutInfo = new MappingElementInfo();
 		calloutInfo.setRoleMethod(new MethodData(
@@ -329,7 +329,7 @@ private void evaluateAttribute(CalloutMappingsAttribute attr, IType type, List<I
 			boolean isSetter = flags == CalloutMappingsAttribute.CALLOUT_SET;
 			String accessorSignature = attr.getBaseMethodSignatureAt(i);
 			String fieldType = isSetter
-					? Signature.getParameterTypes(accessorSignature)[1] // 0 is base object since accessor is static
+					? Signature.getParameterTypes(accessorSignature)[scheme == WeavingScheme.OTRE ? 1 : 0] // under OTRE: 0 is base object since accessor is static
 					: Signature.getReturnType(accessorSignature);
 			if (fieldType.indexOf('/') > -1)
 				fieldType = String.valueOf(ClassFile.translatedName(fieldType.toCharArray()));
@@ -550,12 +550,20 @@ protected void readBinaryChildren(ClassFile classFile, HashMap newElements, IBin
 		generateMethodInfos(type, typeInfo, newElements, childrenHandles, typeParameterHandles);
 		generateInnerClassHandles(type, typeInfo, childrenHandles); // Note inner class are separate openables that are not opened here: no need to pass in newElements
 //{ObjectTeams: eval OT attrs?
-		if (typeInfo instanceof ClassFileReader)
+		if (typeInfo instanceof ClassFileReader) {
+			WeavingScheme scheme = WeavingScheme.OTDRE;
+			for (AbstractAttribute attr : ((ClassFileReader)typeInfo).getOTAttributes()) {
+				if (attr.nameEquals(IOTConstants.OT_COMPILER_VERSION)) {
+					scheme = ((WordValueAttribute) attr).weavingSchemeFromCompilerVersion();
+					break;
+				}
+			}
 			for (AbstractAttribute attr : ((ClassFileReader)typeInfo).getOTAttributes())
 				if (attr.nameEquals(IOTConstants.CALLIN_METHOD_MAPPINGS))
 					evaluateAttribute((CallinMethodMappingsAttribute)attr, type, childrenHandles);
 				else if (attr.nameEquals(IOTConstants.CALLOUT_MAPPINGS))
-					evaluateAttribute((CalloutMappingsAttribute)attr, type, childrenHandles);
+					evaluateAttribute((CalloutMappingsAttribute)attr, type, childrenHandles, scheme);
+		}
 // SH}
 	}
 
