@@ -214,7 +214,7 @@ public class AnchorListAttribute extends ListValueAttribute {
 
             // argument position is relevant:
             char[] tail = CharOperation.subarray(anchorName, ARG_ANCHOR_PREFIX.length(), -1);
-            RoleTypeBinding wrappedRole = (RoleTypeBinding)wrappedType.leafComponentType();
+            DependentTypeBinding wrappedRole = (DependentTypeBinding)wrappedType.leafComponentType();
 			wrappedRole._argumentPosition = Integer.parseInt(String.valueOf(tail));
 			wrappedRole._declaringMethod = new IMethodProvider() {
 				@Override
