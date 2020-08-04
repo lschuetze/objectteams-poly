@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.objectteams.ITeam;
 import org.objectteams.ITeamManager;
@@ -91,25 +90,25 @@ public class TeamManager implements ITeamManager {
 	public synchronized static int[] getCallinIds(final int joinpointId) {
 		final List<ITeam> teams = _teams.get(joinpointId);
 		final int size = teams.size();
-		
+
 		if (size == 0)
 			return null;
-		
+
 		final List<Integer> callinIds = _callinIds.get(joinpointId);
 		int[] ids = new int[size];
 		int count = 0;
 		final Thread th = Thread.currentThread();
-		
+
 		for (int i = 0; i < size; i++) {
 			final ITeam t = teams.get(i);
 			if (t.isActive(th)) {
 				ids[count++] = callinIds.get(i);
 			}
 		}
-		
+
 		if (count == 0)
 			return null;
-		
+
 		if (count != size) {
 			System.arraycopy(ids, 0, ids = new int[count], 0, count);
 		}
@@ -518,10 +517,14 @@ public class TeamManager implements ITeamManager {
 		String teamId = provider.getClassIdentifier(teamClass);
 		IBoundTeam boundTeam = classRepository.getTeam(teamClass.getName(), teamId, teamClass.getClassLoader());
 
-		List<IBinding> result = boundTeam.getBindings().stream()
-				.filter(b -> IBinding.BindingType.CALLIN_BINDING.equals(b.getType()))
-				.filter(b -> joinpoint.equals(getBindingJoinpoint(b, teamClass))).collect(Collectors.toList());
-
+		List<IBinding> result = new ArrayList<>(boundTeam.getBindings());
+		for (IBinding binding : boundTeam.getBindings()) {
+			if (IBinding.BindingType.CALLIN_BINDING.equals(binding.getType())) {
+				if (joinpoint.equals(getBindingJoinpoint(binding, teamClass))) {
+					result.add(binding);
+				}
+			}
+		}
 		return result;
 	}
 
