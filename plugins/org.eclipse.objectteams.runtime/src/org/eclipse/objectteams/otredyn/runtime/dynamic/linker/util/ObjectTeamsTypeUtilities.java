@@ -70,7 +70,12 @@ public final class ObjectTeamsTypeUtilities {
 
 	public static IBinding getBindingFromId(final String joinpointDesc, final ITeam team, final int callinId) {
 		final List<IBinding> bindings = TeamManager.getPrecedenceSortedCallinBindings(team, joinpointDesc);
-		return bindings.stream().filter(b -> b.getPerTeamId() == callinId).findFirst().get();
+		for (IBinding binding : bindings) {
+			if (binding.getPerTeamId() == callinId) {
+				return binding;
+			}
+		}
+		return null;
 	}
 
 	public static MethodHandle findVirtual(MethodHandles.Lookup lookup, Class<?> declaringClass, String name,

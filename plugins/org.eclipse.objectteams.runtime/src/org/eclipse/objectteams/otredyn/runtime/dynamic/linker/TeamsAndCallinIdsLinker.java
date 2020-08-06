@@ -17,7 +17,15 @@ public class TeamsAndCallinIdsLinker implements GuardingDynamicLinker {
 
 	private static MethodHandle getTeamsAndCallinIds = null;
 
-	private static MethodHandle getTeamsAndCallinIds(final MethodHandles.Lookup lookup) {
+	private static Object[] cachedVal = null;
+
+	private static final MethodHandle CACHED;
+
+	static {
+		CACHED = Lookup.findOwnStatic(MethodHandles.lookup(), "getCachedTeamsAndCallinIds", Object[].class, int.class);
+	}
+
+	private static void setTeamsAndCallinIds(MethodHandles.Lookup lookup) {
 		if (getTeamsAndCallinIds == null) {
 			try {
 				getTeamsAndCallinIds = lookup.findStatic(TeamManager.class, "getTeamsAndCallinIds",
@@ -30,27 +38,43 @@ public class TeamsAndCallinIdsLinker implements GuardingDynamicLinker {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private static MethodHandle getTeamsAndCallinIds(final MethodHandles.Lookup lookup) {
+		setTeamsAndCallinIds(lookup);
 		return getTeamsAndCallinIds;
-		// return MethodHandles.insertArguments(getTeamsAndCallinIds, 0, joinpointId);
+	}
+
+	@SuppressWarnings("unused")
+	private static Object[] getCachedTeamsAndCallinIds(final int joinpointId) {
+		if (cachedVal == null) {
+			cachedVal = TeamManager.getTeamsAndCallinIds(joinpointId);
+		}
+		return cachedVal;
 	}
 
 	@Override
 	public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest, LinkerServices linkerServices)
 			throws Exception {
-		MethodHandle result = null;
-
-		// Check if the callsite is unstable
-		if (linkRequest.isCallSiteUnstable()) {
-
+		final TeamsAndCallinIdsCallSiteDescriptor csd;
+		if (linkRequest.getCallSiteDescriptor() instanceof TeamsAndCallinIdsCallSiteDescriptor) {
+			csd = (TeamsAndCallinIdsCallSiteDescriptor) linkRequest.getCallSiteDescriptor();
 		} else {
-			if (linkRequest.getCallSiteDescriptor() instanceof TeamsAndCallinIdsCallSiteDescriptor) {
-				final TeamsAndCallinIdsCallSiteDescriptor csd = (TeamsAndCallinIdsCallSiteDescriptor) linkRequest
-						.getCallSiteDescriptor();
-				result = getTeamsAndCallinIds(csd.getLookup());
-			}
+			throw new IllegalArgumentException();
 		}
 
-		final SwitchPoint sp = new SwitchPoint();
-		return new GuardedInvocation(result, sp);
+		final GuardedInvocation result;
+		// Check if the callsite is unstable
+		if (linkRequest.isCallSiteUnstable()) {
+			// Behave as there is no invokedynamic
+			final MethodHandle target = getTeamsAndCallinIds(csd.getLookup());
+			result = new GuardedInvocation(target);
+		} else {
+			final MethodHandle target = CACHED;
+			final SwitchPoint sp = new SwitchPoint();
+			TeamManager.registerSwitchPoint(csd.getJoinpointId(), sp);
+			result = new GuardedInvocation(target, sp);
+		}
+		return result;
 	}
 }

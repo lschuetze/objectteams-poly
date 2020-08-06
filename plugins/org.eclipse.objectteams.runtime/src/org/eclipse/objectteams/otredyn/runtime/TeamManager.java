@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.objectteams.otredyn.runtime.IBinding.BindingType;
 import org.objectteams.ITeam;
 import org.objectteams.ITeamManager;
 import org.objectteams.Team;
@@ -137,6 +138,7 @@ public class TeamManager implements ITeamManager {
 	 *         elements with equal index correspond between both sub-arrays.
 	 */
 	public synchronized static Object[] getTeamsAndCallinIds(int joinpointId) {
+
 		List<ITeam> teams = _teams.get(joinpointId);
 		int size = teams.size();
 		if (size == 0)
@@ -406,6 +408,11 @@ public class TeamManager implements ITeamManager {
 	 */
 	private synchronized static void changeTeamsForJoinpoint(ITeam t, int callinId, int joinpointId,
 			TeamManager.TeamStateChange stateChange) {
+		List<SwitchPoint> sps = _switchPoints.get(joinpointId);
+		if (!sps.isEmpty()) {
+			SwitchPoint.invalidateAll(sps.toArray(new SwitchPoint[sps.size()]));
+			sps.clear();
+		}
 		switch (stateChange) {
 		case REGISTER:
 			List<ITeam> teams = _teams.get(joinpointId);
@@ -422,11 +429,6 @@ public class TeamManager implements ITeamManager {
 				callinIds.remove(index);
 				index = teams.indexOf(t);
 			}
-
-			List<SwitchPoint> sps = _switchPoints.get(joinpointId);
-			SwitchPoint.invalidateAll(sps.toArray(new SwitchPoint[sps.size()]));
-			sps.clear();
-
 			break;
 		default:
 			throw new RuntimeException("Unknown team state change: " + stateChange.name());
@@ -534,9 +536,9 @@ public class TeamManager implements ITeamManager {
 		String teamId = provider.getClassIdentifier(teamClass);
 		IBoundTeam boundTeam = classRepository.getTeam(teamClass.getName(), teamId, teamClass.getClassLoader());
 
-		List<IBinding> result = new ArrayList<>(boundTeam.getBindings());
+		List<IBinding> result = new ArrayList<>(boundTeam.getBindings().size());
 		for (IBinding binding : boundTeam.getBindings()) {
-			if (IBinding.BindingType.CALLIN_BINDING.equals(binding.getType())) {
+			if (binding.getType() == BindingType.CALLIN_BINDING) {
 				if (joinpoint.equals(getBindingJoinpoint(binding, teamClass))) {
 					result.add(binding);
 				}
