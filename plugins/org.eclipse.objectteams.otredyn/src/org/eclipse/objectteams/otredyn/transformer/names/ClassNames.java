@@ -46,7 +46,8 @@ public abstract class ClassNames {
 	public final static String CALLSITE_SLASH = CallSite.class.getName().replace('.', '/');
 	public final static String LOOKUP_SLASH = MethodHandles.Lookup.class.getName().replace('.', '/');
 	public final static String METHODTYPE_SLASH = MethodType.class.getName().replace('.', '/');
-	public final static String BOOTSTRAP_SLASH = CallinBootstrap.class.getName().replace('.', '/');
+	public final static String CALLIN_BOOTSTRAP_SLASH = CallinBootstrap.class.getName().replace('.', '/');
+	public final static String TEAMS_AND_IDS_BOOTSTRAP_SLASH = TeamsAndCallinIdsBootstrap.class.getName().replace('.', '/');
 
 	public final static String I_BOUND_BASE_SLASH = IBoundBase2.class.getName().replace('.', '/');
 	public final static String OBJECT_SLASH = Object.class.getName().replace('.', '/');

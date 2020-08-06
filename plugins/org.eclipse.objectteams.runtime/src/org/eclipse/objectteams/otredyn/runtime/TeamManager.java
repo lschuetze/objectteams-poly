@@ -18,6 +18,10 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.runtime;
 
+import java.lang.invoke.CallSite;
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.MethodType;
+import java.lang.invoke.SwitchPoint;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,6 +44,7 @@ import org.objectteams.Team;
  */
 public class TeamManager implements ITeamManager {
 
+	private static List<List<SwitchPoint>> _switchPoints = new ArrayList<>();
 	// void handleTeamStateChange(ITeam t, TeamStateChange stateChange) ;
 	private static List<List<ITeam>> _teams = new ArrayList<List<ITeam>>();
 	private static List<List<Integer>> _callinIds = new ArrayList<List<Integer>>();
@@ -113,6 +118,11 @@ public class TeamManager implements ITeamManager {
 			System.arraycopy(ids, 0, ids = new int[count], 0, count);
 		}
 		return ids;
+	}
+
+	public synchronized static void registerSwitchPoint(final int joinpointId, final SwitchPoint sp) {
+		List<SwitchPoint> sps = _switchPoints.get(joinpointId);
+		sps.add(sp);
 	}
 
 	/**
@@ -192,6 +202,8 @@ public class TeamManager implements ITeamManager {
 			_teams.add(teams);
 			List<Integer> callinIds = new ArrayList<Integer>();
 			_callinIds.add(callinIds);
+			List<SwitchPoint> sps = new ArrayList<>();
+			_switchPoints.add(sps);
 			return currentJoinpointId++;
 		}
 		return joinpointId;
@@ -410,6 +422,11 @@ public class TeamManager implements ITeamManager {
 				callinIds.remove(index);
 				index = teams.indexOf(t);
 			}
+
+			List<SwitchPoint> sps = _switchPoints.get(joinpointId);
+			SwitchPoint.invalidateAll(sps.toArray(new SwitchPoint[sps.size()]));
+			sps.clear();
+
 			break;
 		default:
 			throw new RuntimeException("Unknown team state change: " + stateChange.name());

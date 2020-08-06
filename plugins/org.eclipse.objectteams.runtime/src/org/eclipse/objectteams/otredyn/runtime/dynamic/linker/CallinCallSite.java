@@ -6,7 +6,7 @@ import java.lang.invoke.MethodType;
 import jdk.dynalink.CallSiteDescriptor;
 import jdk.dynalink.support.ChainedCallSite;
 
-public class CallinCallSite extends ChainedCallSite {
+public final class CallinCallSite extends ChainedCallSite {
 
 	CallinCallSite(CallSiteDescriptor descriptor) {
 		super(descriptor);

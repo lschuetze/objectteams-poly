@@ -34,12 +34,19 @@ public abstract class ConstantMembers {
 	public static final String HASH_SET_FIELD_TYPE = Types.getAsInternalType(ClassNames.HASH_SET_SLASH);
 	public static final Field roleSet = new Field(OT_ROLE_SET, HASH_SET_FIELD_TYPE);
 
-	// bootstrap method
-	public static final Method bootstrap = new Method("bootstrap",
+	// bootstrap method callins
+	public static final Method callinBootstrap = new Method("bootstrap",
 			Types.getTypeStringForMethod(Types.getAsInternalType(ClassNames.CALLSITE_SLASH),
 					new String[] { Types.getAsInternalType(ClassNames.LOOKUP_SLASH),
 							Types.getAsInternalType(String.class), Types.getAsInternalType(ClassNames.METHODTYPE_SLASH),
 							Types.INT, Types.getAsInternalType(String.class), Types.INT }));
+
+	// bootstrap method teams and callin ids
+	public static final Method teamsAndCallinIdsBootstrap = new Method("bootstrap",
+			Types.getTypeStringForMethod(Types.getAsInternalType(ClassNames.CALLSITE_SLASH),
+					new String[] { Types.getAsInternalType(ClassNames.LOOKUP_SLASH),
+							Types.getAsInternalType(String.class), Types.getAsInternalType(ClassNames.METHODTYPE_SLASH),
+							Types.INT }));
 
 	// predefined methods
 	public static final Method callOrig = new Method("_OT$callOrig",

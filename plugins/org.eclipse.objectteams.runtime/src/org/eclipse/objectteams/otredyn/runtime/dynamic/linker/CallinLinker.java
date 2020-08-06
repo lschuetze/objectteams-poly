@@ -61,6 +61,9 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		if (!(desc instanceof OTCallSiteDescriptor)) {
 			throw new LinkageError("CallSiteDescriptor is no OTCallSiteDescriptor");
 		}
+		if (linkRequest.isCallSiteUnstable()) {
+			// TODO Lars: directly call otCallAllBindings
+		}
 		final OTCallSiteDescriptor otdesc = (OTCallSiteDescriptor) desc;
 		return CallinBootstrap.asTypeSafeReturn(getGuardedInvocation(linkRequest, otdesc), linkerServices, otdesc);
 	}
