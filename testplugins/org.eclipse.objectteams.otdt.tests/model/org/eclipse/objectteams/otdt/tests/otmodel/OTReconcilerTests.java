@@ -222,6 +222,10 @@ public class OTReconcilerTests extends ReconcilerTests {
 				return new String[] {getExternalJCLPathString("1.5"), "OTRE" };
 			return new String[] {getExternalJCLPathString("1.5")};
 		}
+		if (addOTtoLibrary) {
+			IPath otreMinJarPath = OTREContainer.getOtreMinJarPath();
+			return new String[] { otreMinJarPath.toString() };
+		}
 		return null;
 	}
 	// ---
