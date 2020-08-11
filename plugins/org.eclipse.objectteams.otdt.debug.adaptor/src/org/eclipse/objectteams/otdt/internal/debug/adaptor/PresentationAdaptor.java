@@ -23,11 +23,15 @@ import java.util.List;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.model.IThread;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.debug.core.IJavaClassType;
+import org.eclipse.jdt.debug.core.IJavaReferenceType;
+import org.eclipse.jdt.internal.debug.core.model.JDIThread;
 import org.eclipse.jdt.internal.debug.ui.DebugUIMessages;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -51,6 +55,7 @@ import base org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 public team class PresentationAdaptor 
 {
 	enum MethodKind {
+		UNKNOWN,
 		PLAIN,
 		INITIAL, CHAIN, ORIG, TEAM_WRAPPER, BASE_CALL, // callin related
 		LIFT,
@@ -79,26 +84,42 @@ public team class PresentationAdaptor
 	
 	protected class AbstractOTJStackFrame playedBy IJavaStackFrame {
 		// store analyzed method kind between calls:
-		protected MethodKind kind= MethodKind.PLAIN;
+		protected MethodKind kind= MethodKind.UNKNOWN;
 		
 		protected boolean isOTSpecialSrc() {
-			OTDebugAdaptorPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, OTDebugAdaptorPlugin.PLUGIN_ID, "Failed to create specific role for "+this.toString()));
+			OTDebugAdaptorPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, OTDebugAdaptorPlugin.PLUGIN_ID, "Failed to create specific role for "+this.toString())); //$NON-NLS-1$
 			return false;
 		}
 		protected boolean isPurelyGenerated() {
-			OTDebugAdaptorPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, OTDebugAdaptorPlugin.PLUGIN_ID, "Failed to create specific role for "+this.toString()));
+			OTDebugAdaptorPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, OTDebugAdaptorPlugin.PLUGIN_ID, "Failed to create specific role for "+this.toString())); //$NON-NLS-1$
 			return false;
 		}
 		
 		public String toString() => String toString();
 	}
-	@SuppressWarnings("unchecked")
+
 	protected class OTJStackFrame extends AbstractOTJStackFrame playedBy JDIStackFrame 
 	{
 		// === imports: ===
+
+		// lifted access to the list of stack frames: 
+		abstract int stackFramesCount() throws DebugException;
+		int stackFramesCount() -> IThread getThread() with { result <- ((JDIThread)result).computeStackFrames().size() }
+		abstract OTJStackFrame getStackFrameAt(int i) throws DebugException;
+		OTJStackFrame getStackFrameAt(int i) -> IThread getThread() with {
+			result <- (JDIStackFrame)((JDIThread)result).computeStackFrames().get(i)
+		}
+
 		boolean isStatic() -> boolean isStatic();
 		int modifiers() -> com.sun.jdi.Method getUnderlyingMethod()
 			with { result <- result.modifiers() }
+
+		// base versions of methods with callin interception:
+		String baseGetName() 					-> String getMethodName();
+		List<String> baseArgumentTypeNames()	-> List<String> getArgumentTypeNames();
+		int baseLineNumber()					-> int getLineNumber();
+		
+		List<String> computedArgumentTypeNames; // here analyzeCallOrig() stores the signature of the matching INITIAL call
 
 		// == currently unused: ==
 		boolean isRole;
@@ -139,7 +160,8 @@ public team class PresentationAdaptor
 			}
 		}
 
-		String getMethodName() <- replace String getMethodName();
+		String getMethodName() <- replace String getMethodName()
+			base when (!isExecutingCallin()); // no re-entrance, base method is called in this method's flow (via analyzeCallOrig())
 		@SuppressWarnings("nls")
 		callin String getMethodName() throws DebugException {
 			String result= base.getMethodName();
@@ -185,7 +207,8 @@ public team class PresentationAdaptor
 				case CALL_ALL_BINDINGS:
 					return "[base dispatching callins]";
 				case CALL_ORIG:
-					return "[executing base method]";
+					String realName = analyzeCallOrig();
+					return "[executing base method] "+realName;
 				default:
 					return result;
 				}
@@ -200,6 +223,7 @@ public team class PresentationAdaptor
 		@SuppressWarnings("nls")
 		String[] analyzeMethod(String methodName) 
 		{
+			this.kind = MethodKind.PLAIN; // no longer UNKNOWN
 			if (methodName != null && methodName.startsWith("_OT$")) 
 			{
 				String[] segments= methodName.split("[$]");
@@ -226,6 +250,8 @@ public team class PresentationAdaptor
 						this.kind= MethodKind.T_TERMINAL_CALL_NEXT;
 					else if (segments[1].equals("callOrig"))
 						this.kind= MethodKind.CALL_ORIG;
+					else if (segments[1].equals("access"))
+						this.kind= MethodKind.DECAPS;
 					break;
 				case 3:
 					if      (segments[2].equals("orig"))   // _OT$bm$orig
@@ -258,10 +284,42 @@ public team class PresentationAdaptor
 			}
 			return null;
 		}
-		
+
+		String analyzeCallOrig() throws DebugException {
+			// locates a matching INITIAL call below the current frame
+			// (respecting intermediate pairs of INITIAL & T_CALL_REPLACE)
+			int replaceCallinDepth = 0;
+			int frameCount = stackFramesCount();
+			int myIndex = -1;
+			for (int i = 0; i + 1 < frameCount; i++) {
+				OTJStackFrame frame = getStackFrameAt(i);
+				if (myIndex == -1 && frame == this) {
+					myIndex = i;
+				}
+				if (myIndex > -1) {
+					if (frame.kind == MethodKind.UNKNOWN)
+						frame.analyzeMethod(frame.baseGetName()); // main analysis
+					if (frame.kind == MethodKind.PLAIN)
+						frame.baseLineNumber(); // trigger analysis PLAIN/INITIAL
+
+					if (frame.kind == MethodKind.T_CALL_REPLACE) {
+						replaceCallinDepth++;
+					} else if (frame.kind == MethodKind.INITIAL) {
+						if (--replaceCallinDepth == 0) {
+							computedArgumentTypeNames = frame.baseArgumentTypeNames();
+							return frame.baseGetName();
+						}
+					}
+				}
+			}
+			return ""; //$NON-NLS-1$
+		}
+
 		getArgumentTypeNames <- replace getArgumentTypeNames;
-		@SuppressWarnings("rawtypes")
-		callin List getArgumentTypeNames() throws DebugException {
+		@SuppressWarnings("basecall")
+		callin List<String> getArgumentTypeNames() throws DebugException {
+			if (computedArgumentTypeNames != null)
+				return computedArgumentTypeNames;
 			return stripGeneratedParams(base.getArgumentTypeNames());
 		}
 				
@@ -399,4 +457,23 @@ public team class PresentationAdaptor
 
 		return labelText;
 	}
+	
+// Unused snippet in case we ever need to read bytecode attributes for further presentation information:
+//	try {
+//	JDIType declaringType = (JDIType) getStackFrameAt(previousFrame).getReferenceType();
+//	// FIXME: need to navigate to the enclosing team :(
+//	byte[] constantPoolBytes = ((com.sun.jdi.ReferenceType) declaringType.getUnderlyingType()).constantPool();
+//	ConstantPool constantPool = new ConstantPool(constantPoolBytes);
+//	for (int i = 0; i < constantPool.getConstantPoolCount(); i++) {
+//		if (constantPool.getEntryKind(i) == IConstantPoolConstant.CONSTANT_Utf8) {
+//			IConstantPoolEntry entry = constantPool.decodeEntry(i);
+//			if (entry.getStringValue().equals(new String(IOTConstants.OTSPECIAL_ACCESS))) {
+//				System.out.println("found");
+//			}
+//		}
+//	}
+//} catch (DebugException | ClassFormatException e) {
+//	OTDebugAdaptorPlugin.getDefault().getLog().log(new Status(IStatus.WARNING, OTDebugAdaptorPlugin.PLUGIN_ID, "Failed to retrieve class file attribute", e)); //$NON-NLS-1$
+//}
+
 }
