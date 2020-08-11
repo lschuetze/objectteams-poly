@@ -168,6 +168,7 @@ if (PWR_DEBUG) System.out.println("\tweave3");
 			// skip, I saw a mysterious deadlock involving sun.misc.Cleaner
 			if (className.startsWith("sun/misc")
 				|| className.startsWith("sun/launcher")
+				|| className.startsWith("sun/nio/cs") // avoid weaving during calls like Charset.forName() during StandardCharset initialization
 				)
 				return false;
 			break;
@@ -177,6 +178,7 @@ if (PWR_DEBUG) System.out.println("\tweave3");
 				|| className.startsWith("java/lang")
 				|| className.startsWith("java/util")
 				|| className.startsWith("java/io")
+				|| className.equals("java/nio/charset/StandardCharsets") // avoid weaving during calls like Charset.forName() during StandardCharset initialization
 				|| className.startsWith("jdk/jfr")
 				) 
 				return false;
