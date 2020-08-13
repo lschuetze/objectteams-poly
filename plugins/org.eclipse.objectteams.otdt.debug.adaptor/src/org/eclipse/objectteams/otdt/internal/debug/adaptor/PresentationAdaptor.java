@@ -250,7 +250,7 @@ public team class PresentationAdaptor
 						this.kind= MethodKind.T_TERMINAL_CALL_NEXT;
 					else if (segments[1].equals("callOrig"))
 						this.kind= MethodKind.CALL_ORIG;
-					else if (segments[1].equals("access"))
+					else if (segments[1].equals("access") || segments[1].equals("accessStatic"))
 						this.kind= MethodKind.DECAPS;
 					break;
 				case 3:
