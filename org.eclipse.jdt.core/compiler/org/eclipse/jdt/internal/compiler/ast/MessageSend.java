@@ -228,6 +228,10 @@ public class MessageSend extends Expression implements IPolyExpression, Invocati
 	// special case: the role method call in a method pushed out to the enclosing team needs special resolving
 	public boolean isPushedOutRoleMethodCall = false;
 	public boolean isGenerated = false;
+	@Override
+	public boolean isGenerated() {
+		return this.isGenerated;
+	}
 // SH}
 
 @Override
