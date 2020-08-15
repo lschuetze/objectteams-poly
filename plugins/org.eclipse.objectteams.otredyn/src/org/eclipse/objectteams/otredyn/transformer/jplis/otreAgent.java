@@ -19,6 +19,7 @@ package org.eclipse.objectteams.otredyn.transformer.jplis;
 
 import java.lang.instrument.Instrumentation;
 
+import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.commons.AdviceAdapter;
 import org.objectweb.asm.tree.InsnNode;
@@ -38,6 +39,7 @@ public class otreAgent {
 		checkASM();
 		otTransformer = new ObjectTeamsTransformer();
 		instCopy.addTransformer(otTransformer);
+		TeamManager.class.getName(); // trigger earliest possible weaving 
 	}
 	
 	private static void checkASM() {

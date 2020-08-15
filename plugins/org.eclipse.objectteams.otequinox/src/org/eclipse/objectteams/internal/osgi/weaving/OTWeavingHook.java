@@ -122,7 +122,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	// for installing a lifting participant:
 	private static final String LIFTING_PARTICIPANT_FIELD = "_OT$liftingParticipant";
 
-	enum WeavingReason { None, Aspect, Base, Thread }
+	enum WeavingReason { None, Aspect, Base, Thread, Special }
 	
 	/** Interface to data about aspectBinding extensions. */
 	private AspectBindingRegistry aspectBindingRegistry = new AspectBindingRegistry();
@@ -383,6 +383,9 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			if (Util.PROFILE) Util.profile(time, ProfileKind.SuperClassFetching, "");
 		}
 
+		// last: special classes:
+		if (className.equals("org.eclipse.objectteams.otredyn.runtime.TeamManager"))
+			return WeavingReason.Special;
 		return WeavingReason.None;
 	}
 	
