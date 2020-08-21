@@ -20,11 +20,9 @@ package org.objectteams;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.WeakHashMap;
+import java.util.*;
 
-import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jdt.annotation.*;
 
 /**
  *  This is the root class of all team definitions.
