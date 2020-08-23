@@ -25,7 +25,7 @@ Require-Bundle: org.junit;bundle-version="3.8.1",
  org.eclipse.objectteams.otdt,
  javax.annotation
 Import-Package: org.eclipse.jdt.internal.compiler.apt.dispatch
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Eclipse-BundleShape: dir
 Bundle-Activator: org.eclipse.jdt.core.tests.compiler.Activator
 Bundle-ActivationPolicy: lazy

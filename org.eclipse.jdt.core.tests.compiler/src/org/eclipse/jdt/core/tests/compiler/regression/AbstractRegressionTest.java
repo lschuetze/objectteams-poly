@@ -3162,7 +3162,7 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 			javacTestOptions,
 			Charset.defaultCharset());
 	}
-	private void runTest(
+	protected void runTest(
 			// test directory preparation
 			boolean shouldFlushOutputDirectory,
 			String[] testFiles,

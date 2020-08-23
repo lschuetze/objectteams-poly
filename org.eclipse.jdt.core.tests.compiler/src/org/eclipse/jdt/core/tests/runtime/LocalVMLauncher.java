@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -31,7 +31,6 @@ import org.eclipse.jdt.core.tests.util.Util;
  *       instances will be able to retrieve only a part of the running VMs.
  * </ul>
  */
-@SuppressWarnings({ "unchecked", "rawtypes" })
 public abstract class LocalVMLauncher implements RuntimeConstants {
 
 	private static final boolean PWR_DEBUG = Boolean.getBoolean("ot.debug.pwr");
@@ -57,7 +56,7 @@ public abstract class LocalVMLauncher implements RuntimeConstants {
 	protected String evalTargetPath;
 	protected String[] programArguments;
 	protected String programClass;
-	protected Vector runningVMs = new Vector(); // a Vector of LocalVirtualMachine
+	protected List<LocalVirtualMachine> runningVMs = new ArrayList<>(); // a Vector of LocalVirtualMachine
 	protected String[] vmArguments;
 	protected String vmPath;
 
@@ -231,12 +230,10 @@ public String getProgramClass() {
  */
 public LocalVirtualMachine[] getRunningVirtualMachines() {
 	// Select the VMs that are actually running
-	Vector actuallyRunning = new Vector();
-	Enumeration en = this.runningVMs.elements();
-	while (en.hasMoreElements()) {
-		LocalVirtualMachine vm = (LocalVirtualMachine)en.nextElement();
+	List<LocalVirtualMachine> actuallyRunning = new ArrayList<>();
+	for (LocalVirtualMachine vm : this.runningVMs) {
 		if (vm.isRunning())
-			actuallyRunning.addElement(vm);
+			actuallyRunning.add(vm);
 	}
 	this.runningVMs = actuallyRunning;
 
@@ -244,7 +241,7 @@ public LocalVirtualMachine[] getRunningVirtualMachines() {
 	int size = actuallyRunning.size();
 	LocalVirtualMachine[] result = new LocalVirtualMachine[size];
 	for (int i=0; i<size; i++)
-		result[i] = (LocalVirtualMachine)actuallyRunning.elementAt(i);
+		result[i] = actuallyRunning.get(i);
 	return result;
 }
 /**
@@ -413,7 +410,7 @@ public LocalVirtualMachine launch() throws TargetException {
 	//		from happening.
 
 	// add VM to list of known running VMs
-	this.runningVMs.addElement(vm);
+	this.runningVMs.add(vm);
 	return vm;
 }
 /**

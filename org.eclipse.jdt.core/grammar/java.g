@@ -242,8 +242,6 @@ Goal ::= '(' ParenthesizedCastNameAndBounds
 Goal ::= '<' ReferenceExpressionTypeArgumentsAndTrunk
 -- JSR 308 Reconnaissance mission.
 Goal ::= '@' TypeAnnotations
--- JSR 354 Reconnaissance mission.
-Goal ::= '->' YieldStatement
 --{ObjectTeams new goals:
 Goal ::= ':' CallinParameterMappings
 Goal ::= ';' CalloutParameterMappings
@@ -251,6 +249,9 @@ Goal ::= '^' ParameterMapping
 Goal ::= '<' MethodSpecShort
 Goal ::= '>' MethodSpecLong
 -- SH}
+-- JSR 354 Reconnaissance mission.
+Goal ::= '->' YieldStatement
+Goal ::= '->' SwitchLabelCaseLhs
 /:$readableName Goal:/
 
 -- {ObjectTeams
@@ -2704,8 +2705,8 @@ Expressionopt ::= $empty
 Expressionopt -> Expression
 /:$readableName Expression:/
 
-ConstantExpressions -> Expression
-ConstantExpressions ::= ConstantExpressions ',' Expression
+ConstantExpressions -> ConstantExpression
+ConstantExpressions ::= ConstantExpressions ',' ConstantExpression
 /.$putCase consumeConstantExpressions(); $break ./
 /:$readableName ConstantExpressions:/
 
