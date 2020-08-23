@@ -76,15 +76,6 @@ path to map file (with substitutions):
 				<filter token="SDK_QUALIFIER" value="${eclipse.sdk.qualifier}"/>
 			</filterset>
 		</copy>
-        <!-- Insert SDK build qualifier into our configuration file: -->
-        <copy file="${OTScriptDir}/test.properties.in" tofile="${OTScriptDir}/test.properties" overwrite="true">
-                <filterset>
-                        <filter token="SDK_QUALIFIER" value="${eclipse.sdk.qualifier}"/>
-                </filterset>
-        </copy>
-
-        <!-- versions of test plugins: -->
-        <loadproperties srcfile="${OTScriptDir}/test.properties" />
 
 		<!-- ======== More Configuration Details: ======== -->
 		<!-- maybe obsolete: file prefix to distinguish output files. -->

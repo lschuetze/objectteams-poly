@@ -11,10 +11,6 @@
 -->
 <project name="Automated Object Teams Testing" default="all"  basedir="." >
 
-	<!--properties file containing the plugin directory name including version number-->
-	<dirname property="_myDir" file="${ant.file}"/>
-	<property file="${_myDir}/test.properties" />
-
 	<!--properties file containing the build information-->
 	<property file="src/label.properties" />
 	<property file="src/finalPluginsVersions.properties" />
@@ -57,7 +53,6 @@
 	
 	<target name="runtests"
 			description="Runs ant on the test.xml for a specified plugin.  
-			 			 Requires a property value setting for testPlugin only if test.properties is not available.
 						 The property testPlugin represents a directory name made up of the plugin id and plugin version.
 						 This directory must contain a valid test.xml."
 	>
