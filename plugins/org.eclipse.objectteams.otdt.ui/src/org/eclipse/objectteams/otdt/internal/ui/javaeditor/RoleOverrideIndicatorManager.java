@@ -6,7 +6,6 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * $Id$
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -17,11 +16,21 @@ package org.eclipse.objectteams.otdt.internal.ui.javaeditor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+
+import org.eclipse.jface.text.ISynchronizable;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IAnnotationModelExtension;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -31,20 +40,15 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
+
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaSelectAnnotationRulerAction;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.SharedASTProvider;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ISynchronizable;
-import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.text.source.IAnnotationModelExtension;
-import org.eclipse.osgi.util.NLS;
 
 /**
  * Manages the override indicators for the given Java element and annotation model.
@@ -58,7 +62,6 @@ import org.eclipse.osgi.util.NLS;
  * @author stephan
  * @since 1.2.8
  */
-@SuppressWarnings("restriction") // uses internal classes below org.eclipse.jdt.internal.ui
 public class RoleOverrideIndicatorManager implements IJavaReconcilingListener {
 
 	/**
@@ -83,7 +86,7 @@ public class RoleOverrideIndicatorManager implements IJavaReconcilingListener {
 		 * Opens and reveals the defining role (closest tsuper).
 		 */
 		public void open() {
-			CompilationUnit ast= SharedASTProvider.getAST(fJavaElement, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
+			CompilationUnit ast= SharedASTProviderCore.getAST(fJavaElement, SharedASTProviderCore.WAIT_ACTIVE_ONLY, null);
 			if (ast != null) {
 				ASTNode node= ast.findDeclaringNode(fAstNodeKey);
 //{ObjectTeams: specific search strategy for a role's tsupers:				
@@ -156,7 +159,7 @@ public class RoleOverrideIndicatorManager implements IJavaReconcilingListener {
 		if (ast == null || progressMonitor.isCanceled())
 			return;
 
-		final Map<OverrideIndicator, Position> annotationMap= new HashMap<OverrideIndicator, Position>(10);
+		final Map<Annotation, Position> annotationMap= new HashMap<>(50);
 
 		ast.accept(new ASTVisitor(false) {
 			/*
@@ -173,7 +176,7 @@ public class RoleOverrideIndicatorManager implements IJavaReconcilingListener {
 						ITypeBinding definingType= definingRole.getDeclaringClass();
 						String qualifiedRoleName= definingType.getQualifiedName() + "." + binding.getName(); //$NON-NLS-1$
 
-						String text= NLS.bind(OTJavaEditorMessages.RoleOverrideIndicator_overrides, new Object[] {BasicElementLabels.getJavaElementName(qualifiedRoleName)});
+						String text= Messages.format(OTJavaEditorMessages.RoleOverrideIndicator_overrides, new Object[] {BasicElementLabels.getJavaElementName(qualifiedRoleName)});
 
 						SimpleName name= node.getName();
 						Position position= new Position(name.getStartPosition(), name.getLength());
@@ -193,13 +196,13 @@ public class RoleOverrideIndicatorManager implements IJavaReconcilingListener {
 				((IAnnotationModelExtension)fAnnotationModel).replaceAnnotations(fOverrideAnnotations, annotationMap);
 			} else {
 				removeAnnotations();
-				Iterator<Map.Entry<OverrideIndicator, Position>> iter= annotationMap.entrySet().iterator();
+				Iterator<Entry<Annotation, Position>> iter= annotationMap.entrySet().iterator();
 				while (iter.hasNext()) {
-					Map.Entry<OverrideIndicator, Position> mapEntry= iter.next();
+					Entry<Annotation, Position> mapEntry= iter.next();
 					fAnnotationModel.addAnnotation(mapEntry.getKey(), mapEntry.getValue());
 				}
 			}
-			fOverrideAnnotations= annotationMap.keySet().toArray(new Annotation[annotationMap.keySet().size()]);
+			fOverrideAnnotations= annotationMap.keySet().toArray(new Annotation[annotationMap.size()]);
 		}
 	}
 
@@ -216,8 +219,8 @@ public class RoleOverrideIndicatorManager implements IJavaReconcilingListener {
 			if (fAnnotationModel instanceof IAnnotationModelExtension) {
 				((IAnnotationModelExtension)fAnnotationModel).replaceAnnotations(fOverrideAnnotations, null);
 			} else {
-				for (int i= 0, length= fOverrideAnnotations.length; i < length; i++)
-					fAnnotationModel.removeAnnotation(fOverrideAnnotations[i]);
+				for (Annotation fOverrideAnnotation : fOverrideAnnotations)
+					fAnnotationModel.removeAnnotation(fOverrideAnnotation);
 			}
 			fOverrideAnnotations= null;
 		}
@@ -226,12 +229,14 @@ public class RoleOverrideIndicatorManager implements IJavaReconcilingListener {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#aboutToBeReconciled()
 	 */
+	@Override
 	public void aboutToBeReconciled() {
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(CompilationUnit, boolean, IProgressMonitor)
 	 */
+	@Override
 	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
 		updateAnnotations(ast, progressMonitor);
 	}
