@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
@@ -76,7 +77,6 @@ import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.debug.core.IJavaExceptionBreakpoint;
 import org.eclipse.jdt.debug.core.IJavaLineBreakpoint;
 import org.eclipse.jdt.debug.core.IJavaMethodBreakpoint;
-import org.eclipse.jdt.debug.core.IJavaPatternBreakpoint;
 import org.eclipse.jdt.debug.core.IJavaStackFrame;
 import org.eclipse.jdt.debug.core.IJavaStratumLineBreakpoint;
 import org.eclipse.jdt.debug.core.IJavaTargetPatternBreakpoint;
@@ -770,18 +770,6 @@ public abstract class AbstractOTDTDebugTest extends TestCase implements  IEvalua
 	}
 
 	/**
-	 * Creates and returns a pattern breakpoint at the given line number in the
-	 * source file with the given name.
-	 *
-	 * @param lineNumber line number
-	 * @param sourceName name of source file
-	 * @param pattern the pattern of the class file name
-	 */
-	protected IJavaPatternBreakpoint createPatternBreakpoint(int lineNumber, String sourceName, String pattern) throws Exception {
-		return JDIDebugModel.createPatternBreakpoint(getJavaProject().getProject(), sourceName, pattern, lineNumber, -1, -1, 0, true, null);
-	}
-
-	/**
 	 * Creates and returns a target pattern breakpoint at the given line number in the
 	 * source file with the given name.
 	 *
@@ -1341,8 +1329,8 @@ public abstract class AbstractOTDTDebugTest extends TestCase implements  IEvalua
         boolean wasInterrupted = false;
         do {
             try {
-                Platform.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
-                Platform.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
+                Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+                Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
                 wasInterrupted = false;
             } catch (OperationCanceledException e) {
                 e.printStackTrace();

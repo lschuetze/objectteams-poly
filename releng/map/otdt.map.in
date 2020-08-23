@@ -62,6 +62,9 @@ plugin@org.eclipse.jdt.ui=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/git
 plugin@org.eclipse.jdt.ui.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests
 plugin@org.eclipse.jdt.ui.tests.refactoring=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests.refactoring
 
+!== temporarily fetch this fragment from sources to avoid module conflict on javax.lang.model et al.: ==
+plugin@org.eclipse.jdt.compiler.tool=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.compiler.tool
+
 !***************  OTDT Test CONTRIBUTION  ******************************************************** 
 
 
