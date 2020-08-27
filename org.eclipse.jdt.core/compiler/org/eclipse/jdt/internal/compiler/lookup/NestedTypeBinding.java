@@ -86,8 +86,14 @@ public SyntheticArgumentBinding addSyntheticArgument(LocalVariableBinding actual
 public SyntheticArgumentBinding addSyntheticArgument(ReferenceBinding targetEnclosingType) {
 	if (!isPrototype()) throw new IllegalStateException();
 	if (isStatic()) {
+//{ObjectTeams: role interfaces are static, too:
+	  if (!isSynthInterface()) {
+// orig:
 		assert this.isRecord();// a local record is implicitly static; no other local type can be static
 		return null;
+// :giro
+	  }
+// SH}
 	}
 	SyntheticArgumentBinding synthLocal = null;
 	if (this.enclosingInstances == null) {
