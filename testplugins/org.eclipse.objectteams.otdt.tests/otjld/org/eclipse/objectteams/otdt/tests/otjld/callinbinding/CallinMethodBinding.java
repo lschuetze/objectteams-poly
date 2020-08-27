@@ -8639,4 +8639,76 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     		};
     	runner.runConformTest();
     }
+    public void testBug566465() {
+    	Runner runner = new Runner();
+    	runner.testFiles =
+    		new String[] {
+    			"b566465/b/B0.java",
+    			"package b566465.b;\n" +
+    			"public class B0 {\n" +
+    			"	public void bm(String s) {}\n" +
+    			"}\n",
+    			"b566465/b/B1.java",
+    			"package b566465.b;\n" +
+    			"public class B1 extends B0 {\n" +
+    			"}\n",
+    			"b566465/b/B2.java",
+    			"package b566465.b;\n" +
+    			"public class B2 extends B0 {\n" +
+    			"}\n",
+    			"b566465/t/T0.java",
+    			"package b566465.t;\n" +
+    			"import base b566465.b.B1;\n" +
+    			"import base b566465.b.B2;\n" +
+    			"public team class T0 {\n" +
+    			"	protected class R1 playedBy B1 {\n" +
+    			"		label: ci <- after bm;\n" +
+    			"		void ci(String s) {}\n" +
+    			"	}\n" +
+    			"	protected class R2 playedBy B2 {\n" +
+    			"		label: ci <- after bm;\n" +
+    			"		void ci(String s) {}\n" +
+    			"	}\n" +
+    			"}\n"
+    		};
+    	runner.runConformTest();
+    }
+    public void testBug566465b() {
+    	// ensure that binding to the same base method via *compatible* base classes requires a precedence declaration
+    	Runner runner = new Runner();
+    	runner.testFiles =
+    		new String[] {
+    			"b566465/b/B1.java",
+    			"package b566465.b;\n" +
+    			"public class B1 {\n" +
+    			"	public void bm(String s) {}\n" +
+    			"}\n",
+    			"b566465/b/B2.java",
+    			"package b566465.b;\n" +
+    			"public class B2 extends B1 {\n" +
+    			"}\n",
+    			"b566465/t/T0.java",
+    			"package b566465.t;\n" +
+    			"import base b566465.b.B1;\n" +
+    			"import base b566465.b.B2;\n" +
+    			"public team class T0 {\n" +
+    			"	protected class R1 playedBy B1 {\n" +
+    			"		label: ci <- after bm;\n" +
+    			"		void ci(String s) {}\n" +
+    			"	}\n" +
+    			"	protected class R2 playedBy B2 {\n" +
+    			"		label: ci <- after bm;\n" +
+    			"		void ci(String s) {}\n" +
+    			"	}\n" +
+    			"}\n"
+    		};
+    	runner.expectedCompilerLog =
+    			"----------\n" + 
+				"1. ERROR in b566465\\t\\T0.java (at line 6)\n" + 
+				"	label: ci <- after bm;\n" + 
+				"	^^^^^\n" + 
+				"\'after\' callin bindings b566465.t.T0.R1.label and b566465.t.T0.R2.label refer to the same base method; must declare precedence of these bindings (OTJLD 4.8).\n" + 
+				"----------\n";
+    	runner.runNegativeTest();
+    }
 }

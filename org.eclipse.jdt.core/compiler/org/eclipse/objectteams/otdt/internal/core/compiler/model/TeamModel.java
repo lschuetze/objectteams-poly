@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2018 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2020 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -114,7 +114,7 @@ public class TeamModel extends TypeModel {
     /* a synthetic class for storing known role files */
     private RoleFileCache knownRoleFiles = null;
 
-    private Map<String/*label*/,List<Pair<MethodBinding, Integer/*callinID*/>>> labelledCallinIds = null;
+    private Map<String/*label*/,List<CallinInfo>> labelledCallinIds = null;
 
     /** Collection of various flags. */
     public int tagBits = 0;
@@ -927,51 +927,83 @@ public class TeamModel extends TypeModel {
 			return this._binding.enclosingType().getTeamModel().getOutermostTeam();
 		return this;
 	}
-	public void recordLabelledCallin(String label, MethodBinding baseMethod, int callinId) {
-		List<Pair<MethodBinding, Integer>> existing = getCallinsForLabel(label);
+	public void recordLabelledCallin(String label, MethodBinding baseMethod, int callinId, ReferenceBinding declaringRoleClass) {
+		List<CallinInfo> existing = getCallinsForLabel(label, declaringRoleClass);
 		if (existing == null) {
 			existing = new ArrayList<>();
 			this.labelledCallinIds.put(label, existing);
 		}
-		existing.add(new Pair<>(baseMethod, callinId));
+		existing.add(new CallinInfo(declaringRoleClass, callinId, baseMethod));
 	}
-	public List<Pair<MethodBinding,Integer>> getCallinsForLabel(String label) {
+	/** local structure for storing information about the callin-callinId mapping. */
+	static class CallinInfo {
+		ReferenceBinding roleClass;
+		int callinId;
+		MethodBinding baseMethod;
+		public CallinInfo(ReferenceBinding roleClass, int callinId, MethodBinding baseMethod) {
+			this.roleClass = roleClass;
+			this.callinId = callinId;
+			this.baseMethod = baseMethod;
+		}
+	}
+	public List<CallinInfo> getCallinsForLabel(String label, ReferenceBinding declaringRoleClass) {
 		if (this.labelledCallinIds == null) {
 			this.labelledCallinIds = new HashMap<>();
 			TeamModel superTeam = getSuperTeam();
 			if (superTeam != null) {
 				// FIXME: Check if binary team has the (label,baseM->callinId) info.
-				List<Pair<MethodBinding, Integer>> inherited = superTeam.getCallinsForLabel(label);
-				if (inherited != null) {
-					this.labelledCallinIds.put(label, inherited);
-					int max = inherited.stream().map(p->p.second).max(Integer::compareTo).get();
-					this.nextCallinID = Math.max(this.nextCallinID, max+1);
+				ReferenceBinding tsuperRole = null;
+				ReferenceBinding currentRole = declaringRoleClass;
+				while (tsuperRole == null && currentRole != null && currentRole.isRole()) {
+					for (ReferenceBinding tsuper : currentRole.roleModel.getTSuperRoleBindings()) {
+						if (TypeBinding.equalsEquals(tsuper.enclosingType(), superTeam.getBinding())) {
+							tsuperRole = tsuper;
+							break;
+						}
+					}
+					currentRole = currentRole.superclass();
+				}
+				if (tsuperRole != null) {
+					List<CallinInfo> inherited = superTeam.getCallinsForLabel(label, tsuperRole);
+					if (inherited != null) {
+						this.labelledCallinIds.put(label, inherited);
+						int max = inherited.stream().map(p->p.callinId).max(Integer::compareTo).get();
+						this.nextCallinID = Math.max(this.nextCallinID, max+1);
+					}
 				}
 			}
 		}
 		return this.labelledCallinIds.get(label);
 	}
-	/** Assign a fresh callin ID for this method spec, and store it in the method spec. */
+	/**
+	 * Assign a fresh callin ID for this method spec, and store it in the method spec.
+	 * This method, however, respects overriding of named callins.
+	 */
 	public int getNewCallinId(MethodSpec baseMethodSpec, char[] label) {
 		TeamModel outermostTeam = getOutermostTeam();
 		String labelString = null;
+		ReferenceBinding declaringRoleClass = baseMethodSpec.declaringRoleClass;
 		if (label != null) {
 			labelString = new String(label);
-			List<Pair<MethodBinding, Integer>> existing = outermostTeam.getCallinsForLabel(labelString);
+			List<CallinInfo> existing = outermostTeam.getCallinsForLabel(labelString, declaringRoleClass);
 			if (existing != null) {
 				LookupEnvironment environment = this._ast.scope.environment();
-				for (Pair<MethodBinding, Integer> entry : existing) {
+				for (CallinInfo entry : existing) {
+					TypeBinding existingRole = strengthenRoleType(this._binding, entry.roleClass).original();
+					if (!existingRole.isCompatibleWith(declaringRoleClass)
+							&&!declaringRoleClass.isCompatibleWith(existingRole))
+						continue; // provably unrelated roles, callin cannot override
 					MethodBinding baseMethod = baseMethodSpec.resolvedMethod;
-					if (baseMethod == entry.first
-							|| MethodVerifier.doesMethodOverride(baseMethodSpec.resolvedMethod, entry.first, environment)) {
-						return entry.second;
+					if (baseMethod == entry.baseMethod
+							|| MethodVerifier.doesMethodOverride(baseMethodSpec.resolvedMethod, entry.baseMethod, environment)) {
+						return entry.callinId;
 					}
 				}
 			}
 		}
 		int callinID = baseMethodSpec.callinID = outermostTeam.nextCallinID++;
 		if (labelString != null) {
-			outermostTeam.recordLabelledCallin(labelString, baseMethodSpec.resolvedMethod, callinID);
+			outermostTeam.recordLabelledCallin(labelString, baseMethodSpec.resolvedMethod, callinID, declaringRoleClass);
 		}
 		return callinID;
 	}

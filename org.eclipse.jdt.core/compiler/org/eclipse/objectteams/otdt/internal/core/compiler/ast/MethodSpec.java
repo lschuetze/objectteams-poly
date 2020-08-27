@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2019 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2020 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany, and others.
@@ -12,7 +12,6 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * $Id: MethodSpec.java 23401 2010-02-02 23:56:05Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -101,6 +100,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
     public MethodBinding resolvedMethod;
     public boolean[] argNeedsTranslation; // lifting or lowering: one flag for each argument
 	public boolean returnNeedsTranslation;
+	public ReferenceBinding declaringRoleClass;
 
 	public boolean isDeclaration = false;
 //{OTDyn:
@@ -220,8 +220,9 @@ public class MethodSpec extends ASTNode implements InvocationSite
      * @param scope used for resolving. Newly bound arguments are entered here.
      * @param isBaseSide TODO
      */
-   public void resolveTypes(CallinCalloutScope scope, boolean isBaseSide) {
-		if (this.typeParameters != null) {
+    public void resolveTypes(CallinCalloutScope scope, boolean isBaseSide) {
+    	this.declaringRoleClass = scope.enclosingSourceType();
+	    if (this.typeParameters != null) {
 			for (int i = 0, length = this.typeParameters.length; i < length; i++) {
 				if (isBaseSide)
 					scope.problemReporter().illegalMappingRHSTypeParameter(this.typeParameters[i]);
@@ -231,7 +232,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 			if (!isBaseSide)
 				scope.connectTypeVariables(this.typeParameters, true);
 		}
-	   TypeBinding[] types = Binding.NO_PARAMETERS;
+	    TypeBinding[] types = Binding.NO_PARAMETERS;
         if (this.arguments != null) {
             types = new TypeBinding[this.arguments.length];
             for (int i=0; i<this.arguments.length; i++) {
