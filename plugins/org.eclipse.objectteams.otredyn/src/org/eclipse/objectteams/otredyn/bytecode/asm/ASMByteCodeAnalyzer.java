@@ -48,6 +48,16 @@ public class ASMByteCodeAnalyzer {
 			this.superInterfaceNames = classReader.getInterfaces();
 		}
 
+		public ClassInformation(Class<?> clazz) {
+			this.modifiers = clazz.getModifiers();
+			this.superClassName = clazz.getSuperclass().getName().replace('.', '/');
+			Class<?>[] interfaces = clazz.getInterfaces();
+			this.superInterfaceNames = new String[interfaces.length];
+			for (int i = 0; i < interfaces.length; i++) {
+				this.superInterfaceNames[i] = interfaces[i].getName().replace('.', '/');
+			}
+		}
+
 		public boolean isInterface() {
 			return (modifiers & Opcodes.ACC_INTERFACE) != 0;
 		}
@@ -102,5 +112,20 @@ public class ASMByteCodeAnalyzer {
 		classInformation = new ClassInformation(classReader);
 		classInformationMap.put(className, classInformation);
 		return classInformation;
+	}
+
+	public ClassInformation getClassInformation(String className, ClassLoader loader) {
+		ClassInformation classInformation = classInformationMap.get(className);
+		if (classInformation != null) {
+			return classInformation;
+		}
+		try {
+			Class<?> clazz = loader.loadClass(className.replace('/', '.'));
+			if (clazz != null)
+				return new ClassInformation(clazz);
+		} catch (ClassNotFoundException e) {
+			return null;
+		}
+		return null;
 	}
 }
