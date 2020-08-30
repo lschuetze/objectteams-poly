@@ -69,7 +69,7 @@ public class LoaderAwareClassWriter extends ClassWriter {
 			if (ci2 == null)
 				return OBJECT_SLASH;
 		} catch (Exception e) {
-		    throw new RuntimeException(e.toString());
+		    throw new RuntimeException(e);
 		}
 
         // do a breadth-first search: each iteration adds just one more level of super types,
