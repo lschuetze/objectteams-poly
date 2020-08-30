@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
 
@@ -50,7 +51,10 @@ public class ASMByteCodeAnalyzer {
 
 		public ClassInformation(Class<?> clazz) {
 			this.modifiers = clazz.getModifiers();
-			this.superClassName = clazz.getSuperclass().getName().replace('.', '/');
+			Class<?> superclass = clazz.getSuperclass();
+			this.superClassName = superclass != null
+					? superclass.getName().replace('.', '/')
+					: ClassNames.OBJECT_SLASH;
 			Class<?>[] interfaces = clazz.getInterfaces();
 			this.superInterfaceNames = new String[interfaces.length];
 			for (int i = 0; i < interfaces.length; i++) {
