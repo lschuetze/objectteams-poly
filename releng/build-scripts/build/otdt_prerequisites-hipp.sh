@@ -58,7 +58,7 @@ ARCH=`arch`
 
 # VERSIONS:
 # Eclipse SDK build identifier (used for substitution in otdt.map.in etc.):
-SDK_QUALIFIER=${SDK_QUALIFIER:="20200826-1800"}
+SDK_QUALIFIER=${SDK_QUALIFIER:="I20200826-1800"}
 
 # used only locally (components of the ECLIPSE_SDK_TGZ path):
 EVERSION=${EVERSION:="4.17RC1"}
