@@ -89,7 +89,8 @@ public SyntheticArgumentBinding addSyntheticArgument(ReferenceBinding targetEncl
 //{ObjectTeams: role interfaces are static, too:
 	  if (!isSynthInterface()) {
 // orig:
-		assert this.isRecord();// a local record is implicitly static; no other local type can be static
+		// Ref JLS 6.1 due to record preview add-on doc: Local Static Interfaces and Enum Classes
+		// a local record, enum and interface allowed, and will be implicitly static
 		return null;
 // :giro
 	  }

@@ -531,9 +531,24 @@ public LocalDeclaration[] findLocalVariableDeclarations(int position) {
 	}
 	return null;
 }
-
+private boolean isPatternVariableInScope(InvocationSite invocationSite, LocalVariableBinding variable) {
+//{ObjectTeams: call path has no invocationSite (when variable is used as anchor):
+// 		Scope.getType() -> RoleTypeCreater.resolveAnchoredType() -> findResolvedVariable() -> Scope.findVariable()
+	if (invocationSite == null)
+		return false;
+// SH}
+	LocalVariableBinding[] patternVariablesInScope = invocationSite.getPatternVariablesWhenTrue();
+	if (patternVariablesInScope == null)
+		return false;
+	for (LocalVariableBinding v : patternVariablesInScope) {
+		if (v == variable) {
+			return true;
+		}
+	}
+	return false;
+}
 @Override
-public LocalVariableBinding findVariable(char[] variableName) {
+public LocalVariableBinding findVariable(char[] variableName, InvocationSite invocationSite) {
 	int varLength = variableName.length;
 	for (int i = this.localIndex-1; i >= 0; i--) { // lookup backward to reach latest additions first
 		LocalVariableBinding local = this.locals[i];
@@ -549,8 +564,14 @@ public LocalVariableBinding findVariable(char[] variableName) {
 		if ((local.modifiers & ExtraCompilerModifiers.AccPatternVariable) == 0)
 			continue;
 		char[] localName;
-		if ((localName = local.name).length == varLength && CharOperation.equals(localName, variableName))
+		if ((localName = local.name).length != varLength || !CharOperation.equals(localName, variableName))
+			continue;
+		if ((local.modifiers & ExtraCompilerModifiers.AccUnresolved) == 0) {
 			return local;
+		}
+		if (isPatternVariableInScope(invocationSite, local)) {
+			return local;
+		}
 	}
 	return null;
 }

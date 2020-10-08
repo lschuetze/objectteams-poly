@@ -446,8 +446,6 @@ public class AbstractSyntaxTreeTest extends AbstractCompilerTest implements IDoc
 
 
 	}
-	public void enterRecordComponent(RecordComponentInfo recordComponentInfo) {
-	}
 
 	public void enterInitializer(int declarationStart, int modifiers) {
 

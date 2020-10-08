@@ -1076,4 +1076,14 @@ public class PhantomType implements IPhantomType
 	public String getAttachedJavadoc(IProgressMonitor monitor) throws JavaModelException {
         return this._realType.getAttachedJavadoc(monitor);
 	}
+
+	@Override
+	public String[] getPermittedSubtypeNames() throws JavaModelException {
+		return this._realType.getPermittedSubtypeNames();
+	}
+
+	@Override
+	public boolean isSealed() throws JavaModelException {
+		return this._realType.isSealed();
+	}
 }

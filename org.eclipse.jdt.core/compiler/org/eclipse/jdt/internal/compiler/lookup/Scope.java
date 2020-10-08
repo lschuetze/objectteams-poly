@@ -2227,8 +2227,7 @@ public abstract class Scope {
 		return typeBinding;
 	}
 
-	public LocalVariableBinding findVariable(char[] variable) {
-
+	public LocalVariableBinding findVariable(char[] variable, InvocationSite invocationSite) {
 		return null;
 	}
 
@@ -2286,7 +2285,7 @@ public abstract class Scope {
 
 							//$FALL-THROUGH$ could duplicate the code below to save a cast - questionable optimization
 						case BLOCK_SCOPE :
-							LocalVariableBinding variableBinding = scope.findVariable(name);
+							LocalVariableBinding variableBinding = scope.findVariable(name, invocationSite);
 							// looks in this scope only
 							if (variableBinding != null) {
 								if (foundField != null && foundField.isValidBinding())

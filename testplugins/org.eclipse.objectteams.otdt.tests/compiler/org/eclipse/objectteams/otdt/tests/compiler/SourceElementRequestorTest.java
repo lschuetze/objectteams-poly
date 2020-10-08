@@ -180,12 +180,6 @@ public class SourceElementRequestorTest extends FileBasedModelTest implements IS
 
 	}
 
-	@Override
-	public void enterRecordComponent(RecordComponentInfo recordComponentInfo) {
-		// TODO Auto-generated method stub
-		
-	}
-
 	public void enterType(TypeInfo typeInfo) {
 		// TODO Auto-generated method stub
 

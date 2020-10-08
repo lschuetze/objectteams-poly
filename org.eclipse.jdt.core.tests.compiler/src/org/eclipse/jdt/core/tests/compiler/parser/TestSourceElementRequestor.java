@@ -90,7 +90,6 @@ public void enterConstructor(MethodInfo methodInfo) {}
  * enterField method comment.
  */
 public void enterField(FieldInfo fieldInfo) {}
-public void enterRecordComponent(RecordComponentInfo recordComponentInfo) {}
 /**
  * enterMethod method comment.
  */

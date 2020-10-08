@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.compiler.env.IBinaryField;
 import org.eclipse.jdt.internal.compiler.env.IBinaryMethod;
 import org.eclipse.jdt.internal.compiler.env.IBinaryNestedType;
 import org.eclipse.jdt.internal.compiler.env.IBinaryType;
+import org.eclipse.jdt.internal.compiler.env.IRecordComponent;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
@@ -258,10 +259,38 @@ private void generateFieldInfos(IType type, IBinaryType typeInfo, HashMap newEle
 		if (CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, fieldInfo.getName()))
 			continue; // skip;
 // SH}
+		// If the type is a record and this is an instance field, it can only be a record component
+		// Filter out
+		if (typeInfo.isRecord() && (fieldInfo.getModifiers() & ClassFileConstants.AccStatic) == 0)
+			continue;
 		BinaryField field = new BinaryField((JavaElement)type, manager.intern(new String(fieldInfo.getName())));
 		newElements.put(field, fieldInfo);
 		childrenHandles.add(field);
 		generateAnnotationsInfos(field, fieldInfo.getAnnotations(), fieldInfo.getTagBits(), newElements);
+	}
+}
+/**
+ * Creates the handles and infos for the fields of the given binary type.
+ * Adds new handles to the given vector.
+ */
+private void generateRecordComponentInfos(IType type, IBinaryType typeInfo, HashMap newElements, ArrayList childrenHandles) {
+	// Make the fields
+	IRecordComponent[] components = typeInfo.getRecordComponents();
+	if (components == null) {
+		return;
+	}
+	JavaModelManager manager = JavaModelManager.getJavaModelManager();
+	for (int i = 0, fieldCount = components.length; i < fieldCount; i++) {
+		IRecordComponent componentInfo = components[i];
+		BinaryField component = new BinaryField((JavaElement)type, manager.intern(new String(componentInfo.getName()))) {
+			@Override
+			public boolean isRecordComponent() throws JavaModelException {
+				return true;
+			}
+		};
+		newElements.put(component, componentInfo);
+		childrenHandles.add(component);
+		generateAnnotationsInfos(component, componentInfo.getAnnotations(), componentInfo.getTagBits(), newElements);
 	}
 }
 /**
@@ -547,6 +576,7 @@ protected void readBinaryChildren(ClassFile classFile, HashMap newElements, IBin
 		generateAnnotationsInfos(type, typeInfo.getAnnotations(), typeInfo.getTagBits(), newElements);
 		generateTypeParameterInfos(type, typeInfo.getGenericSignature(), newElements, typeParameterHandles);
 		generateFieldInfos(type, typeInfo, newElements, childrenHandles);
+		generateRecordComponentInfos(type, typeInfo, newElements, childrenHandles);
 		generateMethodInfos(type, typeInfo, newElements, childrenHandles, typeParameterHandles);
 		generateInnerClassHandles(type, typeInfo, childrenHandles); // Note inner class are separate openables that are not opened here: no need to pass in newElements
 //{ObjectTeams: eval OT attrs?

@@ -168,7 +168,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 				// build a receiver (_OT$base):
 				AstGenerator gen = new AstGenerator(methodSpec.sourceStart, methodSpec.sourceEnd);
 				SingleNameReference baseRef = gen.singleNameReference(IOTConstants._OT_BASE);
-				baseRef.binding = RoleTypeCreator.findResolvedVariable(this.scope.classScope(), IOTConstants._OT_BASE);
+				baseRef.binding = RoleTypeCreator.findResolvedVariable(this.scope.classScope(), IOTConstants._OT_BASE, methodSpec);
 				// maybe wrap return type relative to _OT$base
 				baseReturn = RoleTypeCreator.maybeWrapQualifiedRoleType(
 						this.scope,

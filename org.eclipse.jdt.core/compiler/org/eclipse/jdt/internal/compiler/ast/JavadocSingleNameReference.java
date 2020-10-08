@@ -40,11 +40,11 @@ public class JavadocSingleNameReference extends SingleNameReference {
 	 */
 	public void resolve(BlockScope scope, boolean warn, boolean considerParamRefAsUsage) {
 
-		LocalVariableBinding variableBinding = scope.findVariable(this.token);
+		LocalVariableBinding variableBinding = scope.findVariable(this.token, this);
 //{ObjectTeams: consider internal renaming for declared lifting
 		if (variableBinding == null && considerParamRefAsUsage) {
 			char[] internalName = CharOperation.concat(IOTConstants.OT_DOLLAR_NAME, this.token);
-			variableBinding = scope.findVariable(internalName);
+			variableBinding = scope.findVariable(internalName, this);
 		}
 // SH}
 		if (variableBinding != null && variableBinding.isValidBinding() && ((variableBinding.tagBits & TagBits.IsArgument) != 0)) {

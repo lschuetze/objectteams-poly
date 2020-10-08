@@ -189,7 +189,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 //	}
 	codeStream.recordPositionsFrom(pc, this.sourceStart);
 }
-public void getAllAnnotationContexts(int targetType, List allAnnotationContexts) {
+public void getAllAnnotationContexts(int targetType, List<AnnotationContext> allAnnotationContexts) {
 	AnnotationCollector collector = new AnnotationCollector(this.type, targetType, allAnnotationContexts);
 	for (int i = 0, max = this.annotations.length; i < max; i++) {
 		Annotation annotation = this.annotations[i];

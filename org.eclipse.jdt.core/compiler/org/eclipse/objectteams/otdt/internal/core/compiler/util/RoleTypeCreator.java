@@ -1042,7 +1042,7 @@ public class RoleTypeCreator implements TagBits {
 			anchor = TypeAnalyzer.findField(staticType, tokens[variableStart], isStatic, /*outer*/ true);
 		} else {
 			try {
-				anchor = findResolvedVariable(scope, tokens[0]);
+				anchor = findResolvedVariable(scope, tokens[0], null); // anchor has no invocation site
 			} catch (InternalCompilerError ice) {
 				// workaround to avoid "Prematurely searching field ..." regarding FQ class names
 				if (havePackagePrefix)
@@ -1136,14 +1136,15 @@ public class RoleTypeCreator implements TagBits {
 	 * Find a variable by name in scope, possibly resolving a field for this purpose.
 	 * @param scope
 	 * @param name
+	 * @param site
 	 * @return valid or null binding.
 	 */
-	public static VariableBinding findResolvedVariable(Scope scope, char[] name) {
+	public static VariableBinding findResolvedVariable(Scope scope, char[] name, InvocationSite site) {
 		if (scope.kind == Scope.COMPILATION_UNIT_SCOPE || scope.kind == Scope.MODULE_SCOPE)
 			return null; // no single name variables in compilation unit scopes
 
 		// first try immediate scope:
-		VariableBinding anchor = scope.findVariable(name);
+		VariableBinding anchor = scope.findVariable(name, site);
 		if (anchor != null)
 			return anchor;
 
@@ -1158,12 +1159,12 @@ public class RoleTypeCreator implements TagBits {
 
 		// find anchor-field in the class-part, if different from direct scope:
 		if (classPartScope != scope)
-			anchor = classPartScope.findVariable(name);
+			anchor = classPartScope.findVariable(name, site);
 		if (anchor != null)
 			return anchor;
 
 		// travel out through enclosing scopes:
-		anchor = findResolvedVariable(scope.parent, name);
+		anchor = findResolvedVariable(scope.parent, name, site);
 		if (anchor != null)
 			return anchor;
 

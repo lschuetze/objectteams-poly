@@ -827,6 +827,7 @@ public class Syntax extends AbstractOTJLDTest {
 			    "}    \n" +
 			    "    \n"
             },
+            // Hint: when it says "Object Teams keywords not enabled in this scope" check if an update is needed in DiagnoseParser.setScannerState()
             "----------\n" +
     		"1. ERROR in Team881br1.java (at line 39)\n" +
     		"	public class R3 played // { lbrace is assumed by the parser\n" +

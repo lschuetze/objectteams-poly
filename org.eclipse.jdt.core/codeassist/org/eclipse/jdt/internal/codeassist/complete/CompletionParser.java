@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.compiler.*;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.*;
+import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.parser.*;
 import org.eclipse.jdt.internal.compiler.problem.*;
@@ -1215,7 +1216,7 @@ private Statement buildMoreCompletionEnclosingContext(Statement statement) {
 	}
 	while (index >= 0) {
 		// Try to find an enclosing if statement even if one is not found immediately preceding the completion node.
-		if (index != -1 && this.elementInfoStack[index] == IF && this.elementObjectInfoStack[index] != null) {
+		if (this.elementInfoStack[index] == IF && this.elementObjectInfoStack[index] != null) {
 			Expression condition = (Expression)this.elementObjectInfoStack[index];
 
 			// If currentElement is a RecoveredLocalVariable then it can be contained in the if statement
@@ -1621,12 +1622,21 @@ private boolean checkKeywordAndRestrictedIdentifiers() {
 				if((this.lastModifiers & ClassFileConstants.AccFinal) == 0) {
 					keywordsAndRestrictedIndentifiers[count++] = Keywords.INTERFACE;
 				}
-				if (this.options.complianceLevel >= ClassFileConstants.JDK14 && this.options.enablePreviewFeatures == true) {
+				if (this.options.complianceLevel >= ClassFileConstants.JDK14
+						&& this.options.enablePreviewFeatures == true) {
 					keywordsAndRestrictedIndentifiers[count++] = RestrictedIdentifiers.RECORD;
 				}
-
+				if (this.options.complianceLevel >= ClassFileConstants.JDK15
+						&& this.options.enablePreviewFeatures == true) {
+					boolean nonSeal = (this.lastModifiers & ExtraCompilerModifiers.AccNonSealed) != 0;
+					boolean seal = (this.lastModifiers & ExtraCompilerModifiers.AccSealed) != 0;
+					if (!nonSeal && !seal) {
+						keywordsAndRestrictedIndentifiers[count++] = RestrictedIdentifiers.SEALED;
+						keywordsAndRestrictedIndentifiers[count++] = RestrictedIdentifiers.NON_SEALED;
+					}
+				}
 			}
-			if(count != 0) {
+			if (count != 0) {
 				System.arraycopy(keywordsAndRestrictedIndentifiers, 0, keywordsAndRestrictedIndentifiers = new char[count][], 0, count);
 
 				this.assistNode = new CompletionOnKeyword2(ident, pos, keywordsAndRestrictedIndentifiers);
@@ -2357,6 +2367,11 @@ private void classHeaderExtendsOrImplements(boolean isInterface, boolean isRecor
 						}
 						keywords[count++] = Keywords.IMPLEMENTS;
 					}
+					if (this.options.enablePreviewFeatures) {
+						boolean sealed = (type.modifiers & ExtraCompilerModifiers.AccSealed) != 0;
+						if (sealed)
+							keywords[count++] = RestrictedIdentifiers.PERMITS;
+					}
 
 //{ObjectTeams: consider possible base class reference
 					if (type.isRole() && type.baseclass == null)
@@ -2785,15 +2800,27 @@ protected void consumeClassHeaderExtends() {
 			RecoveredType recoveredType = (RecoveredType)this.currentElement;
 			/* filter out cases where scanner is still inside type header */
 			if (!recoveredType.foundOpeningBrace) {
+				char[][] keywords = new char[2][];
+				int count = 0;
 				TypeDeclaration type = recoveredType.typeDeclaration;
 				if(type.superInterfaces == null) {
-					type.superclass = new CompletionOnKeyword1(
+					keywords[count++] = Keywords.IMPLEMENTS;
+				}
+				if (this.options.enablePreviewFeatures) {
+					boolean sealed = (type.modifiers & ExtraCompilerModifiers.AccSealed) != 0;
+					if (sealed)
+						keywords[count++] = RestrictedIdentifiers.PERMITS;
+				}
+				System.arraycopy(keywords, 0, keywords = new char[count][], 0, count);
+				if(count > 0) {
+					CompletionOnKeyword1 completionOnKeyword = new CompletionOnKeyword1(
 						this.identifierStack[ptr],
 						this.identifierPositionStack[ptr],
-						Keywords.IMPLEMENTS);
+						keywords);
+					type.superclass = completionOnKeyword;
 					type.superclass.bits |= ASTNode.IsSuperType;
-					this.assistNode = type.superclass;
-					this.lastCheckPoint = type.superclass.sourceEnd + 1;
+					this.assistNode = completionOnKeyword;
+					this.lastCheckPoint = completionOnKeyword.sourceEnd + 1;
 				}
 			}
 		}
@@ -2827,7 +2854,6 @@ protected void consumeClassTypeElt() {
 	super.consumeClassTypeElt();
 	popElement(K_NEXT_TYPEREF_IS_EXCEPTION);
 }
-
 @Override
 protected void consumeCompilationUnit() {
 	this.javadoc = null;

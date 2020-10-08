@@ -45,7 +45,7 @@ $Terminals
 	abstract assert boolean break byte case catch char class 
 	continue const default do double else enum extends false final finally float
 	for goto if implements import instanceof int
-	interface long native new null package private
+	interface long native new non-sealed null package private
 	protected public return short static strictfp super switch
 	synchronized this throw throws transient true try void
 	volatile while module open requires transitive exports opens to uses provides with
@@ -128,6 +128,8 @@ $Terminals
 	BeginCaseExpr
 	RestrictedIdentifierYield
 	RestrictedIdentifierrecord
+	RestrictedIdentifiersealed
+	RestrictedIdentifierpermits
 
 -- {ObjectTeams
 	ATOT
@@ -252,6 +254,10 @@ Goal ::= '>' MethodSpecLong
 -- JSR 354 Reconnaissance mission.
 Goal ::= '->' YieldStatement
 Goal ::= '->' SwitchLabelCaseLhs
+-- JSR 360 Restricted
+Goal ::= RestrictedIdentifiersealed Modifiersopt
+Goal ::= RestrictedIdentifierpermits PermittedSubclasses
+
 /:$readableName Goal:/
 
 -- {ObjectTeams
@@ -750,6 +756,8 @@ Modifier -> 'static'
 Modifier -> 'abstract'
 Modifier -> 'final'
 Modifier -> 'native'
+Modifier -> 'non-sealed'
+Modifier -> RestrictedIdentifiersealed
 Modifier -> 'synchronized'
 Modifier -> 'transient'
 Modifier -> 'volatile'
@@ -767,6 +775,7 @@ Modifier -> 'callin'
 --      'abstract'
 --    | 'final'
 --    | 'public'
+--    | 'non-sealed'
 --18.8.1 Productions from 8.1: Class Declarations
 
 ClassDeclaration ::= ClassHeader ClassBody
@@ -774,8 +783,8 @@ ClassDeclaration ::= ClassHeader ClassBody
 /:$readableName ClassDeclaration:/
 
 --{ObjectTeams: playedBy & guard predicate support:
--- orig: ClassHeader ::= ClassHeaderName ClassHeaderExtendsopt ClassHeaderImplementsopt
-ClassHeader ::= ClassHeaderName ClassHeaderExtendsopt ClassHeaderImplementsopt ClassHeaderPlayedByopt Predicateopt
+-- orig: ClassHeader ::= ClassHeaderName ClassHeaderExtendsopt ClassHeaderImplementsopt ClassHeaderPermittedSubclassesopt
+ClassHeader ::= ClassHeaderName ClassHeaderExtendsopt ClassHeaderImplementsopt ClassHeaderPermittedSubclassesopt ClassHeaderPlayedByopt Predicateopt
 -- MW+SH}
 /.$putCase consumeClassHeader(); $break ./
 /:$readableName ClassHeader:/
@@ -1483,8 +1492,8 @@ InterfaceDeclaration ::= InterfaceHeader InterfaceBody
 /:$readableName InterfaceDeclaration:/
 
 -- {ObjectTeams
--- orig: InterfaceHeader ::= InterfaceHeaderName InterfaceHeaderExtendsopt 
-InterfaceHeader ::= InterfaceHeaderName InterfaceHeaderExtendsopt ClassHeaderPlayedByopt
+-- orig: InterfaceHeader ::= InterfaceHeaderName InterfaceHeaderExtendsopt InterfaceHeaderPermittedSubClassesAndSubInterfacesopt
+InterfaceHeader ::= InterfaceHeaderName InterfaceHeaderExtendsopt InterfaceHeaderPermittedSubClassesAndSubInterfacesopt ClassHeaderPlayedByopt
 -- SH}
 /.$putCase consumeInterfaceHeader(); $break ./
 /:$readableName InterfaceHeader:/
@@ -2768,6 +2777,30 @@ FormalParameterListopt -> FormalParameterList
 ClassHeaderImplementsopt ::= $empty
 ClassHeaderImplementsopt -> ClassHeaderImplements
 /:$readableName ClassHeaderImplements:/
+
+ClassHeaderPermittedSubclassesopt ::= $empty
+ClassHeaderPermittedSubclassesopt -> ClassHeaderPermittedSubclasses
+/:$readableName ClassHeaderPermittedSubclasses:/
+/:$compliance 15:/
+
+-- Production name hardcoded in parser. Must be ::= and not -> 
+PermittedSubclasses ::= ClassTypeList
+/:$readableName PermittedSubclasses:/
+
+ClassHeaderPermittedSubclasses ::= RestrictedIdentifierpermits ClassTypeList
+/.$putCase consumeClassHeaderPermittedSubclasses(); $break ./
+/:$readableName ClassHeaderPermittedSubclasses:/
+/:$compliance 15:/
+
+InterfaceHeaderPermittedSubClassesAndSubInterfacesopt ::= $empty
+InterfaceHeaderPermittedSubClassesAndSubInterfacesopt -> InterfaceHeaderPermittedSubClassesAndSubInterfaces
+/:$readableName InterfaceHeaderPermittedSubClassesAndSubInterfaces:/
+/:$compliance 15:/
+
+InterfaceHeaderPermittedSubClassesAndSubInterfaces ::= RestrictedIdentifierpermits ClassTypeList
+/.$putCase consumeInterfaceHeaderPermittedSubClassesAndSubInterfaces(); $break ./
+/:$readableName InterfaceHeaderPermittedSubClassesAndSubInterfaces:/
+/:$compliance 15:/
 
 InterfaceMemberDeclarationsopt ::= $empty
 /. $putCase consumeEmptyInterfaceMemberDeclarationsopt(); $break ./

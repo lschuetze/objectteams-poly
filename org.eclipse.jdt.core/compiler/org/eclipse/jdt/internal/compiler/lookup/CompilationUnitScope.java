@@ -620,6 +620,10 @@ public
 void connectTypeHierarchy() {
 	for (int i = 0, length = this.topLevelTypes.length; i < length; i++)
 		this.topLevelTypes[i].scope.connectTypeHierarchy();
+	// Wait for all hierarchy information to be built before
+	// checking on permitted types
+	for (int i = 0, length = this.topLevelTypes.length; i < length; i++)
+		this.topLevelTypes[i].scope.connectImplicitPermittedTypes();
 }
 //{ObjectTeams: support faultInTypes being controlled by Dependencies
 // record when imports have been built:

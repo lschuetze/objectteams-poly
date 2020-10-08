@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.internal.core.dom.util.DOMASTUtil;
+
 /**
  * Type declaration AST node type. A type declaration
  * is the union of a class declaration and an interface declaration.
@@ -33,11 +35,13 @@ import java.util.List;
  *			[ <b>&lt;</b> TypeParameter { <b>,</b> TypeParameter } <b>&gt;</b> ]
  *			[ <b>extends</b> Type ]
  *			[ <b>implements</b> Type { <b>,</b> Type } ]
+ *			[ <b>permits</b> Type { <b>,</b> Type } ]
  *			<b>{</b> { ClassBodyDeclaration | <b>;</b> } <b>}</b>
  * InterfaceDeclaration:
  *      [ Javadoc ] { ExtendedModifier } <b>interface</b> Identifier
  *			[ <b>&lt;</b> TypeParameter { <b>,</b> TypeParameter } <b>&gt;</b> ]
  *			[ <b>extends</b> Type { <b>,</b> Type } ]
+ *			[ <b>permits</b> Type { <b>,</b> Type } ]
  * 			<b>{</b> { InterfaceBodyDeclaration | <b>;</b> } <b>}</b>
  * </pre>
  * <p>
@@ -164,6 +168,15 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		internalBodyDeclarationPropertyFactory(TypeDeclaration.class);
 
 	/**
+	 * The "permitsTypes" structural property of this node type (element type: {@link Type}) (added in JLS15 API).
+	 * @since 3.24
+	 */
+	public static final ChildListPropertyDescriptor PERMITS_TYPES_PROPERTY =
+		new ChildListPropertyDescriptor(TypeDeclaration.class, "permitsTypes", Type.class, NO_CYCLE_RISK); //$NON-NLS-1$
+
+
+
+	/**
 	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
@@ -178,6 +191,14 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * @since 3.1
 	 */
 	private static final List PROPERTY_DESCRIPTORS_3_0;
+
+	/**
+	 * A list of property descriptors (element type:
+	 * {@link StructuralPropertyDescriptor}),
+	 * or null if uninitialized.
+	 * @since 3.22
+	 */
+	private static final List PROPERTY_DESCRIPTORS_15;
 
 	static {
 		List propertyList = new ArrayList(12);
@@ -214,6 +235,19 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		addProperty(SUPER_INTERFACE_TYPES_PROPERTY, propertyList);
 		addProperty(BODY_DECLARATIONS_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_3_0 = reapPropertyList(propertyList);
+
+		propertyList = new ArrayList(10);
+		createPropertyList(TypeDeclaration.class, propertyList);
+		addProperty(JAVADOC_PROPERTY, propertyList);
+		addProperty(MODIFIERS2_PROPERTY, propertyList);
+		addProperty(INTERFACE_PROPERTY, propertyList);
+		addProperty(NAME_PROPERTY, propertyList);
+		addProperty(TYPE_PARAMETERS_PROPERTY, propertyList);
+		addProperty(SUPERCLASS_TYPE_PROPERTY, propertyList);
+		addProperty(SUPER_INTERFACE_TYPES_PROPERTY, propertyList);
+		addProperty(PERMITS_TYPES_PROPERTY, propertyList);
+		addProperty(BODY_DECLARATIONS_PROPERTY, propertyList);
+		PROPERTY_DESCRIPTORS_15 = reapPropertyList(propertyList);
 	}
 
 	/**
@@ -233,6 +267,27 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		} else {
 			return PROPERTY_DESCRIPTORS_3_0;
 		}
+	}
+
+	/**
+	 * Returns a list of structural property descriptors for this node type.
+	 * Clients must not modify the result.
+	 *
+	 * @param apiLevel the API level; one of the
+	 * <code>AST.JLS*</code> constants
+	 * @param previewEnabled the previewEnabled flag
+	 * @return a list of property descriptors (element type:
+	 * {@link StructuralPropertyDescriptor})
+	 * @noreference This method is not intended to be referenced by clients.
+	 * @since 3.22
+	 */
+	public static List propertyDescriptors(int apiLevel, boolean previewEnabled) {
+		if (DOMASTUtil.isFeatureSupportedinAST(apiLevel, previewEnabled, Modifier.SEALED)) {
+			return PROPERTY_DESCRIPTORS_15;
+		} else if (apiLevel == AST.JLS2_INTERNAL) {
+			return PROPERTY_DESCRIPTORS_2_0;
+		}
+		return PROPERTY_DESCRIPTORS_3_0;
 	}
 
 	/**
@@ -276,6 +331,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
   :giro */
 	ASTNode.NodeList typeParameters = null;
 // SH}
+
 	/**
 	 * The optional superclass name; <code>null</code> if none.
 	 * Defaults to none. Note that this field is not used for
@@ -287,6 +343,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
   :giro */
 	Name optionalSuperclassName = null;
 // SH}
+
 	/**
 	 * The superinterface names (element type: {@link Name}).
 	 * JLS2 only; defaults to an empty list. Not used in JLS3.
@@ -299,6 +356,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
   :giro */
 	ASTNode.NodeList superInterfaceNames = null;
 // SH}
+
 	/**
 	 * The optional superclass type; <code>null</code> if none.
 	 * Defaults to none. Note that this field is not used for
@@ -311,6 +369,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
   :giro */
 	Type optionalSuperclassType = null;
 // SH}
+
 	/**
 	 * The superinterface types (element type: {@link Type}).
 	 * Null in JLS2. Added in JLS3; defaults to an empty list
@@ -323,6 +382,15 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
   :giro */
 	ASTNode.NodeList superInterfaceTypes = null;
 // SH}
+
+	/**
+	 * The permits types (element type: {@link Type}).
+	 * Not Null from Java 15 with oreview; defaults to an empty list
+	 * (see constructor).
+	 * @since 3.22
+	 */
+	private ASTNode.NodeList permittedTypes = null;
+
 	/**
 	 * Creates a new AST node for a type declaration owned by the given
 	 * AST. By default, the type declaration is for a class of an
@@ -346,6 +414,9 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 			this.typeParameters = new ASTNode.NodeList(TYPE_PARAMETERS_PROPERTY);
 			this.superInterfaceTypes = new ASTNode.NodeList(SUPER_INTERFACE_TYPES_PROPERTY);
 		}
+		if (DOMASTUtil.isFeatureSupportedinAST(ast, Modifier.SEALED)) {
+			this.permittedTypes = new ASTNode.NodeList(PERMITS_TYPES_PROPERTY);
+		}
 	}
 
 	/* (omit javadoc for this method)
@@ -353,19 +424,22 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * @since 3.0
 	 */
 //{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
-    /*final*/ @Override
+	@Override
+//	final
 	List internalStructuralPropertiesForType(int apiLevel) {
 		return propertyDescriptors(apiLevel);
 	}
-//ike}
 
-	/* (omit javadoc for this method)
-	 * Method declared on ASTNode.
-	 */
-//  {ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
-    /*final*/ @Override
+	@Override
+//	final
+	List internalStructuralPropertiesForType(int apiLevel, boolean previewEnabled) {
+		return propertyDescriptors(apiLevel, previewEnabled);
+	}
+
+	@Override
+//	final 
 	int internalGetSetIntProperty(SimplePropertyDescriptor property, boolean get, int value) {
-//      ike}
+// ike}
 		if (property == MODIFIERS_PROPERTY) {
 			if (get) {
 				return getModifiers();
@@ -488,6 +562,9 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		if (property == SUPER_INTERFACE_TYPES_PROPERTY) {
 			return superInterfaceTypes();
 		}
+		if (property == PERMITS_TYPES_PROPERTY) {
+			return permittedTypes();
+		}
 		if (property == BODY_DECLARATIONS_PROPERTY) {
 			return bodyDeclarations();
 		}
@@ -588,6 +665,11 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 			result.superInterfaceTypes().addAll(
 					ASTNode.copySubtrees(target, superInterfaceTypes()));
 		}
+		if (DOMASTUtil.isFeatureSupportedinAST(this.ast, Modifier.SEALED)) {
+			result.permittedTypes().addAll(
+					ASTNode.copySubtrees(target, permittedTypes()));
+			result.restrictedIdentifierStartPosition = getRestrictedIdentifierStartPosition();
+		}
 		result.bodyDeclarations().addAll(
 			ASTNode.copySubtrees(target, bodyDeclarations()));
 		return result;
@@ -600,6 +682,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		// dispatch to correct overloaded match method
 		return matcher.match(this, other);
 	}
+
 	@Override
 	void accept0(ASTVisitor visitor) {
 		boolean visitChildren = visitor.visit(this);
@@ -624,6 +707,9 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 				acceptChild(visitor, this.getGuardPredicate());
 				acceptChildren(visitor, this._precedences);
 // SH}
+			}
+			if (DOMASTUtil.isFeatureSupportedinAST(getAST(), Modifier.SEALED)) {
+				acceptChildren(visitor, this.permittedTypes);
 			}
 		}
 		visitor.endVisit(this);
@@ -897,6 +983,26 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	}
 
 	/**
+	 * Returns the live ordered list of permits of this type
+	 * declaration (added in JLS15 API). For a type declaration, these are the
+	 * permitted types which can implement/extend this sealed type.
+	 *
+	 *
+	 * @return the live list of types
+	 *    (element type: {@link Type})
+	 * @exception UnsupportedOperationException if this operation is not used with Java 15 and preview enabled
+	 * @since 3.24
+	 */
+	public List permittedTypes() {
+		// more efficient than just calling unsupportedIn2() to check
+		if (this.permittedTypes == null) {
+			supportedOnlyIn15();
+			unsupportedWithoutPreviewError();
+		}
+		return this.permittedTypes;
+	}
+
+	/**
 	 * Returns the ordered list of field declarations of this type
 	 * declaration. For a class declaration, these are the
 	 * field declarations; for an interface declaration, these are
@@ -1040,7 +1146,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 
 	@Override
 	int memSize() {
-		return super.memSize() + 6 * 4;
+		// there are 7 fields that are either int or pointer and one boolean type
+		return super.memSize() + 1 + (7 * 4) ;
 	}
 
 	@Override
@@ -1054,11 +1161,44 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 			+ (this.optionalSuperclassType == null ? 0 : getSuperclassType().treeSize())
 			+ (this.superInterfaceNames == null ? 0 : this.superInterfaceNames.listSize())
 			+ (this.superInterfaceTypes == null ? 0 : this.superInterfaceTypes.listSize())
+			+ (this.permittedTypes == null ? 0 : this.permittedTypes.listSize())
 //{ObjectTeams:
 			+ (this.optionalGuardPredicate == null ? 0 : this.optionalGuardPredicate.treeSize())
 			+ this._precedences.listSize()
 // SH}
 			+ this.bodyDeclarations.listSize();
+	}
+
+	/**
+	 * A character index into the original restricted identifier source string, or <code>-1</code> if no restricted
+	 * identifier source position information is available for this node; <code>-1</code> by default.
+	 */
+	private int restrictedIdentifierStartPosition = -1;
+
+	/**
+	 * A character index into the original restricted identifier source string, or <code>-1</code> if no restricted
+	 * identifier source position information is available for this node; <code>-1</code> by default.
+	 *
+	 * @noreference This method is not intended to be referenced by clients.
+	 */
+	public void setRestrictedIdentifierStartPosition(int restrictedIdentifierStartPosition) {
+		if (restrictedIdentifierStartPosition < 0) {
+			throw new IllegalArgumentException();
+		}
+		// restrictedIdentifierStartPosition is not considered a structural property
+		// but we protect it nevertheless
+		checkModifiable();
+		this.restrictedIdentifierStartPosition = restrictedIdentifierStartPosition;
+	}
+
+	/**
+	 * A character index into the original restricted identifier source string, or <code>-1</code> if no restricted
+	 * identifier source position information is available for this node; <code>-1</code> by default.
+	 *
+	 * @noreference This method is not intended to be referenced by clients.
+	 */
+	public int getRestrictedIdentifierStartPosition() {
+		return this.restrictedIdentifierStartPosition;
 	}
 }
 
