@@ -29,7 +29,7 @@ public class LocalStaticsTest_15 extends AbstractRegressionTest {
 	static {
 //		TESTS_NUMBERS = new int [] { 40 };
 //		TESTS_RANGE = new int[] { 1, -1 };
-//		TESTS_NAMES = new String[] { "testBug566715_003"};
+		TESTS_NAMES = new String[] { "testBug564557AnnotInterface_001"};
 	}
 
 	public static Class<?> testClass() {
@@ -92,7 +92,6 @@ public class LocalStaticsTest_15 extends AbstractRegressionTest {
 		runner.runWarningTest();
 	}
 
-	@SuppressWarnings("unused")
 	private static void verifyClassFile(String expectedOutput, String classFileName, int mode)
 			throws IOException, ClassFormatException {
 		File f = new File(OUTPUT_DIR + File.separator + classFileName);

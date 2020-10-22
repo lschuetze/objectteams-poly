@@ -687,6 +687,8 @@ public void test012(){
         "                       (or 6, 6.0, etc)\n" +
         "                       cldc1.1 can also be used to generate the StackMap\n" +
         "                       attribute\n" +
+        "    --enable-preview   enable support for preview features of the\n" +
+        "                       latest Java release\n" +
 //{ObjectTeams: specific target option:
         "    -ot.weaving:otre   compile for the traditional Object Teams weaver\n" +
         "    -ot.weaving:otdre  compile for the dynamic Object Teams weaver\n" +

@@ -15814,6 +15814,38 @@ public void autoModuleWithUnstableName(ModuleReference moduleReference) {
 			moduleReference.sourceStart,
 			moduleReference.sourceEnd);
 }
+public void conflictingPackageInModules(char[][] wellKnownTypeName, CompilationUnitDeclaration compUnitDecl, Object location,
+		char[] packageName, char[] expectedModuleName, char[] conflictingModuleName) {
+	ReferenceContext savedContext = this.referenceContext;
+	this.referenceContext = compUnitDecl;
+	String[] arguments = new String[] {CharOperation.toString(wellKnownTypeName),
+			new String(packageName),
+			new String(expectedModuleName),
+			new String(conflictingModuleName)};
+	int start = 0, end = 0;
+	if (location != null) {
+		if (location instanceof InvocationSite) {
+			InvocationSite site = (InvocationSite) location;
+			start = site.sourceStart();
+			end = site.sourceEnd();
+		} else if (location instanceof ASTNode) {
+			ASTNode node = (ASTNode) location;
+			start = node.sourceStart();
+			end = node.sourceEnd();
+		}
+	}
+	try {
+		this.handle(
+				IProblem.ConflictingPackageInModules,
+				arguments,
+				arguments,
+				start,
+				end);
+	} finally {
+		this.referenceContext = savedContext;
+	}
+}
+
 public void switchExpressionIncompatibleResultExpressions(SwitchExpression expression) {
 	TypeBinding type = expression.resultExpressions.get(0).resolvedType;
 	this.handle(

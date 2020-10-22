@@ -150,13 +150,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="dom/org/eclipse/jdt/core/dom/BaseConstructorInvocation.java" type="org.eclipse.jdt.core.dom.BaseConstructorInvocation">
-        <filter comment="subclassing statement was wrong" id="338849923">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.BaseConstructorInvocation"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="dom/org/eclipse/jdt/core/dom/Annotation.java" type="org.eclipse.jdt.core.dom.Annotation">
         <filter id="576725006">
             <message_arguments>
@@ -170,6 +163,13 @@
             <message_arguments>
                 <message_argument value="ASTNode"/>
                 <message_argument value="AnonymousClassDeclaration"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="dom/org/eclipse/jdt/core/dom/BaseConstructorInvocation.java" type="org.eclipse.jdt.core.dom.BaseConstructorInvocation">
+        <filter comment="subclassing statement was wrong" id="338849923">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.BaseConstructorInvocation"/>
             </message_arguments>
         </filter>
     </resource>
@@ -240,15 +240,6 @@
             <message_arguments>
                 <message_argument value="ASTNode"/>
                 <message_argument value="MemberValuePair"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="model/org/eclipse/jdt/core/Flags.java" type="org.eclipse.jdt.core.Flags">
-        <filter comment="Must yield to new AccRecord." id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.Flags"/>
-                <message_argument value="AccRole"/>
-                <message_argument value="16777216"/>
             </message_arguments>
         </filter>
     </resource>
@@ -389,6 +380,22 @@
             <message_arguments>
                 <message_argument value="ASTNode"/>
                 <message_argument value="VariableDeclaration"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="model/org/eclipse/jdt/core/Flags.java" type="org.eclipse.jdt.core.Flags">
+        <filter comment="Must yield to new AccRecord." id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.Flags"/>
+                <message_argument value="AccRole"/>
+                <message_argument value="16777216"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Necessary adjustment to reconcile Java 15 with OT/J" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.Flags"/>
+                <message_argument value="AccTeam"/>
+                <message_argument value="67108864"/>
             </message_arguments>
         </filter>
     </resource>

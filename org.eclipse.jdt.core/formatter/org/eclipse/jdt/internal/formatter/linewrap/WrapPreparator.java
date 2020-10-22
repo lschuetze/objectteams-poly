@@ -54,7 +54,9 @@ import java.util.function.ToIntFunction;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.AssertStatement;
@@ -76,6 +78,7 @@ import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
@@ -86,6 +89,7 @@ import org.eclipse.jdt.core.dom.MethodSpec;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.OpensDirective;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ProvidesDirective;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -108,6 +112,7 @@ import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
@@ -270,6 +275,12 @@ public class WrapPreparator extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(PackageDeclaration node) {
+		handleAnnotations(node.annotations(), this.options.alignment_for_annotations_on_package);
+		return true;
+	}
+
+	@Override
 	public boolean visit(NormalAnnotation node) {
 		int lParen = this.tm.firstIndexAfter(node.getTypeName(), TokenNameLPAREN);
 		int rParen = this.tm.lastIndexIn(node, TokenNameRPAREN);
@@ -289,6 +300,8 @@ public class WrapPreparator extends ASTVisitor {
 
 	@Override
 	public boolean visit(TypeDeclaration node) {
+		handleAnnotations(node.modifiers(), this.options.alignment_for_annotations_on_type);
+
 		Type superclassType = node.getSuperclassType();
 		if (superclassType != null) {
 			this.wrapParentIndex = this.tm.lastIndexIn(node.getName(), -1);
@@ -317,7 +330,14 @@ public class WrapPreparator extends ASTVisitor {
 
 	@Override
 	public boolean visit(AnnotationTypeDeclaration node) {
+		handleAnnotations(node.modifiers(), this.options.alignment_for_annotations_on_type);
 		this.aligner.handleAlign(node.bodyDeclarations());
+		return true;
+	}
+
+	@Override
+	public boolean visit(AnnotationTypeMemberDeclaration node) {
+		handleAnnotations(node.modifiers(), this.options.alignment_for_annotations_on_method);
 		return true;
 	}
 
@@ -353,6 +373,8 @@ public class WrapPreparator extends ASTVisitor {
 
 	@Override
 	public boolean visit(MethodDeclaration node) {
+		handleAnnotations(node.modifiers(), this.options.alignment_for_annotations_on_method);
+
 		if (!node.isCompactConstructor()) {
 			int lParen = this.tm.firstIndexAfter(node.getName(), TokenNameLPAREN);
 			int rParen = node.getBody() == null ? this.tm.lastIndexIn(node, TokenNameRPAREN)
@@ -410,6 +432,8 @@ public class WrapPreparator extends ASTVisitor {
 
 	@Override
 	public boolean visit(EnumDeclaration node) {
+		handleAnnotations(node.modifiers(), this.options.alignment_for_annotations_on_type);
+
 		List<EnumConstantDeclaration> enumConstants = node.enumConstants();
 		int constantsEnd = -1;
 		if (!enumConstants.isEmpty()) {
@@ -457,6 +481,8 @@ public class WrapPreparator extends ASTVisitor {
 
 	@Override
 	public boolean visit(EnumConstantDeclaration node) {
+		handleAnnotations(node.modifiers(), this.options.alignment_for_annotations_on_enum_constant);
+
 		int lParen = this.tm.firstIndexAfter(node.getName(), -1);
 		while (this.tm.get(lParen).isComment())
 			lParen++;
@@ -985,15 +1011,34 @@ public class WrapPreparator extends ASTVisitor {
 
 	@Override
 	public boolean visit(FieldDeclaration node) {
+		handleAnnotations(node.modifiers(), this.options.alignment_for_annotations_on_field);
 		handleVariableDeclarations(node.fragments());
 		return true;
 	}
 
 	@Override
 	public boolean visit(VariableDeclarationStatement node) {
+		handleAnnotations(node.modifiers(), this.options.alignment_for_annotations_on_local_variable);
 		handleVariableDeclarations(node.fragments());
 		return true;
 	}
+
+	@Override
+	public boolean visit(VariableDeclarationExpression node) {
+		handleAnnotations(node.modifiers(), this.options.alignment_for_annotations_on_local_variable);
+		handleVariableDeclarations(node.fragments());
+		return true;
+	}
+
+	@Override
+	public boolean visit(SingleVariableDeclaration node) {
+		handleAnnotations(node.modifiers(),
+				node.getParent() instanceof EnhancedForStatement
+						? this.options.alignment_for_annotations_on_local_variable
+						: this.options.alignment_for_annotations_on_parameter);
+		return true;
+	}
+
 	@Override
 	public boolean visit(ParameterizedType node) {
 		prepareElementsList(node.typeArguments(), TokenNameCOMMA, TokenNameLESS);
@@ -1190,6 +1235,29 @@ public class WrapPreparator extends ASTVisitor {
 		handleWrap(wrappingOption);
 	}
 
+	private void handleAnnotations(List<? extends IExtendedModifier> modifiers, int wrappingOption) {
+		Annotation last = null;
+		int i;
+		for (i = 0; i < modifiers.size(); i++) {
+			if (modifiers.get(i).isModifier())
+				break;
+			Annotation annotation = (Annotation) modifiers.get(i);
+			if (i == 0) {
+				this.wrapParentIndex = this.tm.firstIndexIn(annotation, -1);
+			} else {
+				this.wrapIndexes.add(this.tm.firstIndexIn(annotation, -1));
+				this.wrapGroupEnd = this.tm.lastIndexIn(annotation, -1);
+			}
+			last = annotation;
+		}
+		handleWrap(wrappingOption, last);
+
+		if (i < modifiers.size()) {
+			// any annotations following other modifiers will be associated with declaration type
+			handleAnnotations(modifiers.subList(i + 1, modifiers.size()), this.options.alignment_for_type_annotations);
+		}
+	}
+
 	private void prepareElementsList(List<? extends ASTNode> elements, int separatorType, int wrapParentType) {
 		for (int i = 0; i < elements.size(); i++) {
 			ASTNode element = elements.get(i);
@@ -1306,6 +1374,8 @@ public class WrapPreparator extends ASTVisitor {
 		boolean isForceWrap = (wrappingOption & Alignment.M_FORCE) != 0;
 		boolean isAlreadyWrapped = false;
 		if (indentOnColumn) {
+			extraIndent = 0;
+		} else if (parentNode instanceof Annotation) {
 			extraIndent = 0;
 		} else if (parentNode instanceof EnumDeclaration) {
 			// special behavior for compatibility with legacy formatter

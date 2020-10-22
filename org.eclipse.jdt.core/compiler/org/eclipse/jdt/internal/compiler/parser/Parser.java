@@ -958,6 +958,7 @@ public class Parser implements TerminalTokens, ParserBasicInformation, Conflicte
 	protected int lParenPos,rParenPos; //accurate only when used !
 	protected int modifiers;
 	protected int modifiersSourceStart;
+	protected int annotationAsModifierSourceStart = -1;
 	protected int colonColonStart = -1;
 	protected int[] nestedMethod; //the ptr is nestedType
 	protected int forStartPosition = 0;
@@ -1315,7 +1316,7 @@ public void checkComment() {
 
 	int lastComment = this.scanner.commentPtr;
 
-	if (this.modifiersSourceStart >= 0) {
+	if (this.modifiersSourceStart >= 0 && this.modifiersSourceStart > this.annotationAsModifierSourceStart) {
 		// eliminate comments located after modifierSourceStart if positioned
 		while (lastComment >= 0) {
 			int commentSourceStart = this.scanner.commentStarts[lastComment];
@@ -1615,6 +1616,7 @@ protected void consumeAnnotationAsModifier() {
 	int sourceStart = expression.sourceStart;
 	if (this.modifiersSourceStart < 0) {
 		this.modifiersSourceStart = sourceStart;
+		this.annotationAsModifierSourceStart = sourceStart;
 	}
 }
 protected void consumeAnnotationName() {
@@ -13616,6 +13618,7 @@ protected void consumeRecordComponentHeaderRightParen() {
 		this.lastCheckPoint = typeDecl.bodyStart;
 		if (this.currentElement.parseTree() == typeDecl) return;
 	}
+	resetModifiers();
 }
 private void convertToFields(TypeDeclaration typeDecl, RecordComponent[] recComps) {
 	int length = recComps.length;
@@ -17338,6 +17341,7 @@ private void reportSyntaxErrorsForSkippedMethod(TypeDeclaration[] types){
 protected void resetModifiers() {
 	this.modifiers = ClassFileConstants.AccDefault;
 	this.modifiersSourceStart = -1; // <-- see comment into modifiersFlag(int)
+	this.annotationAsModifierSourceStart = -1;
 	this.scanner.commentPtr = -1;
 //{ObjectTeams: more state to restore
 	this.currentIsRole = false;
