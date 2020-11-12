@@ -241,6 +241,12 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		addProperty(JAVADOC_PROPERTY, propertyList);
 		addProperty(MODIFIERS2_PROPERTY, propertyList);
 		addProperty(INTERFACE_PROPERTY, propertyList);
+//{ObjectTeams: OT-specific properties added
+		addProperty(TEAM_PROPERTY, propertyList);
+		addProperty(ROLE_PROPERTY, propertyList);
+		addProperty(PRECEDENCE_PROPERTY, propertyList);
+        addProperty(GUARD_PROPERTY, propertyList);
+//SH}
 		addProperty(NAME_PROPERTY, propertyList);
 		addProperty(TYPE_PARAMETERS_PROPERTY, propertyList);
 		addProperty(SUPERCLASS_TYPE_PROPERTY, propertyList);

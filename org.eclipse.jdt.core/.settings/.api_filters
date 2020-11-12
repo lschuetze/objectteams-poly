@@ -266,6 +266,48 @@
         </filter>
     </resource>
     <resource path="dom/org/eclipse/jdt/core/dom/Modifier.java" type="org.eclipse.jdt.core.dom.Modifier">
+        <filter comment="resolve conflict with new keyword non-sealed" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.Modifier"/>
+                <message_argument value="OT_AFTER_CALLIN"/>
+                <message_argument value="131072"/>
+            </message_arguments>
+        </filter>
+        <filter comment="resolve conflict with new keyword non-sealed" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.Modifier"/>
+                <message_argument value="OT_BEFORE_CALLIN"/>
+                <message_argument value="16384"/>
+            </message_arguments>
+        </filter>
+        <filter comment="resolve conflict with new keyword non-sealed" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.Modifier"/>
+                <message_argument value="OT_GET_CALLOUT"/>
+                <message_argument value="262144"/>
+            </message_arguments>
+        </filter>
+        <filter comment="resolve conflict with new keyword non-sealed" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.Modifier"/>
+                <message_argument value="OT_MISSING_MODIFIER"/>
+                <message_argument value="8192"/>
+            </message_arguments>
+        </filter>
+        <filter comment="resolve conflict with new keyword non-sealed" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.Modifier"/>
+                <message_argument value="OT_REPLACE_CALLIN"/>
+                <message_argument value="4096"/>
+            </message_arguments>
+        </filter>
+        <filter comment="resolve conflict with new keyword non-sealed" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.Modifier"/>
+                <message_argument value="OT_SET_CALLOUT"/>
+                <message_argument value="524288"/>
+            </message_arguments>
+        </filter>
         <filter id="576725006">
             <message_arguments>
                 <message_argument value="IExtendedModifier"/>
