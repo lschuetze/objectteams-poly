@@ -551,10 +551,21 @@ class MethodBinding implements IMethodBinding {
 	public String toString() {
 		return this.binding.toString();
 	}
-//{ObjectTeams: new query:
+//{ObjectTeams: new queries:
 	@Override
 	public boolean isCopied() {
 		return this.binding.copyInheritanceSrc != null;
+	}
+	@Override
+	public IMethodBinding[] getImplicitlyOverridden() {
+		if (this.binding.overriddenTSupers != null) {
+			IMethodBinding[] result = new IMethodBinding[this.binding.overriddenTSupers.length];
+			for (int i = 0; i < result.length; i++) {
+				result[i] = this.resolver.getMethodBinding(this.binding.overriddenTSupers[i]);
+			}
+			return result;
+		}
+		return null;
 	}
 // SH}
 

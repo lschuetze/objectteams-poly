@@ -447,6 +447,12 @@ public interface IMethodBinding extends IBinding {
 	 * @since OTDT 1.1.3
 	 */
 	public boolean isCopied();
+	/**
+	 * Return methods from tsuper roles that are overridden by this method
+	 * @return methods overridden via implicit inheritance.
+	 * @since 3.24 OTDT 2.8.2
+	 */
+	public IMethodBinding[] getImplicitlyOverridden();
 // SH}
 	/**
 	 * Returns if this is a compiler generated  equals(), hashCode(), toString() or any accessor

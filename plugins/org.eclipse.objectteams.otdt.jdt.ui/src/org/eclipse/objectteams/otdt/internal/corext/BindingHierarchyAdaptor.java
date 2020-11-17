@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2006, 2007 Technical University Berlin, Germany.
+ * Copyright 2006, 2020 Technical University Berlin, Germany.
  * 
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,9 @@
  * Technical University Berlin - Initial API and implementation
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.corext;
+
+import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -36,6 +39,8 @@ public team class BindingHierarchyAdaptor
 		@SuppressWarnings("basecall")
 		static callin IMethodBinding findOverriddenMethodInHierarchy(ITypeBinding type, IMethodBinding binding)
 		{
+			if (binding.isCopied())
+				return null; // copied method (synth) is never considered as overriding
 			ITypeBinding declaringClass = binding.getDeclaringClass();
 			if (declaringClass.isClassPartOf(type)) {
 				// if type is the interfacepart of declaringClass
@@ -46,6 +51,11 @@ public team class BindingHierarchyAdaptor
 						return method;
 				}
 				return null; 
+			}
+			if (declaringClass.isRole()) {
+				IMethodBinding[] tsupers = binding.getImplicitlyOverridden();
+				if (tsupers != null && tsupers.length > 0)
+					return tsupers[0];
 			}
 			return base.findOverriddenMethodInHierarchy(type, binding);
 		}
