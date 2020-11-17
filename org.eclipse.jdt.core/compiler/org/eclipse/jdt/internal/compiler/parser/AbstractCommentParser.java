@@ -1099,12 +1099,16 @@ public abstract class AbstractCommentParser implements JavadocTagConstants {
 		int moduleRefTokenCount = 0;
 		boolean lookForModule = false;
 		boolean parsingJava15Plus = this.scanner != null ? this.scanner.sourceLevel >= ClassFileConstants.JDK15 : false;
+		boolean stop = false;
 		nextToken : for (int iToken = 0; ; iToken++) {
 			if (iToken == 0) {
 				lookForModule = false;
 				prevToken = TerminalTokens.TokenNameNotAToken;
 			} else {
 				prevToken = curToken;
+			}
+			if (stop) {
+				break;
 			}
 			int token = readTokenSafely();
 			curToken= token;
@@ -1197,6 +1201,9 @@ public abstract class AbstractCommentParser implements JavadocTagConstants {
 						moduleRefTokenCount = (iToken+1) / 2;
 						consumeToken();
 						lookForModule = false;
+						if (!considerNextChar()) {
+							stop = true;
+						}
 						break;
 					} // else fall through
 					// Note: Add other cases before this case.
@@ -1623,6 +1630,15 @@ public abstract class AbstractCommentParser implements JavadocTagConstants {
 			}
 		}
 		return c;
+	}
+
+	private boolean considerNextChar() {
+		boolean consider = true;
+		char ch = getChar();
+		if (ch == ' ' || (System.lineSeparator().indexOf(ch) == 0)) {
+			consider = false;
+		}
+		return consider;
 	}
 
 	/*

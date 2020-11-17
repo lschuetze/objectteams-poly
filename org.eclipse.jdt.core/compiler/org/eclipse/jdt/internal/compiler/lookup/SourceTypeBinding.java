@@ -1498,10 +1498,7 @@ private void checkPermitsInType() {
 			  if (typeDecl.superInterfaces == null || i >= typeDecl.superInterfaces.length) break;
 // SH}
 				TypeReference superInterfaceRef = typeDecl.superInterfaces[i];
-				if (this.isClass())
-					this.scope.problemReporter().sealedSuperClassDoesNotPermit(this, superInterfaceRef, superInterface);
-				else if (this.isInterface())
-					this.scope.problemReporter().sealedSuperInterfaceDoesNotPermit(this, superInterfaceRef, superInterface);
+				this.scope.problemReporter().sealedSuperInterfaceDoesNotPermit(this, superInterfaceRef, superInterface);
 			}
 		}
 	}
