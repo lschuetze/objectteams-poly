@@ -59,7 +59,7 @@ Project Leader:
    </url>
 
    <requires>
-      <import feature="org.eclipse.jdt" version="3.18.600.v20201026-0840" patch="true"/>
+      <import feature="org.eclipse.jdt" version="3.18.600.v20201117-0725" patch="true"/>
    </requires>
 
    <plugin
