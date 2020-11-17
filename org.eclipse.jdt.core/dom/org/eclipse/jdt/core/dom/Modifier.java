@@ -399,10 +399,6 @@ public final class Modifier extends ASTNode implements IExtendedModifier {
 	public static final int OT_TEAM = 0x8000;  // bit 16
 // SH}
 //{ObjectTeams: OT-specific callin modifier constants
-	// Note(SH): please note, that these modifiers differ from all others in this list,
-	//           since they cannot be applied a class, a method, nor a field.
-	//           I find it misleading to place them in this file alltogether.
-
 	/**
      * OT-specific modifier constant.
      * Applicable only to CallinMappingDeclaration.
