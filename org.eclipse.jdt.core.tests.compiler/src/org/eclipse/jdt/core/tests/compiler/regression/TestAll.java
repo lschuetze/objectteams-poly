@@ -197,9 +197,10 @@ public static Test suite() {
 	 // add 14 specific test here (check duplicates)
 	 ArrayList since_14 = new ArrayList();
 	 since_14.add(SwitchExpressionsYieldTest.class);
-	 since_14.add(RecordsRestrictedClassTest.class);
+// OT: see 	 https://bugs.eclipse.org/bugs/show_bug.cgi?id=561820#c10 :
+//	 since_14.add(RecordsRestrictedClassTest.class);
 	 since_14.add(PatternMatching15Test.class);
-	 since_14.add(JavadocTestForRecord.class);
+//	 since_14.add(JavadocTestForRecord.class);
 	 since_14.add(BatchCompilerTest_14.class);
 
 	 // add 14 specific test here (check duplicates)
@@ -209,6 +210,9 @@ public static Test suite() {
 	 since_15.add(JavadocTest_15.class);
 	 since_15.add(LocalStaticsTest_15.class);
 	 since_15.add(Unicode13Test.class);
+// OT: see 	 https://bugs.eclipse.org/bugs/show_bug.cgi?id=561820#c10 :
+	 since_15.add(RecordsRestrictedClassTest.class);
+	 since_15.add(JavadocTestForRecord.class);
 	// Build final test suite
 	TestSuite all = new TestSuite(TestAll.class.getName());
 	all.addTest(new TestSuite(StandAloneASTParserTest.class));
