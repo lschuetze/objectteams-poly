@@ -1547,7 +1547,7 @@ private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
 private boolean needToProcess(AbstractMethodDeclaration method) {
 	return    method.hasParsedStatements
 		   // different reasons, why it may be normal for a method to have no statements:
-	       || method.isDefaultConstructor() || method.isClinit() || method.isAbstract()
+	       || method.isDefaultConstructor() || method.isCanonicalConstructor() || method.isClinit() || method.isAbstract()
 	       || method.isCopied;
 }
 

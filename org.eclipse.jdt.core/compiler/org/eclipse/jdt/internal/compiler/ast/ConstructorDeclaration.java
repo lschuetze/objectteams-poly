@@ -442,7 +442,7 @@ public void generateCode(ClassScope classScope, ClassFile classFile) {
         }
         return;
     }
-    if (areStatementsMissing() && (this.bits & ASTNode.IsDefaultConstructor) == 0 ) {
+    if (areStatementsMissing() && (this.bits & (ASTNode.IsDefaultConstructor|ASTNode.IsCanonicalConstructor)) == 0 ) {
     	this.binding.bytecodeMissing = true;
     	return;
     }
