@@ -1109,7 +1109,7 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FieldBindi
 
 @Override
 public Constant optimizedBooleanConstant() {
-	if (this.binding.isValidBinding()) {
+	if (this.binding.isValidBinding() && this.resolvedType != null) {
 		switch (this.resolvedType.id) {
 			case T_boolean :
 			case T_JavaLangBoolean :
