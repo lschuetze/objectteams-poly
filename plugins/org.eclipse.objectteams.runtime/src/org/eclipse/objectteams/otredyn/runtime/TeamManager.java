@@ -261,7 +261,7 @@ public class TeamManager implements ITeamManager {
 	private void handleBindingForBase(ITeam t, ITeamManager.TeamStateChange stateChange, IBinding binding,
 			IBoundClass boundClass, IClassIdentifierProvider provider) {
 		IMethod method = boundClass.getMethod(binding.getMemberName(), binding.getMemberSignature(),
-				binding.getBaseFlags(), binding.isHandleCovariantReturn());
+				binding.getMemberParameterList(), binding.getBaseFlags(), binding.isHandleCovariantReturn());
 		int joinpointId = getJoinpointId(boundClass.getMethodIdentifier(method));
 		synchronized (method) {
 			stateChangeForJoinpoint(t, stateChange, binding, boundClass, method, joinpointId);
@@ -355,7 +355,7 @@ public class TeamManager implements ITeamManager {
 				if (binding.getType() == IBinding.BindingType.FIELD_ACCESS) {
 					member = boundClass.getField(binding.getMemberName(), binding.getMemberSignature());
 				} else {
-					member = boundClass.getMethod(binding.getMemberName(), binding.getMemberSignature(), 0/* flags */,
+					member = boundClass.getMethod(binding.getMemberName(), binding.getMemberSignature(), binding.getMemberParameterList(), 0/* flags */,
 							false/* covariantReturn */);
 				}
 
@@ -452,7 +452,7 @@ public class TeamManager implements ITeamManager {
 			// gets wired:
 			subClass.addWiringTask(new ISubclassWiringTask() {
 				public void wire(IBoundClass superClass, IBoundClass subClass) {
-					IMethod subMethod = subClass.getMethod(superMethod.getName(), superMethod.getSignature(),
+					IMethod subMethod = subClass.getMethod(superMethod.getName(), superMethod.getSignature(), superMethod.getParameterList(),
 							0/* flags */, handleCovariantReturn);
 					mergeJoinpoints(superClass, subClass, superMethod, subMethod, handleCovariantReturn);
 				}

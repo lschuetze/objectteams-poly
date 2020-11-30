@@ -50,7 +50,7 @@ public interface IBoundClass {
 	 * @param desc the signature of the method (JVM encoding)
 	 * @return
 	 */
-	IMethod getMethod(String memberName, String memberSignature, int flags, boolean handleCovariantReturn);
+	IMethod getMethod(String memberName, String memberSignature, String memberParameterList, int flags, boolean handleCovariantReturn);
 
 	/**
 	 * This method creates a globally unique identifier for the method

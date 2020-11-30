@@ -420,7 +420,8 @@ public abstract class Attributes {
 				// String boundClassIdentifier = provider.getBoundClassIdentifier(clazz, dMethod.baseclass);
 				AbstractBoundClass baseclass = repo.getBoundClass(dMethod.declaringClass, dMethod.declaringClass.replace('.', '/'), clazz.getClassLoader());
 				// register the target method:
-				baseclass.getMethod(dMethod.name, dMethod.desc, false/*covariantReturn*/, dMethod.isStatic);
+				String parameterList = dMethod.desc.substring(0, dMethod.desc.indexOf(')') + 1);
+				baseclass.getMethod(dMethod.name, dMethod.desc, parameterList, false/*covariantReturn*/, dMethod.isStatic);
 				clazz.recordAccessId(dMethod.perTeamAccessId);
 				clazz.addBinding(new Binding(clazz, dMethod.declaringClass, dMethod.name, dMethod.desc, dMethod.perTeamAccessId, IBinding.BindingType.METHOD_ACCESS));
 			}

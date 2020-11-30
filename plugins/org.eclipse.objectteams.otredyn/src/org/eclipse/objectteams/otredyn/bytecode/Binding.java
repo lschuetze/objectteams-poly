@@ -35,6 +35,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 	private String roleMethodName;
 	private String roleMethodSignature;
 	private CallinModifier callinModifier;
+	private String memberParameterList;
 	/**
 	 * Locally unique id for (an element in) this binding:
 	 * For CALLIN_BINDING this is the callinId,
@@ -73,6 +74,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 		this.roleName = roleClassName;
 		this.roleMethodName = roleMethodName;
 		this.roleMethodSignature = roleMethodSignature;
+		this.memberParameterList = memberSignature.substring(0, memberSignature.indexOf(')') + 1);
 	}
 
 	/**
@@ -88,6 +90,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 		this.memberSignature = memberSignature;
 		this.perTeamId = perTeamAccessId;
 		this.type = type;
+		this.memberParameterList = memberSignature.substring(0, memberSignature.indexOf(')') + 1);
 	}
 
 	/** Create a binding for a role base binding to trigger generating _OT$addRemoveRole. */
@@ -216,5 +219,10 @@ public class Binding implements Comparable<Binding>, IBinding {
 	@Override
 	public CallinModifier getCallinModifier() {
 		return callinModifier;
+	}
+
+	@Override
+	public String getMemberParameterList() {
+		return memberParameterList;
 	}
 }

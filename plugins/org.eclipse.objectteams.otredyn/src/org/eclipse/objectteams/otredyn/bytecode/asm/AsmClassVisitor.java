@@ -72,7 +72,8 @@ class AsmClassVisitor extends ClassVisitor {
 	 */
 	@Override
 	public MethodVisitor visitMethod(int access, final String name, final String desc, String signature, String[] exceptions) {
-		clazz.addMethod(name, desc, (access & Opcodes.ACC_STATIC) != 0, (access & (Opcodes.ACC_PUBLIC|Opcodes.ACC_PROTECTED|Opcodes.ACC_PRIVATE)));
+		String methodParameterList = desc.substring(0, desc.indexOf(')') + 1);
+		clazz.addMethod(name, desc, methodParameterList, (access & Opcodes.ACC_STATIC) != 0, (access & (Opcodes.ACC_PUBLIC|Opcodes.ACC_PROTECTED|Opcodes.ACC_PRIVATE)));
 		if (clazz.isTeam() || clazz.isRole())
 			// check for method annotation ImplicitTeamActivation:
 			return new MethodVisitor(this.api) {

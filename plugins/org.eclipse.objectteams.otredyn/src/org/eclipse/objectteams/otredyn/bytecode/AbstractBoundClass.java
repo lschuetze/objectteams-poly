@@ -71,6 +71,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		private WeavingTaskType weavingTaskType;
 		private String memberName;
 		private String memberSignature;
+		private String memberParameterList;
 		private String memberPrefixId;
 		private int baseFlags;
 		private boolean doAllTransformations;
@@ -85,6 +86,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			this.isHandleCovariantReturn = handleCovariantReturn;
 			this.requireBaseSuperCall = requireBaseSuperCall;
 			this.baseFlags = baseFlags;
+			this.memberParameterList = (memberSignature == null) ? null : memberSignature.substring(0, memberSignature.indexOf(')') + 1);
 		}
 
 		public WeavingTask(WeavingTaskType weavingTaskType, Method method, WeavingTask upstream,
@@ -126,11 +128,16 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		public String getMemberSignature() {
 			return memberSignature;
 		}
+		
+		public String getMemberParameterList() {
+			if(memberParameterList == null)
+				memberParameterList = memberSignature.substring(0, memberSignature.indexOf(')') + 1);
+			return memberParameterList;
+		}
 
 		public String getMethodIdentifier(AbstractBoundClass clazz) {
 			String prefix = memberPrefixId != null ? memberPrefixId : clazz.getId();
-			int close = this.memberSignature.lastIndexOf(')');
-			return prefix + '.' + this.memberName + this.memberSignature.substring(0, close + 1);
+			return prefix + "." + this.memberName + this.memberParameterList;
 		}
 
 		public int getBaseFlags() {
@@ -539,12 +546,12 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * @param isStatic  is this method static
 	 * @param isPrivate is this method private
 	 */
-	public void addMethod(String name, String desc, boolean isStatic, int accessFlags) {
+	public void addMethod(String name, String desc, String parameterList, boolean isStatic, int accessFlags) {
 		if (desc == null) {
 			System.err.println("OTDRE: Method " + name + " in class " + this.name + " has no descriptor");
 			return;
 		}
-		String methodKey = getMethodKey(name, desc);
+		String methodKey = getMethodKey(name, parameterList);
 		Method method = methods.get(methodKey);
 		// Does this method already exists?
 		// Methods are created by getMethod, if the class is not loaded
@@ -560,9 +567,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	/** Method signature sans the return type. */
-	private String getMethodKey(String name, String desc) {
-		int pos = desc.indexOf(')');
-		return name + desc.substring(0, pos + 1);
+	private String getMethodKey(String name, String parameterList) {
+		return name + parameterList;
 	}
 
 	/**
@@ -584,11 +590,11 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		}
 	}
 
-	public Method getMethod(String name, String desc, int flags, boolean allowCovariantReturn) {
+	public Method getMethod(String name, String desc, String parameterList, int flags, boolean allowCovariantReturn) {
 		if (this.parsed) {
 			// in this state the current class may already be inside synchronized
 			// handleTaskList(), try without lock:
-			String methodKey = getMethodKey(name, desc);
+			String methodKey = getMethodKey(name, parameterList);
 			Method method = methods.get(methodKey);
 			if (method != null) {
 				if (allowCovariantReturn || method.getSignature().equals(desc))
@@ -598,7 +604,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		}
 		synchronized (this) {
 			parseBytecode();
-			String methodKey = getMethodKey(name, desc);
+			String methodKey = getMethodKey(name, parameterList);
 			Method method = methods.get(methodKey);
 			if (!allowCovariantReturn && method != null && !method.getSignature().equals(desc))
 				return null; // don't use this
@@ -617,18 +623,19 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	Method getMethod(WeavingTask task) {
-		return getMethod(task.getMemberName(), task.getMemberSignature(), task.getBaseFlags(),
+		return getMethod(task.getMemberName(), task.getMemberSignature(), task.getMemberParameterList(), task.getBaseFlags(),
 				task.isHandleCovariantReturn());
 	}
 
 	Method getMethod(Method method, WeavingTask task) {
-		return getMethod(method.getName(), method.getSignature(), task.getBaseFlags(), task.isHandleCovariantReturn());
+		return getMethod(method.getName(), method.getSignature(), task.getMemberParameterList(), task.getBaseFlags(), task.isHandleCovariantReturn());
 	}
 
 	// same as above but specifically request a static/non-static method
-	public synchronized Method getMethod(String name, String desc, boolean allowCovariantReturn, boolean isStatic) {
+	public synchronized Method getMethod(String name, String desc, String parameterList, boolean allowCovariantReturn, boolean isStatic) {
 		parseBytecode();
-		String methodKey = getMethodKey(name, desc);
+		String methodKey = getMethodKey(name, parameterList);
+		System.out.println(methodKey);
 		Method method = methods.get(methodKey);
 		if (!allowCovariantReturn && method != null && !method.getSignature().equals(desc))
 			method = null; // don't use this
@@ -657,9 +664,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	public String getMethodIdentifier(IMethod method) {
-		String signature = method.getSignature();
-		int close = signature.lastIndexOf(')'); // admit covariant return
-		return getId() + '.' + method.getName() + signature.substring(0, close + 1);
+		return getId() + "." + method.getName() + method.getParameterList(); // admit covariant return
 	}
 
 	/**
@@ -788,7 +793,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 								if (!method.isStatic()
 										&& weavingContext.isWeavable(getSuperClassName(), false, false)) {
 									AbstractBoundClass superclass = getSuperclass();
-									Method superMethod = superclass.getMethod(method.getName(), method.getSignature(),
+									Method superMethod = superclass.getMethod(method.getName(), method.getSignature(), method.getParameterList(),
 											true, false);
 									if (superMethod.isImplemented()) {
 										// binding affects also the super implementation, need to handle wicked super

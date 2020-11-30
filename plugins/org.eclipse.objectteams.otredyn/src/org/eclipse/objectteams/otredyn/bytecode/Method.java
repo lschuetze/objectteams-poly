@@ -28,6 +28,7 @@ import org.eclipse.objectteams.otredyn.runtime.IMethod;
 public class Method extends Member implements IMethod {
 	
 	private boolean implemented;
+	private String parameterList;
 
 	public Method(String name, String signature) {
 		super(name, signature);
@@ -35,6 +36,7 @@ public class Method extends Member implements IMethod {
 
 	public Method(String name, String signature, boolean isStatic, int accessFlags) {
 		super(name, signature, isStatic, accessFlags);
+		this.parameterList = signature.substring(0, signature.indexOf(')') + 1);
 	}
 
 	public boolean isImplemented() {
@@ -67,5 +69,10 @@ public class Method extends Member implements IMethod {
 	@Override
 	public String toString() {
 		return super.toString() + (this.isImplemented() ? " - implemented" : " - not implemented");
+	}
+
+	@Override
+	public String getParameterList() {
+		return parameterList;
 	}
 }

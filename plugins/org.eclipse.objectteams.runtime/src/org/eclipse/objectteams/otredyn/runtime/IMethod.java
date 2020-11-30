@@ -28,5 +28,7 @@ public interface IMethod extends IMember {
 	String getName();
 
 	String getSignature();
+	
+	String getParameterList();
 
 }

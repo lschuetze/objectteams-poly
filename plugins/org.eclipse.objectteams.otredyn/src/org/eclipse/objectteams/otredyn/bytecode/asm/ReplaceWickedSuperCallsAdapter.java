@@ -138,7 +138,8 @@ public class ReplaceWickedSuperCallsAdapter extends AbstractTransformableClassNo
 	/** Callback. */
 	public AbstractInsnNode getLoadBoundMethodIdInsn(MethodInsnNode methodInsn) {
 		// boundMethodId can be statically determined based on the target method.
-		IMethod otdreMethod = superclass.getMethod(methodInsn.name, methodInsn.desc, false, false);
+		String parameterList = methodInsn.desc.substring(0, methodInsn.desc.indexOf(')') + 1);
+		IMethod otdreMethod = superclass.getMethod(methodInsn.name, methodInsn.desc, parameterList, false, false);
 		int methodID = otdreMethod.getGlobalId(superclass);
 		return createLoadIntConstant(methodID);
 	}

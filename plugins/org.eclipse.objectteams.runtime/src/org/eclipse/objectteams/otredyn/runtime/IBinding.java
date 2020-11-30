@@ -75,6 +75,9 @@ public interface IBinding {
 
 	/** Signature (JVM encoding) of the bound base member. */
 	String getMemberSignature();
+	
+	/** Signature (JVM encoding) of the bound base member. */
+	String getMemberParameterList();
 
 	String getRoleClassName();
 
