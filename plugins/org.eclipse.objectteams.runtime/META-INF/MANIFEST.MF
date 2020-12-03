@@ -6,7 +6,8 @@ Automatic-Module-Name: org.eclipse.objectteams.runtime
 Bundle-Version: 2.8.1.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Require-Bundle: org.eclipse.jdt.annotation;bundle-version="[2.2.0,3.0.0)";resolution:=optional;visibility:=reexport
+Require-Bundle: org.eclipse.jdt.annotation;bundle-version="[2.2.0,3.0.0)";resolution:=optional;visibility:=reexport,
+ org.slf4j.api;bundle-version="1.7.30"
 Export-Package: org.eclipse.objectteams.otredyn.runtime;version="2.8.1",
  org.eclipse.objectteams.otredyn.runtime.dynamic.linker,
  org.eclipse.objectteams.runtime;version="2.8.1",

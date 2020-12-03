@@ -8,6 +8,8 @@ import org.eclipse.objectteams.otredyn.runtime.IBinding;
 import org.eclipse.objectteams.otredyn.runtime.dynamic.linker.util.ObjectTeamsTypeUtilities;
 import org.objectteams.IBoundBase2;
 import org.objectteams.ITeam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jdk.dynalink.CallSiteDescriptor;
 import jdk.dynalink.linker.GuardedInvocation;
@@ -16,6 +18,8 @@ import jdk.dynalink.linker.LinkerServices;
 import jdk.dynalink.linker.TypeBasedGuardingDynamicLinker;
 
 public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
+
+	static Logger logger = LoggerFactory.getLogger(CallinLinker.class);
 
 	private static MethodHandle lift(final MethodHandles.Lookup lookup, final String joinpointDesc, final ITeam team,
 			final IBinding binding, final Class<?> baseClass) {
@@ -75,6 +79,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		MethodHandle replace = null;
 		CallSiteContext ctx = CallSiteContext.contexts.get(joinpointDesc);
 		for (ITeam team : ctx) {
+			logger.debug("Team {}", team.toString());
 //			out("team", team.toString());
 			final int callinId = ctx.nextCallinId();
 //			out("callinId", Integer.valueOf(callinId).toString());
