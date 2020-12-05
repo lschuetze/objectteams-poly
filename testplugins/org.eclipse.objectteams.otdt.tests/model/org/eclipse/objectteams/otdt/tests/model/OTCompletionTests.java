@@ -1218,4 +1218,36 @@ public void testCompletionOnConfined() throws JavaModelException {
 		requestor.getResults());
 }
 
+public void testBug569502() throws JavaModelException {
+	this.wc = getWorkingCopy("/Completion/src/Main.java",
+		"import java.util.Collection;\n" +
+		"import java.util.List;\n" +
+		"import base p.Base569502;\n" +
+		"public team class Main {\n" +
+		"	protected class R playedBy Base569502 {\n" +
+		"		void filterNulls(Collection<String> proposals)\n" + 
+		"		<-  after void process(String ignore, Object ignore2, Collection<String> proposals)\n" + 
+		"			with { proposals <- proposals }\n" + 
+		"		can\n" +
+		"		void filterNulls(Collection<String> proposals) {\n" + 
+		"			if ((proposals instanceof List)) {\n" + 
+		"				List<String> list = (List<String>)proposals;\n" + 
+		"				for (int i=list.size()-1; i>=0; i--)\n" + 
+		"					if (list.get(i) == null)\n" + 
+		"						list.remove(i);\n" + 
+		"			}\n" + 
+		"		}\n" + 
+		"	}\n" +
+		"\n");
+    CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+    String str = this.wc.getSource();
+    String completeBehind = "		can";
+    int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+    this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
+
+	assertResults(
+		"can[POTENTIAL_METHOD_DECLARATION]{can, LMain$R;, ()V, can, null, 39}\n" + 
+		"canHandle[CALLOUT_DECLARATION]{boolean canHandle() -> boolean canHandle();, Lp.Base569502;, ()Z, canHandle, null, 52}",
+		requestor.getResults());
+}
 }
