@@ -175,11 +175,11 @@
               class="org.eclipse.objectteams.otdt.internal.debug.adaptor.launching.PDELaunchingAdaptor"
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
            <superBase
-                 class="org.eclipse.objectteams.otdt.debug.adaptor.SuperBase1"
+                 class="org.eclipse.debug.core.model.LaunchConfigurationDelegate"
                  plugin="org.eclipse.debug.core">
            </superBase>
            <superBase
-                 class="org.eclipse.objectteams.otdt.debug.adaptor.SuperBase2"
+                 class="org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate"
                  plugin="org.eclipse.jdt.launching">
            </superBase>
         </team>
