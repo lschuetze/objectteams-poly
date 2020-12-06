@@ -8,7 +8,9 @@ BASE=`pwd`
 
 # ABSOLUTE PATHS:
 export UPDATES_BASE=/home/data/httpd/download.eclipse.org/objectteams/updates
-export JAVA8=/shared/common/jdk1.8.0_x64-latest
+export JAVA8=/shared/common/jdk1.8.0_x64-latest/bin/java
+export JAVA11=/shared/common/java/openjdk/jdk-11/bin/java
+
 
 # RELATIVE PATHS:
 BUILD=${BASE}/releng/build-scripts/build
@@ -106,7 +108,7 @@ fi
 for dir in features plugins
 do
         find ${BASE}/testrun/updateSite/${dir} -type f -name \*.jar -exec \
-                ${JAVA8}/bin/java -jar ${JARPROCESSOR} -verbose -processAll -repack -outputDir ${CONDITIONED}/${dir} {} \;
+                ${JAVA8} -jar ${JARPROCESSOR} -verbose -processAll -repack -outputDir ${CONDITIONED}/${dir} {} \;
 done
 # not conditioned, but must not be skipped!
 cp ${BASE}/testrun/updateSite/plugins/org.eclipse.jdt.core_* ${CONDITIONED}/plugins/
@@ -175,12 +177,12 @@ echo "====Step 3: pack jars (again) ===="
 for dir in ${LOCATION}/features ${LOCATION}/plugins
 do
         find ${dir} -type f -name \*.jar -exec \
-                ${JAVA8}/bin/java -jar ${JARPROCESSOR} -verbose -pack -outputDir ${dir} {} \;
+                ${JAVA8} -jar ${JARPROCESSOR} -verbose -pack -outputDir ${dir} {} \;
 done
 
 
 echo "====Step 4: generate metadata===="
-java -jar ${LAUNCHER_PATH} -consoleLog -application ${FABPUB} \
+${JAVA11} -jar ${LAUNCHER_PATH} -consoleLog -application ${FABPUB} \
     -source ${LOCATION} \
     -metadataRepository file:${LOCATION} \
     -artifactRepository file:${LOCATION} \
@@ -205,7 +207,7 @@ ls -ltr ${METADATA}/$OTDTVERSION/*.xml
 echo "====Step 7: generate category===="
 CATEGORYARGS="-categoryDefinition file:${BASE}/testrun/build-root/src/features/org.eclipse.objectteams.otdt/category.xml"
 echo "CATEGORYARGS  = ${CATEGORYARGS}"
-java -jar ${LAUNCHER_PATH} -consoleLog -application ${CATPUB} \
+${JAVA11} -jar ${LAUNCHER_PATH} -consoleLog -application ${CATPUB} \
     -source ${LOCATION} \
     -metadataRepository file:${LOCATION} \
     ${CATEGORYARGS}
