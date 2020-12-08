@@ -808,9 +808,10 @@ private void writeBinaryLocations(DataOutputStream out, ClasspathLocation[] loca
 			}
 			List<Consumer<IUpdatableModule>> mu = c.updates.getList(UpdateKind.MODULE, false);
 			if (mu != null) {
-				out.writeInt(mu.size());
-				for (Consumer<IUpdatableModule> cons : mu) {
-					AddReads m = (AddReads) cons;
+				// TODO, here we cannot handle MODULE_MAIN_CLASS nor MODULE_PACKAGES (ModuleUpdater stores a lambda), should we?
+				List<AddReads> allReads = mu.stream().filter(AddReads.class::isInstance).map(AddReads.class::cast).collect(Collectors.toList());
+				out.writeInt(allReads.size());
+				for (AddReads m : allReads) {
 					writeName(m.getTarget(), out);
 				}
 			} else {
