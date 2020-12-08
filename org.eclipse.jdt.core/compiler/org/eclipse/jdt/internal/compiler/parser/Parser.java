@@ -17345,6 +17345,7 @@ protected void resetModifiers() {
 //{ObjectTeams: more state to restore
 	this.currentIsRole = false;
 // SH}
+	this.scanner.caseStartPosition = -1;
 }
 /*
  * Reset context so as to resume to regular parse loop
