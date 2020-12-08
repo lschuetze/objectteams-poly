@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.internal.core.dom.util.DOMASTUtil;
+
 /**
  * NEW for OTDT, built in analogy to TypeDeclaration (its superclass)
  *
@@ -208,6 +210,14 @@ public class RoleTypeDeclaration extends TypeDeclaration {
         internalBodyDeclarationPropertyFactory(RoleTypeDeclaration.class);
 
 	/**
+	 * The "permitsTypes" structural property of this node type (element type: {@link Type}) (added in JLS15 API).
+	 * @since 3.24
+	 */
+	@SuppressWarnings("hiding")
+	public static final ChildListPropertyDescriptor PERMITS_TYPES_PROPERTY =
+		new ChildListPropertyDescriptor(RoleTypeDeclaration.class, "permitsTypes", Type.class, NO_CYCLE_RISK); //$NON-NLS-1$
+
+	/**
 	 * The "precedence" structural property.
 	 * @since 0.9.24
 	 */
@@ -234,6 +244,13 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     @SuppressWarnings("rawtypes")
 	private static final List PROPERTY_DESCRIPTORS_3_0;
 
+	/**
+	 * A list of property descriptors (element type:
+	 * {@link StructuralPropertyDescriptor}),
+	 * or null if uninitialized.
+	 * @since 3.22
+	 */
+	private static final List PROPERTY_DESCRIPTORS_15;
 
 
     static {
@@ -272,6 +289,26 @@ public class RoleTypeDeclaration extends TypeDeclaration {
         addProperty(BODY_DECLARATIONS_PROPERTY, propertyList);
 		addProperty(PRECEDENCE_PROPERTY, propertyList);
         PROPERTY_DESCRIPTORS_3_0 = reapPropertyList(propertyList);
+
+		propertyList = new ArrayList<>(16);
+		createPropertyList(RoleTypeDeclaration.class, propertyList);
+		addProperty(JAVADOC_PROPERTY, propertyList);
+		addProperty(MODIFIERS2_PROPERTY, propertyList);
+		addProperty(INTERFACE_PROPERTY, propertyList);
+		addProperty(TEAM_PROPERTY, propertyList);
+		addProperty(ROLE_PROPERTY, propertyList);
+        addProperty(ROLE_FILE_PROPERTY, propertyList);
+        addProperty(BASECLASS_TYPE_PROPERTY, propertyList);
+        addProperty(TEAMCLASS_TYPE_PROPERTY, propertyList);
+		addProperty(NAME_PROPERTY, propertyList);
+		addProperty(TYPE_PARAMETERS_PROPERTY, propertyList);
+		addProperty(SUPERCLASS_TYPE_PROPERTY, propertyList);
+		addProperty(SUPER_INTERFACE_TYPES_PROPERTY, propertyList);
+		addProperty(GUARD_PROPERTY, propertyList);
+		addProperty(PERMITS_TYPES_PROPERTY, propertyList);
+		addProperty(BODY_DECLARATIONS_PROPERTY, propertyList);
+		addProperty(PRECEDENCE_PROPERTY, propertyList);
+		PROPERTY_DESCRIPTORS_15 = reapPropertyList(propertyList);
     }
 
     /**
@@ -296,6 +333,27 @@ public class RoleTypeDeclaration extends TypeDeclaration {
             return PROPERTY_DESCRIPTORS_3_0;
         }
     }
+
+	/**
+	 * Returns a list of structural property descriptors for this node type.
+	 * Clients must not modify the result.
+	 *
+	 * @param apiLevel the API level; one of the
+	 * <code>AST.JLS*</code> constants
+	 * @param previewEnabled the previewEnabled flag
+	 * @return a list of property descriptors (element type:
+	 * {@link StructuralPropertyDescriptor})
+	 * @noreference This method is not intended to be referenced by clients.
+	 * @since 3.22
+	 */
+	public static List propertyDescriptors(int apiLevel, boolean previewEnabled) {
+		if (DOMASTUtil.isFeatureSupportedinAST(apiLevel, previewEnabled, Modifier.SEALED)) {
+			return PROPERTY_DESCRIPTORS_15;
+		} else if (apiLevel == AST.JLS2_INTERNAL) {
+			return PROPERTY_DESCRIPTORS_2_0;
+		}
+		return PROPERTY_DESCRIPTORS_3_0;
+	}
 
     /**
      * The optional baseClass name; <code>null</code> if none.
@@ -353,6 +411,11 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     {
         return propertyDescriptors(apiLevel);
     }
+
+	@Override
+	List internalStructuralPropertiesForType(int apiLevel, boolean previewEnabled) {
+		return propertyDescriptors(apiLevel, previewEnabled);
+	}
 
     /* (omit javadoc for this method)
      * Method declared on ASTNode.

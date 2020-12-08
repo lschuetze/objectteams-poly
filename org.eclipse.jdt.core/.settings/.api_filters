@@ -361,6 +361,14 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="dom/org/eclipse/jdt/core/dom/RoleTypeDeclaration.java" type="org.eclipse.jdt.core.dom.RoleTypeDeclaration">
+        <filter comment="copied addition from JDT" id="336658481">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.RoleTypeDeclaration"/>
+                <message_argument value="PERMITS_TYPES_PROPERTY"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="dom/org/eclipse/jdt/core/dom/SimpleName.java" type="org.eclipse.jdt.core.dom.SimpleName">
         <filter id="576778288">
             <message_arguments>
