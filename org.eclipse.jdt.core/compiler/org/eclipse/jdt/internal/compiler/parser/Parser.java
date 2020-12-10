@@ -17345,13 +17345,14 @@ protected void resetModifiers() {
 //{ObjectTeams: more state to restore
 	this.currentIsRole = false;
 // SH}
-	this.scanner.caseStartPosition = -1;
 }
 /*
  * Reset context so as to resume to regular parse loop
  */
 protected void resetStacks() {
-
+//{ObjectTeams: bugfixattempt:
+	this.scanner.caseStartPosition = -1;
+// SH}
 	this.astPtr = -1;
 	this.astLengthPtr = -1;
 	this.patternPtr = -1;
