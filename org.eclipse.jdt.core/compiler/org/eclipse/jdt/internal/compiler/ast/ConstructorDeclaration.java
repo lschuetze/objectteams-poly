@@ -53,6 +53,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.ProblemDetail;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.InsertTypeAdjustmentsVisitor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
@@ -346,7 +347,7 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 					&& this.constructorCall.accessMode != ExplicitConstructorCall.Tsuper) {
 				for (ReferenceBinding tsuperRole : roleType.roleModel.getTSuperRoleBindings()) {
 					RoleModel tsuperModel = tsuperRole.roleModel;
-					if (tsuperModel != null && tsuperModel.hasFieldInit()) {
+					if (tsuperModel != null && tsuperModel.hasFinalFieldInit()) {
 						classScope.problemReporter().needToCallTSuper(this.constructorCall, tsuperRole);
 						break;
 					}
@@ -623,7 +624,7 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 		initializerScope.computeLocalVariablePositions(argSlotSize, codeStream); // offset by the argument size (since not linked to method scope)
 
 		boolean needFieldInitializations = this.constructorCall == null || this.constructorCall.accessMode != ExplicitConstructorCall.This;
-//{ObjectTeams: some more constructors do not initialize fields:
+//{ObjectTeams: some deviations regarding field initialization:
 		// copied team constructors (due to arg lifting) do not initialize fields
 		if (   !needFieldInitializations
 			&& this.constructorCall != null
@@ -653,6 +654,9 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 			if (!preInitSyntheticFields){
 				generateSyntheticFieldInitializationsIfNecessary(this.scope, codeStream, declaringClass);
 			}
+//{ObjectTeams: if a role can make use of _OT$InitFields, that is where all fields are initialized (only if all are non-final):
+		  if (!isRoleUsingInitFields(declaringType, declaringClass)) {
+// orig:
 			// generate user field initialization
 			if (declaringType.fields != null) {
 				for (int i = 0, max = declaringType.fields.length; i < max; i++) {
@@ -662,6 +666,29 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 					}
 				}
 			}
+// :giro
+		  } else
+			callInit:
+		  {
+				// lifting ctor already contains the invoke statement
+				MethodBinding[] initMethods = declaringType.binding.getMethods(IOTConstants.INIT_METHOD_NAME);
+				if (initMethods.length >= 1)
+				{
+					int argCount = TSuperHelper.isTSuper(this.binding) ?  1 : 0;
+					for (int i = 0; i < initMethods.length; i++) {
+						if (initMethods[i].parameters.length == argCount) {
+							codeStream.aload_0(); // this
+							codeStream.invoke(Opcodes.OPC_invokevirtual, initMethods[i], declaringType.binding);
+							break callInit;
+						}
+					}
+				}
+				// no matching role init method should mean we had errors.
+				assert    TypeModel.isIgnoreFurtherInvestigation(classScope.referenceContext)
+				       || RoleModel.hasTagBit(declaringClass, RoleModel.BaseclassHasProblems)
+				       || declaringClass.isTeam(); // might be the "turning constructor" of a nested team (see 2.1.11-otjld-*-1f)
+		  }
+// SH}
 		}
 		// generate statements
 		if (this.statements != null) {
@@ -695,6 +722,23 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 		}
 	}
 	classFile.completeMethodInfo(this.binding, methodAttributeOffset, attributeNumber);
+}
+private boolean isRoleUsingInitFields(TypeDeclaration typeDecl, ReferenceBinding typeBinding) {
+	if (!typeDecl.isRole()
+		  || (   typeBinding.enclosingType() != null // also accept roles of o.o.Team
+			  && typeBinding.enclosingType().id == IOTConstants.T_OrgObjectTeamsTeam))
+		return false;
+	if (typeDecl.fields == null)
+		return false;
+	boolean hasInitialization = false;
+	for (FieldDeclaration fieldDeclaration : typeDecl.fields) {
+		if (fieldDeclaration.initialization != null) {
+			if (fieldDeclaration.isFinal())
+				return false; // needs to be set inside a proper constructor!
+			hasInitialization = true;
+		}
+	}
+	return hasInitialization;
 }
 
 @Override

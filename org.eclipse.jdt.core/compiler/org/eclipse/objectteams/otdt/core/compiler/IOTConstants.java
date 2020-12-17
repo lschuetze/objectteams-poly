@@ -96,6 +96,8 @@ public interface IOTConstants
 	public static final char[] OT_SETFIELD         = (OT_DOLLAR+"set$").toCharArray();
 	public static final String OT_DOLLAR_ARG       = OT_DOLLAR + "arg";
 
+	public static final char[] INIT_METHOD_NAME    = (OT_DOLLAR + "InitFields").toCharArray();
+
     // bytecode attributes:
     public static final String PLAYEDBY               = "PlayedBy";
     public static final char[] PLAYEDBY_NAME          = PLAYEDBY.toCharArray();
@@ -129,7 +131,7 @@ public interface IOTConstants
     public static final int    OT_CLASS_ROLE_FILE       = 16;
     public static final int    OT_CLASS_FLAG_HAS_TSUPER = 32;
     public static final int    OT_CLASS_CONFINED        = 64; // means: superclass Object should be removed on loading
-    public static final int    OT_CLASS_HAS_FIELD_INITS = 128;
+    public static final int    OT_CLASS_HAS_FINAL_FIELD_INITS = 128;
 
     public static final char[] CALLIN_FLAGS           = "CallinFlags".toCharArray();
       // possible values for CALLIN_FLAGS:

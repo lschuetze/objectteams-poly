@@ -2123,7 +2123,7 @@ public void resolve() {
 //{ObjectTeams:	should we work at all?
 	    Config config = Config.getConfig();
 	    boolean fieldsAndMethods = config != null && config.verifyMethods;
-	    boolean hasFieldInit = false;
+	    boolean hasFinalFieldInit = false;
 	  if (fieldsAndMethods) {
 // SH}
 		if (this.recordComponents != null) {
@@ -2160,8 +2160,8 @@ public void resolve() {
 						localMaxFieldCount++;
 						lastVisibleFieldID = field.binding.id;
 //{ObjectTeams: has init?
-						if (field.initialization != null)
-							hasFieldInit = true;
+						if (field.initialization != null && field.isFinal())
+							hasFinalFieldInit = true;
 // SH}
 						break;
 
@@ -2175,8 +2175,8 @@ public void resolve() {
 //{ObjectTeams: also count type value parameters into maxFieldCount
 		if (this.typeParameters != null)
 			TypeValueParameter.updateMaxFieldCount(this);
-		if (hasFieldInit && isRole())
-	        WordValueAttribute.addClassFlags(getRoleModel(), IOTConstants.OT_CLASS_HAS_FIELD_INITS);
+		if (hasFinalFieldInit && isRole())
+	        WordValueAttribute.addClassFlags(getRoleModel(), IOTConstants.OT_CLASS_HAS_FINAL_FIELD_INITS);
 	  }
 // SH}
 		if (this.maxFieldCount < localMaxFieldCount) {

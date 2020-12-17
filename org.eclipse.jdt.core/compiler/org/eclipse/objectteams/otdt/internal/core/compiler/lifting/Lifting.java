@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleInitializationMethod;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
@@ -413,8 +414,13 @@ public class Lifting extends SwitchOnBaseTypeGenerator
                 new Expression[] {
                     gen.singleNameReference(baseArgName)
                 };
-        // start with an empty statements list
-        liftToConstructorDeclaration.setStatements(new Statement[0]);
+        // start with an empty statements list, except for this._OT$InitFields();
+        liftToConstructorDeclaration.setStatements(new Statement[] {
+        		RoleInitializationMethod.genInvokeInitMethod(
+					    					gen.thisReference(),
+					    					roleType.binding,
+					    					gen)
+        });
     }
 
     private void genLiftToConstructorStatements(

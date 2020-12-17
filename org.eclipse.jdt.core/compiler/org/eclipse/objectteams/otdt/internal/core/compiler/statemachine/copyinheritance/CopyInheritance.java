@@ -2246,6 +2246,9 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
                 }
             }
         }
+        if (    !binding.declaringClass.isDirectRole()
+        	&& CharOperation.equals(binding.selector, IOTConstants.INIT_METHOD_NAME))
+        	return changed; // no statements, no casted locals.
         if (!newLocalStats.isEmpty())
         {
         	if (StateHelper.hasState(binding.declaringClass, ITranslationStates.STATE_RESOLVED))
@@ -2348,7 +2351,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	public static boolean needsSuperCtorCall(RoleModel role) {
 		for (ReferenceBinding tsuperRole : role.getTSuperRoleBindings()) {
 			RoleModel tsuperModel = tsuperRole.roleModel;
-			if (tsuperModel != null && tsuperModel.hasFieldInit())
+			if (tsuperModel != null && tsuperModel.hasFinalFieldInit())
 				return true;
 		}
 		return false;

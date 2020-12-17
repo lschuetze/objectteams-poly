@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
@@ -1134,7 +1135,10 @@ public class RoleModel extends TypeModel
 	        this._tsuperRoleBindings[this.numTSuperRoles++] = tsuperRole;
 	        if (getAst() != null && getAst().isInterface())
 	        	TypeLevel.addImplicitInheritance(getAst(), tsuperRole);
-	        WordValueAttribute.addClassFlags(this, IOTConstants.OT_CLASS_FLAG_HAS_TSUPER);
+	        int otClassFlags = IOTConstants.OT_CLASS_FLAG_HAS_TSUPER;
+	        if (tsuperRole.roleModel.hasFinalFieldInit())
+	        	otClassFlags |= IOTConstants.OT_CLASS_HAS_FINAL_FIELD_INITS;
+			WordValueAttribute.addClassFlags(this, otClassFlags);
 	        if (this._binding != null)
 	        	this._binding.modifiers |= AccOverriding;
         }
@@ -1142,10 +1146,17 @@ public class RoleModel extends TypeModel
         this._state.inititalize(ITranslationStates.STATE_ROLES_SPLIT);
     }
 
-    public boolean hasFieldInit() {
+    public boolean hasFinalFieldInit() {
     	AbstractAttribute attribute = getAttribute(IOTConstants.OT_CLASS_FLAGS);
     	if (attribute instanceof WordValueAttribute) {
-    		return (((WordValueAttribute) attribute).getValue() & IOTConstants.OT_CLASS_HAS_FIELD_INITS) != 0;
+    		if ((((WordValueAttribute) attribute).getValue() & IOTConstants.OT_CLASS_HAS_FINAL_FIELD_INITS) != 0)
+    			return true;
+    	}
+    	if (this._classPart != null && this._classPart.fields != null) {
+    		for (FieldDeclaration field : this._classPart.fields) {
+				if (field.initialization != null && field.isFinal())
+					return true;
+			}
     	}
     	return false;
     }

@@ -5763,9 +5763,6 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 			    "	{\n" +
 			    "		buy     <- replace book;\n" +
 			    "		String getName() -> String getName();\n" +
-			    "		public Subscriber(flightbooking.model.Passenger p) {\n" +
-			    "			tsuper();\n" +
-			    "		}\n" +
 			    "	};\n" +
 			    "   @Override\n" +
 			    "	public class Item playedBy flightbooking.model.Segment {\n" +
@@ -5969,9 +5966,6 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 			    "	{\n" +
 			    "		buy     <- replace book;\n" +
 			    "		String getName() -> String getName();\n" +
-			    "		public Subscriber(Passenger p) {\n" +
-			    "			tsuper();\n" +
-			    "		}\n" +
 			    "	};\n" +
 			    "   @Override\n" +
 			    "	public class Item playedBy Segment {\n" +
