@@ -98,9 +98,9 @@ public class OTJStratumGenerationTest003 extends AbstractSourceMapGeneratorTest
         FileInfo fileInfo1 = stratum_role.getOrCreateFileInfo(
         		roleFileSourceName, _packagePath + "/" + "SuperTeam" + "/" + roleFileSourceName);
 
-        LineInfo lineInfo2 = new LineInfo(9,1); // method roleMethod (9..) mapped to synthetic line 1.. (no own lines in SubTeam.RoleA).
+        LineInfo lineInfo1 = new LineInfo(5,1);  // role (5..) mapped to synthetic line 1  (no own lines in SubTeam.RoleA).
+        LineInfo lineInfo2 = new LineInfo(9,2); // method roleMethod (9..) mapped to synthetic line 2..  
         lineInfo2.setRepeatCount(2);
-        LineInfo lineInfo1 = new LineInfo(5,3); // role (5..) mapped to synthetic line 3
         LineInfo lineInfo3 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
         LineInfo lineInfo4 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
 
