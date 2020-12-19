@@ -61,8 +61,8 @@ ARCH=`arch`
 SDK_QUALIFIER=${SDK_QUALIFIER:="I20201202-1800"}
 
 # used only locally (components of the ECLIPSE_SDK_TGZ path):
-EVERSION=${EVERSION:="4.18RC2"}
-DROP=${DROPS4}/${DROP:="S-4.18RC2-202012021800"}
+EVERSION=${EVERSION:="4.18"}
+DROP=${DROPS4}/${DROP:="R-4.18-202012021800"}
 
 # EXPORT: archive file of the base eclipse SDK build:
 ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
