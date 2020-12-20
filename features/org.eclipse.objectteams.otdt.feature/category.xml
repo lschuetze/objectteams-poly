@@ -1,144 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <category-def name="org.eclipse.objectteams.otdt_2.0" label="OTDT 2.0 based on Eclipse 3.7">
-      <description>
-         The Object Teams Development Tooling versions 2.0.x based on Eclipse 3.7.x
-      </description>
-   </category-def>
-   <iu id="org.eclipse.objectteams.otdt.feature.group" range="[2.0.0,2.1.0)">
-      <category name="org.eclipse.objectteams.otdt_2.0"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otequinox.feature.group" range="[2.0.0,2.1.0)">
-      <category name="org.eclipse.objectteams.otdt_2.0"/>
-   </iu>
-   <category-def name="org.eclipse.objectteams.otdt_2.1" label="OTDT 2.1 based on Eclipse 3.8">
-      <description>
-         The Object Teams Development Tooling versions 2.1.x based on Eclipse 3.8.x
-      </description>
-   </category-def>
-   <iu id="org.eclipse.objectteams.otdt.feature.group" range="[2.1.0,2.2.0)">
-      <category name="org.eclipse.objectteams.otdt_2.1"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otdt.source.feature.feature.group" range="[2.1.0,2.2.0)">
-      <category name="org.eclipse.objectteams.otdt_2.1"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otequinox.feature.group" range="[2.1.0,2.2.0)">
-      <category name="org.eclipse.objectteams.otdt_2.1"/>
-   </iu>
-   <category-def name="org.eclipse.objectteams.otdt_2.2" label="OTDT 2.2 based on Eclipse 4.3">
-      <description>
-         The Object Teams Development Tooling versions 2.2.x based on Eclipse 4.3.x
-      </description>
-   </category-def>
-   <iu id="org.eclipse.objectteams.otdt.feature.group" range="[2.2.0,2.3.0)">
-      <category name="org.eclipse.objectteams.otdt_2.2"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otdt.source.feature.feature.group" range="[2.2.0,2.3.0)">
-      <category name="org.eclipse.objectteams.otdt_2.2"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otequinox.feature.group" range="[2.2.0,2.3.0)">
-      <category name="org.eclipse.objectteams.otdt_2.2"/>
-   </iu>
-   <category-def name="org.eclipse.objectteams.otdt_2.3" label="OTDT 2.3 based on Eclipse 4.4">
-      <description>
-         The Object Teams Development Tooling versions 2.3.x based on Eclipse 4.4.x
-      </description>
-   </category-def>
-   <iu id="org.eclipse.objectteams.otdt.feature.group" range="[2.3.0,2.4.0)">
-      <category name="org.eclipse.objectteams.otdt_2.3"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otdt.source.feature.feature.group" range="[2.3.0,2.4.0)">
-      <category name="org.eclipse.objectteams.otdt_2.3"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otequinox.feature.group" range="[2.3.0,2.4.0)">
-      <category name="org.eclipse.objectteams.otdt_2.3"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otequinox.turbo.feature.group" range="[2.3.0,2.4.0)">
-      <category name="org.eclipse.objectteams.otdt_2.3"/>
-   </iu>
-   <category-def name="org.eclipse.objectteams.otdt_2.4" label="OTDT 2.4 based on Eclipse 4.5">
-      <description>
-         The Object Teams Development Tooling versions 2.4.x based on Eclipse 4.5.x
-      </description>
-   </category-def>
-   <iu id="org.eclipse.objectteams.otdt.feature.group" range="[2.4.0,2.5.0)">
-      <category name="org.eclipse.objectteams.otdt_2.4"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otdt.source.feature.feature.group" range="[2.4.0,2.5.0)">
-      <category name="org.eclipse.objectteams.otdt_2.4"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otequinox.feature.group" range="[2.4.0,2.5.0)">
-      <category name="org.eclipse.objectteams.otdt_2.4"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otequinox.turbo.feature.group" range="[2.4.0,2.5.0)">
-      <category name="org.eclipse.objectteams.otdt_2.4"/>
-   </iu>
-   <category-def name="org.eclipse.objectteams.otdt_2.5" label="OTDT 2.5 based on Eclipse 4.6">
-      <description>
-         The Object Teams Development Tooling versions 2.5.x based on Eclipse 4.6.x
-      </description>
-   </category-def>
-   <iu id="org.eclipse.objectteams.otdt.feature.group" range="[2.5.0,2.6.0)">
-      <category name="org.eclipse.objectteams.otdt_2.5"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otdt.source.feature.feature.group" range="[2.5.0,2.6.0)">
-      <category name="org.eclipse.objectteams.otdt_2.5"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otequinox.feature.group" range="[2.5.0,2.6.0)">
-      <category name="org.eclipse.objectteams.otdt_2.5"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otequinox.turbo.feature.group" range="[2.5.0,2.6.0)">
-      <category name="org.eclipse.objectteams.otdt_2.5"/>
-   </iu>
-   <category-def name="org.eclipse.objectteams.otdt_2.6" label="OTDT 2.6 based on Eclipse 4.7">
-      <description>
-         The Object Teams Development Tooling versions 2.6.x based on Eclipse 4.7.x
-      </description>
-   </category-def>
-   <iu id="org.eclipse.objectteams.otdt.feature.group" range="[2.6.0,2.7.0)">
-      <category name="org.eclipse.objectteams.otdt_2.6"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otdt.source.feature.feature.group" range="[2.6.0,2.7.0)">
-      <category name="org.eclipse.objectteams.otdt_2.6"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otequinox.feature.group" range="[2.6.0,2.7.0)">
-      <category name="org.eclipse.objectteams.otdt_2.6"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otequinox.turbo.feature.group" range="[2.6.0,2.7.0)">
-      <category name="org.eclipse.objectteams.otdt_2.6"/>
-   </iu>
-      <category-def name="org.eclipse.objectteams.otdt_2.7" label="OTDT 2.7 based on Eclipse 4.8">
-      <description>
-         The Object Teams Development Tooling versions 2.7.x based on Eclipse 4.8.x
-      </description>
-   </category-def>
-   <iu id="org.eclipse.objectteams.otdt.feature.group" range="[2.7.0,2.8.0)">
-      <category name="org.eclipse.objectteams.otdt_2.7"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otdt.source.feature.feature.group" range="[2.7.0,2.8.0)">
-      <category name="org.eclipse.objectteams.otdt_2.7"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otequinox.feature.group" range="[2.7.0,2.8.0)">
-      <category name="org.eclipse.objectteams.otdt_2.7"/>
-   </iu>
-   <iu id="org.eclipse.objectteams.otequinox.turbo.feature.group" range="[2.7.0,2.8.0)">
-      <category name="org.eclipse.objectteams.otdt_2.7"/>
-   </iu>
-   <category-def name="org.eclipse.objectteams.otdt_2.8" label="OTDT 2.8 (Eclipse 2020-03)">
+   <category-def name="org.eclipse.objectteams.otdt_2.8_2020-12" label="OTDT 2.8 (Eclipse 2020-12)">
       <description>
          The Object Teams Development Tooling versions 2.8.x based on Eclipse 4.15.0 and later
       </description>
    </category-def>
    <iu id="org.eclipse.objectteams.otdt.feature.group" range="[2.8.0,2.9.0)">
-      <category name="org.eclipse.objectteams.otdt_2.8"/>
+      <category name="org.eclipse.objectteams.otdt_2.8_2020-12"/>
    </iu>
    <iu id="org.eclipse.objectteams.otdt.source.feature.feature.group" range="[2.8.0,2.9.0)">
-      <category name="org.eclipse.objectteams.otdt_2.8"/>
+      <category name="org.eclipse.objectteams.otdt_2.8_2020-12"/>
    </iu>
    <iu id="org.eclipse.objectteams.otequinox.feature.group" range="[2.8.0,2.9.0)">
-      <category name="org.eclipse.objectteams.otdt_2.8"/>
+      <category name="org.eclipse.objectteams.otdt_2.8_2020-12"/>
    </iu>
    <iu id="org.eclipse.objectteams.otequinox.turbo.feature.group" range="[2.8.0,2.9.0)">
-      <category name="org.eclipse.objectteams.otdt_2.8"/>
+      <category name="org.eclipse.objectteams.otdt_2.8_2020-12"/>
    </iu>
 </site>
