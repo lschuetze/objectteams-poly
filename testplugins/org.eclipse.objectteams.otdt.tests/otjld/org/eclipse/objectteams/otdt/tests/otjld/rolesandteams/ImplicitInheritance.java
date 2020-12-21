@@ -2010,4 +2010,41 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
 			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI5.R2\' has initializations for final fields.\n" +
 			"----------\n");
     }
+   
+    public void testFieldInitialization6_bound_tsuperUnbound_OK() throws Exception {
+    	// variants with implicit lifting constructors
+    	runConformTest(
+    		new String[] {
+    			"SubTeamFI6btU.java",
+    			"public team class SubTeamFI6btU extends SuperTeamFI6btU {\n" +
+    			"	@Override\n" +
+    			"	protected class R1 playedBy Base1 {\n" +
+    			"	}\n" +
+    			"	@Override\n" +
+    			"	protected class R2 {\n" +
+    			"	}\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		new SubTeamFI6btU().test();\n" +
+    			"	}\n" +
+    			"	@SuppressWarnings(\"roleinstantiation\")\n" +
+    			"	void test() {\n" +
+    			"		System.out.print(new R1(new Base1()).s1);\n" +
+    			"		System.out.print(new R2(new Base1()).s1);\n" +
+    			"		System.out.print(new R2(new Base1()).s2);\n" +
+    			"	}\n" +
+				"}\n",
+    			"SuperTeamFI6btU.java",
+    			"public team class SuperTeamFI6btU {\n" +
+    			"	protected class R1 {\n" +
+    			"		public String s1 = \"s1\";\n" +
+    			"	}\n" +
+    			"	protected class R2 extends R1 {\n" +
+    			"		public String s2 = \"s2\";\n" +
+    			"	}\n" +
+    			"}\n",
+    			"Base1.java",
+    			"public class Base1 {}\n",
+    		},
+    		"s1s1s2");
+    }
 }

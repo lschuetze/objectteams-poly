@@ -728,14 +728,19 @@ private boolean isRoleUsingInitFields(TypeDeclaration typeDecl, ReferenceBinding
 		  || (   typeBinding.enclosingType() != null // also accept roles of o.o.Team
 			  && typeBinding.enclosingType().id == IOTConstants.T_OrgObjectTeamsTeam))
 		return false;
-	if (typeDecl.fields == null)
-		return false;
 	boolean hasInitialization = false;
-	for (FieldDeclaration fieldDeclaration : typeDecl.fields) {
-		if (fieldDeclaration.initialization != null) {
-			if (fieldDeclaration.isFinal())
-				return false; // needs to be set inside a proper constructor!
-			hasInitialization = true;
+	if (typeDecl.fields != null) {
+		for (FieldDeclaration fieldDeclaration : typeDecl.fields) {
+			if (fieldDeclaration.initialization != null) {
+				if (fieldDeclaration.isFinal())
+					return false; // needs to be set inside a proper constructor!
+				hasInitialization = true;
+			}
+		}
+	}
+	for (ReferenceBinding tsuperRole : typeDecl.getRoleModel().getTSuperRoleBindings()) {
+		if (tsuperRole.fields() != Binding.NO_FIELDS && !tsuperRole.roleModel.hasFinalFieldInit()) {
+			hasInitialization = true; // conservative, would need another flag to test if tsuper has field init
 		}
 	}
 	return hasInitialization;
