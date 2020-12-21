@@ -5,9 +5,11 @@
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
     <selectedElements exportClassFiles="false" exportJavaFiles="true" exportOutputFolder="false">
+        <file path="/OTSample-Stopwatch-src/.project"/>
         <javaElement handleIdentifier="=OTSample-Stopwatch-src/src"/>
         <file path="/OTSample-Stopwatch-src/.classpath"/>
-        <file path="/OTSample-Stopwatch-src/.project"/>
         <folder path="/OTSample-Stopwatch-src/img"/>
+        <file path="/OTSample-Stopwatch-src/LaunchStopWatch.launch"/>
+        <folder path="/OTSample-Stopwatch-src/.settings"/>
     </selectedElements>
 </jardesc>

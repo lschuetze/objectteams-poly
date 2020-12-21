@@ -5,14 +5,11 @@
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
     <selectedElements exportClassFiles="false" exportJavaFiles="true" exportOutputFolder="false">
-        <javaElement handleIdentifier="=OTSample-ordersystem-src/src&lt;org.eclipse.objectteams.samples.ordersystem.gui"/>
         <file path="/OTSample-ordersystem-src/Intro0.html"/>
-        <javaElement handleIdentifier="=OTSample-ordersystem-src/src&lt;org.eclipse.objectteams.samples.ordersystem.store"/>
-        <javaElement handleIdentifier="=OTSample-ordersystem-src/src&lt;org.eclipse.objectteams.samples.ordersystem.reservation"/>
-        <javaElement handleIdentifier="=OTSample-ordersystem-src/src&lt;org.eclipse.objectteams.samples.ordersystem.order"/>
-        <file path="/OTSample-ordersystem-src/.project"/>
         <file path="/OTSample-ordersystem-src/.classpath"/>
-        <javaElement handleIdentifier="=OTSample-ordersystem-src/src&lt;org.eclipse.objectteams.samples.ordersystem.data"/>
-        <javaElement handleIdentifier="=OTSample-ordersystem-src/src&lt;org.eclipse.objectteams.samples.ordersystem"/>
+        <file path="/OTSample-ordersystem-src/.project"/>
+        <folder path="/OTSample-ordersystem-src/.settings"/>
+        <file path="/OTSample-ordersystem-src/LaunchOrderGUI.launch"/>
+        <javaElement handleIdentifier="=OTSample-ordersystem-src/src"/>
     </selectedElements>
 </jardesc>
