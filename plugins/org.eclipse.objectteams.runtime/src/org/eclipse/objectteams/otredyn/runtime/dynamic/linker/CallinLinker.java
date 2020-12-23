@@ -73,18 +73,18 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 	}
 
 	static GuardedInvocation getGuardedInvocation(final LinkRequest request, final OTCallSiteDescriptor desc) {
+		logger.debug("========== BEGIN getGuardedInvocation ==========");
 		final String joinpointDesc = desc.getJoinpointDesc();
 		boolean stopSearch = false;
 		MethodHandle beforeComposition = null;
 		MethodHandle replace = null;
 		CallSiteContext ctx = CallSiteContext.contexts.get(joinpointDesc);
 		for (ITeam team : ctx) {
-			logger.debug("Team {}", team.toString());
-//			out("team", team.toString());
+			logger.debug("Team \t\t{}", team.toString());
 			final int callinId = ctx.nextCallinId();
-//			out("callinId", Integer.valueOf(callinId).toString());
+			logger.debug("callinId \t\t{}", Integer.valueOf(callinId).toString());
 			final IBinding binding = ObjectTeamsTypeUtilities.getBindingFromId(joinpointDesc, team, callinId);
-//			out("binding", binding.toString());
+			logger.debug("binding \t\t{}", binding.toString());
 			switch (binding.getCallinModifier()) {
 			case BEFORE:
 				beforeComposition = beforeComposition == null ? handleBefore(desc, team, binding, ctx)
@@ -106,48 +106,51 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		if (beforeComposition != null) {
 			result = MethodHandles.foldArguments(result, beforeComposition);
 		}
+		logger.debug("========== END getGuardedInvocation ==========");
 		return new GuardedInvocation(result);
 	}
 
 	private static MethodHandle handleOrig(OTCallSiteDescriptor desc, CallSiteContext ctx) {
-//		System.out.println("handleOrig");
+		logger.debug("========== BEGIN handleOrig ==========");
 		final MethodHandle orig = ObjectTeamsTypeUtilities.findOrig(desc.getLookup(), ctx.baseClass);
-//		out("orig", orig.toString());
+		logger.debug("orig \t\t{}", orig.toString());
 		MethodHandle result = MethodHandles.dropArguments(orig, 1, ITeam[].class, int.class, int[].class);
-//		out("result", result.toString());
+		logger.debug("result \t\t{}", result.toString());
 		if (desc.isCallNext()) {
 			// might make the super call from last int
 			result = MethodHandles.dropArguments(result, 5, Object[].class);
 			result = MethodHandles.dropArguments(result, 7, int.class);
-//			out("result2", result.toString());
+			logger.debug("result2 \t\t{}", result.toString());
 		}
+		logger.debug("========== END handleOrig ==========");
 		return result;
 	}
 
 	// TODO Lars: variable argument lengths
 	private static MethodHandle handleReplace(final OTCallSiteDescriptor desc, final ITeam team, final IBinding binding,
 			final CallSiteContext ctx) {
+		logger.debug("========== BEGIN handleReplace ==========");
 		final Class<?> base = ObjectTeamsTypeUtilities.getBaseClass(binding.getBoundClass());
 		// MethodHandle(__OT__Role,IBoundBase2,ITeam[],int,int[],int,Object[],args*)Object
 		final MethodHandle rm = findRoleMethod(desc.getLookup(), desc.getJoinpointDesc(), team, binding);
 		final boolean multipleArguments = rm.type().parameterCount() > 7;
-//		out("role function", rm.toString());
+		logger.debug("role function \t\t{}", rm.toString());
 		// MethodHandle(Team,Base)__OT__Role
 		final MethodHandle lift = lift(desc.getLookup(), desc.getJoinpointDesc(), team, binding, base);
-//		out("lift", lift.toString());
+		logger.debug("lift \t\t{}", lift.toString());
 		// MethodHandle(Object[])__OT__Role
 		final MethodHandle liftSpreader = lift.asSpreader(0, Object[].class, 2);
-//		out("liftSpreader", liftSpreader.toString());
+		logger.debug("liftSpreader \t\t{}", liftSpreader.toString());
 		// MethodHandle(Object[],IBoundBase2,ITeam[],int,int[],int,Object[],args*)Object
 		final MethodHandle liftToRole = MethodHandles.filterArguments(rm, 0, liftSpreader);
-//		out("liftToRole", liftToRole.toString());
+		logger.debug("liftToRole \t\t{}", liftToRole.toString());
 		MethodType collectedTypes = MethodType.methodType(Object.class, team.getClass(), base);
 		if (multipleArguments) {
 			collectedTypes = collectedTypes.appendParameterTypes(rm.type().dropParameterTypes(0, 1).parameterList());
 		}
 		// MethodHandle(Team,Base,IBoundBase2,ITeam[],int,int[],int,Object[],args*)Object
 		final MethodHandle liftToRoleCollect = liftToRole.asCollector(0, Object[].class, 2).asType(collectedTypes);
-//		out("liftToRoleCollect", liftToRoleCollect.toString());
+		logger.debug("liftToRoleCollect \t\t{}", liftToRoleCollect.toString());
 		MethodType swapType = MethodType.methodType(Object.class, base, team.getClass());
 		final MethodHandle swapped;
 		if (multipleArguments) {
@@ -164,59 +167,62 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 			// // MethodHandle(Base,Team,IBoundBase2,ITeam[],int,int[],int,Object[])Object
 			swapped = MethodHandles.permuteArguments(liftToRoleCollect, swapType, 1, 0);
 		}
-//		out("swapped", swapped.toString());
+		logger.debug("swapped \t\t{}", swapped.toString());
 		// TODO Lars: A way without insertArgument of index?
 		final MethodHandle unpackTeam = MethodHandles
 				.insertArguments(MethodHandles.arrayElementGetter(ITeam[].class), 1, ctx.getIndex() - 1)
 				.asType(MethodType.methodType(team.getClass(), ITeam[].class));
-//		out("unpackTeam", unpackTeam.toString());
+		logger.debug("unpackTeam \t\t{}", unpackTeam.toString());
 		final MethodHandle unpacked = MethodHandles.filterArguments(swapped, 1, unpackTeam);
-//		out("unpacked", unpacked.toString());
+		logger.debug("unpacked \t\t{}", unpacked.toString());
 		final MethodType unpackedType = MethodType.methodType(Object.class, base, ITeam[].class, base, ITeam[].class,
 				int.class, int[].class, int.class, Object[].class, float.class);
 		final MethodHandle unpackedTyped = unpacked.asType(unpackedType);
-//		out("unpackedTyped", unpackedTyped.toString());
+		logger.debug("unpackedTyped \t\t{}", unpackedTyped.toString());
 		final MethodHandle expanded;
 		if (multipleArguments) {
 			expanded = unpackedTyped.asSpreader(8, Object[].class, rm.type().parameterCount() - 7);
 		} else {
 			expanded = unpackedTyped;
 		}
-//		out("expanded", expanded.toString());
+		logger.debug("expanded \t\t{}", expanded.toString());
 		final MethodType doubleBaseAndTeamType = MethodType.methodType(Object.class, base, ITeam[].class, int.class,
 				int[].class, int.class, Object[].class);
 		final MethodHandle doubleBaseAndTeam = MethodHandles.permuteArguments(expanded, doubleBaseAndTeamType, 0, 1, 0,
 				1, 2, 3, 4, 5, 5);
-//		out("doubleBaseAndTeam", doubleBaseAndTeam.toString());
+		logger.debug("doubleBaseAndTeam \t\t{}", doubleBaseAndTeam.toString());
 		if (desc.isCallAllBindings()) {
+			logger.debug("========== END handleReplace ==========");
 			return doubleBaseAndTeam;
 		} else {
 			final MethodHandle dropObjectParams = MethodHandles.dropArguments(doubleBaseAndTeam, 6, Object[].class);
-//			out("dropObjectParams", dropObjectParams.toString());
+			logger.debug("dropObjectParams \t\t{}", dropObjectParams.toString());
 			final MethodHandle dropBaseId = MethodHandles.dropArguments(dropObjectParams, 7, int.class);
-//			out("dropBaseId", dropBaseId.toString());
+			logger.debug("dropBaseId \t\t{}", dropBaseId.toString());
+			logger.debug("========== END handleReplace ==========");
 			return dropBaseId;
 		}
 	}
 
 	private static MethodHandle handleBefore(final OTCallSiteDescriptor desc, final ITeam team, final IBinding binding,
 			final CallSiteContext ctx) {
+		logger.debug("========== BEGIN handleBefore ==========");
 		final Class<?> base = ObjectTeamsTypeUtilities.getBaseClass(binding.getBoundClass());
 		final MethodHandle rm = findRoleMethod(desc.getLookup(), desc.getJoinpointDesc(), team, binding);
 		final boolean multipleArguments = rm.type().parameterCount() > 1;
-//		out("role function", rm.toString());
+		logger.debug("role function \t\t{}", rm.toString());
 		final MethodHandle lift = lift(desc.getLookup(), desc.getJoinpointDesc(), team, binding, base);
-//		out("lift", lift.toString());
+		logger.debug("lift \t\t{}", lift.toString());
 		final MethodHandle liftSpreader = lift.asSpreader(0, Object[].class, 2);
-//		out("liftSpreader", liftSpreader.toString());
+		logger.debug("liftSpreader \t\t{}", liftSpreader.toString());
 		final MethodHandle liftToRole = MethodHandles.filterArguments(rm, 0, liftSpreader);
-//		out("liftToRole", liftToRole.toString());
+		logger.debug("liftToRole \t\t{}", liftToRole.toString());
 		MethodType collectedTypes = MethodType.methodType(void.class, team.getClass(), base);
 		if (multipleArguments) {
 			collectedTypes = collectedTypes.appendParameterTypes(rm.type().dropParameterTypes(0, 1).parameterList());
 		}
 		final MethodHandle liftToRoleCollect = liftToRole.asCollector(0, Object[].class, 2).asType(collectedTypes);
-//		out("liftToRoleCollect", liftToRoleCollect.toString());
+		logger.debug("liftToRoleCollect \t\t{}", liftToRoleCollect.toString());
 		MethodType swapType = MethodType.methodType(void.class, base, team.getClass());
 		final MethodHandle swapped;
 		if (multipleArguments) {
@@ -231,13 +237,13 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		} else {
 			swapped = MethodHandles.permuteArguments(liftToRoleCollect, swapType, 1, 0);
 		}
-//		out("swapped", swapped.toString());
+		logger.debug("swapped \t\t{}", swapped.toString());
 		final MethodHandle unpackTeam = MethodHandles
 				.insertArguments(MethodHandles.arrayElementGetter(ITeam[].class), 1, ctx.getIndex() - 1)
 				.asType(MethodType.methodType(team.getClass(), ITeam[].class));
-//		out("unpackTeam", unpackTeam.toString());
+		logger.debug("unpackTeam \t\t{}", unpackTeam.toString());
 		final MethodHandle unpacked = MethodHandles.filterArguments(swapped, 1, unpackTeam);
-//		out("unpacked", unpacked.toString());
+		logger.debug("unpacked \t\t{}", unpacked.toString());
 		final MethodHandle dropped;
 		if (multipleArguments) {
 			final MethodHandle unpackedArgs = unpacked.asSpreader(Object[].class, rm.type().parameterCount() - 1);
@@ -245,14 +251,16 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		} else {
 			dropped = MethodHandles.dropArguments(unpacked, 2, int.class, int[].class, int.class, Object[].class);
 		}
-//		out("dropped", dropped.toString());
+		logger.debug("dropped \t\t{}", dropped.toString());
 		if (desc.isCallAllBindings()) {
+			logger.debug("========== END handleBefore ==========");
 			return dropped;
 		} else {
 			final MethodHandle dropObjectParams = MethodHandles.dropArguments(dropped, 6, Object[].class);
-//			out("dropObjectParams", dropObjectParams.toString());
+			logger.debug("dropObjectParams \t\t{}", dropObjectParams.toString());
 			final MethodHandle dropBaseId = MethodHandles.dropArguments(dropObjectParams, 7, int.class);
-//			out("dropBaseId", dropBaseId.toString());
+			logger.debug("dropBaseId \t\t{}", dropBaseId.toString());
+			logger.debug("========== END handleBefore ==========");
 			return dropBaseId;
 		}
 	}
