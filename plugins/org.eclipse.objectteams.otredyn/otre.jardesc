@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="WINDOWS-1252" standalone="no"?>
 <jardesc>
-    <jar path="/Users/lschuetze/Development/repos/role-benchmarks/implementations/objectteams/indy-3.8.0/cp/otredyn.jar"/>
+    <jar path="C:/Users/corny/OneDrive/Uni/7. Semester/BA/role-benchmarks/implementations/objectteams/indy-3.8.0/cp/otredyn.jar"/>
     <options buildIfNeeded="true" compress="true" descriptionLocation="/org.eclipse.objectteams.otredyn/otre.jardesc" exportErrors="false" exportWarnings="true" includeDirectoryEntries="false" overwrite="true" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
