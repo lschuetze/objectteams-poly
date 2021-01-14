@@ -1238,6 +1238,20 @@ public void testBug569502() throws JavaModelException {
 		"			}\n" + 
 		"		}\n" + 
 		"	}\n" +
+		"	protected class WithSwitchCase {\n" +
+		"		void m(int i) {\n" +
+		"			switch (i) {\n" +
+		"				case 0: System.out.println(i); break;\n" +
+		"				default: return;\n" +
+		"			}\n" +
+		"		}\n" +
+		"	}\n" +
+		"	protected class WithCallout playedBy Base569502 {\n" +
+		"		void bm(int i) -> void bm(int i);\n" + // this could no be parsed, wrongly seeing TokenNameBeginCaseExpr
+		"		void another() {\n" +
+		"			System.out.println(\"other\");\n" +
+		"		}\n" +
+		"	}\n" +
 		"\n");
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();

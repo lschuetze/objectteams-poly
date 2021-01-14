@@ -8,5 +8,6 @@ public class Base569502 {
 	boolean canHandle() {
 		return false;
 	}
+	void bm(int i) {}
 }
 
