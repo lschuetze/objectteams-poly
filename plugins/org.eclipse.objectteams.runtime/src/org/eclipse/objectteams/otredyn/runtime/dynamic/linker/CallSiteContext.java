@@ -53,7 +53,7 @@ public class CallSiteContext implements Iterable<ITeam> {
 
 		@Override
 		public boolean hasNext() {
-			return index < teams.length - 1;
+			return index < teams.length;
 		}
 
 		@Override
