@@ -4,6 +4,8 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.SwitchPoint;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 
@@ -17,7 +19,7 @@ public class TeamsAndCallinIdsLinker implements GuardingDynamicLinker {
 
 	private static MethodHandle getTeamsAndCallinIds = null;
 
-	private static Object[] cachedVal = null;
+	private static Map<Integer, Object[]> cachedValues = new HashMap<>();
 
 	private static final MethodHandle CACHED;
 
@@ -47,10 +49,14 @@ public class TeamsAndCallinIdsLinker implements GuardingDynamicLinker {
 
 	@SuppressWarnings("unused")
 	private static Object[] getCachedTeamsAndCallinIds(final int joinpointId) {
-		if (cachedVal == null) {
-			cachedVal = TeamManager.getTeamsAndCallinIds(joinpointId);
+		Object[] value = null;
+		if(cachedValues.containsKey(Integer.valueOf(joinpointId))) {
+			value = cachedValues.get(Integer.valueOf(joinpointId));
+		} else {
+			value = TeamManager.getTeamsAndCallinIds(joinpointId);
+			cachedValues.put(Integer.valueOf(joinpointId), value);
 		}
-		return cachedVal;
+		return value;
 	}
 
 	@Override
