@@ -66,6 +66,8 @@ public class TSuperMessageSend extends MessageSend {
 
 	public  TsuperReference tsuperReference;
 
+	public boolean isReturnFromCallinMethod;
+
 	/** Check whether this message send contributes to base call analysis */
 	@Override
 	public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
@@ -170,6 +172,13 @@ public class TSuperMessageSend extends MessageSend {
 	}
 
 	@Override
+	public void computeConversion(Scope scope, TypeBinding runtimeType, TypeBinding compileTimeType) {
+		if (this.isReturnFromCallinMethod)
+			compileTimeType = this.expectedType; // generalized 'Object' return type
+		super.computeConversion(scope, runtimeType, compileTimeType);
+	}
+
+	@Override
 	public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired)
 	{
 		// for code gen we need to add the marker arg...
@@ -206,7 +215,7 @@ public class TSuperMessageSend extends MessageSend {
 			this.binding = tsuperMethod;
 		}
 
-		if (valueRequired && this.binding.isCallin()) {
+		if (valueRequired && this.binding.isCallin() && !this.isReturnFromCallinMethod) {
 			if (this.resolvedType != null && this.resolvedType.isValidBinding()) {
 				if (this.resolvedType.isBaseType()) {
 					// something like: ((Integer)result).intValue()

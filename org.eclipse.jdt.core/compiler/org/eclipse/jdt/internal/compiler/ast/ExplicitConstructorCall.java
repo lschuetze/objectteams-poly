@@ -371,6 +371,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 //{ObjectTeams: hide marker arg:
 			int len = this.arguments.length;
 			if (   this.accessMode == ExplicitConstructorCall.Tsuper
+				&& len > 0
 			    && TSuperHelper.isMarkerArg(this.arguments[len-1]))
 				len--;
 /* orig:
@@ -656,9 +657,10 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 					&& tsuperMethod != this.binding
 					&& tsuperMethod != methodDeclaration.binding)
 				{
-					updateFromTSuper(scope.enclosingSourceType().superclass(),
+					if (tsuperArgs != null && tsuperArgs.length > 0)
+						updateFromTSuper(scope.enclosingSourceType().superclass(),
 									 tsuperArgs[tsuperArgs.length-1]);
-					this.binding       = tsuperMethod;
+					this.binding  = tsuperMethod;
 					argumentTypes = tsuperArgs;
 				}
 

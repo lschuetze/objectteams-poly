@@ -2047,4 +2047,110 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     		},
     		"s1s1s2");
     }
+
+    public void testTsuperWithPrimitiveReturn() throws Exception {
+    	runConformTest(
+    		new String[] {
+				"Main.java",
+				"public class Main {\n" + 
+				"	public static void main(String[] args) {\n" + 
+				"		BaseClass bsub = new BaseClass();\n" + 
+				"		within (new SubTeam())\n" + 
+				"			System.out.print(bsub.bm());\n" + 
+				"	}\n" + 
+				"}\n",
+    			"BaseClass.java",
+    			"public class BaseClass {\n" + 
+    			"	public boolean bm() {\n" + 
+    			"		System.out.println(\"BaseClass\");\n" + 
+    			"		return false;\n" + 
+    			"	}\n" + 
+    			"}\n",
+    			"SuperTeam.java",
+    			"public team class SuperTeam {\n" + 
+    			"	public class SuperRole playedBy BaseClass {\n" + 
+    			"		callin boolean m() {\n" + 
+    			"			System.out.print(\"SuperTeam.SuperRole\");\n" + 
+    			"			return base.m();\n" + 
+    			"		}\n" + 
+    			"		m <- replace bm;\n" + 
+    			"	}\n" + 
+    			"}\n",
+    			"SubTeam.java",
+    			"public team class SubTeam extends SuperTeam {\n" +
+    			"	@Override\n" + 
+    			"	public class SuperRole playedBy BaseClass {\n" + 
+    			"		@Override\n" + 
+    			"		callin boolean m() {\n" + 
+    			"			System.out.println(\"SubTeam.SuperRole\");\n" + 
+    			"			return tsuper.m();\n" + 
+    			"		}\n" + 
+    			"	}\n" + 
+    			"	public class SubRole extends SuperRole {\n" + 
+    			"		@Override\n" + 
+    			"		callin boolean m() {\n" + 
+    			"			System.out.println(\"SubTeam.SubRole\");\n" + 
+    			"			return super.m();\n" + 
+    			"		}\n" + 
+    			"	}\n" + 
+    			"}\n"
+    		},
+    		"SubTeam.SubRole\n" + 
+    		"SubTeam.SuperRole\n" + 
+    		"SuperTeam.SuperRoleBaseClass\n" + 
+    		"false");
+    }
+
+    public void testTsuperWithRefReturn() throws Exception {
+    	runConformTest(
+    		new String[] {
+				"Main.java",
+				"public class Main {\n" + 
+				"	public static void main(String[] args) {\n" + 
+				"		BaseClass bsub = new BaseClass();\n" + 
+				"		within (new SubTeam())\n" + 
+				"			System.out.print(bsub.bm());\n" + 
+				"	}\n" + 
+				"}\n",
+    			"BaseClass.java",
+    			"public class BaseClass {\n" + 
+    			"	public Boolean bm() {\n" + 
+    			"		System.out.println(\"BaseClass\");\n" + 
+    			"		return false;\n" + 
+    			"	}\n" + 
+    			"}\n",
+    			"SuperTeam.java",
+    			"public team class SuperTeam {\n" + 
+    			"	public class SuperRole playedBy BaseClass {\n" + 
+    			"		callin Boolean m() {\n" + 
+    			"			System.out.print(\"SuperTeam.SuperRole\");\n" + 
+    			"			return base.m();\n" + 
+    			"		}\n" + 
+    			"		m <- replace bm;\n" + 
+    			"	}\n" + 
+    			"}\n",
+    			"SubTeam.java",
+    			"public team class SubTeam extends SuperTeam {\n" +
+    			"	@Override\n" + 
+    			"	public class SuperRole playedBy BaseClass {\n" + 
+    			"		@Override\n" + 
+    			"		callin Boolean m() {\n" + 
+    			"			System.out.println(\"SubTeam.SuperRole\");\n" + 
+    			"			return tsuper.m();\n" + 
+    			"		}\n" + 
+    			"	}\n" + 
+    			"	public class SubRole extends SuperRole {\n" + 
+    			"		@Override\n" + 
+    			"		callin Boolean m() {\n" + 
+    			"			System.out.println(\"SubTeam.SubRole\");\n" + 
+    			"			return super.m();\n" + 
+    			"		}\n" + 
+    			"	}\n" + 
+    			"}\n"
+    		},
+    		"SubTeam.SubRole\n" + 
+    		"SubTeam.SuperRole\n" + 
+    		"SuperTeam.SuperRoleBaseClass\n" + 
+    		"false");
+    }
 }

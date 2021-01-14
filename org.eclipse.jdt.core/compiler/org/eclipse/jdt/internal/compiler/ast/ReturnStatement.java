@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.compiler.codegen.*;
 import org.eclipse.jdt.internal.compiler.flow.*;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.*;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 
 /**
@@ -320,6 +321,11 @@ public void resolve(BlockScope scope) {
 		if (lambda != null && lambda.argumentsTypeElided() && this.expression instanceof CastExpression) {
 			this.expression.bits |= ASTNode.DisableUnnecessaryCastCheck;
 		}
+//{ObjectTeams: tsuper may want to unbox, but shouldn't when directly returning from a callin method:
+		AbstractMethodDeclaration referenceMethod = methodScope.referenceMethod();
+		if (referenceMethod != null && referenceMethod.isCallin() && this.expression instanceof TSuperMessageSend)
+			((TSuperMessageSend) this.expression).isReturnFromCallinMethod = true;
+// SH}
 	}
 
 	if (methodType == TypeBinding.VOID) {
