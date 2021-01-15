@@ -35,7 +35,11 @@ public class CallSiteContext implements Iterable<ITeam> {
 	public void resetIndex() {
 		index = 0;
 	}
-
+	
+	public ITeam[] getTeams() {
+		return teams;
+	}
+	
 	public int getIndex() {
 		return index;
 	}
