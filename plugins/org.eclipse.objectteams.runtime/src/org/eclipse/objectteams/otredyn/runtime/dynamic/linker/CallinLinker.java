@@ -65,9 +65,10 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		if (!(desc instanceof OTCallSiteDescriptor)) {
 			throw new LinkageError("CallSiteDescriptor is no OTCallSiteDescriptor");
 		}
-//		if (linkRequest.isCallSiteUnstable()) {
-//			// TODO Lars: directly call otCallAllBindings
-//		}
+		if (linkRequest.isCallSiteUnstable()) {
+			// TODO Lars: directly call otCallAllBindings
+			logger.debug("-------- Callsite is unstable --------");
+		}
 		final OTCallSiteDescriptor otdesc = (OTCallSiteDescriptor) desc;
 		return CallinBootstrap.asTypeSafeReturn(getGuardedInvocation(linkRequest, otdesc), linkerServices, otdesc);
 	}
@@ -106,8 +107,22 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		if (beforeComposition != null) {
 			result = MethodHandles.foldArguments(result, beforeComposition);
 		}
+		logger.debug("result \t\t{}", result.toString());
+		ITeam[] teams = ctx.getTeams();
+		Class<?>[] stack = new Class<?>[teams.length];
+		for (int i = 0; i < stack.length; i++) {
+			stack[i] = teams[i].getClass();
+		}
+		MethodHandle guard = OTGuards.TEST_COMPOSITION.bindTo(stack);
+		// MethodHandle(ITeam[])boolean
+		MethodHandle guardDropped1 = MethodHandles.dropArguments(guard, 0, IBoundBase2.class);
+		// MethodHandle(IBoundBase2,ITeam[])boolean
+		final MethodType resultType = result.type().changeReturnType(Boolean.TYPE);
+		MethodHandle guardDropped2 = MethodHandles.dropArguments(guardDropped1, 2, resultType.dropParameterTypes(0, 2).parameterList());
+		// MethodHandle(IBoundBase2,ITeam[],...)boolean
 		logger.debug("========== END getGuardedInvocation ==========");
-		return new GuardedInvocation(result);
+		return new GuardedInvocation(result, guardDropped2);
+//		return new GuardedInvocation(result);
 	}
 
 	private static MethodHandle handleOrig(OTCallSiteDescriptor desc, CallSiteContext ctx) {
