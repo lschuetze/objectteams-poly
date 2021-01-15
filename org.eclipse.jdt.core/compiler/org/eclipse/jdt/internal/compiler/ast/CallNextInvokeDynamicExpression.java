@@ -6,12 +6,12 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseReference;
 public class CallNextInvokeDynamicExpression {
 
 	public BaseReference base;
-	public MethodBinding binding;
+	public MethodBinding callinMethodBinding;
 	public MethodBinding codegenBinding;
 
 	public CallNextInvokeDynamicExpression(BaseReference base, MethodBinding binding, MethodBinding codegenBinding) {
 		this.base = base;
-		this.binding = binding;
+		this.callinMethodBinding = binding;
 		this.codegenBinding = codegenBinding;
 	}
 
@@ -20,7 +20,7 @@ public class CallNextInvokeDynamicExpression {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((this.base == null) ? 0 : this.base.hashCode());
-		result = prime * result + ((this.binding == null) ? 0 : this.binding.hashCode());
+		result = prime * result + ((this.callinMethodBinding == null) ? 0 : this.callinMethodBinding.hashCode());
 		result = prime * result + ((this.codegenBinding == null) ? 0 : this.codegenBinding.hashCode());
 		return result;
 	}
@@ -39,10 +39,10 @@ public class CallNextInvokeDynamicExpression {
 				return false;
 		} else if (!this.base.equals(other.base))
 			return false;
-		if (this.binding == null) {
-			if (other.binding != null)
+		if (this.callinMethodBinding == null) {
+			if (other.callinMethodBinding != null)
 				return false;
-		} else if (!this.binding.equals(other.binding))
+		} else if (!this.callinMethodBinding.equals(other.callinMethodBinding))
 			return false;
 		if (this.codegenBinding == null) {
 			if (other.codegenBinding != null)

@@ -722,7 +722,8 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 	if(this.receiver instanceof BaseReference) {
 //		System.out.println(this.binding);
 //		for(Expression e : arguments) System.out.println(e);
-		CallNextInvokeDynamicExpression expr = new CallNextInvokeDynamicExpression((BaseReference) this.receiver, this.binding, codegenBinding);
+		BaseReference baseReference = (BaseReference) this.receiver;
+		CallNextInvokeDynamicExpression expr = new CallNextInvokeDynamicExpression(baseReference, baseReference.outerCallinMethod.binding, codegenBinding);
 		final int bootstrapIndex = codeStream.classFile.recordBootstrapMethod(expr);
 		char[] baseClassSelector = "callNext".toCharArray(); //$NON-NLS-1$
 //		for(int i = 0; i < codegenBinding.parameters.length; i++)

@@ -3791,23 +3791,32 @@ public class ClassFile implements TypeConstants, TypeIds {
 				this.contents[localContentsOffset++] = (byte) flagsIndex;
 
 				// joinpoint Descriptor
-				final ReferenceBinding roleBinding = expr.base.outerCallinMethod.binding.declaringClass;
+				final ReferenceBinding declaringRoleClass = expr.callinMethodBinding.declaringClass;
 				char[] baseClassSelector = null;
 				char[] baseClassSignature = null;
 				char[] returnTypeName = null;
-				for(CallinCalloutBinding ccb : roleBinding.callinCallouts) {
-					if(ccb.isCallin() && ccb._declaringRoleClass.isEquivalentTo(roleBinding)) {
+
+				// Find the callin that we want to generate code for
+				for(CallinCalloutBinding ccb : declaringRoleClass.callinCallouts) {
+					if(ccb._roleMethodBinding.equals(expr.callinMethodBinding)) {
 						baseClassSelector = ccb._baseMethods[0].selector;
 						baseClassSignature = ccb._baseMethods[0].signature();
 						returnTypeName = ccb._baseMethods[0].returnType.signature();
+						break;
 					}
 				}
-				System.out.println(baseClassSignature);
-				System.out.println(returnTypeName);
-				final String baseClassSignatureExt = String.valueOf(baseClassSignature).substring(0, baseClassSignature.length - returnTypeName.length);
-				final String baseClassName = String.valueOf(roleBinding.baseclass.signableName()).replace('.', '/');
-				final String joinpointDesc = baseClassName + "." + String.valueOf(baseClassSelector) + baseClassSignatureExt;
-				System.out.println(joinpointDesc);
+				// TODO Lars: This is a hack; if there is a callin defined but no binding than it wants
+				// to generate the invokedynamic. In this case, the loop will return without a match
+				final String joinpointDesc;
+				if(baseClassSelector == null) {
+					joinpointDesc = "NEVER_EXECUTED"; //$NON-NLS-1$
+				} else {
+					final String baseClassSignatureExt = String.valueOf(baseClassSignature).substring(0, baseClassSignature.length - returnTypeName.length);
+					final String baseClassName = String.valueOf(declaringRoleClass.baseclass.signableName()).replace('.', '/');
+					joinpointDesc = baseClassName + "." + String.valueOf(baseClassSelector) + baseClassSignatureExt;
+					// benchmark/bank/Account.decrease(F)
+				}
+
 				int index = this.constantPool.literalIndex(joinpointDesc);
 				this.contents[localContentsOffset++] = (byte) (index >> 8);
 				this.contents[localContentsOffset++] = (byte) index;
