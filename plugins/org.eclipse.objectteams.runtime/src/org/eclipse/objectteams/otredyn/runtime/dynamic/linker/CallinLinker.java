@@ -5,7 +5,6 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 import org.eclipse.objectteams.otredyn.runtime.IBinding;
-import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.eclipse.objectteams.otredyn.runtime.dynamic.linker.util.ObjectTeamsTypeUtilities;
 import org.objectteams.IBoundBase2;
 import org.objectteams.ITeam;
@@ -17,6 +16,7 @@ import jdk.dynalink.linker.GuardedInvocation;
 import jdk.dynalink.linker.LinkRequest;
 import jdk.dynalink.linker.LinkerServices;
 import jdk.dynalink.linker.TypeBasedGuardingDynamicLinker;
+import jdk.dynalink.linker.support.Guards;
 
 public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 
@@ -114,26 +114,26 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 			result = MethodHandles.foldArguments(result, beforeComposition);
 		}
 		logger.debug("result \t\t{}", result.toString());
+		MethodHandle guard;
 		ITeam[] teams = ctx.getTeams();
-		Class<?>[] stack;
 		if (teams == null) {
-			stack = null;
+			guard = Guards.isNull();
+			// MethodHandle(Object)boolean
 		} else {
-			stack = new Class<?>[teams.length];
+			Class<?>[] stack = new Class<?>[teams.length];
 			for (int i = 0; i < stack.length; i++) {
 				stack[i] = teams[i].getClass();
 			}
+			guard = OTGuards.TEST_COMPOSITION.bindTo(stack);
+			// MethodHandle(ITeam[])boolean
 		}
-		MethodHandle guard = OTGuards.TEST_COMPOSITION.bindTo(stack);
-		// MethodHandle(ITeam[])boolean
-		MethodHandle guardDropped1 = MethodHandles.dropArguments(guard, 0, IBoundBase2.class);
+		guard = MethodHandles.dropArguments(guard, 0, IBoundBase2.class);
 		// MethodHandle(IBoundBase2,ITeam[])boolean
 		final MethodType resultType = result.type().changeReturnType(Boolean.TYPE);
-		MethodHandle guardDropped2 = MethodHandles.dropArguments(guardDropped1, 2, resultType.dropParameterTypes(0, 2).parameterList());
+		guard = MethodHandles.dropArguments(guard, 2, resultType.dropParameterTypes(0, 2).parameterList());
 		// MethodHandle(IBoundBase2,ITeam[],...)boolean
 		logger.debug("========== END getGuardedInvocation ==========");
-		return new GuardedInvocation(result, guardDropped2);
-//		return new GuardedInvocation(result);
+		return new GuardedInvocation(result, guard);
 	}
 
 	private static MethodHandle handleOrig(OTCallSiteDescriptor desc, CallSiteContext ctx) {

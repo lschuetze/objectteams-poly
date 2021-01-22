@@ -18,21 +18,17 @@ public class OTGuards {
     }
 	
 	@SuppressWarnings("unused")
-	public static boolean testTeamsComposition(final Class<ITeam>[] stack, final ITeam[] test) {
-		if (stack == null && test == null) return true;
+	public static boolean testTeamsComposition(final Class<ITeam>[] stack, final ITeam[] test) {		
+		if (test == null || stack.length != test.length) {
+			return false;
+		}
 		
-		if (test == null) return false;
-		
-		if (stack != null) {
-			if (stack.length != test.length) {
+		for (int i = 0; i < stack.length; i++) {
+			if (!stack[i].isAssignableFrom(test[i].getClass())) {
 				return false;
 			}
-			for (int i = 0; i < stack.length; i++) {
-				if (!stack[i].isAssignableFrom(test[i].getClass())) {
-					return false;
-				}
-			}
 		}
+		
 		return true;
 	}
 }
