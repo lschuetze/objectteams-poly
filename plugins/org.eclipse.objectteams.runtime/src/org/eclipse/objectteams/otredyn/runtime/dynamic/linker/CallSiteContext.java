@@ -30,6 +30,7 @@ public class CallSiteContext implements Iterable<ITeam> {
 	public void updateTeams() {
 		this.teams = TeamManager.getTeams(joinpointId);
 		this.callinIds = TeamManager.getCallinIds(joinpointId);
+		resetIndex();
 	}
 
 	public void resetIndex() {
@@ -52,11 +53,17 @@ public class CallSiteContext implements Iterable<ITeam> {
 	public int nextCallinId() {
 		return callinIds[index - 1];
 	}
+	
+	public int getSize() {
+		return teams.length;
+	}
 
 	private class CallSiteContextIterator implements Iterator<ITeam> {
 
 		@Override
 		public boolean hasNext() {
+			if (teams == null) return false;
+			
 			return index < teams.length;
 		}
 

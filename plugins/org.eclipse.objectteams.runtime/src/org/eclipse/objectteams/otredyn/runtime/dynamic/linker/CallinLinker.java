@@ -5,6 +5,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 import org.eclipse.objectteams.otredyn.runtime.IBinding;
+import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.eclipse.objectteams.otredyn.runtime.dynamic.linker.util.ObjectTeamsTypeUtilities;
 import org.objectteams.IBoundBase2;
 import org.objectteams.ITeam;
@@ -80,6 +81,11 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		MethodHandle beforeComposition = null;
 		MethodHandle replace = null;
 		CallSiteContext ctx = CallSiteContext.contexts.get(joinpointDesc);
+		
+		if(desc.isCallAllBindings()) {
+			ctx.updateTeams();
+		}
+			
 		for (ITeam team : ctx) {
 			logger.debug("Team \t\t{}", team.toString());
 			final int callinId = ctx.nextCallinId();
@@ -109,9 +115,14 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		}
 		logger.debug("result \t\t{}", result.toString());
 		ITeam[] teams = ctx.getTeams();
-		Class<?>[] stack = new Class<?>[teams.length];
-		for (int i = 0; i < stack.length; i++) {
-			stack[i] = teams[i].getClass();
+		Class<?>[] stack;
+		if (teams == null) {
+			stack = null;
+		} else {
+			stack = new Class<?>[teams.length];
+			for (int i = 0; i < stack.length; i++) {
+				stack[i] = teams[i].getClass();
+			}
 		}
 		MethodHandle guard = OTGuards.TEST_COMPOSITION.bindTo(stack);
 		// MethodHandle(ITeam[])boolean
