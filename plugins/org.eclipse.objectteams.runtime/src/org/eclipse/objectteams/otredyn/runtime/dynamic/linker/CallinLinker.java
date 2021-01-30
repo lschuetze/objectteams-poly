@@ -82,18 +82,23 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 			// callAllBindings? -> index = 0
 			// callNext? -> index = index - 1
 			if (iter.hasNext()) {
-				ITeam[] teams = ctx.getTeams();
-				ITeam team = isCallAllBindings ? teams[0] : teams[ctx.getIndex()];
-//				ITeam team = iter.next();
-				final MethodType callAllBindingsType = MethodType.methodType(Object.class, IBoundBase2.class, 
-						ITeam[].class,int.class ,int[].class, int.class, Object[].class);
-				MethodHandle callAllBindingsHandle = otdesc.getLookup()
-						.findVirtual(team.getClass(), "_OT$callAllBindings", callAllBindingsType)
-						.bindTo(team);
-				if (!isCallAllBindings) {
-					callAllBindingsHandle = MethodHandles.dropArguments(callAllBindingsHandle, 6, Object[].class, int.class);
+				ITeam team = iter.next();
+				MethodHandle otMethod;
+				MethodType otMethodType;
+				String otMethodName;
+				if (isCallAllBindings) {
+					otMethodType = MethodType.methodType(Object.class, IBoundBase2.class,
+							ITeam[].class,int.class ,int[].class, int.class, Object[].class);
+					otMethodName = "_OT$callAllBindings";
+				} else {
+					otMethodType = MethodType.methodType(Object.class, IBoundBase2.class, ITeam[].class,
+							int.class ,int[].class, int.class, Object[].class, Object[].class, int.class);
+					otMethodName = "_OT$callNext";
 				}
-				return new GuardedInvocation(callAllBindingsHandle);
+				otMethod = otdesc.getLookup()
+						.findVirtual(team.getClass(), otMethodName, otMethodType)
+						.bindTo(team);
+				return new GuardedInvocation(otMethod);
 			} else {
 				MethodHandle orig = handleOrig(otdesc, ctx);
 				final int joinpointId = TeamManager.getJoinpointId(otdesc.getJoinpointDesc());
