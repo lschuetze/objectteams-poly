@@ -3,8 +3,11 @@ package org.eclipse.objectteams.otredyn.runtime.dynamic.linker;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.invoke.SwitchPoint;
+import java.util.Iterator;
 
 import org.eclipse.objectteams.otredyn.runtime.IBinding;
+import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.eclipse.objectteams.otredyn.runtime.dynamic.linker.util.ObjectTeamsTypeUtilities;
 import org.objectteams.IBoundBase2;
 import org.objectteams.ITeam;
@@ -66,11 +69,39 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		if (!(desc instanceof OTCallSiteDescriptor)) {
 			throw new LinkageError("CallSiteDescriptor is no OTCallSiteDescriptor");
 		}
+		final OTCallSiteDescriptor otdesc = (OTCallSiteDescriptor) desc;
 		if (linkRequest.isCallSiteUnstable()) {
 			logger.info("-------- Callsite is unstable --------");
-			// TODO Lars: directly call otCallAllBindings
+			final String joinpointDesc = otdesc.getJoinpointDesc();
+			CallSiteContext ctx = CallSiteContext.contexts.get(joinpointDesc);
+			final boolean isCallAllBindings = otdesc.isCallAllBindings();
+			if (isCallAllBindings) {
+				ctx.updateTeams();
+			}
+			Iterator<ITeam> iter = ctx.iterator();
+			// callAllBindings? -> index = 0
+			// callNext? -> index = index - 1
+			if (iter.hasNext()) {
+				ITeam[] teams = ctx.getTeams();
+				ITeam team = isCallAllBindings ? teams[0] : teams[ctx.getIndex()];
+//				ITeam team = iter.next();
+				final MethodType callAllBindingsType = MethodType.methodType(Object.class, IBoundBase2.class, 
+						ITeam[].class,int.class ,int[].class, int.class, Object[].class);
+				MethodHandle callAllBindingsHandle = otdesc.getLookup()
+						.findVirtual(team.getClass(), "_OT$callAllBindings", callAllBindingsType)
+						.bindTo(team);
+				if (!isCallAllBindings) {
+					callAllBindingsHandle = MethodHandles.dropArguments(callAllBindingsHandle, 6, Object[].class, int.class);
+				}
+				return new GuardedInvocation(callAllBindingsHandle);
+			} else {
+				MethodHandle orig = handleOrig(otdesc, ctx);
+				final int joinpointId = TeamManager.getJoinpointId(otdesc.getJoinpointDesc());
+				SwitchPoint sp = new SwitchPoint();
+				TeamManager.registerSwitchPoint(joinpointId, sp);
+				return new GuardedInvocation(orig, sp);
+			}
 		}
-		final OTCallSiteDescriptor otdesc = (OTCallSiteDescriptor) desc;
 		return CallinBootstrap.asTypeSafeReturn(getGuardedInvocation(linkRequest, otdesc), linkerServices, otdesc);
 	}
 
@@ -81,11 +112,9 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		MethodHandle beforeComposition = null;
 		MethodHandle replace = null;
 		CallSiteContext ctx = CallSiteContext.contexts.get(joinpointDesc);
-		
 		if (desc.isCallAllBindings()) {
 			ctx.updateTeams();
 		}
-			
 		for (ITeam team : ctx) {
 			logger.trace("Team \t\t{}", team.toString());
 			final int callinId = ctx.nextCallinId();
@@ -117,21 +146,21 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		MethodHandle guard;
 		ITeam[] teams = ctx.getTeams();
 		if (teams == null) {
-			guard = Guards.isNull();
 			// MethodHandle(Object)boolean
+			guard = Guards.isNull();
 		} else {
 			Class<?>[] stack = new Class<?>[teams.length];
 			for (int i = 0; i < stack.length; i++) {
 				stack[i] = teams[i].getClass();
 			}
-			guard = OTGuards.TEST_COMPOSITION.bindTo(stack);
 			// MethodHandle(ITeam[])boolean
+			guard = OTGuards.TEST_COMPOSITION.bindTo(stack);
 		}
-		guard = MethodHandles.dropArguments(guard, 0, IBoundBase2.class);
 		// MethodHandle(IBoundBase2,ITeam[])boolean
+		guard = MethodHandles.dropArguments(guard, 0, IBoundBase2.class);
 		final MethodType resultType = result.type().changeReturnType(Boolean.TYPE);
-		guard = MethodHandles.dropArguments(guard, 2, resultType.dropParameterTypes(0, 2).parameterList());
 		// MethodHandle(IBoundBase2,ITeam[],...)boolean
+		guard = MethodHandles.dropArguments(guard, 2, resultType.dropParameterTypes(0, 2).parameterList());
 		logger.debug("========== END getGuardedInvocation ==========");
 		return new GuardedInvocation(result, guard);
 	}
@@ -190,7 +219,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 			// MethodHandle(Base,Team,IBoundBase2,ITeam[],int,int[],int,Object[],args*)Object
 			swapped = MethodHandles.permuteArguments(liftToRoleCollect, swapType, reorder);
 		} else {
-			// // MethodHandle(Base,Team,IBoundBase2,ITeam[],int,int[],int,Object[])Object
+			// MethodHandle(Base,Team,IBoundBase2,ITeam[],int,int[],int,Object[])Object
 			swapped = MethodHandles.permuteArguments(liftToRoleCollect, swapType, 1, 0);
 		}
 		logger.trace("swapped \t\t{}", swapped.toString());
@@ -224,7 +253,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 			final MethodHandle dropObjectParams = MethodHandles.dropArguments(doubleBaseAndTeam, 6, Object[].class);
 			logger.trace("dropObjectParams \t\t{}", dropObjectParams.toString());
 			final MethodHandle dropBaseId = MethodHandles.dropArguments(dropObjectParams, 7, int.class);
-			logger.debug("dropBaseId \t\t{}", dropBaseId.toString());
+			logger.trace("dropBaseId \t\t{}", dropBaseId.toString());
 			logger.debug("========== END handleReplace ==========");
 			return dropBaseId;
 		}
@@ -277,7 +306,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		} else {
 			dropped = MethodHandles.dropArguments(unpacked, 2, int.class, int[].class, int.class, Object[].class);
 		}
-		logger.debug("dropped \t\t{}", dropped.toString());
+		logger.trace("dropped \t\t{}", dropped.toString());
 		if (desc.isCallAllBindings()) {
 			logger.debug("========== END handleBefore ==========");
 			return dropped;
