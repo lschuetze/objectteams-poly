@@ -79,26 +79,31 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 				ctx.updateTeams();
 			}
 			Iterator<ITeam> iter = ctx.iterator();
-			// callAllBindings? -> index = 0
-			// callNext? -> index = index - 1
 			if (iter.hasNext()) {
-				ITeam team = iter.next();
-				MethodHandle otMethod;
 				MethodType otMethodType;
 				String otMethodName;
 				if (isCallAllBindings) {
-					otMethodType = MethodType.methodType(Object.class, IBoundBase2.class,
-							ITeam[].class,int.class ,int[].class, int.class, Object[].class);
+					otMethodType = MethodType.methodType(Object.class, IBoundBase2.class, ITeam[].class,
+							int.class ,int[].class, int.class, Object[].class);
 					otMethodName = "_OT$callAllBindings";
 				} else {
 					otMethodType = MethodType.methodType(Object.class, IBoundBase2.class, ITeam[].class,
-							int.class ,int[].class, int.class, Object[].class, Object[].class, int.class);
+							int.class, int[].class, int.class, Object[].class, Object[].class, int.class);
 					otMethodName = "_OT$callNext";
 				}
-				otMethod = otdesc.getLookup()
-						.findVirtual(team.getClass(), otMethodName, otMethodType)
-						.bindTo(team);
-				return new GuardedInvocation(otMethod);
+				// (ITeam,IBoundBase2,ITeam[],int,int[],int,Object[]...)Object
+				MethodHandle otMethod = otdesc.getLookup().findVirtual(ITeam.class, otMethodName, otMethodType);
+				MethodType movedTeamAndIdxType = MethodType.methodType(Object.class, ITeam.class, ITeam[].class, int.class, IBoundBase2.class);
+				movedTeamAndIdxType = movedTeamAndIdxType.appendParameterTypes(otMethodType.dropParameterTypes(0, 3).parameterList());
+				int[] reorder = isCallAllBindings ? new int[] {0, 3, 1, 2, 4, 5, 6} : new int[] {0, 3, 1, 2, 4, 5, 6, 7, 8};
+				// (ITeam,ITeam[],int,IBoundBase2,int[],int,Object[]...)Object
+				MethodHandle movedTeamAndIdx = MethodHandles.permuteArguments(otMethod, movedTeamAndIdxType, reorder);
+				MethodHandle teamGetter = MethodHandles.arrayElementGetter(ITeam[].class);
+				MethodHandle boundTeamHandle = MethodHandles.foldArguments(movedTeamAndIdx, 0, teamGetter);
+				reorder = isCallAllBindings ? new int[] {1, 2, 0, 3, 4, 5} : new int[] {1, 2, 0, 3, 4, 5, 6, 7};
+				// (ITeam,IBoundBase2,ITeam[],int,int[],int,Object[]...)Object
+				MethodHandle movedTeamAndIdx2 = MethodHandles.permuteArguments(boundTeamHandle, otMethodType, reorder);
+				return new GuardedInvocation(movedTeamAndIdx2);
 			} else {
 				MethodHandle orig = handleOrig(otdesc, ctx);
 				final int joinpointId = TeamManager.getJoinpointId(otdesc.getJoinpointDesc());
