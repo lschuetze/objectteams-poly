@@ -20,10 +20,14 @@ import jdk.dynalink.linker.LinkRequest;
 import jdk.dynalink.linker.LinkerServices;
 import jdk.dynalink.linker.TypeBasedGuardingDynamicLinker;
 import jdk.dynalink.linker.support.Guards;
+import jdk.dynalink.linker.support.Lookup;
 
 public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 
 	static Logger logger = LoggerFactory.getLogger(CallinLinker.class);
+
+	private static final MethodHandle INCREMENT = Lookup.PUBLIC.findStatic(Math.class, "addExact",
+			MethodType.methodType(int.class, int.class, int.class));
 
 	private static MethodHandle lift(final MethodHandles.Lookup lookup, final String joinpointDesc, final ITeam team,
 			final IBinding binding, final Class<?> baseClass) {
@@ -125,6 +129,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		if (desc.isCallAllBindings()) {
 			ctx.updateTeams();
 		}
+		int indexIncrement = 0;
 		for (ITeam team : ctx) {
 			logger.trace("Team \t\t{}", team.toString());
 			final int callinId = ctx.nextCallinId();
@@ -135,6 +140,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 			case BEFORE:
 				beforeComposition = beforeComposition == null ? handleBefore(desc, team, binding, ctx)
 						: MethodHandles.foldArguments(beforeComposition, handleBefore(desc, team, binding, ctx));
+				indexIncrement++;
 				break;
 			case AFTER:
 				// TODO Lars: Implement
@@ -142,6 +148,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 			case REPLACE:
 				replace = handleReplace(desc, team, binding, ctx);
 				stopSearch = true;
+				indexIncrement++;
 				break;
 			}
 			if (stopSearch) {
@@ -152,6 +159,8 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		if (beforeComposition != null) {
 			result = MethodHandles.foldArguments(result, beforeComposition);
 		}
+		MethodHandle incrementor = MethodHandles.insertArguments(INCREMENT, 0, indexIncrement);
+		result = MethodHandles.filterArguments(result, 2, incrementor);
 		logger.trace("result \t\t{}", result.toString());
 		MethodHandle guard;
 		ITeam[] teams = ctx.getTeams();
