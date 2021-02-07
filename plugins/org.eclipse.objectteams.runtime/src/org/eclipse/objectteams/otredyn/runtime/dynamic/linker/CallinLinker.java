@@ -30,6 +30,47 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 			MethodType.methodType(int.class, int.class, int.class));
 	private static final MethodHandle CALLORIG = Lookup.PUBLIC.findVirtual(IBoundBase2.class, "_OT$callOrig",
 			MethodType.methodType(Object.class, int.class, Object[].class));
+	private static MethodHandle OT_CALL_ALL_BINDINGS;
+	private static MethodHandle OT_CALL_NEXT;
+
+	public CallinLinker() {
+		OT_CALL_ALL_BINDINGS = getOriginalDispatch(true);
+		OT_CALL_NEXT = getOriginalDispatch(false);
+	}
+
+	private static MethodHandle getOriginalDispatch(boolean isCallAllBindings) {
+		MethodType otMethodType;
+		String otMethodName;
+		if (isCallAllBindings) {
+			otMethodName = "_OT$callAllBindings";
+			otMethodType = MethodType.methodType(Object.class, IBoundBase2.class, ITeam[].class,
+					int.class ,int[].class, int.class, Object[].class);
+		} else {
+			otMethodName = "_OT$callNext";
+			otMethodType = MethodType.methodType(Object.class, IBoundBase2.class, ITeam[].class,
+					int.class, int[].class, int.class, Object[].class, Object[].class, int.class);
+		}
+		// (ITeam,IBoundBase2,ITeam[],int,int[],int,Object[]...)Object
+		MethodHandle otMethod = Lookup.PUBLIC.findVirtual(ITeam.class, otMethodName, otMethodType);
+		MethodType movedTeamAndIdxType = MethodType.methodType(Object.class, ITeam.class, ITeam[].class, int.class, IBoundBase2.class);
+		movedTeamAndIdxType = movedTeamAndIdxType.appendParameterTypes(otMethodType.dropParameterTypes(0, 3).parameterList());
+		int[] reorder = isCallAllBindings ? new int[] {0, 3, 1, 2, 4, 5, 6} : new int[] {0, 3, 1, 2, 4, 5, 6, 7, 8};
+		// (ITeam,ITeam[],int,IBoundBase2,int[],int,Object[]...)Object
+		MethodHandle movedTeamAndIdx = MethodHandles.permuteArguments(otMethod, movedTeamAndIdxType, reorder);
+		MethodHandle teamGetter = MethodHandles.arrayElementGetter(ITeam[].class);
+		MethodHandle boundTeamHandle = MethodHandles.foldArguments(movedTeamAndIdx, 0, teamGetter);
+		reorder = isCallAllBindings ? new int[] {1, 2, 0, 3, 4, 5} : new int[] {1, 2, 0, 3, 4, 5, 6, 7};
+		// (ITeam,IBoundBase2,ITeam[],int,int[],int,Object[]...)Object
+		MethodHandle movedTeamAndIdx2 = MethodHandles.permuteArguments(boundTeamHandle, otMethodType, reorder);
+		// Call orig if team array is null
+		MethodHandle exceptionHandler = MethodHandles.dropArguments(CALLORIG, 1, ITeam[].class, int.class, int[].class);
+		if (!isCallAllBindings) {
+			exceptionHandler = MethodHandles.dropArguments(exceptionHandler, 6, Object[].class, int.class);
+		}
+		exceptionHandler = MethodHandles.dropArguments(exceptionHandler, 0, NullPointerException.class);
+		MethodHandle result = MethodHandles.catchException(movedTeamAndIdx2, NullPointerException.class, exceptionHandler);
+		return result;
+	}
 
 	private static MethodHandle lift(final MethodHandles.Lookup lookup, final String joinpointDesc, final ITeam team,
 			final IBinding binding, final Class<?> baseClass) {
@@ -79,37 +120,11 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		if (linkRequest.isCallSiteUnstable()) {
 			logger.info("-------- Callsite is unstable --------");
 			final boolean isCallAllBindings = otdesc.isCallAllBindings();
-			MethodType otMethodType;
-			String otMethodName;
 			if (isCallAllBindings) {
-				otMethodType = MethodType.methodType(Object.class, IBoundBase2.class, ITeam[].class,
-						int.class ,int[].class, int.class, Object[].class);
-				otMethodName = "_OT$callAllBindings";
+				return new GuardedInvocation(OT_CALL_ALL_BINDINGS);
 			} else {
-				otMethodType = MethodType.methodType(Object.class, IBoundBase2.class, ITeam[].class,
-						int.class, int[].class, int.class, Object[].class, Object[].class, int.class);
-				otMethodName = "_OT$callNext";
+				return new GuardedInvocation(OT_CALL_NEXT);
 			}
-			// (ITeam,IBoundBase2,ITeam[],int,int[],int,Object[]...)Object
-			MethodHandle otMethod = otdesc.getLookup().findVirtual(ITeam.class, otMethodName, otMethodType);
-			MethodType movedTeamAndIdxType = MethodType.methodType(Object.class, ITeam.class, ITeam[].class, int.class, IBoundBase2.class);
-			movedTeamAndIdxType = movedTeamAndIdxType.appendParameterTypes(otMethodType.dropParameterTypes(0, 3).parameterList());
-			int[] reorder = isCallAllBindings ? new int[] {0, 3, 1, 2, 4, 5, 6} : new int[] {0, 3, 1, 2, 4, 5, 6, 7, 8};
-			// (ITeam,ITeam[],int,IBoundBase2,int[],int,Object[]...)Object
-			MethodHandle movedTeamAndIdx = MethodHandles.permuteArguments(otMethod, movedTeamAndIdxType, reorder);
-			MethodHandle teamGetter = MethodHandles.arrayElementGetter(ITeam[].class);
-			MethodHandle boundTeamHandle = MethodHandles.foldArguments(movedTeamAndIdx, 0, teamGetter);
-			reorder = isCallAllBindings ? new int[] {1, 2, 0, 3, 4, 5} : new int[] {1, 2, 0, 3, 4, 5, 6, 7};
-			// (ITeam,IBoundBase2,ITeam[],int,int[],int,Object[]...)Object
-			MethodHandle movedTeamAndIdx2 = MethodHandles.permuteArguments(boundTeamHandle, otMethodType, reorder);
-			// Call orig if team array is null
-			MethodHandle exceptionHandler = MethodHandles.dropArguments(CALLORIG, 1, ITeam[].class, int.class, int[].class);
-			if (!isCallAllBindings) {
-				exceptionHandler = MethodHandles.dropArguments(exceptionHandler, 6, Object[].class, int.class);
-			}
-			exceptionHandler = MethodHandles.dropArguments(exceptionHandler, 0, NullPointerException.class);
-			MethodHandle result = MethodHandles.catchException(movedTeamAndIdx2, NullPointerException.class, exceptionHandler);
-			return new GuardedInvocation(result);
 		}
 		return CallinBootstrap.asTypeSafeReturn(getGuardedInvocation(linkRequest, otdesc), linkerServices, otdesc);
 	}
