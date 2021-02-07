@@ -30,13 +30,8 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 			MethodType.methodType(int.class, int.class, int.class));
 	private static final MethodHandle CALLORIG = Lookup.PUBLIC.findVirtual(IBoundBase2.class, "_OT$callOrig",
 			MethodType.methodType(Object.class, int.class, Object[].class));
-	private static MethodHandle OT_CALL_ALL_BINDINGS;
-	private static MethodHandle OT_CALL_NEXT;
-
-	public CallinLinker() {
-		OT_CALL_ALL_BINDINGS = getOriginalDispatch(true);
-		OT_CALL_NEXT = getOriginalDispatch(false);
-	}
+	private static final MethodHandle OT_CALL_ALL_BINDINGS = getOriginalDispatch(true);
+	private static final MethodHandle OT_CALL_NEXT = getOriginalDispatch(false);
 
 	private static MethodHandle getOriginalDispatch(boolean isCallAllBindings) {
 		MethodType otMethodType;
@@ -67,6 +62,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		if (!isCallAllBindings) {
 			exceptionHandler = MethodHandles.dropArguments(exceptionHandler, 6, Object[].class, int.class);
 		}
+		// (NullPointerException,IBoundBase2,int,Object[]...)Object
 		exceptionHandler = MethodHandles.dropArguments(exceptionHandler, 0, NullPointerException.class);
 		MethodHandle result = MethodHandles.catchException(movedTeamAndIdx2, NullPointerException.class, exceptionHandler);
 		return result;
