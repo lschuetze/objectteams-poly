@@ -55,16 +55,16 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		MethodHandle teamGetter = MethodHandles.arrayElementGetter(ITeam[].class);
 		MethodHandle boundTeamHandle = MethodHandles.foldArguments(movedTeamAndIdx, 0, teamGetter);
 		reorder = isCallAllBindings ? new int[] {1, 2, 0, 3, 4, 5} : new int[] {1, 2, 0, 3, 4, 5, 6, 7};
-		// (ITeam,IBoundBase2,ITeam[],int,int[],int,Object[]...)Object
+		// (IBoundBase2,ITeam[],int,int[],int,Object[]...)Object
 		MethodHandle movedTeamAndIdx2 = MethodHandles.permuteArguments(boundTeamHandle, otMethodType, reorder);
 		// Call orig if team array is null
-		MethodHandle exceptionHandler = MethodHandles.dropArguments(CALLORIG, 1, ITeam[].class, int.class, int[].class);
+		MethodHandle guard = Guards.isNotNull().asType(MethodType.methodType(boolean.class, ITeam[].class));
+		guard = MethodHandles.dropArguments(guard, 0, IBoundBase2.class);
+		MethodHandle fallback = MethodHandles.dropArguments(CALLORIG, 1, ITeam[].class, int.class, int[].class);
 		if (!isCallAllBindings) {
-			exceptionHandler = MethodHandles.dropArguments(exceptionHandler, 6, Object[].class, int.class);
+			fallback = MethodHandles.dropArguments(fallback, 6, Object[].class, int.class);
 		}
-		// (NullPointerException,IBoundBase2,int,Object[]...)Object
-		exceptionHandler = MethodHandles.dropArguments(exceptionHandler, 0, NullPointerException.class);
-		MethodHandle result = MethodHandles.catchException(movedTeamAndIdx2, NullPointerException.class, exceptionHandler);
+		MethodHandle result = MethodHandles.guardWithTest(guard, movedTeamAndIdx2, fallback);
 		return result;
 	}
 
@@ -183,9 +183,6 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		}
 		// MethodHandle(IBoundBase2,ITeam[])boolean
 		guard = MethodHandles.dropArguments(guard, 0, IBoundBase2.class);
-		final MethodType resultType = result.type().changeReturnType(Boolean.TYPE);
-		// MethodHandle(IBoundBase2,ITeam[],...)boolean
-		guard = MethodHandles.dropArguments(guard, 2, resultType.dropParameterTypes(0, 2).parameterList());
 		logger.debug("========== END getGuardedInvocation ==========");
 		return new GuardedInvocation(result, guard);
 	}
