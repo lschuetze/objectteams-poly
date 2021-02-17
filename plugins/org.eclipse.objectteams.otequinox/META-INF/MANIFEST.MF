@@ -13,7 +13,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.objectteams.otredyn;bundle-version="[1.4.0,2.0.0)",
  org.eclipse.osgi;bundle-version="[3.10.0,4.0.0)",
  org.eclipse.jdt.annotation;bundle-version="[2.2.0,3.0.0)";resolution:=optional,
- org.objectweb.asm;bundle-version="[8.0.1,9.0.0)"
+ org.objectweb.asm;bundle-version="[8.0.1,10.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.objectteams.otequinox
