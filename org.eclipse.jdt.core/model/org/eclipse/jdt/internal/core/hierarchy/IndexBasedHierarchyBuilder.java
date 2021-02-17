@@ -75,6 +75,7 @@ import org.eclipse.jdt.internal.core.search.indexing.IIndexConstants;
 import org.eclipse.jdt.internal.core.search.indexing.IndexManager;
 import org.eclipse.jdt.internal.core.search.matching.MatchLocator;
 import org.eclipse.jdt.internal.core.search.matching.SuperTypeReferencePattern;
+import org.eclipse.jdt.internal.core.search.processing.JobManager;
 import org.eclipse.jdt.internal.core.util.HandleFactory;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.IRoleType;
@@ -674,6 +675,7 @@ private static void legacySearchAllPossibleSubTypes(
 		queue.add(type.getElementName().toCharArray());
 	}
 // SH}
+	long startTime = System.currentTimeMillis();
 	try {
 		while (queue.start <= queue.end) {
 			subMonitor.setWorkRemaining(Math.max(queue.end - queue.start + 1, 100));
@@ -692,6 +694,10 @@ private static void legacySearchAllPossibleSubTypes(
 		}
 	} finally {
 		job.finished();
+		if (JobManager.VERBOSE) {
+			long wallClockTime = System.currentTimeMillis() - startTime;
+			Util.verbose("-> execution time: " + wallClockTime + "ms - " + IndexBasedHierarchyBuilder.class.getSimpleName());//$NON-NLS-1$//$NON-NLS-2$
+		}
 	}
 }
 //{ObjectTeams: additional traversal role->enclosing team in order to cover implicit inheritance, too.

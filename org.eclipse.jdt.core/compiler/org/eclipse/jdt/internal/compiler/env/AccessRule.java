@@ -21,8 +21,8 @@ public class AccessRule {
 
 	public static final int IgnoreIfBetter = 0x02000000; // value must be greater than IProblem#ForbiddenReference and DiscouragedReference
 
-	public char[] pattern;
-	public int problemId;
+	public final char[] pattern;
+	public final int problemId;
 
 //{ObjectTeams: Field for data flow from PDEAdaptor to ...
 	public Object[] aspectBindingData;

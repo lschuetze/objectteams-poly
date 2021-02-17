@@ -83,6 +83,7 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodSpec;
@@ -799,6 +800,13 @@ public class WrapPreparator extends ASTVisitor {
 						closingBraceIndex, 0, this.currentDepth, 1, true, false));
 			}
 		}
+		if (this.options.brace_position_for_array_initializer.equals(DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED)
+				&& openingBrace.getWrapPolicy() == null && (node.getParent() instanceof SingleMemberAnnotation
+						|| node.getParent() instanceof MemberValuePair)) {
+			int parentIndex = this.tm.firstIndexIn(node.getParent(), -1);
+			int indent = this.options.indentation_size;
+			openingBrace.setWrapPolicy(new WrapPolicy(WrapMode.BLOCK_INDENT, parentIndex, indent));
+		}
 		return true;
 	}
 
@@ -988,8 +996,9 @@ public class WrapPreparator extends ASTVisitor {
 			if (!statements.isEmpty()) {
 				int openBraceIndex = this.tm.firstIndexBefore(statements.get(0), TokenNameLBRACE);
 				int closeBraceIndex = this.tm.firstIndexAfter(statements.get(statements.size() - 1), TokenNameRBRACE);
-				boolean areKeptOnOneLine = statements.stream()
-						.allMatch(n -> this.tm.firstTokenIn(n, -1).getLineBreaksBefore() == 0);
+				boolean areKeptOnOneLine = this.tm.stream()
+						.skip(openBraceIndex + 1).limit(closeBraceIndex - openBraceIndex - 1)
+						.allMatch(t -> t.getLineBreaksBefore() == 0 && t.getLineBreaksAfter() == 0);
 				if (areKeptOnOneLine) {
 					for (Statement statement : statements)
 						this.wrapIndexes.add(this.tm.firstIndexIn(statement, -1));

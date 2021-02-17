@@ -1523,6 +1523,7 @@ private void checkPermitsInType() {
 			continue;
 		if (this.isClass()) {
 			ReferenceBinding permSuperType = permittedType.superclass();
+			permSuperType = getActualType(permSuperType);
 			if (!TypeBinding.equalsEquals(this, permSuperType)) {
 				this.scope.problemReporter().sealedNotDirectSuperClass(permittedType, permittedTypeRef, this);
 				continue;
@@ -1532,6 +1533,7 @@ private void checkPermitsInType() {
 			boolean foundSuperInterface = false;
 			if (permSuperInterfaces != null) {
 				for (ReferenceBinding psi : permSuperInterfaces) {
+					psi = getActualType(psi);
 					if (TypeBinding.equalsEquals(this, psi)) {
 						foundSuperInterface = true;
 						break;
@@ -1545,6 +1547,10 @@ private void checkPermitsInType() {
 		}
 	}
 	return;
+}
+
+private ReferenceBinding getActualType(ReferenceBinding ref) {
+	return ref.isParameterizedType() || ref.isRawType() ? ref.actualType(): ref;
 }
 public List<SourceTypeBinding> collectAllTypeBindings(TypeDeclaration typeDecl, CompilationUnitScope unitScope) {
 	class TypeBindingsCollector extends ASTVisitor {
@@ -1585,10 +1591,10 @@ private boolean checkPermitsAndAdd(ReferenceBinding superType, List<SourceTypeBi
 			|| superType.equals(this.scope.getJavaLangObject()))
 		return true;
 	if (superType.isSealed()) {
-		if (superType.isParameterizedType() || superType.isRawType())
-			superType = superType.actualType();
+		superType = getActualType(superType);
 		ReferenceBinding[] superPermittedTypes = superType.permittedTypes();
 		for (ReferenceBinding permittedType : superPermittedTypes) {
+			permittedType = getActualType(permittedType);
 			if (permittedType.isValidBinding() && TypeBinding.equalsEquals(this, permittedType))
 				return true;
 		}
@@ -3598,15 +3604,14 @@ private MethodBinding resolveTypesWithSuspendedTempErrorHandlingPolicy(MethodBin
 			}
 		}
 	}
+	if (this.externalAnnotationProvider != null)
+		ExternalAnnotationSuperimposer.annotateMethodBinding(method, arguments, this.externalAnnotationProvider, this.environment);
 	if (compilerOptions.storeAnnotations)
 		createArgumentBindings(method, compilerOptions); // need annotations resolved already at this point
 	if (foundReturnTypeProblem)
 		return method; // but its still unresolved with a null return type & is still connected to its method declaration
 
 	method.modifiers &= ~ExtraCompilerModifiers.AccUnresolved;
-	if (this.externalAnnotationProvider != null) {
-		ExternalAnnotationSuperimposer.annotateMethodBinding(method, this.externalAnnotationProvider, this.environment);
-	}
 //{ObjectTeams: need role method bridges?
 	int abstractStatic = ClassFileConstants.AccAbstract | ClassFileConstants.AccStatic;
 	if (   isRole()
