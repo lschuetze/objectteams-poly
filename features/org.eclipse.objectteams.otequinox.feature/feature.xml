@@ -57,35 +57,35 @@ Author: Stephan Herrmann.
          id="org.objectweb.asm"
          download-size="0"
          install-size="0"
-         version="8.0.1.v20200420-1007"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.tree"
          download-size="0"
          install-size="0"
-         version="8.0.1.v20200420-1007"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.commons"
          download-size="0"
          install-size="0"
-         version="8.0.1.v20200420-1007"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.util"
          download-size="0"
          install-size="0"
-         version="8.0.1.v20200420-1007"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.analysis"
          download-size="0"
          install-size="0"
-         version="8.0.1.v20200420-1007"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
