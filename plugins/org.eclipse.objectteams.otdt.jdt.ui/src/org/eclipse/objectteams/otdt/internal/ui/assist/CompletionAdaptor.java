@@ -642,14 +642,14 @@ public team class CompletionAdaptor
 					if (isTSuperOf(methodToOverride.getDeclaringClass(), declaringType))
 						CompletionAdaptor.enableSuperCallAdjustor.set(Boolean.TRUE);
 // orig:
-					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);
+					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fCompilationUnit);
 					MethodDeclaration stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, context, methodToOverride, declaringType, settings, declaringType.isInterface(), astNode);
 					ListRewrite rewriter= rewrite.getListRewrite(node, descriptor);
 					rewriter.insertFirst(stub, null);
 
 					ITrackedNodePosition position= rewrite.track(stub);
 					try {
-						rewrite.rewriteAST(recoveredDocument, fJavaProject.getOptions(true)).apply(recoveredDocument);
+						rewrite.rewriteAST(recoveredDocument, fCompilationUnit.getOptions(true)).apply(recoveredDocument);
 
 						String generatedCode= recoveredDocument.get(position.getStartPosition(), position.getLength());
 						int generatedIndent= IndentManipulation.measureIndentUnits(getIndentAt(recoveredDocument, position.getStartPosition(), settings), settings.tabWidth, settings.indentWidth);
