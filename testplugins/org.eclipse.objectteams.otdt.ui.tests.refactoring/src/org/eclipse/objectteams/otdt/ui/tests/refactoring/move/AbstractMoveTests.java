@@ -61,7 +61,7 @@ public abstract team class AbstractMoveTests extends TestCase {
 	void setupProject() throws Exception {
 		if (!this.projectInitialized) {
 			this.projectInitialized = true;
-			IJavaProject javaProj = RefactoringTestSetup.getProject();
+			IJavaProject javaProj = fts.getProject();
 			OTJavaProjectHelper.addNatureToProject(javaProj.getProject(), JavaCore.OTJ_NATURE_ID, null);
 	        OTREContainer.initializeOTJProject(javaProj.getProject());
 		}
