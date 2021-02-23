@@ -13,7 +13,7 @@ import jdk.dynalink.linker.LinkerServices;
 
 public final class CallinBootstrap {
 
-	private final static int unstableRelinkThreshold = 1;
+	private final static int unstableRelinkThreshold = 4;
 
 	private final static GuardingDynamicLinker prioritizedLinkers;
 
