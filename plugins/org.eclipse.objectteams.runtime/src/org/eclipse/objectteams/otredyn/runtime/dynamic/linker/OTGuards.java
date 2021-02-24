@@ -11,15 +11,15 @@ public class OTGuards {
 	static final Lookup lookup = new Lookup(MethodHandles.lookup());
 
 	public static final MethodHandle TEST_COMPOSITION_AND_INDEX = lookup.findOwnStatic("testTeamsComposition",
-			boolean.class, Class[].class, int.class, ITeam[].class, int.class);
+			boolean.class, Class[].class, ITeam[].class, int.class);
 	
 	@SuppressWarnings("unused")
-	public static boolean testTeamsComposition(final Class<ITeam>[] stack, final int index, final ITeam[] testStack, final int testIndex) {
-		if (index != testIndex || testStack == null || stack.length != testStack.length) {
+	public static boolean testTeamsComposition(final Class<ITeam>[] testStack, final ITeam[] stack, final int index) {
+		if (stack == null || testStack.length != stack.length - index) {
 			return false;
 		}
-		for (int i = 0; i < stack.length; i++) {
-			if (!stack[i].isAssignableFrom(testStack[i].getClass())) {
+		for (int i = 0, j = index; i < testStack.length; i++, j++) {
+			if (!testStack[i].isAssignableFrom(stack[j].getClass())) {
 				return false;
 			}
 		}
