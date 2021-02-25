@@ -105,16 +105,15 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 	@Override
 	public GuardedInvocation getGuardedInvocation(final LinkRequest linkRequest, final LinkerServices linkerServices)
 			throws Exception {
+//		logger.info("---- Relinking ----");
 		final CallSiteDescriptor desc = linkRequest.getCallSiteDescriptor();
 		if (!(desc instanceof OTCallSiteDescriptor)) {
 			throw new LinkageError("CallSiteDescriptor is no OTCallSiteDescriptor");
 		}
-//		logger.info("---- Relinking ----");
 		final OTCallSiteDescriptor otdesc = (OTCallSiteDescriptor) desc;
 		if (linkRequest.isCallSiteUnstable()) {
 //			logger.info("-------- Callsite is unstable --------");
-			final boolean isCallAllBindings = otdesc.isCallAllBindings();
-			if (isCallAllBindings) {
+			if (otdesc.isCallAllBindings()) {
 				return new GuardedInvocation(OT_CALL_ALL_BINDINGS);
 			} else {
 				return new GuardedInvocation(OT_CALL_NEXT);
