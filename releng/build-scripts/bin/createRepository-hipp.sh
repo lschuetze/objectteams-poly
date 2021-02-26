@@ -9,7 +9,7 @@ BASE=`pwd`
 # ABSOLUTE PATHS:
 export UPDATES_BASE=/home/data/httpd/download.eclipse.org/objectteams/updates
 export JAVA8=/shared/common/jdk1.8.0_x64-latest/bin/java
-export JAVA11=/shared/common/java/openjdk/jdk-11/bin/java
+export JAVA11=/shared/common/java/openjdk/jdk-11_x64-latest/bin/java
 
 
 # RELATIVE PATHS:
