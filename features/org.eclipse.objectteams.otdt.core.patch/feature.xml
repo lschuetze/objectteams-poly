@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.objectteams.otdt.core.patch"
       label="%featureName"
-      version="2.8.1.qualifier"
+      version="2.8.2.qualifier"
       provider-name="%providerName"
       plugin="org.eclipse.jdt.core">
 
@@ -59,7 +59,7 @@ Project Leader:
    </url>
 
    <requires>
-      <import feature="org.eclipse.jdt" version="3.18.700.v20210217-1800" patch="true"/>
+      <import feature="org.eclipse.jdt" version="3.18.700.v20210224-1800" patch="true"/>
    </requires>
 
    <plugin
