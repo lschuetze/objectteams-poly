@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -146,7 +146,9 @@ public class CompilationUnitProblemFinder extends Compiler {
 			  {
 // orig:  Note(SH): this will redirect:
 				environment.buildTypeBindings(unit, accessRestriction);
+				CompilationUnitDeclaration previousUnitBeingCompleted = this.lookupEnvironment.unitBeingCompleted;
 				environment.completeTypeBindings(unit);
+				this.lookupEnvironment.unitBeingCompleted = previousUnitBeingCompleted;
 // :giro
 			  }
 // SH}
