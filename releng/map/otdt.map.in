@@ -94,8 +94,8 @@ plugin@Base537533=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse
 plugin@Aspect537533=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Aspect537533
 plugin@Base571542_A=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Base571542_A
 plugin@Base571542_B=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Base571542_B
-plugin@Aspect571542_A=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest//Aspect571542_A
-plugin@Aspect571542_B=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest//Aspect571542_B
+plugin@Aspect571542_A=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Aspect571542_A
+plugin@Aspect571542_B=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Aspect571542_B
 
 
 !-- Tests fetched from original GIT (some are required indirectly by jdt.ui.tests): --
