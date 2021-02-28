@@ -286,7 +286,10 @@ public class AspectBinding {
 	
 	Set<TeamBinding> teamsInProgress = new HashSet<>(); // TODO cleanup teams that are done
 	
-	public AspectBinding(String aspectId, @Nullable Bundle aspectBundle, BaseBundle baseBundle, @NonNull IConfigurationElement[] forcedExportsConfs, int count) 
+	ASMByteCodeAnalyzer bytecodeAnalyzer;
+	
+	public AspectBinding(String aspectId, @Nullable Bundle aspectBundle, BaseBundle baseBundle, @NonNull IConfigurationElement[] forcedExportsConfs,
+			int teamCount, ASMByteCodeAnalyzer bytecodeAnalyzer) 
 	{
 		this.aspectPlugin= aspectId;
 		this.aspectBundle= aspectBundle;
@@ -294,7 +297,8 @@ public class AspectBinding {
 		this.basePluginName= baseBundle.bundleName;
 		this.forcedExports= forcedExportsConfs;
 		
-		this.teams = new TeamBinding[count];
+		this.teams = new TeamBinding[teamCount];
+		this.bytecodeAnalyzer = bytecodeAnalyzer;
 	}
 
 	/** Create an initial (unconnected) resolved team binding. */
@@ -321,7 +325,7 @@ public class AspectBinding {
 		if (classLoader == null)
 			return;
 		try (InputStream classStream = classLoader.getResourceAsStream(className.replace('.', '/')+".class")) {
-			this.weavingScheme = ASMByteCodeAnalyzer.determineWeavingScheme(classStream, className);
+			this.weavingScheme = bytecodeAnalyzer.determineWeavingScheme(classStream, className);
 			if (OTWeavingHook.DEFAULT_WEAVING_SCHEME == WeavingScheme.Unknown) {
 				OTWeavingHook.DEFAULT_WEAVING_SCHEME = this.weavingScheme;
 				TransformerPlugin.doLog(IStatus.INFO, "Using weaving scheme "+this.weavingScheme+" as detected from class "+className);	
