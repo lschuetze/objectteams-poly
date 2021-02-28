@@ -5603,4 +5603,52 @@ public class ReportedBugs extends AbstractOTJLDTest {
     		},
     		"cirun");
     }
+    public void testBug571542() throws Exception {
+    	runConformTest(
+    		new String[] {
+    			"Bug571542Main.java",
+    			"public class Bug571542Main {\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		new Team571542().activate();\n" +
+    			"		new Base571542_1().start();\n" +
+    			"		new Base571542_3().start();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"Base571542_0.java",
+    			"public class Base571542_0 {\n" +
+    			"	public void start() {\n" +
+    			"		System.out.print(\"C0\");\n" +
+    			"	}\n" +
+    			"}\n",
+    			"Base571542_1.java",
+    			"public class Base571542_1 extends Base571542_0 {\n" +
+    			"	@Override public void start() {\n" +
+    			"		System.out.print(\"C1\");\n" +
+    			"		super.start();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"Base571542_2.java",
+    			"public class Base571542_2 extends Base571542_0 {\n" +
+    			"	@Override public void start() {\n" +
+    			"		System.out.print(\"C2\");\n" +
+    			"		super.start();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"Base571542_3.java",
+    			"public class Base571542_3 extends Base571542_2 {\n" +
+    			"	@Override public void start() {\n" +
+    			"		System.out.print(\"C3\");\n" +
+    			"		super.start();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"Team571542.java",
+    			"public team class Team571542 {\n" +
+    			"	protected class R playedBy Base571542_1 {\n" +
+    			"		void print() { System.out.print(\"R\"); }\n" +
+    			"		print <- after start;\n" +
+    			"	}\n" +
+    			"}\n"
+    		},
+    		"C1C0RC3C2C0");
+    }
 }

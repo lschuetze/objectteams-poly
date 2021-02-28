@@ -486,12 +486,14 @@ class AsmWritableBoundClass extends AsmBoundClass {
 	 */
 	protected void propagateCallinInfraToSubclasses() {
 		for (AbstractBoundClass sub : subclasses.keySet()) {
-			if (sub instanceof AsmWritableBoundClass && !sub.isAnonymous()) {
+			if (sub instanceof AsmWritableBoundClass) {
 				AsmWritableBoundClass writableSub = (AsmWritableBoundClass) sub;
 				if (!writableSub.hierarchyIsCallinAffected) {
 					writableSub.hierarchyIsCallinAffected = true;
-					writableSub.createSuperCalls();
-					writableSub.propagateCallinInfraToSubclasses();
+					if (!sub.isAnonymous()) {
+						writableSub.createSuperCalls();
+						writableSub.propagateCallinInfraToSubclasses();
+					}
 				}
 			}
 		}
@@ -517,7 +519,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			nodes.add(new CreateSuperCallAdapter(internalSuperClassName, ConstantMembers.callOrig));
 			nodes.add(new CreateSuperCallAdapter(internalSuperClassName, ConstantMembers.access));			
 		};
-		if (isTransformationActive || !isTransformed) {
+		if (isTransformationActive || (isFirstTransformation && !isTransformed)) {
 			// either include in the current transformation or schedule for an upcoming transformation.
 			if (nodes == null) 
 				nodes = new ArrayList<AbstractTransformableClassNode>();
@@ -533,11 +535,12 @@ class AsmWritableBoundClass extends AsmBoundClass {
 					}
 					operation.run();
 					commitTransaction(definedClass);
+					endTransformation(definedClass);
 				}
 			};
 			if (!weavingContext.scheduleReweaving(this.getName(), task))
 				try {
-					handleTaskList(null);
+					task.reweave(this.definedClass);
 				} catch (IllegalClassFormatException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

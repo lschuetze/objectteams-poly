@@ -226,6 +226,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	// callback
 	protected IWeavingContext weavingContext;
 
+	@Nullable
+	protected Class<?> definedClass;
 
 
 	/**
@@ -676,6 +678,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * @throws IllegalClassFormatException various bytecode problems, e.g., unexpected RET instruction etc.
 	 */
 	public void handleTaskList(@Nullable Class<?> definedClass) throws IllegalClassFormatException {
+		if (this.definedClass == null && definedClass != null)
+			this.definedClass = definedClass;
 		if (isTransformationActive()) return;
 
 		if (this.isUnweavable)

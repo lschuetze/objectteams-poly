@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Base571542_B
+Bundle-SymbolicName: Base571542_B
+Bundle-Version: 1.0.0.qualifier
+Automatic-Module-Name: Base571542.B
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: Base571542_A;bundle-version="1.0.0";visibility:=reexport
+Export-Package: base571542.b
