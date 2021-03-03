@@ -285,10 +285,10 @@ path to map file (with substitutions):
         <!-- Make org.eclipse.test.performance available while compiling test projects: -->
         <echo message="Pre-installing Eclipse Test Framework into base Eclipse..."/>
         <mkdir dir="${testsUpdatesDirBase}/eclipse"/>
-		<tempfile property="eclispe.tests.tmp" prefix="eclipse.test"/>
-		<get src="${eclipse.tests.zip}" dest="${eclipse.test.tmp"/>
+		<tempfile property="eclipse.tests.tmp" prefix="eclipse.tests"/>
+		<get src="${eclipse.tests.zip}" dest="${eclipse.tests.tmp}"/>
         <unzip dest="${testsUpdatesDirBase}/eclipse" src="${eclipse.tests.tmp}"/> 
-		<delete><filename name="${eclipse.test.tmp}"/></delete>
+		<delete><filename name="${eclipse.tests.tmp}"/></delete>
         <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${baseLocation}">
             <property name="feature" value="org.eclipse.test.feature.group"/>
             <property name="sourceUpdatesDir" value="${testsUpdatesDirBase}/eclipse"/>
