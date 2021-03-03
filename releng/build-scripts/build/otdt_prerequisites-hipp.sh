@@ -36,7 +36,7 @@ FETCH_CACHE_LOCATION=${HOME}/gitCache
 MAP_FILE_PATH=${BASEDIR}/releng/map/otdt.map
 
 # Base dir for finding previous platform build:
-DROPS4=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
+DROPS4=http://download.eclipse.org/eclipse/downloads/drops4
 
 # Configure ANT:
 ANT_HOME=/shared/common/apache-ant-1.10.5/

@@ -203,11 +203,14 @@ path to map file (with substitutions):
 
 	<target name="UnzipEclipse">
 		<echo message="Extracting Boot Eclipse (${eclipse-app.tgz}) in ${build.root.dir}..."/>
+		<tempfile property="eclipse.app.tmp"/>
+		<get src="${eclipse-app.tgz}" dest="${eclipse.app.tmp}"/>
+
 		<mkdir dir="${build.root.dir}"/>
-		<untar compression="gzip" src="${eclipse-app.tgz}" dest="${build.root.dir}"/>
-		<echo message="Extracting Base Eclipse (${eclipse-app.tgz}) in ${test.root.dir}..."/>
+		<untar compression="gzip" src="${eclipse.app.tmp}" dest="${build.root.dir}"/>
+		<echo message="Extracting Base Eclipse (${eclipse.app.tmp}) in ${test.root.dir}..."/>
 		<mkdir dir="${test.root.dir}"/>
-		<untar compression="gzip" src="${eclipse-app.tgz}" dest="${test.root.dir}"/>
+		<untar compression="gzip" src="${eclipse.app.tmp}" dest="${test.root.dir}"/>
 		<!-- avoid conflict with OTDT-variant when resolving source plug-ins against baseLocation: -->
 		<delete>
 		    <fileset dir="${baseLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
