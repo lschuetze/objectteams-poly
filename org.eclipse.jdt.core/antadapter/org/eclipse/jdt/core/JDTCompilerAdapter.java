@@ -75,10 +75,6 @@ public class JDTCompilerAdapter extends DefaultCompilerAdapter {
 	public boolean execute() throws BuildException {
 		this.attributes.log(AntAdapterMessages.getString("ant.jdtadapter.info.usingJDTCompiler"), Project.MSG_VERBOSE); //$NON-NLS-1$
 		Commandline cmd = setupJavacCommand();
-		System.err.println("CMD: "+cmd);
-		for (String arg : cmd.getArguments()) {
-			System.err.println("Arg: "+arg);
-		}
 
 		try {
 			Class c = Class.forName(compilerClass);
