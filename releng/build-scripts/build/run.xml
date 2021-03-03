@@ -214,8 +214,8 @@ path to map file (with substitutions):
 		<delete>
 			<!-- avoid conflict with OTDT-variant when resolving source plug-ins against baseLocation: -->
 		    <fileset dir="${baseLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
-			<filename name="${eclipse.app.tmp}"/>
 		</delete>
+		<delete file="${eclipse.app.tmp}"></delete>
 	</target>
 	
 	<target name="AddPluginsToEclipse" description="Add git.pde.build plugins to the boot Eclipse">
@@ -288,7 +288,7 @@ path to map file (with substitutions):
 		<tempfile property="eclipse.tests.tmp" prefix="eclipse.tests"/>
 		<get src="${eclipse.tests.zip}" dest="${eclipse.tests.tmp}"/>
         <unzip dest="${testsUpdatesDirBase}/eclipse" src="${eclipse.tests.tmp}"/> 
-		<delete><filename name="${eclipse.tests.tmp}"/></delete>
+		<delete file="${eclipse.tests.tmp}"/>
         <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${baseLocation}">
             <property name="feature" value="org.eclipse.test.feature.group"/>
             <property name="sourceUpdatesDir" value="${testsUpdatesDirBase}/eclipse"/>
