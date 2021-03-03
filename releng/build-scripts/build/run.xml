@@ -203,7 +203,7 @@ path to map file (with substitutions):
 
 	<target name="UnzipEclipse">
 		<echo message="Extracting Boot Eclipse (${eclipse-app.tgz}) in ${build.root.dir}..."/>
-		<tempfile property="eclipse.app.tmp"/>
+		<tempfile property="eclipse.app.tmp" prefix="eclipse-app"/>
 		<get src="${eclipse-app.tgz}" dest="${eclipse.app.tmp}"/>
 
 		<mkdir dir="${build.root.dir}"/>
@@ -211,9 +211,10 @@ path to map file (with substitutions):
 		<echo message="Extracting Base Eclipse (${eclipse.app.tmp}) in ${test.root.dir}..."/>
 		<mkdir dir="${test.root.dir}"/>
 		<untar compression="gzip" src="${eclipse.app.tmp}" dest="${test.root.dir}"/>
-		<!-- avoid conflict with OTDT-variant when resolving source plug-ins against baseLocation: -->
 		<delete>
+			<!-- avoid conflict with OTDT-variant when resolving source plug-ins against baseLocation: -->
 		    <fileset dir="${baseLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
+			<filename name="${eclipse.app.tmp}"/>
 		</delete>
 	</target>
 	
@@ -284,7 +285,10 @@ path to map file (with substitutions):
         <!-- Make org.eclipse.test.performance available while compiling test projects: -->
         <echo message="Pre-installing Eclipse Test Framework into base Eclipse..."/>
         <mkdir dir="${testsUpdatesDirBase}/eclipse"/>
-        <unzip dest="${testsUpdatesDirBase}/eclipse" src="${eclipse.tests.zip}"/> 
+		<tempfile property="eclispe.tests.tmp" prefix="eclipse.test"/>
+		<get src="${eclipse.tests.zip}" dest="${eclipse.test.tmp"/>
+        <unzip dest="${testsUpdatesDirBase}/eclipse" src="${eclipse.tests.tmp}"/> 
+		<delete><filename name="${eclipse.test.tmp}"/></delete>
         <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${baseLocation}">
             <property name="feature" value="org.eclipse.test.feature.group"/>
             <property name="sourceUpdatesDir" value="${testsUpdatesDirBase}/eclipse"/>
