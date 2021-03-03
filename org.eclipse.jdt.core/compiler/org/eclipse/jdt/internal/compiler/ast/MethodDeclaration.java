@@ -109,7 +109,7 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 //{ObjectTeams: some reasons why there might be nothing to analyze:
 			// still waiting for statements to be generated?
 			if (   this.isGenerated && this.statements == null
-				&& !this.scope.isOrgObjectteamsTeam(this.binding.declaringClass)) // o.o.T. methods are special
+				&& this.binding.declaringClass.id != IOTConstants.T_OrgObjectTeamsTeam) // o.o.T. methods are special
 				return;
 // SH}
 

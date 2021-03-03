@@ -1834,7 +1834,7 @@ public class ClassScope extends Scope {
 				sourceType.tagBits |= TagBits.HierarchyHasProblems; // propagate if missing supertype
 				return superclassRef.resolvedType.isValidBinding(); // reported some error against the source type ?
 //{ObjectTeams: team super class only allowed for teams
-            } else if ((isOrgObjectteamsTeam(superclass) || superclass.isTeam())
+            } else if ((superclass.id == IOTConstants.T_OrgObjectTeamsTeam || superclass.isTeam())
                         && !sourceType.isTeam())
             {
             	problemReporter().regularExtendsTeam(sourceType, this.referenceContext.superclass, superclass);

@@ -1003,7 +1003,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	            tgtTeam, targetRoleDecl);
 
 	    if (method.isConstructor()) {
-	    	if (CharOperation.equals(srcRole.compoundName, IOTConstants.ORG_OBJECTTEAMS_TEAM_OTCONFINED))
+	    	if (srcRole.id == IOTConstants.T_OrgObjectteamsTeamOTConfined)
 	        {
 	        	// must add default constructor explicitly,
 	        	// since if we would copy the one from Team.__OT__Confined,

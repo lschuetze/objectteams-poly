@@ -662,6 +662,14 @@ public void computeId() {
 					this.id = IOTConstants.T_OrgObjectTeamsIBoundBase2;
 				else if(CharOperation.equals(IOTConstants.INSTANTIATION, this.compoundName[2]))
 					this.id = IOTConstants.T_OrgObjectTeamsInstantiation;
+				else if(CharOperation.equals(IOTConstants.ICONFINED, this.compoundName[2]))
+					this.id = IOTConstants.T_OrgObjectteamsIConfined;
+				else if(CharOperation.equals(IOTConstants.ITEAM_ICONFINED, this.compoundName[2]))
+					this.id = IOTConstants.T_OrgObjectteamsITeamIConfined;
+				else if(CharOperation.equals(IOTConstants.TEAM_CONFINED, this.compoundName[2]))
+					this.id = IOTConstants.T_OrgObjectteamsTeamConfined;
+				else if(CharOperation.equals(IOTConstants.TEAM_OTCONFINED, this.compoundName[2]))
+					this.id = IOTConstants.T_OrgObjectteamsTeamOTConfined;
 				return;
 			}
 // SH}

@@ -37,7 +37,6 @@ package org.eclipse.jdt.internal.compiler.ast;
 
 import static org.eclipse.jdt.internal.compiler.ast.ExpressionContext.INVOCATION_CONTEXT;
 
-import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.*;
@@ -440,8 +439,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 			}
 //{ObjectTeams: compiling org.objectteams.Team$__OT__Confined ?
 			if (receiverType == null) {
-				if (CharOperation.equals(scope.enclosingSourceType().compoundName,
-							IOTConstants.ORG_OBJECTTEAMS_TEAM_OTCONFINED))
+				if (scope.enclosingSourceType().id == IOTConstants.T_OrgObjectteamsTeamOTConfined)
 					receiverType = scope.getJavaLangObject(); // use this supertype only this one time!
 				else // testharness for checking a hypothesis:
 					scope.problemReporter().missingImplementation(this, "Detected null receiverType"); //$NON-NLS-1$

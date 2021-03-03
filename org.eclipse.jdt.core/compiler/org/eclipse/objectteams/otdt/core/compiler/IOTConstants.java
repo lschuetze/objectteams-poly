@@ -200,8 +200,8 @@ public interface IOTConstants
 	public static final char[] ICONFINED = "IConfined".toCharArray();
 	public static final char[][] ORG_OBJECTTEAMS_ICONFINED = {ORG, OBJECTTEAMS, ICONFINED};
 
-	public static final char[] TEAM_ICONFINED = "ITeam$IConfined".toCharArray();
-	public static final char[][] ORG_OBJECTTEAMS_ITEAM_ICONFINED = {ORG, OBJECTTEAMS, TEAM_ICONFINED};
+	public static final char[] ITEAM_ICONFINED = "ITeam$IConfined".toCharArray();
+	public static final char[][] ORG_OBJECTTEAMS_ITEAM_ICONFINED = {ORG, OBJECTTEAMS, ITEAM_ICONFINED};
 
 	public static final char[] OTCONFINED = "__OT__Confined".toCharArray();
 	public static final char[] CONFINED = "Confined".toCharArray();
@@ -264,18 +264,25 @@ public interface IOTConstants
 
 
 	// Type IDs (cf. type TypeIds)
-	public static final int T_OrgObjectTeamsITeam      = 100;
-	public static final int T_OrgObjectTeamsTeam       = 101;
-	public static final int T_OrgObjectTeamsIBoundBase = 102;
+	public static final int T_OrgObjectTeamsITeam      = 127;
+	public static final int T_OrgObjectTeamsTeam       = 126;
+	public static final int T_OrgObjectTeamsIBoundBase = 125;
 	/**
 	 * @since 3.7 (OT 2.0)
 	 */
-	public static final int T_OrgObjectTeamsInstantiation = 103;
+	public static final int T_OrgObjectTeamsInstantiation = 124;
 	/**
 	 * @since 3.10 (OT 2.3)
 	 */
-	public static final int T_OrgObjectTeamsIBoundBase2 = 104;
-
+	public static final int T_OrgObjectTeamsIBoundBase2 = 123;
+	/** @since 3.25 (OT 2.8.2) */
+	public static final int T_OrgObjectteamsIConfined = 122;
+	/** @since 3.25 (OT 2.8.2) */
+	public static final int T_OrgObjectteamsITeamIConfined = 121;
+	/** @since 3.25 (OT 2.8.2) */
+	public static final int T_OrgObjectteamsTeamConfined = 120;
+	/** @since 3.25 (OT 2.8.2) */
+	public static final int T_OrgObjectteamsTeamOTConfined = 119;
     // special identifiers:
 	public static final char[] RESULT = "result".toCharArray();
 	public static final char[] OT_RESULT = (OT_DOLLAR+"result").toCharArray();
