@@ -196,7 +196,7 @@ path to map file (with substitutions):
 		<property name="ws" value="gtk" />
 	</target>
 
-	<target name="setupForCompile" depends="checkOS" unless="_hasCreatedOTDTEclipse">
+	<target name="setupForCompile" depends="checkOS,setupProperties" unless="_hasCreatedOTDTEclipse">
 		<antcall target="UnzipEclipse"/>
 		<antcall target="AddPluginsToEclipse"/>
 	</target>
