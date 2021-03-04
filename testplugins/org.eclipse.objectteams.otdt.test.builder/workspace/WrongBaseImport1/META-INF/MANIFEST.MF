@@ -7,3 +7,5 @@ Bundle-Version: 1.0.0
 Require-Bundle: org.eclipse.objectteams.otequinox,
  Trac18b,
  org.eclipse.core.runtime
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+ 
