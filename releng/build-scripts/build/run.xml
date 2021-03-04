@@ -370,7 +370,8 @@ path to map file (with substitutions):
 	</target>
 	
 	<!-- TESTING at STAGE 3: -->
-	<target name="setupTests" depends="createOTDTEclipse" description="Install the tests into an fresh OTDT">
+	<!-- assumed from previous invocation: depends="createOTDTEclipse" -->
+	<target name="setupTests" description="Install the tests into an fresh OTDT">
 		<available file="${buildDirectory}/label.properties" property="label.properties.exists" />
 		<ant antfile="${OTScriptDir}/test.xml" target="setupTests" dir="${build.root.dir}">
 			<property name="os" value="${os}" />

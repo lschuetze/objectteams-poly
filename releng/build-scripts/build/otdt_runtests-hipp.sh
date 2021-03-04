@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # Copyright (c) 2010 Stephan Herrmann.
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -45,6 +45,14 @@
 ##		-Dmap.file.path			path to the otdt.map file (original location of otdt.map.in)
 ##		-D_hasSaxon.jar			to prevent copying of saxon8.jar (was needed on build.eclipse.org)
 # =============================================================================
+
+# CONSTANTS (FOR NOW):
+
+baseRepo=ot2.7-base
+statsRepo=ot2.8
+statsVersion=2.8.2
+export PROMOTE=staging
+export SIGN=""
 
 usage()
 {
@@ -138,10 +146,9 @@ ANT_OPTIONS="${ANT_PROFILE} \
 ANT_OPTS="-Xmx1024m"
 export ANT_OPTS
 
-CMD="nice -n ${NICE} ant -f ${BUILDFILE} ${ANT_OPTIONS} ${MAIN_TARGET}"
-
-echo "Running $CMD"
-eval "$CMD" < /dev/null
+ant -f ${BUILDFILE} ${ANT_OPTIONS} createOTDTEclipse &&  \
+	( cd .. ; ./releng/build-scripts/bin/createRepository-hipp.sh ${baseRepo} ${statsRepo} ${statsVersion} ) && \
+	ant -f ${BUILDFILE} ${ANT_OPTIONS} ${MAIN_TARGET}
 
 trap - INT
 

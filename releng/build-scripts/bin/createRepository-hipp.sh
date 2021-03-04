@@ -7,10 +7,9 @@
 BASE=`pwd`
 
 # ABSOLUTE PATHS:
-export UPDATES_BASE=/home/data/httpd/download.eclipse.org/objectteams/updates
-export JAVA8=/shared/common/jdk1.8.0_x64-latest/bin/java
-export JAVA11=/shared/common/java/openjdk/jdk-11_x64-latest/bin/java
-
+export UPDATES_BASE=genie.objectteams@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/objectteams/updates
+export JAVA8=/opt/tools/java/oracle/jdk-8/latest/bin/java
+export JAVA11=/opt/tools/java/openjdk/jdk-11/latest/bin/java
 
 # RELATIVE PATHS:
 BUILD=${BASE}/releng/build-scripts/build
@@ -22,6 +21,7 @@ then
         MASTER="none"
         echo "Generating fresh new repository"
 else
+# FIXME : this branch is broken
         MASTER=${UPDATES_BASE}/$1
         if [ -r ${MASTER}/features ]
         then
@@ -68,8 +68,8 @@ case ${JDTVERSIONB} in
                 ;;
 esac
 # hardcode when unable to compute
-#JDTVERSION=${JDTVERSIONA}
-#JDTVERSIONNEXT=3.8.0.v20110728
+#JDTVERSION=3.18.700.v20210224-1800
+#JDTVERSIONNEXT=3.18.700.v20210224-1801
 echo "JDT feature is ${JDTVERSION}"
 echo "Next           ${JDTVERSIONNEXT}"
 if [ ! -r ${BASE}/testrun/build-root/eclipse/features/org.eclipse.jdt_${JDTVERSION} ]
@@ -238,24 +238,26 @@ then
 	if [ "${PROMOTE}" != "" ]
 	then
         DEST=${UPDATES_BASE}/${2}/${PROMOTE}
-        /bin/rm -rf ${DEST}
+        # FIXME /bin/rm -rf ${DEST}
     else
         DEST=${UPDATES_BASE}/${2}/${BUILDID}
     fi
 	echo "====Step 11: promote to ${DEST}===="
-	if [ -d ${UPDATES_BASE}/${2} ]
-	then
-		mkdir ${DEST}
+# FIXME: check is broken
+#	if [ -d ${UPDATES_BASE}/${2} ]
+#	then
+		# FIXME mkdir ${DEST}
 		if [ "${MASTER}" != "none" ]
 		then
-			cp -pr ${MASTER}/* ${DEST}/
+		    # FIXME
+			# cp -pr ${MASTER}/* ${DEST}/
 		fi
-		cp -pr * ${DEST}/ && \
-			chmod -R g+w ${DEST} && \
-			find ${DEST} -type d -exec /bin/ls -ld {} \;
-		ls -latr ${UPDATES_BASE}/${2}
-	else
-		echo "${UPDATES_BASE}/${2} not found or not a directory"
-	fi
+		scp -r . ${DEST}
+		#	chmod -R g+w ${DEST} && \
+		#	find ${DEST} -type d -exec /bin/ls -ld {} \;
+		# ls -latr ${UPDATES_BASE}/${2}
+#	else
+#		echo "${UPDATES_BASE}/${2} not found or not a directory"
+#	fi
 fi
 echo "====DONE===="
