@@ -247,11 +247,11 @@ then
 #	if [ -d ${UPDATES_BASE}/${2} ]
 #	then
 		# FIXME mkdir ${DEST}
-		if [ "${MASTER}" != "none" ]
-		then
+		# if [ "${MASTER}" != "none" ]
+		# then
 		    # FIXME
 			# cp -pr ${MASTER}/* ${DEST}/
-		fi
+		# fi
 		scp -r . ${DEST}
 		#	chmod -R g+w ${DEST} && \
 		#	find ${DEST} -type d -exec /bin/ls -ld {} \;
