@@ -48,7 +48,7 @@
 
 # CONSTANTS (FOR NOW):
 
-baseRepo=ot2.7-base
+baseRepo=none
 statsRepo=ot2.8
 statsVersion=2.8.2
 export PROMOTE=staging
