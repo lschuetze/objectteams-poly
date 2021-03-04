@@ -1830,10 +1830,14 @@ private boolean checkVMVersion(long minimalSupportedVersion) {
  *  Low-level API performing the actual compilation
  */
 public boolean compile(String[] argv) {
-	System.err.println("Main args:");
-	for (String arg : argv) {
-		System.err.println("\t"+arg);
+//{ObjectTeams:
+	if ("true".equals(System.getProperty("ecj.batch.configure.verbose"))) {  //$NON-NLS-1$//$NON-NLS-2$
+		System.err.println("Main args:"); //$NON-NLS-1$
+		for (String arg : argv)
+			System.err.println("\t"+arg); //$NON-NLS-1$
 	}
+// SH}
+
 	// decode command line arguments
 	try {
 		configure(argv);
