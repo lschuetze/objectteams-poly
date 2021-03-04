@@ -27,7 +27,7 @@
 # FETCH_CACHE_LOCATION	git working area holding caches for fetch
 # MAP_FILE_PATH			path to the otdt.map file (original location of otdt.map.in)
 # ANT_PROFILE           configure the ant process
-# NICE                  niceness value for nice -n ${NICE}
+# SIGN					"nosign" or empty
 # =============================================================================
 # OUTPUT: Variables passed to the toplevel ant script
 # -----------------------------------------------------------------------------
@@ -39,7 +39,6 @@
 ##      -Declipse-app.tgz       path of eclipse SDK
 ##      -Declipse.tests.zip     path of eclipse test framework
 ##		-Dpublished.updates		path to previously published things
-##      -Ddo.build.all          true|false: should OTDT and tests be built?
 ##      -Ddo.run.tests          true|false: should test be run?
 ##    	-DfetchCacheLocation    git working area holding caches for fetch
 ##		-Dmap.file.path			path to the otdt.map file (original location of otdt.map.in)
@@ -47,12 +46,12 @@
 # =============================================================================
 
 # CONSTANTS (FOR NOW):
-
+# option baseRepo is currently broken
 baseRepo=none
-statsRepo=ot2.8
-statsVersion=2.8.2
+export UPDATE_SITE_BASE=ot2.8
+export OT_VERSION=2.8.2
+# during the build we always publish to 'staging':
 export PROMOTE=staging
-export SIGN=""
 
 usage()
 {
@@ -84,16 +83,10 @@ BUILDFILE="${_prefix}/run.xml"
 #LOCAL: main ant target:
 MAIN_TARGET=${MAIN_TARGET:="ot-junit-all"}
 
-#LOCAL: should OTDT and tests be built?
-DO_BUILD="true"
-
 #LOCAL: should the tests be run?
 DO_RUN="true"
 
 case ${MAIN_TARGET} in
-	"ot-junit-run")
-		DO_BUILD="false"
-		;;
 	"ot-compiler-build")
 		;&
 	"ot-junit-build")
@@ -107,19 +100,6 @@ test -d "$TMPDIR" || mkdir -p "$TMPDIR"
 test -d "$OT_TESTSUITE_DIR" || mkdir -p "$OT_TESTSUITE_DIR"
 cd "$OT_TESTSUITE_DIR"
 
-# cleanup previous:
-if [ "$DO_BUILD" == "true" ]
-then
-	rm -rf build-root
-	rm -rf test-root
-	rm -rf updateSite
-    rm -rf updateSiteTests
-    rm -rf updateSiteCompiler
-	rm -rf metadata
-	rm -rf ecj
-else
-	rm -f test-root/eclipse/results/*
-fi
 
 # preload metadata for appending:
 if [ -f "${METADATA}/content.xml" ]
@@ -137,7 +117,6 @@ ANT_OPTIONS="${ANT_PROFILE} \
     -Declipse.sdk.qualifier=${SDK_QUALIFIER} \
     -Dpublished.updates=${PUBLISHED_UPDATES} \
     -Ddo.run.tests=${DO_RUN} \
-    -Ddo.build.all=${DO_BUILD} \
     -Dtest.tmpDir=${TEST_TMPDIR} \
     -DfetchCacheLocation=${FETCH_CACHE_LOCATION} \
     -Dmap.file.path=${MAP_FILE_PATH} \
@@ -146,8 +125,11 @@ ANT_OPTIONS="${ANT_PROFILE} \
 ANT_OPTS="-Xmx1024m"
 export ANT_OPTS
 
+# 1. build OTDT
+# 2. create & publish the update site
+# 3. run tests using (1)
 ant -f ${BUILDFILE} ${ANT_OPTIONS} createOTDTEclipse &&  \
-	( cd .. ; ./releng/build-scripts/bin/createRepository-hipp.sh ${baseRepo} ${statsRepo} ${statsVersion} ) && \
+	( cd .. ; ./releng/build-scripts/bin/createRepository-hipp.sh ${baseRepo} ${UPDATE_SITE_BASE} ${OT_VERSION} ) && \
 	ant -f ${BUILDFILE} ${ANT_OPTIONS} ${MAIN_TARGET}
 
 trap - INT

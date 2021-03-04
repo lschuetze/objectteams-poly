@@ -36,6 +36,7 @@ do
 			JDT_VERSIONA=`echo ${JDT_VERSION_ALL}| sed -e 's/\([0-9]\+\.[0-9]\+\.[0-9]\+\.[^-]*-\)[0-9]\{4\}.*/\1/'`
 			JDT_VERSIONB=`echo ${JDT_VERSION_ALL}| sed -e   's/[0-9]\+\.[0-9]\+\.[0-9]\+\.[^-]*-\([0-9]\{4\}\).*/\1/'`
 			JDT_VERSIONB_NEXT=`expr $JDT_VERSIONB + 1`
+			JDT_VERSIONB_NEXT=`printf "%04d" ${JDT_VERSIONB_NEXT}`
 			;;
 		org.eclipse.equinox.launcher*)
 			LAUNCHER_VERSION=$VERSION

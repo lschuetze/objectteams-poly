@@ -352,7 +352,6 @@ path to map file (with substitutions):
 				<arg value="-Dmap.file.path=${map.file.path}"/>
 		    	<arg value="-DfetchCacheLocation=${fetchCacheLocation}"/>
 				<arg value="-Ddo.run.tests=${do.run.tests}"/>
-				<arg value="-Ddo.build.all=${do.build.all}"/>
 				<arg value="-Declipse-app.tgz=${eclipse-app.tgz}"/>
 				<arg value="-Declipse.tests.zip=${eclipse.tests.zip}"/>
 				<arg value="-Djdt.compiler.apt=${jdt.compiler.apt}"/>

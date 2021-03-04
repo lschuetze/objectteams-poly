@@ -7,7 +7,10 @@
 BASE=`pwd`
 
 # ABSOLUTE PATHS:
-export UPDATES_BASE=genie.objectteams@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/objectteams/updates
+TARGET_HOST=genie.objectteams@projects-storage.eclipse.org
+TARGET_BASEDIR=/home/data/httpd/download.eclipse.org/objectteams/updates
+TARGET_HTTPS="https://download.eclipse.org/objectteams/updates"
+export UPDATES_BASE=${TARGET_HOST}:${TARGET_BASEDIR}
 export JAVA8=/opt/tools/java/oracle/jdk-8/latest/bin/java
 export JAVA11=/opt/tools/java/openjdk/jdk-11/latest/bin/java
 
@@ -21,7 +24,8 @@ then
         MASTER="none"
         echo "Generating fresh new repository"
 else
-# FIXME : this branch is broken
+		echo "Using a previous repo is broken in this script"
+		exit 1
         MASTER=${UPDATES_BASE}/$1
         if [ -r ${MASTER}/features ]
         then
@@ -33,7 +37,7 @@ else
                 echo "Generating Repository based on ${MASTER}"
             else
                 echo "No such repository ${MASTER}"
-                echo "Usage: $0 updateMasterRelativePath [ -nosign ] [ statsRepoId statsVersionId ]"
+                echo "Usage: $0 updateMasterRelativePath [ statsRepoId statsVersionId ]"
                 exit 1
             fi
         fi
@@ -63,6 +67,7 @@ case ${JDTVERSIONB} in
                 JDTVERSIONC1=`echo ${JDTVERSIONA} | cut -d 'v' -f 1`
                 JDTVERSIONC2=`echo ${JDTVERSIONA} | cut -d 'v' -f 2`
                 JDTVERSIONC3=`expr $JDTVERSIONC2 + 1`
+                JDTVERSIONC3=`printf "%04d" ${JDTVERSIONC3}`
                 JDTVERSION=${JDTVERSIONC1}v${JDTVERSIONC2}
                 JDTVERSIONNEXT=${JDTVERSIONC1}v${JDTVERSIONC3}
                 ;;
@@ -107,8 +112,9 @@ fi
 
 for dir in features plugins
 do
+		# add "-verbose" to the second line if needed:
         find ${BASE}/testrun/updateSite/${dir} -type f -name \*.jar -exec \
-                ${JAVA8} -jar ${JARPROCESSOR} -verbose -processAll -repack -outputDir ${CONDITIONED}/${dir} {} \;
+                ${JAVA8} -jar ${JARPROCESSOR} -processAll -repack -outputDir ${CONDITIONED}/${dir} {} \;
 done
 # not conditioned, but must not be skipped!
 cp ${BASE}/testrun/updateSite/plugins/org.eclipse.jdt.core_* ${CONDITIONED}/plugins/
@@ -176,8 +182,9 @@ cd ${LOCATION}
 echo "====Step 3: pack jars (again) ===="
 for dir in ${LOCATION}/features ${LOCATION}/plugins
 do
+		# add "-verbose" to the second line if needed:
         find ${dir} -type f -name \*.jar -exec \
-                ${JAVA8} -jar ${JARPROCESSOR} -verbose -pack -outputDir ${dir} {} \;
+                ${JAVA8} -jar ${JARPROCESSOR} -pack -outputDir ${dir} {} \;
 done
 
 
@@ -234,30 +241,28 @@ find . -type l -exec /bin/rm {} \;
 
 if [ "${PROMOTE}" != "false" ]
 then
-	BUILDID=`echo $OTDTVERSION | cut -d '.' -f 4`
 	if [ "${PROMOTE}" != "" ]
 	then
-        DEST=${UPDATES_BASE}/${2}/${PROMOTE}
-        # FIXME /bin/rm -rf ${DEST}
+        DEST_REL=${2}/${PROMOTE}
     else
-        DEST=${UPDATES_BASE}/${2}/${BUILDID}
+		BUILDID=`echo $OTDTVERSION | cut -d '.' -f 4`
+		if [ "${BUILDID}" != "" ]
+		then
+	        DEST_REL=${2}/${BUILDID}
+	    else
+			echo "Unrecognized OT version: $OTDTVERSION"
+			exit 1
+		fi
     fi
-	echo "====Step 11: promote to ${DEST}===="
-# FIXME: check is broken
-#	if [ -d ${UPDATES_BASE}/${2} ]
-#	then
-		# FIXME mkdir ${DEST}
-		# if [ "${MASTER}" != "none" ]
-		# then
-		    # FIXME
-			# cp -pr ${MASTER}/* ${DEST}/
-		# fi
-		scp -r . ${DEST}
-		#	chmod -R g+w ${DEST} && \
-		#	find ${DEST} -type d -exec /bin/ls -ld {} \;
-		# ls -latr ${UPDATES_BASE}/${2}
-#	else
-#		echo "${UPDATES_BASE}/${2} not found or not a directory"
-#	fi
+	echo "====Step 11: promote to ${TARGET_HOST}:{TARGET_BASEDIR}/${DEST_REL}===="
+	# FIXME mkdir ${DEST}
+	# if [ "${MASTER}" != "none" ]
+	# then
+	    # FIXME
+		# cp -pr ${MASTER}/* ${DEST}/
+	# fi
+	ssh ${TARGET_HOST} "/bin/rm -r ${TARGET_BASEDIR}/${DEST_REL} || true"
+	scp -r . ${TARGET_HOST}:${TARGET_BASEDIR}/${DEST_REL}
+	echo "Installed to ${TARGET_HTTPS}/${DEST_REL}"
 fi
 echo "====DONE===="
