@@ -70,6 +70,7 @@
             	--add-opens java.base/jdk.internal.ref=ALL-UNNAMED
             	--add-opens java.base/jdk.internal.math=ALL-UNNAMED
             	--add-opens java.base/jdk.internal.misc=ALL-UNNAMED
+            	--add-opens jdk.zipfs/jdk.nio.zipfs=ALL-UNNAMED
             	-Djava.io.tmpdir=${test.tmpDir} -Dot.weaving=otdre -javaagent:${otequinox.agent.jar}
             	-Dcompliance=1.8,11,14"/>
 		</ant>
