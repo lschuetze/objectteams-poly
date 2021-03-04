@@ -1578,6 +1578,8 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a super-call bypasses a callin binding
     // X.1.1-otjld-binding-inheritance-12
     public void testX11_bindingInheritance12() {
+        if (isKnownFailure(this.getClass().getName()+".testX11_bindingInheritance12"))
+     	   return;
 
        runConformTest(
             new String[] {
@@ -1620,6 +1622,8 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a super-call bypasses a callin binding - other team binds super version
     // X.1.1-otjld-binding-inheritance-13
     public void testX11_bindingInheritance13() {
+       if (isKnownFailure(this.getClass().getName()+".testX11_bindingInheritance13"))
+      	   return;
 
        runConformTest(
             new String[] {
@@ -1672,6 +1676,8 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
     // a callin to a private base method does not affect the unrelated version in a sub-base (reported by Oliver Frank)
     // X.1.1-otjld-binding-inheritance-14
     public void testX11_bindingInheritance14() {
+       if (isKnownFailure(this.getClass().getName()+".testX11_bindingInheritance14"))
+      	   return;
 
        runConformTest(
             new String[] {

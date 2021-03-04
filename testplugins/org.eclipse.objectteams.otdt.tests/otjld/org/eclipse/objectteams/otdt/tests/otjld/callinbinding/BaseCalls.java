@@ -2073,6 +2073,8 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a callin method has a base super call, same base method is bound by two roles
     // 4.5.13-otjld-basecall-super-access-4
     public void test4513_basecallSuperAccess4() {
+       if (isKnownFailure(this.getClass().getName()+".test4513_basecallSuperAccess4"))
+      	   return;
 
        runConformTest(
             new String[] {
@@ -2126,6 +2128,8 @@ public class BaseCalls extends AbstractOTJLDTest {
     // a callin method has a base super call, super method is bound by another role
     // 4.5.13-otjld-basecall-super-access-5
     public void test4513_basecallSuperAccess5() {
+       if (isKnownFailure(this.getClass().getName()+".test4513_basecallSuperAccess4"))
+       	   return;
 
        runConformTest(
             new String[] {

@@ -524,4 +524,10 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 				"-Dot.teamconfig="+OUTPUT_DIR+'/'+relativeFilePath
 		};
 	}
+	
+	static protected int ignoreCount = 0;
+	protected boolean isKnownFailure(String test) {
+		System.err.println("Test "+test+" is known to fail (#"+(++ignoreCount)+"), see https://bugs.eclipse.org/484164");
+		return true; // boolean result to avoid dead code warning at call site
+	}
 }

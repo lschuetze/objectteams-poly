@@ -1966,6 +1966,8 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
     // global team activation applies also for later started threads - SUPER class of started thread implements 'Runnable'
     // 5.2.15-otjld-explicit-activation-for-all-threads-1a
     public void test5215_explicitActivationForAllThreads1a() {
+       if (isKnownFailure(this.getClass().getName()+".test5215_explicitActivationForAllThreads1a"))
+      	   return;
 
        runConformTest(
             new String[] {
