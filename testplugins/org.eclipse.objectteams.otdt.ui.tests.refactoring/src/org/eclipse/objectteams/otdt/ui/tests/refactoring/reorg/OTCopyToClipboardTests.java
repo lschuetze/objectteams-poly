@@ -73,6 +73,7 @@ public class OTCopyToClipboardTests extends GenericRefactoringTest
 
 	public void genericbefore() throws Exception
     {
+		rts = setup;
         super.genericbefore();
         _clipboard = new MockClipboard(Display.getDefault());
 
