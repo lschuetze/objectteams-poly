@@ -17,18 +17,7 @@
 	<property name="otequinox.agent.jar" value="${test.root.dir}/eclipse/plugins/org.eclipse.objectteams.otequinox_${org.eclipse.objectteams.otequinox}/otequinoxAgent.jar"/>
 
 
-	<target name="readFlags">
-		<condition property="really.build.all">
-			<istrue value="${do.build.all}"/>
-        </condition>
-	</target>
-	
-	<target name="checkFlags" depends="readFlags" unless="really.build.all">
-		<property name="otdt-eclipse.is.setup" value="true"/>
-		<property name="tests.are.setup" value="true"/>
-	</target>
-
-	<target name="setupOTDTEclipse" depends="checkFlags" unless="otdt-eclipse.is.setup"
+	<target name="setupOTDTEclipse" unless="otdt-eclipse.is.setup"
 		description="Creates the SUT by and installing the OTDT into a pre-installed base Eclipse"
 	>
 		<echo message="Installing OTDT into Test Eclipse..."/>
