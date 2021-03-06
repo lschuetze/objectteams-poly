@@ -8,8 +8,8 @@ import org.eclipse.objectteams.otredyn.runtime.IBinding;
 import org.eclipse.objectteams.otredyn.runtime.dynamic.linker.util.ObjectTeamsTypeUtilities;
 import org.objectteams.IBoundBase2;
 import org.objectteams.ITeam;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 import jdk.dynalink.CallSiteDescriptor;
 import jdk.dynalink.linker.GuardedInvocation;
@@ -21,7 +21,7 @@ import jdk.dynalink.linker.support.Lookup;
 
 public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 
-	static Logger logger = LoggerFactory.getLogger(CallinLinker.class);
+//	static Logger logger = LoggerFactory.getLogger(CallinLinker.class);
 
 	private static final MethodHandle INCREMENT = Lookup.PUBLIC.findStatic(Math.class, "addExact",
 			MethodType.methodType(int.class, int.class, int.class));

@@ -76,9 +76,11 @@ public class TeamsAndCallinIdsLinker implements GuardingDynamicLinker {
 			final MethodHandle target = getTeamsAndCallinIds(csd.getLookup());
 			result = new GuardedInvocation(target);
 		} else {
+			final int joinpointId = csd.getJoinpointId();
+			cachedValues.remove(joinpointId);
 			final MethodHandle target = CACHED;
 			final SwitchPoint sp = new SwitchPoint();
-			TeamManager.registerSwitchPoint(csd.getJoinpointId(), sp);
+			TeamManager.registerSwitchPoint(joinpointId, sp);
 			result = new GuardedInvocation(target, sp);
 		}
 		return result;
