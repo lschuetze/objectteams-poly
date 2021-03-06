@@ -374,7 +374,7 @@ public class WordValueAttribute
 		if ((this._value & OT_CLASS_TEAM) != 0)
 			modifiers |= ExtraCompilerModifiers.AccTeam;
 		if ((this._value & OT_CLASS_FLAG_HAS_TSUPER) != 0)
-			modifiers |= ExtraCompilerModifiers.AccOverriding;
+			modifiers |= ExtraCompilerModifiers.AccOverridingRole;
 		return modifiers;
 	}
 

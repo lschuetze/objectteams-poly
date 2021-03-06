@@ -24,7 +24,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.model;
 
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccInterface;
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccSynthetic;
-import static org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers.AccOverriding;
+import static org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers.AccOverridingRole;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1140,7 +1140,7 @@ public class RoleModel extends TypeModel
 	        	otClassFlags |= IOTConstants.OT_CLASS_HAS_FINAL_FIELD_INITS;
 			WordValueAttribute.addClassFlags(this, otClassFlags);
 	        if (this._binding != null)
-	        	this._binding.modifiers |= AccOverriding;
+	        	this._binding.modifiers |= AccOverridingRole;
         }
     	// invoked from copy role we have at least this state:
         this._state.inititalize(ITranslationStates.STATE_ROLES_SPLIT);

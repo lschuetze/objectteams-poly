@@ -87,8 +87,10 @@ public interface ExtraCompilerModifiers { // modifier constant
 	 */
 	int AccCallin = ASTNode.Bit32;
 
+	/** Similar to AccOverriding, but for role classes rather than methods. */
+	int AccOverridingRole = ASTNode.Bit20; // AccFromClassFile seems to be obsolete :)
 
-	final int AccOTTypeJustFlag = AccJustFlag | AccRole | AccTeam | AccOverriding;
+	final int AccOTTypeJustFlag = AccJustFlag | AccRole | AccTeam | AccOverridingRole;
 
 	/**
  	 * A field encoding a value paramter (not a conflict with class-modifier AccTeam, method modifier AccDefaultMethod).

@@ -2013,7 +2013,7 @@ public void resolve() {
 //{ObjectTeams: check @Override annotation:
 		boolean hasOverrideAnnotation = (this.binding.tagBits & TagBits.AnnotationOverride) != 0;
 		if (isSourceRole()) {
-			boolean hasTSuper =    (this.binding.modifiers & ExtraCompilerModifiers.AccOverriding) != 0
+			boolean hasTSuper =    (this.binding.modifiers & ExtraCompilerModifiers.AccOverridingRole) != 0
 								|| this.roleModel.getTSuperRoleBindings().length > 0;
 			if (hasOverrideAnnotation && !hasTSuper)
 				this.scope.problemReporter().roleMustOverride(this);

@@ -395,7 +395,7 @@ public class RoleType extends OTType implements IRoleType
     			if (superTeam != null) {
     				IType tsuperRole = superTeam.getType(getElementName());
     				if (tsuperRole != null && tsuperRole.exists()) {
-    					this.flags |= ExtraCompilerModifiers.AccOverriding;
+    					this.flags |= ExtraCompilerModifiers.AccOverridingRole;
     					tsuperRoles.add(tsuperRole);
     				}
     			}
@@ -418,7 +418,7 @@ public class RoleType extends OTType implements IRoleType
 		if (tsuperRole != null) {
 			// in case the client was only interested in the fact that we have a tsuper role
 			// store this flag to avoid duplicate search for tsuper roles:
-			this.flags |= ExtraCompilerModifiers.AccOverriding;
+			this.flags |= ExtraCompilerModifiers.AccOverridingRole;
 			tsuperRoles.add(tsuperRole);
 		}
     }
