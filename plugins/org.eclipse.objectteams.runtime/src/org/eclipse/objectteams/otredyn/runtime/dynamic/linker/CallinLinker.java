@@ -236,11 +236,17 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		// MethodHandle(Base,Team,Base,ITeam[],int,int[],int,Object[],Object[])Object
 		final MethodHandle expandedTyped = expanded.asType(expandedType);
 //		logger.trace("expandedTyped \t\t{}", expandedTyped.toString());
-		final MethodType doubleBaseAndTeamType = MethodType.methodType(Object.class, base, team.getClass(), ITeam[].class,
+		MethodType doubleBaseAndTeamType = MethodType.methodType(Object.class, base, team.getClass(), ITeam[].class,
 				int.class, int[].class, int.class, Object[].class);
+		int[] reorder;
+		if (desc.isCallAllBindings()) {
+			reorder = new int[] { 0, 1, 0, 2, 3, 4, 5, 6, 6 };
+		} else {
+			reorder = new int[] { 0, 1, 0, 2, 3, 4, 5, 6, 7 };
+			doubleBaseAndTeamType = doubleBaseAndTeamType.appendParameterTypes(Object[].class, int.class);
+		}
 		// MethodHandle(Base,Team,ITeam[],int,int[],int,Object[])Object
-		final MethodHandle doubleBaseAndTeam = MethodHandles.permuteArguments(expandedTyped, doubleBaseAndTeamType, 0, 1, 0,
-				2, 3, 4, 5, 6, 6);
+		final MethodHandle doubleBaseAndTeam = MethodHandles.permuteArguments(expandedTyped, doubleBaseAndTeamType, reorder);
 //		logger.trace("doubleBaseAndTeam \t\t{}", doubleBaseAndTeam.toString());
 		final MethodHandle unpackTeam = MethodHandles.arrayElementGetter(ITeam[].class)
 				.asType(MethodType.methodType(team.getClass(), ITeam[].class, int.class));
@@ -248,17 +254,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		// MethodHandle(Base,ITeam[],int,int[],int,Object[])Object
 		final MethodHandle unpacked = MethodHandles.foldArguments(doubleBaseAndTeam, 1, unpackTeam);
 //		logger.trace("unpacked \t\t{}", unpacked.toString());
-		if (desc.isCallAllBindings()) {
-//			logger.debug("========== END handleReplace ==========");
-			return unpacked;
-		} else {
-			final MethodHandle dropObjectParams = MethodHandles.dropArguments(unpacked, 6, Object[].class);
-//			logger.trace("dropObjectParams \t\t{}", dropObjectParams.toString());
-			final MethodHandle dropBaseId = MethodHandles.dropArguments(dropObjectParams, 7, int.class);
-//			logger.trace("dropBaseId \t\t{}", dropBaseId.toString());
-//			logger.debug("========== END handleReplace ==========");
-			return dropBaseId;
-		}
+		return unpacked;
 	}
 
 	private static MethodHandle handleBefore(final OTCallSiteDescriptor desc, final ITeam team, final IBinding binding) {
