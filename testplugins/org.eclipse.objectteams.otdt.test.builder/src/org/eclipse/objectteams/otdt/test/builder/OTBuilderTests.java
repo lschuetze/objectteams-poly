@@ -59,6 +59,8 @@ public class OTBuilderTests extends BuilderTests {
 					// don't know why this warning is getting reported against perfectly valid files, ignore it for now:
 					if (allProblems[i].getMessage().equals(PDECoreMessages.Builders_Manifest_useless_file))
 						continue;
+					if (allProblems[i].getMessage().startsWith("The JRE container on the classpath is not a perfect match to the"))
+						continue; // start of PDECoreMessages.BundleErrorReporter_reqExecEnv_conflict - reported when not running on JavaSE-11
 					// some plugin.xml have a deprecated 'action' extension, just ignore those:
 					if (allProblems[i].getMessage().contains("deprecated"))
 						continue;
