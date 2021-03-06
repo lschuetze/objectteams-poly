@@ -29,6 +29,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -130,12 +131,12 @@ public class CreateCallAllBindingsCallInOrgMethod extends AbstractTransformableC
 	private void generateInvocation(MethodNode method, Type[] args, AbstractInsnNode insertBefore,
 			InsnList newInstructions) {
 		// TODO Lars: invokedynamic to make Team[] array a constant if nothing changed
-		// put this on the stack
+		// Put this on the stack
 		newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-		// put joinpointId on the stack as argument to
+		// Put joinpointId on the stack as argument to
 		// TeamManager.getTeamsAndCallinIds[]
 		newInstructions.add(createLoadIntConstant(joinpointId));
-		// put Object[] on the stack by calling getTeamsAndCallinIds with joinpointId
+		// Put Object[] on the stack by calling getTeamsAndCallinIds with joinpointId
 		addLineNumber(newInstructions, SMAPConstants.STEP_INTO_LINENUMBER);
 		// TODO Lars: implement invokedynamic
 		newInstructions.add(new InvokeDynamicInsnNode("getTeamsAndCallinIds",
@@ -144,29 +145,40 @@ public class CreateCallAllBindingsCallInOrgMethod extends AbstractTransformableC
 		// Store Object[] array reference at local variable args + 1
 		newInstructions.add(new VarInsnNode(Opcodes.ASTORE, args.length + 1));
 		// Load Object[] from result getTeamsAndCallinIds stored in args+1
-		// put ITeam[] teams on the stack
 		newInstructions.add(new VarInsnNode(Opcodes.ALOAD, args.length + 1));
-		newInstructions.add(createLoadIntConstant(0));
+		// Check if it is null
+		newInstructions.add(new InsnNode(Opcodes.DUP));
+		LabelNode isNull = new LabelNode();
+		newInstructions.add(new JumpInsnNode(Opcodes.IFNULL, isNull));
+		// Put ITeam[] teams on the stack
+		newInstructions.add(new InsnNode(Opcodes.ICONST_0));
 		newInstructions.add(new InsnNode(Opcodes.AALOAD));
 		newInstructions.add(new TypeInsnNode(Opcodes.CHECKCAST, Type.getInternalName(ITeam[].class)));
-		// put starting idx 0 on the stack
-		newInstructions.add(createLoadIntConstant(0));
+		// Put starting idx 0 on the stack
+		newInstructions.add(new InsnNode(Opcodes.ICONST_0));
 		// Load Object[] from result getTeamsAndCallinIds stored in args+1
-		// put int[] callinIds on the stack
+		// Put int[] callinIds on the stack
 		newInstructions.add(new VarInsnNode(Opcodes.ALOAD, args.length + 1));
-		newInstructions.add(createLoadIntConstant(1));
+		newInstructions.add(new InsnNode(Opcodes.ICONST_1));
 		newInstructions.add(new InsnNode(Opcodes.AALOAD));
 		newInstructions.add(new TypeInsnNode(Opcodes.CHECKCAST, Type.getInternalName(int[].class)));
-		// put boundMethodId on the stack
+		LabelNode isNotNull = new LabelNode();
+		newInstructions.add(new JumpInsnNode(Opcodes.GOTO, isNotNull));
+		newInstructions.add(isNull);
+		// Put 0, null on the stack
+		newInstructions.add(new InsnNode(Opcodes.ICONST_0));
+		newInstructions.add(new InsnNode(Opcodes.ACONST_NULL));
+		newInstructions.add(isNotNull);
+		// Put boundMethodId on the stack
 		if (method.name.equals("<init>")) { // set bit 0x8000000 to signal the ctor
 			newInstructions.add(createLoadIntConstant(0x8000_0000 | boundMethodId));
 		} else {
 			newInstructions.add(createLoadIntConstant(boundMethodId));
 		}
-		// box the arguments to Object[]
+		// Box the arguments to Object[]
 		newInstructions.add(getBoxingInstructions(args, false));
 
-		// invoke invokedynamic bootstrap
+		// Invoke invokedynamic bootstrap
 		addLineNumber(newInstructions, SMAPConstants.STEP_INTO_LINENUMBER);
 		newInstructions.add(new InvokeDynamicInsnNode(method.name.replaceAll("[<>]", ""),
 				ConstantMembers.callAllBindingsTeam.getSignature(), callinBootstrapHandle, 0, joinpointDesc,
