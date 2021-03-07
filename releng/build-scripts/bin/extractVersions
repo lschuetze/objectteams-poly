@@ -1,16 +1,26 @@
 #!/bin/sh
 
-if [ ! -d $1 ]
+if [ $# != 2 ]
 then
-	echo "Not a directory: $1"
-	exit 1
+	echo "Usage: ${0} dropsDir sdkVersion
 fi
 
-SDK=`ls $1/eclipse-SDK*linux-gtk-x86_64.tar.gz`
+dropsDir=$1
+sdkVersion=$2
+
+# below: verbatim copy of Job-script on Jenkins:
+
+#!/bin/bash
+
+
+SDK=eclipse-SDK-${sdkVersion}-linux-gtk-x86_64.tar.gz
+wget -nv https://download.eclipse.org/eclipse/downloads/drops4/${dropDir}/${SDK}
+
+
 if [ ! -r $SDK ]
 then
-        echo "Can't read SDK from $SDK"
-        exit 1
+		echo "Can't read SDK from $SDK"
+		exit 1
 fi
 
 PDEBUILD=eclipse/plugins/org.eclipse.pde.build_.*/about.html
@@ -20,6 +30,7 @@ JDT_COMPILER_APT=eclipse/plugins/org.eclipse.jdt.compiler.apt_
 JDT_COMPILER_TOOL=eclipse/plugins/org.eclipse.jdt.compiler.tool_
 
 for VERSION in `tar tzvf $SDK | egrep "${PDEBUILD}|${LAUNCHER}|${JDTFEATURE}|${JDT_COMPILER_APT}|${JDT_COMPILER_TOOL}" | sed -e "s#.*eclipse/[^/]*/\([^/]*\).*#\1#"`
+
 do
 	case $VERSION in
 		org.eclipse.pde.build*)
@@ -43,6 +54,12 @@ do
 			;;
 	esac
 done
+echo
+echo "Variables for otdt_prerequisites_hipp.sh:"
+echo "========================================="
+echo "EVERSION=\${EVERSION:=\"${sdkVersion}\"}"
+echo "DROP=\${DROPS4}/\${DROP:=\"${dropDir}\"}"
+echo
 
 echo "Versions for run.properties:"
 echo "============================"
@@ -57,7 +74,6 @@ echo
 echo "# jdt.core fragments for extracting pre-built classes and properties:"
 echo "jdt.compiler.apt=${JDT_COMPILER_APT_VERSION}"
 echo "jdt.compiler.tool=${JDT_COMPILER_TOOL_VERSION}"
-echo "============================"
 
 echo
 echo "Version for org.eclipse.objectteams.otdt.core.patch.feature:"
