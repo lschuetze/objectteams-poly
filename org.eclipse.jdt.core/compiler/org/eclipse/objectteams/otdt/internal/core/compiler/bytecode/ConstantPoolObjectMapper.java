@@ -384,15 +384,13 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 		if (!refMethodBinding.isConstructor())
 			return false;
 		// of class __OT__Confined?
-		if (!CharOperation.equals(refMethodBinding.declaringClass.compoundName, IOTConstants.ORG_OBJECTTEAMS_TEAM_OTCONFINED))
+		if (refMethodBinding.declaringClass.id != IOTConstants.T_OrgObjectteamsTeamOTConfined)
 			return false;
 		// is it the superclass of the current src class?
 		if (TypeBinding.equalsEquals(refMethodBinding.declaringClass, srcMethod.declaringClass.superclass()))
 			return true;
 		// current src class may have no super class which is OK if it is Team.__OT__Confined
-		return
-			   srcMethod.declaringClass.superclass() == null
-			&& CharOperation.equals(IOTConstants.ORG_OBJECTTEAMS_TEAM_OTCONFINED, refMethodBinding.declaringClass.compoundName);
+		return srcMethod.declaringClass.superclass() == null;
 	}
 
 	private static MethodBinding getConfinedSuperCtor(MethodBinding dstMethod) {

@@ -1198,7 +1198,7 @@ boolean isSameClassOrSubclassOf(ReferenceBinding testClass, ReferenceBinding sup
 //{ObjectTeams: some methods don't need to be implemented:
 boolean mustImplementThisAbstractMethod(MethodBinding abstractMethod) {
 	// no need to implement methods from predefined Confined types
-	if (OTNameUtils.isPredefinedConfined(abstractMethod.declaringClass.compoundName))
+	if (OTNameUtils.isPredefinedConfined(abstractMethod.declaringClass))
 		return false;
 
 	// faked enhanced callins will be implemented by the OTRE:

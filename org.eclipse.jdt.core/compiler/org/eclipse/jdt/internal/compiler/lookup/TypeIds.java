@@ -149,6 +149,9 @@ public interface TypeIds {
 	// Java 14 preview
 	final int T_JavaLangRecord = 93;
 
+//{ObjectTeams:
+	// see also ud constants in IOTConstants (119 - 127)
+// SH}
 	// If you add new type id, make sure to bump up T_LastWellKnownTypeId if there is a cross over.
 	final int T_LastWellKnownTypeId = 128;
 

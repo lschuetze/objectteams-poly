@@ -687,7 +687,7 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 			char[] superclassName = binaryType.getSuperclassName();
 //{ObjectTeams: predefined confined types require special treatment
 		  // 1. add the synthetic flag which is missing from the class file:
-		  if (CharOperation.equals(this.compoundName, IOTConstants.ORG_OBJECTTEAMS_TEAM_CONFINED))
+		  if (this.id == IOTConstants.T_OrgObjectteamsTeamConfined)
 			this.modifiers |= ClassFileConstants.AccSynthetic;
 		  if (TypeAnalyzer.isTopConfined(this)) {
 			// 2. don't search a superclass, have none (ie., skip the else part)

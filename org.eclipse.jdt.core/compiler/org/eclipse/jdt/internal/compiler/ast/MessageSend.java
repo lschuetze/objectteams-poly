@@ -1533,7 +1533,7 @@ protected TypeBinding afterMethodLookup(Scope scope, AnchorMapping anchorMapping
 {
 	// tweak methods of predefined confined types:
 	if (   this.binding.isValidBinding()
-		&& CharOperation.equals(this.binding.declaringClass.compoundName, IOTConstants.ORG_OBJECTTEAMS_TEAM_OTCONFINED)
+		&& this.binding.declaringClass.id == IOTConstants.T_OrgObjectteamsTeamOTConfined
 		&& !CharOperation.equals(this.selector, IOTConstants._OT_GETTEAM))
 	{
 		// methods found in a predefined confined type are actually methods of Object

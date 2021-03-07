@@ -25,9 +25,8 @@ import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.OT_DOLLAR_
 import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.PREDICATE_METHOD_NAME;
 import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.TSUPER_OT_NAME;
 
-
-
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 
 /**
  * API class providing various operations for special names in generated OT/J code.
@@ -120,16 +119,17 @@ public class OTNameUtils {
 	}
 
 	/**
-	 * does compoundName denote a predefined confined type?
+	 * does 'type' denote a predefined confined type?
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
-	public static boolean isPredefinedConfined(char[][] compoundName)
+	public static boolean isPredefinedConfined(ReferenceBinding type)
 	{
-		if (compoundName.length == 3) {
-			return
-				   CharOperation.equals(compoundName, IOTConstants.ORG_OBJECTTEAMS_ICONFINED)
-				|| CharOperation.equals(compoundName, IOTConstants.ORG_OBJECTTEAMS_ITEAM_ICONFINED)
-				|| CharOperation.equals(compoundName, IOTConstants.ORG_OBJECTTEAMS_TEAM_OTCONFINED)
-				|| CharOperation.equals(compoundName, IOTConstants.ORG_OBJECTTEAMS_TEAM_CONFINED);
+		switch (type.id) {
+			case IOTConstants.T_OrgObjectteamsIConfined:
+			case IOTConstants.T_OrgObjectteamsITeamIConfined:
+			case IOTConstants.T_OrgObjectteamsTeamOTConfined:
+			case IOTConstants.T_OrgObjectteamsTeamConfined:
+				return true;
 		}
 		return false;
 	}
