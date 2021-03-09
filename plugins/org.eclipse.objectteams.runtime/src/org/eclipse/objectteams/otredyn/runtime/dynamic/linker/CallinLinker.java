@@ -105,7 +105,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 	@Override
 	public GuardedInvocation getGuardedInvocation(final LinkRequest linkRequest, final LinkerServices linkerServices)
 			throws Exception {
-//		logger.info("---- Relinking ----");
+//		logger.info("---- Relink ----");
 		final CallSiteDescriptor desc = linkRequest.getCallSiteDescriptor();
 		if (!(desc instanceof OTCallSiteDescriptor)) {
 			throw new LinkageError("CallSiteDescriptor is no OTCallSiteDescriptor");
@@ -242,7 +242,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		if (desc.isCallAllBindings()) {
 			reorder = new int[] { 0, 1, 0, 2, 3, 4, 5, 6, 6 };
 		} else {
-			reorder = new int[] { 0, 1, 0, 2, 3, 4, 5, 6, 7 };
+			reorder = new int[] { 0, 1, 0, 2, 3, 4, 5, 7, 7 };
 			doubleBaseAndTeamType = doubleBaseAndTeamType.appendParameterTypes(Object[].class, int.class);
 		}
 		// MethodHandle(Base,Team,ITeam[],int,int[],int,Object[])Object
