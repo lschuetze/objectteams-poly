@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -495,7 +495,7 @@ public class ClassFile implements TypeConstants, TypeIds {
 		if (this.bootstrapMethods != null && !this.bootstrapMethods.isEmpty()) {
 			attributesNumber += generateBootstrapMethods(this.bootstrapMethods);
 		}
-		if (this.targetJDK >= ClassFileConstants.JDK15) {
+		if (this.targetJDK >= ClassFileConstants.JDK16) {
 			// add record attributes
 			attributesNumber += generatePermittedTypeAttributes();
 		}
@@ -2529,7 +2529,8 @@ public class ClassFile implements TypeConstants, TypeIds {
 											(node) -> size > 0,
 											() -> allTypeAnnotationContexts);
 		}
-		if ((this.produceAttributes & ClassFileConstants.ATTR_METHOD_PARAMETERS) != 0) {
+		if ((this.produceAttributes & ClassFileConstants.ATTR_METHOD_PARAMETERS) != 0 ||
+				binding.isConstructor() &&  binding.declaringClass.isRecord()) {
 			attributesNumber += generateMethodParameters(binding);
 		}
 		// update the number of attributes
@@ -3654,7 +3655,9 @@ public class ClassFile implements TypeConstants, TypeIds {
 			}
 			// access flag
 			if (innerClass.isAnonymousType()) {
-				accessFlags &= ~ClassFileConstants.AccFinal;
+				ReferenceBinding superClass = innerClass.superclass();
+				if (superClass == null || !(superClass.isEnum() && superClass.isSealed()))
+					accessFlags &= ~ClassFileConstants.AccFinal;
 			} else if (innerClass.isMemberType() && innerClass.isInterface()) {
 				accessFlags |= ClassFileConstants.AccStatic; // implicitely static
 			}
@@ -4227,16 +4230,21 @@ public class ClassFile implements TypeConstants, TypeIds {
 						if (annotations != null) {
 							assert !methodBinding.isConstructor();
 							attributesNumber += generateRuntimeAnnotations(annotations, TagBits.AnnotationForMethod);
-							// Now type annotations
-							Supplier<List<AnnotationContext>> collector = () -> {
-								List<AnnotationContext> allTypeAnnotationContexts = new ArrayList<>();
+						}
+						if ((this.produceAttributes & ClassFileConstants.ATTR_TYPE_ANNOTATION) != 0) {
+							List<AnnotationContext> allTypeAnnotationContexts = new ArrayList<>();
+							if (annotations != null && (comp.bits & ASTNode.HasTypeAnnotations) != 0) {
 								comp.getAllAnnotationContexts(AnnotationTargetTypeConstants.METHOD_RETURN, allTypeAnnotationContexts);
-								return allTypeAnnotationContexts;
-							};
+							}
+							TypeReference compType = comp.type;
+							if (compType != null && ((compType.bits & ASTNode.HasTypeAnnotations) != 0)) {
+								compType.getAllAnnotationContexts(AnnotationTargetTypeConstants.METHOD_RETURN, allTypeAnnotationContexts);
+							}
+							int size = allTypeAnnotationContexts.size();
 							attributesNumber = completeRuntimeTypeAnnotations(attributesNumber,
-									comp,
-									(node) -> (comp.bits & ASTNode.HasTypeAnnotations) != 0,
-									collector);
+									null,
+									(node) -> size > 0,
+									() -> allTypeAnnotationContexts);
 						}
 					}
 				}
@@ -5870,6 +5878,8 @@ public class ClassFile implements TypeConstants, TypeIds {
 			accessFlags |= ClassFileConstants.AccSuper;
 		}
 		if (aType.isAnonymousType()) {
+			ReferenceBinding superClass = aType.superclass;
+			if (superClass == null || !(superClass.isEnum() && superClass.isSealed()))
 			accessFlags &= ~ClassFileConstants.AccFinal;
 		}
 		int finalAbstract = ClassFileConstants.AccFinal | ClassFileConstants.AccAbstract;

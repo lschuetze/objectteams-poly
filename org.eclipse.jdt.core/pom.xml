@@ -14,11 +14,11 @@
   <parent>
     <artifactId>eclipse.jdt.core</artifactId>
     <groupId>eclipse.jdt.core</groupId>
-    <version>4.19.0-SNAPSHOT</version>
+    <version>4.20.0-SNAPSHOT</version>
   </parent>
   <groupId>org.eclipse.jdt</groupId>
   <artifactId>org.eclipse.jdt.core</artifactId>
-  <version>3.25.0-SNAPSHOT</version>
+  <version>3.26.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>
@@ -113,6 +113,15 @@
               <fileSets>
                 <fileSet>
                   <directory>${project.basedir}/batch</directory>
+                  <excludes>
+                    <exclude>org/eclipse/jdt/internal/compiler/batch/messages.properties</exclude>
+                  </excludes>
+                </fileSet>
+                <fileSet>
+                  <directory>${project.build.directory}/classes</directory>
+                  <includes>
+                    <include>org/eclipse/jdt/internal/compiler/batch/messages.properties</include>
+                  </includes>
                 </fileSet>
                 <fileSet>
                   <directory>${project.basedir}/compiler</directory>

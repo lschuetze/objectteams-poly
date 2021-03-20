@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,6 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - adapted for Object Teams
@@ -81,7 +80,7 @@ public class ReconcilerTests extends ModifyingResourceTests {
 		}
 	}
 
-	/*package*/ static final int JLS_LATEST = AST.JLS15;
+	/*package*/ static final int JLS_LATEST = AST_INTERNAL_LATEST;
 
 	static class ReconcileParticipant extends CompilationParticipant {
 		IJavaElementDelta delta;
@@ -6011,9 +6010,9 @@ public void testBug562637() throws CoreException, IOException, InterruptedExcept
 	IJavaProject project15 = null;
 	try {
 		project15 = createJava14Project("Reconciler_15", new String[] {"src"});
-		project15.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_15);
-		project15.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_15);
-		project15.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_15);
+		project15.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_16);
+		project15.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_16);
+		project15.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_16);
 		project15.setOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
 		project15.setOption(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
 
@@ -6079,9 +6078,9 @@ public void testBug564613_001() throws CoreException, IOException, InterruptedEx
 	IJavaProject project15 = null;
 	try {
 		project15 = createJava15Project("Reconciler_15", new String[] {"src"});
-		project15.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_15);
-		project15.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_15);
-		project15.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_15);
+		project15.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_16);
+		project15.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_16);
+		project15.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_16);
 		project15.setOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
 		project15.setOption(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
 

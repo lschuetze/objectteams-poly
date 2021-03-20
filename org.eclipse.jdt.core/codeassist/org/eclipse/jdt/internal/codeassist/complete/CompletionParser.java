@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.compiler.*;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.*;
+import org.eclipse.jdt.internal.compiler.impl.JavaFeature;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.parser.*;
@@ -1622,12 +1623,10 @@ private boolean checkKeywordAndRestrictedIdentifiers() {
 				if((this.lastModifiers & ClassFileConstants.AccFinal) == 0) {
 					keywordsAndRestrictedIndentifiers[count++] = Keywords.INTERFACE;
 				}
-				if (this.options.complianceLevel >= ClassFileConstants.JDK14
-						&& this.options.enablePreviewFeatures == true) {
+				if (JavaFeature.RECORDS.isSupported(this.options)) {
 					keywordsAndRestrictedIndentifiers[count++] = RestrictedIdentifiers.RECORD;
 				}
-				if (this.options.complianceLevel >= ClassFileConstants.JDK15
-						&& this.options.enablePreviewFeatures == true) {
+				if (JavaFeature.SEALED_CLASSES.isSupported(this.options)) {
 					boolean nonSeal = (this.lastModifiers & ExtraCompilerModifiers.AccNonSealed) != 0;
 					boolean seal = (this.lastModifiers & ExtraCompilerModifiers.AccSealed) != 0;
 					if (!nonSeal && !seal) {
@@ -5408,6 +5407,10 @@ public NameReference createSingleAssistNameReference(char[] assistName, long pos
 				keywords[count++]= Keywords.CLASS;
 				if (this.options.complianceLevel >= ClassFileConstants.JDK10) {
 					keywords[count++]= Keywords.VAR;
+				}
+				if (this.options.complianceLevel >= ClassFileConstants.JDK16) {
+					keywords[count++]= Keywords.INTERFACE;
+					keywords[count++]= Keywords.ENUM;
 				}
 
 				if(this.previousKind == K_BLOCK_DELIMITER) {

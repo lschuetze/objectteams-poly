@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -3676,6 +3676,7 @@ public abstract class Scope {
 		MethodScope methodScope = null;
 		ReferenceBinding foundType = null;
 		boolean insideStaticContext = false;
+		boolean insideClassContext = false;
 		boolean insideTypeAnnotation = false;
 //{ObjectTeams: support non static team fields to be accessed from static role context:
 		boolean insideRoleType = false;
@@ -3695,8 +3696,12 @@ public abstract class Scope {
 						if (methodDecl != null) {
 							if (methodDecl.binding != null) {
 								TypeVariableBinding typeVariable = methodDecl.binding.getTypeVariable(name);
-								if (typeVariable != null)
+								if (typeVariable != null) {
+									if (insideStaticContext && insideClassContext) {
+										return new ProblemReferenceBinding(new char[][]{name}, typeVariable, ProblemReasons.NonStaticReferenceInStaticContext);
+									}
 									return typeVariable;
+								}
 							} else {
 								// use the methodDecl's typeParameters to handle problem cases when the method binding doesn't exist
 								TypeParameter[] params = methodDecl.typeParameters();
@@ -3781,6 +3786,7 @@ public abstract class Scope {
 							return typeVariable;
 						}
 						insideStaticContext |= sourceType.isStatic();
+						insideClassContext = true;
 						insideTypeAnnotation = false;
 						if (CharOperation.equals(sourceType.sourceName, name)) {
 							if (foundType != null && TypeBinding.notEquals(foundType, sourceType) && foundType.problemId() != ProblemReasons.NotVisible)

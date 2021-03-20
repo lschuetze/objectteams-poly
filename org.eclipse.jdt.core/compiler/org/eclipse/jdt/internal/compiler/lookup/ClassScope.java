@@ -264,6 +264,7 @@ public class ClassScope extends Scope {
 					sz);
 			permTypes[sz] = anonymousType;
 		}
+		anonymousType.modifiers |= ClassFileConstants.AccFinal; // JLS 15 / sealed preview/Sec 8.9.1
 		sourceSuperType.setPermittedTypes(permTypes);
 	}
 
@@ -500,6 +501,9 @@ public class ClassScope extends Scope {
 				TypeDeclaration memberContext = this.referenceContext.memberTypes[i];
 				switch(TypeDeclaration.kind(memberContext.modifiers)) {
 					case TypeDeclaration.INTERFACE_DECL :
+						if (compilerOptions().sourceLevel >= ClassFileConstants.JDK16)
+							break;
+						//$FALL-THROUGH$
 					case TypeDeclaration.ANNOTATION_TYPE_DECL :
 						problemReporter().illegalLocalTypeDeclaration(memberContext);
 						continue nextMember;
@@ -573,6 +577,9 @@ public class ClassScope extends Scope {
 				switch(TypeDeclaration.kind(memberContext.modifiers)) {
 					case TypeDeclaration.INTERFACE_DECL :
 					case TypeDeclaration.ANNOTATION_TYPE_DECL :
+						if (compilerOptions().sourceLevel >= ClassFileConstants.JDK16)
+							break;
+						//$FALL-THROUGH$
 						if (sourceType.isNestedType()
 								&& sourceType.isClass() // no need to check for enum, since implicitly static
 //{ObjectTeams: check for team (may indeed contain interface):
@@ -1060,6 +1067,7 @@ public class ClassScope extends Scope {
 		int modifiers = sourceType.modifiers;
 		boolean isPreviewEnabled = compilerOptions().sourceLevel == ClassFileConstants.getLatestJDKLevel() &&
 				compilerOptions().enablePreviewFeatures;
+		boolean is16Plus = compilerOptions().sourceLevel >= ClassFileConstants.JDK16;
 		boolean flagSealedNonModifiers = isPreviewEnabled &&
 				(modifiers & (ExtraCompilerModifiers.AccSealed | ExtraCompilerModifiers.AccNonSealed)) != 0;
 		if (sourceType.isRecord()) {
@@ -1084,7 +1092,7 @@ public class ClassScope extends Scope {
 			modifiers = Protections.checkRoleModifiers(modifiers, this.referenceContext, this);
 // SH}
 			if (sourceType.isEnum()) {
-				if (!enclosingType.isStatic())
+				if (!is16Plus && !enclosingType.isStatic())
 					problemReporter().nonStaticContextForEnumMemberType(sourceType);
 				else
 					modifiers |= ClassFileConstants.AccStatic;
@@ -1096,7 +1104,7 @@ public class ClassScope extends Scope {
 			}
 		} else if (sourceType.isLocalType()) {
 			if (sourceType.isEnum()) {
-				if (!isPreviewEnabled) {
+				if (!is16Plus) {
 					problemReporter().illegalLocalTypeDeclaration(this.referenceContext);
 					sourceType.modifiers = 0;
 //{ObjectTeams: if inside a role mark as role instead of enum (possible by very broken code only):
@@ -1115,12 +1123,13 @@ public class ClassScope extends Scope {
 				}
 				modifiers |= ClassFileConstants.AccStatic;
 			} else if (sourceType.isRecord()) {
-				if (enclosingType != null && enclosingType.isLocalType()) {
-					problemReporter().illegalLocalTypeDeclaration(this.referenceContext);
-					return;
-				}
+//				if (enclosingType != null && enclosingType.isLocalType()) {
+//					problemReporter().illegalLocalTypeDeclaration(this.referenceContext);
+//					return;
+//				}
 				if ((modifiers & ClassFileConstants.AccStatic) != 0) {
-					problemReporter().recordIllegalStaticModifierForLocalClassOrInterface(sourceType);
+					if (!(this.parent instanceof ClassScope))
+						problemReporter().recordIllegalStaticModifierForLocalClassOrInterface(sourceType);
 					return;
 				}
 				modifiers |= ClassFileConstants.AccStatic;
@@ -1131,6 +1140,12 @@ public class ClassScope extends Scope {
 			    // set AccEnum flag for anonymous body of enum constants
 			    if (this.referenceContext.allocation.type == null)
 			    	modifiers |= ClassFileConstants.AccEnum;
+			} else if (this.parent.referenceContext() instanceof TypeDeclaration) {
+				TypeDeclaration typeDecl = (TypeDeclaration) this.parent.referenceContext();
+				if (TypeDeclaration.kind(typeDecl.modifiers) == TypeDeclaration.INTERFACE_DECL) {
+					// Sec 8.1.3 applies for local types as well
+					modifiers |= ClassFileConstants.AccStatic;
+				}
 			}
 			Scope scope = this;
 			do {
@@ -1210,10 +1225,12 @@ public class ClassScope extends Scope {
 					if ((realModifiers & unexpectedModifiers) != 0)
 						problemReporter().illegalModifierForLocalInterface(sourceType);
 				*/
-			} else 	if (isPreviewEnabled && sourceType.isLocalType()) {
+			} else 	if (sourceType.isLocalType()) {
 				final int UNEXPECTED_MODIFIERS = ~(ClassFileConstants.AccAbstract | ClassFileConstants.AccInterface
-						| ClassFileConstants.AccStrictfp | ClassFileConstants.AccAnnotation);
-				if ((realModifiers & UNEXPECTED_MODIFIERS) != 0 || flagSealedNonModifiers)
+						| ClassFileConstants.AccStrictfp | ClassFileConstants.AccAnnotation
+						| ((is16Plus && this.parent instanceof ClassScope) ? ClassFileConstants.AccStatic : 0));
+				if ((realModifiers & UNEXPECTED_MODIFIERS) != 0
+						|| (isPreviewEnabled && flagSealedNonModifiers))
 					problemReporter().localStaticsIllegalVisibilityModifierForInterfaceLocalType(sourceType);
 //				if ((modifiers & ClassFileConstants.AccStatic) != 0) {
 //					problemReporter().recordIllegalStaticModifierForLocalClassOrInterface(sourceType);
@@ -1368,6 +1385,7 @@ public class ClassScope extends Scope {
 					problemReporter().illegalModifierForMemberClass(sourceType);
 			} else if (sourceType.isLocalType()) {
 				final int UNEXPECTED_MODIFIERS = ~(ClassFileConstants.AccAbstract | ClassFileConstants.AccFinal | ClassFileConstants.AccStrictfp
+						| ((is16Plus && this.parent instanceof ClassScope) ? ClassFileConstants.AccStatic : 0)
 //{ObjectTeams more flags allowed for types:
 											| ExtraCompilerModifiers.AccRole
 											);
@@ -1378,8 +1396,9 @@ public class ClassScope extends Scope {
 				final int UNEXPECTED_MODIFIERS = ~(ClassFileConstants.AccPublic | ClassFileConstants.AccAbstract | ClassFileConstants.AccFinal | ClassFileConstants.AccStrictfp
 //{ObjectTeams more flags allowed for types:
 											| ExtraCompilerModifiers.AccRole | ExtraCompilerModifiers.AccTeam | ClassFileConstants.AccSynthetic
-				  							);
+											);
 // SH}
+
 				if ((realModifiers & UNEXPECTED_MODIFIERS) != 0)
 					problemReporter().illegalModifierForClass(sourceType);
 			}
@@ -1427,9 +1446,10 @@ public class ClassScope extends Scope {
 			  // role interfaces need to be members (at any level of nesting)!
 			  if (!sourceType.isRole()) {
 // SH}
-				if (sourceType.isRecord())
-					problemReporter().recordNestedRecordInherentlyStatic(sourceType);
-				else
+//				if (sourceType.isRecord())
+//					problemReporter().recordNestedRecordInherentlyStatic(sourceType);
+//				else
+					if (!is16Plus)
 					// error the enclosing type of a static field must be static or a top-level type
 					problemReporter().illegalStaticModifierForMemberType(sourceType);
 /* OT: */	  }

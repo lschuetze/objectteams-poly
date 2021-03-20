@@ -533,6 +533,7 @@ private void launchVerifyTestsIfNeeded(String[] classpaths, String[] vmArguments
 							c = input.read();
 						}
 					} catch(IOException ioEx) {
+						ioEx.printStackTrace();
 					}
 				}
 			});
@@ -547,12 +548,14 @@ private void launchVerifyTestsIfNeeded(String[] classpaths, String[] vmArguments
 							c = errorStream.read();
 						}
 					} catch(IOException ioEx) {
+						ioEx.printStackTrace();
 					}
 				}
 			});
 			outputThread.start();
 			errorThread.start();
 		} catch(TargetException e) {
+			e.printStackTrace();
 			throw new Error(e.getMessage());
 		}
 
@@ -576,6 +579,7 @@ private void launchVerifyTestsIfNeeded(String[] classpaths, String[] vmArguments
 			}
 		} while (this.socket == null && isVMRunning);
 	} catch (IOException e) {
+		e.printStackTrace();
 		throw new Error(e.getMessage());
 	}
 }

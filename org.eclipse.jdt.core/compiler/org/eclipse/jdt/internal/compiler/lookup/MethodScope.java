@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  * Copyright (c) 2000, 2020 IBM Corporation and others.
+ *  * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -348,11 +348,13 @@ private void checkAndSetModifiersForMethod(final MethodBinding methodBinding) {
 		problemReporter().nativeMethodsCannotBeStrictfp(declaringClass, (AbstractMethodDeclaration) this.referenceContext);
 
 	// static members are only authorized in a static member or top level type
-	if (((realModifiers & ClassFileConstants.AccStatic) != 0) && declaringClass.isNestedType() && !declaringClass.isStatic())
+	if (sourceLevel < ClassFileConstants.JDK16) {
+		if (((realModifiers & ClassFileConstants.AccStatic) != 0) && declaringClass.isNestedType() && !declaringClass.isStatic())
 //{ObjectTeams: allow static in roles
-	  if (!methodBinding.declaringClass.isDirectRole())
+		  if (!methodBinding.declaringClass.isDirectRole())
 // SH}
-		problemReporter().unexpectedStaticModifierForMethod(declaringClass, (AbstractMethodDeclaration) this.referenceContext);
+			problemReporter().unexpectedStaticModifierForMethod(declaringClass, (AbstractMethodDeclaration) this.referenceContext);
+	}
 
 //{ObjectTeams: callin modifier:
 	  if (   methodBinding.isCallin()

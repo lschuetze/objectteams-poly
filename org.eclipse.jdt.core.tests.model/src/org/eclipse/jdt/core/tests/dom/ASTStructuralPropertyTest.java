@@ -447,9 +447,9 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
 		}
 // {ObjectTeams: adapted for OT specific ASTNodes
 /* orig:
-		assertEquals("Wrong last known type", 103, hi); // last known one
+		assertEquals("Wrong last known type", 104, hi); // last known one
   :giro */
-		assertEquals("Wrong last known type", 119, hi); // last known one
+		assertEquals("Wrong last known type", 120, hi); // last known one
 // jwl}
 		assertEquals("Wrong number of distinct types",  hi, classes.size()); // all classes are distinct
 	}

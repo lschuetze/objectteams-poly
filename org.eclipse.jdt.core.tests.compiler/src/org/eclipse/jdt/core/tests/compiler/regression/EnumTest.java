@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -2546,25 +2546,41 @@ public void test080() {
 
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=87818
 public void test081() {
-	this.runNegativeTest(
+	String expectedErrorMessage = this.complianceLevel < ClassFileConstants.JDK16 ?
+			"----------\n" +
+			"1. ERROR in X.java (at line 3)\n" +
+			"	enum E {}\n" +
+			"	     ^\n" +
+			"The member enum E can only be defined inside a top-level class or interface or in a static context\n" +
+			"----------\n" +
+			"2. ERROR in X.java (at line 4)\n" +
+			"	Zork();\n" +
+			"	^^^^\n" +
+			"The method Zork() is undefined for the type X\n" +
+			"----------\n"
+			:
+			"----------\n" +
+			"1. ERROR in X.java (at line 4)\n" +
+			"	Zork();\n" +
+			"	^^^^\n" +
+			"The method Zork() is undefined for the type X\n" +
+			"----------\n";
+		this.runNegativeTest(
 		new String[] {
 			"X.java",
 			"public class X {\n" +
 			"	void foo() {\n" +
 			"		enum E {}\n" +
+			"	    Zork();\n" +
 			"	}\n" +
 			"}"
 		},
-		"----------\n" +
-		"1. ERROR in X.java (at line 3)\n" +
-		"	enum E {}\n" +
-		"	     ^\n" +
-		"The member enum E can only be defined inside a top-level class or interface or in a static context\n" +
-		"----------\n");
+		expectedErrorMessage);
 }
 
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=88223
 public void test082() {
+	if ( this.complianceLevel < ClassFileConstants.JDK16) {
 	this.runNegativeTest(
 		new String[] {
 			"X.java",
@@ -2580,6 +2596,18 @@ public void test082() {
 		"	     ^\n" +
 		"The member enum E must be defined inside a static member type\n" +
 		"----------\n");
+	} else {
+		this.runConformTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"	class Y {\n" +
+					"		enum E {}\n" +
+					"	}\n" +
+					"}"
+				},
+				"");
+	}
 	this.runConformTest(
 		new String[] {
 			"X.java",
@@ -2590,23 +2618,38 @@ public void test082() {
 			"}"
 		},
 		"");
-	this.runNegativeTest(
-		new String[] {
-			"X.java",
-			"public class X {\n" +
-			"	void foo() {\n" +
-			"		class Local {\n" +
-			"			enum E {}\n" +
-			"		}\n" +
-			"	}\n" +
-			"}"
-		},
-		"----------\n" +
-		"1. ERROR in X.java (at line 4)\n" +
-		"	enum E {}\n" +
-		"	     ^\n" +
-		"The member enum E can only be defined inside a top-level class or interface or in a static context\n" +
-		"----------\n");
+	if ( this.complianceLevel < ClassFileConstants.JDK16) {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"	void foo() {\n" +
+					"		class Local {\n" +
+					"			enum E {}\n" +
+					"		}\n" +
+					"	}\n" +
+					"}"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 4)\n" +
+				"	enum E {}\n" +
+				"	     ^\n" +
+				"The member enum E can only be defined inside a top-level class or interface or in a static context\n" +
+				"----------\n");
+	} else {
+		this.runConformTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"	void foo() {\n" +
+					"		class Local {\n" +
+					"			enum E {}\n" +
+					"		}\n" +
+					"	}\n" +
+					"}"
+				},
+				"");
+	}
 }
 
 
@@ -3828,6 +3871,9 @@ public void test112() {
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=93789
 public void test113() {
+	if (this.complianceLevel >= ClassFileConstants.JDK16) {
+		return;
+	}
     this.runNegativeTest(
         new String[] {
             "X.java",
@@ -6625,6 +6671,10 @@ public void test180() {
 	);
 	Map options = getCompilerOptions();
 	options.put(CompilerOptions.OPTION_Process_Annotations, CompilerOptions.ENABLED);
+	JavacTestOptions.Excuse excuse = JavacTestOptions.Excuse.JavacHasErrorsEclipseHasNone;
+	if(this.complianceLevel >= ClassFileConstants.JDK16) {
+		excuse = null;
+	}
 	this.runConformTest(
 		false,
 		new String[] {
@@ -6641,7 +6691,7 @@ public void test180() {
 		"",
 		"class test180.Test",
 		"",
-		JavacTestOptions.Excuse.JavacHasErrorsEclipseHasNone);
+		excuse);
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=289892
 // in interaction with null annotations
@@ -6685,6 +6735,10 @@ public void test180a() {
 	);
 	options = getCompilerOptions();
 	options.put(CompilerOptions.OPTION_Process_Annotations, CompilerOptions.ENABLED);
+	JavacTestOptions.Excuse excuse = JavacTestOptions.Excuse.JavacHasErrorsEclipseHasNone;
+	if(this.complianceLevel >= ClassFileConstants.JDK16) {
+		excuse = null;
+	}
 	this.runConformTest(
 		false,
 		new String[] {
@@ -6701,7 +6755,7 @@ public void test180a() {
 		"",
 		"class test180.Test",
 		"",
-		JavacTestOptions.Excuse.JavacHasErrorsEclipseHasNone);
+		excuse);
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=300133
 public void test181() {
