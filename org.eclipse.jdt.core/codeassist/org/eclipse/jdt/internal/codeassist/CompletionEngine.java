@@ -3956,6 +3956,12 @@ public final class CompletionEngine
 							(BlockScope)scope,
 							typesFound);
 				}
+				else if ( astNodeParent instanceof InstanceOfExpression) {
+					// propose final keyword
+					if (!this.requestor.isIgnored(CompletionProposal.KEYWORD)) {
+						findKeywordsForMember(this.completionToken, (~ClassFileConstants.AccFinal  & 0xFF), astNode);
+					}
+				}
 
 				checkCancel();
 

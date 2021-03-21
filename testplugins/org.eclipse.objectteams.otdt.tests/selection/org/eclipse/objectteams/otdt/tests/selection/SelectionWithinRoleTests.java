@@ -1505,7 +1505,7 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 			"public team class T1 {\n"+
 			"  role class R1 {\n"+
 			"    void foo() {\n"+
-			"      <SelectOnType:Object>;\n"+
+			"      y = (x instanceof <SelectOnType:Object>);\n"+
 			"    }\n"+
 			"  }\n"+
 			"  public T1() {\n"+
@@ -1551,7 +1551,7 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 			"public team class T1 {\n"+
 			"  role class R1 {\n"+
 			"    void foo() {\n"+
-			"      boolean y = <SelectOnType:Object>;\n"+
+			"      boolean y = (x instanceof <SelectOnType:Object>);\n"+
 			"    }\n"+
 			"  }\n"+
 			"  public T1() {\n"+
@@ -1594,7 +1594,7 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n"+
 			"  role class R1 {\n"+
-			"    boolean y = <SelectOnType:Object>;\n"+
+			"    boolean y = (x instanceof <SelectOnType:Object>);\n"+
 			"  }\n"+
 			"  public T1() {\n"+
 			"  }\n"+

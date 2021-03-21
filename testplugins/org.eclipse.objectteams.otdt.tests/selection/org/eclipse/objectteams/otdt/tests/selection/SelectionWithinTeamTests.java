@@ -1874,7 +1874,9 @@ public class SelectionWithinTeamTests extends AbstractSelectionTest
 			"  public X() {\n"+
 			"  }\n"+
 			"  void foo() {\n"+
-			"    <SelectOnType:Object>;\n"+
+			"    if ((x instanceof <SelectOnType:Object>))\n" +
+			"        {\n" +
+			"        }\n"+
 			"  }\n"+
 			"}\n";
 		String expectedReplacedSource = "Object";
@@ -1915,7 +1917,7 @@ public class SelectionWithinTeamTests extends AbstractSelectionTest
 			"  public X() {\n"+
 			"  }\n"+
 			"  void foo() {\n"+
-			"    <SelectOnType:Object>;\n"+
+			"    y = (x instanceof <SelectOnType:Object>);\n" + 
 			"  }\n"+
 			"}\n";
 		String expectedReplacedSource = "Object";
@@ -1956,7 +1958,7 @@ public class SelectionWithinTeamTests extends AbstractSelectionTest
 			"  public X() {\n"+
 			"  }\n"+
 			"  void foo() {\n"+
-			"    boolean y = <SelectOnType:Object>;\n"+
+			"    boolean y = (x instanceof <SelectOnType:Object>);\n" + 
 			"  }\n"+
 			"}\n";
 		String expectedReplacedSource = "Object";
@@ -1992,7 +1994,7 @@ public class SelectionWithinTeamTests extends AbstractSelectionTest
 		String completionIdentifier = "Object";
 		String expectedUnitDisplayString =
 			"public team class X {\n"+
-			"  boolean y = <SelectOnType:Object>;\n"+
+			"  boolean y = (x instanceof <SelectOnType:Object>);\n"+
 			"  public X() {\n"+
 			"  }\n"+
 			"}\n";
