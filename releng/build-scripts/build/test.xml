@@ -15,6 +15,7 @@
 	<property file="src/label.properties" />
 	<property file="src/finalPluginsVersions.properties" />
 	<property name="otequinox.agent.jar" value="${test.root.dir}/eclipse/plugins/org.eclipse.objectteams.otequinox_${org.eclipse.objectteams.otequinox}/otequinoxAgent.jar"/>
+	<property name="junit-report-output" value="${test.root.dir}/results"/>
 
 
 	<target name="setupOTDTEclipse" unless="otdt-eclipse.is.setup"
