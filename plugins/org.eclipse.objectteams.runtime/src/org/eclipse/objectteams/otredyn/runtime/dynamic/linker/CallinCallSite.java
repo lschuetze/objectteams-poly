@@ -22,9 +22,4 @@ public final class CallinCallSite extends ChainedCallSite {
 				boundMethodId);
 		return new CallinCallSite(desc);
 	}
-
-	@Override
-	protected int getMaxChainLength() {
-		return 12;
-	}
 }
