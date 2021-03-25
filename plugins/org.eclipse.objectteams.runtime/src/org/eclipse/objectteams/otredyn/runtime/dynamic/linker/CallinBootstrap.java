@@ -13,11 +13,13 @@ import jdk.dynalink.linker.LinkerServices;
 
 public final class CallinBootstrap {
 
-	private final static int unstableRelinkThreshold = 4;
+	private final static int unstableRelinkThreshold;
 
 	private final static GuardingDynamicLinker prioritizedLinkers;
 
 	static {
+		final String threshold = System.getProperty("otdyn.urt");
+		unstableRelinkThreshold = (threshold == null) ? 4 : Integer.parseInt(threshold);
 		prioritizedLinkers = new CallinLinker();
 	}
 

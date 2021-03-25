@@ -8,6 +8,13 @@ import jdk.dynalink.support.ChainedCallSite;
 
 public final class CallinCallSite extends ChainedCallSite {
 
+	private final static int maxChainLength;
+
+	static {
+		final String chainLength = System.getProperty("otdyn.mcl");
+		maxChainLength = (chainLength == null) ? 8 : Integer.parseInt(chainLength);
+	}
+
 	CallinCallSite(CallSiteDescriptor descriptor) {
 		super(descriptor);
 	}
@@ -21,5 +28,10 @@ public final class CallinCallSite extends ChainedCallSite {
 		final OTCallSiteDescriptor desc = OTCallSiteDescriptor.get(lookup, name, type, flags, joinpointDesc,
 				boundMethodId);
 		return new CallinCallSite(desc);
+	}
+
+	@Override
+	public int getMaxChainLength() {
+		return maxChainLength;
 	}
 }

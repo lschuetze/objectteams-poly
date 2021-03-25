@@ -23,6 +23,7 @@ import jdk.dynalink.linker.support.Lookup;
 public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 
 //	static Logger logger = LoggerFactory.getLogger(CallinLinker.class);
+	static final boolean NO_DEG = System.getProperty("otdyn.nodeg") != null;
 
 	private static final MethodHandle INCREMENT = Lookup.PUBLIC.findStatic(Math.class, "addExact",
 			MethodType.methodType(int.class, int.class, int.class));
@@ -113,7 +114,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 			throw new LinkageError("CallSiteDescriptor is no OTCallSiteDescriptor");
 		}
 		final OTCallSiteDescriptor otdesc = (OTCallSiteDescriptor) desc;
-		if (linkRequest.isCallSiteUnstable()) {
+		if (!NO_DEG && linkRequest.isCallSiteUnstable()) {
 //			logger.info("-------- Callsite is unstable --------");
 			if (otdesc.isCallAllBindings()) {
 				return new GuardedInvocation(OT_CALL_ALL_BINDINGS);
