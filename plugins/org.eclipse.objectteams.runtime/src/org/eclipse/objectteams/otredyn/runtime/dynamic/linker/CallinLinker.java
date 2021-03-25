@@ -127,6 +127,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 	static GuardedInvocation getGuardedInvocation(final LinkRequest request, final OTCallSiteDescriptor desc) {
 //		logger.debug("========== BEGIN getGuardedInvocation ==========");
 		final String joinpointDesc = desc.getJoinpointDesc();
+		final boolean isCallNext = desc.isCallNext();
 		MethodHandle beforeComposition = null;
 		MethodHandle replace = null;
 		MethodHandle afterComposition = null;
@@ -138,22 +139,17 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		final int[] callinIds = (int[]) stack[3];
 		final Class<?> baseClass = request.getReceiver().getClass();
 		if (teams != null) {
-			boolean replaceSeen = false;
-			ITeam currentTeam = null;
-			if (desc.isCallNext()) {
+			boolean stopSearch = false;
+			if (isCallNext) {
 				index++;
 			}
-			while (index < teams.length) {
+			while (!stopSearch && index < teams.length) {
 				final ITeam team = teams[index];
 				final int callinId = callinIds[index];
 				final IBinding binding = ObjectTeamsTypeUtilities.getBindingFromId(joinpointDesc, team, callinId);
-				final CallinModifier modifier = binding.getCallinModifier();
-				if (replaceSeen && (modifier == CallinModifier.REPLACE || currentTeam != team)) {
-					break;
-				}
 				int relativeIndex = index - oldIndex;
 				final MethodHandle incrementor = MethodHandles.insertArguments(INCREMENT, 0, relativeIndex);
-				switch (modifier) {
+				switch (binding.getCallinModifier()) {
 					case BEFORE:
 						beforeComposition = beforeComposition == null ? handleBeforeAndAfter(desc, team, binding)
 								: MethodHandles.foldArguments(beforeComposition, handleBeforeAndAfter(desc, team, binding));
@@ -164,25 +160,20 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 						MethodHandle handleAfter = handleBeforeAndAfter(desc, team, binding);
 						if (afterComposition == null) {
 							final MethodHandle returnWrapper = MethodHandles.identity(Object.class);
-							final MethodHandle returnWrapperDropped = MethodHandles.dropArguments(returnWrapper, 1, 
-									handleAfter.type().parameterList());
-							afterComposition = MethodHandles.foldArguments(returnWrapperDropped, 1, handleAfter);
-						} else {
-							afterComposition = MethodHandles.foldArguments(afterComposition, 1, handleAfter);
+							afterComposition = MethodHandles.dropArguments(returnWrapper, 1, handleAfter.type().parameterList());
 						}
+						afterComposition = MethodHandles.foldArguments(afterComposition, 1, handleAfter);
 						afterComposition = MethodHandles.filterArguments(afterComposition, 3, incrementor);
 						index++;
 						break;
 					case REPLACE:
 						replace = handleReplace(desc, team, binding);
 						replace = MethodHandles.filterArguments(replace, 2, incrementor);
-						replaceSeen = true;
-						currentTeam = team;
-						index++;
+						stopSearch = true;
 						break;
 				}
 			}
-			final int testStackLength = (desc.isCallNext()) ? teams.length - oldIndex : teams.length;
+			final int testStackLength = (isCallNext) ? teams.length - oldIndex : teams.length;
 			Class<?>[] testStack = new Class<?>[testStackLength];
 			for (int j = 0, i = oldIndex; i < teams.length; i++, j++) {
 				testStack[j] = teams[i].getClass();
