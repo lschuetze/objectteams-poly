@@ -14,7 +14,7 @@ public class OTGuards {
 			boolean.class, Class[].class, ITeam[].class, int.class);
 	
 	@SuppressWarnings("unused")
-	public static boolean testTeamsComposition(final Class<ITeam>[] testStack, final ITeam[] stack, final int index) {
+	private static boolean testTeamsComposition(final Class<ITeam>[] testStack, final ITeam[] stack, final int index) {
 		if (stack == null || testStack.length != stack.length - index) {
 			return false;
 		}

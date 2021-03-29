@@ -8,7 +8,7 @@ import jdk.dynalink.support.ChainedCallSite;
 
 public final class CallinCallSite extends ChainedCallSite {
 
-	private final static int maxChainLength;
+	private static final int maxChainLength;
 
 	static {
 		final String chainLength = System.getProperty("otdyn.mcl");

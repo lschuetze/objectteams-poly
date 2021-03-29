@@ -168,7 +168,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 			// the following comparison respects precedence:
 			compare = this.teamClass.compare(this.callinLabel, other.callinLabel);
 			if (compare != 0)
-				return (this.callinModifier != CallinModifier.BEFORE) ? compare : -compare;
+				return compare;
 		}
 		if (this.baseFlags != other.baseFlags)
 			return Integer.valueOf(this.baseFlags).compareTo(other.baseFlags);

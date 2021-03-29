@@ -5,7 +5,6 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 import org.eclipse.objectteams.otredyn.runtime.IBinding;
-import org.eclipse.objectteams.otredyn.runtime.IBinding.CallinModifier;
 import org.eclipse.objectteams.otredyn.runtime.dynamic.linker.util.ObjectTeamsTypeUtilities;
 import org.objectteams.IBoundBase2;
 import org.objectteams.ITeam;
@@ -22,8 +21,8 @@ import jdk.dynalink.linker.support.Lookup;
 
 public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 
-//	static Logger logger = LoggerFactory.getLogger(CallinLinker.class);
-	static final boolean NO_DEG = System.getProperty("otdyn.nodeg") != null;
+//	private static Logger logger = LoggerFactory.getLogger(CallinLinker.class);
+	private static final boolean NO_DEG = System.getProperty("otdyn.nodeg") != null;
 
 	private static final MethodHandle INCREMENT = Lookup.PUBLIC.findStatic(Math.class, "addExact",
 			MethodType.methodType(int.class, int.class, int.class));
@@ -152,19 +151,17 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 				final MethodHandle incrementor = MethodHandles.insertArguments(INCREMENT, 0, relativeIndex);
 				switch (binding.getCallinModifier()) {
 					case BEFORE:
-						beforeComposition = beforeComposition == null ? handleBeforeAndAfter(desc, team, binding)
-								: MethodHandles.foldArguments(beforeComposition, handleBeforeAndAfter(desc, team, binding));
-						beforeComposition = MethodHandles.filterArguments(beforeComposition, 2, incrementor);
+						final MethodHandle handleBefore = MethodHandles.filterArguments(
+								handleBeforeAndAfter(desc, team, binding), 2, incrementor);
+						beforeComposition = beforeComposition == null ? handleBefore
+								: MethodHandles.foldArguments(handleBefore, beforeComposition);
 						index++;
 						break;
 					case AFTER:
-						MethodHandle handleAfter = handleBeforeAndAfter(desc, team, binding);
-						if (afterComposition == null) {
-							final MethodHandle returnWrapper = MethodHandles.identity(Object.class);
-							afterComposition = MethodHandles.dropArguments(returnWrapper, 1, handleAfter.type().parameterList());
-						}
-						afterComposition = MethodHandles.foldArguments(afterComposition, 1, handleAfter);
-						afterComposition = MethodHandles.filterArguments(afterComposition, 3, incrementor);
+						final MethodHandle handleAfter = MethodHandles.filterArguments(
+								handleBeforeAndAfter(desc, team, binding), 2, incrementor);
+						afterComposition = afterComposition == null ? handleAfter
+								: MethodHandles.foldArguments(afterComposition, handleAfter);
 						index++;
 						break;
 					case REPLACE:
@@ -185,6 +182,9 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		}
 		MethodHandle result = (replace == null) ? handleOrig(desc, baseClass) : replace;
 		if (afterComposition != null) {
+			final MethodHandle returnWrapper = MethodHandles.identity(Object.class);
+			final MethodHandle returnWrapperDropped = MethodHandles.dropArguments(returnWrapper, 1, afterComposition.type().parameterList());
+			afterComposition = MethodHandles.foldArguments(returnWrapperDropped, 1, afterComposition);
 			result = MethodHandles.foldArguments(afterComposition, result);
 		}
 		if (beforeComposition != null) {

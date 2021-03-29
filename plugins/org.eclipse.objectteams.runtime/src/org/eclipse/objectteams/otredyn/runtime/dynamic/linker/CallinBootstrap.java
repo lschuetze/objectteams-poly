@@ -13,9 +13,9 @@ import jdk.dynalink.linker.LinkerServices;
 
 public final class CallinBootstrap {
 
-	private final static int unstableRelinkThreshold;
+	private static final int unstableRelinkThreshold;
 
-	private final static GuardingDynamicLinker prioritizedLinkers;
+	private static final GuardingDynamicLinker prioritizedLinkers;
 
 	static {
 		final String threshold = System.getProperty("otdyn.urt");
