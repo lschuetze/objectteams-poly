@@ -10,11 +10,11 @@ import jdk.dynalink.linker.support.Lookup;
 public class OTGuards {
 	static final Lookup lookup = new Lookup(MethodHandles.lookup());
 
-	public static final MethodHandle TEST_COMPOSITION_AND_INDEX = lookup.findOwnStatic("testTeamsComposition",
+	public static final MethodHandle TEST_TEAM_COMPOSITION = lookup.findOwnStatic("testTeamComposition",
 			boolean.class, Class[].class, ITeam[].class, int.class);
-	
+
 	@SuppressWarnings("unused")
-	private static boolean testTeamsComposition(final Class<ITeam>[] testStack, final ITeam[] stack, final int index) {
+	private static boolean testTeamComposition(final Class<ITeam>[] testStack, final ITeam[] stack, final int index) {
 		if (stack == null || testStack.length != stack.length - index) {
 			return false;
 		}
@@ -23,7 +23,7 @@ public class OTGuards {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 }

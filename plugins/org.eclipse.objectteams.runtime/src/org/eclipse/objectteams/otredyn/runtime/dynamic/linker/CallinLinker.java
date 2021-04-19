@@ -127,27 +127,24 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 	static GuardedInvocation getGuardedInvocation(final LinkRequest request, final OTCallSiteDescriptor desc) {
 //		logger.debug("========== BEGIN getGuardedInvocation ==========");
 		final String joinpointDesc = desc.getJoinpointDesc();
-		final boolean isCallNext = desc.isCallNext();
-		MethodHandle beforeComposition = null;
-		MethodHandle replace = null;
-		MethodHandle afterComposition = null;
+		MethodHandle beforeComposition = null, replace = null, afterComposition = null;
 		MethodHandle guard;
 		final Object[] stack = request.getArguments();
+		final Class<?> baseClass = stack[0].getClass();
 		final ITeam[] teams = (ITeam[]) stack[1];
-		final int oldIndex = (int) stack[2];
-		int index = oldIndex;
+		final int startingIndex = (int) stack[2];
+		int index = startingIndex;
 		final int[] callinIds = (int[]) stack[3];
-		final Class<?> baseClass = request.getReceiver().getClass();
 		if (teams != null) {
 			boolean stopSearch = false;
-			if (isCallNext) {
+			if (desc.isCallNext()) {
 				index++;
 			}
 			while (!stopSearch && index < teams.length) {
 				final ITeam team = teams[index];
 				final int callinId = callinIds[index];
 				final IBinding binding = ObjectTeamsTypeUtilities.getBindingFromId(joinpointDesc, team, callinId);
-				int relativeIndex = index - oldIndex;
+				int relativeIndex = index - startingIndex;
 				final MethodHandle incrementor = MethodHandles.insertArguments(INCREMENT, 0, relativeIndex);
 				switch (binding.getCallinModifier()) {
 					case BEFORE:
@@ -165,18 +162,17 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 						index++;
 						break;
 					case REPLACE:
-						replace = handleReplace(desc, team, binding);
-						replace = MethodHandles.filterArguments(replace, 2, incrementor);
+						replace = MethodHandles.filterArguments(handleReplace(desc, team, binding), 2, incrementor);
 						stopSearch = true;
 						break;
 				}
 			}
-			final int testStackLength = (isCallNext) ? teams.length - oldIndex : teams.length;
+			final int testStackLength = teams.length - startingIndex;
 			Class<?>[] testStack = new Class<?>[testStackLength];
-			for (int j = 0, i = oldIndex; i < teams.length; i++, j++) {
+			for (int j = 0, i = startingIndex; i < teams.length; i++, j++) {
 				testStack[j] = teams[i].getClass();
 			}
-			guard = OTGuards.TEST_COMPOSITION_AND_INDEX.bindTo(testStack);
+			guard = OTGuards.TEST_TEAM_COMPOSITION.bindTo(testStack);
 		} else {
 			guard = Guards.isNull();
 		}
