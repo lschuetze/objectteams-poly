@@ -455,6 +455,7 @@ public void updateFromParserState(){
 					for (int i = 1, max = length + 1; i < max; i++) {
 						if(!(parser.astStack[astPtr + i ] instanceof TypeReference)) {
 							canConsume = false;
+							break;
 						}
 					}
 				}
@@ -529,6 +530,7 @@ public void updateFromParserState(){
 						for (int i = 1, max = length + 1; i < max; i++) {
 							if(!(parser.astStack[astPtr + i ] instanceof Argument)) {
 								canConsume = false;
+								break;
 							}
 						}
 					}

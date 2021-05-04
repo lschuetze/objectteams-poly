@@ -228,6 +228,7 @@ Goal ::= '?' PackageDeclaration
 Goal ::= '+' TypeDeclaration
 Goal ::= '/' GenericMethodDeclaration
 Goal ::= '&' ClassBodyDeclarations
+Goal ::= '-' RecordBodyDeclarations
 -- code snippet
 Goal ::= '%' Expression
 Goal ::= '%' ArrayInitializer

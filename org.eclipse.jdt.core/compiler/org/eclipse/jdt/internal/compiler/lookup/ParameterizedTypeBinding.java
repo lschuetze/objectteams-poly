@@ -925,6 +925,11 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return this.type.hasMethodWithNumArgs(selector, numArgs);
 	}
 
+	@Override
+	public boolean hasValueBasedTypeAnnotation() {
+		return this.type.hasValueBasedTypeAnnotation();
+	}
+
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#implementsMethod(MethodBinding)
 	 */

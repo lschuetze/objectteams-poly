@@ -31,7 +31,7 @@ public class SealedTypesTests extends AbstractRegressionTest9 {
 	static {
 //		TESTS_NUMBERS = new int [] { 40 };
 //		TESTS_RANGE = new int[] { 1, -1 };
-//		TESTS_NAMES = new String[] { "testBug570218"};
+//		TESTS_NAMES = new String[] { "testBug572205"};
 	}
 
 	public static Class<?> testClass() {
@@ -61,9 +61,8 @@ public class SealedTypesTests extends AbstractRegressionTest9 {
 		runConformTest(testFiles, expectedOutput, getCompilerOptions());
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	protected void runConformTest(String[] testFiles, String expectedOutput, Map customOptions) {
+	protected void runConformTest(String[] testFiles, String expectedOutput, Map<String, String> customOptions) {
 		Runner runner = new Runner();
 		runner.testFiles = testFiles;
 		runner.expectedOutputString = expectedOutput;
@@ -74,7 +73,7 @@ public class SealedTypesTests extends AbstractRegressionTest9 {
 	}
 	@Override
 	protected void runNegativeTest(String[] testFiles, String expectedCompilerLog) {
-		runNegativeTest(testFiles, expectedCompilerLog, JavacTestOptions.forReleaseWithPreview("15"));
+		runNegativeTest(testFiles, expectedCompilerLog, JavacTestOptions.forReleaseWithPreview("16"));
 	}
 	protected void runWarningTest(String[] testFiles, String expectedCompilerLog) {
 		runWarningTest(testFiles, expectedCompilerLog, null);
@@ -90,8 +89,8 @@ public class SealedTypesTests extends AbstractRegressionTest9 {
 		runner.expectedCompilerLog = expectedCompilerLog;
 		runner.customOptions = customOptions;
 		runner.vmArguments = new String[] {"--enable-preview"};
-		runner.javacTestOptions = javacAdditionalTestOptions == null ? JavacTestOptions.forReleaseWithPreview("15") :
-			JavacTestOptions.forReleaseWithPreview("15", javacAdditionalTestOptions);
+		runner.javacTestOptions = javacAdditionalTestOptions == null ? JavacTestOptions.forReleaseWithPreview("16") :
+			JavacTestOptions.forReleaseWithPreview("16", javacAdditionalTestOptions);
 		runner.runWarningTest();
 	}
 
@@ -1452,7 +1451,7 @@ public class SealedTypesTests extends AbstractRegressionTest9 {
 			"1. ERROR in X.java (at line 3)\n" +
 			"	IY y = new IY(){};\n" +
 			"	           ^^\n" +
-			"A local class new IY(){} cannot have a sealed direct superclass or a sealed direct superinterface IY\n" +
+			"An anonymous class cannot subclass a sealed type IY\n" +
 			"----------\n");
 	}
 	public void testBug564492_003() {
@@ -1497,7 +1496,7 @@ public class SealedTypesTests extends AbstractRegressionTest9 {
 			"1. ERROR in X.java (at line 3)\n" +
 			"	new A.IY() {};\n" +
 			"	    ^^^^\n" +
-			"A local class new IY(){} cannot have a sealed direct superclass or a sealed direct superinterface A.IY\n" +
+			"An anonymous class cannot subclass a sealed type A.IY\n" +
 			"----------\n");
 	}
 	public void testBug564498_1() throws IOException, ClassFormatException {
@@ -5845,4 +5844,28 @@ public class SealedTypesTests extends AbstractRegressionTest9 {
 			},
 			"0");
 	}
+	public void testBug572205_001() {
+		runNegativeTest(
+			new String[] {
+				"X.java",
+				"public class X{\n" +
+				"  public static void main(String[] args) {\n" +
+				"	 class Circle implements Shape{}\n" +
+				"  }\n" +
+				"  sealed interface Shape {}\n" +
+				"}",
+			},
+			"----------\n" +
+			"1. ERROR in X.java (at line 3)\n" +
+			"	class Circle implements Shape{}\n" +
+			"	                        ^^^^^\n" +
+			"A local class Circle cannot have a sealed direct superclass or a sealed direct superinterface X.Shape\n" +
+			"----------\n" +
+			"2. ERROR in X.java (at line 5)\n" +
+			"	sealed interface Shape {}\n" +
+			"	                 ^^^^^\n" +
+			"Sealed class or interface lacks the permits clause and no class or interface from the same compilation unit declares Shape as its direct superclass or superinterface\n" +
+			"----------\n");
+	}
+
 }

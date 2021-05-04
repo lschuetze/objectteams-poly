@@ -1685,7 +1685,9 @@ public char[] signature(ClassFile classFile) {
 			// we need to record inner classes references
 			boolean isConstructor = isConstructor();
 			TypeBinding[] targetParameters = this.parameters;
-			boolean needSynthetics = isConstructor && this.declaringClass.isNestedType();
+			boolean needSynthetics = isConstructor
+						&& this.declaringClass.isNestedType()
+						&& !this.declaringClass.isStatic();
 //{ObjectTeams: also need synthetics for static role methods:
 			if (this.needsSyntheticEnclosingTeamInstance())
 				needSynthetics = true;
@@ -1744,7 +1746,9 @@ public char[] signature(ClassFile classFile) {
 		buffer.append(ConstantPool.JavaLangStringSignature);
 		buffer.append(TypeBinding.INT.signature());
 	}
-	boolean needSynthetics = isConstructor && this.declaringClass.isNestedType();
+	boolean needSynthetics = isConstructor
+			&& this.declaringClass.isNestedType()
+			&& !this.declaringClass.isStatic();
 //{ObjectTeams: also need synthetics for static role methods:
 	if (this.needsSyntheticEnclosingTeamInstance()) {
 		needSynthetics = true;

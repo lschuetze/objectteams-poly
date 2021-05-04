@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -679,6 +679,8 @@ public void computeId() {
 				case 3: // only one type in this group, yet:
 					if (CharOperation.equals(TypeConstants.ORG_JUNIT_ASSERT, this.compoundName))
 						this.id = TypeIds.T_OrgJunitAssert;
+					else if (CharOperation.equals(TypeConstants.JDK_INTERNAL_PREVIEW_FEATURE, this.compoundName))
+						this.id = TypeIds.T_JdkInternalPreviewFeature;
 					return;
 				case 4:
 					if (!CharOperation.equals(TypeConstants.JAVA, packageName))
@@ -1096,8 +1098,12 @@ public void computeId() {
 										this.id = TypeIds.T_OrgApacheCommonsLangValidate;
 									else if (CharOperation.equals(TypeConstants.ORG_APACHE_COMMONS_LANG3_VALIDATE, this.compoundName))
 										this.id = TypeIds.T_OrgApacheCommonsLang3Validate;
-			}
+								}
 							}
+							return;
+						case 'j':
+							if (CharOperation.equals(TypeConstants.ORG_JUNIT_JUPITER_API_ASSERTIONS, this.compoundName))
+								this.id = TypeIds.T_OrgJunitJupiterApiAssertions;
 							return;
 					}
 					return;
@@ -1186,8 +1192,8 @@ public int depth() {
 }
 
 public boolean detectAnnotationCycle() {
-	if ((this.tagBits & TagBits.EndAnnotationCheck) != 0) return false; // already checked
-	if ((this.tagBits & TagBits.BeginAnnotationCheck) != 0) return true; // in the middle of checking its methods
+	if ((this.tagBits & TagBits.EndAnnotationCheck) == TagBits.EndAnnotationCheck) return false; // already checked
+	if ((this.tagBits & TagBits.BeginAnnotationCheck) == TagBits.BeginAnnotationCheck) return true; // in the middle of checking its methods
 
 	this.tagBits |= TagBits.BeginAnnotationCheck;
 	MethodBinding[] currentMethods = methods();
@@ -1209,6 +1215,7 @@ public boolean detectAnnotationCycle() {
 	}
 	if (inCycle)
 		return true;
+	this.tagBits &= (~TagBits.BeginAnnotationCheck);
 	this.tagBits |= TagBits.EndAnnotationCheck;
 	return false;
 }
@@ -1245,6 +1252,10 @@ public int fieldCount() {
 
 public FieldBinding[] fields() {
 	return Binding.NO_FIELDS;
+}
+
+public RecordComponentBinding[] components() {
+	return Binding.NO_COMPONENTS;
 }
 
 public final int getAccessFlags() {
@@ -2633,12 +2644,29 @@ protected boolean hasMethodWithNumArgs(char[] selector, int numArgs) {
 protected int applyCloseableInterfaceWhitelists() {
 	switch (this.compoundName.length) {
 		case 4:
-			for (int i=0; i<2; i++)
-				if (!CharOperation.equals(this.compoundName[i], TypeConstants.JAVA_UTIL_STREAM[i]))
-					return 0;
-			for (char[] streamName : TypeConstants.RESOURCE_FREE_CLOSEABLE_J_U_STREAMS)
-				if (CharOperation.equals(this.compoundName[3], streamName))
-					return TypeIds.BitResourceFreeCloseable;
+			if (CharOperation.equals(this.compoundName[0], TypeConstants.JAVA_UTIL_STREAM[0])) {
+				for (int i=1; i<3; i++) {
+					if (!CharOperation.equals(this.compoundName[i], TypeConstants.JAVA_UTIL_STREAM[i])) {
+						return 0;
+					}
+				}
+				for (char[] streamName : TypeConstants.RESOURCE_FREE_CLOSEABLE_J_U_STREAMS) {
+					if (CharOperation.equals(this.compoundName[3], streamName)) {
+						return TypeIds.BitResourceFreeCloseable;
+					}
+				}
+			} else {
+				for (int i=0; i<3; i++) {
+					if (!CharOperation.equals(this.compoundName[i], TypeConstants.ONE_UTIL_STREAMEX[i])) {
+						return 0;
+					}
+				}
+				for (char[] streamName : TypeConstants.RESOURCE_FREE_CLOSEABLE_STREAMEX) {
+					if (CharOperation.equals(this.compoundName[3], streamName)) {
+						return TypeIds.BitResourceFreeCloseable;
+					}
+				}
+			}
 			break;
 	}
 	return 0;

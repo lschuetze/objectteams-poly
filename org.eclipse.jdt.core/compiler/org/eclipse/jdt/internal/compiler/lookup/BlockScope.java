@@ -1008,6 +1008,15 @@ public Object[] getEmulationPath(ReferenceBinding targetEnclosingType, boolean o
 		}
 		return null;
 	}
+//{ObjectTeams: check does not apply to roles:
+  if (!sourceType.isRole())
+// SH}
+	if (sourceType.isNestedType() && currentMethodScope.isInsideInitializer()) {
+		if (currentMethodScope.isStatic) {
+
+			return BlockScope.NoEnclosingInstanceInStaticContext;
+		}
+	}
 	boolean insideConstructor = currentMethodScope.isInsideInitializerOrConstructor();
 	// use synthetic constructor arguments if possible
 	if (insideConstructor) {

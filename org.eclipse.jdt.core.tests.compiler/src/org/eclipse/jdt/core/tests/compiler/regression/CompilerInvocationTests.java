@@ -151,7 +151,7 @@ public class CompilerInvocationTests extends AbstractRegressionTest {
 		}
 	}
 
-	class TasksReader implements ICompilerRequestor {
+	static class TasksReader implements ICompilerRequestor {
 		CompilationResult result;
 
 		public void acceptResult(CompilationResult compilationResult) {
@@ -1298,6 +1298,7 @@ public void _test011_problem_categories() {
 //SH}
 	    expectedProblemAttributes.put("PreviewFeaturesNotAllowed", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
 	    expectedProblemAttributes.put("FeatureNotSupported", new ProblemAttributes(CategorizedProblem.CAT_COMPLIANCE));
+	    expectedProblemAttributes.put("PreviewAPIUsed", new ProblemAttributes(CategorizedProblem.CAT_COMPLIANCE));
 	    expectedProblemAttributes.put("SwitchExpressionsYieldIncompatibleResultExpressionTypes", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 	    expectedProblemAttributes.put("SwitchExpressionsYieldEmptySwitchBlock", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
 	    expectedProblemAttributes.put("SwitchExpressionsYieldNoResultExpression", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
@@ -1375,6 +1376,8 @@ public void _test011_problem_categories() {
 	    expectedProblemAttributes.put("SealedNotDirectSuperInterface", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
 	    expectedProblemAttributes.put("SealedLocalDirectSuperTypeSealed", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
 	    expectedProblemAttributes.put("SealedAnonymousClassCannotExtendSealedType", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SafeVarargsOnSyntheticRecordAccessor", new ProblemAttributes(true));
+	    expectedProblemAttributes.put("DiscouragedValueBasedTypeSynchronization", new ProblemAttributes(true));
 	    StringBuffer failures = new StringBuffer();
 		StringBuffer correctResult = new StringBuffer(70000);
 		Field[] fields = (iProblemClass = IProblem.class).getFields();
@@ -2976,6 +2979,7 @@ public void test012_compiler_problems_tuning() {
 	    expectedProblemAttributes.put("PreviewFeatureNotSupported", SKIP);
 	    expectedProblemAttributes.put("PreviewFeaturesNotAllowed", SKIP);
 	    expectedProblemAttributes.put("FeatureNotSupported", SKIP);
+	    expectedProblemAttributes.put("PreviewAPIUsed", SKIP);
 	    expectedProblemAttributes.put("SwitchExpressionsYieldIncompatibleResultExpressionTypes", SKIP);
 	    expectedProblemAttributes.put("SwitchExpressionsYieldEmptySwitchBlock", SKIP);
 	    expectedProblemAttributes.put("SwitchExpressionsYieldNoResultExpression", SKIP);
@@ -3054,6 +3058,8 @@ public void test012_compiler_problems_tuning() {
 	    expectedProblemAttributes.put("SealedNotDirectSuperInterface", SKIP);
 	    expectedProblemAttributes.put("SealedLocalDirectSuperTypeSealed", SKIP);
 	    expectedProblemAttributes.put("SealedAnonymousClassCannotExtendSealedType", SKIP);
+	    expectedProblemAttributes.put("SafeVarargsOnSyntheticRecordAccessor", SKIP);
+	    expectedProblemAttributes.put("DiscouragedValueBasedTypeSynchronization", SKIP);
 	    Map constantNamesIndex = new HashMap();
 		Field[] fields = JavaCore.class.getFields();
 		for (int i = 0, length = fields.length; i < length; i++) {

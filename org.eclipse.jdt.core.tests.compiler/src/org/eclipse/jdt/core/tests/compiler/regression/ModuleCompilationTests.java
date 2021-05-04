@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2019 IBM Corporation and others.
+ * Copyright (c) 2016, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -4052,6 +4052,16 @@ public void testBug521362_emptyFile() {
 		     true);
 	}
 	public void testReleaseOption8() throws Exception {
+
+		String output =
+				isJRE12Plus ?
+						"	public java.util.stream.Stream<String> emptyStream() {\n" +
+						"	       ^^^^^^^^^^^^^^^^\n" +
+						"java.util.stream cannot be resolved to a type\n" :
+							"	public java.util.stream.Stream<String> emptyStream() {\n" +
+							"	       ^^^^^^^^^^^^^^^^^^^^^^^\n" +
+							"java.util.stream.Stream cannot be resolved to a type\n";
+
 		this.runNegativeTest(
 				new String[] {
 					"X.java",
@@ -4067,9 +4077,7 @@ public void testBug521362_emptyFile() {
 		     "",
 		     "----------\n" +
     		 "1. ERROR in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" +
-    		 "	public java.util.stream.Stream<String> emptyStream() {\n" +
-    		 "	       ^^^^^^^^^^^^^^^^\n" +
-    		 "java.util.stream cannot be resolved to a type\n" +
+    		 output +
     		 "----------\n" +
     		 "1 problem (1 error)\n",
 		     true);
@@ -5514,5 +5522,21 @@ public void testBug521362_emptyFile() {
     		 "----------\n" +
     		 "1 problem (1 warning)\n",
 		     true);
+	}
+	public void testBug571363() throws Exception {
+		if (!isJRE12Plus) return;
+		this.runConformTest(
+			new String[] {
+				"A.java",
+				"public final class A {\n"
+				+ "    org.w3c.dom.Element list;\n"
+				+ "}",
+			},
+	     "\"" + OUTPUT_DIR +  File.separator + "A.java\""
+	     + " -classpath " + "\"" + this.getCompilerTestsPluginDirectoryPath() + File.separator + "workspace" + File.separator + "Test571363.jar\""
+	     + " --release 11 -d \"" + OUTPUT_DIR + "\"",
+	     "",
+	     "",
+	     true);
 	}
 }

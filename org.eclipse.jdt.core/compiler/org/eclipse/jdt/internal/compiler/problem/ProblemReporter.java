@@ -201,6 +201,7 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.ModuleBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedGenericMethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
@@ -871,6 +872,7 @@ public static int getIrritant(int problemID) {
 		case IProblem.UnstableAutoModuleName:
 			return CompilerOptions.UnstableAutoModuleName;
 		case IProblem.PreviewFeatureUsed:
+		case IProblem.PreviewAPIUsed:
 			return CompilerOptions.PreviewFeatureUsed;
 
 		case IProblem.ProblemNotAnalysed:
@@ -1969,6 +1971,9 @@ public int computeSeverity(int problemID){
 			return ProblemSeverities.Warning;
 		case IProblem.IllegalUseOfUnderscoreAsAnIdentifier:
 			return this.underScoreIsError ? ProblemSeverities.Error : ProblemSeverities.Warning;
+		// for Java 16
+		case IProblem.DiscouragedValueBasedTypeSynchronization:
+			return ProblemSeverities.Warning;
 	}
 	int irritant = getIrritant(problemID);
 	if (irritant != 0) {
@@ -5676,6 +5681,17 @@ public void illegalTypeAnnotationsInStaticMemberAccess(Annotation first, Annotat
 			first.sourceStart,
 			last.sourceEnd);
 }
+public void discouragedValueBasedTypeToSynchronize(Expression expression, TypeBinding type) {
+	if (type.isParameterizedType()) {
+		type =  ((ParameterizedTypeBinding)type).actualType();
+	}
+	this.handle(
+		IProblem.DiscouragedValueBasedTypeSynchronization,
+		new String[] {new String(type.readableName())},
+		new String[] {new String(type.shortReadableName())},
+		expression.sourceStart,
+		expression.sourceEnd);
+}
 public void isClassPathCorrect(char[][] wellKnownTypeName, CompilationUnitDeclaration compUnitDecl, Object location, boolean implicitAnnotationUse) {
 	// ProblemReporter is not designed to be reentrant. Just in case, we discovered a build path problem while we are already
 	// in the midst of reporting some other problem, save and restore reference context thereby mimicking a stack.
@@ -6745,7 +6761,9 @@ public void localVariableHiding(LocalDeclaration local, Binding hiddenVariable, 
 			nodeSourceStart(hiddenVariable, local),
 			nodeSourceEnd(hiddenVariable, local));
 	} else if (hiddenVariable instanceof FieldBinding) {
-		if (isSpecialArgHidingField && !this.options.reportSpecialParameterHidingField){
+		if (isSpecialArgHidingField
+				&& ( !this.options.reportSpecialParameterHidingField
+						|| ((FieldBinding) hiddenVariable).isRecordComponent())) {
 			return;
 		}
 		int id = (local instanceof Argument)
@@ -10345,6 +10363,17 @@ public void previewFeatureUsed(int sourceStart, int sourceEnd) {
 			sourceStart,
 			sourceEnd);
 }
+public void previewAPIUsed(int sourceStart, int sourceEnd, boolean isFatal) {
+	if (this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+			IProblem.PreviewAPIUsed,
+			NoArgument,
+			NoArgument,
+			isFatal ? ProblemSeverities.Error | ProblemSeverities.Fatal : ProblemSeverities.Warning,
+			sourceStart,
+			sourceEnd);
+}
 //Returns true if the problem is handled and reported (only errors considered and not warnings)
 public boolean validateRestrictedKeywords(char[] name, int start, int end, boolean reportSyntaxError) {
 	return validateRestrictedKeywords(name, null, start, end, reportSyntaxError);
@@ -10542,6 +10571,15 @@ public void possibleHeapPollutionFromVararg(AbstractVariableDeclaration vararg) 
 		arguments,
 		vararg.sourceStart,
 		vararg.sourceEnd);
+}
+public void safeVarargsOnOnSyntheticRecordAccessor(RecordComponent comp) {
+	String[] arguments = new String[] {new String(comp.name)};
+	this.handle(
+		IProblem.SafeVarargsOnSyntheticRecordAccessor,
+		arguments,
+		arguments,
+		comp.sourceStart,
+		comp.sourceEnd);
 }
 public void variableTypeCannotBeVoid(AbstractVariableDeclaration varDecl) {
 	String[] arguments = new String[] {new String(varDecl.name)};

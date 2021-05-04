@@ -23678,6 +23678,99 @@ public void testBug346454i() throws JavaModelException {
 		COMPLETION_PROJECT.setOptions(options);
 	}
 }
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=346454
+//Qualified allocation case. Corrected case (need explicit type arg of outer instance).
+public void testBug346454j() throws JavaModelException {
+	Map<String, String> options = COMPLETION_PROJECT.getOptions(true);
+	String savedOptionCompliance = options.get(CompilerOptions.OPTION_Compliance);
+	String savedOptionSource = options.get(CompilerOptions.OPTION_Source);
+	try {
+		options.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_7);
+		options.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_7);
+		COMPLETION_PROJECT.setOptions(options);
+		this.workingCopies = new ICompilationUnit[2];
+		this.workingCopies[0] = getWorkingCopy(
+			"/Completion/src/test/Test.java",
+			"package test;" +
+			"import pack.Test;\n"+
+			"public class X {\n" +
+			"	public void foo(String str) {\n" +
+			"     Test<String>.T2<String> t = new Test<String>().new T2<>()\n" +
+			"   }" +
+			"}\n");
+
+		this.workingCopies[1] = getWorkingCopy(
+				"/Completion/src/pack/Test.java",
+				"package pack;"+
+				"public class Test<T> {\n" +
+				"	public class T2<Z> {\n" +
+				"		public T2(Z z){}\n" +
+				"   }" +
+				"}\n");
+
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+		String str = this.workingCopies[0].getSource();
+		String completeBehind = ".new T2<>(";
+		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+		assertResults(
+			"T2[METHOD_REF<CONSTRUCTOR>]{, Lpack.Test<Ljava.lang.String;>.T2<>;, (TZ;)V, T2, (z), 39}\n" +
+			"Test<java.lang.String>.T2<>[ANONYMOUS_CLASS_DECLARATION]{, Lpack.Test<Ljava.lang.String;>.T2<>;, (TZ;)V, null, (z), 39}",
+			requestor.getResults());
+	} finally {
+		// Restore compliance settings.
+		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
+		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
+		COMPLETION_PROJECT.setOptions(options);
+	}
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=346454
+//Qualified allocation case. Corrected case (using ctor-arg for inference).
+public void testBug346454k() throws JavaModelException {
+	Map<String, String> options = COMPLETION_PROJECT.getOptions(true);
+	String savedOptionCompliance = options.get(CompilerOptions.OPTION_Compliance);
+	String savedOptionSource = options.get(CompilerOptions.OPTION_Source);
+	try {
+		options.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_7);
+		options.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_7);
+		COMPLETION_PROJECT.setOptions(options);
+		this.workingCopies = new ICompilationUnit[2];
+		this.workingCopies[0] = getWorkingCopy(
+			"/Completion/src/test/Test.java",
+			"package test;" +
+			"import pack.Test;\n"+
+			"public class X {\n" +
+			"	public void foo(String str) {\n" +
+			"     Test<String>.T2<String> t = new Test<>(\"\").new T2<>()\n" +
+			"   }" +
+			"}\n");
+
+		this.workingCopies[1] = getWorkingCopy(
+				"/Completion/src/pack/Test.java",
+				"package pack;"+
+				"public class Test<T> {\n" +
+				"	public Test(T t) {}\n" +
+				"	public class T2<Z> {\n" +
+				"		public T2(Z z){}\n" +
+				"   }" +
+				"}\n");
+
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+		String str = this.workingCopies[0].getSource();
+		String completeBehind = ".new T2<>(";
+		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+		assertResults(
+			"T2[METHOD_REF<CONSTRUCTOR>]{, Lpack.Test<Ljava.lang.String;>.T2<>;, (TZ;)V, T2, (z), 39}\n" +
+			"Test<java.lang.String>.T2<>[ANONYMOUS_CLASS_DECLARATION]{, Lpack.Test<Ljava.lang.String;>.T2<>;, (TZ;)V, null, (z), 39}",
+			requestor.getResults());
+	} finally {
+		// Restore compliance settings.
+		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
+		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
+		COMPLETION_PROJECT.setOptions(options);
+	}
+}
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=346415
 // To make sure we get proposals after the second catch block.
 public void testBug346415() throws JavaModelException {

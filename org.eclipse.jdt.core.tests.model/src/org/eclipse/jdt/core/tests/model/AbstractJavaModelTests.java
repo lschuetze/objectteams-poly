@@ -222,7 +222,7 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 	/**
 	 * Delta listener
 	 */
-	protected class DeltaListener implements IElementChangedListener, IResourceChangeListener {
+	protected static class DeltaListener implements IElementChangedListener, IResourceChangeListener {
 		/**
 		 * Deltas received from the java model. See
 		 * <code>#startDeltas</code> and
@@ -252,7 +252,7 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 				copy[this.deltas.length]= event.getDelta();
 				this.deltas= copy;
 
-				new Throwable("Caller of IElementChangedListener#elementChanged").printStackTrace(new PrintStream(this.stackTraces));
+				new Throwable("Caller of IElementChangedListener#elementChanged with delta " + event.getDelta()).printStackTrace(new PrintStream(this.stackTraces));
 			}
 		}
 		public synchronized CompilationUnit getCompilationUnitAST(ICompilationUnit workingCopy) {
@@ -1552,6 +1552,9 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 	}
 	protected IJavaProject createJava16Project(String name, String[] srcFolders) throws CoreException {
 		return createJava9ProjectWithJREAttributes(name, srcFolders, null, "16");
+	}
+	protected IJavaProject createJava16Project(String name) throws CoreException {
+		return createJava9ProjectWithJREAttributes(name, new String[]{"src"}, null, "16");
 	}
 	protected IJavaProject createJava9ProjectWithJREAttributes(String name, String[] srcFolders, IClasspathAttribute[] attributes) throws CoreException {
 		return createJava9ProjectWithJREAttributes(name, srcFolders, attributes, "9");

@@ -35,6 +35,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 
 import static org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates.*;
 
+import java.util.Map;
+
 /**
  * Handle translation states of compilation units and types.
  *
@@ -156,11 +158,11 @@ public class StateHelper
 						requested= roleRequest;
 				}
 			}
-		LocalTypeBinding[] localTypes = unit.localTypes;
+		Map<Integer, LocalTypeBinding> localTypes = unit.localTypes;
 		if(localTypes != null) {
-			for (int t=0; t < unit.localTypeCount; t++) {
-				if (localTypes[t].scope != null) {
-					ClassScope scope = localTypes[t].scope;
+			for (LocalTypeBinding localType : localTypes.values()) {
+				if (localType.scope != null) {
+					ClassScope scope = localType.scope;
 					if (scope.referenceContext != null)
 						setStateRecursive(scope.referenceContext, state, markRoleUnits);
 				}

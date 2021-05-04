@@ -478,7 +478,14 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	public ASTNode concreteStatement() {
 		return this;
 	}
-
+	private void reportPreviewAPI(Scope scope, long modifiers) {
+		if (scope.compilerOptions().enablePreviewFeatures)
+			return;
+		if((modifiers & TagBits.AnnotationPreviewFeature) == TagBits.AnnotationPreviewFeature) {
+			scope.problemReporter().previewAPIUsed(this.sourceStart, this.sourceEnd,
+					(modifiers & TagBits.EssentialAPI) != 0);
+		}
+	}
 	public final boolean isFieldUseDeprecated(FieldBinding field, Scope scope, int filteredBits) {
 		if ((this.bits & ASTNode.InsideJavadoc) == 0			// ignore references inside Javadoc comments
 				&& (filteredBits & IsStrictlyAssigned) == 0 	// ignore write access
@@ -491,6 +498,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 			else
 				field.original().modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
 		}
+		reportPreviewAPI(scope, field.tagBits);
 
 		if ((field.modifiers & ExtraCompilerModifiers.AccRestrictedAccess) != 0) {
 			ModuleBinding module = field.declaringClass.module();
@@ -535,6 +543,9 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	*/
 	public final boolean isMethodUseDeprecated(MethodBinding method, Scope scope,
 			boolean isExplicitUse, InvocationSite invocation) {
+
+		reportPreviewAPI(scope, method.tagBits);
+
 		// ignore references insing Javadoc comments
 		if ((this.bits & ASTNode.InsideJavadoc) == 0 && method.isOrEnclosedByPrivateType() && !scope.isDefinedInMethod(method)) {
 			// ignore cases where method is used from inside itself (e.g. direct recursions)
@@ -622,7 +633,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 			// ignore cases where type is used from inside itself
 			((ReferenceBinding)refType.erasure()).modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
 		}
-
+		reportPreviewAPI(scope, type.extendedTagBits);
 		if (refType.hasRestrictedAccess()) {
 			ModuleBinding module = refType.module();
 			LookupEnvironment env = (module == null) ? scope.environment() : module.environment;
@@ -773,6 +784,9 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 					if (lambda.hasErrors() || lambda.hasDescripterProblem) {
 						continue;
 					}
+					// avoid that preliminary local type bindings escape beyond this point:
+					lambda.updateLocalTypesInMethod(candidateMethod);
+					parameterType = InferenceContext18.getParameter(parameters, i, variableArity); // refresh after update
 					if (!lambda.isCompatibleWith(parameterType, scope)) {
 						if (method.isValidBinding() && problemMethod == null) {
 							TypeBinding[] originalArguments = Arrays.copyOf(argumentTypes, argumentTypes.length);
@@ -784,8 +798,6 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 						}
 						continue;
 					}
-					// avoid that preliminary local type bindings escape beyond this point:
-					lambda.updateLocalTypesInMethod(candidateMethod);
 				} else {
 					updatedArgumentType = argument.resolveType(scope);
 				}
@@ -795,6 +807,9 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 						candidateMethod.parameters[i] = updatedArgumentType;
 				}
 			}
+		}
+		if (method.returnType instanceof ReferenceBinding) {
+			scope.referenceCompilationUnit().updateLocalTypesInMethod(method);
 		}
 		if (method instanceof ParameterizedGenericMethodBinding) {
 			InferenceContext18 ic18 = invocation.getInferenceContext((ParameterizedMethodBinding) method);

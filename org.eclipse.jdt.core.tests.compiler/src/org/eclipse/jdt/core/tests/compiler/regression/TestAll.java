@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -197,26 +197,26 @@ public static Test suite() {
 	 // add 14 specific test here (check duplicates)
 	 ArrayList since_14 = new ArrayList();
 	 since_14.add(SwitchExpressionsYieldTest.class);
-// OT: see 	 https://bugs.eclipse.org/bugs/show_bug.cgi?id=561820#c10 :
-//	 since_14.add(RecordsRestrictedClassTest.class);
+	 since_14.add(RecordsRestrictedClassTest.class);
 	 since_14.add(PatternMatching16Test.class);
-//	 since_14.add(JavadocTestForRecord.class);
+	 since_14.add(JavadocTestForRecord.class);
 	 since_14.add(BatchCompilerTest_14.class);
 
 	 // add 15 specific test here (check duplicates)
 	 ArrayList since_15 = new ArrayList();
-	 since_15.add(SealedTypesTests.class);
 	 since_15.add(ClassFileReaderTest_15.class);
 	 since_15.add(JavadocTest_15.class);
 	 since_15.add(Unicode13Test.class);
-// OT: see 	 https://bugs.eclipse.org/bugs/show_bug.cgi?id=561820#c10 :
-	 since_15.add(RecordsRestrictedClassTest.class);
-	 since_15.add(JavadocTestForRecord.class);
+	 since_15.add(BatchCompilerTest_15.class);
 
 	 // add 16 specific test here (check duplicates)
 	 ArrayList since_16 = new ArrayList();
+	 since_16.add(SealedTypesTests.class);
 	 since_16.add(LocalEnumTest.class);
 	 since_16.add(LocalStaticsTest.class);
+	 since_16.add(PreviewFeatureTest.class);
+	 since_16.add(ValueBasedAnnotationTests.class);
+	 since_16.add(BatchCompilerTest_16.class);
 
 	 // Build final test suite
 	TestSuite all = new TestSuite(TestAll.class.getName());
