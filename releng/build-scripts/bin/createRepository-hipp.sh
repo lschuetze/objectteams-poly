@@ -114,7 +114,7 @@ for dir in features plugins
 do
 		# add "-verbose" to the second line if needed:
         find ${BASE}/testrun/updateSite/${dir} -type f -name \*.jar -exec \
-                ${JAVA8} -jar ${JARPROCESSOR} -processAll -repack -outputDir ${CONDITIONED}/${dir} {} \;
+                ${JAVA11} -jar ${JARPROCESSOR} -processAll -repack -outputDir ${CONDITIONED}/${dir} {} \;
 done
 # not conditioned, but must not be skipped!
 cp ${BASE}/testrun/updateSite/plugins/org.eclipse.jdt.core_* ${CONDITIONED}/plugins/
@@ -184,7 +184,7 @@ for dir in ${LOCATION}/features ${LOCATION}/plugins
 do
 		# add "-verbose" to the second line if needed:
         find ${dir} -type f -name \*.jar -exec \
-                ${JAVA8} -jar ${JARPROCESSOR} -pack -outputDir ${dir} {} \;
+                ${JAVA11} -jar ${JARPROCESSOR} -pack -outputDir ${dir} {} \;
 done
 
 
