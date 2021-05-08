@@ -5215,9 +5215,19 @@ public void testBug564672_022() {
 		"6. ERROR in X.java (at line 6)\n" +
 		"	return new R(i);\n" +
 		"	              ^\n" +
-		"Syntax error, insert \")\" to complete MethodDeclaration\n" +
+		"Syntax error, insert \")\" to complete MethodSpecLong\n" +
 		"----------\n" +
-		"7. ERROR in X.java (at line 12)\n" +
+		"7. ERROR in X.java (at line 6)\n" +
+		"	return new R(i);\n" +
+		"	              ^\n" +
+		"Syntax error, insert \"<-\" to complete CallinBindingLeft\n" +
+		"----------\n" +
+		"8. ERROR in X.java (at line 6)\n" +
+		"	return new R(i);\n" +
+		"	              ^\n" +
+		"Syntax error, insert \"MethodSpecsLong EmptyParameterMappings\" to complete RecordBodyDeclarations\n" +
+		"----------\n" +
+		"9. ERROR in X.java (at line 12)\n" +
 		"	record.a(1);\n" +
 		"	       ^\n" +
 		"The method a(int) is undefined for the type X.Point\n" +

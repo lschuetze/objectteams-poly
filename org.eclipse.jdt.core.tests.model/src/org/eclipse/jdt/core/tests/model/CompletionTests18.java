@@ -299,9 +299,6 @@ public void test008() throws JavaModelException {
 	assertResults(
 			"[POTENTIAL_METHOD_DECLARATION]{, LX;, ()V, , null, " + (R_DEFAULT + 9) + "}\n" +
 			"abstract[KEYWORD]{abstract, null, null, abstract, null, " + (R_DEFAULT + 19) + "}\n" +
-//{ObjectTeams:
-			"callin[KEYWORD]{callin, null, null, callin, null, " + (R_DEFAULT + 19) + "}\n" +
-// SH}
 			"class[KEYWORD]{class, null, null, class, null, " + (R_DEFAULT + 19) + "}\n" +
 			"enum[KEYWORD]{enum, null, null, enum, null, " + (R_DEFAULT + 19) + "}\n" +
 			"final[KEYWORD]{final, null, null, final, null, " + (R_DEFAULT + 19) + "}\n" +
@@ -313,9 +310,6 @@ public void test008() throws JavaModelException {
 			"static[KEYWORD]{static, null, null, static, null, " + (R_DEFAULT + 19) + "}\n" +
 			"strictfp[KEYWORD]{strictfp, null, null, strictfp, null, " + (R_DEFAULT + 19) + "}\n" +
 			"synchronized[KEYWORD]{synchronized, null, null, synchronized, null, " + (R_DEFAULT + 19) + "}\n" +
-//{ObjectTeams:
-			"team[KEYWORD]{team, null, null, team, null, " + (R_DEFAULT + 19) + "}\n" +
-// SH}
 			"transient[KEYWORD]{transient, null, null, transient, null, " + (R_DEFAULT + 19) + "}\n" +
 			"volatile[KEYWORD]{volatile, null, null, volatile, null, " + (R_DEFAULT + 19) + "}\n" +
 			"I[TYPE_REF]{I, , LI;, null, null, " + (R_DEFAULT + 22) + "}\n" +
@@ -353,9 +347,6 @@ public void test009() throws JavaModelException {
 	assertResults(
 			"[POTENTIAL_METHOD_DECLARATION]{, LX;, ()V, , null, " + (R_DEFAULT + 9) + "}\n" +
 			"abstract[KEYWORD]{abstract, null, null, abstract, null, " + (R_DEFAULT + 19) + "}\n" +
-//{ObjectTeams:
-			"callin[KEYWORD]{callin, null, null, callin, null, " + (R_DEFAULT + 19) + "}\n" +
-// SH}
 			"class[KEYWORD]{class, null, null, class, null, " + (R_DEFAULT + 19) + "}\n" +
 			"enum[KEYWORD]{enum, null, null, enum, null, " + (R_DEFAULT + 19) + "}\n" +
 			"final[KEYWORD]{final, null, null, final, null, " + (R_DEFAULT + 19) + "}\n" +
@@ -367,9 +358,6 @@ public void test009() throws JavaModelException {
 			"static[KEYWORD]{static, null, null, static, null, " + (R_DEFAULT + 19) + "}\n" +
 			"strictfp[KEYWORD]{strictfp, null, null, strictfp, null, " + (R_DEFAULT + 19) + "}\n" +
 			"synchronized[KEYWORD]{synchronized, null, null, synchronized, null, " + (R_DEFAULT + 19) + "}\n" +
-//{ObjectTeams:
-			"team[KEYWORD]{team, null, null, team, null, " + (R_DEFAULT + 19) + "}\n" +
-// SH}
 			"transient[KEYWORD]{transient, null, null, transient, null, " + (R_DEFAULT + 19) + "}\n" +
 			"volatile[KEYWORD]{volatile, null, null, volatile, null, " + (R_DEFAULT + 19) + "}\n" +
 			"I[TYPE_REF]{I, , LI;, null, null, " + (R_DEFAULT + 22) + "}\n" +
@@ -3254,9 +3242,6 @@ public void testBug473654() throws Exception {
 	assertResults(
 			"[POTENTIAL_METHOD_DECLARATION]{, LObject;, ()V, , null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED)+"}\n" +
 			"abstract[KEYWORD]{abstract, null, null, abstract, null, "+keywordRelevance+"}\n" +
-//{ObjectTeams:
-			"callin[KEYWORD]{callin, null, null, callin, null, "+keywordRelevance+"}\n" +
-// SH}
 			"class[KEYWORD]{class, null, null, class, null, "+keywordRelevance+"}\n" +
 			"enum[KEYWORD]{enum, null, null, enum, null, "+keywordRelevance+"}\n" +
 			"final[KEYWORD]{final, null, null, final, null, "+keywordRelevance+"}\n" +
@@ -3307,9 +3292,6 @@ public void testBug537679() throws JavaModelException {
 	assertResults(
 			"[POTENTIAL_METHOD_DECLARATION]{, LObject;, ()V, , null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED)+"}\n" +
 			"abstract[KEYWORD]{abstract, null, null, abstract, null, "+keywordRelevance+"}\n" +
-//{ObjectTeams:
-			"callin[KEYWORD]{callin, null, null, callin, null, "+keywordRelevance+"}\n" +
-// SH}
 			"class[KEYWORD]{class, null, null, class, null, "+keywordRelevance+"}\n" +
 			"enum[KEYWORD]{enum, null, null, enum, null, "+keywordRelevance+"}\n" +
 			"final[KEYWORD]{final, null, null, final, null, "+keywordRelevance+"}\n" +
@@ -3321,9 +3303,6 @@ public void testBug537679() throws JavaModelException {
 			"static[KEYWORD]{static, null, null, static, null, "+keywordRelevance+"}\n" +
 			"strictfp[KEYWORD]{strictfp, null, null, strictfp, null, "+keywordRelevance+"}\n" +
 			"synchronized[KEYWORD]{synchronized, null, null, synchronized, null, "+keywordRelevance+"}\n" +
-//{ObjectTeams:
-			"team[KEYWORD]{team, null, null, team, null, "+keywordRelevance+"}\n" +
-// SH}
 			"transient[KEYWORD]{transient, null, null, transient, null, "+keywordRelevance+"}\n" +
 			"volatile[KEYWORD]{volatile, null, null, volatile, null, "+keywordRelevance+"}\n" +
 			"Test[TYPE_REF]{Test, p, Lp.Test;, null, null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED + R_CASE + R_UNQUALIFIED)+"}\n" +

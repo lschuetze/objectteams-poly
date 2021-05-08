@@ -2784,7 +2784,12 @@ public final class CompletionEngine
 
 		findTypesAndPackages(this.completionToken, scope, true, true, new ObjectVector());
 		if (!this.requestor.isIgnored(CompletionProposal.KEYWORD)) {
+//{ObjectTeams: argument added:
+/* orig:
 			findKeywordsForMember(this.completionToken, field.modifiers, astNode);
+  :giro*/
+			findKeywordsForMember(this.completionToken, field.modifiers, astNode, scope);
+// SH}
 		}
 
 		if (!field.isLocalVariable && field.modifiers == ClassFileConstants.AccDefault) {
@@ -3457,7 +3462,12 @@ public final class CompletionEngine
 		setSourceAndTokenRange(type.sourceStart, type.sourceEnd);
 		findTypesAndPackages(this.completionToken, scope.parent, true, true, new ObjectVector());
 		if (!this.requestor.isIgnored(CompletionProposal.KEYWORD)) {
+//{ObjectTeams: argument added:
+/* orig:
 			findKeywordsForMember(this.completionToken, method.modifiers, null);
+  :giro */
+			findKeywordsForMember(this.completionToken, method.modifiers, null, scope);
+// SH}
 		}
 
 		if (method.modifiers == ClassFileConstants.AccDefault) {
@@ -3970,7 +3980,12 @@ public final class CompletionEngine
 				else if ( astNodeParent instanceof InstanceOfExpression) {
 					// propose final keyword
 					if (!this.requestor.isIgnored(CompletionProposal.KEYWORD)) {
+//{ObjectTeams: argument added:
+/* orig:
 						findKeywordsForMember(this.completionToken, (~ClassFileConstants.AccFinal  & 0xFF), astNode);
+  :giro */
+						findKeywordsForMember(this.completionToken, (~ClassFileConstants.AccFinal  & 0xFF), astNode, scope);
+// SH}
 					}
 				}
 
@@ -9190,8 +9205,12 @@ public final class CompletionEngine
 		// add expected type else final keyword will be buried inside multiple Fin* classes
 		return this.parser.assistNodeParent instanceof InstanceOfExpression ? R_FINAL + R_EXPECTED_TYPE : 0;
 	}
-
+//{ObjectTeams: signature extended:
+/* orig:
 	private void findKeywordsForMember(char[] token, int modifiers, ASTNode astNode) {
+  :giro */
+	private void findKeywordsForMember(char[] token, int modifiers, ASTNode astNode, Scope scope) {
+// SH}
 		char[][] keywords = new char[Keywords.COUNT][];
 		int count = 0;
 
@@ -9273,7 +9292,10 @@ public final class CompletionEngine
 					keywords[count++] = Keywords.SYNCHRONIZED;
 				}
 //{ObjectTeams: OT specific modifier "callin"
-				if((modifiers & ExtraCompilerModifiers.AccCallin) == 0)	{
+				if((modifiers & ExtraCompilerModifiers.AccCallin) == 0
+						&& scope.enclosingReceiverType() != null
+						&& scope.enclosingReceiverType().isRole())
+				{
 				    keywords[count++] = Keywords.CALLIN;
 				}
 // gbr}
@@ -9281,7 +9303,10 @@ public final class CompletionEngine
 
 			if(canBeType) {
 //{ObjectTeams: OT specific modifier
-				if((modifiers & ExtraCompilerModifiers.AccTeam) == 0) {
+				if((modifiers & ExtraCompilerModifiers.AccTeam) == 0
+						&& scope.enclosingReceiverType() != null
+						&& scope.enclosingReceiverType().isTeam())
+				{
 				    keywords[count++] = Keywords.TEAM;
 				}
 //gbr}

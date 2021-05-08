@@ -102,6 +102,7 @@ import org.eclipse.objectteams.otdt.ui.tests.core.rule.ProjectTestSetup;
  */
 public class CodeCompletionTest {
 
+	private static final int KEYWORD_RELEVANCE = R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_NON_RESTRICTED;
 	private static final int CALLOUT_BASE_RELEVANCE = R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_METHOD_OVERIDE+R_NON_RESTRICTED;
 	private static final int INTERESTING_CALLIN_CALLOUT_PROPOSAL = CompletionAdaptor.R_METHOD_MAPPING * CALLOUT_BASE_RELEVANCE;
 	private static final int VERY_INTERESTING_CALLIN_CALLOUT_PROPOSAL = CompletionAdaptor.R_METHOD_MAPPING * (CALLOUT_BASE_RELEVANCE+R_EXPECTED_TYPE);
@@ -1355,6 +1356,54 @@ public class CodeCompletionTest {
 				"    String toString() <- after String check() base when(base.flig|); \n" +
 				"}\n",
 				0, false);
+	}
+
+	@Test
+	public void testCallinMethodModifier() throws Exception {
+		createBaseClass("    public void foo() {}\n");
+		assertTypeBodyProposal(
+				"	 	 |",
+				"callin",
+				"	 	 callin",
+				KEYWORD_RELEVANCE);
+	}
+
+	@Test
+	public void testTeamKeywordToplevel() throws Exception {
+		StringBuffer teamContent = new StringBuffer();
+		teamContent.append("package test1;\n");
+		teamContent.append("public  class MyTeam {\n");
+		teamContent.append("}");
+
+		StringBuffer expectedContent = new StringBuffer();
+		expectedContent.append("package test1;\n");
+		expectedContent.append("public team class MyTeam {\n");
+		expectedContent.append("}");
+
+		String completeAfter = "public ";
+		int pos = teamContent.indexOf(completeAfter)+completeAfter.length();
+
+		assertProposal("te", null, null, teamContent, new Region(pos, 0), expectedContent, new Region(pos+4, 0), 0);
+	}
+
+	@Test
+	public void testTeamKeywordNested() throws Exception {
+		StringBuffer teamContent = new StringBuffer();
+		teamContent.append("package test1;\n");
+		teamContent.append("public team class MyTeam {\n");
+		teamContent.append("	protected \n");
+		teamContent.append("}");
+
+		StringBuffer expectedContent = new StringBuffer();
+		expectedContent.append("package test1;\n");
+		expectedContent.append("public team class MyTeam {\n");
+		expectedContent.append("	protected team\n");
+		expectedContent.append("}");
+
+		String completeAfter = "protected ";
+		int pos = teamContent.indexOf(completeAfter)+completeAfter.length();
+
+		assertProposal("te", null, null, teamContent, new Region(pos, 0), expectedContent, new Region(pos+4, 0), 0);
 	}
 
 	@Test
