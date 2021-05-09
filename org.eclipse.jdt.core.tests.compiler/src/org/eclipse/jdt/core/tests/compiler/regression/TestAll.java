@@ -197,11 +197,11 @@ public static Test suite() {
 	 // add 14 specific test here (check duplicates)
 	 ArrayList since_14 = new ArrayList();
 	 since_14.add(SwitchExpressionsYieldTest.class);
-//{ObjectTeams: wrong in JDT
+/*{ObjectTeams: wrong in JDT
 	 since_14.add(RecordsRestrictedClassTest.class);
 	 since_14.add(PatternMatching16Test.class);
 	 since_14.add(JavadocTestForRecord.class);
-// SH}
+SH} */
 	 since_14.add(BatchCompilerTest_14.class);
 
 	 // add 15 specific test here (check duplicates)

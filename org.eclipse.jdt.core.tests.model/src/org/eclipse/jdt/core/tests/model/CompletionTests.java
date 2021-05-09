@@ -12915,9 +12915,6 @@ public void testCompletionMethodDeclaration5() throws JavaModelException {
 			assertResults(
 				"[POTENTIAL_METHOD_DECLARATION]{, LCompletionSuperClass;, ()V, , null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED)+"}\n" +
 				"abstract[KEYWORD]{abstract, null, null, abstract, null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED)+"}\n"+
-//{ObjectTeams: new keyword:
-				"callin[KEYWORD]{callin, null, null, callin, null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED)+"}\n" +
-// SH}
 				"class[KEYWORD]{class, null, null, class, null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED)+"}\n"+
 				"enum[KEYWORD]{enum, null, null, enum, null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED)+"}\n"+
 				"final[KEYWORD]{final, null, null, final, null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED)+"}\n"+
@@ -12929,9 +12926,6 @@ public void testCompletionMethodDeclaration5() throws JavaModelException {
 				"static[KEYWORD]{static, null, null, static, null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED)+"}\n"+
 				"strictfp[KEYWORD]{strictfp, null, null, strictfp, null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED)+"}\n"+
 				"synchronized[KEYWORD]{synchronized, null, null, synchronized, null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED)+"}\n"+
-//{ObjectTeams: new keyword:
-				"team[KEYWORD]{team, null, null, team, null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED)+"}\n" +
-// SH}
 				"transient[KEYWORD]{transient, null, null, transient, null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED)+"}\n"+
 				"volatile[KEYWORD]{volatile, null, null, volatile, null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED)+"}\n"+
 				"CompletionMethodDeclaration5[TYPE_REF]{CompletionMethodDeclaration5, , LCompletionMethodDeclaration5;, null, null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_UNQUALIFIED + R_NON_RESTRICTED)+"}\n"+

@@ -3253,7 +3253,6 @@ public void testBug473654() throws Exception {
 			"static[KEYWORD]{static, null, null, static, null, "+keywordRelevance+"}\n" +
 			"strictfp[KEYWORD]{strictfp, null, null, strictfp, null, "+keywordRelevance+"}\n" +
 			"synchronized[KEYWORD]{synchronized, null, null, synchronized, null, "+keywordRelevance+"}\n" +
-			"team[KEYWORD]{team, null, null, team, null, "+keywordRelevance+"}\n" +
 			"transient[KEYWORD]{transient, null, null, transient, null, "+keywordRelevance+"}\n" +
 			"volatile[KEYWORD]{volatile, null, null, volatile, null, "+keywordRelevance+"}\n" +
 			"Foo[TYPE_REF]{Foo, , LFoo;, null, null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED + R_CASE + R_UNQUALIFIED)+"}\n" +

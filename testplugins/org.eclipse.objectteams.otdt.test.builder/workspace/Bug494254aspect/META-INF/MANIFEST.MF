@@ -6,6 +6,6 @@ Bundle-Version: 1.0.0.qualifier
 Require-Bundle: org.eclipse.objectteams.otequinox,
  Bug494254base1;bundle-version="1.0.0"
 Automatic-Module-Name: Bug494254aspect
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: bug494254aspect

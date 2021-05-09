@@ -4,6 +4,6 @@ Bundle-Name: Base1_494254
 Bundle-SymbolicName: Bug494254base1
 Bundle-Version: 1.0.0.qualifier
 Automatic-Module-Name: Base1_494254
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: Bug494254base0;bundle-version="1.0.0";visibility:=reexport
 Export-Package: p1

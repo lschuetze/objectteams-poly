@@ -233,7 +233,7 @@ public void testCompletionBaseGuard2() throws JavaModelException {
 
 	assertResults(
 		"check[METHOD_REF]{check(), LCompletionBaseclass;, ()Z, check, null, "+
-		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_NON_STATIC+R_NON_RESTRICTED)+"}",
+		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_NON_STATIC+R_NON_RESTRICTED+R_EXACT_EXPECTED_TYPE)+"}",
 		requestor.getResults());
 }
 
