@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -633,4 +633,20 @@ public class CaptureBinding extends TypeVariableBinding {
 		}
 	}
 // SH}
+
+
+	@Override
+	public char[] signature() /* Ljava/lang/Object; */ {
+		if (this.signature != null)
+			return this.signature;
+
+		if (this.firstBound instanceof ArrayBinding) {
+			this.signature = constantPoolName();
+		} else {
+			this.signature = CharOperation.concat('L', constantPoolName(), ';');
+		}
+		return this.signature;
+
+	}
+
 }
