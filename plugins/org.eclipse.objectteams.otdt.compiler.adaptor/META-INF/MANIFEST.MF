@@ -9,7 +9,7 @@ Require-Bundle: org.eclipse.jdt.core;bundle-version="[3.20.0.OTDT_r276,4.0.0)",
  org.eclipse.objectteams.otequinox;bundle-version="[2.5.0,3.0.0)",
  org.eclipse.core.runtime;bundle-version="[3.7.0,4.0.0)",
  org.eclipse.core.resources;bundle-version="[3.7.100,4.0.0)",
- org.eclipse.pde.core;bundle-version="[3.7.0,4.0.0)",
+ org.eclipse.pde.core;bundle-version="[3.14.300,4.0.0)",
  org.eclipse.objectteams.otdt;bundle-version="[2.5.0,3.0.0)"
 Export-Package: org.eclipse.objectteams.otdt.internal.compiler.adaptor;x-friends:="org.eclipse.objectteams.otdt.test.builder,org.eclipse.core.resources,org.eclipse.jdt.core,org.eclipse.pde.core"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

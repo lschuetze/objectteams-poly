@@ -111,7 +111,7 @@ public team class PDEAdaptor
 			Rule[] additionalRules= new Rule[forcedExports.size()];
 			Iterator<String> exportIter= forcedExports.iterator();
 			for (int i = 0; i < additionalRules.length; i++) 
-				additionalRules[i]= new Rule(this, aspectBindingData, exportIter.next());
+				additionalRules[i]= new Rule(aspectBindingData, exportIter.next());
 			
 			// merge arrays:
 			int len1= regularRules.length, len2= additionalRules.length;
@@ -151,9 +151,9 @@ public team class PDEAdaptor
 		protected boolean isForcedExport;
 		
 		/** Ctor for force-exported packages (merely adapted packages instantiate via lifting ctor). */
-		protected Rule(RequiredPluginsClasspathContainer encl, AdaptedBaseBundle aspectBindingData, String packageName) 
+		protected Rule(AdaptedBaseBundle aspectBindingData, String packageName) 
 		{
-			encl.base();
+			base();
 			String pattern= packageName.replace('.', '/')+"/*"; //$NON-NLS-1$
 			setPath(new Path(pattern));
 			this.aspectBindingData= aspectBindingData;
