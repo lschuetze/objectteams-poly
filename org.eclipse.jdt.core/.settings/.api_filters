@@ -241,15 +241,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="dom/org/eclipse/jdt/core/dom/AST.java" type="org.eclipse.jdt.core.dom.AST">
-        <filter comment="This should have the latest value" id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.AST"/>
-                <message_argument value="JLS_Latest"/>
-                <message_argument value="15"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="compiler/org/eclipse/objectteams/otdt/core/compiler/IOTConstants.java" type="org.eclipse.objectteams.otdt.core.compiler.IOTConstants">
         <filter comment="cleanup constants to avoid near-term conflict with JDT" id="388194388">
             <message_arguments>
@@ -311,117 +302,126 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="dom/org/eclipse/jdt/core/dom/AST.java" type="org.eclipse.jdt.core.dom.AST">
+        <filter comment="This should have the latest value" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.AST"/>
+                <message_argument value="JLS_Latest"/>
+                <message_argument value="15"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="dom/org/eclipse/jdt/core/dom/ASTNode.java" type="org.eclipse.jdt.core.dom.ASTNode">
         <filter comment="necessary constant change after new constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
                 <message_argument value="BASE_CALL_MESSAGE_SEND"/>
-                <message_argument value="110"/>
-            </message_arguments>
-        </filter>
-        <filter comment="necessary constant change after new constants in JDT" id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="BASE_CONSTRUCTOR_INVOCATION"/>
-                <message_argument value="108"/>
-            </message_arguments>
-        </filter>
-        <filter comment="necessary constant change after new constants in JDT" id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="CALLIN_MAPPING_DECLARATION"/>
-                <message_argument value="104"/>
-            </message_arguments>
-        </filter>
-        <filter comment="necessary constant change after new constants in JDT" id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="CALLOUT_MAPPING_DECLARATION"/>
-                <message_argument value="105"/>
-            </message_arguments>
-        </filter>
-        <filter comment="necessary constant change after new constants in JDT" id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="FIELD_ACCESS_SPEC"/>
                 <message_argument value="111"/>
             </message_arguments>
         </filter>
         <filter comment="necessary constant change after new constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="GUARD_PREDICATE_DECLARATION"/>
-                <message_argument value="117"/>
-            </message_arguments>
-        </filter>
-        <filter comment="necessary constant change after new constants in JDT" id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="LIFTING_TYPE"/>
-                <message_argument value="106"/>
-            </message_arguments>
-        </filter>
-        <filter comment="necessary constant change after new constants in JDT" id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="METHOD_BINDING_OPERATOR"/>
-                <message_argument value="118"/>
-            </message_arguments>
-        </filter>
-        <filter comment="necessary constant change after new constants in JDT" id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="METHOD_SPEC"/>
-                <message_argument value="103"/>
-            </message_arguments>
-        </filter>
-        <filter comment="necessary constant change after new constants in JDT" id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="PARAMETER_MAPPING"/>
+                <message_argument value="BASE_CONSTRUCTOR_INVOCATION"/>
                 <message_argument value="109"/>
             </message_arguments>
         </filter>
         <filter comment="necessary constant change after new constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="PRECEDENCE_DECLARATION"/>
-                <message_argument value="116"/>
+                <message_argument value="CALLIN_MAPPING_DECLARATION"/>
+                <message_argument value="105"/>
             </message_arguments>
         </filter>
         <filter comment="necessary constant change after new constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="ROLE_TYPE_DECLARATION"/>
+                <message_argument value="CALLOUT_MAPPING_DECLARATION"/>
+                <message_argument value="106"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary constant change after new constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="FIELD_ACCESS_SPEC"/>
                 <message_argument value="112"/>
             </message_arguments>
         </filter>
         <filter comment="necessary constant change after new constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="TSUPER_CONSTRUCTOR_INVOCATION"/>
-                <message_argument value="114"/>
+                <message_argument value="GUARD_PREDICATE_DECLARATION"/>
+                <message_argument value="118"/>
             </message_arguments>
         </filter>
         <filter comment="necessary constant change after new constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="TSUPER_MESSAGE_SEND"/>
+                <message_argument value="LIFTING_TYPE"/>
+                <message_argument value="107"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary constant change after new constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="METHOD_BINDING_OPERATOR"/>
+                <message_argument value="119"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary constant change after new constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="METHOD_SPEC"/>
+                <message_argument value="104"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary constant change after new constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="PARAMETER_MAPPING"/>
+                <message_argument value="110"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary constant change after new constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="PRECEDENCE_DECLARATION"/>
+                <message_argument value="117"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary constant change after new constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="ROLE_TYPE_DECLARATION"/>
                 <message_argument value="113"/>
             </message_arguments>
         </filter>
         <filter comment="necessary constant change after new constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="TYPE_ANCHOR"/>
+                <message_argument value="TSUPER_CONSTRUCTOR_INVOCATION"/>
                 <message_argument value="115"/>
             </message_arguments>
         </filter>
         <filter comment="necessary constant change after new constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="TSUPER_MESSAGE_SEND"/>
+                <message_argument value="114"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary constant change after new constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="TYPE_ANCHOR"/>
+                <message_argument value="116"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary constant change after new constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
                 <message_argument value="WITHIN_STATEMENT"/>
-                <message_argument value="107"/>
+                <message_argument value="108"/>
             </message_arguments>
         </filter>
     </resource>
@@ -702,6 +702,14 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="formatter/org/eclipse/jdt/core/formatter/CodeFormatter.java" type="org.eclipse.jdt.core.formatter.CodeFormatter">
+        <filter comment="Not updating to 4.0" id="336658481">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.formatter.CodeFormatter"/>
+                <message_argument value="K_RECORD_BODY_DECLARATIONS"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="model/org/eclipse/jdt/core/Flags.java" type="org.eclipse.jdt.core.Flags">
         <filter comment="Must yield to new AccRecord." id="388194388">
             <message_arguments>
@@ -715,14 +723,6 @@
                 <message_argument value="org.eclipse.jdt.core.Flags"/>
                 <message_argument value="AccTeam"/>
                 <message_argument value="67108864"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="formatter/org/eclipse/jdt/core/formatter/CodeFormatter.java" type="org.eclipse.jdt.core.formatter.CodeFormatter">
-        <filter comment="Not updating to 4.0" id="336658481">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.formatter.CodeFormatter"/>
-                <message_argument value="K_RECORD_BODY_DECLARATIONS"/>
             </message_arguments>
         </filter>
     </resource>
