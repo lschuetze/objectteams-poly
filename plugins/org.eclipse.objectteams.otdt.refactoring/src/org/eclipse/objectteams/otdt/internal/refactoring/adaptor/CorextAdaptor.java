@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
+import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.internal.refactoring.adaptor.extractmethod.ExtractMethodAmbuguityMsgCreator;
 import org.eclipse.objectteams.otdt.internal.refactoring.adaptor.extractmethod.ExtractMethodOverloadingMsgCreator;
 import org.eclipse.objectteams.otdt.internal.refactoring.corext.OTRefactoringCoreMessages;
@@ -213,7 +214,7 @@ public team class CorextAdaptor
 		{
 			if (considerVisibility & javaElement instanceof IMember) {
 				IMember member= (IMember) javaElement;
-				if (JdtFlags.isPrivate(member)) {
+				if (JdtFlags.isPrivate(member) && OTModelManager.belongsToRole(member)) {
 					int includeMask = IJavaSearchScope.REFERENCED_PROJECTS | IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES;					
 					((JavaSearchScope)scope).add((JavaProject)javaElement.getJavaProject(), includeMask, new HashSet<IProject>());
 				}
