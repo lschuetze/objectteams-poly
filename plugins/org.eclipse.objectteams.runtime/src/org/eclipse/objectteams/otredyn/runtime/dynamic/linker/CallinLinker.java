@@ -3,13 +3,16 @@ package org.eclipse.objectteams.otredyn.runtime.dynamic.linker;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.Arrays;
 
 import org.eclipse.objectteams.otredyn.runtime.IBinding;
+import org.eclipse.objectteams.otredyn.runtime.dynamic.linker.util.ObjectTeamsGuardUtility;
 import org.eclipse.objectteams.otredyn.runtime.dynamic.linker.util.ObjectTeamsTypeUtilities;
 import org.objectteams.IBoundBase2;
 import org.objectteams.ITeam;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
+import org.objectteams.Team;
 
 import jdk.dynalink.CallSiteDescriptor;
 import jdk.dynalink.linker.GuardedInvocation;
@@ -128,54 +131,56 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 //		logger.debug("========== BEGIN getGuardedInvocation ==========");
 		final String joinpointDesc = desc.getJoinpointDesc();
 		MethodHandle beforeComposition = null, replace = null, afterComposition = null;
-		MethodHandle guard;
 		final Object[] stack = request.getArguments();
 		final Class<?> baseClass = stack[0].getClass();
 		final ITeam[] teams = (ITeam[]) stack[1];
 		final int startingIndex = (int) stack[2];
 		int index = startingIndex;
 		final int[] callinIds = (int[]) stack[3];
-		if (teams != null) {
-			boolean stopSearch = false;
-			if (desc.isCallNext()) {
-				index++;
-			}
-			while (!stopSearch && index < teams.length) {
-				final ITeam team = teams[index];
-				final int callinId = callinIds[index];
-				final IBinding binding = ObjectTeamsTypeUtilities.getBindingFromId(joinpointDesc, team, callinId);
-				int relativeIndex = index - startingIndex;
-				final MethodHandle incrementor = MethodHandles.insertArguments(INCREMENT, 0, relativeIndex);
-				switch (binding.getCallinModifier()) {
-					case BEFORE:
-						final MethodHandle handleBefore = MethodHandles.filterArguments(
-								handleBeforeAndAfter(desc, team, binding), 2, incrementor);
-						beforeComposition = beforeComposition == null ? handleBefore
-								: MethodHandles.foldArguments(handleBefore, beforeComposition);
-						index++;
-						break;
-					case AFTER:
-						final MethodHandle handleAfter = MethodHandles.filterArguments(
-								handleBeforeAndAfter(desc, team, binding), 2, incrementor);
-						afterComposition = afterComposition == null ? handleAfter
-								: MethodHandles.foldArguments(afterComposition, handleAfter);
-						index++;
-						break;
-					case REPLACE:
-						replace = MethodHandles.filterArguments(handleReplace(desc, team, binding), 2, incrementor);
-						stopSearch = true;
-						break;
-				}
-			}
-			final int testStackLength = teams.length - startingIndex;
-			Class<?>[] testStack = new Class<?>[testStackLength];
-			for (int j = 0, i = startingIndex; i < teams.length; i++, j++) {
-				testStack[j] = teams[i].getClass();
-			}
-			guard = OTGuards.TEST_TEAM_COMPOSITION.bindTo(testStack);
-		} else {
-			guard = Guards.isNull();
+		
+		if(teams == null) {
+			MethodHandle guard = Guards.isNull();
+			guard = MethodHandles.dropArguments(guard, 0, IBoundBase2.class);
+			return new GuardedInvocation(handleOrig(desc, baseClass), guard);
 		}
+		
+		if(desc.isCallNext()) {
+			index++;
+		}
+		
+		boolean stopSearch = false;
+		while (!stopSearch && index < teams.length) {
+			final ITeam team = teams[index];
+			final int callinId = callinIds[index];
+			int relativeIndex = index - startingIndex;
+			final IBinding binding = ObjectTeamsTypeUtilities.getBindingFromId(joinpointDesc, team, callinId);
+			final MethodHandle incrementor = MethodHandles.insertArguments(INCREMENT, 0, relativeIndex);
+			switch (binding.getCallinModifier()) {
+				case BEFORE:
+					final MethodHandle handleBefore = MethodHandles.filterArguments(
+							handleBeforeAndAfter(desc, team, binding), 2, incrementor);
+					beforeComposition = beforeComposition == null ? handleBefore
+							: MethodHandles.foldArguments(handleBefore, beforeComposition);
+					index++;
+					break;
+				case AFTER:
+					final MethodHandle handleAfter = MethodHandles.filterArguments(
+							handleBeforeAndAfter(desc, team, binding), 2, incrementor);
+					afterComposition = afterComposition == null ? handleAfter
+							: MethodHandles.foldArguments(afterComposition, handleAfter);
+					index++;
+					break;
+				case REPLACE:
+					replace = MethodHandles.filterArguments(handleReplace(desc, team, binding), 2, incrementor);
+					stopSearch = true;
+					break;
+			}
+		}
+		
+		Class<?>[] testStack = ObjectTeamsGuardUtility.guardTestStack(teams, index, startingIndex);
+		MethodHandle guard = OTGuards.buildGuard(testStack);
+		guard = MethodHandles.dropArguments(guard, 0, IBoundBase2.class);
+		
 		MethodHandle result = (replace == null) ? handleOrig(desc, baseClass) : replace;
 		if (afterComposition != null) {
 			final MethodHandle returnWrapper = MethodHandles.identity(Object.class);
@@ -186,7 +191,6 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		if (beforeComposition != null) {
 			result = MethodHandles.foldArguments(result, beforeComposition);
 		}
-		guard = MethodHandles.dropArguments(guard, 0, IBoundBase2.class);
 //		logger.debug("========== END getGuardedInvocation ==========");
 		return new GuardedInvocation(result, guard);
 	}
@@ -206,7 +210,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 //		logger.debug("========== END handleOrig ==========");
 		return result;
 	}
-
+	
 	private static MethodHandle handleReplace(final OTCallSiteDescriptor desc, final ITeam team, final IBinding binding) {
 //		logger.debug("========== BEGIN handleReplace ==========");
 		final Class<?> base = ObjectTeamsTypeUtilities.getBaseClass(binding.getBoundClass());

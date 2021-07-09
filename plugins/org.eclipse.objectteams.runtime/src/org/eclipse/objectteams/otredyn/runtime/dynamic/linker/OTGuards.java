@@ -15,15 +15,19 @@ public class OTGuards {
 
 	@SuppressWarnings("unused")
 	private static boolean testTeamComposition(final Class<ITeam>[] testStack, final ITeam[] stack, final int index) {
-		if (stack == null || testStack.length != stack.length - index) {
+		if (stack == null || testStack.length < stack.length + index) {
 			return false;
 		}
-		for (int i = 0, j = index; i < testStack.length; i++, j++) {
+		for (int i = 0; i < testStack.length; i++) {
+			int j = i + index;
 			if (!testStack[i].isAssignableFrom(stack[j].getClass())) {
 				return false;
 			}
 		}
-
 		return true;
+	}
+	
+	public static MethodHandle buildGuard(Class<?>[] testStack) {
+		return TEST_TEAM_COMPOSITION.bindTo(testStack);
 	}
 }
