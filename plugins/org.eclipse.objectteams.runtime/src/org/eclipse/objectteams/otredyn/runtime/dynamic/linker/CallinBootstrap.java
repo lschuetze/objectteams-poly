@@ -19,7 +19,7 @@ public final class CallinBootstrap {
 
 	static {
 		final String threshold = System.getProperty("otdyn.urt");
-		unstableRelinkThreshold = (threshold == null) ? 4 : Integer.parseInt(threshold);
+		unstableRelinkThreshold = (threshold == null) ? 8 : Integer.parseInt(threshold);
 		prioritizedLinkers = new CallinLinker();
 	}
 

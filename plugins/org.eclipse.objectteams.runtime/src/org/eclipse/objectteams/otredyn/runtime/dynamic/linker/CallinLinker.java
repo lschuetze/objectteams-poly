@@ -180,7 +180,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		Class<?>[] testStack = ObjectTeamsGuardUtility.guardTestStack(teams, index, startingIndex);
 		MethodHandle guard = OTGuards.buildGuard(testStack);
 		guard = MethodHandles.dropArguments(guard, 0, IBoundBase2.class);
-		
+		 
 		MethodHandle result = (replace == null) ? handleOrig(desc, baseClass) : replace;
 		if (afterComposition != null) {
 			final MethodHandle returnWrapper = MethodHandles.identity(Object.class);

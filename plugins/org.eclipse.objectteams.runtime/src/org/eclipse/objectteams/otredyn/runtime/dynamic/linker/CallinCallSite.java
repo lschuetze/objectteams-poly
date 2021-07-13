@@ -12,7 +12,7 @@ public final class CallinCallSite extends ChainedCallSite {
 
 	static {
 		final String chainLength = System.getProperty("otdyn.mcl");
-		maxChainLength = (chainLength == null) ? 8 : Integer.parseInt(chainLength);
+		maxChainLength = (chainLength == null) ? 4 : Integer.parseInt(chainLength);
 	}
 
 	CallinCallSite(CallSiteDescriptor descriptor) {
