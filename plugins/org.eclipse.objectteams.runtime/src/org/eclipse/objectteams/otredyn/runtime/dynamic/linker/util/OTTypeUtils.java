@@ -9,7 +9,7 @@ import org.eclipse.objectteams.otredyn.runtime.IBinding;
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.objectteams.ITeam;
 
-public final class ObjectTeamsTypeUtilities {
+public final class OTTypeUtils {
 
 	private static final MethodType CallOrigType = MethodType.methodType(Object.class, int.class, Object[].class);
 
