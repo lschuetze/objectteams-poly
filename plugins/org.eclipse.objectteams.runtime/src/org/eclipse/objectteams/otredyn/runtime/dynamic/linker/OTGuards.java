@@ -36,6 +36,11 @@ public class OTGuards {
 				return false;
 			}
 		}
+		// We have captured a stack of [] which means we will call the base method.
+		// This is just okay if the runtime stack is also completely run through.
+		if(guardedStack.length == 0) {
+			return runtimeStack.length == index + 1;
+		}
 		return true;
 	}
 	

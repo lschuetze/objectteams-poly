@@ -172,7 +172,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 					final MethodHandle handleAfter = MethodHandles.filterArguments(
 							handleBeforeAndAfter(desc, team, binding, indexIncrement), 2, OTLinkerUtils.incrementInt(indexIncrement));
 					afterComposition = afterComposition == null ? handleAfter
-							: MethodHandles.foldArguments(afterComposition, handleAfter);
+							: MethodHandles.foldArguments(afterComposition, handleAfter);	
 					break;
 				case REPLACE:
 					replace = MethodHandles.filterArguments(
@@ -190,7 +190,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		
 		// Check if we are in a callNext then the index must also be increased
 		// When checking the guard. Otherwise we will check the old index.
-		if(desc.isCallNext()) {
+		if(desc.isCallNext() && guardedStack.length > 0) {
 			guard = MethodHandles.filterArguments(guard, 2, OTLinkerUtils.incrementInt(1));
 		}
 		 
