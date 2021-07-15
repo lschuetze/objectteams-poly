@@ -6,8 +6,9 @@ import java.lang.invoke.MethodType;
 import java.util.Arrays;
 
 import org.eclipse.objectteams.otredyn.runtime.IBinding;
-import org.eclipse.objectteams.otredyn.runtime.dynamic.linker.util.ObjectTeamsGuardUtility;
-import org.eclipse.objectteams.otredyn.runtime.dynamic.linker.util.ObjectTeamsTypeUtilities;
+import org.eclipse.objectteams.otredyn.runtime.dynamic.linker.util.OTGuardUtils;
+import org.eclipse.objectteams.otredyn.runtime.dynamic.linker.util.OTLinkerUtils;
+import org.eclipse.objectteams.otredyn.runtime.dynamic.linker.util.OTTypeUtils;
 import org.objectteams.IBoundBase2;
 import org.objectteams.ITeam;
 //import org.slf4j.Logger;
@@ -27,8 +28,6 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 //	private static Logger logger = LoggerFactory.getLogger(CallinLinker.class);
 	private static final boolean NO_DEG = System.getProperty("otdyn.nodeg") != null;
 
-	private static final MethodHandle INCREMENT = Lookup.PUBLIC.findStatic(Math.class, "addExact",
-			MethodType.methodType(int.class, int.class, int.class));
 	private static final MethodHandle CALLORIG = Lookup.PUBLIC.findVirtual(IBoundBase2.class, "_OT$callOrig",
 			MethodType.methodType(Object.class, int.class, Object[].class));
 	private static final MethodHandle OT_CALL_ALL_BINDINGS = getOriginalDispatch(true);
@@ -74,14 +73,14 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 			final IBinding binding, final Class<?> baseClass) {
 		// Retrieve the lifting method for the current binding
 		final String liftingMethod = "_OT$liftTo$" + binding.getRoleClassName();
-		final MethodHandle lift = ObjectTeamsTypeUtilities.findVirtual(lookup, team.getClass(), liftingMethod,
+		final MethodHandle lift = OTTypeUtils.findVirtual(lookup, team.getClass(), liftingMethod,
 				MethodType.methodType(
-						ObjectTeamsTypeUtilities.getRoleItfType(team.getClass(), binding.getRoleClassName()),
+						OTTypeUtils.getRoleItfType(team.getClass(), binding.getRoleClassName()),
 						baseClass));
 
 		// Lifting works on interfaces; cast the return type to the implementation type
 		final MethodHandle adaptedLift = lift.asType(MethodType.methodType(
-				ObjectTeamsTypeUtilities.getRoleImplType(team.getClass(), binding.getRoleClassName()), team.getClass(),
+				OTTypeUtils.getRoleImplType(team.getClass(), binding.getRoleClassName()), team.getClass(),
 				baseClass));
 
 		return adaptedLift;
@@ -89,7 +88,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 
 	private static MethodHandle findRoleMethod(final MethodHandles.Lookup lookup, final String joinpointDesc,
 			final ITeam team, final IBinding binding) {
-		final Class<?> roleClass = ObjectTeamsTypeUtilities.getRoleImplType(team.getClass(),
+		final Class<?> roleClass = OTTypeUtils.getRoleImplType(team.getClass(),
 				binding.getRoleClassName());
 		final MethodType mt = MethodType.fromMethodDescriptorString(binding.getRoleMethodSignature(),
 				roleClass.getClassLoader());
@@ -134,8 +133,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		final Object[] stack = request.getArguments();
 		final Class<?> baseClass = stack[0].getClass();
 		final ITeam[] teams = (ITeam[]) stack[1];
-		final int startingIndex = (int) stack[2];
-		int index = startingIndex;
+		final int startingIndex;
 		final int[] callinIds = (int[]) stack[3];
 		
 		if(teams == null) {
@@ -144,42 +142,57 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 			return new GuardedInvocation(handleOrig(desc, baseClass), guard);
 		}
 		
-		if(desc.isCallNext()) {
-			index++;
-		}
-		
+		int indexIncrement;
 		boolean stopSearch = false;
+		// If we are in a callNext the index must be increased by 1
+		// as it still points to the last team.
+		// The startingIndex is used to create the guard and must also
+		// be incremented by 1.
+		if(desc.isCallNext()) {
+			indexIncrement = 1;
+			startingIndex = (int) stack[2] + 1;
+		} else {
+			indexIncrement = 0;
+			startingIndex = (int) stack[2];
+		}
+		int index = startingIndex;
+		
 		while (!stopSearch && index < teams.length) {
 			final ITeam team = teams[index];
 			final int callinId = callinIds[index];
-			int relativeIndex = index - startingIndex;
-			final IBinding binding = ObjectTeamsTypeUtilities.getBindingFromId(joinpointDesc, team, callinId);
-			final MethodHandle incrementor = MethodHandles.insertArguments(INCREMENT, 0, relativeIndex);
+			final IBinding binding = OTTypeUtils.getBindingFromId(joinpointDesc, team, callinId);
 			switch (binding.getCallinModifier()) {
 				case BEFORE:
 					final MethodHandle handleBefore = MethodHandles.filterArguments(
-							handleBeforeAndAfter(desc, team, binding), 2, incrementor);
+							handleBeforeAndAfter(desc, team, binding, indexIncrement), 2, OTLinkerUtils.incrementInt(indexIncrement));
 					beforeComposition = beforeComposition == null ? handleBefore
 							: MethodHandles.foldArguments(handleBefore, beforeComposition);
-					index++;
 					break;
 				case AFTER:
 					final MethodHandle handleAfter = MethodHandles.filterArguments(
-							handleBeforeAndAfter(desc, team, binding), 2, incrementor);
+							handleBeforeAndAfter(desc, team, binding, indexIncrement), 2, OTLinkerUtils.incrementInt(indexIncrement));
 					afterComposition = afterComposition == null ? handleAfter
 							: MethodHandles.foldArguments(afterComposition, handleAfter);
-					index++;
 					break;
 				case REPLACE:
-					replace = MethodHandles.filterArguments(handleReplace(desc, team, binding), 2, incrementor);
+					replace = MethodHandles.filterArguments(
+							handleReplace(desc, team, binding, indexIncrement), 2, OTLinkerUtils.incrementInt(indexIncrement));
 					stopSearch = true;
 					break;
 			}
+			indexIncrement++;
+			index++;
 		}
 		
-		Class<?>[] testStack = ObjectTeamsGuardUtility.guardTestStack(teams, index, startingIndex);
-		MethodHandle guard = OTGuards.buildGuard(testStack);
+		Class<?>[] guardedStack = OTGuardUtils.constructTestStack(teams, startingIndex, index);
+		MethodHandle guard = OTGuards.buildGuard(guardedStack);
 		guard = MethodHandles.dropArguments(guard, 0, IBoundBase2.class);
+		
+		// Check if we are in a callNext then the index must also be increased
+		// When checking the guard. Otherwise we will check the old index.
+		if(desc.isCallNext()) {
+			guard = MethodHandles.filterArguments(guard, 2, OTLinkerUtils.incrementInt(1));
+		}
 		 
 		MethodHandle result = (replace == null) ? handleOrig(desc, baseClass) : replace;
 		if (afterComposition != null) {
@@ -197,7 +210,7 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 
 	private static MethodHandle handleOrig(OTCallSiteDescriptor desc, Class<?> baseClass) {
 //		logger.debug("========== BEGIN handleOrig ==========");
-		final MethodHandle orig = ObjectTeamsTypeUtilities.findOrig(desc.getLookup(), baseClass);
+		final MethodHandle orig = OTTypeUtils.findOrig(desc.getLookup(), baseClass);
 //		logger.trace("orig \t\t{}", orig.toString());
 		MethodHandle result = MethodHandles.dropArguments(orig, 1, ITeam[].class, int.class, int[].class);
 //		logger.trace("result \t\t{}", result.toString());
@@ -211,9 +224,12 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		return result;
 	}
 	
-	private static MethodHandle handleReplace(final OTCallSiteDescriptor desc, final ITeam team, final IBinding binding) {
+	private static final int[] REORDER_CALLALLBINDINGS = new int[] { 0, 1, 0, 2, 3, 4, 5, 6, 6 };
+	private static final int[] REORDER_CALLNEXT = new int[] { 0, 1, 0, 2, 3, 4, 5, 7, 7 };
+	
+	private static MethodHandle handleReplace(final OTCallSiteDescriptor desc, final ITeam team, final IBinding binding, final int indexIncrement) {
 //		logger.debug("========== BEGIN handleReplace ==========");
-		final Class<?> base = ObjectTeamsTypeUtilities.getBaseClass(binding.getBoundClass());
+		final Class<?> base = OTTypeUtils.getBaseClass(binding.getBoundClass());
 		// MethodHandle(__OT__Role,IBoundBase2,ITeam[],int,int[],int,Object[],args*)Object
 		final MethodHandle rm = findRoleMethod(desc.getLookup(), desc.getJoinpointDesc(), team, binding);
 //		logger.trace("role function \t\t{}", rm.toString());
@@ -246,11 +262,11 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 //		logger.trace("expanded \t\t{}", expanded.toString());
 		MethodType doubleBaseAndArgsType = MethodType.methodType(Object.class, base, team.getClass(), ITeam[].class,
 				int.class, int[].class, int.class, Object[].class);
-		int[] reorder;
+		final int[] reorder;
 		if (desc.isCallAllBindings()) {
-			reorder = new int[] { 0, 1, 0, 2, 3, 4, 5, 6, 6 };
+			reorder = REORDER_CALLALLBINDINGS;
 		} else {
-			reorder = new int[] { 0, 1, 0, 2, 3, 4, 5, 7, 7 };
+			reorder = REORDER_CALLNEXT;
 			doubleBaseAndArgsType = doubleBaseAndArgsType.appendParameterTypes(Object[].class, int.class);
 		}
 		// MethodHandle(Base,Team,ITeam[],int,int[],int,Object[])Object
@@ -265,9 +281,9 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		return unpackedTeams;
 	}
 
-	private static MethodHandle handleBeforeAndAfter(final OTCallSiteDescriptor desc, final ITeam team, final IBinding binding) {
+	private static MethodHandle handleBeforeAndAfter(final OTCallSiteDescriptor desc, final ITeam team, final IBinding binding, final int relativeIndex) {
 //		logger.debug("========== BEGIN handleBefore ==========");
-		final Class<?> base = ObjectTeamsTypeUtilities.getBaseClass(binding.getBoundClass());
+		final Class<?> base = OTTypeUtils.getBaseClass(binding.getBoundClass());
 		final MethodHandle rm = findRoleMethod(desc.getLookup(), desc.getJoinpointDesc(), team, binding);
 		final boolean multipleArguments = rm.type().parameterCount() > 1;
 //		logger.trace("role function \t\t{}", rm.toString());
