@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.eclipse.jdt.core.tests.compiler.parser.ComplianceDiagnoseTest;
+import org.eclipse.jdt.core.tests.compiler.regression.SwitchExpressionsYieldTest;
 import org.eclipse.jdt.core.tests.dom.ASTConverter14Test;
 import org.eclipse.jdt.core.tests.dom.ConverterTestSetup;
 import org.eclipse.jdt.core.tests.model.JavaSearchBugs13Tests;
@@ -37,7 +38,7 @@ public class RunAllJava13Tests extends TestCase {
 		return new Class[] {
 			JavaSearchBugs13Tests.class,
 			ComplianceDiagnoseTest.class,
-//			SwitchExpressionsYieldTest.class, //JDT bug: duplicate suite
+			SwitchExpressionsYieldTest.class,
 //			org.eclipse.jdt.compiler.apt.tests.AllTests.class,
 		};
 	}
