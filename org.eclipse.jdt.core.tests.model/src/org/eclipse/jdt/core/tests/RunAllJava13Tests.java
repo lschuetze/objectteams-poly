@@ -38,7 +38,7 @@ public class RunAllJava13Tests extends TestCase {
 			JavaSearchBugs13Tests.class,
 			ComplianceDiagnoseTest.class,
 //			SwitchExpressionsYieldTest.class, //JDT bug: duplicate suite
-			org.eclipse.jdt.compiler.apt.tests.AllTests.class,
+//			org.eclipse.jdt.compiler.apt.tests.AllTests.class,
 		};
 	}
 
