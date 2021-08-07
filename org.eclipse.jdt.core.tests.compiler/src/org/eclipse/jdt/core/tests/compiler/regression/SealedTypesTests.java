@@ -31,7 +31,7 @@ public class SealedTypesTests extends AbstractRegressionTest9 {
 	static {
 //		TESTS_NUMBERS = new int [] { 40 };
 //		TESTS_RANGE = new int[] { 1, -1 };
-		TESTS_NAMES = new String[] { "testBug573450"};
+//		TESTS_NAMES = new String[] { "testBug573450"};
 	}
 
 	public static Class<?> testClass() {
@@ -616,7 +616,7 @@ public class SealedTypesTests extends AbstractRegressionTest9 {
 			"1. ERROR in p2\\Y.java (at line 2)\n" +
 			"	public final class Y extends p1.X{}\n" +
 			"	                             ^^^^\n" +
-			"The type Y extending a sealed class X should be a permitted subtype of X\n" +
+			"Sealed type X and sub type Y in an unnamed module should be declared in the same package p1\n" +
 			"----------\n");
 	}
 	public void testBug563806_011() {
@@ -650,7 +650,7 @@ public class SealedTypesTests extends AbstractRegressionTest9 {
 			"1. ERROR in p2\\Y.java (at line 2)\n" +
 			"	public final class Y implements p1.X{}\n" +
 			"	                                ^^^^\n" +
-			"The type Y that implements a sealed interface X should be a permitted subtype of X\n" +
+			"Sealed type X and sub type Y in an unnamed module should be declared in the same package p1\n" +
 			"----------\n");
 	}
 	public void testBug563806_013() {
@@ -695,7 +695,7 @@ public class SealedTypesTests extends AbstractRegressionTest9 {
 			"2. ERROR in p2\\Y.java (at line 2)\n" +
 			"	public interface Y extends p1.X{}\n" +
 			"	                           ^^^^\n" +
-			"The type Y that extends a sealed interface X should be a permitted subtype of X\n" +
+			"Sealed type X and sub type Y in an unnamed module should be declared in the same package p1\n" +
 			"----------\n");
 	}
 	public void testBug563806_015() {

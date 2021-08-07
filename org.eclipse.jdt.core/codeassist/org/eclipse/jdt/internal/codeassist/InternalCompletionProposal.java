@@ -532,7 +532,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 
 				if(this.parameterNames != null) {
 					int length = this.parameterNames.length;
-					StringBuffer completionBuffer = new StringBuffer(this.completion.length);
+					StringBuilder completionBuffer = new StringBuilder(this.completion.length);
 
 					int start = 0;
 					int end = CharOperation.indexOf('%', this.completion);
@@ -1068,7 +1068,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 
 	@Override
 	public String toString() {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		buffer.append('[');
 		switch(this.completionKind) {
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION :

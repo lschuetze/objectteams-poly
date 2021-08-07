@@ -390,7 +390,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 
 	@Override
 	public char[] computeUniqueKey(boolean isLeaf) {
-	    StringBuffer sig = new StringBuffer(10);
+	    StringBuilder sig = new StringBuilder(10);
 	    ReferenceBinding enclosing;
 		if (isMemberType() && ((enclosing = enclosingType()).isParameterizedType() || enclosing.isRawType())) {
 		    char[] typeSig = enclosing.computeUniqueKey(false/*not a leaf*/);
@@ -457,7 +457,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	public String debugName() {
 	    if (this.hasTypeAnnotations())
 	    	return annotatedDebugName();
-		StringBuffer nameBuffer = new StringBuffer(10);
+		StringBuilder nameBuffer = new StringBuilder(10);
 	    if (this.type instanceof UnresolvedReferenceBinding) {
 	    	nameBuffer.append(this.type);
 	    } else {
@@ -476,7 +476,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 
 	@Override
 	public String annotatedDebugName() {
-		StringBuffer nameBuffer = new StringBuffer(super.annotatedDebugName());
+		StringBuilder nameBuffer = new StringBuilder(super.annotatedDebugName());
 		if (this.arguments != null && this.arguments.length > 0) {
 			nameBuffer.append('<');
 			for (int i = 0, length = this.arguments.length; i < length; i++) {
@@ -676,7 +676,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 			if ((this.modifiers & ExtraCompilerModifiers.AccGenericSignature) == 0) {
 		    	this.genericTypeSignature = this.type.signature();
 			} else {
-			    StringBuffer sig = new StringBuffer(10);
+			    StringBuilder sig = new StringBuilder(10);
 			    if (isMemberType() && !isStatic()) {
 			    	ReferenceBinding enclosing = enclosingType();
 					char[] typeSig = enclosing.genericTypeSignature();
@@ -1330,7 +1330,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	}
 	@Override
 	public char[] readableName(boolean showGenerics) {
-	    StringBuffer nameBuffer = new StringBuffer(10);
+	    StringBuilder nameBuffer = new StringBuilder(10);
 		if (isMemberType()) {
 			nameBuffer.append(CharOperation.concat(enclosingType().readableName(showGenerics && !isStatic()), this.sourceName, '.'));
 		} else {
@@ -1359,12 +1359,12 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 
 //{ObjectTeams: pretty printing:
 	// extracted from readableName/shortReadableName:
-	private StringBuffer appendValueAndTypeParameters(StringBuffer nameBuffer, boolean makeShort) {
-		StringBuffer buf2 = new StringBuffer();
+	private StringBuilder appendValueAndTypeParameters(StringBuilder nameBuffer, boolean makeShort) {
+		StringBuilder buf2 = new StringBuilder();
 		buf2.append('<');
 		boolean haveValueParameters = appendReadableValueParameterNames(buf2);
 		if (haveValueParameters)
-			nameBuffer = new StringBuffer().append(this.type.sourceName()); // reset to single name
+			nameBuffer = new StringBuilder().append(this.type.sourceName()); // reset to single name
 		TypeBinding[] args = this.arguments;
 		// avoid printing incomplete parameters: if there are value parameters also print declared type params:
 		if (haveValueParameters && args == null && this.type.isGenericType())
@@ -1385,7 +1385,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return nameBuffer;
 	}
 	// hook for dependent type printing:
-	public boolean appendReadableValueParameterNames(StringBuffer buf) {
+	public boolean appendReadableValueParameterNames(StringBuilder buf) {
 		if (this.type instanceof DependentTypeBinding)
 			return ((DependentTypeBinding)this.type).appendReadableValueParameterNames(buf);
 		return false;
@@ -1453,7 +1453,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	}
 	@Override
 	public char[] shortReadableName(boolean showGenerics) {
-	    StringBuffer nameBuffer = new StringBuffer(10);
+	    StringBuilder nameBuffer = new StringBuilder(10);
 		if (isMemberType()) {
 			nameBuffer.append(CharOperation.concat(enclosingType().shortReadableName(showGenerics && !isStatic()), this.sourceName, '.'));
 		} else {
@@ -1702,7 +1702,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		if (this.hasTypeAnnotations()) {
 			return annotatedDebugName();
 		}
-		StringBuffer buffer = new StringBuffer(30);
+		StringBuilder buffer = new StringBuilder(30);
 		if (this.type instanceof UnresolvedReferenceBinding) {
 	    	buffer.append(debugName());
 	    } else {

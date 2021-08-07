@@ -152,7 +152,7 @@ public class BatchCompilerTest extends AbstractBatchCompilerTest {
 		@Override
 		String normalized(String originalValue) {
 			String result;
-			StringBuffer normalizedValueBuffer = new StringBuffer(originalValue);
+			StringBuilder normalizedValueBuffer = new StringBuilder(originalValue);
 			int classpathsStartTagStart = normalizedValueBuffer
 					.indexOf("<classpaths>"), classpathsEndTagStart = normalizedValueBuffer
 					.indexOf("</classpaths>");
@@ -215,7 +215,7 @@ public class BatchCompilerTest extends AbstractBatchCompilerTest {
 					state = SKIPING;
 				else
 					state = KEEPING;
-				StringBuffer normalizedValueBuffer = new StringBuffer(), source = new StringBuffer(
+				StringBuilder normalizedValueBuffer = new StringBuilder(), source = new StringBuilder(
 						originalValue);
 				sourceLength = source.length();
 				while (state != END && state != ERROR) {
@@ -315,7 +315,7 @@ public void test001() {
 		String expected = " <-classpath> <D:/a folder;d:/jdk1.4/jre/lib/rt.jar> <-1.4> <-preserveAllLocals> <-g> <-verbose> <d:/eclipse/workspaces/development2.0/plugins/Bar/src2/> <-d> <d:/test>";
 
 		String[] args = Main.tokenize(commandLine);
-		StringBuffer  buffer = new StringBuffer(30);
+		StringBuilder  buffer = new StringBuilder(30);
 		for (int i = 0; i < args.length; i++){
 			buffer.append(" <"+args[i]+">");
 		}
@@ -331,7 +331,7 @@ public void test002() {
 		String expected = " <-classpath> <a folder;b folder>";
 
 		String[] args = Main.tokenize(commandLine);
-		StringBuffer  buffer = new StringBuffer(30);
+		StringBuilder  buffer = new StringBuilder(30);
 		for (int i = 0; i < args.length; i++){
 			buffer.append(" <"+args[i]+">");
 		}
@@ -347,7 +347,7 @@ public void test003() {
 		String expected = " <-classpath> <a folder;b folder>";
 
 		String[] args = Main.tokenize(commandLine);
-		StringBuffer  buffer = new StringBuffer(30);
+		StringBuilder  buffer = new StringBuilder(30);
 		for (int i = 0; i < args.length; i++){
 			buffer.append(" <"+args[i]+">");
 		}
@@ -363,7 +363,7 @@ public void test004() {
 		String expected = " <d:/tmp A/A.java> <-classpath> <d:/tmp A;d:/jars/rt.jar> <-nowarn> <-time> <-g> <-d> <d:/tmp>";
 
 		String[] args = Main.tokenize(commandLine);
-		StringBuffer  buffer = new StringBuffer(30);
+		StringBuilder  buffer = new StringBuilder(30);
 		for (int i = 0; i < args.length; i++){
 			buffer.append(" <"+args[i]+">");
 		}
@@ -379,7 +379,7 @@ public void test005() {
 		String expected = " <d:/tmp A/A.java> <-classpath> <d:/jars/rt.jar;d:/tmp A;toto> <-nowarn> <-time> <-g> <-d> <d:/tmp>";
 
 		String[] args = Main.tokenize(commandLine);
-		StringBuffer  buffer = new StringBuffer(30);
+		StringBuilder  buffer = new StringBuilder(30);
 		for (int i = 0; i < args.length; i++){
 			buffer.append(" <"+args[i]+">");
 		}
@@ -395,7 +395,7 @@ public void test006() {
 		String expected = " <d:/tmp A/A.java> <-classpath> <d:/jars/rt.jar;d:/tmp A;d:/tmpB/> <-nowarn> <-time> <-g> <-d> <d:/tmp>";
 
 		String[] args = Main.tokenize(commandLine);
-		StringBuffer  buffer = new StringBuffer(30);
+		StringBuilder  buffer = new StringBuilder(30);
 		for (int i = 0; i < args.length; i++){
 			buffer.append(" <"+args[i]+">");
 		}
@@ -680,9 +680,10 @@ public void test012(){
         "    -13 -13.0          use 13  compliance (-source 13  -target 13)\n" +
         "    -14 -14.0          use 14  compliance (-source 14  -target 14)\n" +
         "    -15 -15.0          use 15  compliance (-source 15  -target 15)\n" +
-        "    -source <version>  set source level: 1.3 to 1.9, 10 to 15\n" +
+        "    -16 -16.0          use 16  compliance (-source 16  -target 16)\n" +
+        "    -source <version>  set source level: 1.3 to 1.9, 10 to 16\n" +
         "                       (or 6, 6.0, etc)\n" +
-        "    -target <version>  set classfile target: 1.3 to 1.9, 10 to 15\n" +
+        "    -target <version>  set classfile target: 1.3 to 1.9, 10 to 16\n" +
         "                       (or 6, 6.0, etc)\n" +
         "                       cldc1.1 can also be used to generate the StackMap\n" +
         "                       attribute\n" +

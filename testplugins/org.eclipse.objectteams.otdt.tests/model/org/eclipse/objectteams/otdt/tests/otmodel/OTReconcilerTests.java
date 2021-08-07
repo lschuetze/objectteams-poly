@@ -66,7 +66,6 @@ import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.core.SearchableEnvironment;
 import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.core.SourceTypeElementInfo;
-import org.eclipse.jdt.internal.core.nd.indexer.Indexer;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
@@ -95,6 +94,12 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 	public OTReconcilerTests(String name) {
 		super(name);
+	}
+
+	@Override
+	public void setUp() throws Exception {
+		this.indexDisabledForTest = false;
+		super.setUp();
 	}
 
 	static {
@@ -596,7 +601,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 
 			ICompilationUnit wc = getCompilationUnit("/P/Foo/Role2.java").getWorkingCopy(this.wcOwner, null);
-			wc.reconcile(AST.JLS12,
+			wc.reconcile(AST.getJLSLatest(),
 						 ICompilationUnit.FORCE_PROBLEM_DETECTION|ICompilationUnit.ENABLE_STATEMENTS_RECOVERY|ICompilationUnit.ENABLE_BINDINGS_RECOVERY,
 						 wc.getOwner(), null);
 
@@ -664,7 +669,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 							"		String s1, s2, s3, s4, s5, s6;\n" +
 					"	}\n").length()),
 					null);
-			wc.reconcile(AST.JLS12,
+			wc.reconcile(AST.getJLSLatest(),
 					ICompilationUnit.FORCE_PROBLEM_DETECTION|ICompilationUnit.ENABLE_STATEMENTS_RECOVERY|ICompilationUnit.ENABLE_BINDINGS_RECOVERY,
 					wc.getOwner(), null);
 
@@ -2438,7 +2443,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 					sourceFoo
 			);
 
-			Indexer.getInstance().waitForIndex(null);
+			// FIXME: removed Indexer.getInstance().waitForIndex(null);
 			char[] sourceChars = sourceFoo.toCharArray();
 			this.problemRequestor.initialize(sourceChars);
 
@@ -2526,7 +2531,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 					"----------\n");
 
 			this.problemRequestor.initialize(sourceChars);
-			fooWC.reconcile(AST.JLS12,
+			fooWC.reconcile(AST.getJLSLatest(),
 					 ICompilationUnit.FORCE_PROBLEM_DETECTION|ICompilationUnit.ENABLE_STATEMENTS_RECOVERY|ICompilationUnit.ENABLE_BINDINGS_RECOVERY,
 					 fooWC.getOwner(), null);
 

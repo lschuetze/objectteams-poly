@@ -10231,4 +10231,98 @@ public void testBug508834_comment0() {
 				"}\n"
 			});
 	}
+	public void testBug573933() {
+		runConformTest(
+			new String[] {
+				"B.java",
+				"import java.util.List;\n" +
+				"import java.util.function.Function;\n" +
+				"import java.util.stream.Collectors;\n" +
+				"public class B {\n" +
+				 "   List<M> r;\n" +
+				  "  B(final RC c) {\n" +
+				  "  	r = m(c.getRI(), i -> t(i, x -> new M(x))); // no error\n" +
+				  "  	r = m(c.getRI(), i -> t(i, M::new)); \n" +
+				  "  } \n" +
+				  "  static <T, U> U m(T t, Function<T, U> f) {\n" +
+				  "      return f.apply(t);\n" +
+				  "  }\n" +
+				  "  static <T, R> List<R> t(final List<T> list, final Function<T, R> function) {\n" +
+				  "      return list.stream().map(function).collect(Collectors.toList());\n" +
+				  "  }\n" +
+				"}\n" +
+				"class RC {\n" +
+				"    List<Integer> getRI() { return null; }\n" +
+				"}\n" +
+				"class M {\n" +
+				 "   Integer r;\n" +
+				 "   public M(final Integer r) {\n" +
+				  "  	this.r = r;\n" +
+				  "  }\n" +
+
+				    // Removing this constructor makes the problem go away
+				  "  public M(final RC i) {\n" +
+				  "  	this.r = 3;\n" +
+				  "  }\n" +
+				  "}"
+			});
+
+	}
+
+	public void testBug573378() {
+		runNegativeTest(
+			new String[] {
+				"TypeInferenceError.java",
+				"import java.util.*;\n" +
+				"import java.util.function.*;\n" +
+				"import java.util.stream.*;\n" +
+				"\n" +
+				"public class TypeInferenceError {\n" +
+				"  void test() {\n" +
+				"    Optional<Stream<Object>> s = Optional.empty();\n" +
+				"    map(s, Stream::count);\n" +
+				"    assertThat(map(s, Stream::count));\n" +
+				"  }\n" +
+				"  private <T> OptionalInt map(Optional<T> o, ToIntFunction<T> mapper) {\n" +
+				"    return OptionalInt.empty();\n" +
+				"  }\n" +
+				"  private void assertThat(OptionalInt o) {}\n" +
+				"}\n"
+			},
+			"----------\n" +
+			"1. ERROR in TypeInferenceError.java (at line 8)\n" +
+			"	map(s, Stream::count);\n" +
+			"	       ^^^^^^^^^^^^^\n" +
+			"The type of count() from the type Stream<Object> is long, this is incompatible with the descriptor\'s return type: int\n" +
+			"----------\n" +
+			"2. ERROR in TypeInferenceError.java (at line 9)\n" +
+			"	assertThat(map(s, Stream::count));\n" +
+			"	                  ^^^^^^^^^^^^^\n" +
+			"The type of count() from the type Stream<Object> is long, this is incompatible with the descriptor\'s return type: int\n" +
+			"----------\n");
+	}
+	public void testBug549446() {
+		if (this.complianceLevel < ClassFileConstants.JDK12)
+			return; // uses interface Constable
+		runConformTest(
+			new String[] {
+				"TestFile.java",
+				"import java.lang.constant.Constable;\n" +
+				"public class TestFile {\n" +
+				"\n" +
+				"  @SafeVarargs\n" +
+				"  public final <E> E elements(E... args) {\n" +
+				"    return null;\n" +
+				"  }\n" +
+				"\n" +
+				"  public void test1() {\n" +
+				"    var v = elements(\"a\", 1);\n" +
+				"  }\n" +
+				"\n" +
+				"  public void test2() {\n" +
+				"    var v = elements(\"a\", (Comparable<String> & Constable) null);\n" +
+				"  }\n" +
+				"}\n"
+			});
+	}
 }

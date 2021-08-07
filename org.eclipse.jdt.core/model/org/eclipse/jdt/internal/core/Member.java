@@ -144,8 +144,8 @@ public String[] getCategories() throws JavaModelException {
  */
 @Override
 public IClassFile getClassFile() {
-	IJavaElement element = getParent();
-	while (element instanceof IMember) {
+	JavaElement element = getParent();
+	while (element instanceof Member) {
 		element= element.getParent();
 	}
 	if (element instanceof IClassFile) {
@@ -158,7 +158,7 @@ public IClassFile getClassFile() {
  */
 @Override
 public IType getDeclaringType() {
-	JavaElement parentElement = (JavaElement)getParent();
+	JavaElement parentElement = getParent();
 	if (parentElement.getElementType() == TYPE) {
 		return (IType) parentElement;
 	}
@@ -415,7 +415,7 @@ public String readableName() {
 	IJavaElement declaringType = getDeclaringType();
 	if (declaringType != null) {
 		String declaringName = ((JavaElement) getDeclaringType()).readableName();
-		StringBuffer buffer = new StringBuffer(declaringName);
+		StringBuilder buffer = new StringBuilder(declaringName);
 		buffer.append('.');
 		buffer.append(getElementName());
 		return buffer.toString();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -377,13 +377,9 @@ private void yieldQualifiedCheck(BlockScope currentScope) {
 	long sourceLevel = currentScope.compilerOptions().sourceLevel;
 	if (sourceLevel < ClassFileConstants.JDK14 || !this.receiverIsImplicitThis())
 		return;
-	if (this.selector == null || !("yield".equals(new String(this.selector)))) //$NON-NLS-1$
+	if (!CharOperation.equals(this.selector, TypeConstants.YIELD))
 		return;
-	if (sourceLevel >= ClassFileConstants.JDK14) {
-		currentScope.problemReporter().switchExpressionsYieldUnqualifiedMethodError(this);
-	} else {
-		currentScope.problemReporter().switchExpressionsYieldUnqualifiedMethodWarning(this);
-	}
+	currentScope.problemReporter().switchExpressionsYieldUnqualifiedMethodError(this);
 }
 private void recordCallingClose(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo, Expression closeTarget) {
 	FakedTrackingVariable trackingVariable = FakedTrackingVariable.getCloseTrackingVariable(closeTarget, flowInfo, flowContext);
@@ -973,15 +969,7 @@ public TypeBinding resolveType(BlockScope scope) {
 		if (this.actualReceiverType instanceof InferenceVariable) {
 				return null; // not yet ready for resolving
 		}
-  /*
-		this.receiverIsType = this.receiver instanceof NameReference && (((NameReference) this.receiver).bits & Binding.TYPE) != 0;
-   */
-    	// don't only expect NameReference, BaseReference can be static, too.
-		this.receiverIsType = (   (this.receiver instanceof NameReference)
-								  || (this.receiver instanceof BaseReference))
-								 && (this.receiver.bits & Binding.TYPE) != 0
-								 || (this.receiver instanceof TypeReference); // happens in generated AST
-// MW,JH,SH}
+		this.receiverIsType = this.receiver.isType();
 		if (receiverCast && this.actualReceiverType != null) {
 			// due to change of declaring class with receiver type, only identity cast should be notified
 			TypeBinding resolvedType2 = ((CastExpression)this.receiver).expression.resolvedType;

@@ -1131,7 +1131,7 @@ public class AstGenerator extends AstFactory {
 	}
 	public CaseStatement caseStatement(Expression constExpr) {
 		CaseStatement caseStatement = new CaseStatement(constExpr, this.sourceStart, this.sourceEnd);
-		caseStatement.constantExpressions = new Expression[] {constExpr};
+		caseStatement.constantExpressions = constExpr != null ? new Expression[] {constExpr} : new Expression[0];
 		return caseStatement;
 	}
 	public BreakStatement breakStatement() {
@@ -1394,7 +1394,7 @@ public class AstGenerator extends AstFactory {
 	public MessageSend createBoxing(Expression resultExpr, BaseTypeBinding type)
 	{
 		char[][] boxedType = boxTypeName(type);
-		return messageSend(qualifiedTypeReference(boxedType), TypeConstants.VALUEOF, new Expression[]{resultExpr});
+		return messageSend(qualifiedNameReference(boxedType), TypeConstants.VALUEOF, new Expression[]{resultExpr});
 	}
 
 	public static char[][] boxTypeName(BaseTypeBinding type) {

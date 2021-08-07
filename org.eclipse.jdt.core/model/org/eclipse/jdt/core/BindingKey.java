@@ -59,7 +59,7 @@ public final class BindingKey {
 	 */
 	public static String createArrayTypeBindingKey(String typeKey, int arrayDimension) {
 		// Note this implementation is heavily dependent on ArrayTypeBinding#computeUniqueKey()
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		while (arrayDimension-- > 0)
 			buffer.append('[');
 		buffer.append(typeKey);
@@ -89,7 +89,7 @@ public final class BindingKey {
 	 */
 	public static String createParameterizedTypeBindingKey(String genericTypeKey, String[] argumentTypeKeys) {
 		// Note this implementation is heavily dependent on ParameterizedTypeBinding#computeUniqueKey() and its subclasses
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		buffer.append(Signature.getTypeErasure(genericTypeKey));
 		buffer.insert(buffer.length()-1, '<');
 		for (int i = 0, length = argumentTypeKeys.length; i < length; i++) {
@@ -143,7 +143,7 @@ public final class BindingKey {
 	 */
 	public static String createTypeVariableBindingKey(String typeVariableName, String declaringKey) {
 		// Note this implementation is heavily dependent on TypeVariableBinding#computeUniqueKey()
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		buffer.append(declaringKey);
 		buffer.append(':');
 		buffer.append('T');

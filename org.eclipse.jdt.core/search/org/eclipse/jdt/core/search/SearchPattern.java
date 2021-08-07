@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.core.search.IndexQueryRequestor;
 import org.eclipse.jdt.internal.core.search.JavaSearchScope;
 import org.eclipse.jdt.internal.core.search.StringOperation;
 import org.eclipse.jdt.internal.core.search.indexing.IIndexConstants;
+import org.eclipse.jdt.internal.core.search.indexing.QualifierQuery;
 import org.eclipse.jdt.internal.core.search.matching.AndPattern;
 import org.eclipse.jdt.internal.core.search.matching.ConstructorPattern;
 import org.eclipse.jdt.internal.core.search.matching.FieldPattern;
@@ -295,6 +296,21 @@ public abstract class SearchPattern {
 	public IJavaElement focus;
 
 	/**
+	 * The encoded index qualifier query which is used to narrow down number of indexes to search based on the qualifier.
+	 * This is optional. In absence all indexes provided by scope will be searched.
+	 * <br>
+	 * The encoded query format is as following
+	 * <pre>
+	 * CATEGORY1[,CATEGORY2]:SIMPLE_KEY:QUALIFIED_KEY
+	 * </pre>
+	 * if the category is not provided, then the index qualifier search will be done for all type of qualifiers.
+	 *
+	 * @noreference This field is not intended to be referenced by clients.
+	 * @see QualifierQuery#encodeQuery(org.eclipse.jdt.internal.core.search.indexing.QualifierQuery.QueryCategory[], char[], char[])
+	 */
+	public char[] indexQualifierQuery;
+
+	/**
 	 * @noreference This field is not intended to be referenced by clients.
 	 */
 	public int kind;
@@ -370,7 +386,7 @@ public void acceptMatch(String relativePath, String containerPath, char separato
 		// Note that requestor has to verify if needed whether the document violates the access restriction or not
 		AccessRuleSet access = javaSearchScope.getAccessRuleSet(relativePath, containerPath);
 		if (access != JavaSearchScope.NOT_ENCLOSED) { // scope encloses the document path
-			StringBuffer documentPath = new StringBuffer(containerPath.length() + 1 + relativePath.length());
+			StringBuilder documentPath = new StringBuilder(containerPath.length() + 1 + relativePath.length());
 			documentPath.append(containerPath);
 			documentPath.append(separator);
 			documentPath.append(relativePath);
@@ -378,7 +394,7 @@ public void acceptMatch(String relativePath, String containerPath, char separato
 				throw new OperationCanceledException();
 		}
 	} else {
-		StringBuffer buffer = new StringBuffer(containerPath.length() + 1 + relativePath.length());
+		StringBuilder buffer = new StringBuilder(containerPath.length() + 1 + relativePath.length());
 		buffer.append(containerPath);
 		buffer.append(separator);
 		buffer.append(relativePath);

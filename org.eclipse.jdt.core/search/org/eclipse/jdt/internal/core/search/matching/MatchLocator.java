@@ -96,6 +96,7 @@ import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.core.SourceTypeElementInfo;
 import org.eclipse.jdt.internal.core.index.Index;
 import org.eclipse.jdt.internal.core.search.*;
+import org.eclipse.jdt.internal.core.search.indexing.QualifierQuery;
 import org.eclipse.jdt.internal.core.util.ASTNodeFinder;
 import org.eclipse.jdt.internal.core.util.HandleFactory;
 import org.eclipse.jdt.internal.core.util.Util;
@@ -287,6 +288,14 @@ public static SearchDocument[] addWorkingCopies(SearchPattern pattern, SearchDoc
 
 public static void setFocus(SearchPattern pattern, IJavaElement focus) {
 	pattern.focus = focus;
+}
+
+/**
+ * Sets the qualifier queries into pattern.
+ * @see QualifierQuery#encodeQuery(org.eclipse.jdt.internal.core.search.indexing.QualifierQuery.QueryCategory[], char[], char[])
+ */
+public static void setIndexQualifierQuery(SearchPattern pattern, char[] queries) {
+	pattern.indexQualifierQuery = queries;
 }
 
 /*
@@ -1600,7 +1609,7 @@ public void locateMatches(SearchDocument[] searchDocuments) throws CoreException
 			// create new parser and lookup environment if this is a new project
 			IResource resource = null;
 			openable = getCloserOpenable(openable, pathString);
-			JavaProject javaProject = (JavaProject) openable.getJavaProject();
+			JavaProject javaProject = openable.getJavaProject();
 			resource = workingCopy != null ? workingCopy.getResource() : openable.getResource();
 			if (resource == null)
 				resource = javaProject.getProject(); // case of a file in an external jar or external folder
@@ -1672,7 +1681,7 @@ private IJavaSearchScope getSubScope(String optionString, long value, boolean re
 private Openable getCloserOpenable(Openable openable, String pathString) {
 	if (this.pattern instanceof TypeDeclarationPattern &&
 			((TypeDeclarationPattern) this.pattern).moduleNames != null) {
-		JavaProject javaProject = (JavaProject) openable.getJavaProject();
+		JavaProject javaProject = openable.getJavaProject();
 		PackageFragmentRoot root = openable.getPackageFragmentRoot();
 		if (root instanceof JarPackageFragmentRoot) {
 			JarPackageFragmentRoot jpkf = (JarPackageFragmentRoot) root;

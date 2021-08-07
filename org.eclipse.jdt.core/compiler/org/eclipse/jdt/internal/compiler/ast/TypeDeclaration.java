@@ -999,7 +999,7 @@ public AbstractMethodDeclaration declarationOf(MethodBinding methodBinding) {
  */
 public RecordComponent declarationOf(RecordComponentBinding recordComponentBinding) {
 	if (recordComponentBinding != null && this.recordComponents != null) {
-		for (int i = 0, max = this.fields.length; i < max; i++) {
+		for (int i = 0, max = this.recordComponents.length; i < max; i++) {
 			RecordComponent recordComponent;
 			if ((recordComponent = this.recordComponents[i]).binding == recordComponentBinding)
 				return recordComponent;
@@ -1397,7 +1397,10 @@ public boolean hasErrors() {
  *	Common flow analysis for all types
  */
 private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
-	checkYieldUsage();
+	if (CharOperation.equals(this.name, TypeConstants.YIELD)) {
+		this.scope.problemReporter().validateRestrictedKeywords(this.name, this);
+	}
+
 //{ObjectTeams: postponed from resolve() to also catch import usage from late statement generators.
 	if (isRoleFile() && !this.binding.isSynthInterface())
 		if (!this.compilationResult.hasSyntaxError)
@@ -1603,18 +1606,6 @@ private void mergePrecedences() {
 		PrecedenceBinding.checkDuplicates(this);
 }
 // SH}
-
-private void checkYieldUsage() {
-	long sourceLevel = this.scope.compilerOptions().sourceLevel;
-	if (sourceLevel < ClassFileConstants.JDK14 || this.name == null ||
-			!("yield".equals(new String(this.name)))) //$NON-NLS-1$
-		return;
-	if (sourceLevel >= ClassFileConstants.JDK14) {
-		this.scope.problemReporter().switchExpressionsYieldTypeDeclarationError(this);
-	} else {
-		this.scope.problemReporter().switchExpressionsYieldTypeDeclarationWarning(this);
-	}
-}
 
 private SimpleSetOfCharArray getJUnitMethodSourceValues() {
 	SimpleSetOfCharArray junitMethodSourceValues = new SimpleSetOfCharArray();

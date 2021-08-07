@@ -162,4 +162,9 @@ public void checkEffectiveFinality(VariableBinding localBinding, Scope scope) {
 //{ObjectTeams: hook after this reference has been fully resolved
 public void resolveFinished() { /* noop  */ }
 // SH}
+
+@Override
+public boolean isType() {
+	return (this.bits & Binding.TYPE) != 0;
+}
 }

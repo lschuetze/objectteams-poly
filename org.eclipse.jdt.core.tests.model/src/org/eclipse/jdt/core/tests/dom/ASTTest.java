@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -6764,7 +6764,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 	 * source ranges to all nodes.
 	 */
 	void assignSourceRanges(ASTNode target) {
-		final StringBuffer buffer = new StringBuffer();
+		final StringBuilder buffer = new StringBuilder();
 		final List stack = new ArrayList();
 		// pretend that every construct begins with "(" and ends with ")"
 		class PositionAssigner extends ASTVisitor {
@@ -9273,6 +9273,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(Modifier.ModifierKeyword.DEFAULT_KEYWORD.toString().equals("default")); //$NON-NLS-1$
 		if (DOMASTUtil.isFeatureSupportedinAST(this.ast, Modifier.SEALED)) {
 			assertTrue(Modifier.ModifierKeyword.SEALED_KEYWORD.toString().equals("sealed")); //$NON-NLS-1$
+		} else if (DOMASTUtil.isFeatureSupportedinAST(this.ast, Modifier.NON_SEALED)) {
 			assertTrue(Modifier.ModifierKeyword.NON_SEALED_KEYWORD.toString().equals("non-sealed")); //$NON-NLS-1$
 		}
 

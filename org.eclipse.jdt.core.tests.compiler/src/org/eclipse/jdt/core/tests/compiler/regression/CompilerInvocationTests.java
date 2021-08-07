@@ -160,7 +160,7 @@ public class CompilerInvocationTests extends AbstractRegressionTest {
 	}
 
 	static String taskTagsAsCutAndPaste(CategorizedProblem tasks[]) {
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		String arguments[];
 		for (int i = 0; i < tasks.length - 1; i++) {
 			arguments = tasks[i].getArguments();
@@ -184,7 +184,7 @@ public class CompilerInvocationTests extends AbstractRegressionTest {
 	}
 
 	static String taskTagsAsStrings(CategorizedProblem tasks[]) {
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		String arguments[];
 		for (int i = 0; i < tasks.length; i++) {
 			arguments = tasks[i].getArguments();
@@ -1376,6 +1376,8 @@ public void _test011_problem_categories() {
 	    expectedProblemAttributes.put("SealedNotDirectSuperInterface", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
 	    expectedProblemAttributes.put("SealedLocalDirectSuperTypeSealed", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
 	    expectedProblemAttributes.put("SealedAnonymousClassCannotExtendSealedType", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SealedSuperTypeInDifferentPackage", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SealedSuperTypeDisallowed", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
 	    expectedProblemAttributes.put("SafeVarargsOnSyntheticRecordAccessor", new ProblemAttributes(true));
 	    expectedProblemAttributes.put("DiscouragedValueBasedTypeSynchronization", new ProblemAttributes(true));
 	    StringBuffer failures = new StringBuffer();
@@ -3057,6 +3059,8 @@ public void test012_compiler_problems_tuning() {
 	    expectedProblemAttributes.put("SealedSuperInterfaceDoesNotPermit", SKIP);
 	    expectedProblemAttributes.put("SealedNotDirectSuperInterface", SKIP);
 	    expectedProblemAttributes.put("SealedLocalDirectSuperTypeSealed", SKIP);
+	    expectedProblemAttributes.put("SealedSuperTypeInDifferentPackage", SKIP);
+	    expectedProblemAttributes.put("SealedSuperTypeDisallowed", SKIP);
 	    expectedProblemAttributes.put("SealedAnonymousClassCannotExtendSealedType", SKIP);
 	    expectedProblemAttributes.put("SafeVarargsOnSyntheticRecordAccessor", SKIP);
 	    expectedProblemAttributes.put("DiscouragedValueBasedTypeSynchronization", SKIP);

@@ -173,7 +173,7 @@ public char[] constantPoolName() {
 public String debugName() {
 	if (this.hasTypeAnnotations())
 		return annotatedDebugName();
-	StringBuffer brackets = new StringBuffer(this.dimensions * 2);
+	StringBuilder brackets = new StringBuilder(this.dimensions * 2);
 	for (int i = this.dimensions; --i >= 0;)
 		brackets.append("[]"); //$NON-NLS-1$
 	return this.leafComponentType.debugName() + brackets.toString();
@@ -181,7 +181,7 @@ public String debugName() {
 
 @Override
 public String annotatedDebugName() {
-	StringBuffer brackets = new StringBuffer(this.dimensions * 2);
+	StringBuilder brackets = new StringBuilder(this.dimensions * 2);
 	brackets.append(this.leafComponentType.annotatedDebugName());
 	brackets.append(' ');
 	AnnotationBinding [] annotations = getTypeAnnotations();

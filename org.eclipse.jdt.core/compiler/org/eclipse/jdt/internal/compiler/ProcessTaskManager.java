@@ -31,7 +31,7 @@ public class ProcessTaskManager implements Runnable {
 	volatile int currentIndex, availableIndex, size, sleepCount;
 	CompilationUnitDeclaration[] units;
 
-	public static final int PROCESSED_QUEUE_SIZE = 12;
+	public static final int PROCESSED_QUEUE_SIZE = 100;
 
 //{ObjectTeams:
 	private Config sharedConfig;

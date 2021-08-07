@@ -562,7 +562,7 @@ public void recheckProblems(IrritantSet[] foundIrritants) {
 
 @Override
 public String toString(){
-	StringBuffer buffer = new StringBuffer();
+	StringBuilder buffer = new StringBuilder();
 	if (this.fileName != null){
 		buffer.append("Filename : ").append(this.fileName).append('\n'); //$NON-NLS-1$
 	}

@@ -95,7 +95,7 @@ public static LocalVMLauncher getLauncher() {
  * Builds the actual class path that is going to be passed to the VM.
  */
 protected String buildClassPath() {
-	StringBuffer classPathString = new StringBuffer();
+	StringBuilder classPathString = new StringBuilder();
 	char pathSeparator = File.pathSeparatorChar;
 
 	// Add jar support if in evaluation mode

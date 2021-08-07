@@ -756,7 +756,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				if (needSuperCall) {
 					if (!isReplace)
 						statements.add(gen.caseStatement(null)); // default label
-					char[]   selector;				char[][] argNames;
+					char[]   selector;
+					char[][] argNames;
 					if (isReplace) {
 						selector = OT_CALL_REPLACE;	argNames = REPLACE_ARG_NAMES;
 					} else if (isAfter) {

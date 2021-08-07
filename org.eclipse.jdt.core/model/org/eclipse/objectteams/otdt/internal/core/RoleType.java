@@ -79,8 +79,9 @@ public class RoleType extends OTType implements IRoleType
 	public IOTType getTeam()
     {
     	// try directly within OT-Model:
-    	if (this.parent != null && this.parent instanceof IOTType)
-    		return (IOTType)this.parent;
+    	IJavaElement p = getParent();
+    	if (p != null && p instanceof IOTType)
+    		return (IOTType)p;
     	// try a detour through Java-Model:
     	IType teamType = getTeamJavaType();
         if (teamType != null)

@@ -616,7 +616,7 @@ public char[] computeGenericTypeSignature(TypeVariableBinding[] typeVariables) {
 	if (typeVariables == Binding.NO_TYPE_VARIABLES && !isMemberOfGeneric) {
 		return signature();
 	}
-	StringBuffer sig = new StringBuffer(10);
+	StringBuilder sig = new StringBuilder(10);
 	if (isMemberOfGeneric) {
 	    char[] typeSig = enclosingType().genericTypeSignature();
 	    sig.append(typeSig, 0, typeSig.length-1); // copy all but trailing semicolon
@@ -2257,7 +2257,7 @@ public char[] readableName(boolean showGenerics) /*java.lang.Object,  p.X<T> */ 
   :giro */
 		if ((typeVars = typeVariables()) != Binding.NO_TYPE_VARIABLES || valueParams != Binding.NO_SYNTH_ARGUMENTS) {
 // orig:
-	    	StringBuffer nameBuffer = new StringBuffer(10);
+	    	StringBuilder nameBuffer = new StringBuilder(10);
 	    	nameBuffer.append(readableName).append('<');
 // :giro
 		    for (int i = 0; i < valueParams.length; i++) {
@@ -2425,7 +2425,7 @@ public char[] shortReadableName(boolean showGenerics) /*Object*/ {
   :giro */
 		if ((typeVars = typeVariables()) != Binding.NO_TYPE_VARIABLES || valueParams != Binding.NO_SYNTH_ARGUMENTS) {
 // orig:
-		    StringBuffer nameBuffer = new StringBuffer(10);
+		    StringBuilder nameBuffer = new StringBuilder(10);
 		    nameBuffer.append(shortReadableName).append('<');
 // :giro
 		    for (int i = 0; i < valueParams.length; i++) {

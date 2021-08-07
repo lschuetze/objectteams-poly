@@ -1605,7 +1605,9 @@ class ASTConverter {
 				}
 			}
 		} else {
-			org.eclipse.jdt.internal.compiler.ast.Expression constantExpression = statement.constantExpression;
+			org.eclipse.jdt.internal.compiler.ast.Expression[] constantExpressions = statement.constantExpressions;
+			org.eclipse.jdt.internal.compiler.ast.Expression constantExpression =
+					constantExpressions != null && constantExpressions.length > 0 ? constantExpressions[0] : null;
 			if (constantExpression == null) {
 				internalSetExpression(switchCase, null);
 			} else {
@@ -1753,7 +1755,7 @@ class ASTConverter {
 			if (SourceRangeVerifier.DEBUG) {
 				String bugs = new SourceRangeVerifier().process(compilationUnit);
 				if (bugs != null) {
-					StringBuffer message = new StringBuffer("Bad AST node structure:");  //$NON-NLS-1$
+					StringBuilder message = new StringBuilder("Bad AST node structure:");  //$NON-NLS-1$
 					String lineDelimiter = Util.findLineSeparator(source);
 					if (lineDelimiter == null) lineDelimiter = System.getProperty("line.separator");//$NON-NLS-1$
 					message.append(lineDelimiter);
@@ -1772,7 +1774,7 @@ class ASTConverter {
 			}
 			return compilationUnit;
 		} catch(IllegalArgumentException e) {
-			StringBuffer message = new StringBuffer("Exception occurred during compilation unit conversion:");  //$NON-NLS-1$
+			StringBuilder message = new StringBuilder("Exception occurred during compilation unit conversion:");  //$NON-NLS-1$
 			String lineDelimiter = Util.findLineSeparator(source);
 			if (lineDelimiter == null) lineDelimiter = System.getProperty("line.separator");//$NON-NLS-1$
 			message.append(lineDelimiter);

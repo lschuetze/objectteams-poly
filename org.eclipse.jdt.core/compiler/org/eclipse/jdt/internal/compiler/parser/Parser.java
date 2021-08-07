@@ -292,7 +292,7 @@ public class Parser implements TerminalTokens, ParserBasicInformation, Conflicte
 		result[0] = null;
 		int resultCount = 1;
 
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 
 		int start = contents.indexOf("name[]"); //$NON-NLS-1$
 		start = contents.indexOf('\"', start);
@@ -302,7 +302,7 @@ public class Parser implements TerminalTokens, ParserBasicInformation, Conflicte
 
 		boolean addLineSeparator = false;
 		int tokenStart = -1;
-		StringBuffer currentToken = new StringBuffer();
+		StringBuilder currentToken = new StringBuilder();
 		for (int i = 0; i < contents.length(); i++) {
 			char c = contents.charAt(i);
 			if(c == '\"') {
@@ -312,7 +312,7 @@ public class Parser implements TerminalTokens, ParserBasicInformation, Conflicte
 					if(addLineSeparator) {
 						buffer.append('\n');
 						result[resultCount++] = currentToken.toString();
-						currentToken = new StringBuffer();
+						currentToken = new StringBuilder();
 					}
 					String token = contents.substring(tokenStart, i);
 					if(token.equals(ERROR_TOKEN)){
@@ -747,7 +747,7 @@ public class Parser implements TerminalTokens, ParserBasicInformation, Conflicte
 		byte[] bytes = null;
 		try {
 			stream = new BufferedInputStream(stream);
-			bytes = Util.getInputStreamAsByteArray(stream, -1);
+			bytes = Util.getInputStreamAsByteArray(stream);
 		} finally {
 			try {
 				stream.close();
@@ -768,7 +768,7 @@ public class Parser implements TerminalTokens, ParserBasicInformation, Conflicte
 		byte[] bytes = null;
 		try {
 			stream = new BufferedInputStream(stream);
-			bytes = Util.getInputStreamAsByteArray(stream, -1);
+			bytes = Util.getInputStreamAsByteArray(stream);
 		} finally {
 			try {
 				stream.close();
@@ -848,7 +848,7 @@ public class Parser implements TerminalTokens, ParserBasicInformation, Conflicte
 		byte[] bytes = null;
 		try {
 			stream = new BufferedInputStream(stream);
-			bytes = Util.getInputStreamAsByteArray(stream, -1);
+			bytes = Util.getInputStreamAsByteArray(stream);
 		} finally {
 			try {
 				stream.close();
@@ -1401,6 +1401,7 @@ protected void classInstanceCreation(boolean isQualified) {
 		dispatchDeclarationInto(length);
 		TypeDeclaration anonymousTypeDeclaration = (TypeDeclaration)this.astStack[this.astPtr];
 		anonymousTypeDeclaration.declarationSourceEnd = this.endStatementPosition;
+		anonymousTypeDeclaration.addClinit();
 		anonymousTypeDeclaration.bodyEnd = this.endStatementPosition;
 		if (anonymousTypeDeclaration.allocation != null) {
 			anonymousTypeDeclaration.allocation.sourceEnd = this.endStatementPosition;
@@ -3075,13 +3076,12 @@ protected void consumeCaseLabel() {
 	} else {
 		// TODO : ERROR
 	}
-	CaseStatement caseStatement = new CaseStatement(constantExpressions[0], constantExpressions[length - 1].sourceEnd, this.intStack[this.intPtr--]);
+	CaseStatement caseStatement = new CaseStatement(constantExpressions[length - 1].sourceEnd, this.intStack[this.intPtr--], constantExpressions);
 	if (constantExpressions.length > 1) {
 		if (!this.parsingJava14Plus) {
 			problemReporter().multiConstantCaseLabelsNotSupported(caseStatement);
 		}
 	}
-	caseStatement.constantExpressions = constantExpressions;
 	// Look for $fall-through$ tag in leading comment for case statement
 	if (hasLeadingTagComment(FALL_THROUGH_TAG, caseStatement.sourceStart)) {
 		caseStatement.bits |= ASTNode.DocumentedFallthrough;
@@ -4804,6 +4804,7 @@ protected void consumeEnumConstantWithClassBody() {
 	dispatchDeclarationInto(this.astLengthStack[this.astLengthPtr--]);
 	TypeDeclaration anonymousType = (TypeDeclaration) this.astStack[this.astPtr--]; // pop type
 	this.astLengthPtr--;
+	anonymousType.addClinit();
 	anonymousType.bodyEnd = this.endPosition;
 	anonymousType.declarationSourceEnd = flushCommentsDefinedPriorTo(this.endStatementPosition);
 	final FieldDeclaration fieldDeclaration = ((FieldDeclaration) this.astStack[this.astPtr]);

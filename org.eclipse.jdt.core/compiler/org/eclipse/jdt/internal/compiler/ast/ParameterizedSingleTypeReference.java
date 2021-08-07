@@ -120,7 +120,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 	 */
 	@Override
 	public char [][] getParameterizedTypeName(){
-		StringBuffer buffer = new StringBuffer(5);
+		StringBuilder buffer = new StringBuilder(5);
 		buffer.append(this.token).append('<');
 //{ObjectTeams: type anchors?
 		boolean haveOne = false;

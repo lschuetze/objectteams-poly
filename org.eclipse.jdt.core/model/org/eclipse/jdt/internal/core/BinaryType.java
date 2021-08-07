@@ -143,7 +143,7 @@ public void codeComplete(
 	if (requestor == null) {
 		throw new IllegalArgumentException("Completion requestor cannot be null"); //$NON-NLS-1$
 	}
-	JavaProject project = (JavaProject) getJavaProject();
+	JavaProject project = getJavaProject();
 	SearchableEnvironment environment = project.newSearchableNameEnvironment(owner, requestor.isTestCodeExcluded());
 	CompletionEngine engine = new CompletionEngine(environment, requestor, project.getOptions(true), project, owner, monitor);
 
@@ -268,7 +268,7 @@ public IJavaElement[] getChildrenForCategory(String category) throws JavaModelEx
 	return NO_ELEMENTS;
 }
 protected ClassFileInfo getClassFileInfo() throws JavaModelException {
-	return (ClassFileInfo) this.parent.getElementInfo();
+	return (ClassFileInfo) this.getParent().getElementInfo();
 }
 @Override
 public IOrdinaryClassFile getClassFile() {
@@ -276,7 +276,7 @@ public IOrdinaryClassFile getClassFile() {
 }
 @Override
 public IType getDeclaringType() {
-	IOrdinaryClassFile classFile = getClassFile();
+	IClassFile classFile = getClassFile();
 	if (classFile.isOpen()) {
 		try {
 //{ObjectTeams: try not to call getElementInfo().
@@ -451,7 +451,7 @@ public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento,
 					case JEM_METHOD:
 						if (!memento.hasMoreTokens()) return this;
 						String param = memento.nextToken();
-						StringBuffer buffer = new StringBuffer();
+						StringBuilder buffer = new StringBuilder();
 						while (param.length() == 1 && Signature.C_ARRAY == param.charAt(0)) { // backward compatible with 3.0 mementos
 							buffer.append(Signature.C_ARRAY);
 							if (!memento.hasMoreTokens()) return this;
@@ -545,7 +545,7 @@ public IMethod[] getMethods() throws JavaModelException {
 
 @Override
 public IPackageFragment getPackageFragment() {
-	IJavaElement parentElement = this.parent;
+	IJavaElement parentElement = this.getParent();
 	while (parentElement != null) {
 		if (parentElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 			return (IPackageFragment)parentElement;
@@ -1016,7 +1016,7 @@ public ITypeHierarchy newTypeHierarchy(
 }
 @Override
 public JavaElement resolved(Binding binding) {
-	SourceRefElement resolvedHandle = new ResolvedBinaryType(this.parent, this.name, new String(binding.computeUniqueKey()));
+	SourceRefElement resolvedHandle = new ResolvedBinaryType(this.getParent(), this.name, new String(binding.computeUniqueKey()));
 	resolvedHandle.occurrenceCount = this.occurrenceCount;
 	return resolvedHandle;
 }
@@ -1173,7 +1173,7 @@ private static IModuleDescription getModuleDescription(IPackageFragment pack) {
 	if (javaProject != null && isComplianceJava11OrHigher(javaProject)) {
 		if (pack.isReadOnly()) {
 			IPackageFragmentRoot root= (IPackageFragmentRoot) pack.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-			if (root != null) {
+			if (root instanceof JrtPackageFragmentRoot) {
 				moduleDescription= root.getModuleDescription();
 			}
 		} else {

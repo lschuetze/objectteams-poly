@@ -66,7 +66,7 @@ public class AccessRule {
 
 	@Override
 	public String toString() {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		buffer.append("pattern="); //$NON-NLS-1$
 		buffer.append(this.pattern);
 		switch (getProblemId()) {

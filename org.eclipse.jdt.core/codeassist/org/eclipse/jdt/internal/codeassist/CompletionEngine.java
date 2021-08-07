@@ -69,8 +69,9 @@ import org.eclipse.jdt.internal.codeassist.complete.CompletionNodeDetector;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionNodeFound;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnAnnotationOfType;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnArgumentName;
-import org.eclipse.jdt.internal.codeassist.complete.CompletionOnBranchStatementLabel;
+import org.eclipse.jdt.internal.codeassist.complete.CompletionOnBreakStatement;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnClassLiteralAccess;
+import org.eclipse.jdt.internal.codeassist.complete.CompletionOnContinueStatement;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnExplicitConstructorCall;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnFieldName;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnFieldType;
@@ -161,7 +162,6 @@ import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ModuleDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ModuleReference;
-import org.eclipse.jdt.internal.compiler.ast.NameReference;
 import org.eclipse.jdt.internal.compiler.ast.NormalAnnotation;
 import org.eclipse.jdt.internal.compiler.ast.OperatorExpression;
 import org.eclipse.jdt.internal.compiler.ast.OperatorIds;
@@ -329,7 +329,7 @@ public final class CompletionEngine
 
 		@Override
 		public String toString() {
-			StringBuffer buffer = new StringBuffer();
+			StringBuilder buffer = new StringBuilder();
 			buffer.append('{');
 			buffer.append(this.packageName);
 			buffer.append(',');
@@ -364,7 +364,7 @@ public final class CompletionEngine
 
 		@Override
 		public String toString() {
-			StringBuffer buffer = new StringBuffer();
+			StringBuilder buffer = new StringBuilder();
 			buffer.append('{');
 			buffer.append(this.packageName);
 			buffer.append(',');
@@ -596,7 +596,7 @@ public final class CompletionEngine
 
 	private static char[] getRequiredTypeSignature(TypeBinding typeBinding) {
 		char[] result = null;
-		StringBuffer sig = new StringBuffer(10);
+		StringBuilder sig = new StringBuilder(10);
 
 		sig.append(typeBinding.signature());
 
@@ -1935,7 +1935,7 @@ public final class CompletionEngine
 			CompletionOnSingleTypeReference completionOnSingleTypeReference = (CompletionOnSingleTypeReference) astNode;
 			if (completionOnSingleTypeReference.isConstructorType) {
 				context.setTokenLocation(CompletionContext.TL_CONSTRUCTOR_START);
-			} else if (astNodeParent instanceof LambdaExpression) {
+			} else if (astNodeParent instanceof LambdaExpression || astNodeParent instanceof LocalDeclaration) {
 				context.setTokenLocation(CompletionContext.TL_STATEMENT_START);
 			}
 		} else if (astNode instanceof CompletionOnQualifiedTypeReference) {
@@ -2076,8 +2076,10 @@ public final class CompletionEngine
 			completionOnMarkerAnnotationName(astNode, qualifiedBinding, scope);
 		} else if (astNode instanceof CompletionOnMemberValueName) {
 			completionOnMemberValueName(astNode, astNodeParent, scope, insideTypeAnnotation);
-		} else if(astNode instanceof CompletionOnBranchStatementLabel) {
-			completionOnBranchStatementLabel(astNode);
+		} else if(astNode instanceof CompletionOnBreakStatement) {
+			completionOnBreakStatement((CompletionOnBreakStatement) astNode);
+		} else if(astNode instanceof CompletionOnContinueStatement) {
+			completionOnContinueStatement((CompletionOnContinueStatement) astNode);
 		} else if(astNode instanceof CompletionOnMessageSendName) {
 			completionOnMessageSendName(astNode, qualifiedBinding, scope);
 		} else if (astNode instanceof CompletionOnReferenceExpressionName) {
@@ -2710,11 +2712,17 @@ public final class CompletionEngine
 		}
 	}
 
-	private void completionOnBranchStatementLabel(ASTNode astNode) {
+	private void completionOnBreakStatement(CompletionOnBreakStatement astNode) {
 		if (!this.requestor.isIgnored(CompletionProposal.LABEL_REF)) {
-			CompletionOnBranchStatementLabel label = (CompletionOnBranchStatementLabel) astNode;
-			this.completionToken = label.label;
-			findLabels(this.completionToken, label.possibleLabels);
+			this.completionToken = astNode.label;
+			findLabels(this.completionToken, astNode.possibleLabels);
+		}
+	}
+
+	private void completionOnContinueStatement(CompletionOnContinueStatement astNode) {
+		if (!this.requestor.isIgnored(CompletionProposal.LABEL_REF)) {
+			this.completionToken = astNode.label;
+			findLabels(this.completionToken, astNode.possibleLabels);
 		}
 	}
 
@@ -3347,17 +3355,15 @@ public final class CompletionEngine
 			if (messageSend.statementEnd > messageSend.sourceStart)
 				setSourceRange(messageSend.sourceStart, messageSend.statementEnd);
 
-			this.insideQualifiedReference = true;
 			this.completionToken = messageSend.selector;
-			boolean onlyStatic = false;
-			if (messageSend.receiver instanceof NameReference) {
-				onlyStatic = ((NameReference)messageSend.receiver).isTypeReference();
-			} else if (!(messageSend.receiver instanceof MessageSend) &&
-					!(messageSend.receiver instanceof FieldReference) &&
-					!(messageSend.receiver.isThis()) &&
-					!(messageSend.receiver.isSuper())) {
-				onlyStatic = true;
+
+			if (messageSend.nextIsCast) {
+				// optionalPrefix|((String) s) was mistaken as a messageSend(?). Treat like beginning of statement.
+				findVariablesAndMethods(this.completionToken, scope, messageSend, scope, false, false);
+				return;
 			}
+
+			this.insideQualifiedReference = true;
 
 			TypeBinding receiverType = (TypeBinding)qualifiedBinding;
 
@@ -3371,7 +3377,7 @@ public final class CompletionEngine
 							(ReferenceBinding)receiverType.capture(scope, messageSend.receiver.sourceStart, messageSend.receiver.sourceEnd),
 							scope,
 							new ObjectVector(),
-							onlyStatic,
+							messageSend.receiver.isType(),
 							false,
 							messageSend,
 							scope,
@@ -3849,6 +3855,27 @@ public final class CompletionEngine
 			// replace to the end of the completion identifier
 			findTypesAndSubpackages(this.completionToken, (PackageBinding) qualifiedBinding, scope);
 		}
+		ASTNode parentNode = this.parser.assistNodeParent;
+		if (ref.tokens.length > 0 && parentNode instanceof LocalDeclaration && ((LocalDeclaration) parentNode).type == ref) {
+			// additionally check if 'prefix.' should be interpreted as a variable receiver rather then part of a type reference:
+			Binding variable = scope.getBinding(ref.tokens[0], Binding.VARIABLE, FakeInvocationSite, true);
+			lookupViaVariable: if (variable instanceof VariableBinding) {
+				TypeBinding receiverType = ((VariableBinding) variable).type;
+				int len = ref.tokens.length;
+				for (int i=1; i<len; i++) {
+					// lookup subsequent fields in 'prefix.q.r.'
+					if (!(receiverType instanceof ReferenceBinding && receiverType.isValidBinding()))
+						break lookupViaVariable;
+					FieldBinding field = scope.getField(receiverType, ref.tokens[i], FakeInvocationSite);
+					if (!field.isValidBinding())
+						break lookupViaVariable;
+					receiverType = field.type;
+				}
+				if (receiverType instanceof ReferenceBinding && receiverType.isValidBinding()) {
+					findFieldsAndMethods(this.completionToken, receiverType, scope, new ObjectVector(), new ObjectVector(), FakeInvocationSite, scope, false, false, null, null, null, false, null, ref.sourceStart, (int)ref.sourcePositions[0]);
+				}
+			}
+		}
 	}
 
 	private void completionOnProvidesInterfacesQualifiedTypeReference(ASTNode astNode, ASTNode astNodeParent, Binding qualifiedBinding, Scope scope) {
@@ -4011,6 +4038,15 @@ public final class CompletionEngine
 				null,
 				false);
 		}
+		ASTNode parentNode = this.parser.assistNodeParent;
+		if (parentNode instanceof LocalDeclaration && ((LocalDeclaration) parentNode).type == singleRef) {
+			// additionally check if this identifier should be interpreted as the beginning of an expression rather than the type of a variable declaration.
+			TypeBinding receiverType = scope.enclosingReceiverType();
+			if (receiverType != null && receiverType.isValidBinding()) {
+				findVariablesAndMethods(this.completionToken, scope, FakeInvocationSite, scope, false, false);
+			}
+		}
+
 	}
 
 	private void completionOnProvidesInterfacesSingleTypeReference(ASTNode astNode, ASTNode astNodeParent, Binding qualifiedBinding, Scope scope) {
@@ -4629,15 +4665,21 @@ public final class CompletionEngine
 				continue nextMethod;
 
 			int length = arguments.length - 1;
+			int completionArgIndex = arguments.length - 1;
 
 			for (int j = 0; j < length; j++) {
 				Expression argument = arguments[j];
 				TypeBinding argType = argument.resolvedType;
 				if(argType != null && !argType.erasure().isCompatibleWith(parameters[j].erasure()))
 					continue nextMethod;
+
+				if((argument.sourceStart >= this.startPosition)
+						&& (argument.sourceEnd <= this.endPosition)) {
+					completionArgIndex = j;
+				}
 			}
 
-			TypeBinding expectedType = method.parameters[arguments.length - 1];
+			TypeBinding expectedType = method.parameters[completionArgIndex];
 			if(expectedType != null) {
 				addExpectedType(expectedType, scope);
 			}
@@ -4756,7 +4798,7 @@ public final class CompletionEngine
 
 	private char[] computePrefix(SourceTypeBinding declarationType, SourceTypeBinding invocationType, boolean isStatic){
 
-		StringBuffer completion = new StringBuffer(10);
+		StringBuilder completion = new StringBuilder(10);
 
 		if (isStatic) {
 			completion.append(declarationType.sourceName());
@@ -6713,10 +6755,12 @@ public final class CompletionEngine
 			char[][] alreadyUsedConstants = new char[switchStatement.caseCount][];
 			int alreadyUsedConstantCount = 0;
 			for (int i = 0; i < switchStatement.caseCount; i++) {
-				Expression caseExpression = cases[i].constantExpression;
+				Expression[] caseExpressions = cases[i].constantExpressions;
+				Expression caseExpression = caseExpressions != null && caseExpressions.length > 0 ?
+						caseExpressions[0] : null;
 				if((caseExpression instanceof SingleNameReference)
 						&& (caseExpression.resolvedType != null && caseExpression.resolvedType.isEnum())) {
-					alreadyUsedConstants[alreadyUsedConstantCount++] = ((SingleNameReference)cases[i].constantExpression).token;
+					alreadyUsedConstants[alreadyUsedConstantCount++] = ((SingleNameReference)caseExpression).token;
 				}
 			}
 
@@ -13638,7 +13682,7 @@ public final class CompletionEngine
 
 	private char[] getCompletedTypeSignature(ReferenceBinding referenceBinding) {
 		char[] result = null;
-		StringBuffer sig = new StringBuffer(10);
+		StringBuilder sig = new StringBuilder(10);
 		if (!referenceBinding.isMemberType()) {
 			char[] typeSig = referenceBinding.genericTypeSignature();
 			sig.append(typeSig, 0, typeSig.length);

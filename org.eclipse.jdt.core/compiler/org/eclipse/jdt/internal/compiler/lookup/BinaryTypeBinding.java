@@ -2860,7 +2860,7 @@ public String toString() {
 	if (this.hasTypeAnnotations())
 		return annotatedDebugName();
 
-	StringBuffer buffer = new StringBuffer();
+	StringBuilder buffer = new StringBuilder();
 
 	if (isDeprecated()) buffer.append("deprecated "); //$NON-NLS-1$
 	if (isPublic()) buffer.append("public "); //$NON-NLS-1$
