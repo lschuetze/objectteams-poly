@@ -1987,7 +1987,9 @@ public class Dependencies implements ITranslationStates {
         	} else if (clazz.isTeam()) {
         		if (type.memberTypes != null) {
         			for (int i = 0; i < type.memberTypes.length; i++) {
-						establishStatementsTransformed(type.memberTypes[i].getRoleModel());
+						TypeDeclaration typeDeclaration = type.memberTypes[i];
+						if (typeDeclaration.isRole()) // not for member enums etc
+							establishStatementsTransformed(typeDeclaration.getRoleModel());
 					}
         		}
         	}
