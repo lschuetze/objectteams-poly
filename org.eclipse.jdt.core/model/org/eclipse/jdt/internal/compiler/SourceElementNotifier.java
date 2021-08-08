@@ -1011,7 +1011,10 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
 			typeInfo.modifiers = deprecated
 					? (currentModifiers & ExtraCompilerModifiers.AccOTTypeJustFlag) | ClassFileConstants.AccDeprecated
 					: currentModifiers & ExtraCompilerModifiers.AccOTTypeJustFlag;
+// orig:
+			typeInfo.modifiers |= currentModifiers & (ExtraCompilerModifiers.AccSealed | ExtraCompilerModifiers.AccNonSealed);
 			typeInfo.name = typeDeclaration.name;
+// :giro
 			// existing __OT__ prefix and special treatment for o.o.Team.Confined:
 			if (CharOperation.prefixEquals(IOTConstants.OT_DELIM_NAME, typeInfo.name)) {
 				typeInfo.name = CharOperation.subarray(typeInfo.name, IOTConstants.OT_DELIM_LEN, -1);
