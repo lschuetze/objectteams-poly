@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2021 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -34,7 +34,6 @@ import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 /**
  *
  * @author michael
- * @version $Id: OTModelManagerTest.java 23494 2010-02-05 23:06:44Z stephan $
  *
  */
 public class OTModelManagerTest extends FileBasedModelTest {
@@ -97,6 +96,12 @@ public class OTModelManagerTest extends FileBasedModelTest {
         _T21T10T00 = TypeHelper.findNestedRoleType(_T21, "T21.T10.T00");
         _T21T11T00 = TypeHelper.findNestedRoleType(_T21, "T21.T11.T00");
     }
+
+	@Override
+	protected void setUp() throws Exception {
+		this.indexDisabledForTest = false;
+		super.setUp();
+	}
 
 	public void testCreation()
 	{

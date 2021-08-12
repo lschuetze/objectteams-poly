@@ -28,17 +28,15 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
-import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
+import org.eclipse.objectteams.otdt.tests.hierarchy.FileBasedHierarchyTest;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 
 /**
  *
  * @author michael
- * @version $Id: OTSuperTypeHierarchyTest009.java 23494 2010-02-05 23:06:44Z stephan $
- *
  */
-public class OTSuperTypeHierarchyTest009 extends FileBasedModelTest {
+public class OTSuperTypeHierarchyTest009 extends FileBasedHierarchyTest {
 
 	@SuppressWarnings("unused")
 	private ITypeHierarchy _testObj;

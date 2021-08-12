@@ -28,7 +28,7 @@ Export-Package: org.eclipse.objectteams.otdt.internal.refactoring.adaptor;x-inte
  org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.extractcallin;x-internal:=true,
  org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.inlinecallin;x-internal:=true,
  org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.rolefile;x-friends:="org.eclipse.objectteams.otdt.ui.tests.refactoring",
- org.eclipse.objectteams.otdt.internal.refactoring.util;x-internal:=true
+ org.eclipse.objectteams.otdt.internal.refactoring.util;x-friends:="org.eclipse.objectteams.otdt.ui.tests.refactoring"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.objectteams.otdt.internal.refactoring.OTRefactoringPlugin
