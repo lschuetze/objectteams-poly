@@ -262,7 +262,7 @@ then
 		# cp -pr ${MASTER}/* ${DEST}/
 	# fi
 	ssh ${TARGET_HOST} "/bin/rm -r ${TARGET_BASEDIR}/${DEST_REL} || true"
-	scp -r . ${TARGET_HOST}:${TARGET_BASEDIR}/${DEST_REL}
+	scp -r `pwd` ${TARGET_HOST}:${TARGET_BASEDIR}/${DEST_REL}
 	echo "Installed to ${TARGET_HTTPS}/${DEST_REL}"
 fi
 echo "====DONE===="
