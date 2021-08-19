@@ -1432,12 +1432,6 @@ private void buildMoreTryStatementCompletionContext(TypeReference exceptionRef) 
 		this.currentElement = this.currentElement.add(exceptionRef, 0);
 	}
 }
-//{ObjectTeams: ... monkey do FIXME: weg damit??
-@Override
-public int bodyEnd(AbstractMethodMappingDeclaration mapping){
-	return this.cursorLocation;
-}
-// SH}
 @Override
 public int bodyEnd(Initializer initializer){
 	return this.cursorLocation;
