@@ -922,6 +922,7 @@ public void testBug574338_from574215c14() throws CoreException {
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
 		assertResults(
+				"for[KEYWORD]{for, null, null, for, null, 49}\n" +
 				"fooo[LOCAL_VARIABLE_REF]{fooo, null, Ljava.lang.String;, fooo, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_UNQUALIFIED + R_NON_RESTRICTED) + "}",
 				requestor.getResults());
 	} finally {
@@ -953,6 +954,7 @@ public void testBug574704() throws Exception {
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
 		int relevance = R_DEFAULT + R_INTERESTING + R_RESOLVED + R_CASE + R_UNQUALIFIED + R_NON_RESTRICTED;
 		assertResults(
+				"Cast[TYPE_REF]{Cast, , LCast;, null, null, "+relevance+"}\n" +
 				"clone[METHOD_REF]{clone(), Ljava.lang.Object;, ()Ljava.lang.Object;, clone, null, " + relevance + "}\n" +
 				"equals[METHOD_REF]{equals(), Ljava.lang.Object;, (Ljava.lang.Object;)Z, equals, (obj), " + relevance + "}\n" +
 				"field[FIELD_REF]{field, LCast;, Ljava.lang.Object;, field, null, " + relevance + "}\n" +
@@ -996,7 +998,9 @@ public void testBug574704_withPrefix() throws Exception {
 		int cursorLocation = str.indexOf(completeBefore);
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
 		int relevance = R_DEFAULT + R_INTERESTING + R_RESOLVED + R_CASE + R_UNQUALIFIED + R_NON_RESTRICTED;
+		int relevanceNoCase = R_DEFAULT + R_INTERESTING + R_RESOLVED + R_UNQUALIFIED + R_NON_RESTRICTED;
 		assertResults(
+				"Object[TYPE_REF]{Object, java.lang, Ljava.lang.Object;, null, null, "+relevanceNoCase+"}\n" +
 				"oArg[LOCAL_VARIABLE_REF]{oArg, null, Ljava.lang.Object;, oArg, null, "+relevance+"}\n" +
 				"oField[FIELD_REF]{oField, LCast;, Ljava.lang.Object;, oField, null, " + relevance + "}",
 				requestor.getResults());
@@ -1130,6 +1134,129 @@ public void testBug575032b() throws Exception {
 		int relevance = R_DEFAULT + R_INTERESTING + R_RESOLVED + R_CASE + R_NON_STATIC + R_NON_RESTRICTED;
 		assertResults(
 			"set[METHOD_REF]{set(), LAtomicInteger;, (I)V, set, (i), "+relevance+"}",
+			requestor.getResults());
+	} finally {
+		deleteProject("P");
+	}
+}
+public void testBug574979() throws Exception {
+	try {
+		createJavaProject("P", new String[] {"src"}, new String[]{"JCL17_LIB"}, "bin", "1.7");
+		this.workingCopies = new ICompilationUnit[1];
+		this.workingCopies[0] = getWorkingCopy(
+			"/P/src/Bug.java",
+			"public class Bug {\n" +
+			"	void test (Object o) {\n" +
+			"		if (true) {\n" +
+			"			Str\n" +
+			"			((String) o).toCharArray();\n" +
+			"		}\n" +
+			"	}\n" +
+			"}\n");
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+		String str = this.workingCopies[0].getSource();
+		String completeAfter = "Str";
+		int cursorLocation = str.indexOf(completeAfter) + completeAfter.length();
+		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+		int relevance = R_DEFAULT + R_INTERESTING + R_RESOLVED + R_CASE + R_UNQUALIFIED + R_NON_RESTRICTED;
+		assertResults(
+			"String[TYPE_REF]{String, java.lang, Ljava.lang.String;, null, null, "+relevance+"}",
+			requestor.getResults());
+	} finally {
+		deleteProject("P");
+	}
+}
+public void testBug575397a() throws Exception {
+	try {
+		createJavaProject("P", new String[] {"src"}, new String[]{"JCL11_LIB"}, "bin", "11");
+		this.workingCopies = new ICompilationUnit[1];
+		this.workingCopies[0] = getWorkingCopy(
+			"/P/src/ContentAssist.java",
+			"class Thread {\n" +
+			"	static void sleep(int millis) {}\n" +
+			"}\n" +
+			"public class ContentAssist {\n" +
+			"	protected void test() {\n" +
+			"		if (true) {\n" +
+			"			Thread.\n" +
+			"			someMethod();\n" +
+			"		}\n" +
+			"	}\n" +
+			"	void someMethod() { }\n" +
+			"}\n");
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+		String str = this.workingCopies[0].getSource();
+		String completeAfter = "Thread.";
+		int cursorLocation = str.indexOf(completeAfter) + completeAfter.length();
+		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+		assertResults(
+			"sleep[METHOD_REF]{sleep(), LThread;, (I)V, sleep, (millis), 51}",
+			requestor.getResults());
+	} finally {
+		deleteProject("P");
+	}
+}
+public void testBug575397b() throws Exception {
+	try {
+		createJavaProject("P", new String[] {"src"}, new String[]{"JCL11_LIB"}, "bin", "11");
+		this.workingCopies = new ICompilationUnit[1];
+		this.workingCopies[0] = getWorkingCopy(
+			"/P/src/ContentAssist.java",
+			"class Thread {\n" +
+			"	static void sleep(int millis) {}\n" +
+			"	public enum State { NEW, BLOCKED }\n" +
+			"}\n" +
+			"public class ContentAssist {\n" +
+			"	protected void test() {\n" +
+			"		if (true) {\n" +
+			"			Thread.Sta\n" +
+			"			someMethod();\n" +
+			"		}\n" +
+			"	}\n" +
+			"	void someMethod() { }\n" +
+			"}\n");
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+		String str = this.workingCopies[0].getSource();
+		String completeAfter = "Thread.Sta";
+		int cursorLocation = str.indexOf(completeAfter) + completeAfter.length();
+		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+		assertResults(
+			"Thread.State[TYPE_REF]{State, , LThread$State;, null, null, 49}",
+			requestor.getResults());
+	} finally {
+		deleteProject("P");
+	}
+}
+public void testBug575397c() throws Exception {
+	try {
+		createJavaProject("P", new String[] {"src"}, new String[]{"JCL11_LIB"}, "bin", "11");
+		this.workingCopies = new ICompilationUnit[1];
+		this.workingCopies[0] = getWorkingCopy(
+			"/P/src/ContentAssist.java",
+			"class Thread {\n" +
+			"	static void sleep(int millis) {}\n" +
+			"	public enum State { NEW, BLOCKED }\n" +
+			"}\n" +
+			"public class ContentAssist {\n" +
+			"	protected void test() {\n" +
+			"		if (true) {\n" +
+			"			Thread.State.\n" +
+			"			someMethod();\n" +
+			"		}\n" +
+			"	}\n" +
+			"	void someMethod() { }\n" +
+			"}\n");
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+		String str = this.workingCopies[0].getSource();
+		String completeAfter = "Thread.State.";
+		int cursorLocation = str.indexOf(completeAfter) + completeAfter.length();
+		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+		assertResults(
+			"serialVersionUID[FIELD_REF]{serialVersionUID, Ljava.lang.Enum<LThread$State;>;, J, serialVersionUID, null, 49}\n" +
+			"BLOCKED[FIELD_REF]{BLOCKED, LThread$State;, LThread$State;, BLOCKED, null, 51}\n" +
+			"NEW[FIELD_REF]{NEW, LThread$State;, LThread$State;, NEW, null, 51}\n" +
+			"valueOf[METHOD_REF]{valueOf(), LThread$State;, (Ljava.lang.String;)LThread$State;, valueOf, (arg0), 51}\n" +
+			"values[METHOD_REF]{values(), LThread$State;, ()[LThread$State;, values, null, 51}",
 			requestor.getResults());
 	} finally {
 		deleteProject("P");

@@ -20,6 +20,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.codeassist.complete;
 
+import java.util.ArrayList;
+
 /*
  * Parser able to build specific completion parse nodes, given a cursorLocation.
  *
@@ -31,6 +33,7 @@ package org.eclipse.jdt.internal.codeassist.complete;
  */
 
 import java.util.HashSet;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.compiler.*;
@@ -1973,7 +1976,6 @@ private boolean checkLabelStatement() {
 	}
 	return false;
 }
-
 /**
  * Checks if the completion is on a member access (i.e. in an identifier following a dot).
  * Returns whether we found a completion node.
@@ -5381,7 +5383,7 @@ private TypeReference checkAndCreateModuleQualifiedAssistTypeReference(char[][] 
 		if (isAfterWithClause()) return new CompletionOnProvidesImplementationsQualifiedTypeReference(previousIdentifiers, assistName, positions);
 		return new CompletionOnProvidesInterfacesQualifiedTypeReference(previousIdentifiers, assistName, positions);
 	}
-	return new CompletionOnQualifiedTypeReference(previousIdentifiers,	assistName,	positions);
+	return null;
 }
 @Override
 public TypeReference createQualifiedAssistTypeReference(char[][] previousIdentifiers, char[] assistName, long[] positions){
@@ -5407,10 +5409,14 @@ public TypeReference createQualifiedAssistTypeReference(char[][] previousIdentif
 					positions,
 					CompletionOnQualifiedTypeReference.K_INTERFACE);
 		default :
-			return checkAndCreateModuleQualifiedAssistTypeReference(
+			TypeReference ref = checkAndCreateModuleQualifiedAssistTypeReference(
 					previousIdentifiers,
 					assistName,
 					positions);
+			if (ref != null)
+				return ref;
+			return new CompletionOnQualifiedTypeReference(previousIdentifiers, assistName, positions,
+					CompletionOnQualifiedTypeReference.K_TYPE, this.currentToken);
 	}
 }
 @Override
@@ -5485,130 +5491,9 @@ public NameReference createSingleAssistNameReference(char[] assistName, long pos
 			&& topKnownElementInfo(COMPLETION_OR_ASSIST_PARSER) == SWITCH) {
 			return new CompletionOnKeyword3(assistName, position, new char[][]{Keywords.CASE, Keywords.DEFAULT}, false);
 		} else {
-			char[][] keywords = new char[Keywords.COUNT][];
-			int count = 0;
-
-			if((this.lastModifiers & ClassFileConstants.AccStatic) == 0) {
-				keywords[count++]= Keywords.SUPER;
-				keywords[count++]= Keywords.THIS;
-//{ObjectTeams: OT specific keyword:
-				keywords[count++]= Keywords.TSUPER;
-// SH}
-			}
-			keywords[count++]= Keywords.NEW;
-			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=269493: Keywords are not proposed in a for
-			// loop without block. Completion while at K_CONTROL_STATEMENT_DELIMITER case needs to handled
-			// similar to the K_BLOCK_DELIMITER with minor differences.
-			if(kind == K_BLOCK_DELIMITER || kind == K_CONTROL_STATEMENT_DELIMITER || kind == K_LAMBDA_EXPRESSION_DELIMITER
-					|| kind == K_SWITCH_EXPRESSION_DELIMITTER) {
-				if(this.canBeExplicitConstructor == YES) {
-					canBeExplicitConstructorCall = true;
-				}
-				if (this.options.complianceLevel >= ClassFileConstants.JDK1_4) {
-					keywords[count++]= Keywords.ASSERT;
-				}
-				keywords[count++]= Keywords.DO;
-				keywords[count++]= Keywords.FOR;
-				keywords[count++]= Keywords.IF;
-				keywords[count++]= Keywords.RETURN;
-				keywords[count++]= Keywords.SWITCH;
-				keywords[count++]= Keywords.SYNCHRONIZED;
-				keywords[count++]= Keywords.THROW;
-				keywords[count++]= Keywords.TRY;
-				keywords[count++]= Keywords.WHILE;
-//{ObjectTeams: OT specific keywords/modifiers
-				// within a block only a restricted set is allowed:
-				// (note that CLASS below refers to local classes!)
-				keywords[count++]= Keywords.WITHIN;
-				keywords[count++]= Keywords.BASE;
-//gbr}
-				keywords[count++]= Keywords.FINAL;
-				keywords[count++]= Keywords.CLASS;
-				if (this.options.complianceLevel >= ClassFileConstants.JDK10) {
-					keywords[count++]= Keywords.VAR;
-				}
-				if (this.options.complianceLevel >= ClassFileConstants.JDK16) {
-					keywords[count++]= Keywords.INTERFACE;
-					keywords[count++]= Keywords.ENUM;
-				}
-
-				if(this.previousKind == K_BLOCK_DELIMITER) {
-					switch (this.previousInfo) {
-						case IF :
-							keywords[count++]= Keywords.ELSE;
-							break;
-						case CATCH :
-							keywords[count++]= Keywords.CATCH;
-							keywords[count++]= Keywords.FINALLY;
-							break;
-					}
-				} else if(this.previousKind == K_CONTROL_STATEMENT_DELIMITER && this.previousInfo == IF) {
-					keywords[count++]= Keywords.ELSE;
-				}
-				if(isInsideLoop()) {
-					keywords[count++]= Keywords.CONTINUE;
-				}
-				if(isInsideBreakable()) {
-					keywords[count++]= Keywords.BREAK;
-				}
-				if(isInsideSwitch()) {
-					keywords[count++]= Keywords.YIELD;
-				}
-//{ObjectTeams: keywords in parameter mapping:
-			} else if (kind == K_BETWEEN_WITH_AND_RIGHT_PAREN) {
-					keywords[count++] = Keywords.BASE;
-					keywords[count++] = Keywords.RESULT;
-// SH}
-			} else if (kind == K_BETWEEN_FOR_AND_RIGHT_PAREN) {
-				if (this.options.complianceLevel >= ClassFileConstants.JDK10) {
-					keywords[count++]= Keywords.VAR;
-				}
-			} else if(kind != K_BETWEEN_CASE_AND_COLON && kind != K_BETWEEN_DEFAULT_AND_COLON) {
-				if (kind == K_LOCAL_INITIALIZER_DELIMITER && this.options.complianceLevel >= ClassFileConstants.JDK11) {
-					keywords[count++]= Keywords.VAR;
-				}
-				if (kind == K_SELECTOR_QUALIFIER && this.options.complianceLevel >= ClassFileConstants.JDK12) {
-					keywords[count++] = Keywords.SWITCH;
-				}
-				keywords[count++]= Keywords.TRUE;
-				keywords[count++]= Keywords.FALSE;
-				keywords[count++]= Keywords.NULL;
-				if (kind == K_YIELD_KEYWORD) {
-					keywords[count++]= Keywords.YIELD;
-				}
-				if(kind == K_SWITCH_LABEL) {
-					if(topKnownElementInfo(COMPLETION_OR_ASSIST_PARSER) != DEFAULT) {
-						keywords[count++]= Keywords.DEFAULT;
-					}
-					keywords[count++]= Keywords.BREAK;
-					keywords[count++]= Keywords.CASE;
-					keywords[count++]= Keywords.YIELD;
-					if (this.options.complianceLevel >= ClassFileConstants.JDK1_4) {
-						keywords[count++]= Keywords.ASSERT;
-					}
-					keywords[count++]= Keywords.DO;
-					keywords[count++]= Keywords.FOR;
-					keywords[count++]= Keywords.IF;
-					keywords[count++]= Keywords.RETURN;
-					keywords[count++]= Keywords.SWITCH;
-					keywords[count++]= Keywords.SYNCHRONIZED;
-					keywords[count++]= Keywords.THROW;
-					keywords[count++]= Keywords.TRY;
-					keywords[count++]= Keywords.WHILE;
-
-					keywords[count++]= Keywords.FINAL;
-					keywords[count++]= Keywords.CLASS;
-
-					if (this.options.complianceLevel >= ClassFileConstants.JDK10) {
-						keywords[count++]= Keywords.VAR;
-					}
-					if(isInsideLoop()) {
-						keywords[count++]= Keywords.CONTINUE;
-					}
-				}
-			}
-			System.arraycopy(keywords, 0 , keywords = new char[count][], 0, count);
-
+			List<char[]> keywordsList = new ArrayList<>(Keywords.COUNT);
+			canBeExplicitConstructorCall = computeKeywords(kind, keywordsList);
+			char[][] keywords = keywordsList.toArray(char[][]::new);
 			return new CompletionOnSingleNameReference(assistName, position, keywords, canBeExplicitConstructorCall, isInsideAttributeValue()
 //{ObjectTeams: isBaseAccess? isTSuperAccess?
 					, (this.invocationType == BASE_RECEIVER), (this.invocationType == TSUPER_RECEIVER)
@@ -5617,13 +5502,140 @@ public NameReference createSingleAssistNameReference(char[] assistName, long pos
 		}
 	}
 }
+boolean computeKeywords(int kind, List<char[]> keywords) {
+	boolean canBeExplicitConstructorCall = false;
+
+	if((this.lastModifiers & ClassFileConstants.AccStatic) == 0) {
+		keywords.add(Keywords.SUPER);
+		keywords.add(Keywords.THIS);
+//{ObjectTeams: OT specific keyword:
+		keywords.add(Keywords.TSUPER);
+//SH}
+	}
+	keywords.add(Keywords.NEW);
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=269493: Keywords are not proposed in a for
+	// loop without block. Completion while at K_CONTROL_STATEMENT_DELIMITER case needs to handled
+	// similar to the K_BLOCK_DELIMITER with minor differences.
+	if(kind == K_BLOCK_DELIMITER || kind == K_CONTROL_STATEMENT_DELIMITER || kind == K_LAMBDA_EXPRESSION_DELIMITER
+			|| kind == K_SWITCH_EXPRESSION_DELIMITTER) {
+		if(this.canBeExplicitConstructor == YES) {
+			canBeExplicitConstructorCall = true;
+		}
+		if (this.options.complianceLevel >= ClassFileConstants.JDK1_4) {
+			keywords.add(Keywords.ASSERT);
+		}
+		keywords.add(Keywords.DO);
+		keywords.add(Keywords.FOR);
+		keywords.add(Keywords.IF);
+		keywords.add(Keywords.RETURN);
+		keywords.add(Keywords.SWITCH);
+		keywords.add(Keywords.SYNCHRONIZED);
+		keywords.add(Keywords.THROW);
+		keywords.add(Keywords.TRY);
+		keywords.add(Keywords.WHILE);
+//{ObjectTeams: OT specific keywords/modifiers
+		// within a block only a restricted set is allowed:
+		// (note that CLASS below refers to local classes!)
+		keywords.add(Keywords.WITHIN);
+		keywords.add(Keywords.BASE);
+//gbr}
+
+		keywords.add(Keywords.FINAL);
+		keywords.add(Keywords.CLASS);
+		if (this.options.complianceLevel >= ClassFileConstants.JDK10) {
+			keywords.add(Keywords.VAR);
+		}
+		if (this.options.complianceLevel >= ClassFileConstants.JDK16) {
+			keywords.add(Keywords.INTERFACE);
+			keywords.add(Keywords.ENUM);
+		}
+
+		if(this.previousKind == K_BLOCK_DELIMITER) {
+			switch (this.previousInfo) {
+				case IF :
+					keywords.add(Keywords.ELSE);
+					break;
+				case CATCH :
+					keywords.add(Keywords.CATCH);
+					keywords.add(Keywords.FINALLY);
+					break;
+			}
+		} else if(this.previousKind == K_CONTROL_STATEMENT_DELIMITER && this.previousInfo == IF) {
+			keywords.add(Keywords.ELSE);
+		}
+		if(isInsideLoop()) {
+			keywords.add(Keywords.CONTINUE);
+		}
+		if(isInsideBreakable()) {
+			keywords.add(Keywords.BREAK);
+		}
+		if(isInsideSwitch()) {
+			keywords.add(Keywords.YIELD);
+		}
+		//{ObjectTeams: keywords in parameter mapping:
+	} else if (kind == K_BETWEEN_WITH_AND_RIGHT_PAREN) {
+		keywords.add(Keywords.BASE);
+		keywords.add(Keywords.RESULT);
+//SH}
+	} else if (kind == K_BETWEEN_FOR_AND_RIGHT_PAREN) {
+		if (this.options.complianceLevel >= ClassFileConstants.JDK10) {
+			keywords.add(Keywords.VAR);
+		}
+	} else if(kind != K_BETWEEN_CASE_AND_COLON && kind != K_BETWEEN_DEFAULT_AND_COLON) {
+		if (kind == K_LOCAL_INITIALIZER_DELIMITER && this.options.complianceLevel >= ClassFileConstants.JDK11) {
+			keywords.add(Keywords.VAR);
+		}
+		if (kind == K_SELECTOR_QUALIFIER && this.options.complianceLevel >= ClassFileConstants.JDK12) {
+			keywords.add(Keywords.SWITCH);
+		}
+		keywords.add(Keywords.TRUE);
+		keywords.add(Keywords.FALSE);
+		keywords.add(Keywords.NULL);
+		if (kind == K_YIELD_KEYWORD) {
+			keywords.add(Keywords.YIELD);
+		}
+		if(kind == K_SWITCH_LABEL) {
+			if(topKnownElementInfo(COMPLETION_OR_ASSIST_PARSER) != DEFAULT) {
+				keywords.add(Keywords.DEFAULT);
+			}
+			keywords.add(Keywords.BREAK);
+			keywords.add(Keywords.CASE);
+			keywords.add(Keywords.YIELD);
+			if (this.options.complianceLevel >= ClassFileConstants.JDK1_4) {
+				keywords.add(Keywords.ASSERT);
+			}
+			keywords.add(Keywords.DO);
+			keywords.add(Keywords.FOR);
+			keywords.add(Keywords.IF);
+			keywords.add(Keywords.RETURN);
+			keywords.add(Keywords.SWITCH);
+			keywords.add(Keywords.SYNCHRONIZED);
+			keywords.add(Keywords.THROW);
+			keywords.add(Keywords.TRY);
+			keywords.add(Keywords.WHILE);
+
+			keywords.add(Keywords.FINAL);
+			keywords.add(Keywords.CLASS);
+
+			if (this.options.complianceLevel >= ClassFileConstants.JDK10) {
+				keywords.add(Keywords.VAR);
+			}
+			if(isInsideLoop()) {
+				keywords.add(Keywords.CONTINUE);
+			}
+		}
+	}
+	return canBeExplicitConstructorCall;
+}
 private TypeReference checkAndCreateModuleSingleAssistTypeReference(char[] assistName, long position) {
 	if (isInUsesStatement()) return new CompletionOnUsesSingleTypeReference(assistName, position);
 	if (isInProvidesStatement()) {
 		if (isAfterWithClause()) return new CompletionOnProvidesImplementationsSingleTypeReference(assistName, position);
 		return new CompletionOnProvidesInterfacesSingleTypeReference(assistName, position);
 	}
-	return new CompletionOnSingleTypeReference(assistName,position);
+	List<char[]> keywords = new ArrayList<>(Keywords.COUNT);
+	boolean canBeCtorCall = computeKeywords(topKnownElementKind(COMPLETION_OR_ASSIST_PARSER), keywords);
+	return new CompletionOnSingleTypeReference(assistName,position, keywords.toArray(char[][]::new), canBeCtorCall);
 }
 @Override
 public TypeReference createSingleAssistTypeReference(char[] assistName, long position) {
@@ -5830,6 +5842,14 @@ protected NameReference getUnspecifiedReference(boolean rejectTypeAnnotations) {
 		recordReference(ref);
 	}
 	return ref;
+}
+@Override
+protected void updateSourcePosition(Expression exp) {
+	// handles total positions of parenthesized expressions, but don't extend position of the assist node:
+	if (exp == this.assistNode)
+		this.intPtr -= 2;
+	else
+		super.updateSourcePosition(exp);
 }
 @Override
 protected void consumePostfixExpression() {
@@ -6509,7 +6529,6 @@ protected void updateRecoveryState() {
 
 	recoveryExitFromVariable();
 }
-
 @Override
 protected CompilationUnitDeclaration endParse(int act) {
 	CompilationUnitDeclaration cud = super.endParse(act);

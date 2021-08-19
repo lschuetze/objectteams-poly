@@ -42,7 +42,7 @@ public abstract class JobManager implements Runnable {
 	    it cannot go beyond 1 */
 	private int enableCount = 1;
 
-	public static boolean VERBOSE = false;
+	public static boolean VERBOSE = true;
 	/* flag indicating that the activation has completed */
 	public boolean activated = false;
 
@@ -137,7 +137,7 @@ public abstract class JobManager implements Runnable {
 	public synchronized void enable() {
 		this.enableCount++;
 		if (VERBOSE)
-			Util.verbose("ENABLING  background indexing"); //$NON-NLS-1$
+			Util.verbose("ENABLING  background indexing "+this.enableCount); //$NON-NLS-1$
 		notifyAll(); // wake up the background thread if it is waiting (context must be synchronized)
 	}
 	protected synchronized boolean isJobWaiting(IJob request) {

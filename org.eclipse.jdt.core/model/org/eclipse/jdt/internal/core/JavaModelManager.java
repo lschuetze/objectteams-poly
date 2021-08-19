@@ -148,7 +148,6 @@ import org.eclipse.jdt.internal.core.search.IRestrictedAccessTypeRequestor;
 import org.eclipse.jdt.internal.core.search.JavaWorkspaceScope;
 import org.eclipse.jdt.internal.core.search.indexing.IndexManager;
 import org.eclipse.jdt.internal.core.search.processing.IJob;
-import org.eclipse.jdt.internal.core.search.processing.JobManager;
 import org.eclipse.jdt.internal.core.util.HashtableOfArrayToObject;
 import org.eclipse.jdt.internal.core.util.LRUCache;
 import org.eclipse.jdt.internal.core.util.Messages;
@@ -187,7 +186,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	private static final String ASSUMED_EXTERNAL_FILES_CACHE = "assumedExternalFilesCache";  //$NON-NLS-1$
 
 	public static enum ArchiveValidity {
-		BAD_FORMAT, UNABLE_TO_READ, FILE_NOT_FOUND, VALID;
+		INVALID, VALID;
 
 		public boolean isValid() {
 			return this == VALID;
@@ -1335,7 +1334,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		}
 
 		public synchronized ClasspathChange resetResolvedClasspath() {
-			// clear non-chaining jars cache and invalid jars cache
+			// clear non-chaining jars cache and external jars cache
 			JavaModelManager.getJavaModelManager().resetClasspathListCache();
 
 			// null out resolved information
@@ -1627,11 +1626,10 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	}
 
 	/*
-	 * A map of IPaths for jars that are known to be invalid (such as not being in a valid/known format), to an eviction timestamp.
-	 * Synchronize on invalidArchivesMutex before accessing.
+	 * A map of IPaths for jars with known validity (such as being in a valid/known format or not), to an eviction timestamp.
+	 * Synchronize on invalidArchives before accessing.
 	 */
 	private final Map<IPath, InvalidArchiveInfo> invalidArchives = new HashMap<>();
-	private final Object invalidArchivesMutex = new Object();
 
 	/*
 	 * A set of IPaths for files that are known to be external to the workspace.
@@ -1803,9 +1801,9 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 
 	public void addInvalidArchive(IPath path, ArchiveValidity reason) {
 		if (DEBUG_INVALID_ARCHIVES) {
-			System.out.println("Invalid JAR cache: adding " + path + ", reason: " + reason);  //$NON-NLS-1$//$NON-NLS-2$
+			System.out.println("JAR cache: adding " + reason + " " + path);  //$NON-NLS-1$//$NON-NLS-2$
 		}
-		synchronized (this.invalidArchivesMutex) {
+		synchronized (this.invalidArchives) {
 			this.invalidArchives.put(path, new InvalidArchiveInfo(System.currentTimeMillis() + INVALID_ARCHIVE_TTL_MILLISECONDS, reason));
 		}
 	}
@@ -1879,7 +1877,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 				SourceRangeVerifier.DEBUG |= SourceRangeVerifier.DEBUG_THROW;
 				RewriteEventStore.DEBUG = debug && options.getBooleanOption(DOM_REWRITE_DEBUG, false);
 				TypeHierarchy.DEBUG = debug && options.getBooleanOption(HIERARCHY_DEBUG, false);
-				JobManager.VERBOSE = debug && options.getBooleanOption(INDEX_MANAGER_DEBUG, false);
+//				JobManager.VERBOSE = debug && options.getBooleanOption(INDEX_MANAGER_DEBUG, false);
 				IndexManager.DEBUG = debug && options.getBooleanOption(INDEX_MANAGER_ADVANCED_DEBUG, false);
 				JavaModelManager.DEBUG_CLASSPATH = debug && options.getBooleanOption(JAVAMODEL_CLASSPATH, false);
 				JavaModelManager.DEBUG_INVALID_ARCHIVES = debug && options.getBooleanOption(JAVAMODEL_INVALID_ARCHIVES, false);
@@ -2850,7 +2848,9 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		if (isJrt(path)) {
 			return;
 		}
-		throwExceptionIfArchiveInvalid(path);
+		if (isArchiveStateKnownToBeValid(path)) {
+			return; // known to be valid
+		}
 		ZipFile file = getZipFile(path);
 		closeZipFile(file);
 	}
@@ -2884,7 +2884,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 
 	public ZipFile getZipFile(IPath path, boolean checkInvalidArchiveCache) throws CoreException {
 		if (checkInvalidArchiveCache) {
-			throwExceptionIfArchiveInvalid(path);
+			isArchiveStateKnownToBeValid(path);
 		}
 		ZipCache zipCache;
 		ZipFile zipFile;
@@ -2905,17 +2905,11 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 			if (zipCache != null) {
 				zipCache.setCache(path, zipFile);
 			}
+			addInvalidArchive(path, ArchiveValidity.VALID); // remember its valid
 			return zipFile;
 		} catch (IOException e) {
-			ArchiveValidity reason;
-
-			if (e instanceof ZipException) {
-				reason = ArchiveValidity.BAD_FORMAT;
-			} else if (e instanceof FileNotFoundException) {
-				reason = ArchiveValidity.FILE_NOT_FOUND;
-			} else {
-				reason = ArchiveValidity.UNABLE_TO_READ;
-			}
+			// file may exist but for some reason is inaccessible
+			ArchiveValidity reason=ArchiveValidity.INVALID;
 			addInvalidArchive(path, reason);
 			throw new CoreException(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, -1, Messages.status_IOException, e));
 		}
@@ -2941,18 +2935,12 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		return localFile;
 	}
 
-	private void throwExceptionIfArchiveInvalid(IPath path) throws CoreException {
+	private boolean isArchiveStateKnownToBeValid(IPath path) throws CoreException {
 		ArchiveValidity validity = getArchiveValidity(path);
-		IOException reason;
-		switch (validity) {
-			case BAD_FORMAT: reason = new ZipException("Bad format in archive: " + path); break; //$NON-NLS-1$
-			case FILE_NOT_FOUND: reason = new FileNotFoundException("Archive not found for path: " + path); break; //$NON-NLS-1$
-			case UNABLE_TO_READ: reason = new IOException("Unable to read archive: " + path); break; //$NON-NLS-1$
-			default: reason = null;
+		if (validity == null || validity == ArchiveValidity.INVALID) {
+			return false; // chance the file has become accessible/readable now.
 		}
-		if (reason != null) {
-			throw new CoreException(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, -1, Messages.status_IOException, reason));
-		}
+		return true;
 	}
 
 	/*
@@ -3408,18 +3396,23 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 
 	public ArchiveValidity getArchiveValidity(IPath path) {
 		InvalidArchiveInfo invalidArchiveInfo;
-		synchronized (this.invalidArchivesMutex) {
+		synchronized (this.invalidArchives) {
 			invalidArchiveInfo = this.invalidArchives.get(path);
 		}
-		if (invalidArchiveInfo == null)
-			return ArchiveValidity.VALID;
+		if (invalidArchiveInfo == null) {
+			if (DEBUG_INVALID_ARCHIVES) {
+				System.out.println("JAR cache: UNKNOWN validity for " + path);  //$NON-NLS-1$
+			}
+			return null;
+		}
 		long now = System.currentTimeMillis();
 
 		// If the TTL for this cache entry has expired, directly check whether the archive is still invalid.
 		// If it transitioned to being valid, remove it from the cache and force an update to project caches.
 		if (now > invalidArchiveInfo.evictionTimestamp) {
 			try {
-				getZipFile(path, false);
+				ZipFile zipFile = getZipFile(path, false);
+				closeZipFile(zipFile);
 				removeFromInvalidArchiveCache(path);
 			} catch (CoreException e) {
 				// Archive is still invalid, fall through to reporting it is invalid.
@@ -3427,14 +3420,24 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 			// Retry the test from the start, now that we have an up-to-date result
 			return getArchiveValidity(path);
 		}
+		if (DEBUG_INVALID_ARCHIVES) {
+			System.out.println("JAR cache: " + invalidArchiveInfo.reason + " " + path);  //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		return invalidArchiveInfo.reason;
 	}
 
 	public void removeFromInvalidArchiveCache(IPath path) {
-		synchronized(this.invalidArchivesMutex) {
+		synchronized(this.invalidArchives) {
+			InvalidArchiveInfo entry = this.invalidArchives.get(path);
+			if (entry != null && entry.reason == ArchiveValidity.VALID) {
+				if (DEBUG_INVALID_ARCHIVES) {
+					System.out.println("JAR cache: keep VALID " + path);  //$NON-NLS-1$
+				}
+				return; // do not remove the VALID information
+			}
 			if (this.invalidArchives.remove(path) != null) {
 				if (DEBUG_INVALID_ARCHIVES) {
-					System.out.println("Invalid JAR cache: removed " + path);  //$NON-NLS-1$
+					System.out.println("JAR cache: removed INVALID " + path);  //$NON-NLS-1$
 				}
 				try {
 					// Bug 455042: Force an update of the JavaProjectElementInfo project caches.
@@ -4301,16 +4304,6 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	public void resetClasspathListCache() {
 		if (this.nonChainingJars != null)
 			this.nonChainingJars.clear();
-		if (DEBUG_INVALID_ARCHIVES) {
-			synchronized(this.invalidArchivesMutex) {
-				if (!this.invalidArchives.isEmpty()) {
-					System.out.println("Invalid JAR cache: clearing cache"); //$NON-NLS-1$
-				}
-			}
-		}
-		synchronized(this.invalidArchivesMutex) {
-			this.invalidArchives.clear();
-		}
 		if (this.externalFiles != null)
 			this.externalFiles.clear();
 		if (this.assumedExternalFiles != null)
