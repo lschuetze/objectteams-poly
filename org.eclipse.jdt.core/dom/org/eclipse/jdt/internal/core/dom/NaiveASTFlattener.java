@@ -7,6 +7,9 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -480,6 +483,14 @@ public class NaiveASTFlattener extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(CaseDefaultExpression node) {
+		if (DOMASTUtil.isPatternSupported(node.getAST())) {
+			this.buffer.append("default");//$NON-NLS-1$
+		}
+		return false;
+	}
+
+	@Override
 	public boolean visit(CastExpression node) {
 		this.buffer.append("(");//$NON-NLS-1$
 		node.getType().accept(this);
@@ -804,6 +815,16 @@ public class NaiveASTFlattener extends ASTVisitor {
 		}
 		this.buffer.append(") ");//$NON-NLS-1$
 		node.getBody().accept(this);
+		return false;
+	}
+
+	@Override
+	public boolean visit(GuardedPattern node) {
+		if (DOMASTUtil.isPatternSupported(node.getAST())) {
+			node.getPattern().accept(this);
+			this.buffer.append(" && ");//$NON-NLS-1$
+			node.getExpression().accept(this);
+		}
 		return false;
 	}
 
@@ -1231,6 +1252,14 @@ public class NaiveASTFlattener extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(NullPattern node) {
+		if (DOMASTUtil.isPatternSupported(node.getAST())) {
+			this.buffer.append("null");//$NON-NLS-1$
+		}
+		return false;
+	}
+
+	@Override
 	public boolean visit(NumberLiteral node) {
 		this.buffer.append(node.getToken());
 		return false;
@@ -1594,7 +1623,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 	@Override
 	public boolean visit(SwitchCase node) {
 		if ((node.getAST().apiLevel() >= JLS14)) {
-			if (node.isDefault()) {
+			if (node.isDefault() && !isCaseDefaultExpression(node)) {
 				this.buffer.append("default");//$NON-NLS-1$
 				this.buffer.append(node.isSwitchLabeledRule() ? " ->" : ":");//$NON-NLS-1$ //$NON-NLS-2$
 			} else {
@@ -1608,7 +1637,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 			}
 		}
 		else {
-			if (node.isDefault()) {
+			if (node.isDefault() && !isCaseDefaultExpression(node)) {
 				this.buffer.append("default :\n");//$NON-NLS-1$
 			} else {
 				this.buffer.append("case ");//$NON-NLS-1$
@@ -1617,6 +1646,13 @@ public class NaiveASTFlattener extends ASTVisitor {
 			}
 		}
 		this.indent++; //decremented in visit(SwitchStatement)
+		return false;
+	}
+
+	private boolean isCaseDefaultExpression(SwitchCase node) {
+		if (node.expressions() != null && node.expressions().size() == 1 && node.expressions().get(0) instanceof CaseDefaultExpression) {
+			return true;
+		}
 		return false;
 	}
 	/**
@@ -1919,6 +1955,14 @@ public class NaiveASTFlattener extends ASTVisitor {
 					this.buffer.append(" & ");//$NON-NLS-1$
 				}
 			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean visit(TypePattern node) {
+		if (DOMASTUtil.isPatternSupported(node.getAST())) {
+			node.getPatternVariable().accept(this);
 		}
 		return false;
 	}

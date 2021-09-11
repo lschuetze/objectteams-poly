@@ -325,7 +325,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 //{ObjectTeams: avoid duplicate resolving:
 	  if (this.binding == null) {
 // SH}
-		if (isTypeNameVar) {
+		if (isTypeNameVar && !isPatternVariable) {
 			if ((this.bits & ASTNode.IsForeachElementVariable) == 0) {
 				// infer a type from the initializer
 				if (this.initialization != null) {

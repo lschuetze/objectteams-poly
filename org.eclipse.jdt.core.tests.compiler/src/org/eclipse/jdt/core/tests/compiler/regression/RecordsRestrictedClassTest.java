@@ -7,6 +7,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -20,6 +24,7 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.jdt.core.util.ClassFileBytesDisassembler;
 import org.eclipse.jdt.core.util.ClassFormatException;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 
 import junit.framework.Test;
@@ -48,9 +53,19 @@ public class RecordsRestrictedClassTest extends AbstractRegressionTest {
 		defaultOptions.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_16);
 		defaultOptions.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_16);
 		defaultOptions.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_16);
-		defaultOptions.put(CompilerOptions.OPTION_EnablePreviews, CompilerOptions.ENABLED);
 		defaultOptions.put(CompilerOptions.OPTION_ReportPreviewFeatures, CompilerOptions.IGNORE);
 		defaultOptions.put(CompilerOptions.OPTION_Store_Annotations, CompilerOptions.ENABLED);
+		return defaultOptions;
+	}
+	// Enables the tests to run individually
+	protected Map<String, String> getCompilerOptionsWithPreview() {
+		Map<String, String> defaultOptions = super.getCompilerOptions();
+		defaultOptions.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_17);
+		defaultOptions.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_17);
+		defaultOptions.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_17);
+		defaultOptions.put(CompilerOptions.OPTION_ReportPreviewFeatures, CompilerOptions.IGNORE);
+		defaultOptions.put(CompilerOptions.OPTION_Store_Annotations, CompilerOptions.ENABLED);
+		defaultOptions.put(CompilerOptions.OPTION_EnablePreviews, CompilerOptions.ENABLED);
 		return defaultOptions;
 	}
 
@@ -68,7 +83,7 @@ public class RecordsRestrictedClassTest extends AbstractRegressionTest {
 		runner.expectedOutputString = expectedOutput;
 		runner.vmArguments = new String[] {"--enable-preview"};
 		runner.customOptions = customOptions;
-		runner.javacTestOptions = JavacTestOptions.forReleaseWithPreview("16");
+		runner.javacTestOptions = JavacTestOptions.forRelease("16");
 		runner.runConformTest();
 	}
 	@Override
@@ -91,9 +106,9 @@ public class RecordsRestrictedClassTest extends AbstractRegressionTest {
 		runner.testFiles = testFiles;
 		runner.expectedCompilerLog = expectedCompilerLog;
 		runner.customOptions = customOptions;
-		runner.vmArguments = new String[] {"--enable-preview"};
-		runner.javacTestOptions = javacAdditionalTestOptions == null ? JavacTestOptions.forReleaseWithPreview("16") :
-			JavacTestOptions.forReleaseWithPreview("16", javacAdditionalTestOptions);
+		runner.vmArguments = new String[] {};
+		runner.javacTestOptions = javacAdditionalTestOptions == null ? JavacTestOptions.forRelease("16") :
+			JavacTestOptions.forRelease("16", javacAdditionalTestOptions);
 		runner.runWarningTest();
 	}
 
@@ -179,7 +194,7 @@ public class RecordsRestrictedClassTest extends AbstractRegressionTest {
 		runConformTest(
 				new String[] {
 						"X.java",
-						"class X {\n"+
+						"public class X {\n"+
 						"  public static void main(String[] args){\n"+
 						"     System.out.println(0);\n" +
 						"  }\n"+
@@ -769,7 +784,7 @@ public class RecordsRestrictedClassTest extends AbstractRegressionTest {
 			"1. ERROR in X.java (at line 1)\n" +
 			"	class record {\n" +
 			"	      ^^^^^^\n" +
-			"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+			"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 			"----------\n");
 	}
 	public void testBug550750_033() {
@@ -786,7 +801,7 @@ public class RecordsRestrictedClassTest extends AbstractRegressionTest {
 			"1. ERROR in X.java (at line 1)\n" +
 			"	class X<record> {\n" +
 			"	        ^^^^^^\n" +
-			"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+			"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 			"----------\n");
 	}
 	public void testBug550750_034() {
@@ -804,12 +819,12 @@ public class RecordsRestrictedClassTest extends AbstractRegressionTest {
 			"1. ERROR in X.java (at line 5)\n" +
 			"	public <record> void foo(record args){}\n" +
 			"	        ^^^^^^\n" +
-			"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+			"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 			"----------\n" +
 			"2. ERROR in X.java (at line 5)\n" +
 			"	public <record> void foo(record args){}\n" +
 			"	                         ^^^^^^\n" +
-			"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+			"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 			"----------\n");
 	}
 	public void testBug550750_035() {
@@ -827,7 +842,7 @@ public class RecordsRestrictedClassTest extends AbstractRegressionTest {
 			"1. ERROR in X.java (at line 5)\n" +
 			"	public void foo(record args){}\n" +
 			"	                ^^^^^^\n" +
-			"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+			"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 			"----------\n");
 	}
 	public void testBug550750_036() {
@@ -853,7 +868,7 @@ public class RecordsRestrictedClassTest extends AbstractRegressionTest {
 			"2. ERROR in X.java (at line 4)\n" +
 			"	I lambda = (record r) -> {};\n" +
 			"	            ^^^^^^\n" +
-			"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+			"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 			"----------\n");
 	}
 	public void testBug550750_037() {
@@ -4720,12 +4735,12 @@ public void testBug564672_001() {
 		"1. ERROR in X.java (at line 1)\n" +
 		"	class X extends record {\n" +
 		"	                ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 6)\n" +
 		"	class record {}\n" +
 		"	      ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_002() {
@@ -4742,7 +4757,7 @@ public void testBug564672_002() {
 		"1. ERROR in X.java (at line 1)\n" +
 		"	class X extends record {\n" +
 		"	                ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_003() {
@@ -4760,12 +4775,12 @@ public void testBug564672_003() {
 		"1. ERROR in X.java (at line 1)\n" +
 		"	class X implements record {\n" +
 		"	                   ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 5)\n" +
 		"	interface record {}\n" +
 		"	          ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_004() {
@@ -4782,7 +4797,7 @@ public void testBug564672_004() {
 		"1. ERROR in X.java (at line 1)\n" +
 		"	class X implements record {\n" +
 		"	                   ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_005() {
@@ -4802,12 +4817,12 @@ public void testBug564672_005() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	class Y extends record {\n" +
 		"	                ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 4)\n" +
 		"	class record {}\n" +
 		"	      ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_006() {
@@ -4826,7 +4841,7 @@ public void testBug564672_006() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	class Y extends record {\n" +
 		"	                ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_007() {
@@ -4846,12 +4861,12 @@ public void testBug564672_007() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	class Y implements record {\n" +
 		"	                   ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 4)\n" +
 		"	interface record {}\n" +
 		"	          ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_008() {
@@ -4870,7 +4885,7 @@ public void testBug564672_008() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	class Y implements record {\n" +
 		"	                   ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_009() {
@@ -4890,12 +4905,12 @@ public void testBug564672_009() {
 		"1. ERROR in X.java (at line 1)\n" +
 		"	interface Y extends record {\n" +
 		"	                    ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 3)\n" +
 		"	interface record {}\n" +
 		"	          ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_010() {
@@ -4914,7 +4929,7 @@ public void testBug564672_010() {
 		"1. ERROR in X.java (at line 1)\n" +
 		"	interface Y extends record {\n" +
 		"	                    ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_011() {
@@ -4934,12 +4949,12 @@ public void testBug564672_011() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	interface Y extends record {\n" +
 		"	                    ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 4)\n" +
 		"	interface record {}\n" +
 		"	          ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_012() {
@@ -4958,7 +4973,7 @@ public void testBug564672_012() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	interface Y extends record {\n" +
 		"	                    ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_013() {
@@ -4975,12 +4990,12 @@ public void testBug564672_013() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	class Y extends record {\n" +
 		"	                ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 4)\n" +
 		"	class record {}\n" +
 		"	      ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_014() {
@@ -4996,7 +5011,7 @@ public void testBug564672_014() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	class Y extends record {\n" +
 		"	                ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_015() {
@@ -5013,12 +5028,12 @@ public void testBug564672_015() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	class Y implements record {\n" +
 		"	                   ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 4)\n" +
 		"	interface record {}\n" +
 		"	          ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_016() {
@@ -5034,7 +5049,7 @@ public void testBug564672_016() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	class Y implements record {\n" +
 		"	                   ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_017() {
@@ -5051,12 +5066,12 @@ public void testBug564672_017() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	interface Y extends record {\n" +
 		"	                    ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 4)\n" +
 		"	interface record {}\n" +
 		"	          ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_018() {
@@ -5072,7 +5087,7 @@ public void testBug564672_018() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	interface Y extends record {\n" +
 		"	                    ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_019() {
@@ -5093,12 +5108,12 @@ public void testBug564672_019() {
 		"1. ERROR in X.java (at line 3)\n" +
 		"	record r=new record(i,j);\n" +
 		"	^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 3)\n" +
 		"	record r=new record(i,j);\n" +
 		"	             ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"3. ERROR in X.java (at line 4)\n" +
 		"	return r;\n" +
@@ -5125,17 +5140,17 @@ public void testBug564672_020() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	class record {};\n" +
 		"	      ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 4)\n" +
 		"	record r=new record();\n" +
 		"	^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"3. ERROR in X.java (at line 4)\n" +
 		"	record r=new record();\n" +
 		"	             ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"4. ERROR in X.java (at line 5)\n" +
 		"	return r;\n" +
@@ -5254,7 +5269,7 @@ public void testBug564672_023() {
 		"1. ERROR in X.java (at line 5)\n" +
 		"	static IPoint a(int i, int j) throws record{\n" +
 		"	                                     ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_024() {
@@ -5272,7 +5287,7 @@ public void testBug564672_024() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	X() throws record {} \n" +
 		"	           ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_025() {
@@ -5287,7 +5302,7 @@ public void testBug564672_025() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	int a() throws record; \n" +
 		"	               ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_026() {
@@ -5306,7 +5321,7 @@ public void testBug564672_026() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	List<record> R = new List<record>();\n" +
 		"	     ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 2)\n" +
 		"	List<record> R = new List<record>();\n" +
@@ -5316,7 +5331,7 @@ public void testBug564672_026() {
 		"3. ERROR in X.java (at line 2)\n" +
 		"	List<record> R = new List<record>();\n" +
 		"	                          ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_027() {
@@ -5344,12 +5359,12 @@ public void testBug564672_027() {
 		"2. ERROR in X.java (at line 4)\n" +
 		"	public class X implements I<record>{\n" +
 		"	                            ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"3. ERROR in X.java (at line 5)\n" +
 		"	void print(record arg){\n" +
 		"	           ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_028() {
@@ -5369,12 +5384,12 @@ public void testBug564672_028() {
 		"1. ERROR in X.java (at line 1)\n" +
 		"	class Y<record> {\n" +
 		"	        ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 2)\n" +
 		"	void equal(record R) {}\n" +
 		"	           ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_029() {
@@ -5394,12 +5409,12 @@ public void testBug564672_029() {
 		"1. ERROR in X.java (at line 1)\n" +
 		"	class Y<record> {\n" +
 		"	        ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 2)\n" +
 		"	Y(record R) {}\n" +
 		"	  ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_030() {
@@ -5417,7 +5432,7 @@ public void testBug564672_030() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	static record i= 0;\n" +
 		"	       ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_031() {
@@ -5437,7 +5452,7 @@ public void testBug564672_031() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	record i=0;\n" +
 		"	^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_032() {
@@ -5457,7 +5472,7 @@ public void testBug564672_032() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	static int sum(record i, int param){\n" +
 		"	               ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_033() {
@@ -5476,7 +5491,7 @@ public void testBug564672_033() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	X(record i, int param){\n" +
 		"	  ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_034() {
@@ -5496,7 +5511,7 @@ public void testBug564672_034() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	int sum(record i, int num);\n" +
 		"	        ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_035() {
@@ -5535,7 +5550,7 @@ public void testBug564672_036() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	int sum(record this, int i, int num) {}\n" +
 		"	        ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_037() {
@@ -5553,7 +5568,7 @@ public void testBug564672_037() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	static record i;\n" +
 		"	       ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_038() {
@@ -5572,7 +5587,7 @@ public void testBug564672_038() {
 		"1. ERROR in X.java (at line 3)\n" +
 		"	for (record i = 0; i<10; i++) {\n" +
 		"	     ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_039() {
@@ -5592,7 +5607,7 @@ public void testBug564672_039() {
 		"1. ERROR in X.java (at line 4)\n" +
 		"	for (record i: rec) {\n" +
 		"	     ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 4)\n" +
 		"	for (record i: rec) {\n" +
@@ -5616,7 +5631,7 @@ public void testBug564672_040() {
 		"1. ERROR in X.java (at line 3)\n" +
 		"	try (record i = 0){\n" +
 		"	     ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_041() {
@@ -5636,7 +5651,7 @@ public void testBug564672_041() {
 		"1. ERROR in X.java (at line 5)\n" +
 		"	catch (record e) {}\n" +
 		"	       ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_042() {
@@ -5659,7 +5674,7 @@ public void testBug564672_042() {
 		"2. ERROR in X.java (at line 1)\n" +
 		"	record Point(record x, int i) { }\n" +
 		"	             ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_043() {
@@ -5683,7 +5698,7 @@ public void testBug564672_043() {
 		"1. ERROR in X.java (at line 5)\n" +
 		"	<record> this(null);\n" +
 		"	 ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 5)\n" +
 		"	<record> this(null);\n" +
@@ -5714,7 +5729,7 @@ public void testBug564672_044() {
 		"1. ERROR in X.java (at line 7)\n" +
 		"	<record> super(null);\n" +
 		"	 ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 7)\n" +
 		"	<record> super(null);\n" +
@@ -5742,7 +5757,7 @@ public void testBug564672_045() {
 		"1. ERROR in X.java (at line 4)\n" +
 		"	this.<record>m1();	}\n" +
 		"	      ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. WARNING in X.java (at line 4)\n" +
 		"	this.<record>m1();	}\n" +
@@ -5770,7 +5785,7 @@ public void testBug564672_046() {
 		"1. ERROR in X.java (at line 8)\n" +
 		"	new <record>Y().a();\n" +
 		"	     ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. WARNING in X.java (at line 8)\n" +
 		"	new <record>Y().a();\n" +
@@ -5799,7 +5814,7 @@ public void testBug564672_047() {
 		"1. ERROR in X.java (at line 5)\n" +
 		"	new <record>Y() {\n" +
 		"	     ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. WARNING in X.java (at line 5)\n" +
 		"	new <record>Y() {\n" +
@@ -5828,7 +5843,7 @@ public void testBug564672_048() {
 		"1. ERROR in X.java (at line 5)\n" +
 		"	new <record>Y() {\n" +
 		"	     ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. WARNING in X.java (at line 5)\n" +
 		"	new <record>Y() {\n" +
@@ -5851,12 +5866,12 @@ public void testBug564672_049() {
 		"1. ERROR in X.java (at line 3)\n" +
 		"	record[] y= new record[3]; \n" +
 		"	^^^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 3)\n" +
 		"	record[] y= new record[3]; \n" +
 		"	                ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_050() {
@@ -5875,12 +5890,12 @@ public void testBug564672_050() {
 		"1. ERROR in X.java (at line 4)\n" +
 		"	record y= (record)s; \n" +
 		"	^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n" +
 		"2. ERROR in X.java (at line 4)\n" +
 		"	record y= (record)s; \n" +
 		"	           ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_051() {
@@ -5901,7 +5916,7 @@ public void testBug564672_051() {
 		"1. ERROR in X.java (at line 4)\n" +
 		"	if (s instanceof record) { \n" +
 		"	                 ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 public void testBug564672_052() {
@@ -5950,7 +5965,7 @@ public void testBug564672_053() {
 		"2. ERROR in X.java (at line 7)\n" +
 		"	messages.stream().map(record::new).toArray(record[]::new);\n" +
 		"	                                           ^^^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n");
 }
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -5991,7 +6006,7 @@ public void testBug564672b_002() {
 		"1. ERROR in X.java (at line 1)\n" +
 		"	class X extends record {\n" +
 		"	                ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n",
 		null,
 		true,
@@ -6036,7 +6051,7 @@ public void testBug564672b_004() {
 		"1. ERROR in X.java (at line 1)\n" +
 		"	class X implements record {\n" +
 		"	                   ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n",
 		null,
 		true,
@@ -6085,7 +6100,7 @@ public void testBug564672b_006() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	class Y extends record {\n" +
 		"	                ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n",
 		null,
 		true,
@@ -6134,7 +6149,7 @@ public void testBug564672b_008() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	class Y implements record {\n" +
 		"	                   ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n",
 		null,
 		true,
@@ -6183,7 +6198,7 @@ public void testBug564672b_010() {
 		"1. ERROR in X.java (at line 1)\n" +
 		"	interface Y extends record {\n" +
 		"	                    ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n",
 		null,
 		true,
@@ -6232,7 +6247,7 @@ public void testBug564672b_012() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	interface Y extends record {\n" +
 		"	                    ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n",
 		null,
 		true,
@@ -6280,7 +6295,7 @@ public void testBug564672b_014() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	class Y extends record {\n" +
 		"	                ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n",
 		null,
 		true,
@@ -6328,7 +6343,7 @@ public void testBug564672b_016() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	class Y implements record {\n" +
 		"	                   ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n",
 		null,
 		true,
@@ -6376,7 +6391,7 @@ public void testBug564672b_018() {
 		"1. ERROR in X.java (at line 2)\n" +
 		"	interface Y extends record {\n" +
 		"	                    ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n",
 		null,
 		true,
@@ -6961,7 +6976,7 @@ public void testBug564672b_039() {
 		"2. ERROR in X.java (at line 7)\n" +
 		"	class record {}\n" +
 		"	      ^^^^^^\n" +
-		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java "+ AbstractRegressionTest.PREVIEW_ALLOWED_LEVEL +"\n" +
+		"\'record\' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 16\n" +
 		"----------\n",
 		null,
 		true,
@@ -7264,8 +7279,8 @@ public void testBug564672b_049() {
 	);
 }
 public void testBug565388_001() {
-	Map<String, String> options = getCompilerOptions();
-	options.put(CompilerOptions.OPTION_EnablePreviews, CompilerOptions.ENABLED);
+	if (this.complianceLevel < ClassFileConstants.JDK17) return;
+	Map<String, String> options = getCompilerOptionsWithPreview();
 	this.runNegativeTest(
 		new String[] {
 			"X.java",
@@ -7284,8 +7299,8 @@ public void testBug565388_001() {
 	options.put(CompilerOptions.OPTION_EnablePreviews, CompilerOptions.DISABLED);
 }
 public void testBug565388_002() {
-	Map<String, String> options = getCompilerOptions();
-	options.put(CompilerOptions.OPTION_EnablePreviews, CompilerOptions.ENABLED);
+	if (this.complianceLevel < ClassFileConstants.JDK17) return;
+	Map<String, String> options = getCompilerOptionsWithPreview();
 	this.runNegativeTest(
 		new String[] {
 			"X.java",
@@ -7746,8 +7761,8 @@ public void testBug563182_07() {
 		"private final int X$1Bar.x");
 	}
 public void testBug566063_001() {
-	Map<String, String> options = getCompilerOptions();
-	options.put(CompilerOptions.OPTION_EnablePreviews, CompilerOptions.ENABLED);
+	if (this.complianceLevel < ClassFileConstants.JDK17) return;
+	Map<String, String> options = getCompilerOptionsWithPreview();
 	runConformTest(
 			new String[] {
 				"X.java",
@@ -7773,8 +7788,8 @@ public void testBug566063_001() {
 		options.put(CompilerOptions.OPTION_EnablePreviews, CompilerOptions.DISABLED);
 }
 public void testBug566063_002() {
-	Map<String, String> options = getCompilerOptions();
-	options.put(CompilerOptions.OPTION_EnablePreviews, CompilerOptions.ENABLED);
+	if (this.complianceLevel < ClassFileConstants.JDK17) return;
+	Map<String, String> options = getCompilerOptionsWithPreview();
 	runNegativeTest(
 			new String[] {
 				"X.java",
@@ -7807,8 +7822,8 @@ public void testBug566063_002() {
 		options.put(CompilerOptions.OPTION_EnablePreviews, CompilerOptions.DISABLED);
 }
 public void testBug566063_003() {
-	Map<String, String> options = getCompilerOptions();
-	options.put(CompilerOptions.OPTION_EnablePreviews, CompilerOptions.ENABLED);
+	if (this.complianceLevel < ClassFileConstants.JDK17) return;
+	Map<String, String> options = getCompilerOptionsWithPreview();
 	runNegativeTest(
 			new String[] {
 				"X.java",
@@ -8029,8 +8044,8 @@ public void testBug566554_04() {
 		"----------\n");
 }
 public void testBug567731_001() {
-	Map<String, String> options = getCompilerOptions();
-	options.put(CompilerOptions.OPTION_EnablePreviews, CompilerOptions.ENABLED);
+	if (this.complianceLevel < ClassFileConstants.JDK17) return;
+	Map<String, String> options = getCompilerOptionsWithPreview();
 	this.runNegativeTest(
 		new String[] {
 			"X.java",
@@ -8059,8 +8074,8 @@ public void testBug567731_001() {
 	options.put(CompilerOptions.OPTION_EnablePreviews, CompilerOptions.DISABLED);
 }
 public void testBug567731_002() {
-	Map<String, String> options = getCompilerOptions();
-	options.put(CompilerOptions.OPTION_EnablePreviews, CompilerOptions.ENABLED);
+	if (this.complianceLevel < ClassFileConstants.JDK17) return;
+	Map<String, String> options = getCompilerOptionsWithPreview();
 	this.runNegativeTest(
 		new String[] {
 			"X.java",

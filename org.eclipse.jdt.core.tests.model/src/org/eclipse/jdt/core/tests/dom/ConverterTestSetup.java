@@ -7,7 +7,9 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -108,6 +110,10 @@ public abstract class ConverterTestSetup extends AbstractASTTests {
 			this.deleteProject("Converter11"); //$NON-NLS-1$
 			this.deleteProject("Converter13"); //$NON-NLS-1$
 			this.deleteProject("Converter14"); //$NON-NLS-1$
+			this.deleteProject("Converter_15"); //$NON-NLS-1$
+			this.deleteProject("Converter_15_1"); //$NON-NLS-1$
+			this.deleteProject("Converter_16"); //$NON-NLS-1$
+			this.deleteProject("Converter_17"); //$NON-NLS-1$
 			PROJECT_SETUP = false;
 		} else {
 			TEST_SUITES.remove(getClass());
@@ -122,6 +128,10 @@ public abstract class ConverterTestSetup extends AbstractASTTests {
 				this.deleteProject("Converter11"); //$NON-NLS-1$
 				this.deleteProject("Converter13"); //$NON-NLS-1$
 				this.deleteProject("Converter14"); //$NON-NLS-1$
+				this.deleteProject("Converter_15"); //$NON-NLS-1$
+				this.deleteProject("Converter_15_1"); //$NON-NLS-1$
+				this.deleteProject("Converter_16"); //$NON-NLS-1$
+				this.deleteProject("Converter_17"); //$NON-NLS-1$
 				PROJECT_SETUP = false;
 			}
 		}
@@ -208,6 +218,14 @@ public abstract class ConverterTestSetup extends AbstractASTTests {
 						new IPath[] {getConverterJCLPath("14"), getConverterJCLSourcePath("14"), getConverterJCLRootSourcePath()},
 						null);
 			}
+		} else if ("17".equals(compliance)) {
+			if (JavaCore.getClasspathVariable("CONVERTER_JCL_17_LIB") == null) {
+				setupExternalJCL("converterJclMin17");
+				JavaCore.setClasspathVariables(
+						new String[] {"CONVERTER_JCL_17_LIB", "CONVERTER_JCL_17_SRC", "CONVERTER_JCL_17_SRCROOT"},
+						new IPath[] {getConverterJCLPath("17"), getConverterJCLSourcePath("17"), getConverterJCLRootSourcePath()},
+						null);
+			}
 		} else if (JavaCore.getClasspathVariable("CONVERTER_JCL_LIB") == null) {
 			setupExternalJCL("converterJclMin");
 			JavaCore.setClasspathVariables(
@@ -238,6 +256,7 @@ public abstract class ConverterTestSetup extends AbstractASTTests {
 			setUpJavaProject("Converter_15", "15"); //$NON-NLS-1$ //$NON-NLS-2$
 			setUpJavaProject("Converter_15_1", "15"); //$NON-NLS-1$ //$NON-NLS-2$
 			setUpJavaProject("Converter_16", "16"); //$NON-NLS-1$ //$NON-NLS-2$
+			setUpJavaProject("Converter_17", "17"); //$NON-NLS-1$ //$NON-NLS-2$
 			waitUntilIndexesReady(); // needed to find secondary types
 			PROJECT_SETUP = true;
 		}

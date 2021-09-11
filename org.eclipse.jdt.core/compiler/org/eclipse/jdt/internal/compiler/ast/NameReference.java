@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -20,6 +24,8 @@
  *							bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
+
+import java.util.function.Predicate;
 
 import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.compiler.problem.AbortMethod;
@@ -151,13 +157,23 @@ public abstract char[][] getName();
    Aborts if constraints are violated. Due to various complexities, this check is not conveniently
    implementable in resolve/analyze phases.
 */
-public void checkEffectiveFinality(VariableBinding localBinding, Scope scope) {
+public boolean checkEffectiveFinality(VariableBinding localBinding, Scope scope) {
+	Predicate<VariableBinding> test = (local) -> {
+		return (!localBinding.isFinal() && !localBinding.isEffectivelyFinal());
+	};
 	if ((this.bits & ASTNode.IsCapturedOuterLocal) != 0) {
-		if (!localBinding.isFinal() && !localBinding.isEffectivelyFinal()) {
+		if (test.test(localBinding)) {
 			scope.problemReporter().cannotReferToNonEffectivelyFinalOuterLocal(localBinding, this);
 			throw new AbortMethod(scope.referenceCompilationUnit().compilationResult, null);
 		}
+		return true;
+	} else if ((this.bits & ASTNode.IsUsedInPatternGuard) != 0) {
+		if (test.test(localBinding)) {
+			scope.problemReporter().cannotReferToNonFinalLocalInGuard(localBinding, this);
+			throw new AbortMethod(scope.referenceCompilationUnit().compilationResult, null);
+		}
 	}
+	return false;
 }
 //{ObjectTeams: hook after this reference has been fully resolved
 public void resolveFinished() { /* noop  */ }

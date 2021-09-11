@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -184,6 +188,7 @@ public void test0002() {
 		expected15ProblemLog
 	);
 }
+// TODO: Fix this and Enable
 public void test0003() {
 	String[] testFiles = new String[] {
 		"X.java",
@@ -196,12 +201,7 @@ public void test0003() {
 		"1. ERROR in X.java (at line 1)\n" +
 		"	public enum X {\n" +
 		"	       ^^^^\n" +
-//{ObjectTeams: in non-deterministic choice, OT/J takes other alternative:
-/* orig:
-		"Syntax error on token \"enum\", interface expected\n" +
-  :giro */
 		"Syntax error on token \"enum\", class expected\n" +
-// SH}
 		"----------\n";
 	String expected14ProblemLog =
 		expected13ProblemLog;
