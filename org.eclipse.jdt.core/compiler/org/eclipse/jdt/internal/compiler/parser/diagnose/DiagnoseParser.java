@@ -460,9 +460,9 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 //{ObjectTeams: WATCHOUT: needs to be updated with each new grammar!!!!
 	private void setScannerState(int act) {
 		switch(act) {
-		case 249: this.lexStream.forceBaseIsIdentifier(); break; // ForceBaseIsIdentifier
-		case 250: this.lexStream.restoreBaseKeyword(); break;    // RestoreBaseKeyword
-		case 345: this.parser.scanner._insideParameterMapping = true; break; // NestedParamMappings
+		case 250: this.lexStream.forceBaseIsIdentifier(); break; // ForceBaseIsIdentifier
+		case 251: this.lexStream.restoreBaseKeyword(); break;    // RestoreBaseKeyword
+		case 346: this.parser.scanner._insideParameterMapping = true; break; // NestedParamMappings
 		}
 	}
 //SH}
