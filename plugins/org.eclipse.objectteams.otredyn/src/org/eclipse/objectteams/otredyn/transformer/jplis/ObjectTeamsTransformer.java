@@ -192,6 +192,7 @@ if (PWR_DEBUG) System.out.println("\tweave3");
 				|| className.startsWith("java/io")
 				|| className.equals("java/nio/charset/StandardCharsets") // avoid weaving during calls like Charset.forName() during StandardCharset initialization
 				|| className.startsWith("jdk/jfr")
+				|| className.contains("$Proxy") // starting with JDK-16, 7 of these tests would otherwise fail during reflection: Java5.testA117_copyinheritanceForAnnotation*()
 				) 
 				return false;
 			break;

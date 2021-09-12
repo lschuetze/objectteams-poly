@@ -377,8 +377,12 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * (see constructor).
 	 * @since 3.22
 	 */
+//{ObjectTeams: avoid private to allow access from RoleTypeDeclaration without duplicating this field
+/* orig:
 	private ASTNode.NodeList permittedTypes = null;
-
+  :giro */
+	ASTNode.NodeList permittedTypes = null;
+// SH}
 	/**
 	 * Creates a new AST node for a type declaration owned by the given
 	 * AST. By default, the type declaration is for a class of an

@@ -6075,6 +6075,9 @@ protected void consumeInterfaceMethodDeclaration(boolean hasSemicolonBody) {
 	//watch for } that could be given as a unicode ! ( u007D is '}' )
 	MethodDeclaration md = (MethodDeclaration) this.astStack[this.astPtr];
 	md.statements = statements;
+//{ObjectTeams: mark as parsed
+	md.hasParsedStatements = true;
+// SH}
 	md.explicitDeclarations = explicitDeclarations;
 	md.bodyEnd = this.endPosition;
 	md.declarationSourceEnd = flushCommentsDefinedPriorTo(this.endStatementPosition);
@@ -14025,6 +14028,9 @@ protected void consumeCompactConstructorDeclaration() {
 
 	CompactConstructorDeclaration ccd = (CompactConstructorDeclaration) this.astStack[this.astPtr];
 	ccd.statements = statements;
+//{ObjectTeams: mark as parsed
+	ccd.hasParsedStatements = true;
+// SH}
 
 	if (!(this.diet && this.dietInt == 0)
 			&& statements == null

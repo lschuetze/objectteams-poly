@@ -925,6 +925,29 @@ public class Dependencies implements ITranslationStates {
 		return true;
 	}
 
+	private static boolean hasErrors(TypeDeclaration ast) {
+		if (ast.ignoreFurtherInvestigation)
+			return true;
+		if (ast.enclosingType != null && hasErrors(ast.enclosingType))
+			return true;
+		if (ast.scope != null && ast.scope.enclosingReferenceContext().hasErrors())
+			return true;
+		return false;
+	}
+
+	private static boolean isLocalType(TypeModel model) {
+		ReferenceBinding binding = model.getBinding();
+		if (binding != null)
+			return binding.isLocalType();
+		TypeDeclaration curType = model.getAst();
+		while (curType != null) {
+			if ((curType.bits & ASTNode.IsLocalType) != 0)
+				return true;
+			curType = curType.enclosingType;
+		}
+		return false;
+	}
+
 	private static boolean isLateRole(RoleModel model, int nextState) {
 		if (   model.getTeamModel().getState() >= nextState
 			&& model.getState() < nextState)
@@ -1055,7 +1078,7 @@ public class Dependencies implements ITranslationStates {
                     if (nextState == STATE_METHODS_PARSED)
                     	model.setState(STATE_METHODS_PARSED);
                     // local types need to catch up:
-                    if (nextState <= STATE_RESOLVED && model.getBinding().isLocalType())
+                    if (nextState <= STATE_RESOLVED && isLocalType(model))
                     	model.setState(nextState);
                     break;
             }
@@ -1555,7 +1578,7 @@ public class Dependencies implements ITranslationStates {
 		if (clazz.getBinding() != null) {
 			ModelElement.evaluateLateAttributes(clazz.getBinding(), STATE_FAULT_IN_TYPES);
 		} else {
-			assert ast != null && ast.hasErrors();
+			assert ast != null && hasErrors(ast);
 		}
 
 		clazz.setState(STATE_FAULT_IN_TYPES);

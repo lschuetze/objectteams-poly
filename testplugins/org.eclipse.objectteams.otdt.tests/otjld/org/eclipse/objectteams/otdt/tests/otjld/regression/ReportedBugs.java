@@ -44,7 +44,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testBug529685"};
+		TESTS_NAMES = new String[] { "testB11_ch5b"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -5202,9 +5202,11 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "            MY_STATIC = gv();\n" +
 			    "        }\n" +
 			    "        private static int gv() { return 3; }\n" +
+			    "        public static void main(String... args) {\n" +
+			    "            System.out.print(MY_STATIC);\n" +
+			    "        }\n" +
 			    "    }\n" +
-			    "}\n" +
-			    "    \n"
+			    "}\n" 
             },
             "static initializer");
     }

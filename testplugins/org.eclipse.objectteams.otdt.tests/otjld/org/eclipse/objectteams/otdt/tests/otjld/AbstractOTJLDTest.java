@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.compiler.batch.FileSystem;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.core.search.processing.JobManager;
 import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.ClasspathUtil;
 
@@ -275,6 +276,8 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 		return defaults;
 	}
 
+	boolean jobManVerbose;
+
 	@Override
 	public void initialize(CompilerTestSetup setUp) {
 		super.initialize(setUp);
@@ -288,6 +291,8 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 				regressionSetTup.verifier = this.verifier = new OTTestVerifier(true/*reuseVM*/);
 			}
 		}
+		jobManVerbose = JobManager.VERBOSE;
+		JobManager.VERBOSE = false;
 	}
 
 	@Override
@@ -299,6 +304,7 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 	protected void tearDown() throws Exception {
 		this.compileOrder = null;
 		super.tearDown();
+		JobManager.VERBOSE = jobManVerbose;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -379,6 +385,7 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 		if (this.compileOrder == null) {
 			batchCompiler.sortCompilationUnits = true;
 			super.compileTestFiles(batchCompiler, testFiles);
+			batchCompiler.lookupEnvironment.nameEnvironment.cleanup(); // don't use cached info from previous runs
 		} else {
 			for (String[] bunch : this.compileOrder) {
 				String[] bunchFiles = new String[bunch.length * 2];
@@ -394,15 +401,16 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 					assertTrue("Unmatched filename: "+bunch[i], b == b0+2);
 				}
 				super.compileTestFiles(batchCompiler, bunchFiles);
-				batchCompiler.lookupEnvironment.nameEnvironment.cleanup(); // don't use chached info from previous runs
+				batchCompiler.lookupEnvironment.nameEnvironment.cleanup(); // don't use cached info from previous runs
 			}
 		}
 	}
 
-	protected INameEnvironment getNameEnvironment(final String[] testFiles, String[] classPaths) {
+	@Override
+	protected INameEnvironment getNameEnvironment(final String[] testFiles, String[] classPaths, Map<String, String> options) {
 		this.classpaths = classPaths == null ? getDefaultClassPaths() : classPaths;
 		// make cleanup weaker:
-		return new InMemoryNameEnvironment(testFiles, getClassLibs(false)) {
+		return new InMemoryNameEnvironment(testFiles, getClassLibs(false, options)) {
 			@Override
 			public void cleanup() {
 				for (int i = 0, max = this.classLibs.length; i < max; i++)

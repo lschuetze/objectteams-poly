@@ -400,6 +400,9 @@ public class RoleTypeDeclaration extends TypeDeclaration {
             this.typeParameters = new ASTNode.NodeList(TYPE_PARAMETERS_PROPERTY);
             this.superInterfaceTypes = new ASTNode.NodeList(SUPER_INTERFACE_TYPES_PROPERTY);
         }
+		if (DOMASTUtil.isFeatureSupportedinAST(ast, Modifier.SEALED)) {
+			this.permittedTypes = new ASTNode.NodeList(PERMITS_TYPES_PROPERTY);
+		}
     }
 
     /* (omit javadoc for this method)
@@ -442,14 +445,10 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     @Override
 	final boolean internalGetSetBooleanProperty(SimplePropertyDescriptor property, boolean get, boolean value)
     {
-        if (property == INTERFACE_PROPERTY)
-        {
-            if (get)
-            {
+        if (property == INTERFACE_PROPERTY) {
+            if (get) {
                 return isInterface();
-            }
-            else
-            {
+            } else {
                 setInterface(value);
                 return false;
             }
@@ -501,8 +500,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     @Override
     final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean get, ASTNode child)
     {
-        if (property == JAVADOC_PROPERTY)
-        {
+        if (property == JAVADOC_PROPERTY) {
             if (get) {
                 return getJavadoc();
             } else {
@@ -597,28 +595,22 @@ public class RoleTypeDeclaration extends TypeDeclaration {
 	@Override
 	final List internalGetChildListProperty(ChildListPropertyDescriptor property)
     {
-        if (property == MODIFIERS2_PROPERTY)
-        {
+        if (property == MODIFIERS2_PROPERTY) {
             return modifiers();
         }
-
-        if (property == TYPE_PARAMETERS_PROPERTY)
-        {
+        if (property == TYPE_PARAMETERS_PROPERTY) {
             return typeParameters();
         }
-
-        if (property == SUPER_INTERFACES_PROPERTY)
-        {
+        if (property == SUPER_INTERFACES_PROPERTY) {
             return internalSuperInterfaces();
         }
-
-        if (property == SUPER_INTERFACE_TYPES_PROPERTY)
-        {
+        if (property == SUPER_INTERFACE_TYPES_PROPERTY) {
             return superInterfaceTypes();
         }
-
-        if (property == BODY_DECLARATIONS_PROPERTY)
-        {
+		if (property == PERMITS_TYPES_PROPERTY) {
+			return permittedTypes();
+		}
+        if (property == BODY_DECLARATIONS_PROPERTY) {
             return bodyDeclarations();
         }
 
@@ -671,6 +663,15 @@ public class RoleTypeDeclaration extends TypeDeclaration {
         return BODY_DECLARATIONS_PROPERTY;
     }
 
+	@Override
+	public List permittedTypes() {
+		// more efficient than just calling unsupportedIn2() to check
+		if (this.permittedTypes == null) {
+			unsupportedBelow17();
+		}
+		return this.permittedTypes;
+	}
+
     @Override
 	ChildPropertyDescriptor internalGuardPredicateProperty() {
     	return GUARD_PROPERTY;
@@ -700,8 +701,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
         result.setSourceRange(this.getStartPosition(), this.getLength());
         result.setJavadoc(
             (Javadoc) ASTNode.copySubtree(target, getJavadoc()));
-        if (this.ast.apiLevel == AST.JLS2_INTERNAL)
-        {
+        if (this.ast.apiLevel == AST.JLS2_INTERNAL) {
             result.internalSetModifiers(getModifiers());
             result.internalSetSuperclass(
                     (Name) ASTNode.copySubtree(target, internalGetSuperclass()));
@@ -718,8 +718,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
         result.setRole(isRole());
 		result.setRoleFile(isRoleFile());
         result.setName((SimpleName) getName().clone(target));
-        if (this.ast.apiLevel >= AST.JLS3_INTERNAL)
-        {
+        if (this.ast.apiLevel >= AST.JLS3_INTERNAL) {
             result.modifiers().addAll(ASTNode.copySubtrees(target, modifiers()));
             result.typeParameters().addAll(
                     ASTNode.copySubtrees(target, typeParameters()));
@@ -755,8 +754,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * Method declared on ASTNode.
      */
     @Override
-	void accept0(ASTVisitor visitor)
-    {
+	void accept0(ASTVisitor visitor) {
         boolean visitChildren = visitor.visit(this);
         if (visitChildren) {
             // visit children in normal left to right reading order
@@ -779,6 +777,9 @@ public class RoleTypeDeclaration extends TypeDeclaration {
                 acceptChildren(visitor, this.bodyDeclarations);
                 acceptChildren(visitor, this._precedences);
             }
+			if (DOMASTUtil.isFeatureSupportedinAST(getAST(), Modifier.SEALED)) {
+				acceptChildren(visitor, this.permittedTypes);
+			}
         }
         visitor.endVisit(this);
     }
@@ -1143,8 +1144,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * Method declared on ASTNode.
      */
     @Override
-	int treeSize()
-    {
+	int treeSize() {
         return memSize()
             + (this.optionalDocComment == null ? 0 : getJavadoc().treeSize())
             + (this.modifiers == null ? 0 : this.modifiers.listSize())
@@ -1155,6 +1155,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
             + (this.superInterfaceNames == null ? 0 : this.superInterfaceNames.listSize())
             + (this.superInterfaceTypes == null ? 0 : this.superInterfaceTypes.listSize())
             + this.bodyDeclarations.listSize()
+			+ (this.permittedTypes == null ? 0 : this.permittedTypes.listSize())
             + this._precedences.listSize()
             + (this.optionalBaseClassName == null  ? 0 : this.optionalBaseClassName.treeSize())
             + (this.optionalBaseClassType == null  ? 0 : this.optionalBaseClassType.treeSize())

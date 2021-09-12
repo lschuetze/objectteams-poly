@@ -199,6 +199,84 @@ public class InterfaceMethodsTest extends AbstractComparableTest {
 	// regular interface with illegal modifiers
 	public void testModifiers2() {
 		String infMod = this.complianceLevel >= ClassFileConstants.JDK9 ? " private," : "";
+		String op = this.complianceLevel < ClassFileConstants.JDK17 ?
+		"----------\n" +
+		"1. ERROR in I.java (at line 5)\n" +
+		"	public synchronized void foo2();\n" +
+		"	                         ^^^^^^\n" +
+		"Illegal modifier for the interface method foo2; only public,"+ infMod +" abstract, default, static and strictfp are permitted\n" +
+		"----------\n" +
+		"2. ERROR in I.java (at line 6)\n" +
+		"	strictfp void foo3();\n" +
+		"	              ^^^^^^\n" +
+		"strictfp is not permitted for abstract interface method foo3\n" +
+		"----------\n" +
+		"3. ERROR in I.java (at line 7)\n" +
+		"	public strictfp synchronized void foo4();\n" +
+		"	                                  ^^^^^^\n" +
+		"strictfp is not permitted for abstract interface method foo4\n" +
+		"----------\n" +
+		"4. ERROR in I.java (at line 7)\n" +
+		"	public strictfp synchronized void foo4();\n" +
+		"	                                  ^^^^^^\n" +
+		"Illegal modifier for the interface method foo4; only public,"+ infMod +" abstract, default, static and strictfp are permitted\n" +
+		"----------\n" +
+		"5. ERROR in I.java (at line 8)\n" +
+		"	public strictfp synchronized @Annot void foo5();\n" +
+		"	                                         ^^^^^^\n" +
+		"strictfp is not permitted for abstract interface method foo5\n" +
+		"----------\n" +
+		"6. ERROR in I.java (at line 8)\n" +
+		"	public strictfp synchronized @Annot void foo5();\n" +
+		"	                                         ^^^^^^\n" +
+		"Illegal modifier for the interface method foo5; only public,"+ infMod +" abstract, default, static and strictfp are permitted\n" +
+		"----------\n" :
+			"----------\n" +
+			"1. ERROR in I.java (at line 5)\n" +
+			"	public synchronized void foo2();\n" +
+			"	                         ^^^^^^\n" +
+			"Illegal modifier for the interface method foo2; only public, private, abstract, default, static and strictfp are permitted\n" +
+			"----------\n" +
+			"2. WARNING in I.java (at line 6)\n" +
+			"	strictfp void foo3();\n" +
+			"	^^^^^^^^\n" +
+			"Floating-point expressions are always strictly evaluated from source level 17. Keyword \'strictfp\' is not required.\n" +
+			"----------\n" +
+			"3. ERROR in I.java (at line 6)\n" +
+			"	strictfp void foo3();\n" +
+			"	              ^^^^^^\n" +
+			"strictfp is not permitted for abstract interface method foo3\n" +
+			"----------\n" +
+			"4. WARNING in I.java (at line 7)\n" +
+			"	public strictfp synchronized void foo4();\n" +
+			"	       ^^^^^^^^\n" +
+			"Floating-point expressions are always strictly evaluated from source level 17. Keyword \'strictfp\' is not required.\n" +
+			"----------\n" +
+			"5. ERROR in I.java (at line 7)\n" +
+			"	public strictfp synchronized void foo4();\n" +
+			"	                                  ^^^^^^\n" +
+			"strictfp is not permitted for abstract interface method foo4\n" +
+			"----------\n" +
+			"6. ERROR in I.java (at line 7)\n" +
+			"	public strictfp synchronized void foo4();\n" +
+			"	                                  ^^^^^^\n" +
+			"Illegal modifier for the interface method foo4; only public, private, abstract, default, static and strictfp are permitted\n" +
+			"----------\n" +
+			"7. WARNING in I.java (at line 8)\n" +
+			"	public strictfp synchronized @Annot void foo5();\n" +
+			"	       ^^^^^^^^\n" +
+			"Floating-point expressions are always strictly evaluated from source level 17. Keyword \'strictfp\' is not required.\n" +
+			"----------\n" +
+			"8. ERROR in I.java (at line 8)\n" +
+			"	public strictfp synchronized @Annot void foo5();\n" +
+			"	                                         ^^^^^^\n" +
+			"strictfp is not permitted for abstract interface method foo5\n" +
+			"----------\n" +
+			"9. ERROR in I.java (at line 8)\n" +
+			"	public strictfp synchronized @Annot void foo5();\n" +
+			"	                                         ^^^^^^\n" +
+			"Illegal modifier for the interface method foo5; only public, private, abstract, default, static and strictfp are permitted\n" +
+			"----------\n";
 		runNegativeTest(
 		new String[] {
 			"I.java",
@@ -211,37 +289,7 @@ public class InterfaceMethodsTest extends AbstractComparableTest {
 			"    public strictfp synchronized void foo4();\n" +
 			"    public strictfp synchronized @Annot void foo5();\n" +
 			"}\n"},
-			"----------\n" +
-			"1. ERROR in I.java (at line 5)\n" +
-			"	public synchronized void foo2();\n" +
-			"	                         ^^^^^^\n" +
-			"Illegal modifier for the interface method foo2; only public,"+ infMod +" abstract, default, static and strictfp are permitted\n" +
-			"----------\n" +
-			"2. ERROR in I.java (at line 6)\n" +
-			"	strictfp void foo3();\n" +
-			"	              ^^^^^^\n" +
-			"strictfp is not permitted for abstract interface method foo3\n" +
-			"----------\n" +
-			"3. ERROR in I.java (at line 7)\n" +
-			"	public strictfp synchronized void foo4();\n" +
-			"	                                  ^^^^^^\n" +
-			"strictfp is not permitted for abstract interface method foo4\n" +
-			"----------\n" +
-			"4. ERROR in I.java (at line 7)\n" +
-			"	public strictfp synchronized void foo4();\n" +
-			"	                                  ^^^^^^\n" +
-			"Illegal modifier for the interface method foo4; only public,"+ infMod +" abstract, default, static and strictfp are permitted\n" +
-			"----------\n" +
-			"5. ERROR in I.java (at line 8)\n" +
-			"	public strictfp synchronized @Annot void foo5();\n" +
-			"	                                         ^^^^^^\n" +
-			"strictfp is not permitted for abstract interface method foo5\n" +
-			"----------\n" +
-			"6. ERROR in I.java (at line 8)\n" +
-			"	public strictfp synchronized @Annot void foo5();\n" +
-			"	                                         ^^^^^^\n" +
-			"Illegal modifier for the interface method foo5; only public,"+ infMod +" abstract, default, static and strictfp are permitted\n" +
-			"----------\n");
+			op);
 	}
 
 	// default & regular methods with modifiers that are illegal even for default methods

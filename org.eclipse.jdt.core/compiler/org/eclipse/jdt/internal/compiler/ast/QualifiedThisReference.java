@@ -157,6 +157,9 @@ public class QualifiedThisReference extends ThisReference {
 		else if (scope.compilerOptions().complianceLevel >= ClassFileConstants.JDK16) {
 			MethodScope ms = scope.methodScope();
 			if (ms.isStatic)
+//{ObjectTeams: roles do have access to the enclosing team instance:
+			  if (!scope.enclosingReceiverType().isRole())
+// SH}
 				ms.problemReporter().errorThisSuperInStatic(this);
 		}
 		MethodScope methodScope = scope.namedMethodScope();
