@@ -143,7 +143,7 @@ else
 		then
 			mkdir -p ${SIGNED}/${DIR}
 		fi
-		curl -o ${SIGNED}/${JAR} -F file=@${JAR} http://build.eclipse.org:31338/sign
+		curl -o ${SIGNED}/${JAR} -F file=@${JAR} https://cbi.eclipse.org/jarsigner/sign
 	done
 	if [ -f ${OTDTJAR} ]
 	then
@@ -254,7 +254,7 @@ then
 			exit 1
 		fi
     fi
-	echo "====Step 11: promote to ${TARGET_HOST}:{TARGET_BASEDIR}/${DEST_REL}===="
+	echo "====Step 11: promote to ${TARGET_HOST}:${TARGET_BASEDIR}/${DEST_REL}===="
 	# FIXME mkdir ${DEST}
 	# if [ "${MASTER}" != "none" ]
 	# then
