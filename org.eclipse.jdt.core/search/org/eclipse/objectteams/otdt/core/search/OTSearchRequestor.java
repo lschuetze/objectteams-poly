@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2021 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -37,15 +37,22 @@ import org.eclipse.objectteams.otdt.core.OTModelManager;
 
 /**
  * @author brcan
- * $Id: OTSearchRequestor.java 23416 2010-02-03 19:59:31Z stephan $
  */
 public class OTSearchRequestor extends SearchRequestor
 {
     private ArrayList<IOTType> otTypes = null;
+	private boolean acceptOrgObjectteamsTeam;
 
-    public OTSearchRequestor()
+    public OTSearchRequestor() {
+    	this(true);
+    }
+    /**
+	 * @since 3.27 (OTDT 2.8.2)
+	 */
+    public OTSearchRequestor(boolean acceptOrgObjectteamsTeam)
     {
         this.otTypes = new ArrayList<IOTType>();
+        this.acceptOrgObjectteamsTeam = acceptOrgObjectteamsTeam;
     }
 
     @Override
@@ -66,6 +73,8 @@ public class OTSearchRequestor extends SearchRequestor
 
         if (javaType != null)
         {
+        	if (!this.acceptOrgObjectteamsTeam && javaType.getPackageFragment().getElementName().equals("org.objectteams")) //$NON-NLS-1$
+        		return;
             IOTType otType = OTModelManager.getOTElement(javaType);
             if (otType == null)
             {
