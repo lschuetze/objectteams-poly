@@ -302,7 +302,9 @@ private boolean pathsMatch(IPath relative, IPath absolute) {
 }
 // SH}
 protected void cleanUp() {
-	this.nameEnvironment.cleanup();
+	if (this.nameEnvironment != null) {
+		this.nameEnvironment.cleanup();
+	}
 
 	this.javaBuilder = null;
 	this.nameEnvironment = null;

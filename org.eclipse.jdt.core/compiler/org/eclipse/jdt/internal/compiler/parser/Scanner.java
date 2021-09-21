@@ -369,10 +369,9 @@ public class Scanner implements TerminalTokens {
 		new char[] {'\u0000', '\u0000', '\u0000', '\u0000', '\u0000', '\u0000'};
 	static final int TableSize = 30, InternalTableSize = 6; //30*6 =210 entries
 
-	public static final int OptimizedLength = 7;
-//{ObjectTeams: really static:
-	public static final char[][][][] charArray_length;
-// SH}
+	public static final int OptimizedLength = 6;
+	public /*static*/ final char[][][][] charArray_length =
+		new char[OptimizedLength - 1][TableSize][InternalTableSize][];
 	// support for detecting non-externalized string literals
 	public static final char[] TAG_PREFIX= "//$NON-NLS-".toCharArray(); //$NON-NLS-1$
 	public static final int TAG_PREFIX_LENGTH= TAG_PREFIX.length;
@@ -393,26 +392,15 @@ public class Scanner implements TerminalTokens {
 	// generic support
 	public boolean returnOnlyGreater = false;
 
-//{ObjectTeams: really static:
-	static int si,sj,k; // fields so IBM JVM has no chance to optimize out wrongly
-	static {
-		// predictable initialization:
-		charArray_length =
-			new char[OptimizedLength][TableSize][InternalTableSize][];
-		for (si = 0; si < 6; si++) {
-			for (sj = 0; sj < TableSize; sj++) {
-				for (k = 0; k < InternalTableSize; k++) {
-// debug:
-//System.out.print("i="+i+", j="+j+", k="+k+"; O="+OptimizedLength+", T="+TableSize+", I="+InternalTableSize);
-//System.out.print(", l0="+charArray_length.length);
-//System.out.print(", l1="+charArray_length[i].length);
-//System.out.println(", l2="+charArray_length[i][j].length);
-					charArray_length[si][sj][k] = initCharArray;
+	/*static*/ {
+		for (int i = 0; i < OptimizedLength - 1; i++) {
+			for (int j = 0; j < TableSize; j++) {
+				for (int k = 0; k < InternalTableSize; k++) {
+					this.charArray_length[i][j][k] = initCharArray;
 				}
 			}
 		}
 	}
-// SH}
 	/*static*/ int newEntry2 = 0,
 		newEntry3 = 0,
 		newEntry4 = 0,

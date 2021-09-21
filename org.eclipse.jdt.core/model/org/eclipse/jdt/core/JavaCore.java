@@ -3168,7 +3168,7 @@ public final class JavaCore extends Plugin {
 	public static final String VERSION_16 = "16"; //$NON-NLS-1$
 	/**
 	 * Configurable option value: {@value}.
-	 * @since 3.27
+	 * @since 3.28
 	 * @category OptionValue
 	 */
 	public static final String VERSION_17 = "17"; //$NON-NLS-1$
@@ -4631,7 +4631,7 @@ public final class JavaCore extends Plugin {
 				}
 			}
 		} finally {
-			manager.batchContainerInitializationsProgress.initializeAfterLoadMonitor.set(null);
+			manager.batchContainerInitializationsProgress.initializeAfterLoadMonitor.remove();
 		}
 
 		// avoid leaking source attachment properties (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=183413 )

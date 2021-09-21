@@ -259,8 +259,7 @@ HashtableOfObject addQueryResults(char[][] categories, char[] key, int matchRule
 private void cacheDocumentNames() throws IOException {
 	// will need all document names so get them now
 	this.cachedChunks = new String[this.numberOfChunks][];
-	InputStream stream = this.indexLocation.getInputStream();
-	try {
+	try (InputStream stream = this.indexLocation.getInputStream()) {
 		if (this.numberOfChunks > 5) BUFFER_READ_SIZE <<= 1;
 		int offset = this.chunkOffsets[0];
 		stream.skip(offset);
@@ -275,7 +274,6 @@ private void cacheDocumentNames() throws IOException {
 		this.cachedChunks = null;
 		throw e;
 	} finally {
-		stream.close();
 		this.indexLocation.close();
 		this.streamBuffer = null;
 		BUFFER_READ_SIZE = DEFAULT_BUFFER_SIZE;
@@ -435,7 +433,7 @@ void initialize(boolean reuseExistingFile) throws IOException {
 	}
 	if (this.indexLocation.createNewFile()) {
 		FileOutputStream stream = new FileOutputStream(this.indexLocation.getIndexFile(), false);
-		try {
+		try (stream) {
 			this.streamBuffer = new byte[BUFFER_READ_SIZE];
 			this.bufferIndex = 0;
 			writeStreamChars(stream, SIGNATURE_CHARS);
@@ -445,8 +443,6 @@ void initialize(boolean reuseExistingFile) throws IOException {
 				stream.write(this.streamBuffer, 0, this.bufferIndex);
 				this.bufferIndex = 0;
 			}
-		} finally {
-			stream.close();
 		}
 	} else {
 		if (DEBUG)
@@ -629,7 +625,7 @@ private synchronized String[] readAllDocumentNames() throws IOException {
 		return CharOperation.NO_STRINGS;
 
 	InputStream stream = this.indexLocation.getInputStream();
-	try {
+	try (stream) {
 		int offset = this.chunkOffsets[0];
 		stream.skip(offset);
 		this.streamBuffer = new byte[BUFFER_READ_SIZE];
@@ -641,7 +637,6 @@ private synchronized String[] readAllDocumentNames() throws IOException {
 			readChunk(docNames, stream, i * CHUNK_SIZE, i < lastIndex ? CHUNK_SIZE : this.sizeOfLastChunk);
 		return docNames;
 	} finally {
-		stream.close();
 		this.indexLocation.close();
 		this.streamBuffer = null;
 	}
@@ -797,7 +792,7 @@ synchronized String readDocumentName(int docNumber) throws IOException {
 		this.streamBuffer = new byte[numberOfBytes];
 		this.bufferIndex = 0;
 		InputStream file = this.indexLocation.getInputStream();
-		try {
+		try (file) {
 			file.skip(start);
 			if (file.read(this.streamBuffer, 0, numberOfBytes) != numberOfBytes)
 				throw new IOException();
@@ -805,7 +800,6 @@ synchronized String readDocumentName(int docNumber) throws IOException {
 			this.streamBuffer = null;
 			throw ioe;
 		} finally {
-			file.close();
 			this.indexLocation.close();
 		}
 		int numberOfNames = isLastChunk ? this.sizeOfLastChunk : CHUNK_SIZE;
@@ -827,7 +821,7 @@ synchronized int[] readDocumentNumbers(Object arrayOffset) throws IOException {
 		return (int[]) arrayOffset;
 
 	InputStream stream = this.indexLocation.getInputStream();
-	try {
+	try (stream) {
 		int offset = ((Integer) arrayOffset).intValue();
 		stream.skip(offset);
 		this.streamBuffer = new byte[BUFFER_READ_SIZE];
@@ -835,7 +829,6 @@ synchronized int[] readDocumentNumbers(Object arrayOffset) throws IOException {
 		this.bufferEnd = stream.read(this.streamBuffer, 0, this.streamBuffer.length);
 		return readStreamDocumentArray(stream, readStreamInt(stream));
 	} finally {
-		stream.close();
 		this.indexLocation.close();
 		this.streamBuffer = null;
 	}
@@ -954,6 +947,13 @@ private char[] readStreamChars(InputStream stream) throws IOException {
 		// all the characters must already be in the buffer if we're at the end of the stream
 		if (charsInBuffer > length || stream == null  || (this.bufferEnd != this.streamBuffer.length && stream.available() == 0))
 			charsInBuffer = length;
+		{ // optimization for the typical case of pure ASCII chars:
+			byte b;
+			while (i < charsInBuffer && (b = this.streamBuffer[this.bufferIndex]) >= 0) {
+				word[i++] = (char) b;
+				this.bufferIndex++;
+			}
+		}
 		while (i < charsInBuffer) {
 			byte b = this.streamBuffer[this.bufferIndex++];
 			switch (b & 0xF0) {
@@ -1249,12 +1249,10 @@ private void writeHeaderInfo(FileOutputStream stream) throws IOException {
 private void writeOffsetToHeader(int offsetToHeader) throws IOException {
 	if (offsetToHeader > 0) {
 		RandomAccessFile file = new RandomAccessFile(this.indexLocation.getIndexFile(), "rw"); //$NON-NLS-1$
-		try {
+		try (file) {
 			file.seek(this.headerInfoOffset); // offset to position in header
 			file.writeInt(offsetToHeader);
 			this.headerInfoOffset = offsetToHeader; // update to reflect the correct offset
-		} finally {
-			file.close();
 		}
 	}
 }

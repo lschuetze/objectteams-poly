@@ -718,7 +718,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		if (perPathContainers.size() == 0)
 			perProjectContainers.remove(project);
 		if (perProjectContainers.size() == 0)
-			this.containersBeingInitialized.set(null);
+			this.containersBeingInitialized.remove();
 		return container;
 	}
 
@@ -926,7 +926,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		if (projectInitializations.size() == 0)
 			initializations.remove(project);
 		if (initializations.size() == 0)
-			this.containerInitializationInProgress.set(null);
+			this.containerInitializationInProgress.remove();
 	}
 
 	private synchronized void containersReset(String[] containerIDs) {
@@ -2036,7 +2036,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		// the owner will be responsible for flushing the cache
 		// we want to check object identity to make sure this is the owner that created the cache
 		if (zipCache.owner == owner) {
-			this.zipFiles.set(null);
+			this.zipFiles.remove();
 			zipCache.flush();
 		} else {
 			if (JavaModelManager.ZIP_ACCESS_VERBOSE) {
@@ -3058,7 +3058,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 							while (perProjectContainers != null && !perProjectContainers.isEmpty()) {
 								initKnownContainers(perProjectContainers, monitor);
 							}
-							JavaModelManager.this.containersBeingInitialized.set(null);
+							JavaModelManager.this.containersBeingInitialized.remove();
 						} finally {
 							if (monitor != null)
 								monitor.done();
@@ -3109,7 +3109,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 				// if we're being traversed by an exception, ensure that that containers are
 				// no longer marked as initialization in progress
 				// (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=66437)
-				this.containerInitializationInProgress.set(null);
+				this.containerInitializationInProgress.remove();
 			}
 		}
 
@@ -4112,22 +4112,17 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	protected Object readState(IProject project) throws CoreException {
 		File file = getSerializationFile(project);
 		if (file != null && file.exists()) {
-			try {
-				DataInputStream in= new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
-				try {
-					String pluginID= in.readUTF();
-					if (!pluginID.equals(JavaCore.PLUGIN_ID))
-						throw new IOException(Messages.build_wrongFileFormat);
-					String kind= in.readUTF();
-					if (!kind.equals("STATE")) //$NON-NLS-1$
-						throw new IOException(Messages.build_wrongFileFormat);
-					if (in.readBoolean())
-						return JavaBuilder.readState(project, in);
-					if (JavaBuilder.DEBUG)
-						System.out.println("Saved state thinks last build failed for " + project.getName()); //$NON-NLS-1$
-				} finally {
-					in.close();
-				}
+			try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
+				String pluginID = in.readUTF();
+				if (!pluginID.equals(JavaCore.PLUGIN_ID))
+					throw new IOException(Messages.build_wrongFileFormat);
+				String kind = in.readUTF();
+				if (!kind.equals("STATE")) //$NON-NLS-1$
+					throw new IOException(Messages.build_wrongFileFormat);
+				if (in.readBoolean())
+					return JavaBuilder.readState(project, in);
+				if (JavaBuilder.DEBUG)
+					System.out.println("Saved state thinks last build failed for " + project.getName()); //$NON-NLS-1$
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new CoreException(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, Platform.PLUGIN_ERROR, "Error reading last build state for project "+ project.getName(), e)); //$NON-NLS-1$
@@ -4314,7 +4309,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	 * Resets the temporary cache for newly created elements to null.
 	 */
 	public void resetTemporaryCache() {
-		this.temporaryCache.set(null);
+		this.temporaryCache.remove();
 	}
 
 	/**
@@ -4344,8 +4339,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		if (file == null) return;
 		long t = System.currentTimeMillis();
 		try {
-			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
-			try {
+			try (DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)))) {
 				out.writeUTF(JavaCore.PLUGIN_ID);
 				out.writeUTF("STATE"); //$NON-NLS-1$
 				if (info.savedState == null) {
@@ -4354,8 +4348,6 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 					out.writeBoolean(true);
 					JavaBuilder.writeState(info.savedState, out);
 				}
-			} finally {
-				out.close();
 			}
 		} catch (RuntimeException | IOException e) {
 			try {

@@ -47,7 +47,7 @@ public class OTSearchRequestor extends SearchRequestor
     	this(true);
     }
     /**
-	 * @since 3.27 (OTDT 2.8.2)
+	 * @since 3.28 (OTDT 2.8.2)
 	 */
     public OTSearchRequestor(boolean acceptOrgObjectteamsTeam)
     {

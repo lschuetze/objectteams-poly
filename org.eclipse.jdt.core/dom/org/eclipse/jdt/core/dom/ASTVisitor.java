@@ -397,7 +397,7 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
-	 * @since 3.27
+	 * @since 3.28
 	 */
 	public boolean visit(CaseDefaultExpression node) {
 		return true;
@@ -757,7 +757,7 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
-	 * @since 3.27
+	 * @since 3.28
 	 */
 	public boolean visit(GuardedPattern node) {
 		return true;
@@ -1174,7 +1174,7 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
-	 * @since 3.27
+	 * @since 3.28
 	 */
 	public boolean visit(NullPattern node) {
 		return true;
@@ -1852,7 +1852,7 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
-	 * @since 3.27
+	 * @since 3.28
 	 */
 	public boolean visit(TypePattern node) {
 		return true;
@@ -2289,7 +2289,7 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
-	 * @since 3.27
+	 * @since 3.28
 	 */
 	public void endVisit(CaseDefaultExpression node) {
 		// default implementation: do nothing
@@ -2549,7 +2549,7 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
-	 * @since 3.27
+	 * @since 3.28
 	 */
 	public void endVisit(GuardedPattern node) {
 		// default implementation: do nothing
@@ -2835,7 +2835,7 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
-	 * @since 3.27
+	 * @since 3.28
 	 */
 	public void endVisit(NullPattern node) {
 		// default implementation: do nothing
@@ -3344,7 +3344,7 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
-	 * @since 3.27
+	 * @since 3.28
 	 */
 	public void endVisit(TypePattern node) {
 		// default implementation: do nothing
