@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -1012,7 +1008,7 @@ public abstract class ASTNode {
 	 * Node type constant indicating a node of type
 	 * <code>TypePattern</code>.
 	 * @see TypePattern
-	 * @since 3.27 BETA_JAVA17
+	 * @since 3.27
 	 */
 	public static final int TYPE_PATTERN = 106;
 
@@ -1020,7 +1016,7 @@ public abstract class ASTNode {
 	 * Node type constant indicating a node of type
 	 * <code>GuardedPattern</code>.
 	 * @see GuardedPattern
-	 * @since 3.27 BETA_JAVA17
+	 * @since 3.27
 	 */
 	public static final int GUARDED_PATTERN = 107;
 
@@ -1028,7 +1024,7 @@ public abstract class ASTNode {
 	 * Node type constant indicating a node of type
 	 * <code>NullPattern</code>.
 	 * @see NullPattern
-	 * @since 3.27 BETA_JAVA17
+	 * @since 3.27
 	 */
 	public static final int NULL_PATTERN = 108;
 
@@ -1036,7 +1032,7 @@ public abstract class ASTNode {
 	 * Node type constant indicating a node of type
 	 * <code>CaseDefaultExpression</code>.
 	 * @see CaseDefaultExpression
-	 * @since 3.27 BETA_JAVA17
+	 * @since 3.27
 	 */
 	public static final int CASE_DEFAULT_EXPRESSION = 109;
 
@@ -2400,7 +2396,7 @@ public abstract class ASTNode {
      * </p>
      *
 	 * @exception UnsupportedOperationException if this operation is used below JLS17
-	 * @since 3.27 BETA_JAVA17
+	 * @since 3.27
 	 */
 	final void unsupportedBelow17() {
 		if (this.ast.apiLevel < AST.JLS17_INTERNAL) {
@@ -2548,7 +2544,7 @@ public abstract class ASTNode {
      * </p>
      *
 	 * @exception UnsupportedOperationException if this operation is not used in JLS17
-	 * @since 3.27 BETA_JAVA17
+	 * @since 3.27
 	 */
 	final void supportedOnlyIn17() {
 		if (this.ast.apiLevel != AST.JLS17_INTERNAL) {

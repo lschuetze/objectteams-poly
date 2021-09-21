@@ -504,7 +504,7 @@ public class ASTMatcher {
 	 * @return <code>true</code> if the subtree matches, or
 	 *   <code>false</code> if they do not match or the other object has a
 	 *   different node type or is <code>null</code>
-	 *  @since 3.27 BETA_JAVA17
+	 *  @since 3.27
 	 */
 	public boolean match(CaseDefaultExpression node, Object other) {
 		if (!(other instanceof CaseDefaultExpression)) {
@@ -856,7 +856,7 @@ public class ASTMatcher {
 	 * @return <code>true</code> if the subtree matches, or
 	 *   <code>false</code> if they do not match or the other object has a
 	 *   different node type or is <code>null</code>
-	 * @since 3.27 BETA_JAVA17
+	 * @since 3.27
 	 */
 	public boolean match(GuardedPattern node, Object other) {
 		if (!(other instanceof GuardedPattern)) {
@@ -1423,7 +1423,7 @@ public class ASTMatcher {
 	 * @return <code>true</code> if the subtree matches, or
 	 *   <code>false</code> if they do not match or the other object has a
 	 *   different node type or is <code>null</code>
-	 *  @since 3.27 BETA_JAVA17
+	 *  @since 3.27
 	 */
 	public boolean match(NullPattern node, Object other) {
 		if (!(other instanceof NullPattern)) {
@@ -2833,7 +2833,7 @@ public class ASTMatcher {
 	 * @return <code>true</code> if the subtree matches, or
 	 *   <code>false</code> if they do not match or the other object has a
 	 *   different node type or is <code>null</code>
-	 * @since 3.27 BETA_JAVA17
+	 * @since 3.27
 	 */
 	public boolean match(TypePattern node, Object other) {
 		if (!(other instanceof TypePattern)) {
