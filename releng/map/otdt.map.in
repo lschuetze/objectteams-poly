@@ -47,11 +47,11 @@ plugin@org.eclipse.objectteams.otdt.samples=GIT,repo=https://git.eclipse.org/r/o
 !** Consume BCEL from Orbit: **!
 plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository
 !** ASM from Orbit: **!
-plugin@org.objectweb.asm,9.1.0=p2IU,id=org.objectweb.asm,version=9.1.0.v20210209-1849,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
-plugin@org.objectweb.asm.tree,9.1.0=p2IU,id=org.objectweb.asm.tree,version=9.1.0.v20210209-1849,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
-plugin@org.objectweb.asm.commons,9.1.0=p2IU,id=org.objectweb.asm.commons,version=9.1.0.v20210209-1849,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
-plugin@org.objectweb.asm.util,9.1.0=p2IU,id=org.objectweb.asm.util,version=9.1.0.v20210209-1849,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
-plugin@org.objectweb.asm.analysis,9.1.0=p2IU,id=org.objectweb.asm.analysis,version=9.1.0.v20210209-1849,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
+plugin@org.objectweb.asm,9.2.0=p2IU,id=org.objectweb.asm,version=9.2.0.v20210813-1119,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
+plugin@org.objectweb.asm.tree,9.2.0=p2IU,id=org.objectweb.asm.tree,version=9.2.0.v20210813-1119,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
+plugin@org.objectweb.asm.commons,9.2.0=p2IU,id=org.objectweb.asm.commons,version=9.2.0.v20210813-1119,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
+plugin@org.objectweb.asm.util,9.2.0=p2IU,id=org.objectweb.asm.util,version=9.2.0.v20210813-1119,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
+plugin@org.objectweb.asm.analysis,9.2.0=p2IU,id=org.objectweb.asm.analysis,version=9.2.0.v20210813-1119,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
 
 plugin@org.mockito,1.9.5=p2IU,id=org.mockito,version=1.9.5.v201605172210,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
 plugin@org.hamcrest.core,1.3.0=p2IU,id=org.hamcrest.core,version=1.3.0.v20180420-1519,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
