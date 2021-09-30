@@ -881,9 +881,6 @@ public final class CompletionEngine
 	private int foundConstructorsCount;
 	private ObjectVector acceptedConstructors;
 
-	// Introduce to disable Bug575149
-	private static final boolean DISABLE_OVERLOAD_EXPERIMENT = Boolean.parseBoolean(System.getProperty("org.eclipse.jdt.disableOverloadExperiment", "false")); //$NON-NLS-1$ //$NON-NLS-2$
-
 	/**
 	 * The CompletionEngine is responsible for computing source completions.
 	 *
@@ -2032,7 +2029,7 @@ public final class CompletionEngine
 		} else if (astNode instanceof CompletionOnMethodReturnType) {
 			completionOnMethodReturnType(astNode, scope);
 		} else if (astNode instanceof CompletionOnSingleNameReference) {
-			completionOnSingleNameReference(astNode, astNodeParent, scope, insideTypeAnnotation, qualifiedBinding);
+			completionOnSingleNameReference(astNode, astNodeParent, scope, insideTypeAnnotation);
 		} else if (astNode instanceof CompletionOnProvidesInterfacesQualifiedTypeReference) {
 			completionOnProvidesInterfacesQualifiedTypeReference(astNode, astNodeParent, qualifiedBinding, scope);
 		} else if (astNode instanceof CompletionOnProvidesInterfacesSingleTypeReference) {
@@ -3308,9 +3305,9 @@ public final class CompletionEngine
 		CompletionOnMessageSend messageSend = (CompletionOnMessageSend) astNode;
 		TypeBinding[] argTypes = computeTypes(messageSend.arguments);
 		this.completionToken = messageSend.selector;
-		ObjectVector methodsFound = new ObjectVector();
 		if (qualifiedBinding == null) {
 			if (!this.requestor.isIgnored(CompletionProposal.METHOD_REF)) {
+				ObjectVector methodsFound = new ObjectVector();
 
 				findImplicitMessageSends(this.completionToken, argTypes, scope, messageSend, scope, methodsFound);
 
@@ -3332,7 +3329,7 @@ public final class CompletionEngine
 				argTypes,
 				(ReferenceBinding)((ReferenceBinding) qualifiedBinding).capture(scope, messageSend.receiver.sourceStart, messageSend.receiver.sourceEnd),
 				scope,
-				methodsFound,
+				new ObjectVector(),
 				false,
 				true,
 				messageSend,
@@ -3347,30 +3344,6 @@ public final class CompletionEngine
 				null,
 				-1,
 				-1);
-		}
-
-		if(this.assistNodeInJavadoc > 0 || DISABLE_OVERLOAD_EXPERIMENT) {
-			return;
-		}
-		// find completions for first parameters of matching overloaded methods.
-		CompletionOnSingleNameReference name = new CompletionOnSingleNameReference(new char[0], (((long)(messageSend.sourceEnd + 1)) << 32) + (messageSend.sourceEnd + 1), false);
-
-		MessageSend send = new MessageSend();
-		send.receiver = messageSend.receiver;
-		send.typeArguments = messageSend.typeArguments;
-		send.bits = messageSend.bits;
-		send.sourceStart = messageSend.sourceStart;
-		send.sourceEnd = messageSend.sourceEnd;
-		send.selector = messageSend.selector;
-		send.arguments = messageSend.arguments;
-		send.resolveType((BlockScope) scope);
-
-		computeExpectedTypes(send, name, scope);
-		if(this.expectedTypesPtr > -1) {
-			// rest of the completion logic must based on first argument completion with the following positions
-			this.startPosition = this.endPosition = name.sourceStart;
-			this.tokenStart = this.tokenEnd = name.sourceStart;
-			completionOnSingleNameReference(name, messageSend, scope, false, qualifiedBinding, methodsFound);
 		}
 	}
 
@@ -3927,11 +3900,7 @@ public final class CompletionEngine
 	}
 
 	private void completionOnSingleNameReference(ASTNode astNode, ASTNode astNodeParent, Scope scope,
-			boolean insideTypeAnnotation, Binding qualifiedBinding) {
-		completionOnSingleNameReference(astNode, astNodeParent, scope, insideTypeAnnotation, qualifiedBinding, new ObjectVector());
-	}
-	private void completionOnSingleNameReference(ASTNode astNode, ASTNode astNodeParent, Scope scope,
-			boolean insideTypeAnnotation, Binding qualifiedBinding, ObjectVector methodsFound) {
+			boolean insideTypeAnnotation) {
 		CompletionOnSingleNameReference singleNameReference = (CompletionOnSingleNameReference) astNode;
 		this.completionToken = singleNameReference.token;
 		SwitchStatement switchStatement = astNodeParent instanceof SwitchStatement ? (SwitchStatement) astNodeParent : null;
@@ -4003,28 +3972,13 @@ public final class CompletionEngine
 
 			checkCancel();
 
-			if(!DISABLE_OVERLOAD_EXPERIMENT && this.assistNodeInJavadoc == 0 && singleNameReference.token.length == 0
-					&& methodsFound.size() == 0	&& (astNodeParent instanceof MessageSend)) {
-				MessageSend message = (MessageSend) astNodeParent;
-
-				// find only overloads by performing a exact match
-				findMethods(message.selector, null, computeTypes(message.arguments),
-						(ReferenceBinding)((ReferenceBinding) message.actualReceiverType).capture(scope, message.receiver.sourceStart, message.receiver.sourceEnd),
-						scope, methodsFound, false, true, message, scope,
-						false, message.receiver instanceof SuperReference,
-						false,
-						null, null, null,
-						false, null,
-						-1, -1);
-			}
-
 			findVariablesAndMethods(
 				this.completionToken,
 				scope,
 				singleNameReference,
 				scope,
 				insideTypeAnnotation,
-				singleNameReference.isInsideAnnotationAttribute, methodsFound);
+				singleNameReference.isInsideAnnotationAttribute);
 
 //{ObjectTeams: following analyses don't apply to base/tsuper calls:
 			if (isBaseAccess(singleNameReference) || isTSuperAccess(singleNameReference))
@@ -4680,7 +4634,7 @@ public final class CompletionEngine
 			}
 		}
 
-		if(this.expectedTypesPtr > -1 && this.expectedTypesPtr + 1 != this.expectedTypes.length) {
+		if(this.expectedTypesPtr + 1 != this.expectedTypes.length) {
 			System.arraycopy(this.expectedTypes, 0, this.expectedTypes = new TypeBinding[this.expectedTypesPtr + 1], 0, this.expectedTypesPtr + 1);
 		}
 	}
@@ -4732,6 +4686,9 @@ public final class CompletionEngine
 		InvocationSite invocationSite,
 		boolean isStatic) {
 
+		if (arguments == null)
+			return;
+
 		MethodBinding[] methods = binding.availableMethods();
 		nextMethod : for (int i = 0; i < methods.length; i++) {
 			MethodBinding method = methods[i];
@@ -4749,30 +4706,24 @@ public final class CompletionEngine
 			if(!CharOperation.equals(method.selector, selector)) continue nextMethod;
 
 			TypeBinding[] parameters = method.parameters;
-			if(method.parameters.length == 0) {
+			if(parameters.length < arguments.length)
 				continue nextMethod;
-			}
 
-			int completionArgIndex = 0;
-			if(arguments != null) {
-				if(parameters.length < arguments.length)
+			int length = arguments.length - 1;
+			int completionArgIndex = arguments.length - 1;
+
+			for (int j = 0; j < length; j++) {
+				Expression argument = arguments[j];
+				TypeBinding argType = argument.resolvedType;
+				if(argType != null && !argType.erasure().isCompatibleWith(parameters[j].erasure()))
 					continue nextMethod;
 
-				int length = arguments.length - 1;
-				completionArgIndex = arguments.length - 1;
-
-				for (int j = 0; j < length; j++) {
-					Expression argument = arguments[j];
-					TypeBinding argType = argument.resolvedType;
-					if(argType != null && !argType.erasure().isCompatibleWith(parameters[j].erasure()))
-						continue nextMethod;
-
-					if((argument.sourceStart >= this.startPosition)
-							&& (argument.sourceEnd <= this.endPosition)) {
-						completionArgIndex = j;
-					}
+				if((argument.sourceStart >= this.startPosition)
+						&& (argument.sourceEnd <= this.endPosition)) {
+					completionArgIndex = j;
 				}
 			}
+
 			TypeBinding expectedType = method.parameters[completionArgIndex];
 			if(expectedType != null) {
 				addExpectedType(expectedType, scope);
@@ -5189,14 +5140,6 @@ public final class CompletionEngine
 		}
 		return 0;
 	}
-
-	private int computeRelevanceForOverload(MethodBinding method, char[] overloadSelector, boolean completingOverloadedMethod) {
-		if(!DISABLE_OVERLOAD_EXPERIMENT && CharOperation.equals(method.selector, overloadSelector) && completingOverloadedMethod) {
-			return R_METHOD_OVERLOAD;
-		}
-		return 0;
-	}
-
 
 	private long computeTargetedElement(CompletionOnAnnotationOfType fakeNode) {
 		ASTNode annotatedElement = fakeNode.potentialAnnotatedNode;
@@ -9745,22 +9688,6 @@ public final class CompletionEngine
 		int minTypeArgLength = typeArgTypes == null ? 0 : typeArgTypes.length;
 		int minArgLength = argTypes == null ? 0 : argTypes.length;
 
-		// find if the current method in search is an overloaded method.
-		int sameNameCount = 0;
-		boolean currentMethodIsOverloaded = false;
-		if(this.assistNodeInJavadoc == 0) {
-			for (MethodBinding methodBinding : methods) {
-				if(CharOperation.equals(methodName, methodBinding.selector) &&
-						TypeBinding.equalsEquals(receiverType, methodBinding.declaringClass)) {
-					sameNameCount++;
-					if(sameNameCount == 2) {
-						currentMethodIsOverloaded = true;
-						break;
-					}
-				}
-			}
-		}
-
 		next : for (int f = methods.length; --f >= 0;) {
 			MethodBinding method = methods[f];
 
@@ -10026,7 +9953,6 @@ public final class CompletionEngine
 				relevance += computeRelevanceForMissingElements(missingElementsHaveProblems);
 			}
 			relevance += computeRelevanceForSuper(method, scope, invocationSite);
-			relevance += computeRelevanceForOverload(method, methodName, currentMethodIsOverloaded);
 			this.noProposal = false;
 
 			if (castedReceiver == null) {
@@ -13534,25 +13460,13 @@ public final class CompletionEngine
 		}
 
 	}
-
-	private void findVariablesAndMethods(
-			char[] token,
-			Scope scope,
-			InvocationSite invocationSite,
-			Scope invocationScope,
-			boolean insideTypeAnnotation,
-			boolean insideAnnotationAttribute) {
-		findVariablesAndMethods(token, scope, invocationSite, invocationScope, insideTypeAnnotation,
-				insideAnnotationAttribute, new ObjectVector());
-	}
-
 	private void findVariablesAndMethods(
 		char[] token,
 		Scope scope,
 		InvocationSite invocationSite,
 		Scope invocationScope,
 		boolean insideTypeAnnotation,
-		boolean insideAnnotationAttribute, ObjectVector methodsFound) {
+		boolean insideAnnotationAttribute) {
 
 		if (token == null)
 			return;
@@ -13566,6 +13480,7 @@ public final class CompletionEngine
 
 		ObjectVector localsFound = new ObjectVector();
 		ObjectVector fieldsFound = new ObjectVector();
+		ObjectVector methodsFound = new ObjectVector();
 
 		Scope currentScope = scope;
 

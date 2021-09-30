@@ -38,7 +38,6 @@ import org.eclipse.jdt.internal.compiler.flow.SwitchFlowContext;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.impl.JavaFeature;
-import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
@@ -187,17 +186,14 @@ public class SwitchStatement extends Expression {
 							this.scope.problemReporter().possibleFallThroughCase(this.scope.enclosingCase);
 						}
 						caseInits = caseInits.mergedWith(flowInfo.unconditionalInits());
-						if ((this.switchBits & LabeledRules) != 0 && this.expression instanceof Reference) {
-							Reference reference = (Reference) this.expression;
+						if ((this.switchBits & LabeledRules) != 0 && this.expression instanceof NameReference) {
 							// default case does not apply to null => mark the variable being switched over as nonnull:
-							switch (reference.bits & ASTNode.RestrictiveFlagMASK) {
-								case Binding.LOCAL:
-									caseInits.markAsDefinitelyNonNull(reference.localVariableBinding());
-									break;
-								case Binding.FIELD:
-									if (this.scope.compilerOptions().enableSyntacticNullAnalysisForFields)
-										switchContext.recordNullCheckedFieldReference(reference, 2); // survive this case statement and into the next
-									break;
+							NameReference reference = (NameReference) this.expression;
+							if (reference.localVariableBinding() != null) {
+								caseInits.markAsDefinitelyNonNull(reference.localVariableBinding());
+							} else if (reference.lastFieldBinding() != null) {
+								if (this.scope.compilerOptions().enableSyntacticNullAnalysisForFields)
+									switchContext.recordNullCheckedFieldReference(reference, 2); // survive this case statement and into the next
 							}
 						}
 						complaintLevel = initialComplaintLevel; // reset complaint
@@ -787,6 +783,7 @@ public class SwitchStatement extends Expression {
 			CompilerOptions compilerOptions = upperScope.compilerOptions();
 			boolean isEnhanced = checkAndSetEnhanced(upperScope, expressionType);
 			if (expressionType != null) {
+				this.expression.computeConversion(upperScope, expressionType, expressionType);
 				checkType: {
 					if (!expressionType.isValidBinding()) {
 						expressionType = null; // fault-tolerance: ignore type mismatch from constants from hereon
