@@ -44,7 +44,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-		TESTS_NAMES = new String[] { "testB11_ch5b"};
+//		TESTS_NAMES = new String[] { "testB11_ch5b"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -5191,24 +5191,34 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // Problem with a static field in a role and inheritance - static initializer
     // B.1.1-otjld-ch-5b
     public void testB11_ch5b() {
-        runNegativeTestMatching(
-            new String[] {
-		"TeamB11ch5b.java",
-			    "\n" +
-			    "public team class TeamB11ch5b {\n" +
-			    "    public class RB11ch5b {\n" +
-			    "        private static final int MY_STATIC;\n" +
-			    "        static {\n" +
-			    "            MY_STATIC = gv();\n" +
-			    "        }\n" +
-			    "        private static int gv() { return 3; }\n" +
-			    "        public static void main(String... args) {\n" +
-			    "            System.out.print(MY_STATIC);\n" +
-			    "        }\n" +
-			    "    }\n" +
-			    "}\n" 
-            },
-            "static initializer");
+        String contents =
+    		"public team class TeamB11ch5b {\n" +
+			"    public class RB11ch5b {\n" +
+			"        private static final int MY_STATIC;\n" +
+			"        static {\n" +
+			"            MY_STATIC = gv();\n" +
+			"        }\n" +
+			"        private static int gv() { return 3; }\n" +
+			"        public static void main(String... args) {\n" +
+			"            System.out.print(MY_STATIC);\n" +
+			"        }\n" +
+			"    }\n" +
+			"	public static void main(String... args) {\n" +
+			"		new TeamB11ch5b().test();\n" +
+			"	}\n" +
+			"	void test() {\n" +
+			"		RB11ch5b.main(null);\n" +
+			"	}\n" +
+			"}\n";
+        if (this.complianceLevel >= ClassFileConstants.JDK16) {
+        	runConformTest(
+        			new String[] { "TeamB11ch5b.java", contents },
+        			"3");
+        } else {
+        	runNegativeTestMatching(
+        			new String[] { "TeamB11ch5b.java", contents },
+        			"Cannot define static initializer in inner type TeamB11ch5b.RB11ch5b");
+        }
     }
 
     // variant reported by Andreas Werner: public fields

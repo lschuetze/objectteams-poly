@@ -706,11 +706,15 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 	else if (codegenBinding.needsSyntheticEnclosingTeamInstance())
 	{
 		codeStream.iconst_0(); // dummy
-		codeStream.generateSyntheticEnclosingInstanceValues(
+		if (currentScope.isStatic() && currentScope.kind == Scope.METHOD_SCOPE && ((MethodScope) currentScope).isInsideInitializer()) {
+			codeStream.aconst_null(); // in <clinit> we simply don't have an enclosing team argument :(
+		} else {
+			codeStream.generateSyntheticEnclosingInstanceValues(
 				currentScope,
 				(ReferenceBinding)this.actualReceiverType,
 				null, /*enclosing instance*/
 				this);
+		}
 	}
 // SH}
 	codeStream.recordPositionsFrom(pc, this.sourceStart);
