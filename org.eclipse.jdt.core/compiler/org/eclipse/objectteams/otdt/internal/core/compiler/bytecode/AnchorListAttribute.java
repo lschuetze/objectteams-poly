@@ -24,8 +24,11 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.bytecode;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.MethodInfo;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
+import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
@@ -204,7 +207,14 @@ public class AnchorListAttribute extends ListValueAttribute {
             LocalVariableBinding anchor = new LocalVariableBinding(
                     anchorName, type.enclosingType(), 0, true); // name is irrelevant.
             // make sure this anchor can answer `anchor.declaringScope.referenceMethodBinding()`:
-            anchor.declaringScope = new CallinCalloutScope(null, null) {
+            anchor.declaringScope = new CallinCalloutScope(
+            							new ClassScope(
+            								new CompilationUnitScope(
+            									new CompilationUnitDeclaration(null, null, 0),
+            									environment.globalOptions),
+            								null),
+            							null)
+            {
             	@Override
 				public MethodBinding referenceMethodBinding() {
             		return declaringMethod;
