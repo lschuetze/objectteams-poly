@@ -614,7 +614,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 		    		baseAccess = baseSend;
 		    		break;
 				case DYN_ACCESS:
-					baseAccess = CalloutImplementorDyn.baseAccessExpression(calloutDecl.scope, this._role, baseType, receiver, calloutDecl.baseMethodSpec, arguments, gen);
+					baseAccess = CalloutImplementorDyn.baseAccessExpression(calloutDecl.scope, this._role, baseType, receiver, calloutDecl, arguments, gen);
 					break;
     		}
 		}

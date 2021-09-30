@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialLowerExpression;
@@ -49,9 +50,10 @@ public class CalloutImplementorDyn {
 
 
 	public static Expression baseAccessExpression(Scope scope, RoleModel roleModel, ReferenceBinding baseType,
-												  Expression receiver, MethodSpec baseSpec, Expression[] arguments,
+												  Expression receiver, CalloutMappingDeclaration calloutDecl, Expression[] arguments,
 												  AstGenerator gen)
 	{
+		MethodSpec baseSpec = calloutDecl.baseMethodSpec;
 		char[] selector = ensureAccessor(scope, baseType, baseSpec.isStatic()).selector;
 		TeamModel teamModel = roleModel.getTeamModel();
 		TeamModel.UpdatableIntLiteral accessIdArg = gen.updatableIntLiteral(baseSpec.accessId);
@@ -74,8 +76,10 @@ public class CalloutImplementorDyn {
 		MessageSend messageSend = gen.messageSend(receiver, selector, new Expression[] {accessIdArg, opKindArg, packagedArgs, callerArg});
 		if (baseSpec.resolvedType() == TypeBinding.VOID || opKind == 1)
 			return messageSend;
-		else
-			return gen.createCastOrUnboxing(messageSend, baseSpec.resolvedType(), true/*baseAccess*/);
+		TypeBinding expectedType = calloutDecl.mappings != null || calloutDecl.roleMethodSpec.returnNeedsTranslation
+				? baseSpec.resolvedType()
+				: calloutDecl.roleMethodSpec.resolvedType(); // shortcut to avoid casting to an intermediate base type
+		return gen.createCastOrUnboxing(messageSend, expectedType, true/*baseAccess*/);
 	}
 
 	public static MethodBinding ensureAccessor(Scope scope, ReferenceBinding baseType, boolean isStatic) {

@@ -2232,4 +2232,36 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
             },
             "Base");
     }
+
+    public void testBug576367() {
+    	runConformTest(new String[] {
+    		"p2/Team576367.java",
+    			"package p2;\n" +
+    			"import java.util.Arrays;\n" +
+    			"import base p1.Base576367;\n" +
+    			"import base p1.Base576367.Inner;\n" +
+    			"public team class Team576367 {\n" +
+    			"	@SuppressWarnings(\"decapsulation\")\n" +
+    			"	protected class R playedBy Base576367 {\n" +
+    			"		public R() { base(); }\n" +
+    			"		public Object[] getInners() -> get Inner[] inners;\n" +
+    			"	}\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		new Team576367().test();\n" +
+    			"	}\n" +
+    			"	void test() {\n" +
+    			"		Object[] os = new R().getInners();\n" +
+    			"		System.out.print(Arrays.toString(os));\n" +
+    			"	}\n" +
+    			"}\n",
+    		"p1/Base576367.java",
+    			"package p1;\n" +
+    			"public class Base576367 {\n" +
+    			"	private Inner[] inners = { new Inner() };\n" +
+    			"	static class Inner {\n" +
+    			"		@Override public String toString() { return \"inner\"; }\n" +
+    			"	}\n" +
+    			"}\n"},
+    		"[inner]");
+    }
 }
