@@ -153,8 +153,10 @@ public class BaseBundleLoadTrigger {
 		log(IStatus.INFO, "Adding OTRE import to "+baseBundleName);
 		List<String> imports = baseClass.getDynamicImports();
 		imports.add("org.objectteams");
-		if (useDynamicWeaver)
+		if (useDynamicWeaver) {
 			imports.add("org.eclipse.objectteams.otredyn.runtime"); // for access to TeamManager
+			imports.add("org.eclipse.objectteams.otredyn.runtime.dynamic.linker");
+		}
 	}
 
 	public boolean isDone() {
