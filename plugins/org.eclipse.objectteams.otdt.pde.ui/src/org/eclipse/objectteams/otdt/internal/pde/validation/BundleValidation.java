@@ -344,7 +344,7 @@ public team class BundleValidation
 				// from ITypeBinding descend into IMethodMappingBinding, then IMethodBinding (base):
 				for (IBinding binding : bindings) {
 					if (binding instanceof ITypeBinding) {
-						String teamName = ((ITypeBinding) binding).getDeclaringClass().getQualifiedName();
+						String teamName = ((ITypeBinding) binding).getDeclaringClass().getBinaryName();
 						Map<String,Set<String>> perTeamResult = superBasePackagesByTeam.get(teamName);
 						for (IMethodMappingBinding mappingBinding : ((ITypeBinding) binding).getResolvedMethodMappings()) {
 							if (mappingBinding == null) continue;
