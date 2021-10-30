@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <category-def name="org.eclipse.objectteams.otdt_2.8_2020-12" label="OTDT 2.8 (Eclipse 2020-12)">
+   <category-def name="org.eclipse.objectteams.otdt_2.8_2020-12" label="OTDT 2.8 (Eclipse 2020-12 - 2021-12)">
       <description>
          The Object Teams Development Tooling versions 2.8.x based on Eclipse 4.15.0 and later
       </description>
