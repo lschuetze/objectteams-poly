@@ -63,11 +63,11 @@ public class ReplaceSingleNameVisitor
      */
     public static boolean performReplacement(ASTNode node, BlockScope scope, char[] oldName, final char[] newName)
     {
-    	final int start = node.sourceStart;
+    	final long pos = (((long) node.sourceStart) << 32) + node.sourceEnd;
     	IExpressionProvider provider = new IExpressionProvider() {
 			@Override
 			public Expression newExpression() {
-                return new SingleNameReference(newName, start);
+                return new SingleNameReference(newName, pos);
 			}
     	};
     	ReplaceSingleNameVisitor replaceSingleNameVisitor = new ReplaceSingleNameVisitor(oldName, provider);

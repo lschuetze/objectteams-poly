@@ -8,67 +8,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="compiler/org/eclipse/objectteams/otdt/core/compiler/IOTConstants.java" type="org.eclipse.objectteams.otdt.core.compiler.IOTConstants">
-        <filter comment="cleanup constants to avoid near-term conflict with JDT" id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
-                <message_argument value="T_OrgObjectTeamsIBoundBase"/>
-                <message_argument value="102"/>
-            </message_arguments>
-        </filter>
-        <filter comment="cleanup constants to avoid near-term conflict with JDT" id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
-                <message_argument value="T_OrgObjectTeamsIBoundBase2"/>
-                <message_argument value="104"/>
-            </message_arguments>
-        </filter>
-        <filter comment="cleanup constants to avoid near-term conflict with JDT" id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
-                <message_argument value="T_OrgObjectTeamsITeam"/>
-                <message_argument value="100"/>
-            </message_arguments>
-        </filter>
-        <filter comment="cleanup constants to avoid near-term conflict with JDT" id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
-                <message_argument value="T_OrgObjectTeamsInstantiation"/>
-                <message_argument value="103"/>
-            </message_arguments>
-        </filter>
-        <filter comment="cleanup constants to avoid near-term conflict with JDT" id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
-                <message_argument value="T_OrgObjectTeamsTeam"/>
-                <message_argument value="101"/>
-            </message_arguments>
-        </filter>
-        <filter comment="constant name was corrected" id="405864542">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
-                <message_argument value="TEAM_ICONFINED"/>
-            </message_arguments>
-        </filter>
-        <filter comment="name corrected" id="1211105284">
-            <message_arguments>
-                <message_argument value="ITEAM_ICONFINED"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="compiler/org/eclipse/objectteams/otdt/core/compiler/OTNameUtils.java" type="org.eclipse.objectteams.otdt.core.compiler.OTNameUtils">
-        <filter comment="method signature was improved" id="338792546">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.OTNameUtils"/>
-                <message_argument value="isPredefinedConfined(char[][])"/>
-            </message_arguments>
-        </filter>
-        <filter comment="method signature was improved" id="1143996420">
-            <message_arguments>
-                <message_argument value="isPredefinedConfined(ReferenceBinding)"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="compiler/org/eclipse/jdt/core/compiler/IProblem.java" type="org.eclipse.jdt.core.compiler.IProblem">
         <filter id="388194388">
             <message_arguments>
@@ -208,6 +147,67 @@
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
                 <message_argument value="SealedSuperTypeInDifferentPackage"/>
                 <message_argument value="2099018"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="compiler/org/eclipse/objectteams/otdt/core/compiler/IOTConstants.java" type="org.eclipse.objectteams.otdt.core.compiler.IOTConstants">
+        <filter comment="cleanup constants to avoid near-term conflict with JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="T_OrgObjectTeamsIBoundBase"/>
+                <message_argument value="102"/>
+            </message_arguments>
+        </filter>
+        <filter comment="cleanup constants to avoid near-term conflict with JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="T_OrgObjectTeamsIBoundBase2"/>
+                <message_argument value="104"/>
+            </message_arguments>
+        </filter>
+        <filter comment="cleanup constants to avoid near-term conflict with JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="T_OrgObjectTeamsITeam"/>
+                <message_argument value="100"/>
+            </message_arguments>
+        </filter>
+        <filter comment="cleanup constants to avoid near-term conflict with JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="T_OrgObjectTeamsInstantiation"/>
+                <message_argument value="103"/>
+            </message_arguments>
+        </filter>
+        <filter comment="cleanup constants to avoid near-term conflict with JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="T_OrgObjectTeamsTeam"/>
+                <message_argument value="101"/>
+            </message_arguments>
+        </filter>
+        <filter comment="constant name was corrected" id="405864542">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="TEAM_ICONFINED"/>
+            </message_arguments>
+        </filter>
+        <filter comment="name corrected" id="1211105284">
+            <message_arguments>
+                <message_argument value="ITEAM_ICONFINED"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="compiler/org/eclipse/objectteams/otdt/core/compiler/OTNameUtils.java" type="org.eclipse.objectteams.otdt.core.compiler.OTNameUtils">
+        <filter comment="method signature was improved" id="338792546">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.OTNameUtils"/>
+                <message_argument value="isPredefinedConfined(char[][])"/>
+            </message_arguments>
+        </filter>
+        <filter comment="method signature was improved" id="1143996420">
+            <message_arguments>
+                <message_argument value="isPredefinedConfined(ReferenceBinding)"/>
             </message_arguments>
         </filter>
     </resource>
@@ -524,6 +524,14 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="dom/org/eclipse/jdt/core/dom/GuardPredicateDeclaration.java" type="org.eclipse.jdt.core.dom.GuardPredicateDeclaration">
+        <filter comment="Extending ASTNode is OK inside this plugin" id="576778288">
+            <message_arguments>
+                <message_argument value="ASTNode"/>
+                <message_argument value="GuardPredicateDeclaration"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="dom/org/eclipse/jdt/core/dom/ImportDeclaration.java" type="org.eclipse.jdt.core.dom.ImportDeclaration">
         <filter id="576778288">
             <message_arguments>
@@ -551,6 +559,14 @@
             <message_arguments>
                 <message_argument value="ASTNode"/>
                 <message_argument value="MemberValuePair"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="dom/org/eclipse/jdt/core/dom/MethodBindingOperator.java" type="org.eclipse.jdt.core.dom.MethodBindingOperator">
+        <filter comment="Extending ASTNode is OK inside this plugin" id="576778288">
+            <message_arguments>
+                <message_argument value="ASTNode"/>
+                <message_argument value="MethodBindingOperator"/>
             </message_arguments>
         </filter>
     </resource>
@@ -655,14 +671,6 @@
             <message_arguments>
                 <message_argument value="Name"/>
                 <message_argument value="QualifiedName"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="dom/org/eclipse/jdt/core/dom/RoleTypeDeclaration.java" type="org.eclipse.jdt.core.dom.RoleTypeDeclaration">
-        <filter comment="copied addition from JDT" id="336658481">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.RoleTypeDeclaration"/>
-                <message_argument value="PERMITS_TYPES_PROPERTY"/>
             </message_arguments>
         </filter>
     </resource>

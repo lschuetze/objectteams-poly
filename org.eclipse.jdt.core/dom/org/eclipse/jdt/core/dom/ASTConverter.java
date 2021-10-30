@@ -3897,6 +3897,7 @@ class ASTConverter {
 //{ObjectTeams: base imports:
 					} else if (modifiers == ExtraCompilerModifiers.AccBase) {
 						importDeclaration.setBase(true);
+						importDeclaration.setBaseModifierPosition(importReference.baseModifierPosition);
 // SH}
 					} else {
 						importDeclaration.setFlags(importDeclaration.getFlags() | ASTNode.MALFORMED);
@@ -7076,6 +7077,7 @@ class ASTConverter {
 	private RoleTypeDeclaration buildRoleTypeDeclaration(org.eclipse.jdt.internal.compiler.ast.TypeDeclaration typeDeclaration)
     {
 		RoleTypeDeclaration roleTypeDecl = this.ast.newRoleTypeDeclaration();
+		roleTypeDecl.setPlayedByPosition(typeDeclaration.playedByStart);
 		char[] oldSource = null;
 		try {
 			if (typeDeclaration.isRoleFile()) {
@@ -7221,6 +7223,7 @@ class ASTConverter {
 	private GuardPredicateDeclaration convertGuardPredicate(org.eclipse.objectteams.otdt.internal.core.compiler.ast.GuardPredicateDeclaration guard) {
 		GuardPredicateDeclaration newGuard = this.ast.newGuardPredicateDeclaration();
 		newGuard.setSourceRange(guard.declarationSourceStart, guard.declarationSourceEnd - guard.declarationSourceStart + 1);
+		newGuard.setWhenPosition(guard.sourceStart);
 		if (guard.hasParsedStatements) {
 			org.eclipse.jdt.internal.compiler.ast.ReturnStatement returnStat = guard.returnStatement;
 			newGuard.setExpression(convert(returnStat.expression));
@@ -7448,7 +7451,7 @@ public BaseConstructorInvocation convert(
 
 // convert methods for OT-specific internal types CallinMappingDeclaration
 //  and CalloutMappingDeclaration
-	public CallinMappingDeclaration convert(
+	public AbstractMethodMappingDeclaration convert(
 			org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration callinMapping) {
 		org.eclipse.jdt.core.dom.CallinMappingDeclaration result = this.ast
 				.newCallinMappingDeclaration();
@@ -7481,6 +7484,7 @@ public BaseConstructorInvocation convert(
 
 		// with { ... }, parameter mappings
 		if (callinMapping.mappings != null) {
+			result.setWithKeywordStart(callinMapping.bodyStart);
 			int mappingsLength = callinMapping.mappings.length;
 			for (int idx = 0; idx < mappingsLength; idx++) {
 				result.getParameterMappings().add(
@@ -7556,6 +7560,7 @@ public BaseConstructorInvocation convert(
 
 		// convert parameter mappings
 		if (calloutMapping.mappings != null) {
+			result.setWithKeywordStart(calloutMapping.bodyStart);
 			for (int idx = 0; idx < calloutMapping.mappings.length; idx++) {
 				result.getParameterMappings().add(idx,
 						convert(calloutMapping.mappings[idx]));

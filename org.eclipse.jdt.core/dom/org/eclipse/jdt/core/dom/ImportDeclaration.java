@@ -139,6 +139,8 @@ public class ImportDeclaration extends ASTNode {
 	 * @since 3.2
 	 */
 	private boolean isBase = false;
+
+	private int baseModifierPosition = -1;
 // SH}
 	/**
 	 * Creates a new AST node for an import declaration owned by the
@@ -421,6 +423,21 @@ public class ImportDeclaration extends ASTNode {
 		return
 			memSize()
 			+ (this.importName == null ? 0 : getName().treeSize());
+	}
+
+	/**
+	 * Set the start position of the 'base' modifier.
+	 * @since 3.28 OTDT 2.8.2
+	 */
+	public void setBaseModifierPosition(int baseModifierPosition) {
+		this.baseModifierPosition = baseModifierPosition;
+	}
+	/**
+	 * Get the start position of the 'base' modifier, or -1.
+	 * @since 3.28 OTDT 2.8.2
+	 */
+	public int getBaseModifierPosition() {
+		return this.baseModifierPosition;
 	}
 }
 

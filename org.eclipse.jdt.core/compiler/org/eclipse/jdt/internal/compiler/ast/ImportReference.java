@@ -44,7 +44,9 @@ public class ImportReference extends ASTNode {
 	// star end position
 	public int trailingStarPosition;
 
-//{ObjectTeams: new queries:
+//{ObjectTeams:
+	public int baseModifierPosition;
+//  new queries:
 	public boolean isTeam() {
 		return (this.modifiers & ExtraCompilerModifiers.AccTeam) != 0;
 	}

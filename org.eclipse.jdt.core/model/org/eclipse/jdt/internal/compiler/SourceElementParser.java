@@ -785,7 +785,9 @@ protected void consumeSingleBaseImportDeclarationName() {
 	impt.declarationEnd = impt.declarationSourceEnd;
 	//this.endPosition is just before the ;
 //	OT/J: consume start and end position of base:
-	this.intPtr-=2;
+	impt.baseModifierPosition = this.intStack[this.intPtr--];
+	this.intPtr-=1;
+//
 	impt.declarationSourceStart = this.intStack[this.intPtr--];
 
 	if(!this.statementRecoveryActivated &&

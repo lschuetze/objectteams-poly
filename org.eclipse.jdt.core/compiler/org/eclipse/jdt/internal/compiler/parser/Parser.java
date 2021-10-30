@@ -3530,6 +3530,7 @@ protected void consumeClassHeaderPlayedBy() {
 	typeDecl.bits |= (baseclass.bits & ASTNode.HasTypeAnnotations);
 	typeDecl.baseclass = baseclass;
 	typeDecl.baseclass.setBaseclassDecapsulation(DecapsulationState.ALLOWED);
+	typeDecl.playedByStart = this.intStack[this.intPtr--];
 	typeDecl.bodyStart = typeDecl.baseclass.sourceEnd + 1;
 	// recovery
 	if (this.currentElement != null) {
@@ -11758,7 +11759,9 @@ protected void consumeSingleBaseImportDeclarationName() {
 	impt.declarationEnd = impt.declarationSourceEnd;
 	//this.endPosition is just before the ;
 //OT/J: consume start and end position of base:
-	this.intPtr-=2;
+	impt.baseModifierPosition = this.intStack[this.intPtr--];
+	this.intPtr-=1;
+//
 	impt.declarationSourceStart = this.intStack[this.intPtr--];
 
 //OT/J never an error (unlike static):
@@ -12827,6 +12830,7 @@ protected void consumeToken(int type) {
 //{ObjectTeams: new constructs storing startPosition, too.
         case TokenNamewithin:
         case TokenNameprecedence:
+        case TokenNameplayedBy :
 // SH}
 		case TokenNamemodule:
 		case TokenNamerequires:
@@ -12952,7 +12956,6 @@ protected void consumeToken(int type) {
 			//  case TokenNameinstanceof  :
 //{ObjectTeams:	new tokens without special treatment:
             //  case TokenNameas :
-            //  case TokenNameplayedBy :
 			//  case TokenNameprecedence :
 			//  case TokenNamereadonly :
             //  case TokenNamewith :

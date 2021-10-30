@@ -183,6 +183,7 @@ public class TypeDeclaration extends Statement implements ProblemSeverities, Ref
 	public AbstractMethodMappingDeclaration[] callinCallouts;
 	public PrecedenceDeclaration[] precedences;
 	public TypeReference baseclass;
+	public int playedByStart;
 
 
 	// (stored by Parser.consumePredicate(), copied to methods from Parser.dispatchDeclarationInto())

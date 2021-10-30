@@ -66,6 +66,8 @@ public class GuardPredicateDeclaration extends ASTNode {
 	private Expression expression = null;
 	private boolean isBase = false;
 
+	private int whenPosition;
+
 	GuardPredicateDeclaration(AST ast)
 	{
 		super(ast);
@@ -198,4 +200,19 @@ public class GuardPredicateDeclaration extends ASTNode {
 		return memSize() + (this.expression == null ? 0 : getExpression().treeSize());
 	}
 
+	/**
+	 * Set position of the 'when' keyword (differs from start position in 'base' 'when' combination).
+	 * @since 3.28
+	 */
+	public void setWhenPosition(int sourceStart) {
+		this.whenPosition = sourceStart;
+	}
+
+	/**
+	 * Set position of the 'when' keyword (differs from start position in 'base' 'when' combination).
+	 * @since 3.28
+	 */
+	public int getWhenPosition() {
+		return this.whenPosition;
+	}
 }

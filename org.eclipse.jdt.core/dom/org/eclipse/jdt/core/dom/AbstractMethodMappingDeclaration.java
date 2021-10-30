@@ -61,6 +61,8 @@ public abstract class AbstractMethodMappingDeclaration extends BodyDeclaration
 	ASTNode.NodeList parameterMappings =
 		new ASTNode.NodeList(internalParameterMappingsProperty());
 
+	private int withKeywordStart;
+
 	/** Return the structural property descriptor for the roleMappingElement property of this node. */
 	public abstract ChildPropertyDescriptor getRoleElementProperty();
 
@@ -234,4 +236,20 @@ public abstract class AbstractMethodMappingDeclaration extends BodyDeclaration
     {
         return this.ast.getBindingResolver().resolveMethodMapping(this);
     }
+
+	/**
+	 * Set the start position of the 'with' keyword starting the parameter mappings block.
+	 * @since 3.28 OTDT 2.8.2
+	 */
+	public void setWithKeywordStart(int withKeywordStart) {
+		this.withKeywordStart = withKeywordStart;
+	}
+
+	/**
+	 * Get the start position of the 'with' keyword starting the parameter mappings block.
+	 * @since 3.28 OTDT 2.8.2
+	 */
+	public int getWithKeywordStart() {
+		return this.withKeywordStart;
+	}
 }

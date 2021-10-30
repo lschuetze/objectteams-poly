@@ -378,6 +378,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      */
 	private boolean isRoleFile = false;
 
+	private int playedByPosition;
+
     /**
      * Creates a new AST node for a type declaration owned by the given
      * AST. By default, the type declaration is for a class of an
@@ -699,6 +701,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     {
         RoleTypeDeclaration result = new RoleTypeDeclaration(target);
         result.setSourceRange(this.getStartPosition(), this.getLength());
+        result.setPlayedByPosition(this.playedByPosition);
         result.setJavadoc(
             (Javadoc) ASTNode.copySubtree(target, getJavadoc()));
         if (this.ast.apiLevel == AST.JLS2_INTERNAL) {
@@ -1163,4 +1166,20 @@ public class RoleTypeDeclaration extends TypeDeclaration {
             + (this.teamClassType == null          ? 0 : this.teamClassType.treeSize())
             + (this.optionalGuardPredicate == null ? 0 : this.optionalGuardPredicate.treeSize());
     }
+
+    /**
+     * Set the start position of the 'playedBy' keyword.
+	 * @since 3.28 OTDT 2.8.2
+	 */
+    public void setPlayedByPosition(int playedByPosition) {
+		this.playedByPosition = playedByPosition;
+	}
+
+    /**
+     * Answer the start position of the 'playedBy' keyword.
+	 * @since 3.28 OTDT 2.8.2
+	 */
+    public int getPlayedByPosition() {
+		return this.playedByPosition;
+	}
 }

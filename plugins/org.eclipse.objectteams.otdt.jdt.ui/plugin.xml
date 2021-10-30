@@ -96,6 +96,23 @@
                class="org.eclipse.objectteams.otdt.internal.ui.javaeditor.HighlightingAdaptor"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"/>
          <team
+               activation="NONE"
+               class="org.eclipse.objectteams.otdt.internal.ui.javaeditor.HighlightingAdaptor$OTSemanticReconciler"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+            <superBase
+                  class="org.eclipse.jdt.internal.ui.javaeditor.PositionCollectorCore"
+                  plugin="org.eclipse.jdt.core.manipulation">
+            </superBase>
+            <superBase
+                  class="org.eclipse.jdt.internal.corext.dom.GenericVisitor"
+                  plugin="org.eclipse.jdt.core.manipulation">
+            </superBase>
+            <superBase
+                  class="org.eclipse.jdt.core.dom.ASTVisitor"
+                  plugin="org.eclipse.jdt.core">
+            </superBase>
+         </team>
+         <team
                activation="ALL_THREADS"
                class="org.eclipse.objectteams.otdt.internal.ui.javaeditor.AnnotationAdaptor"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
