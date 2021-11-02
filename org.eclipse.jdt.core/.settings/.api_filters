@@ -730,6 +730,15 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="model/org/eclipse/jdt/core/CompletionProposal.java" type="org.eclipse.jdt.core.CompletionProposal">
+        <filter comment="give way to new constant from JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.CompletionProposal"/>
+                <message_argument value="OVERRIDE_ROLE_DECLARATION"/>
+                <message_argument value="30"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="model/org/eclipse/jdt/core/Flags.java" type="org.eclipse.jdt.core.Flags">
         <filter comment="Must yield to new AccRecord." id="388194388">
             <message_arguments>

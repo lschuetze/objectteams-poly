@@ -396,7 +396,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 		try {
 			AbstractMethodDeclaration methodDeclaration = methodScope.referenceMethod();
 			if (methodDeclaration != null && methodDeclaration.binding != null
-					&& (methodDeclaration.binding.tagBits & TagBits.IsCanonicalConstructor) != 0) {
+					&& methodDeclaration.binding.isCanonicalConstructor()) {
 				if (!checkAndFlagExplicitConstructorCallInCanonicalConstructor(methodDeclaration, scope))
 					return;
 			}

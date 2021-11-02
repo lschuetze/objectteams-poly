@@ -2844,6 +2844,8 @@ void setSourceStart(int sourceStart);
 	int LocalStaticsIllegalVisibilityModifierForInterfaceLocalType = TypeRelated + 1765;
 	/** @since 3.28 */
 	int IllegalModifierForLocalEnumDeclaration = TypeRelated + 1766;
+	/** @since 3.28 */
+	int ClassExtendFinalRecord = TypeRelated + 1767;
 	/* records - end */
 
 
