@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.LambdaExpression;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
@@ -2258,6 +2259,8 @@ protected boolean needBindoutDisambiguation() {
 		return !(goal == Goal.LambdaParameterListGoal || goal == Goal.PatternGoal);
 	} else if (this.activeParser instanceof Parser) {
 		Parser parser = (Parser) this.activeParser;
+		if (parser.referenceContext instanceof AbstractMethodDeclaration)
+			return false; // no callout inside a method :)
 		int ptr = parser.astPtr;
 		while (ptr > -1) {
 			ASTNode topAstNode = parser.astStack[ptr];

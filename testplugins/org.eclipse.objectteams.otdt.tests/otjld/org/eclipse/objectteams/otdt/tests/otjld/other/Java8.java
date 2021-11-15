@@ -601,4 +601,19 @@ public class Java8 extends AbstractOTJLDTest {
 				"}\n"
 			});
 	}
+	public void testRoleLambdaArgNoParen() {
+		runConformTest(
+			new String[] {
+				"LambdaArgNoParen.java",
+				"import java.util.function.Function;\n" +
+				"public team class LambdaArgNoParen {\n" +
+				"	protected class R {\n" +
+				"		void m1(Function<String,Boolean> f) {}\n" +
+				"		void m2() {\n" +
+				"			m1(s -> s.isEmpty());\n" +
+				"		}\n" +
+				"	}\n" +
+				"}\n"
+			});
+	}
 }
