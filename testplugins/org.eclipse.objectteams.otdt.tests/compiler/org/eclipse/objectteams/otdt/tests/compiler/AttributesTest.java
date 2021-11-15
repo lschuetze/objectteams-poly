@@ -60,6 +60,10 @@ public class AttributesTest extends AbstractOTJLDTest {
 			this.versionString = "version 14 : 58.0";
 		} else if (this.complianceLevel == ClassFileConstants.JDK15) {
 			this.versionString = "version 15 : 59.0";
+		} else if (this.complianceLevel == ClassFileConstants.JDK16) {
+			this.versionString = "version 16 : 60.0";
+		} else if (this.complianceLevel == ClassFileConstants.JDK17) {
+			this.versionString = "version 17 : 61.0";
 		}
 	}
 

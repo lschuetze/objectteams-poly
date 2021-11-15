@@ -2815,7 +2815,7 @@ protected void consumeCalloutBindingLeft(boolean hasSignature) {
 	// CalloutKind
 	calloutBinding.calloutKind       = this.intStack[this.intPtr--];
 	calloutBinding.bindingTokenStart = this.intStack[this.intPtr--];
-	if (calloutBinding.calloutKind == TokenNameBINDOUT) // as apposed to '=>'
+	if (calloutBinding.calloutKind == TokenNameSYNTHBINDOUT) // as opposed to '=>'
 		this.intPtr--; // from Scanner.currentPosition for LE.arrowPosition
 	calloutBinding.modifierEnd = calloutBinding.bindingTokenStart+1; // assume just '->' or '=>', until we find actual callout modifiers (get/set)
 
@@ -4006,7 +4006,7 @@ protected void consumeConstructorHeader() {
 				this.currentElement = this.currentElement.parent;
 			}
 //{ObjectTeams: recover method mapping:
-		} else if (this.currentToken == TokenNameBINDOUT) {
+		} else if (this.currentToken == TokenNameSYNTHBINDOUT) {
 			// TODO(SH): element should have been a callout mapping (missing return type)
 			//           create RecoveredMethodMapping.
 // SH}
@@ -12540,7 +12540,8 @@ protected void consumeToken(int type) {
 	//System.out.println(this.scanner.toStringAction(type));
 	switch (type) {
 		case TokenNameARROW:
-//{ObjectTeams: for alias TokenNameBINDOUT
+//{ObjectTeams: for alias TokenNameSYNTHBINDOUT
+		case TokenNameSYNTHBINDOUT:
 			pushOnIntStack(this.scanner.currentPosition); // for LE.arrowPosition
 			pushOnIntStack(this.scanner.startPosition); // for bindingTokenStart
 			pushOnIntStack(type);

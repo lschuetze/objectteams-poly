@@ -293,12 +293,13 @@ protected int getNextToken0() throws InvalidInputException {
 							return TokenNameARROW;
   :giro */
 						if (getNextChar('>')) {
-							if (this._isOTSource) {
-								this._calloutSeen = true; // TODO distinguish from ARROW?
+							if (needBindoutDisambiguation()) {
 								if (this._insideParameterMapping) {
 									this._bindoutLookahead = new BindoutLookahead();
 									return this._bindoutLookahead.getNextToken();
 								}
+								this._calloutSeen = true;
+								return TokenNameSYNTHBINDOUT;
 							}
 							return TokenNameARROW;
 						}

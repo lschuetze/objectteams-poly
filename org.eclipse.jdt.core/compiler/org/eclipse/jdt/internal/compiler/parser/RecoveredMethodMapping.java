@@ -153,7 +153,7 @@ public RecoveredElement add(AbstractMethodDeclaration methodDeclaration, int bra
 		switch (nextToken) {
 		case TerminalTokens.TokenNameLBRACE:   // it's a real method
 		case TerminalTokens.TokenNameBINDIN:   // it's the start of a new callin mapping
-		case TerminalTokens.TokenNameBINDOUT:  // it's the start of a new callout mapping
+		case TerminalTokens.TokenNameSYNTHBINDOUT:  // it's the start of a new callout mapping
 			// add real method or mapping to the class:
 			return super.add(methodDeclaration, bracketBalanceValue);
 		}
@@ -220,7 +220,7 @@ public RecoveredElement add(FieldDeclaration fieldDeclaration, int bracketBalanc
 	// check whether fieldDeclaration is a misread method spec rather than a real field
 	switch (parser().currentToken) {
 	case TerminalTokens.TokenNameBINDIN:   // it's the start of a new callin mapping
-	case TerminalTokens.TokenNameBINDOUT:  // it's the start of a new callout mapping
+	case TerminalTokens.TokenNameSYNTHBINDOUT:  // it's the start of a new callout mapping
 		// ignore misread field:
 		return this;
 	}

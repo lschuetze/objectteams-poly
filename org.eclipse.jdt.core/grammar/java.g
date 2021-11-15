@@ -1156,7 +1156,7 @@ CalloutBinding ::= Modifiersopt CalloutBindingLeftShort CalloutModifieropt Metho
 /.$putCase consumeCalloutParameterMappingsInvalid(); $break ./
 
 -- SYMBOLS:
-CalloutKind -> '->'
+CalloutKind -> SYNTHBINDOUT
 CalloutKind -> '=>'
 /:$readableName CalloutKind:/
 

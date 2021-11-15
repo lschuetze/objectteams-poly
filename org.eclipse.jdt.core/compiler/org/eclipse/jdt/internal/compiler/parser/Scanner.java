@@ -28,7 +28,12 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
+import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.ast.Argument;
+import org.eclipse.jdt.internal.compiler.ast.LambdaExpression;
+import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
+import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.JavaFeature;
@@ -235,7 +240,7 @@ public class Scanner implements TerminalTokens {
     		return baseIsKeyword(false);
     	case TokenNameas:
     	case TokenNameBINDIN:
-    	case TokenNameBINDOUT:
+    	case TokenNameSYNTHBINDOUT:
     	case TokenNamecallin:
     	case TokenNameplayedBy:
     	case TokenNameprecedence:
@@ -1785,12 +1790,13 @@ protected int getNextToken0() throws InvalidInputException {
 							return TokenNameARROW;
   :giro */
 						if (getNextChar('>')) {
-							if (this._isOTSource) {
-								this._calloutSeen = true; // TODO distinguish from ARROW?
+							if (needBindoutDisambiguation()) {
 								if (this._insideParameterMapping) {
 									this._bindoutLookahead = new BindoutLookahead();
 									return this._bindoutLookahead.getNextToken();
 								}
+								this._calloutSeen = true;
+								return TokenNameSYNTHBINDOUT;
 							}
 							return TokenNameARROW;
 						}
@@ -2241,6 +2247,34 @@ protected int getNextToken0() throws InvalidInputException {
 		}
 	}
 	return TokenNameEOF;
+}
+protected boolean needBindoutDisambiguation() {
+	if (!this._isOTSource)
+		return false;
+	if (this._calloutSeen || this._callinSeen)
+		return false; // no nesting
+	if (this.activeParser instanceof VanguardParser) {
+		Goal goal = ((VanguardParser)this.activeParser).currentGoal;
+		return !(goal == Goal.LambdaParameterListGoal || goal == Goal.PatternGoal);
+	} else if (this.activeParser instanceof Parser) {
+		Parser parser = (Parser) this.activeParser;
+		int ptr = parser.astPtr;
+		while (ptr > -1) {
+			ASTNode topAstNode = parser.astStack[ptr];
+			if (topAstNode instanceof TypeDeclaration) {
+				return true;
+			} else if (topAstNode instanceof MethodDeclaration) {
+				return true; // method to be reclassified as MethodSpec :( TODO: test content?
+			} else if (topAstNode instanceof LambdaExpression) {
+				return topAstNode.sourceEnd != 0; // disambiguation only when body is complete
+			} else if (topAstNode instanceof Argument) {
+				ptr--; // dig deeper
+			} else {
+				return true;
+			}
+		}
+	}
+	return true;
 }
 private int scanForStringLiteral() throws InvalidInputException {
 	boolean isTextBlock = false;
@@ -5906,6 +5940,14 @@ private VanguardParser getVanguardParser() {
 	}
 	this.vanguardScanner.setSource(this.source);
 	this.vanguardScanner.resetTo(this.startPosition, this.eofPosition - 1, isInModuleDeclaration(), this.scanContext);
+//{ObjectTeams: init OT-state:
+	this.vanguardScanner._isOTSource = this._isOTSource;
+	this.vanguardScanner._dotSeen = this._dotSeen;
+	this.vanguardScanner._calloutSeen = this._calloutSeen;
+	this.vanguardScanner._callinSeen = this._callinSeen;
+	this.vanguardScanner._insideParameterMapping = this._insideParameterMapping;
+	this.vanguardScanner._forceBaseIsIdentifier = this._forceBaseIsIdentifier;
+// SH}
 	return this.vanguardParser;
 }
 private VanguardParser getNewVanguardParser() {
