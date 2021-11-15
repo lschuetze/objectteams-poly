@@ -1108,7 +1108,7 @@ public class SpacePreparator extends ASTVisitor {
 	}
 	@Override
 	public boolean visit(CalloutMappingDeclaration node) {
-		handleTokenAfter(node.getRoleMappingElement(), node.isCalloutOverride() ? TokenNameCALLOUT_OVERRIDE : TokenNameSYNTHBINDOUT, true, true);
+		handleTokenAfter(node.getRoleMappingElement(), node.isCalloutOverride() ? TokenNameCALLOUT_OVERRIDE : TokenNameBINDOUT, true, true);
 		if (node.hasParameterMapping())
 			handleTokenAfter(node.getBaseMappingElement(), TokenNamewith, true, true);
 		return true;
@@ -1137,7 +1137,7 @@ public class SpacePreparator extends ASTVisitor {
 		if (node.isBindIN())
 			handleTokenAfter(node.getIdentifier(), TokenNameBINDIN, true, true);
 		else
-			handleTokenBefore(node.getIdentifier(), TokenNameSYNTHBINDOUT, true, true);
+			handleTokenBefore(node.getIdentifier(), TokenNameBINDOUT, true, true);
 		return true;
 	}
 	@Override

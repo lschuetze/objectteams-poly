@@ -191,10 +191,7 @@ public interface TerminalTokens {
 							TokenNameATOT = 128,
 							TokenNameBINDIN = 81,
 							TokenNameCALLOUT_OVERRIDE = 97,
-							TokenNameSYNTHBINDOUT = 73,
+							TokenNameBINDOUT = 73,
 							TokenNameEOF = 69,
 							TokenNameERROR = 154;
-
-	// This alias is statically inserted by GenerateParserScript.java:
-	int TokenNameBINDOUT = TokenNameARROW;
 }

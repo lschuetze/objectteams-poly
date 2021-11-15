@@ -67,7 +67,6 @@ import org.eclipse.jdt.internal.compiler.parser.RecoveredMethod;
 import org.eclipse.jdt.internal.compiler.parser.RecoveredStatement;
 import org.eclipse.jdt.internal.compiler.parser.RecoveredType;
 import org.eclipse.jdt.internal.compiler.parser.RecoveredUnit;
-import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
@@ -2255,12 +2254,12 @@ public void parseBlockStatements(AbstractMethodMappingDeclaration mapping, Compi
 		long pos= (((long)this.endPosition)<<32) + this.endPosition;
 		// assume: "expr -> <MISSING>"
 		char[] ident= "<MISSING>".toCharArray();  //$NON-NLS-1$
-		int direction= TerminalTokens.TokenNameBINDOUT;
+		int direction= AbstractMethodMappingDeclaration.BindingDirectionOut;
 		if (this.identifierLengthPtr > -1 && this.identifierLengthStack[0] == 1) { // unconsumed single identifier at the bottom of the stack?
 			// it's: "ident <- expr"
 			pos= this.identifierPositionStack[0]; // don't bother with clearing stacks, parsing aborts right now
 			ident= this.identifierStack[0];
-			direction= TerminalTokens.TokenNameBINDIN;
+			direction= AbstractMethodMappingDeclaration.BindingDirectionIn;
 		}
 		pushOnAstStack(new ParameterMapping(direction,
 										    this.expressionStack[this.expressionPtr--],

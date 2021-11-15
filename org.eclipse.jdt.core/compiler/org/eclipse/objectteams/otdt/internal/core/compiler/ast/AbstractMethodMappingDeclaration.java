@@ -22,9 +22,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.ast;
 
-import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNameBINDIN;
-import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNameBINDOUT;
-
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
@@ -51,7 +48,6 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.parser.Parser;
-import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilationUnit;
 import org.eclipse.jdt.internal.compiler.problem.AbortMethod;
@@ -114,6 +110,10 @@ public abstract class AbstractMethodMappingDeclaration
 	public Javadoc javadoc;
 	public Annotation[] annotations;
 	public boolean hasParsedParamMappings= false;
+	// distinction '->' / '=>' / '<-' :
+	public static final int BindingDirectionOut = 1;
+	public static final int BindingOutOverride = 2;
+	public static final int BindingDirectionIn = 3;
 
 	public AbstractMethodMappingDeclaration(CompilationResult compilationResult)
 	{
@@ -376,7 +376,7 @@ public abstract class AbstractMethodMappingDeclaration
 									continue;
 								}
 							}
-							if (   !methodSpec.checkBaseReturnType(this.scope, isCallin()?TokenNameBINDOUT:TokenNameBINDIN)
+							if (   !methodSpec.checkBaseReturnType(this.scope, isCallin()?BindingDirectionOut:BindingDirectionIn)
 								|| !methodSpec.checkParameterTypes(this.scope, true))
 								continue;
 							// translation bits are already initialized in the constructor of MethodSpec.
@@ -599,13 +599,13 @@ public abstract class AbstractMethodMappingDeclaration
 		if (this.mappings != null)
 		{
 			for (ParameterMapping mapping : this.mappings)
-				if (mapping.direction == TerminalTokens.TokenNameBINDIN) // ident <- expr
+				if (mapping.direction == BindingDirectionIn) // ident <- expr
 					mapping.expression.traverse(new BaseScopeMarker(), this.scope);
 
 			// check 4.4(c) - sentence 2:
 			if (isCallin() && !isReplaceCallin())
 				for (ParameterMapping mapping : this.mappings)
-					if (mapping.direction == TerminalTokens.TokenNameBINDOUT) // expr -> ident
+					if (mapping.direction == BindingDirectionOut) // expr -> ident
 						parser.problemReporter().illegalBindingDirectionNonReplaceCallin(mapping);
 
 			{ // prepare positions:
@@ -660,7 +660,7 @@ public abstract class AbstractMethodMappingDeclaration
 	{
 		Expression mappedArgExpr = null;
 		Integer basePos = null;
-		int bindingDirection= isCallin() ? TerminalTokens.TokenNameBINDIN : TerminalTokens.TokenNameBINDOUT;
+		int bindingDirection= isCallin() ? BindingDirectionIn: BindingDirectionOut;
 		// look for a mapping:
 		for (int i=0; i<this.mappings.length; i++)
 		{

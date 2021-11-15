@@ -2815,8 +2815,6 @@ protected void consumeCalloutBindingLeft(boolean hasSignature) {
 	// CalloutKind
 	calloutBinding.calloutKind       = this.intStack[this.intPtr--];
 	calloutBinding.bindingTokenStart = this.intStack[this.intPtr--];
-	if (calloutBinding.calloutKind == TokenNameSYNTHBINDOUT) // as opposed to '=>'
-		this.intPtr--; // from Scanner.currentPosition for LE.arrowPosition
 	calloutBinding.modifierEnd = calloutBinding.bindingTokenStart+1; // assume just '->' or '=>', until we find actual callout modifiers (get/set)
 
 	// MethodSpec
@@ -2958,12 +2956,12 @@ private void checkIllegalModifierInCallinMapping(CallinMappingDeclaration method
 		int offset = 0;
 		int modifEnd = 0;
 		// look for "<-" (is the wrong modifier left or right of the "<-" ?)
-		boolean isLHS = this.intStack[this.intPtr-3] == TerminalTokens.TokenNameBINDIN;
+		boolean isLHS = this.intStack[this.intPtr-3] == AbstractMethodMappingDeclaration.BindingDirectionIn;
 		if (isLHS) {
 			offset = 4; // modifier is below "<-" end start callinModif (LHS)
 			modifEnd = methodMapping.roleMethodSpec.declarationSourceStart-2;
 		} else {        // "<-" is below modifier (RHS modifier)
-			assert this.intStack[this.intPtr-5] == TerminalTokens.TokenNameBINDIN;
+			assert this.intStack[this.intPtr-5] == AbstractMethodMappingDeclaration.BindingDirectionIn;
 			modifEnd = methodMapping.baseDeclarationSourceStart()-2;
 		}
 		int modifStart = this.intStack[this.intPtr-offset];
@@ -4006,7 +4004,7 @@ protected void consumeConstructorHeader() {
 				this.currentElement = this.currentElement.parent;
 			}
 //{ObjectTeams: recover method mapping:
-		} else if (this.currentToken == TokenNameSYNTHBINDOUT) {
+		} else if (this.currentToken == TokenNameBINDOUT) {
 			// TODO(SH): element should have been a callout mapping (missing return type)
 			//           create RecoveredMethodMapping.
 // SH}
@@ -7850,7 +7848,7 @@ protected void consumeParameterMappingIn() {
 	char[] ident = getIdentifier();
 	long pos = this.identifierPositionStack[this.identifierPtr--];
 	int bindingKind = this.intStack[this.intPtr--];
-	assert(bindingKind == TerminalTokens.TokenNameBINDIN);
+	assert(bindingKind == AbstractMethodMappingDeclaration.BindingDirectionIn);
 	this.intPtr--; // start pos of '->' token (unused)
 
 	pushOnAstStack(new ParameterMapping(bindingKind, expression, new SingleNameReference(ident, pos)));
@@ -7865,7 +7863,7 @@ protected void consumeParameterMappingOut() {
 	char[] ident = getIdentifier();
 	long pos = this.identifierPositionStack[this.identifierPtr--];
 
-	pushOnAstStack(new ParameterMapping(TerminalTokens.TokenNameBINDOUT, expression, new SingleNameReference(ident, pos)));
+	pushOnAstStack(new ParameterMapping(AbstractMethodMappingDeclaration.BindingDirectionOut, expression, new SingleNameReference(ident, pos)));
 }
 private void checkMisplacedSemiInParameterMapping() {
 	if (this.currentToken == TerminalTokens.TokenNameSEMICOLON)
@@ -9149,7 +9147,7 @@ protected void consumeRule(int act) {
 		    consumeParameterMappingList();
 			break;
 
-    case 344 : if (DEBUG) { System.out.println("ParameterMapping ::= Expression SYNTHBINDOUT Identifier"); }  //$NON-NLS-1$
+    case 344 : if (DEBUG) { System.out.println("ParameterMapping ::= Expression BINDOUT Identifier"); }  //$NON-NLS-1$
 		    consumeParameterMappingOut();
 			break;
 
@@ -11284,8 +11282,7 @@ protected void consumeNestedLambda() {
 protected void consumeLambdaHeader() {
 	// LambdaHeader ::= LambdaParameters '->'  Synthetic/fake production with a synthetic non-terminal. Body not seen yet.
 
-//{ObjectTeams: two unused ints from consumeToken() (for TokenNameARROW, for use as TokenNameBINDOUT):
-	this.intPtr-=2;
+//{ObjectTeams: fix position (see also Commit 1725edbd):
 	int arrowPosition = this.intStack[this.intPtr--] - 1; // saved during consumeToken()
 	/*
 	int arrowPosition = this.scanner.currentPosition - 1;
@@ -12540,11 +12537,8 @@ protected void consumeToken(int type) {
 	//System.out.println(this.scanner.toStringAction(type));
 	switch (type) {
 		case TokenNameARROW:
-//{ObjectTeams: for alias TokenNameSYNTHBINDOUT
-		case TokenNameSYNTHBINDOUT:
+//{ObjectTeams: save arrow position:
 			pushOnIntStack(this.scanner.currentPosition); // for LE.arrowPosition
-			pushOnIntStack(this.scanner.startPosition); // for bindingTokenStart
-			pushOnIntStack(type);
 /* orig: (now called from rule EnterLambda):
 			if (!this.caseFlagSet && this.scanner.lookBack[0] != TokenNamedefault)
 				consumeLambdaHeader();
@@ -12611,9 +12605,16 @@ protected void consumeToken(int type) {
 			pushOnIntStack(this.scanner.startPosition);
 			break;
 		case TokenNameCALLOUT_OVERRIDE :
+			pushOnIntStack(this.scanner.startPosition); // for bindingTokenStart
+			pushOnIntStack(AbstractMethodMappingDeclaration.BindingOutOverride);
+			break;
 		case TokenNameBINDIN:
 			pushOnIntStack(this.scanner.startPosition); // for bindingTokenStart
-			pushOnIntStack(type);
+			pushOnIntStack(AbstractMethodMappingDeclaration.BindingDirectionIn);
+			break;
+		case TokenNameBINDOUT:
+			pushOnIntStack(this.scanner.startPosition); // for bindingTokenStart
+			pushOnIntStack(AbstractMethodMappingDeclaration.BindingDirectionOut);
 			break;
 // SH}
 		case TokenNameabstract :

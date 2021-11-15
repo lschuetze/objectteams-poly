@@ -299,7 +299,7 @@ protected int getNextToken0() throws InvalidInputException {
 									return this._bindoutLookahead.getNextToken();
 								}
 								this._calloutSeen = true;
-								return TokenNameSYNTHBINDOUT;
+								return TokenNameBINDOUT;
 							}
 							return TokenNameARROW;
 						}

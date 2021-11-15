@@ -136,7 +136,7 @@ $Terminals
 	ATOT
 	BINDIN
 	CALLOUT_OVERRIDE
-	SYNTHBINDOUT
+	BINDOUT
 -- Markus Witte}
 --    BodyMarker
 
@@ -1156,7 +1156,7 @@ CalloutBinding ::= Modifiersopt CalloutBindingLeftShort CalloutModifieropt Metho
 /.$putCase consumeCalloutParameterMappingsInvalid(); $break ./
 
 -- SYMBOLS:
-CalloutKind -> SYNTHBINDOUT
+CalloutKind -> BINDOUT
 CalloutKind -> '=>'
 /:$readableName CalloutKind:/
 
@@ -1198,7 +1198,7 @@ CalloutParameterMappingList ::= CalloutParameterMappingList ';' ParameterMapping
 /:$readableName CalloutParameterMappingList:/
 
 
-ParameterMapping ::= Expression SYNTHBINDOUT 'Identifier'
+ParameterMapping ::= Expression BINDOUT 'Identifier'
 /.$putCase consumeParameterMappingOut(); $break ./
 
 ParameterMapping ::= 'Identifier' '<-' ForceBaseIsIdentifier Expression RestoreBaseKeyword
@@ -3852,7 +3852,7 @@ COLON_COLON ::= '::'
 ATOT ::= '@'
 BINDIN ::= '<-'
 CALLOUT_OVERRIDE ::= '=>'
-SYNTHBINDOUT ::= '->'
+BINDOUT ::= '->'
 -- Markus Witte}
 
 $end

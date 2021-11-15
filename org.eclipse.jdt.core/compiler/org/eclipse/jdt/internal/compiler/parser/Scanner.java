@@ -130,7 +130,7 @@ public class Scanner implements TerminalTokens {
     /**
      * A little state machine for lookahead of up-to 2 tokens.
      * This is used to disambiguate whether a '->' inside parameter mappings is
-     * an ARROW (lambda) or a SYNTHBINDOUT (parameter mapping role-to-base)
+     * an ARROW (lambda) or a BINDOUT (parameter mapping role-to-base)
      */
     protected class BindoutLookahead {
 
@@ -172,7 +172,7 @@ public class Scanner implements TerminalTokens {
 						case TerminalTokens.TokenNameCOMMA :	  // more mappings?
 						case TerminalTokens.TokenNameSEMICOLON :  // more mappings? (wrong delimiter, though)
 						case TerminalTokens.TokenNameRBRACE :	  // end of parameter mappings?
-							return TokenNameSYNTHBINDOUT; 		  // match, tweak '->' to mean SYNTHBINDOUT
+							return TokenNameBINDOUT; 			  // match, tweak '->' to mean BINDOUT
 						default:
 							return TerminalTokens.TokenNameARROW; // no match, '->' should be interpreted as normal
 					}
@@ -240,7 +240,7 @@ public class Scanner implements TerminalTokens {
     		return baseIsKeyword(false);
     	case TokenNameas:
     	case TokenNameBINDIN:
-    	case TokenNameSYNTHBINDOUT:
+    	case TokenNameBINDOUT:
     	case TokenNamecallin:
     	case TokenNameplayedBy:
     	case TokenNameprecedence:
@@ -1796,7 +1796,7 @@ protected int getNextToken0() throws InvalidInputException {
 									return this._bindoutLookahead.getNextToken();
 								}
 								this._calloutSeen = true;
-								return TokenNameSYNTHBINDOUT;
+								return TokenNameBINDOUT;
 							}
 							return TokenNameARROW;
 						}

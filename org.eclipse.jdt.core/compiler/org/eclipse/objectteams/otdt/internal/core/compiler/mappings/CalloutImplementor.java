@@ -57,7 +57,6 @@ import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
-import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
@@ -145,7 +144,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 	public CalloutImplementor(RoleModel role)
 	{
 		super(role);
-	    this.bindingDirection = TerminalTokens.TokenNameBINDOUT;
+	    this.bindingDirection = AbstractMethodMappingDeclaration.BindingDirectionOut;
 	}
 
 	private boolean transform(boolean needMethodBodies)
@@ -827,7 +826,7 @@ public class CalloutImplementor extends MethodMappingImplementor
             for (int i = 0; i < mappings.length; i++) {
             	if (CharOperation.equals(mappings[i].ident.token, IOTConstants.RESULT))
             	{
-            		if (mappings[i].direction == TerminalTokens.TokenNameBINDOUT)
+            		if (mappings[i].direction == AbstractMethodMappingDeclaration.BindingDirectionOut)
             		{
             			problemReporter.wrongBindingDirection(
             					calloutMappingDeclaration, mappings[i]);
@@ -851,7 +850,7 @@ public class CalloutImplementor extends MethodMappingImplementor
             	{
             		if (!mappings[i].isUsedFor(calloutMappingDeclaration.roleMethodSpec))
             		{
-	                    if (mappings[i].direction == TerminalTokens.TokenNameBINDOUT)
+	                    if (mappings[i].direction == AbstractMethodMappingDeclaration.BindingDirectionOut)
 	                    {
 	                    	// TODO(SH): can this actually happen? Clover says: YES.
 	                    	// would have to be an inexistent param ident?

@@ -142,7 +142,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	{
 		this._role = role;
 		this._roleScope = role.getAst().scope; // we definitely have an AST here
-		this.bindingDirection = TerminalTokens.TokenNameBINDIN;
+		this.bindingDirection = AbstractMethodMappingDeclaration.BindingDirectionIn;
 
 		AbstractMethodMappingDeclaration[] methodMappings =	this._role.getAst().callinCallouts;
 		if(methodMappings == null || methodMappings.length == 0)

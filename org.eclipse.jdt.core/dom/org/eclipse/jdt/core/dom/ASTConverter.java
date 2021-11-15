@@ -18,6 +18,9 @@
 
 package org.eclipse.jdt.core.dom;
 
+import static org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration.BindingDirectionIn;
+import static org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration.BindingDirectionOut;
+
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -6100,7 +6103,7 @@ class ASTConverter {
 			int token;
 			while ((token = this.scanner.getNextToken()) != TerminalTokens.TokenNameEOF) {
 				switch(token) {
-					case TerminalTokens.TokenNameBINDIN://225
+					case TerminalTokens.TokenNameBINDIN:
 						return this.scanner.startPosition;
 				}
 			}
@@ -7613,10 +7616,10 @@ public BaseConstructorInvocation convert(
 
 		result.setExpression(convert(parameterMapping.expression));
 
-		if (parameterMapping.direction == TerminalTokens.TokenNameBINDIN)
+		if (parameterMapping.direction == BindingDirectionIn)
 			result.setDirection("<-");
 
-		if (parameterMapping.direction == TerminalTokens.TokenNameBINDOUT)
+		if (parameterMapping.direction == BindingDirectionOut)
 			result.setDirection("->");
 
 		result.setIdentifier(convert(parameterMapping.ident));

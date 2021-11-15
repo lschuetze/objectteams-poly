@@ -5008,7 +5008,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		MethodBindingOperator bindingOp = node.bindingOperator();
 		int oldBindingKind= ((Integer) getOriginalValue(bindingOp, MethodBindingOperator.BINDING_KIND_PROPERTY)).intValue();
 		boolean isCalloutOverride = (oldBindingKind == MethodBindingOperator.KIND_CALLOUT_OVERRIDE);
-		int typeToken= isCalloutOverride ? TerminalTokens.TokenNameCALLOUT_OVERRIDE : TerminalTokens.TokenNameSYNTHBINDOUT;
+		int typeToken= isCalloutOverride ? TerminalTokens.TokenNameCALLOUT_OVERRIDE : TerminalTokens.TokenNameBINDOUT;
 		try {
 			getScanner().readToToken(typeToken, node.getStartPosition());
 		} catch (CoreException e) {

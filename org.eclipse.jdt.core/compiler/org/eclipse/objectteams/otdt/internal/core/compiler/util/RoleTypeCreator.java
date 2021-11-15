@@ -33,10 +33,10 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.*;
-import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialLowerExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
@@ -1620,7 +1620,7 @@ public class RoleTypeCreator implements TagBits {
 		if (baseType instanceof ReferenceBinding) {
 			TypeBinding baseAnchoredBase = maybeInstantiateFromPlayedBy(
 					scope, (ReferenceBinding)baseType);
-			if (bindDir == TerminalTokens.TokenNameBINDIN) {
+			if (bindDir == AbstractMethodMappingDeclaration.BindingDirectionIn) {
 				if (baseAnchoredBase.isCompatibleWith(roleType))
 					return true;
 			} else {
