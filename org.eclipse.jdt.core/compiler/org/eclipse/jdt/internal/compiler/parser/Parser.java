@@ -12323,8 +12323,8 @@ protected void consumeSwitchLabelCaseLhs() {
 }
 protected void consumeCaseLabelExpr() {
 //	SwitchLabelExpr ::= SwitchLabelCaseLhs BeginCaseExpr '->'
-//{ObjectTeams: remove three unused ints pushed in consumeToken(->):
-	this.intPtr-=3;
+//{ObjectTeams: remove one unused int pushed in consumeToken(->):
+	this.intPtr--;
 // SH}
 	consumeCaseLabel();
 	CaseStatement caseStatement = (CaseStatement) this.astStack[this.astPtr];
@@ -12335,8 +12335,8 @@ protected void consumeCaseLabelExpr() {
 }
 protected void consumeDefaultLabelExpr() {
 //	SwitchLabelDefaultExpr ::= 'default' '->'
-//{ObjectTeams: remove three unused ints pushed in consumeToken(->):
-	this.intPtr-=3;
+//{ObjectTeams: remove one unused int pushed in consumeToken(->):
+	this.intPtr--;
 // SH}
 	consumeDefaultLabel();
 	CaseStatement defaultStatement = (CaseStatement) this.astStack[this.astPtr];

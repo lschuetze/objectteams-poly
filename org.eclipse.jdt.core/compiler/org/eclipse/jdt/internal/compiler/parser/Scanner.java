@@ -2256,7 +2256,7 @@ protected boolean needBindoutDisambiguation() {
 		return false; // no nesting
 	if (this.activeParser instanceof VanguardParser) {
 		Goal goal = ((VanguardParser)this.activeParser).currentGoal;
-		return !(goal == Goal.LambdaParameterListGoal || goal == Goal.PatternGoal);
+		return !(goal == Goal.LambdaParameterListGoal || goal == Goal.PatternGoal || goal == Goal.SwitchLabelCaseLhsGoal);
 	} else if (this.activeParser instanceof Parser) {
 		Parser parser = (Parser) this.activeParser;
 		if (parser.referenceContext instanceof AbstractMethodDeclaration)
