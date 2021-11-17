@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.JavaFeature;
+import org.eclipse.jdt.internal.compiler.parser.diagnose.DiagnoseParser;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.compiler.util.CharDeduplication;
@@ -2257,10 +2258,17 @@ protected boolean needBindoutDisambiguation() {
 	if (this.activeParser instanceof VanguardParser) {
 		Goal goal = ((VanguardParser)this.activeParser).currentGoal;
 		return !(goal == Goal.LambdaParameterListGoal || goal == Goal.PatternGoal || goal == Goal.SwitchLabelCaseLhsGoal);
-	} else if (this.activeParser instanceof Parser) {
-		Parser parser = (Parser) this.activeParser;
+	} else {
+		Parser parser = null;
+		if (this.activeParser instanceof DiagnoseParser) {
+			parser = ((DiagnoseParser) this.activeParser).parser;
+		} else if (this.activeParser instanceof Parser) {
+			parser = (Parser) this.activeParser;
+		} else {
+			return true;
+		}
 		if (parser.referenceContext instanceof AbstractMethodDeclaration)
-			return false; // no callout inside a method :)
+			return false; // no callout inside a method (incl. the case of local types in a method):)
 		int ptr = parser.astPtr;
 		while (ptr > -1) {
 			ASTNode topAstNode = parser.astStack[ptr];

@@ -94,7 +94,12 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 	int statePoolTop;
 	StateInfo[] statePool;
 
+//{ObjectTeams: make accessible:
+/* orig:
 	private Parser parser;
+  :giro */
+	public Parser parser;
+// SH}
 
 	private RecoveryScanner recoveryScanner;
 

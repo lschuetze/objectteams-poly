@@ -3711,8 +3711,18 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 						oldToken = TerminalTokens.TokenNameARROW;
 						newVal = ":"; //$NON-NLS-1$
 					}
+//{ObjectTeams: here we don't care about BINDOUT, only ARROW:
+					Scanner realScanner = getScanner().getScanner();
+					boolean prev = realScanner.parseOTJonly;
+					realScanner.parseOTJonly = false;
+					realScanner.resetOTFlags();
+//SH}
 					pos = getScanner().getTokenStartOffset(oldToken, pos);
 					tokenEnd = getScanner().getTokenEndOffset(oldToken, pos);
+//{ObjectTeams: reset:
+					realScanner.parseOTJonly = prev;
+					realScanner.resetOTFlags();
+// SH}
 					doTextRemove(pos, tokenEnd - pos, editGroup);
 					doTextInsert(pos, newVal, editGroup);
 					pos = tokenEnd;
