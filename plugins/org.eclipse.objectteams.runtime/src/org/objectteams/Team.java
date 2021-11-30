@@ -81,7 +81,7 @@ public /* team */ class Team implements ITeam {
 	protected interface Confined {
 		/* internal method needed for cast and instanceof
 		 * (this method will be generated for role classes) */
-		ITeam _OT$getTeam();
+		public abstract /*explicit modifiers, since this ifc is 'synthetic'*/ ITeam _OT$getTeam();
 	}
 
     /**
