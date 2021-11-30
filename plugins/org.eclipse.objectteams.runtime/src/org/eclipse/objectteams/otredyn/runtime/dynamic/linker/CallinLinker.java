@@ -73,13 +73,17 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 			final IBinding binding, final Class<?> baseClass) {
 		// Retrieve the lifting method for the current binding
 		final String liftingMethod = "_OT$liftTo$" + binding.getRoleClassName();
-		final MethodHandle lift = OTTypeUtils.findVirtual(lookup, team.getClass(), liftingMethod,
-				MethodType.methodType(
-						OTTypeUtils.getRoleItfType(team.getClass(), binding.getRoleClassName()),
-						baseClass));
+		// Construct the method type of the lifting function
+		final String liftingDescriptor = "(L"+ binding.getDeclaringBaseClassName() +";)L" +
+				team.getClass().getName().replace('.', '/') + "$" + binding.getRoleClassName() + ";";
+		final MethodType type = MethodType.fromMethodDescriptorString(
+				liftingDescriptor, team.getClass().getClassLoader());
+		final MethodHandles.Lookup teamLookup = team.__OT$getLookup();
+		final MethodHandle lift = OTTypeUtils.findVirtual(teamLookup, team.getClass(), liftingMethod, type);
 
 		// Lifting works on interfaces; cast the return type to the implementation type
 		final MethodHandle adaptedLift = lift.asType(MethodType.methodType(
+				// TODO: rework with MethodType.fromMethodDescriptor
 				OTTypeUtils.getRoleImplType(team.getClass(), binding.getRoleClassName()), team.getClass(),
 				baseClass));
 
@@ -164,19 +168,19 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 			switch (binding.getCallinModifier()) {
 				case BEFORE:
 					final MethodHandle handleBefore = MethodHandles.filterArguments(
-							handleBeforeAndAfter(desc, team, binding, indexIncrement), 2, OTLinkerUtils.incrementInt(indexIncrement));
+							handleBeforeAndAfter(desc, baseClass, team, binding, indexIncrement), 2, OTLinkerUtils.incrementInt(indexIncrement));
 					beforeComposition = beforeComposition == null ? handleBefore
 							: MethodHandles.foldArguments(handleBefore, beforeComposition);
 					break;
 				case AFTER:
 					final MethodHandle handleAfter = MethodHandles.filterArguments(
-							handleBeforeAndAfter(desc, team, binding, indexIncrement), 2, OTLinkerUtils.incrementInt(indexIncrement));
+							handleBeforeAndAfter(desc, baseClass, team, binding, indexIncrement), 2, OTLinkerUtils.incrementInt(indexIncrement));
 					afterComposition = afterComposition == null ? handleAfter
 							: MethodHandles.foldArguments(afterComposition, handleAfter);	
 					break;
 				case REPLACE:
 					replace = MethodHandles.filterArguments(
-							handleReplace(desc, team, binding, indexIncrement), 2, OTLinkerUtils.incrementInt(indexIncrement));
+							handleReplace(desc, baseClass, team, binding, indexIncrement), 2, OTLinkerUtils.incrementInt(indexIncrement));
 					stopSearch = true;
 					break;
 			}
@@ -227,9 +231,9 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 	private static final int[] REORDER_CALLALLBINDINGS = new int[] { 0, 1, 0, 2, 3, 4, 5, 6, 6 };
 	private static final int[] REORDER_CALLNEXT = new int[] { 0, 1, 0, 2, 3, 4, 5, 7, 7 };
 	
-	private static MethodHandle handleReplace(final OTCallSiteDescriptor desc, final ITeam team, final IBinding binding, final int indexIncrement) {
+	private static MethodHandle handleReplace(final OTCallSiteDescriptor desc, final Class<?> base, final ITeam team, final IBinding binding, final int indexIncrement) {
 //		logger.debug("========== BEGIN handleReplace ==========");
-		final Class<?> base = OTTypeUtils.getBaseClass(binding.getBoundClass());
+		//final Class<?> base = OTTypeUtils.getBaseClass(binding.getBoundClass());
 		// MethodHandle(__OT__Role,IBoundBase2,ITeam[],int,int[],int,Object[],args*)Object
 		final MethodHandle rm = findRoleMethod(desc.getLookup(), desc.getJoinpointDesc(), team, binding);
 //		logger.trace("role function \t\t{}", rm.toString());
@@ -281,9 +285,9 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 		return unpackedTeams;
 	}
 
-	private static MethodHandle handleBeforeAndAfter(final OTCallSiteDescriptor desc, final ITeam team, final IBinding binding, final int relativeIndex) {
+	private static MethodHandle handleBeforeAndAfter(final OTCallSiteDescriptor desc, final Class<?> base, final ITeam team, final IBinding binding, final int relativeIndex) {
 //		logger.debug("========== BEGIN handleBefore ==========");
-		final Class<?> base = OTTypeUtils.getBaseClass(binding.getBoundClass());
+		//final Class<?> base = OTTypeUtils.getBaseClass(binding.getBoundClass());
 		final MethodHandle rm = findRoleMethod(desc.getLookup(), desc.getJoinpointDesc(), team, binding);
 		final boolean multipleArguments = rm.type().parameterCount() > 1;
 //		logger.trace("role function \t\t{}", rm.toString());

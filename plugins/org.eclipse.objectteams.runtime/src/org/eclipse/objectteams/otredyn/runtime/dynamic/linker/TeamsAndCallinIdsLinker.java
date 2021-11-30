@@ -17,45 +17,17 @@ import jdk.dynalink.linker.support.Lookup;
 
 public class TeamsAndCallinIdsLinker implements GuardingDynamicLinker {
 
-	private static MethodHandle getTeamsAndCallinIds = null;
-
-	private static Map<Integer, Object[]> cachedValues = new HashMap<>();
-
-	private static final MethodHandle CACHED;
+	private static final MethodHandle TEAMS_AND_CALLIN_IDS;
+	private static final MethodHandle CACHED_VALUE;
 
 	static {
-		CACHED = Lookup.findOwnStatic(MethodHandles.lookup(), "getCachedTeamsAndCallinIds", Object[].class, int.class);
-	}
-
-	private static void setTeamsAndCallinIds(MethodHandles.Lookup lookup) {
-		if (getTeamsAndCallinIds == null) {
-			try {
-				getTeamsAndCallinIds = lookup.findStatic(TeamManager.class, "getTeamsAndCallinIds",
-						MethodType.methodType(Object[].class, int.class));
-			} catch (NoSuchMethodException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-
-	private static MethodHandle getTeamsAndCallinIds(final MethodHandles.Lookup lookup) {
-		setTeamsAndCallinIds(lookup);
-		return getTeamsAndCallinIds;
+		CACHED_VALUE = Lookup.findOwnStatic(MethodHandles.lookup(), "cachedValue", Object[].class, Object[].class);
+		TEAMS_AND_CALLIN_IDS = Lookup.PUBLIC.findStatic(TeamManager.class, "getTeamsAndCallinIds",
+				MethodType.methodType(Object[].class, int.class));
 	}
 
 	@SuppressWarnings("unused")
-	private static Object[] getCachedTeamsAndCallinIds(final int joinpointId) {
-		Object[] value = null;
-		if(cachedValues.containsKey(Integer.valueOf(joinpointId))) {
-			value = cachedValues.get(Integer.valueOf(joinpointId));
-		} else {
-			value = TeamManager.getTeamsAndCallinIds(joinpointId);
-			cachedValues.put(Integer.valueOf(joinpointId), value);
-		}
+	private static Object[] cachedValue(final Object[] value) {
 		return value;
 	}
 
@@ -70,19 +42,20 @@ public class TeamsAndCallinIdsLinker implements GuardingDynamicLinker {
 		}
 
 		final GuardedInvocation result;
+		final int joinpointId = csd.getJoinpointId();
 		// Check if the callsite is unstable
 		if (linkRequest.isCallSiteUnstable()) {
 			// Behave as there is no invokedynamic
-			final MethodHandle target = getTeamsAndCallinIds(csd.getLookup());
+			final MethodHandle target = TEAMS_AND_CALLIN_IDS.bindTo(joinpointId);
 			result = new GuardedInvocation(target);
 		} else {
-			final int joinpointId = csd.getJoinpointId();
-			cachedValues.remove(joinpointId);
-			final MethodHandle target = CACHED;
+			final Object[] data = TeamManager.getTeamsAndCallinIds(joinpointId);
+			final MethodHandle target = CACHED_VALUE.bindTo(data);
 			final SwitchPoint sp = new SwitchPoint();
 			TeamManager.registerSwitchPoint(joinpointId, sp);
 			result = new GuardedInvocation(target, sp);
 		}
 		return result;
 	}
+
 }

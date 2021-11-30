@@ -18,6 +18,7 @@
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
 import org.eclipse.objectteams.otredyn.bytecode.Method;
+import org.eclipse.objectteams.otredyn.bytecode.Types;
 import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
 import org.eclipse.objectteams.otredyn.util.SMAPConstants;
@@ -127,73 +128,78 @@ public class CreateCallAllBindingsCallInOrgMethod extends AbstractTransformableC
 	private static final Handle teamsAndIdsBootstrapHandle = new Handle(Opcodes.H_INVOKESTATIC,
 			ClassNames.TEAMS_AND_IDS_BOOTSTRAP_SLASH, ConstantMembers.teamsAndCallinIdsBootstrap.getName(),
 			ConstantMembers.teamsAndCallinIdsBootstrap.getSignature(), false);
+	
+	private static final Method getTeamsAndCallinIds = new Method("getTeamsAndCallinIds",
+			Types.getTypeStringForMethod(Types.getAsArrayType(ClassNames.OBJECT_SLASH), new String[] {}));
 
-	private void generateInvocation(MethodNode method, Type[] args, AbstractInsnNode insertBefore,
-			InsnList newInstructions) {
-		// TODO Lars: invokedynamic to make Team[] array a constant if nothing changed
+
+	/* Create a call into the invoke dynamic which awaits the arguments on the stack
+	 * to be following:
+	 * IBoundBase2 (this), int, ITeam[], int, int[], int
+	 */
+	private void generateInvocation(final MethodNode method, final Type[] args, final AbstractInsnNode insertBefore,
+			final InsnList stmt) {
 		// Put this on the stack
-		newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-		// Put joinpointId on the stack as argument to
-		// TeamManager.getTeamsAndCallinIds[]
-		newInstructions.add(createLoadIntConstant(joinpointId));
+		stmt.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		// Put Object[] on the stack by calling getTeamsAndCallinIds with joinpointId
-		addLineNumber(newInstructions, SMAPConstants.STEP_INTO_LINENUMBER);
-		// TODO Lars: implement invokedynamic
-		newInstructions.add(new InvokeDynamicInsnNode("getTeamsAndCallinIds",
-				ConstantMembers.getTeamsAndCallinIds.getSignature(), teamsAndIdsBootstrapHandle, joinpointId));
-		addLineNumber(newInstructions, SMAPConstants.STEP_OVER_LINENUMBER);
-		// Store Object[] array reference at local variable args + 1
-		newInstructions.add(new VarInsnNode(Opcodes.ASTORE, args.length + 1));
+		addLineNumber(stmt, SMAPConstants.STEP_INTO_LINENUMBER);
+		// Call Invokedynamic that does the call and caches the result if there was no change
+		stmt.add(new InvokeDynamicInsnNode("getTeamsAndCallinIds",
+				getTeamsAndCallinIds.getSignature(),
+				teamsAndIdsBootstrapHandle, joinpointId));
+		addLineNumber(stmt, SMAPConstants.STEP_OVER_LINENUMBER);
+		// Store Object[ITeam[],int[]] array reference at local variable args + 1
+		stmt.add(new VarInsnNode(Opcodes.ASTORE, args.length + 1));
 		// Load Object[] from result getTeamsAndCallinIds stored in args+1
-		newInstructions.add(new VarInsnNode(Opcodes.ALOAD, args.length + 1));
-		// Check if it is null
-		newInstructions.add(new InsnNode(Opcodes.DUP));
+		stmt.add(new VarInsnNode(Opcodes.ALOAD, args.length + 1));
+		// Check if it is null - this happens when NO TEAM IS ACTIVE
+		stmt.add(new InsnNode(Opcodes.DUP));
 		LabelNode isNull = new LabelNode();
-		newInstructions.add(new JumpInsnNode(Opcodes.IFNULL, isNull));
+		stmt.add(new JumpInsnNode(Opcodes.IFNULL, isNull));
 		// Put ITeam[] teams on the stack
-		newInstructions.add(new InsnNode(Opcodes.ICONST_0));
-		newInstructions.add(new InsnNode(Opcodes.AALOAD));
-		newInstructions.add(new TypeInsnNode(Opcodes.CHECKCAST, Type.getInternalName(ITeam[].class)));
+		stmt.add(new InsnNode(Opcodes.ICONST_0));
+		stmt.add(new InsnNode(Opcodes.AALOAD));
+		stmt.add(new TypeInsnNode(Opcodes.CHECKCAST, Type.getInternalName(ITeam[].class)));
 		// Put starting idx 0 on the stack
-		newInstructions.add(new InsnNode(Opcodes.ICONST_0));
+		stmt.add(new InsnNode(Opcodes.ICONST_0));
 		// Load Object[] from result getTeamsAndCallinIds stored in args+1
 		// Put int[] callinIds on the stack
-		newInstructions.add(new VarInsnNode(Opcodes.ALOAD, args.length + 1));
-		newInstructions.add(new InsnNode(Opcodes.ICONST_1));
-		newInstructions.add(new InsnNode(Opcodes.AALOAD));
-		newInstructions.add(new TypeInsnNode(Opcodes.CHECKCAST, Type.getInternalName(int[].class)));
+		stmt.add(new VarInsnNode(Opcodes.ALOAD, args.length + 1));
+		stmt.add(new InsnNode(Opcodes.ICONST_1));
+		stmt.add(new InsnNode(Opcodes.AALOAD));
+		stmt.add(new TypeInsnNode(Opcodes.CHECKCAST, Type.getInternalName(int[].class)));
 		LabelNode isNotNull = new LabelNode();
-		newInstructions.add(new JumpInsnNode(Opcodes.GOTO, isNotNull));
-		newInstructions.add(isNull);
+		stmt.add(new JumpInsnNode(Opcodes.GOTO, isNotNull));
+		stmt.add(isNull);
 		// Put 0, null on the stack
-		newInstructions.add(new InsnNode(Opcodes.ICONST_0));
-		newInstructions.add(new InsnNode(Opcodes.ACONST_NULL));
-		newInstructions.add(isNotNull);
+		stmt.add(new InsnNode(Opcodes.ICONST_0));
+		stmt.add(new InsnNode(Opcodes.ACONST_NULL));
+		stmt.add(isNotNull);
 		// Put boundMethodId on the stack
 		if (method.name.equals("<init>")) { // set bit 0x8000000 to signal the ctor
-			newInstructions.add(createLoadIntConstant(0x8000_0000 | boundMethodId));
+			stmt.add(createLoadIntConstant(0x8000_0000 | boundMethodId));
 		} else {
-			newInstructions.add(createLoadIntConstant(boundMethodId));
+			stmt.add(createLoadIntConstant(boundMethodId));
 		}
 		// Box the arguments to Object[]
-		newInstructions.add(getBoxingInstructions(args, false));
+		stmt.add(getBoxingInstructions(args, false));
 
 		// Invoke invokedynamic bootstrap
-		addLineNumber(newInstructions, SMAPConstants.STEP_INTO_LINENUMBER);
-		newInstructions.add(new InvokeDynamicInsnNode(method.name.replaceAll("[<>]", ""),
+		addLineNumber(stmt, SMAPConstants.STEP_INTO_LINENUMBER);
+		stmt.add(new InvokeDynamicInsnNode(method.name.replaceAll("[<>]", ""),
 				ConstantMembers.callAllBindingsTeam.getSignature(), callinBootstrapHandle, 0, joinpointDesc,
 				boundMethodId));
-		addLineNumber(newInstructions, SMAPConstants.STEP_OVER_LINENUMBER);
+		addLineNumber(stmt, SMAPConstants.STEP_OVER_LINENUMBER);
 
 		Type returnType = Type.getReturnType(method.desc);
 		// TODO Lars: invokedynamic should unbox on its own
-		newInstructions.add(getUnboxingInstructionsForReturnValue(returnType));
+		stmt.add(getUnboxingInstructionsForReturnValue(returnType));
 
 		if (insertBefore != null) {
-			method.instructions.insertBefore(insertBefore, newInstructions);
+			method.instructions.insertBefore(insertBefore, stmt);
 			method.instructions.remove(insertBefore); // remove extra RETURN
 		} else {
-			method.instructions.add(newInstructions);
+			method.instructions.add(stmt);
 		}
 	}
 
