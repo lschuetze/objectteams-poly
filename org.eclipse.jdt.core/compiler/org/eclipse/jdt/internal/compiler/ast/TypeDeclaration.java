@@ -358,10 +358,12 @@ public class TypeDeclaration extends Statement implements ProblemSeverities, Ref
 			for (int i = 0; i < this.memberTypes.length; i++) {
 				TypeDeclaration memberType = this.memberTypes[i];
 				memberType.modifiers |= ExtraCompilerModifiers.AccRole;
-				if (CharOperation.equals(memberType.name, IOTConstants.OTCONFINED))
+				if (CharOperation.equals(memberType.name, IOTConstants.OTCONFINED)) {
 					otconfined = memberType;
-				else if (CharOperation.equals(memberType.name, IOTConstants.CONFINED))
+				} else if (CharOperation.equals(memberType.name, IOTConstants.CONFINED)) {
 					confined = memberType;
+					confined.modifiers |= IOTConstants.AccSynthIfc; // synthetically mark as synthetic :)
+				}
 			}
 			if (confined != null && otconfined != null) {
 				// link roles that are split manually (without using RoleSplitter).
