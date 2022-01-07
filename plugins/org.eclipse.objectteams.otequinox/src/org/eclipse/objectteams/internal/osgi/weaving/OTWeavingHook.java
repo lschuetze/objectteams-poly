@@ -122,10 +122,12 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	// for installing a lifting participant:
 	private static final String LIFTING_PARTICIPANT_FIELD = "_OT$liftingParticipant";
 
-	enum WeavingReason { None, Aspect, Base, Thread }
+	enum WeavingReason { None, Aspect, Base, Thread, Special }
 	
+	private ASMByteCodeAnalyzer byteCodeAnalyzer = new ASMByteCodeAnalyzer();
+
 	/** Interface to data about aspectBinding extensions. */
-	private AspectBindingRegistry aspectBindingRegistry = new AspectBindingRegistry();
+	private AspectBindingRegistry aspectBindingRegistry = new AspectBindingRegistry(byteCodeAnalyzer);
 	
 	/** Map of trip wires to be fired when a particular base bundle is loaded. */
 	private Map<String, BaseBundleLoadTrigger> baseTripWires = new HashMap<>();
@@ -139,7 +141,6 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	/** Records of teams that have been deferred due to unresolved class dependencies: */
 	private List<WaitingTeamRecord> deferredTeams = new ArrayList<>();
 
-	private ASMByteCodeAnalyzer byteCodeAnalyzer = new ASMByteCodeAnalyzer();
 
 	private @Nullable AspectPermissionManager permissionManager;
 
@@ -347,8 +348,11 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		@SuppressWarnings("null")@NonNull // FIXME: org.eclipse.osgi.internal.resolver.BundleDescriptionImpl.getBundle() can return null!
 		Bundle bundle = bundleWiring.getBundle();
 		if (considerReasons.contains(WeavingReason.Aspect)) {
-			if (aspectBindingRegistry.getAdaptedBasePlugins(bundle) != null)
-				return WeavingReason.Aspect;
+			if (aspectBindingRegistry.getAdaptedBasePlugins(bundle) != null) {
+				ClassInformation classInformation = byteCodeAnalyzer.getClassInformation(bytes, className);
+				if (classInformation == null || classInformation.isOTClass())
+					return WeavingReason.Aspect;
+			}
 		}
 
 		boolean isBaseBundle = false;
@@ -383,6 +387,9 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			if (Util.PROFILE) Util.profile(time, ProfileKind.SuperClassFetching, "");
 		}
 
+		// last: special classes:
+		if (className.equals("org.eclipse.objectteams.otredyn.runtime.TeamManager"))
+			return WeavingReason.Special;
 		return WeavingReason.None;
 	}
 	

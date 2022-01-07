@@ -69,7 +69,7 @@ public class OTPluginProject
 		String value = javaProject.getOption(OTDTPlugin.OT_COMPILER_BINDING_CONVENTIONS, true);
 		if (!value.equals(JavaCore.ERROR))
 			javaProject.setOption(OTDTPlugin.OT_COMPILER_BINDING_CONVENTIONS, JavaCore.ERROR);
-		if (JavaModelUtil.is18OrHigher(javaProject))
+		if (JavaModelUtil.is1d8OrHigher(javaProject))
 			javaProject.setOption(OTDTPlugin.OT_COMPILER_WEAVING_SCHEME, WeavingScheme.OTDRE.name());
 	}
 

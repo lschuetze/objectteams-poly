@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -211,10 +211,27 @@ public final class Flags {
 	 * Note that this flag's value is internal and is not defined in the
 	 * Virtual Machine specification.
 	 * </p>
-	 * @since 3.22
-	 * @noreference This field is not intended to be referenced by clients as it is a part of Java preview feature.
+	 * @since 3.26
 	 */
 	public static final int  AccRecord = ExtraCompilerModifiers.AccRecord;
+	/**
+	 * Sealed property flag.
+	 * <p>
+	 * Note that this flag's value is internal and is not defined in the
+	 * Virtual Machine specification.
+	 * </p>
+	 * @since 3.24
+	 */
+	public static final int  AccSealed = ExtraCompilerModifiers.AccSealed;
+	/**
+	 * Non-sealed property flag.
+	 * <p>
+	 * Note that this flag's value is internal and is not defined in the
+	 * Virtual Machine specification.
+	 * </p>
+	 * @since 3.24
+	 */
+	public static final int  AccNonSealed = ExtraCompilerModifiers.AccNonSealed;
 
 	/**
 	 * Not instantiable.
@@ -419,10 +436,34 @@ public final class Flags {
 	 * @param flags the flags
 	 * @return <code>true</code> if the <code>AccRecord</code> flag is included
 	 * @see #AccRecord
-	 * @noreference This method is not intended to be referenced by clients as it is a part of Java preview feature.
+	 * @since 3.26
 	 */
 	public static boolean isRecord(int flags) {
 		return (flags & AccRecord) != 0;
+	}
+	/**
+	  * Returns whether the given integer has the <code>AccSealed</code>
+	 * bit set.
+	 *
+	 * @param flags the flags
+	 * @return <code>true</code> if the <code>AccSealed</code> flag is included
+	 * @see #AccSealed
+	 * @since 3.28
+	 * */
+	public static boolean isSealed(int flags) {
+		return (flags & AccSealed) != 0;
+	}
+	/**
+	  * Returns whether the given integer has the <code>AccNonSealed</code>
+	 * bit set.
+	 *
+	 * @param flags the flags
+	 * @return <code>true</code> if the <code>AccNonSealed</code> flag is included
+	 * @see #AccNonSealed
+	 * @since 3.28
+	 */
+	public static boolean isNonSealed(int flags) {
+		return (flags & AccNonSealed) != 0;
 	}
 
 	/**
@@ -555,7 +596,7 @@ public final class Flags {
 	}
 	private static String internalToString(int flags, boolean onlyTypeFlags) {
 // SH}
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 
 		if (isPublic(flags))
 			sb.append("public "); //$NON-NLS-1$
@@ -584,13 +625,16 @@ public final class Flags {
 			sb.append("transient "); //$NON-NLS-1$
 		if (isVolatile(flags))
 			sb.append("volatile "); //$NON-NLS-1$
+		if (isSealed(flags))
+			sb.append("sealed "); //$NON-NLS-1$
+		if (isNonSealed(flags))
+			sb.append("non-sealed "); //$NON-NLS-1$
 //{ObjectTeams: OT flags:
 		if (isTeam(flags))
 			sb.append("team "); //$NON-NLS-1$
 		if (isCallin(flags))
 			sb.append("callin "); //$NON-NLS-1$
 // SH}
-
 		int len = sb.length();
 		if (len == 0)
 			return ""; //$NON-NLS-1$

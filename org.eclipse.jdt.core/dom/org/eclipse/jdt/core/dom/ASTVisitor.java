@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,8 +7,6 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
- * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
@@ -399,6 +397,23 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
+	 * @since 3.28
+	 */
+	public boolean visit(CaseDefaultExpression node) {
+		return true;
+	}
+
+	/**
+	 * Visits the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing and return true.
+	 * Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @return <code>true</code> if the children of this node should be
+	 * visited, and <code>false</code> if the children of this node should
+	 * be skipped
 	 */
 	public boolean visit(BreakStatement node) {
 		return true;
@@ -728,6 +743,23 @@ public abstract class ASTVisitor {
 	 * be skipped
 	 */
 	public boolean visit(FieldDeclaration node) {
+		return true;
+	}
+
+	/**
+	 * Visits the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing and return true.
+	 * Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @return <code>true</code> if the children of this node should be
+	 * visited, and <code>false</code> if the children of this node should
+	 * be skipped
+	 * @since 3.28
+	 */
+	public boolean visit(GuardedPattern node) {
 		return true;
 	}
 
@@ -1142,6 +1174,23 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
+	 * @since 3.28
+	 */
+	public boolean visit(NullPattern node) {
+		return true;
+	}
+
+	/**
+	 * Visits the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing and return true.
+	 * Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @return <code>true</code> if the children of this node should be
+	 * visited, and <code>false</code> if the children of this node should
+	 * be skipped
 	 */
 	public boolean visit(NullLiteral node) {
 		return true;
@@ -1210,6 +1259,23 @@ public abstract class ASTVisitor {
 	 * @since 3.1
 	 */
 	public boolean visit(ParameterizedType node) {
+		return true;
+	}
+
+	/**
+	 * Visits the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing and return true.
+	 * Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @return <code>true</code> if the children of this node should be
+	 * visited, and <code>false</code> if the children of this node should
+	 * be skipped
+	 * @since 3.26
+	 */
+	public boolean visit(PatternInstanceofExpression node) {
 		return true;
 	}
 
@@ -1307,6 +1373,23 @@ public abstract class ASTVisitor {
 	 * be skipped
 	 */
 	public boolean visit(QualifiedName node) {
+		return true;
+	}
+
+	/**
+	 * Visits the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing and return true.
+	 * Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @return <code>true</code> if the children of this node should be
+	 * visited, and <code>false</code> if the children of this node should
+	 * be skipped
+	 * @noreference
+	 */
+	public boolean visit(ModuleQualifiedName node) {
 		return true;
 	}
 
@@ -1553,9 +1636,7 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
-	 * @noreference This method is not intended to be referenced by clients as it is a part of Java preview feature.
-	 * @nooverride This method is not intended to be re-implemented or extended by clients as it is a part of Java preview feature.
-	 * @since 3.18
+	 * @since 3.24
 	 */
 	public boolean visit(SwitchExpression node) {
 		return true;
@@ -1623,9 +1704,7 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
-	 * @noreference This method is not intended to be referenced by clients as it is a part of Java preview feature.
-	 * @nooverride This method is not intended to be re-implemented or extended by clients as it is a part of Java preview feature.
-	 * @since 3.20
+	 * @since 3.24
 	 */
 	public boolean visit(TextBlock node) {
 		return true;
@@ -1773,6 +1852,23 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
+	 * @since 3.28
+	 */
+	public boolean visit(TypePattern node) {
+		return true;
+	}
+
+	/**
+	 * Visits the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing and return true.
+	 * Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @return <code>true</code> if the children of this node should be
+	 * visited, and <code>false</code> if the children of this node should
+	 * be skipped
 	 * @since 3.1
 	 */
 	public boolean visit(TypeParameter node) {
@@ -1905,9 +2001,7 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
-	 * @noreference This method is not intended to be referenced by clients as it is a part of Java preview feature.
-	 * @nooverride This method is not intended to be re-implemented or extended by clients as it is a part of Java preview feature.
-	 * @since 3.20
+	 * @since 3.24
 	 */
 	public boolean visit(YieldStatement node) {
 		return true;
@@ -2195,6 +2289,19 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
+	 * @since 3.28
+	 */
+	public void endVisit(CaseDefaultExpression node) {
+		// default implementation: do nothing
+	}
+
+	/**
+	 * End of visit the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing. Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
 	 * @since 3.1
 	 */
 	public void endVisit(AnnotationTypeMemberDeclaration node) {
@@ -2442,6 +2549,19 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
+	 * @since 3.28
+	 */
+	public void endVisit(GuardedPattern node) {
+		// default implementation: do nothing
+	}
+
+	/**
+	 * End of visit the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing. Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
 	 * @since 3.10
 	 */
 	public void endVisit(CreationReference node) {
@@ -2665,6 +2785,19 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
+	 * @since 3.26
+	 */
+	public void endVisit(PatternInstanceofExpression node) {
+		// default implementation: do nothing
+	}
+
+	/**
+	 * End of visit the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing. Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
 	 */
 	public void endVisit(Javadoc node) {
 		// default implementation: do nothing
@@ -2692,6 +2825,19 @@ public abstract class ASTVisitor {
 	 * @since 3.10
 	 */
 	public void endVisit(LambdaExpression node) {
+		// default implementation: do nothing
+	}
+
+	/**
+	 * End of visit the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing. Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @since 3.28
+	 */
+	public void endVisit(NullPattern node) {
 		// default implementation: do nothing
 	}
 
@@ -2736,6 +2882,19 @@ public abstract class ASTVisitor {
 	 * @since 3.0
 	 */
 	public void endVisit(MemberRef node) {
+		// default implementation: do nothing
+	}
+
+	/**
+	 * End of visit the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing. Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @noreference
+	 */
+	public void endVisit(ModuleQualifiedName node) {
 		// default implementation: do nothing
 	}
 
@@ -2963,9 +3122,7 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
-	 * @noreference This method is not intended to be referenced by clients as it is a part of Java preview feature.
-	 * @nooverride This method is not intended to be re-implemented or extended by clients as it is a part of Java preview feature.
-	 * @since 3.20
+	 * @since 3.24
 	 */
 	public void endVisit(TextBlock node) {
 		// default implementation: do nothing
@@ -3177,6 +3334,19 @@ public abstract class ASTVisitor {
 	 * @since 3.10
 	 */
 	public void endVisit(SuperMethodReference node) {
+		// default implementation: do nothing
+	}
+
+	/**
+	 * End of visit the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing. Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @since 3.28
+	 */
+	public void endVisit(TypePattern node) {
 		// default implementation: do nothing
 	}
 
@@ -3460,9 +3630,7 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
-	 * @noreference This method is not intended to be referenced by clients as it is a part of Java preview feature.
-	 * @nooverride This method is not intended to be re-implemented or extended by clients as it is a part of Java preview feature.
-	 * @since 3.20
+	 * @since 3.24
 	 */
 	public void endVisit(YieldStatement node) {
 		// default implementation: do nothing

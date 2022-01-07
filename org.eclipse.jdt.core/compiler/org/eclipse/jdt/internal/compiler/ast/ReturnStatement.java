@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.compiler.codegen.*;
 import org.eclipse.jdt.internal.compiler.flow.*;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.*;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 
 /**
@@ -303,7 +304,7 @@ public StringBuffer printStatement(int tab, StringBuffer output){
 @Override
 public void resolve(BlockScope scope) {
 	MethodScope methodScope = scope.methodScope();
-	MethodBinding methodBinding;
+	MethodBinding methodBinding = null;
 	LambdaExpression lambda = methodScope.referenceContext instanceof LambdaExpression ? (LambdaExpression) methodScope.referenceContext : null;
 	TypeBinding methodType =
 		lambda != null ? lambda.expectedResultType() :
@@ -314,12 +315,20 @@ public void resolve(BlockScope scope) {
 			: TypeBinding.VOID;
 	TypeBinding expressionType;
 
+	if (methodBinding != null && methodBinding.isCompactConstructor())
+		scope.problemReporter().recordCompactConstructorHasReturnStatement(this);
+
 	if (this.expression != null) {
 		this.expression.setExpressionContext(ASSIGNMENT_CONTEXT);
 		this.expression.setExpectedType(methodType);
 		if (lambda != null && lambda.argumentsTypeElided() && this.expression instanceof CastExpression) {
 			this.expression.bits |= ASTNode.DisableUnnecessaryCastCheck;
 		}
+//{ObjectTeams: tsuper may want to unbox, but shouldn't when directly returning from a callin method:
+		AbstractMethodDeclaration referenceMethod = methodScope.referenceMethod();
+		if (referenceMethod != null && referenceMethod.isCallin() && this.expression instanceof TSuperMessageSend)
+			((TSuperMessageSend) this.expression).isReturnFromCallinMethod = true;
+// SH}
 	}
 
 	if (methodType == TypeBinding.VOID) {
@@ -359,7 +368,7 @@ public void resolve(BlockScope scope) {
 
 	if (methodType.isProperType(true) && lambda != null) {
 		// ensure that type conversions don't leak a preliminary local type:
-		if (lambda.updateLocalTypesInMethod(lambda.descriptor))
+		if (lambda.updateLocalTypes())
 			methodType = lambda.expectedResultType();
 	}
 	if (TypeBinding.notEquals(methodType, expressionType)) // must call before computeConversion() and typeMismatchError()

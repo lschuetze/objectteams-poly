@@ -122,7 +122,7 @@ public class ScannerTest extends AbstractRegressionTest {
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=43437
 	 */
 	public void test005() {
-		StringBuffer buf = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 		buf.append("\"Hello\"");
 		String str = buf.toString();
 		IScanner scanner = ToolFactory.createScanner(true, false, false, false);
@@ -1554,5 +1554,32 @@ public class ScannerTest extends AbstractRegressionTest {
 			assertTrue(false);
 		}
 		assertEquals("Wrong token type", ITerminalSymbols.TokenNameIntegerLiteral, token);
+	}
+
+	public void testBug575556_at_14() {
+		char[] source= "\"Hello\\sworld\"".toCharArray();
+		Scanner scanner = new Scanner(false, false, false, ClassFileConstants.JDK14, null, null, false);
+		scanner.setSource(source);
+		scanner.resetTo(0, source.length - 1);
+		try {
+			scanner.getNextToken();
+			fail("Should have rejected \\s");
+		} catch (InvalidInputException e) {
+			assertEquals(Scanner.INVALID_ESCAPE, e.getMessage());
+		}
+	}
+
+	public void testBug575556_at_15() {
+		char[] source= "\"Hello\\sworld\"".toCharArray();
+		Scanner scanner = new Scanner(false, false, false, ClassFileConstants.JDK15, null, null, false);
+		scanner.setSource(source);
+		scanner.resetTo(0, source.length - 1);
+		try {
+			int token = scanner.getNextToken();
+			assertEquals(TerminalTokens.TokenNameStringLiteral, token);
+			assertEquals("Unexpected string literal content", "Hello world", scanner.getCurrentStringLiteral());
+		} catch (InvalidInputException e) {
+			fail("Should have accepted \\s");
+		}
 	}
 }

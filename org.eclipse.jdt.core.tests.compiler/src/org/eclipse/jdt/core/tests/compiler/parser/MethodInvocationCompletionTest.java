@@ -301,20 +301,20 @@ public void testAfterEmptyAnonymous() {
 		// completeBehind:
 		"fred(new Runnable() {}, ",
 		// expectedCompletionNodeToString:
-		"<CompleteOnMessageSend:this.fred(new Runnable() {\n})>",
+		"<CompleteOnName:>",
 		// expectedUnitDisplayString:
 		"class Bar {\n" +
 		"  Bar() {\n" +
 		"  }\n" +
 		"  void foo() {\n" +
-		"    <CompleteOnMessageSend:this.fred(new Runnable() {\n" +
-		"})>;\n" +
+		"    this.fred(new Runnable() {\n" +
+		"}, <CompleteOnName:>, i);\n" +
 		"  }\n" +
 		"}\n",
 		// expectedCompletionIdentifier:
 		"",
 		// expectedReplacedSource:
-		"fred(new Runnable() {}, ",
+		"",
 		// test name
 		"<completion just before second parameter, the first parameter being an empty anonymous class>"
 	);
@@ -364,19 +364,19 @@ public void testBeforeFirstParameter() {
 		// completeBehind:
 		"fred(",
 		// expectedCompletionNodeToString:
-		"<CompleteOnMessageSend:this.fred()>",
+		"<CompleteOnMessageSend:this.fred(<CompleteOnName:>, 2, i)>",
 		// expectedUnitDisplayString:
 		"class Bar {\n" +
 		"  Bar() {\n" +
 		"  }\n" +
 		"  void foo() {\n" +
-		"    <CompleteOnMessageSend:this.fred()>;\n" +
+		"    <CompleteOnMessageSend:this.fred(<CompleteOnName:>, 2, i)>;\n" +
 		"  }\n" +
 		"}\n",
 		// expectedCompletionIdentifier:
 		"",
 		// expectedReplacedSource:
-		"fred(",
+		"fred(1, 2, i)",
 		// test name
 		"<completion just before first parameter>"
 	);
@@ -395,19 +395,19 @@ public void testBeforeLastParameter() {
 		// completeBehind:
 		"fred(1, 2,",
 		// expectedCompletionNodeToString:
-		"<CompleteOnMessageSend:this.fred(1, 2)>",
+		"<CompleteOnName:>",
 		// expectedUnitDisplayString:
 		"class Bar {\n" +
 		"  Bar() {\n" +
 		"  }\n" +
 		"  void foo() {\n" +
-		"    <CompleteOnMessageSend:this.fred(1, 2)>;\n" +
+		"    this.fred(1, 2, <CompleteOnName:>, i);\n" +
 		"  }\n" +
 		"}\n",
 		// expectedCompletionIdentifier:
 		"",
 		// expectedReplacedSource:
-		"fred(1, 2,",
+		"",
 		// test name
 		"<completion just before last parameter>"
 	);
@@ -426,19 +426,19 @@ public void testBeforeSecondParameter() {
 		// completeBehind:
 		"fred(1, ",
 		// expectedCompletionNodeToString:
-		"<CompleteOnMessageSend:this.fred(1)>",
+		"<CompleteOnName:>",
 		// expectedUnitDisplayString:
 		"class Bar {\n" +
 		"  Bar() {\n" +
 		"  }\n" +
 		"  void foo() {\n" +
-		"    <CompleteOnMessageSend:this.fred(1)>;\n" +
+		"    this.fred(1, <CompleteOnName:>, i);\n" +
 		"  }\n" +
 		"}\n",
 		// expectedCompletionIdentifier:
 		"",
 		// expectedReplacedSource:
-		"fred(1, ",
+		"",
 		// test name
 		"<completion just before second parameter>"
 	);
@@ -463,7 +463,7 @@ public void testEmptyInFirstParameter() {
 		"  Bar() {\n" +
 		"  }\n" +
 		"  void foo() {\n" +
-		"    (\"abc\" + <CompleteOnName:>);\n" +
+		"    this.fred((\"abc\" + <CompleteOnName:>), 2, i);\n" +
 		"  }\n" +
 		"}\n",
 		// expectedCompletionIdentifier:
@@ -494,7 +494,7 @@ public void testInFirstParameter() {
 		"  Bar() {\n" +
 		"  }\n" +
 		"  void foo() {\n" +
-		"    (\"abc\" + <CompleteOnName:bi>);\n" +
+		"    this.fred((\"abc\" + <CompleteOnName:bi>), 2, i);\n" +
 		"  }\n" +
 		"}\n",
 		// expectedCompletionIdentifier:
@@ -527,15 +527,16 @@ public void testInIfStatement() {
 		"  X() {\n" +
 		"  }\n" +
 		"  void foo() {\n" +
-		"    {\n" +
-		"      <CompleteOnMessageSend:bar.fred()>;\n" +
-		"    }\n" +
+		"    if (true)\n" +
+		"        {\n" +
+		"          <CompleteOnMessageSend:bar.fred()>;\n" +
+		"        }\n" +
 		"  }\n" +
 		"}\n",
 		// expectedCompletionIdentifier:
 		"",
 		// expectedReplacedSource:
-		"fred(",
+		"fred()",
 		// test name
 		"<completion inside a if statement>"
 	);
@@ -554,19 +555,19 @@ public void testLabeledWithExpressionReceiver() {
 		// completeBehind:
 		"fred(1, 2,",
 		// expectedCompletionNodeToString:
-		"<CompleteOnMessageSend:bar().fred(1, 2)>",
+		"<CompleteOnName:>",
 		// expectedUnitDisplayString:
 		"class X {\n" +
 		"  X() {\n" +
 		"  }\n" +
 		"  void foo() {\n" +
-		"    <CompleteOnMessageSend:bar().fred(1, 2)>;\n" +
+		"    label1: bar().fred(1, 2, <CompleteOnName:>, o);\n" +
 		"  }\n" +
 		"}\n",
 		// expectedCompletionIdentifier:
 		"",
 		// expectedReplacedSource:
-		"fred(1, 2,",
+		"",
 		// expectedLabels:
 		new String[] {"label1"},
 		// test name
@@ -587,19 +588,19 @@ public void testLabeledWithoutReceiver() {
 		// completeBehind:
 		"fred(1, 2,",
 		// expectedCompletionNodeToString:
-		"<CompleteOnMessageSend:fred(1, 2)>",
+		"<CompleteOnName:>",
 		// expectedUnitDisplayString:
 		"class Bar {\n" +
 		"  Bar() {\n" +
 		"  }\n" +
 		"  void foo() {\n" +
-		"    <CompleteOnMessageSend:fred(1, 2)>;\n" +
+		"    label1: fred(1, 2, <CompleteOnName:>, o);\n" +
 		"  }\n" +
 		"}\n",
 		// expectedCompletionIdentifier:
 		"",
 		// expectedReplacedSource:
-		"fred(1, 2,",
+		"",
 		// expectedLabels:
 		new String[] {"label1"},
 		// test name
@@ -651,19 +652,19 @@ public void testSpaceThenFirstParameter() {
 		// completeBehind:
 		"fred( ",
 		// expectedCompletionNodeToString:
-		"<CompleteOnMessageSend:this.fred()>",
+		"<CompleteOnName:>",
 		// expectedUnitDisplayString:
 		"class Bar {\n" +
 		"  Bar() {\n" +
 		"  }\n" +
 		"  void foo() {\n" +
-		"    <CompleteOnMessageSend:this.fred()>;\n" +
+		"    this.fred(<CompleteOnName:>, 2, i);\n" +
 		"  }\n" +
 		"}\n",
 		// expectedCompletionIdentifier:
 		"",
 		// expectedReplacedSource:
-		"fred( ",
+		"",
 		// test name
 		"<completion just before first parameter with a space after open parenthesis>"
 	);
@@ -725,7 +726,7 @@ public void testWithExpressionReceiver() {
 		// expectedCompletionIdentifier:
 		"",
 		// expectedReplacedSource:
-		"fred(",
+		"fred()",
 		// test name
 		"<completion on method invocation with expression receiver>"
 	);
@@ -812,20 +813,20 @@ public void testWithNameReceiverAndTwoArgs() {
 		// completeBehind:
 		"x.fred(1, 2,",
 		// expectedCompletionNodeToString:
-		"<CompleteOnMessageSend:x.fred(1, 2)>",
+		"<CompleteOnName:>",
 		// expectedUnitDisplayString:
 		"class Bar {\n" +
 		"  Bar() {\n" +
 		"  }\n" +
 		"  void foo() {\n" +
 		"    X x;\n" +
-		"    <CompleteOnMessageSend:x.fred(1, 2)>;\n" +
+		"    x.fred(1, 2, <CompleteOnName:>, o);\n" +
 		"  }\n" +
 		"}\n",
 		// expectedCompletionIdentifier:
 		"",
 		// expectedReplacedSource:
-		"fred(1, 2,",
+		"",
 		// test name
 		"<completion with name receiver and 2 arguments>"
 	);
@@ -845,20 +846,20 @@ public void testWithQualifiedNameReceiver() {
 		// completeBehind:
 		"x.fred(1, 2,",
 		// expectedCompletionNodeToString:
-		"<CompleteOnMessageSend:y.x.fred(1, 2)>",
+		"<CompleteOnName:>",
 		// expectedUnitDisplayString:
 		"class Bar {\n" +
 		"  Bar() {\n" +
 		"  }\n" +
 		"  void foo() {\n" +
 		"    X x;\n" +
-		"    <CompleteOnMessageSend:y.x.fred(1, 2)>;\n" +
+		"    y.x.fred(1, 2, <CompleteOnName:>, o);\n" +
 		"  }\n" +
 		"}\n",
 		// expectedCompletionIdentifier:
 		"",
 		// expectedReplacedSource:
-		"fred(1, 2,",
+		"",
 		// test name
 		"<completion with qualified name receiver>"
 	);

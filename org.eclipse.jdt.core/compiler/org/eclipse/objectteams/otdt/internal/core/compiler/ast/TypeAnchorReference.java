@@ -435,7 +435,7 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 				//$FALL-THROUGH$
 			case Scope.BLOCK_SCOPE:
 			case Scope.BINDING_SCOPE:
-				anchorBinding = scope.findVariable(token);
+				anchorBinding = scope.findVariable(token, this);
 				break;
 		}
 		if (anchorBinding == null) {

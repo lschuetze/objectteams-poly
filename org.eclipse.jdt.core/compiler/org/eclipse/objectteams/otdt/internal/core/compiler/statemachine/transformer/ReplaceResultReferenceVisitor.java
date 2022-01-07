@@ -71,7 +71,7 @@ public class ReplaceResultReferenceVisitor
         {
             boolean isResultDir = false;
             if (this._methodMapping.isCallin()) {
-                isResultDir = this._bindingDirection == TerminalTokens.TokenNameBINDOUT;
+                isResultDir = this._bindingDirection == AbstractMethodMappingDeclaration.BindingDirectionOut;
                 if (   !isResultDir
                 	&& 	((CallinMappingDeclaration)this._methodMapping).callinModifier
 					     == TerminalTokens.TokenNameafter)
@@ -79,7 +79,7 @@ public class ReplaceResultReferenceVisitor
                 	isResultDir = true;
                 }
             } else
-                isResultDir = this._bindingDirection == TerminalTokens.TokenNameBINDIN;
+                isResultDir = this._bindingDirection == AbstractMethodMappingDeclaration.BindingDirectionIn;
             if (isResultDir) {
             	AstGenerator gen = new AstGenerator(ref.sourceStart, ref.sourceEnd);
                 ResultReference resultRef = gen.resultReference(ref, this._methodMapping);

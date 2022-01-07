@@ -28,13 +28,13 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.core.JavaElement;
+import org.eclipse.jdt.internal.core.JavaModel;
+import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.core.Member;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
@@ -108,14 +108,14 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 	}
 
 	@Override
-	public IJavaElement getParent()
+	public JavaElement getParent()
 	{
 //{OTModelUpdate : if null return the parent of the wrapped java element
 //orig:		return _parent;
-	    IJavaElement result = this.parent;
+	    JavaElement result = super.getParent();
 
 	    if (result == null)
-	        result = getCorrespondingJavaElement().getParent();
+	        result = (JavaElement) getCorrespondingJavaElement().getParent();
 
 	    return result;
 //jwl}
@@ -234,15 +234,15 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
     }
 
     @Override
-	public IJavaModel getJavaModel()
+	public JavaModel getJavaModel()
     {
-        return this.correspondingJavaElem.getJavaModel();
+        return (JavaModel) this.correspondingJavaElem.getJavaModel();
     }
 
     @Override
-	public IJavaProject getJavaProject()
+	public JavaProject getJavaProject()
     {
-        return this.correspondingJavaElem.getJavaProject();
+        return (JavaProject) this.correspondingJavaElem.getJavaProject();
     }
 
     @Override
@@ -258,9 +258,9 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
     }
 
     @Override
-	public IJavaElement getPrimaryElement()
+	public JavaElement getPrimaryElement()
     {
-        return this.correspondingJavaElem.getPrimaryElement();
+        return (JavaElement) this.correspondingJavaElem.getPrimaryElement();
     }
 
     @Override

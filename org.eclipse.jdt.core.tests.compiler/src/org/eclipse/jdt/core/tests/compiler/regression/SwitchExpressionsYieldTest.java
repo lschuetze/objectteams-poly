@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 IBM Corporation and others.
+ * Copyright (c) 2019, 2021 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,7 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 	static {
 //		TESTS_NUMBERS = new int [] { 40 };
 //		TESTS_RANGE = new int[] { 1, -1 };
-//		TESTS_NAMES = new String[] { "testBug561766" };
+//		TESTS_NAMES = new String[] { "571833" };
 	}
 
 	public static Class<?> testClass() {
@@ -2370,7 +2370,7 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 				"2. ERROR in X.java (at line 6)\n" +
 				"	class yield {\n" +
 				"	      ^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n");
 	}
 	public void testBug547891_04() {
@@ -2395,7 +2395,7 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 				"2. ERROR in X.java (at line 7)\n" +
 				"	class yield {\n" +
 				"	      ^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n";
 		this.runNegativeTest(
 				testFiles,
@@ -2417,12 +2417,12 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 				"1. ERROR in X.java (at line 3)\n" +
 				"	yield y;\n" +
 				"	^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n" +
 				"2. ERROR in X.java (at line 6)\n" +
 				"	class yield {\n" +
 				"	      ^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n");
 	}
 	public void testBug547891_06() {
@@ -2442,7 +2442,7 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 				"1. ERROR in X.java (at line 3)\n" +
 				"	yield y;\n" +
 				"	^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n" +
 				"2. ERROR in X.java (at line 4)\n" +
 				"	Zork();\n" +
@@ -2452,7 +2452,7 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 				"3. ERROR in X.java (at line 7)\n" +
 				"	class yield {\n" +
 				"	      ^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n";
 		this.runNegativeTest(
 				testFiles,
@@ -2474,12 +2474,12 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 				"1. ERROR in X.java (at line 3)\n" +
 				"	yield y = null;\n" +
 				"	^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n" +
 				"2. ERROR in X.java (at line 6)\n" +
 				"	class yield {\n" +
 				"	      ^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n");
 	}
 	public void testBug547891_08() {
@@ -2499,7 +2499,7 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 				"1. ERROR in X.java (at line 3)\n" +
 				"	yield y = null;\n" +
 				"	^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n" +
 				"2. ERROR in X.java (at line 4)\n" +
 				"	Zork();\n" +
@@ -2509,7 +2509,7 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 				"3. ERROR in X.java (at line 7)\n" +
 				"	class yield {\n" +
 				"	      ^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n";
 		this.runNegativeTest(
 				testFiles,
@@ -2530,7 +2530,7 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 				"1. ERROR in X.java (at line 5)\n" +
 				"	class yield {\n" +
 				"	      ^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n");
 	}
 	public void testBug547891_10() {
@@ -2554,7 +2554,7 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 				"2. ERROR in X.java (at line 6)\n" +
 				"	class yield {\n" +
 				"	      ^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n";
 		this.runNegativeTest(
 				testFiles,
@@ -2576,12 +2576,12 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 				"1. ERROR in X.java (at line 3)\n" +
 				"	new yield();\n" +
 				"	    ^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n" +
 				"2. ERROR in X.java (at line 6)\n" +
 				"	class yield {\n" +
 				"	      ^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n");
 	}
 	public void testBug547891_12() {
@@ -2601,7 +2601,7 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 				"1. ERROR in X.java (at line 3)\n" +
 				"	new yield();\n" +
 				"	    ^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n" +
 				"2. ERROR in X.java (at line 4)\n" +
 				"	Zork();\n" +
@@ -2611,7 +2611,7 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 				"3. ERROR in X.java (at line 7)\n" +
 				"	class yield {\n" +
 				"	      ^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n";
 		this.runNegativeTest(
 				testFiles,
@@ -2633,12 +2633,12 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 				"1. ERROR in X.java (at line 3)\n" +
 				"	yield[] y;\n" +
 				"	^^^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n" +
 				"2. ERROR in X.java (at line 6)\n" +
 				"	class yield {\n" +
 				"	      ^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n");
 	}
 	public void testBug547891_14() {
@@ -2658,7 +2658,7 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 				"1. ERROR in X.java (at line 3)\n" +
 				"	yield[] y;\n" +
 				"	^^^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n" +
 				"2. ERROR in X.java (at line 4)\n" +
 				"	Zork();\n" +
@@ -2668,7 +2668,7 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 				"3. ERROR in X.java (at line 7)\n" +
 				"	class yield {\n" +
 				"	      ^^^^^\n" +
-				"yield is a restricted identifier and cannot be used as type name\n" +
+				"'yield' is not a valid type name; it is a restricted identifier and not allowed as a type identifier in Java 14\n" +
 				"----------\n";
 		this.runNegativeTest(
 				testFiles,
@@ -4503,6 +4503,59 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 			},
 			"3");
 	}
+	public void testBug571929_normal() {
+		runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				" public static void main(String[] args) {\n" +
+				"   System.out.println(foo(\"a\"));\n" +
+				" }\n" +
+				" private static boolean foo(String s) {\n" +
+				"  bar(0L);\n" +
+				"  return switch (s) {\n" +
+				"    case \"a\" -> {\n" +
+				"      try {\n" +
+				"        yield true;\n" +
+				"      } finally {\n" +
+				"      }\n" +
+				"    }\n" +
+				"    default -> false;\n" +
+				"  };\n" +
+				" }\n" +
+				" private static void bar(long l) {}\n" +
+				"}"
+			},
+			"true");
+	}
+	public void testBug571929_lambda() {
+		runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				" public static void main(String[] args) {\n" +
+				"   System.out.println(foo(\"a\"));\n" +
+				" }\n" +
+				" static long m = 0L;\n" +
+				" private static boolean foo(String s) {\n" +
+				"  long l = m;\n" +
+				"  // capture l\n" +
+				"  Runnable r = () -> bar(l);\n" +
+				"  return switch (s) {\n" +
+				"    case \"a\" -> {\n" +
+				"      try {\n" +
+				"        yield true;\n" +
+				"      } finally {\n" +
+				"      }\n" +
+				"    }\n" +
+				"    default -> false;\n" +
+				"  };\n" +
+				" }\n" +
+				" private static void bar(long l) {}\n" +
+				"}"
+			},
+			"true");
+	}
 	public void testBug561762_001() {
 		this.runNegativeTest(
 				new String[] {
@@ -4640,6 +4693,45 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 			"	          ^\n" +
 			"r cannot be resolved to a variable\n" +
 			"----------\n");
+	}
+	public void testBug572121() {
+		Map<String, String> compilerOptions = getCompilerOptions();
+		// must disable this option to trigger compilation restart
+		compilerOptions.put(CompilerOptions.OPTION_PreserveUnusedLocal, CompilerOptions.DISABLED);
+		runConformTest(
+				new String[] {
+						"X.java",
+						"public class X {\n" +
+						" private void foo(int i) {\n" +
+						" }\n" +
+						"\n" +
+						" private static void bar() {\n" +
+						" }\n" +
+						"\n" +
+						" public static void main(String[] args) {\n" +
+						"  if (f) {\n" +
+						"   Object o = switch (j) {\n" +
+						"    default -> {\n" +
+						"     try {\n" +
+						"      bar();\n" +
+						"     } catch (Throwable e) {\n" +
+						"     }\n" +
+						"     yield null;\n" +
+						"    }\n" +
+						"   };\n" +
+						"  }\n" +
+						"  int i = 0;\n" +
+						"  x.foo(i++);\n" +
+						" }\n" +
+						"\n" +
+						" private static boolean f = true;\n" +
+						" private static int j;\n" +
+						" private static X x = new X();\n" +
+						"}"
+				},
+				"",
+				compilerOptions
+				);
 	}
 	public void testBug562198_001() {
 		runConformTest(
@@ -5191,5 +5283,857 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 			"	             ^^^^^\n" +
 			"The target type of this expression must be a functional interface\n" +
 			"----------\n");
+	}
+	public void testBug565156_001() {
+		runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n"+
+				"  public int test() {\n"+
+				"    return switch (0) {\n"+
+				"      default -> {\n"+
+				"        try {\n"+
+				"          yield 0;\n"+
+				"        }\n"+
+				"        catch (RuntimeException e) {\n"+
+				"          throw e;\n"+
+				"        }\n"+
+				"      }\n"+
+				"    };\n"+
+				"  }    \n"+
+				"  public static void main(String[] args) {\n"+
+				"       int i = new X().test();\n"+
+				"       System.out.println(i);\n"+
+				" }\n"+
+				"}\n"
+			},
+			"0");
+	}
+	public void testBug565156_002() {
+		runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n"+
+				"  public int test() {\n"+
+				"    return switch (0) {\n"+
+				"      default -> {\n"+
+				"        try {\n"+
+				"          yield 0;\n"+
+				"        }\n"+
+				"        finally {\n"+
+				"          //do nothing\n"+
+				"        }\n"+
+				"      }\n"+
+				"    };\n"+
+				"  }    \n"+
+				"  public static void main(String[] args) {\n"+
+				"       int i = new X().test();\n"+
+				"       System.out.println(i);\n"+
+				" }\n"+
+				"}\n"
+			},
+			"0");
+	}
+	public void testBug565156_003() {
+		runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n"+
+				"  public int test() {\n"+
+				"    return switch (0) {\n"+
+				"      default -> {\n"+
+				"        try {\n"+
+				"          yield 0;\n"+
+				"        }\n"+
+				"        finally {\n"+
+				"          int i = 20;"+
+				"          yield 20;"+
+				"        }\n"+
+				"      }\n"+
+				"    };\n"+
+				"  }    \n"+
+				"  public static void main(String[] args) {\n"+
+				"       int i = new X().test();\n"+
+				"       System.out.println(i);\n"+
+				" }\n"+
+				"}\n"
+			},
+			"20");
+	}
+	public void testBug565156_004() {
+		runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n"+
+				"  public int test()  {\n"+
+				"    return switch (0) {\n"+
+				"      default -> {\n"+
+				"        try {\n"+
+				"          yield switch (0) {\n"+
+				"          default -> {\n"+
+				"              try {\n"+
+				"                yield 100;\n"+
+				"              }\n"+
+				"              finally {\n"+
+				"                   yield 200;       \n"+
+				"               }\n"+
+				"            }\n"+
+				"          };\n"+
+				"        }\n"+
+				"        finally {\n"+
+				"             yield 20;\n"+
+				"         }\n"+
+				"      }\n"+
+				"    };\n"+
+				"  }\n"+
+				"  public static void main(String[] args){\n"+
+				"       int i = new X().test();\n"+
+				"       System.out.println(i);\n"+
+				"  }\n"+
+				"}"
+			},
+			"20");
+	}
+	public void testBug565156_005() {
+		runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n"+
+				"  public int test()  {\n"+
+				"    return switch (0) {\n"+
+				"      default -> {\n"+
+				"        try {\n"+
+				"          yield switch (0) {\n"+
+				"          default -> {\n"+
+				"              try {\n"+
+				"                yield 100;\n"+
+				"              }\n"+
+				"              finally {\n"+
+				"                   // do nothing\n"+
+				"               }\n"+
+				"            }\n"+
+				"          };\n"+
+				"        }\n"+
+				"        finally {\n"+
+				"           // do nothing\n"+
+				"         }\n"+
+				"      }\n"+
+				"    };\n"+
+				"  }\n"+
+				"  public static void main(String[] args){\n"+
+				"       int i = new X().test();\n"+
+				"       System.out.println(i);\n"+
+				"  }\n"+
+				"}"
+			},
+			"100");
+	}
+	public void testBug565156_006() {
+		runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n"+
+				"    public static void main(String[] args) {\n"+
+				"            new X().foo(args);\n"+
+				"    }\n"+
+				"\n"+
+				"  @SuppressWarnings({ \"finally\" })\n"+
+				"  public void foo(String[] args) {\n"+
+				"     int t = switch (0) {\n"+
+				"     default -> {\n"+
+				"        try {\n"+
+				"            if (args == null)\n"+
+				"            yield 1;\n"+
+				"            else if (args.length ==2)\n"+
+				"                    yield 2; \n"+
+				"            else if (args.length == 4)\n"+
+				"                    yield 4;\n"+
+				"            else yield 5; \n"+
+				"        } finally {\n"+
+				"                yield 3; \n"+
+				"        }\n"+
+				"     }\n"+
+				"     }; \n"+
+				"     t = switch (100) {\n"+
+				"     default -> {\n"+
+				"             try {\n"+
+				"                     yield 10;\n"+
+				"             } finally {\n"+
+				"             }\n"+
+				"     }  \n"+
+				"     };      \n"+
+				"     System.out.println(t);\n"+
+				"  }\n"+
+				"}"
+			},
+			"10");
+	}
+	public void testBug565156_007() {
+		runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n"+
+				"    public static void main(String[] args) {\n"+
+				"            new X().foo(args);\n"+
+				"    }\n"+
+				"\n"+
+				"  @SuppressWarnings({ \"finally\" })\n"+
+				"  public void foo(String[] args) {\n"+
+				"     int t = switch (0) {\n"+
+				"     case 101 -> {yield 101;}\n"+
+				"     default -> {\n"+
+				"        try {\n"+
+				"            if (args == null)\n"+
+				"            yield 1;\n"+
+				"            else if (args.length ==2)\n"+
+				"                    yield 2; \n"+
+				"            else if (args.length == 4)\n"+
+				"                    yield 4;\n"+
+				"            else yield 5; \n"+
+				"        } finally {\n"+
+				"                yield 3; \n"+
+				"        }\n"+
+				"     }\n"+
+				"     }; \n"+
+				"     t = switch (100) {\n"+
+				"     default -> {\n"+
+				"             try {\n"+
+				"                     yield 10;\n"+
+				"             } finally {\n"+
+				"             }\n"+
+				"     }  \n"+
+				"     };      \n"+
+				"     System.out.println(t);\n"+
+				"  }\n"+
+				"}"
+			},
+			"10");
+	}
+	public void testBug547193_001() {
+		runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n"+
+				"  public static void main(String[] args) {\n"+
+				"    System.out.println(switch (0) {default -> {\n"+
+				"      try {\n"+
+				"        yield 1;\n"+
+				"      } catch (Exception ex) {\n"+
+				"        yield 2;\n"+
+				"      }\n"+
+				"    }});\n"+
+				"  }\n"+
+				"}"
+			},
+			"1");
+	}
+	public void testBug565844_01() {
+		runConformTest(
+				new String[] {
+					"X.java",
+					"public class X {\n"+
+					"    public final static int j = 5;\n" +
+					"    public static void main(String argv[]) {\n" +
+					"    	boolean b = \n" +
+					"    			switch (j) {\n" +
+					"    				case j != 1 ? 2 : 3 ->  true;\n" +
+					"    				default -> false;\n" +
+					"    			}; \n" +
+					"    	System.out.println(b);\n" +
+					"    }\n"+
+					"}"
+				},
+				"false");
+	}
+	public void testBug565844_02() {
+		runConformTest(
+				new String[] {
+					"X.java",
+					"public class X {\n"+
+					"    public final static int j = 2;\n" +
+					"    public static void main(String argv[]) {\n" +
+					"    	boolean b = \n" +
+					"    			switch (j) {\n" +
+					"    				case j != 1 ? 2 : (j == 2 ? 4 : 5) ->  true;\n" +
+					"    				default -> false;\n" +
+					"    			}; \n" +
+					"    	System.out.println(b);\n" +
+					"    }\n"+
+					"}"
+				},
+				"true");
+	}
+	public void testBug565844_03() {
+		runConformTest(
+				new String[] {
+					"X.java",
+					"public class X {\n"+
+					"    public final static int j = 5;\n" +
+					"    public static void main(String argv[]) {\n" +
+					"    	boolean b = \n" +
+					"    			switch (j) {\n" +
+					"    				case j != 1 ? 2 : 3 ->  {\n" +
+					"    						yield true;\n" +
+					"    					}\n" +
+					"    				default -> { yield false;}\n" +
+					"    			}; \n" +
+					"    	System.out.println(b);\n" +
+					"    }\n"+
+					"}"
+				},
+				"false");
+	}
+	public void testBug565844_04() {
+		runConformTest(
+				new String[] {
+					"X.java",
+					"public class X {\n"+
+					"    public final static int j = 5;\n" +
+					"    public static void main(String argv[]) {\n" +
+					"    	boolean b = \n" +
+					"    			switch (j) {\n" +
+					"    				case j != 1 ? 2 : 3 :  {\n" +
+					"    						yield true;\n" +
+					"    					}\n" +
+					"    				default : { yield false;}\n" +
+					"    			}; \n" +
+					"    	System.out.println(b);\n" +
+					"    }\n"+
+					"}"
+				},
+				"false");
+	}
+	public void testBug565844_05() {
+		runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n"+
+					"    public static int j = 5;\n" +
+					"    public static void main(String argv[]) {\n" +
+					"    	boolean b = \n" +
+					"    			switch (j) {\n" +
+					"    				case j != 1 ? 2 : 3 ->  {\n" +
+					"    						yield true;\n" +
+					"    					}\n" +
+					"    				default -> { yield false;}\n" +
+					"    			}; \n" +
+					"    	System.out.println(b);\n" +
+					"    }\n"+
+					"}"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 6)\n" +
+				"	case j != 1 ? 2 : 3 ->  {\n" +
+				"	     ^^^^^^^^^^^^^^\n" +
+				"case expressions must be constant expressions\n" +
+				"----------\n");
+	}
+	public void testBug565844_06() {
+		runConformTest(
+				new String[] {
+					"X.java",
+					"public class X {\n"+
+					"    public final static int j = 5;\n" +
+					"    public static void main(String argv[]) {\n" +
+					"    	boolean b = \n" +
+					"    			switch (j) {\n" +
+					"    				case j != 1 ? ( j != 1 ? 2: 3 ) : 3 -> false;\n" +
+					"    				default -> false;\n" +
+					"    			}; \n" +
+					"    	System.out.println(b);\n" +
+					"    }\n"+
+					"}"
+				},
+				"false");
+	}
+	public void testBug565844_07() {
+		runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n"+
+					"\n"+
+					"       void foo() {\n"+
+					"               Object value2 = switch(1) {\n"+
+					"                       case AAABBB -> 1;\n"+
+					"                               (I)()->();\n"+
+					"                       default -> 0;\n"+
+					"               };\n"+
+					"       }\n"+
+					"}\n"+
+					"interface I {\n"+
+					"       void apply();\n"+
+					"}"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 5)\n" +
+				"	case AAABBB -> 1;\n" +
+				"	                ^\n" +
+				"Syntax error on token \";\", case expected after this token\n" +
+				"----------\n" +
+				"2. ERROR in X.java (at line 6)\n" +
+				"	(I)()->();\n" +
+				"	  ^^^^^\n" +
+				"Syntax error on token(s), misplaced construct(s)\n" +
+				"----------\n" +
+				"3. ERROR in X.java (at line 6)\n" +
+				"	(I)()->();\n" +
+				"	        ^\n" +
+				"Syntax error, insert \")\" to complete Expression\n" +
+				"----------\n" +
+				"4. ERROR in X.java (at line 6)\n" +
+				"	(I)()->();\n" +
+				"	        ^\n" +
+				"Syntax error, insert \":\" to complete SwitchLabel\n" +
+				"----------\n");
+	}
+	public void _testBug565844SwitchConst_07() {
+		runConformTest(
+				new String[] {
+					"X.java",
+					"public class X {\n"+
+					"    public final static int j = 5;\n" +
+					"    public static void main(String argv[]) {\n" +
+					"    	boolean b = \n" +
+					"    			switch (j) {\n" +
+					"    				case switch(1) {default -> 2;} -> false;\n" +
+					"    				default -> false;\n" +
+					"    			}; \n" +
+					"    	System.out.println(b);\n" +
+					"    }\n"+
+					"}"
+				},
+				"false");
+	}
+	public void _testBug565844SwitchConst_08() {
+		runConformTest(
+				new String[] {
+					"X.java",
+					"public class X {\n"+
+					"    public final static int j = 5;\n" +
+					"    public static void main(String argv[]) {\n" +
+					"    	boolean b = \n" +
+					"    			switch (j) {\n" +
+					"    				case switch(1) {case 1 -> 2; default -> 0;} -> false;\n" +
+					"    				default -> false;\n" +
+					"    			}; \n" +
+					"    	System.out.println(b);\n" +
+					"    }\n"+
+					"}"
+				},
+				"false");
+	}
+	public void _testBug565844SwitchConst_09() {
+		runConformTest(
+				new String[] {
+					"X.java",
+					"public class X {\n"+
+					"    public final static int j = 5;\n" +
+					"    public static void main(String argv[]) {\n" +
+					"    	boolean b = \n" +
+					"    			switch (j) {\n" +
+					"    				case switch(1) {default -> 2;}, switch(2) {default -> 3;}  -> false;\n" +
+					"    				default -> false;\n" +
+					"    			}; \n" +
+					"    	System.out.println(b);\n" +
+					"    }\n"+
+					"}"
+				},
+				"false");
+	}
+	public void _testBug565844SwitchConst_10() {
+		runConformTest(
+				new String[] {
+					"X.java",
+					"public class X {\n"+
+					"    public final static int j = 5;\n" +
+					"    public static void main(String argv[]) {\n" +
+					"    	boolean b = \n" +
+					"    			switch (j) {\n" +
+					"    				case switch(1) {case 1 -> 2; default -> 0;}," +
+					" 							switch(2) {case 1 -> 3; default -> 4;}  -> false;\n" +
+					"    				default -> false;\n" +
+					"    			}; \n" +
+					"    	System.out.println(b);\n" +
+					"    }\n"+
+					"}"
+				},
+				"false");
+	}
+	public void testBug566125_01() {
+		runConformTest(
+				new String[] {
+						"X.java",
+						"public class X  {\n" +
+						"	public static void main(String[] args) {\n" +
+						"		new X().bar(0);\n" +
+						"	}\n" +
+						"    @SuppressWarnings(\"deprecation\")\n" +
+						"    public void bar(int i) {\n" +
+						"		boolean b = foo( switch(i+1) {\n" +
+						"	    	case 0 -> new Short((short)0);\n" +
+						"	    	case 2 -> new Double(2.0d);\n" +
+						"	    	default -> new Integer((short)6);\n" +
+						"    	});\n" +
+						"    	System.out.println(b);\n" +
+						"    }\n" +
+						"    boolean foo(short data){ return false; }\n" +
+						"    boolean foo(byte data){ return false; }\n" +
+						"    boolean foo(int data){ return false; }\n" +
+						"    boolean foo(float data){ return false; }\n" +
+						"    boolean foo(long data){ return false; }\n" +
+						"    boolean foo(double data){ return true; }\n" +
+						"}"
+				},
+				"true");
+
+	}
+	// Same as above, but with explicit yield
+	public void testBug566125_02() {
+		runConformTest(
+				new String[] {
+						"X.java",
+						"public class X  {\n" +
+						"	public static void main(String[] args) {\n" +
+						"		new X().bar(0);\n" +
+						"	}\n" +
+						"    @SuppressWarnings(\"deprecation\")\n" +
+						"    public void bar(int i) {\n" +
+						"		boolean b = foo( switch(i+1) {\n" +
+						"	    	case 0 : yield new Short((short)0);\n" +
+						"	    	case 2 : yield new Double(2.0d);\n" +
+						"	    	default : yield new Integer((short)6);\n" +
+						"    	});\n" +
+						"    	System.out.println(b);\n" +
+						"    }\n" +
+						"    boolean foo(short data){ return false; }\n" +
+						"    boolean foo(byte data){ return false; }\n" +
+						"    boolean foo(int data){ return false; }\n" +
+						"    boolean foo(float data){ return false; }\n" +
+						"    boolean foo(long data){ return false; }\n" +
+						"    boolean foo(double data){ return true; }\n" +
+						"}"
+				},
+				"true");
+
+	}
+	public void testBug566125_03() {
+		runConformTest(
+				new String[] {
+						"X.java",
+						"public class X  {\n" +
+						"	public static void main(String[] args) {\n" +
+						"		new X().bar(0);\n" +
+						"	}\n" +
+						"    @SuppressWarnings(\"deprecation\")\n" +
+						"    public void bar(int i) {\n" +
+						"		boolean b = foo( switch(i+1) {\n" +
+						"	    	case 0 -> new Short((short)0);\n" +
+						"	    	case 2 -> 2.0d;\n" +
+						"	    	default -> new Integer((short)6);\n" +
+						"    	});\n" +
+						"    	System.out.println(b);\n" +
+						"    }\n" +
+						"    boolean foo(short data){ return false; }\n" +
+						"    boolean foo(byte data){ return false; }\n" +
+						"    boolean foo(int data){ return false; }\n" +
+						"    boolean foo(float data){ return false; }\n" +
+						"    boolean foo(long data){ return false; }\n" +
+						"    boolean foo(double data){ return true; }\n" +
+						"}"
+				},
+				"true");
+
+	}
+	// Long -> float is accepted
+	public void testBug566125_04() {
+		runConformTest(
+				new String[] {
+						"X.java",
+						"public class X  {\n" +
+						"	public static void main(String[] args) {\n" +
+						"		new X().bar(0);\n" +
+						"	}\n" +
+						"    @SuppressWarnings(\"deprecation\")\n" +
+						"    public void bar(int i) {\n" +
+						"		boolean b = foo( switch(i+1) {\n" +
+						"	    	case 0 -> new Integer((short)0);\n" +
+						"	    	default -> 2l;\n" +
+						"    	});\n" +
+						"    	System.out.println(b);\n" +
+						"    }\n" +
+						"	boolean foo(int data){ return false; }\n" +
+						"    boolean foo(long data){ return true; }\n" +
+						"}"
+				},
+				"true");
+
+	}
+	public void testBug566125_05() {
+		runConformTest(
+				new String[] {
+						"X.java",
+						"public class X  {\n" +
+						"	public static void main(String[] args) {\n" +
+						"		new X().bar(0);\n" +
+						"	}\n" +
+						"    @SuppressWarnings(\"deprecation\")\n" +
+						"    public void bar(int i) {\n" +
+						"		boolean b = foo(\n" +
+						"    				switch(i%2)  {\n" +
+						"    					case 1 -> switch(i) {\n" +
+						"    								case 1 -> new Byte((byte)1);\n" +
+						"    								case 3 -> new Float(3);\n" +
+						"    								case 5 -> new Long(5);\n" +
+						"    								default -> new Short((short)6);\n" +
+						"    							}; \n" +
+						"    					default -> switch(i) {\n" +
+						"									case 0 -> new Integer((byte)2);\n" +
+						"									case 2 -> new Double(4);\n" +
+						"									case 4 -> new Long(6);\n" +
+						"									default -> new Short((short)8);\n" +
+						"    							};\n" +
+						"    				}\n" +
+						"    			);\n" +
+						"    	System.out.println(b);\n" +
+						"    }\n" +
+						"    boolean foo(short data){ return false; }\n" +
+						"    boolean foo(byte data){ return false; }\n" +
+						"    boolean foo(int data){ return false; }\n" +
+						"    boolean foo(float data){ return false; }\n" +
+						"    boolean foo(long data){ return false; }\n" +
+						"    boolean foo(double data){ return true; }\n" +
+						"}"
+				},
+				"true"
+				);
+
+	}
+	public void testBug566125_06() {
+		runNegativeTest(
+				new String[] {
+						"X.java",
+						"public class X  {\n" +
+						"	public static void main(String[] args) {\n" +
+						"		new X().bar(0);\n" +
+						"	}\n" +
+						"    @SuppressWarnings(\"deprecation\")\n" +
+						"    public void bar(int i) {\n" +
+						"		boolean b = foo( switch(i+1) {\n" +
+						"	    	case 0 -> Short.valueOf((short)0);\n" +
+						"	    	default -> Double.valueOf(2.0d);\n" +
+						"    	});\n" +
+						"    	System.out.println(b);\n" +
+						"    }\n" +
+						"    boolean foo(short data){ return false; }\n" +
+						"    boolean foo(byte data){ return false; }\n" +
+						"    boolean foo(int data){ return false; }\n" +
+						"    boolean foo(float data){ return false; }\n" +
+						"    boolean foo(long data){ return false; }\n" +
+						"}"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 7)\n" +
+				"	boolean b = foo( switch(i+1) {\n" +
+				"	            ^^^\n" +
+				"The method foo(short) in the type X is not applicable for the arguments (double)\n" +
+				"----------\n" +
+				"2. ERROR in X.java (at line 9)\n" +
+				"	default -> Double.valueOf(2.0d);\n" +
+				"	           ^^^^^^^^^^^^^^^^^^^^\n" +
+				"Type mismatch: cannot convert from Double to short\n" +
+				"----------\n"
+				);
+	}
+	public void testBug566125_07() {
+		runNegativeTest(
+				new String[] {
+						"X.java",
+						"public class X  {\n" +
+						"	public static void main(String[] args) {\n" +
+						"		new X().bar(0);\n" +
+						"	}\n" +
+						"    @SuppressWarnings(\"deprecation\")\n" +
+						"    public void bar(int i) {\n" +
+						"		boolean b = foo( switch(i+1) {\n" +
+						"	    	case 0 -> Short.valueOf((short)0);\n" +
+						"	    	default -> 2.0d;\n" +
+						"    	});\n" +
+						"    	System.out.println(b);\n" +
+						"    }\n" +
+						"    boolean foo(short data){ return false; }\n" +
+						"    boolean foo(byte data){ return false; }\n" +
+						"    boolean foo(int data){ return false; }\n" +
+						"    boolean foo(float data){ return false; }\n" +
+						"    boolean foo(long data){ return false; }\n" +
+						"}"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 7)\n" +
+				"	boolean b = foo( switch(i+1) {\n" +
+				"	            ^^^\n" +
+				"The method foo(short) in the type X is not applicable for the arguments (double)\n" +
+				"----------\n" +
+				"2. ERROR in X.java (at line 9)\n" +
+				"	default -> 2.0d;\n" +
+				"	           ^^^^\n" +
+				"Type mismatch: cannot convert from double to short\n" +
+				"----------\n"
+				);
+	}
+	// Same as 07() but with explicit yield
+	public void testBug566125_08() {
+		runNegativeTest(
+				new String[] {
+						"X.java",
+						"public class X  {\n" +
+						"	public static void main(String[] args) {\n" +
+						"		new X().bar(0);\n" +
+						"	}\n" +
+						"    @SuppressWarnings(\"deprecation\")\n" +
+						"    public void bar(int i) {\n" +
+						"		boolean b = foo( switch(i+1) {\n" +
+						"	    	case 0 : yield Short.valueOf((short)0);\n" +
+						"	    	default : yield 2.0d;\n" +
+						"    	});\n" +
+						"    	System.out.println(b);\n" +
+						"    }\n" +
+						"    boolean foo(short data){ return false; }\n" +
+						"    boolean foo(byte data){ return false; }\n" +
+						"    boolean foo(int data){ return false; }\n" +
+						"    boolean foo(float data){ return false; }\n" +
+						"    boolean foo(long data){ return false; }\n" +
+						"}"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 7)\n" +
+				"	boolean b = foo( switch(i+1) {\n" +
+				"	            ^^^\n" +
+				"The method foo(short) in the type X is not applicable for the arguments (double)\n" +
+				"----------\n" +
+				"2. ERROR in X.java (at line 9)\n" +
+				"	default : yield 2.0d;\n" +
+				"	                ^^^^\n" +
+				"Type mismatch: cannot convert from double to short\n" +
+				"----------\n"
+				);
+	}
+	public void testBug567112_001() {
+		runNegativeTest(
+				new String[] {
+						"X.java",
+						"import java.util.ArrayList;\n"+
+						"\n"+
+						"public class X {\n"+
+						"    public void foo() {\n"+
+						"        new ArrayList<>().stream().filter(p -> p != null)\n"+
+						"        switch (\"\") {\n"+
+						"        case \"\":\n"+
+						"        }\n"+
+						"    }\n"+
+						"}"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 5)\n" +
+				"	new ArrayList<>().stream().filter(p -> p != null)\n" +
+				"	                                            ^^^^^\n" +
+				"Syntax error on tokens, delete these tokens\n" +
+				"----------\n" +
+				"2. ERROR in X.java (at line 8)\n" +
+				"	}\n" +
+				"	^\n" +
+				"Syntax error, insert \")\" to complete Expression\n" +
+				"----------\n" +
+				"3. ERROR in X.java (at line 8)\n" +
+				"	}\n" +
+				"	^\n" +
+				"Syntax error, insert \";\" to complete BlockStatements\n" +
+				"----------\n"
+				);
+	}
+	public void testBug571833_01() {
+		runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n"+
+				" private static int foo(int a) {\n"+
+				"   int b = (int) switch (a) {\n"+
+				"     case 1 -> 1.0;\n"+
+				"     default -> 0;\n"+
+				"   };\n"+
+				"   return b;\n"+
+				" }\n"+
+				"\n"+
+				" public static void main(String[] args) {\n"+
+				"   int b = foo(2);\n"+
+				"   System.out.println(b);\n"+
+				" }\n"+
+				"}"
+			},
+			"0"
+		);
+
+	}
+	public void testBug572382() {
+		runConformTest(
+				new String[] {
+						"X.java",
+						"import java.lang.invoke.MethodHandle;\n"+
+						"\n"+
+						"public class X {\n"+
+						"\n"+
+						"	Object triggerBug(MethodHandle method) throws Throwable {\n"+
+						"		return switch (0) {\n"+
+						"		case 0 -> method.invoke(\"name\");\n"+
+						"		default -> null;\n"+
+						"		};\n"+
+						"	}\n"+
+						"}\n"
+				},
+				(String)null
+				);
+
+	}
+	public void testBug576026() {
+		this.runConformTest(
+				new String[] {
+						"X.java",
+						"public class X {\n"
+						+ "	enum E { A }\n"
+						+ "	static class C {\n"
+						+ "		E e = E.A;\n"
+						+ "	}\n"
+						+ "	public static void main(String[] args) {\n"
+						+ "		C c = new C();\n"
+						+ "		switch (c.e) {\n"
+						+ "		case A -> {\n"
+						+ "			System.out.println(\"Success\");\n"
+						+ "		}\n"
+						+ "		default -> System.out.println(\"Wrong\");\n"
+						+ "		}\n"
+						+ "	}\n"
+						+ "}",
+				},
+				"Success");
+	}
+	public void testBug576861_001() {
+		this.runConformTest(
+				new String[] {
+				"X.java",
+				"import java.util.Comparator;\n"+
+				"\n"+
+				"public class X {\n"+
+				" public static void foo(Comparator<? super Long> comparator) {}\n"+
+				"\n"+
+				" public static void main(String[] args) {\n"+
+				"   int someSwitchCondition = 10;\n"+
+				"   X.foo(switch (someSwitchCondition) {\n"+
+				"   case 10 -> Comparator.comparingLong(Long::longValue);\n"+
+				"   default -> throw new IllegalArgumentException(\"Unsupported\");\n"+
+				" });\n"+
+				"   System.out.println(\"hello\");\n"+
+				" }\n"+
+				"}"
+				},
+				"hello");
 	}
 }

@@ -8,4 +8,4 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.objectteams.otequinox,
  AspectExportBase
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11

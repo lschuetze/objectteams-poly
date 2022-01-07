@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2021 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -157,7 +157,7 @@ public class RefactoringUtil implements ITeamConstants {
 	 * @return an array of role types
 	 */
 	public static IOTType[] getAllRoleClasses(IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
-		OTSearchRequestor requestor = new OTSearchRequestor();
+		OTSearchRequestor requestor = new OTSearchRequestor(false);
 		try {
 			SearchPattern rolePattern = OTSearchEngine.createRoleTypePattern(IJavaSearchConstants.TYPE, SearchPattern.R_EXACT_MATCH);
 			IJavaElement[] relevantProjects = getRelevantProjects(project);

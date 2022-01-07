@@ -394,7 +394,7 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 		return parameters;
 	}
 
-	public static void beautifyTypesString(StringBuffer types, boolean makeShort, WeavingScheme weavingScheme) {
+	public static void beautifyTypesString(StringBuilder types, boolean makeShort, WeavingScheme weavingScheme) {
 		String typeString = types.toString();
 		String prefix =
 //{OTDyn: configurable:

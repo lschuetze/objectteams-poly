@@ -3,7 +3,7 @@ package org.eclipse.jdt.internal.compiler.ast;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseReference;
 
-public class CallNextInvokeDynamicExpression {
+public class CallNextInvokeDynamicExpression extends Expression {
 
 	public BaseReference base;
 	public MethodBinding callinMethodBinding;
@@ -50,6 +50,12 @@ public class CallNextInvokeDynamicExpression {
 		} else if (!this.codegenBinding.equals(other.codegenBinding))
 			return false;
 		return true;
+	}
+
+	@Override
+	public StringBuffer printExpression(int indent, StringBuffer output) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

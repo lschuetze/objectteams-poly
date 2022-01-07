@@ -151,8 +151,14 @@ public class JavaProject
 
 	/**
 	 * Whether the underlying file system is case sensitive.
+	 * @deprecated case sensitivity is not a constant but can be configured at runtime for individual folders (see bug 571614#c8)
 	 */
-	protected static final boolean IS_CASE_SENSITIVE = !new File("Temp").equals(new File("temp")); //$NON-NLS-1$ //$NON-NLS-2$
+	@Deprecated
+	private static final boolean IS_CASE_SENSITIVE = !new File("Temp").equals(new File("temp")); //$NON-NLS-1$ //$NON-NLS-2$
+	/**
+	 * ignore case insensitivity by default (see bug 571614#c8)
+	 */
+	static final boolean RESOLVE_ACTUAL_PACKAGEFRAGMENT_NAME = Boolean.getBoolean("org.eclipse.jdt.resolve_actual_packagefragment_name"); //$NON-NLS-1$
 
 	/**
 	 * An empty array of strings indicating that a project doesn't have any prerequesite projects.
@@ -210,7 +216,7 @@ public class JavaProject
 		super(null);
 	}
 
-	public JavaProject(IProject project, JavaElement parent) {
+	public JavaProject(IProject project, JavaModel parent) {
 		super(parent);
 		this.project = project;
 	}
@@ -311,20 +317,47 @@ public class JavaProject
 	}
 
 	/**
+	 * Does nothing by default. With system flag org.eclipse.jdt.resolve_actual_packagefragment_name=true it tries to find the actual filename
+	 */
+	public static IPath createPackageFragementKey(IPath externalPath) {
+		if (RESOLVE_ACTUAL_PACKAGEFRAGMENT_NAME) { //disabled by default
+			return capitailzePath(externalPath);
+		} else {
+			// trust the UI to already have resolved the actual capitalization:
+			return externalPath;  // do nothing
+		}
+	}
+
+	/**
 	 * Returns a canonicalized path from the given external path.
 	 * Note that the return path contains the same number of segments
 	 * and it contains a device only if the given path contained one.
 	 * @param externalPath IPath
-	 * @see java.io.File for the definition of a canonicalized path
 	 * @return IPath
+	 * @deprecated This method may not do what you expect from its name (see bug 571614):
+	 *             <p> On Linux/Mac (CASE_SENSITIVE by default) it does nothing - even when pointing to a case insensitive filesystem.
+	 *             <p> On Windows (CASE_INSENSITIVE by default) it will find the actual capitalization of all path segments.
+	 *             On Windows it will also resolve 8.3 filenames to its long names.
+	 *             On Windows this results in slow system calls for every segment of the path since JDK 12
+	 *             (see https://bugs.openjdk.java.net/browse/JDK-8207005) - even when the filesystem is configured to
+	 *             be case sensitive and 8.3 name resolving is disabled.
+	 *             <p> ALTERNATIVES:
+	 *             <p> For package fragments use {@link #createPackageFragementKey}
+	 *             <p> For comparing files use {@link java.nio.file.Files#isSameFile}
+	 *         	   <p> For getting the actual capitalization use {@link java.nio.file.Path#toRealPath}
 	 */
+	@Deprecated
 	public static IPath canonicalizedPath(IPath externalPath) {
+		return capitailzePath(externalPath);
+	}
+
+    private static IPath capitailzePath(IPath externalPath) {
 
 		if (externalPath == null)
 			return null;
 
-		if (IS_CASE_SENSITIVE) {
-			return externalPath;
+		if (IS_CASE_SENSITIVE) { // if Linux/Mac
+			return externalPath; // do nothing
 		}
 
 		// if not external path, return original path
@@ -1405,8 +1438,7 @@ public class JavaProject
 	 */
 	protected String encodeClasspath(IClasspathEntry[] classpath, IClasspathEntry[] referencedEntries, IPath outputLocation, boolean indent, Map unknownElements) throws JavaModelException {
 		try {
-			ByteArrayOutputStream s = new ByteArrayOutputStream();
-			OutputStreamWriter writer = new OutputStreamWriter(s, "UTF8"); //$NON-NLS-1$
+			StringWriter writer = new StringWriter();
 			XMLWriter xmlWriter = new XMLWriter(writer, this, true/*print XML version*/);
 
 			xmlWriter.startTag(ClasspathEntry.TAG_CLASSPATH, indent);
@@ -1432,7 +1464,7 @@ public class JavaProject
 			xmlWriter.endTag(ClasspathEntry.TAG_CLASSPATH, indent, true/*insert new line*/);
 			writer.flush();
 			writer.close();
-			return s.toString("UTF8");//$NON-NLS-1$
+			return writer.toString();
 		} catch (IOException e) {
 			throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
 		}
@@ -1441,15 +1473,14 @@ public class JavaProject
 	@Override
 	public String encodeClasspathEntry(IClasspathEntry classpathEntry) {
 		try {
-			ByteArrayOutputStream s = new ByteArrayOutputStream();
-			OutputStreamWriter writer = new OutputStreamWriter(s, "UTF8"); //$NON-NLS-1$
+			StringWriter writer = new StringWriter();
 			XMLWriter xmlWriter = new XMLWriter(writer, this, false/*don't print XML version*/);
 
 			((ClasspathEntry)classpathEntry).elementEncode(xmlWriter, this.project.getFullPath(), true/*indent*/, true/*insert new line*/, null/*not interested in unknown elements*/, (classpathEntry.getReferencingEntry() != null));
 
 			writer.flush();
 			writer.close();
-			return s.toString("UTF8");//$NON-NLS-1$
+			return writer.toString();
 		} catch (IOException e) {
 			return null; // never happens since all is done in memory
 		}
@@ -1587,7 +1618,7 @@ public class JavaProject
 	public IPackageFragment findPackageFragment(IPath path)
 		throws JavaModelException {
 
-		return findPackageFragment0(JavaProject.canonicalizedPath(path));
+		return findPackageFragment0(createPackageFragementKey(path));
 	}
 	/*
 	 * non path canonicalizing version
@@ -1606,7 +1637,7 @@ public class JavaProject
 	public IPackageFragmentRoot findPackageFragmentRoot(IPath path)
 		throws JavaModelException {
 
-		return findPackageFragmentRoot0(JavaProject.canonicalizedPath(path));
+		return findPackageFragmentRoot0(createPackageFragementKey(path));
 	}
 	/*
 	 * no path canonicalization
@@ -2343,7 +2374,7 @@ public class JavaProject
 	 */
 	@Override
 	public IPackageFragmentRoot getPackageFragmentRoot(String externalLibraryPath) {
-		return getPackageFragmentRoot0(JavaProject.canonicalizedPath(new Path(externalLibraryPath)), null);
+		return getPackageFragmentRoot0(createPackageFragementKey(new Path(externalLibraryPath)), null);
 	}
 
 	/*
@@ -2450,6 +2481,20 @@ public class JavaProject
 	@Override
 	public IProject getProject() {
 		return this.project;
+	}
+
+	@Override
+	public JavaProject getJavaProject() {
+		return this;
+	}
+
+	/**
+	 * @see IJavaElement#getJavaModel
+	 * returns null for dummy projects
+	 */
+	@Override
+	public JavaModel getJavaModel() {
+		return (JavaModel) getParent();
 	}
 
 	@Deprecated
@@ -2777,38 +2822,46 @@ public class JavaProject
 	 */
 	@Override
 	public boolean isOnClasspath(IResource resource) {
-		IPath exactPath = resource.getFullPath();
-		IPath path = exactPath;
+		return findContainingClasspathEntry(resource) != null;
+	}
 
+	/*
+	 * @see IJavaProject
+	 */
+	@Override
+	public IClasspathEntry findContainingClasspathEntry(IResource resource) {
+		if (resource == null) {
+			return null;
+		}
+		final int resourceType = resource.getType();
 		// ensure that folders are only excluded if all of their children are excluded
-		int resourceType = resource.getType();
-		boolean isFolderPath = resourceType == IResource.FOLDER || resourceType == IResource.PROJECT;
-
+		final boolean isFolderPath = resourceType == IResource.FOLDER || resourceType == IResource.PROJECT;
 		IClasspathEntry[] classpath;
 		try {
 			classpath = this.getResolvedClasspath();
 		} catch(JavaModelException e){
-			return false; // not a Java project
+			return null; // not a Java project
 		}
+		final IPath path = resource.getFullPath();
 		for (int i = 0; i < classpath.length; i++) {
 			IClasspathEntry entry = classpath[i];
 			IPath entryPath = entry.getPath();
-			if (entryPath.equals(exactPath)) { // package fragment roots must match exactly entry pathes (no exclusion there)
-				return true;
+			if (entryPath.equals(path)) { // package fragment roots must match exactly entry pathes (no exclusion there)
+				return entry;
 			}
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=276373
 			// When a classpath entry is absolute, convert the resource's relative path to a file system path and compare
 			// e.g - /P/lib/variableLib.jar and /home/P/lib/variableLib.jar when compared should return true
 			if (entryPath.isAbsolute()
-					&& entryPath.equals(ResourcesPlugin.getWorkspace().getRoot().getLocation().append(exactPath))) {
-				return true;
+					&& entryPath.equals(ResourcesPlugin.getWorkspace().getRoot().getLocation().append(path))) {
+				return entry;
 			}
 			if (entryPath.isPrefixOf(path)
 					&& !Util.isExcluded(path, ((ClasspathEntry)entry).fullInclusionPatternChars(), ((ClasspathEntry)entry).fullExclusionPatternChars(), isFolderPath)) {
-				return true;
+				return entry;
 			}
 		}
-		return false;
+		return null;
 	}
 
 	private boolean isOnClasspathEntry(IPath elementPath, boolean isFolderPath, boolean isPackageFragmentRoot, IClasspathEntry entry) {
@@ -2840,18 +2893,9 @@ public class JavaProject
 		if (projectMetaLocation != null) {
 			File prefFile = projectMetaLocation.append(PREF_FILENAME).toFile();
 			if (prefFile.exists()) { // load preferences from file
-				InputStream in = null;
-				try {
-					in = new BufferedInputStream(new FileInputStream(prefFile));
+				try (InputStream in = new BufferedInputStream(new FileInputStream(prefFile))){
 					preferences = Platform.getPreferencesService().readPreferences(in);
 				} catch (CoreException | IOException e) { // problems loading preference store - quietly ignore
-				} finally {
-					if (in != null) {
-						try {
-							in.close();
-						} catch (IOException e) { // ignore problems with close
-						}
-					}
 				}
 				// one shot read, delete old preferences
 				prefFile.delete();
@@ -3593,7 +3637,8 @@ public class JavaProject
 	public void setProject(IProject project) {
 
 		this.project = project;
-		this.parent = JavaModelManager.getJavaModelManager().getJavaModel();
+		setParent(JavaModelManager.getJavaModelManager().getJavaModel());
+
 	}
 
 	/**

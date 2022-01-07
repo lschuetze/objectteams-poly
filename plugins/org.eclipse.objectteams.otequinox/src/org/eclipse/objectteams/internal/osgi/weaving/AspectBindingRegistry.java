@@ -81,9 +81,14 @@ public class AspectBindingRegistry {
 	private Set<String> selfAdaptingAspects= new HashSet<String>(); // TODO, never read / evaluated
 	
 	private Set<String> allAllBoundBaseClasses = new HashSet<>(1024);
+	private ASMByteCodeAnalyzer bytecodeAnalyzer;
 
 	public static boolean IS_OTDT = false;
 	
+	public AspectBindingRegistry(ASMByteCodeAnalyzer byteCodeAnalyzer) {
+		this.bytecodeAnalyzer = byteCodeAnalyzer;
+	}
+
 	public boolean isOTDT() {
 		return IS_OTDT;
 	}
@@ -145,7 +150,8 @@ public class AspectBindingRegistry {
 														aspectBundle,
 														baseBundle,
 														basePlugins[0].getChildren(Constants.FORCED_EXPORTS_ELEMENT),
-														teamCount);
+														teamCount,
+														bytecodeAnalyzer);
 			bindings.add(binding);
 			// TODO(SH): maybe enforce that every bundle id is given only once?
 
@@ -215,7 +221,7 @@ public class AspectBindingRegistry {
 		} else {
 			superBaseBundle = getBaseBundle(superBasePlugin);
 		}
-		AspectBinding superBinding = new AspectBinding(aspectBundleId, aspectBundle, superBaseBundle, new IConfigurationElement[0], 1);
+		AspectBinding superBinding = new AspectBinding(aspectBundleId, aspectBundle, superBaseBundle, new IConfigurationElement[0], 1, bytecodeAnalyzer);
 		TeamBinding team2 = superBinding.createResolvedTeam(0, teamBinding.teamName, NONE, teamBinding.superTeamName);
 		superBinding.allBaseClassNames.add(superBaseClass);
 		team2.baseClassNames.add(superBaseClass);

@@ -184,9 +184,11 @@ public class ImplicitTeamActivation extends AbstractOTJLDTest {
             null/*no custom requestor*/);
     }
 
-    // a team-level method is called while the team is not (expicitly) activated - after that call the team has to be deactivated again (also if an exception has been thrown)
+    // a team-level method is called while the team is not (explicitly) activated - after that call the team has to be deactivated again (also if an exception has been thrown)
     // 5.3.1b-otjld-callin-invocation-in-team-method
     public void test531b_callinInvocationInTeamMethod() {
+       if (isKnownFailure(this.getClass().getName()+".test531b_callinInvocationInTeamMethod"))
+    	   return;
        Map customOptions = getCompilerOptions();
        runConformTest(
             new String[] {

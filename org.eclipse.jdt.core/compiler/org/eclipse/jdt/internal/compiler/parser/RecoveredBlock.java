@@ -24,9 +24,11 @@ import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ForeachStatement;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
+import org.eclipse.jdt.internal.compiler.ast.TryStatement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.WithinStatement;
 
 public class RecoveredBlock extends RecoveredStatement implements TerminalTokens {
 
@@ -352,6 +354,12 @@ public Block updatedBlock(int depth, Set<TypeDeclaration> knownTypes){
 	for (int i = 0; i < this.statementCount; i++){
 		Statement updatedStatement = this.statements[i].updatedStatement(depth, knownTypes);
 		if (updatedStatement != null) {
+//{ObjectTeams: prevent destroying the fixed structure of generated statements in a WithinStatement (we have funny source positions):
+			if (updatedStatement.isGenerated() || (updatedStatement instanceof TryStatement && this.blockDeclaration instanceof WithinStatement)) {
+				updatedStatements[updatedCount++] = updatedStatement;
+				continue next;
+			}
+// SH}
 			for (int j = 0; j < i; j++) {
 				if (updatedStatements[j] instanceof LocalDeclaration) {
 					LocalDeclaration local = (LocalDeclaration) updatedStatements[j];

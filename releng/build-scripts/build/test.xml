@@ -11,28 +11,14 @@
 -->
 <project name="Automated Object Teams Testing" default="all"  basedir="." >
 
-	<!--properties file containing the plugin directory name including version number-->
-	<dirname property="_myDir" file="${ant.file}"/>
-	<property file="${_myDir}/test.properties" />
-
 	<!--properties file containing the build information-->
 	<property file="src/label.properties" />
 	<property file="src/finalPluginsVersions.properties" />
 	<property name="otequinox.agent.jar" value="${test.root.dir}/eclipse/plugins/org.eclipse.objectteams.otequinox_${org.eclipse.objectteams.otequinox}/otequinoxAgent.jar"/>
+	<property name="junit-report-output" value="${test.root.dir}/results"/>
 
 
-	<target name="readFlags">
-		<condition property="really.build.all">
-			<istrue value="${do.build.all}"/>
-        </condition>
-	</target>
-	
-	<target name="checkFlags" depends="readFlags" unless="really.build.all">
-		<property name="otdt-eclipse.is.setup" value="true"/>
-		<property name="tests.are.setup" value="true"/>
-	</target>
-
-	<target name="setupOTDTEclipse" depends="checkFlags" unless="otdt-eclipse.is.setup"
+	<target name="setupOTDTEclipse" unless="otdt-eclipse.is.setup"
 		description="Creates the SUT by and installing the OTDT into a pre-installed base Eclipse"
 	>
 		<echo message="Installing OTDT into Test Eclipse..."/>
@@ -57,7 +43,6 @@
 	
 	<target name="runtests"
 			description="Runs ant on the test.xml for a specified plugin.  
-			 			 Requires a property value setting for testPlugin only if test.properties is not available.
 						 The property testPlugin represents a directory name made up of the plugin id and plugin version.
 						 This directory must contain a valid test.xml."
 	>
@@ -75,8 +60,9 @@
             	--add-opens java.base/jdk.internal.ref=ALL-UNNAMED
             	--add-opens java.base/jdk.internal.math=ALL-UNNAMED
             	--add-opens java.base/jdk.internal.misc=ALL-UNNAMED
+            	--add-opens jdk.zipfs/jdk.nio.zipfs=ALL-UNNAMED
             	-Djava.io.tmpdir=${test.tmpDir} -Dot.weaving=otdre -javaagent:${otequinox.agent.jar}
-            	-Dcompliance=1.7,1.8,12"/>
+            	-Dcompliance=1.8,11,14"/>
 		</ant>
 	</target>
 

@@ -191,7 +191,7 @@ public class RoleTypeBinding extends DependentTypeBinding
         }
 
         // compute the team:
-        if (CharOperation.equals(roleType.compoundName, IOTConstants.ORG_OBJECTTEAMS_TEAM_OTCONFINED))
+        if (roleType.id == IOTConstants.T_OrgObjectteamsTeamOTConfined)
         	// the following is needed in order to break the circularity
         	// of roles extending the predefined Team.__OT__Confined (see class comment)
         	this._staticallyKnownTeam = roleType.enclosingType();
@@ -665,7 +665,7 @@ public class RoleTypeBinding extends DependentTypeBinding
 	        if ((superClass != null) && (superClass.isDirectRole()))
 	        {
 	        	// 1.a: a confined type "as-is": don't instantiate/strengthen
-	        	if (   OTNameUtils.isPredefinedConfined(superClass.compoundName)
+	        	if (   OTNameUtils.isPredefinedConfined(superClass)
 	        		|| CharOperation.equals(IOTConstants.OTCONFINED, superClass.sourceName))
 	        		return this._superClass = superClass;
 

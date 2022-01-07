@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -2467,6 +2467,25 @@ public void test078() {
 
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=85397
 public void test079() throws Exception {
+	String op =
+			this.complianceLevel < ClassFileConstants.JDK17 ?
+					"----------\n" +
+					"1. ERROR in X.java (at line 3)\n" +
+					"	private strictfp X() {}\n" +
+					"	                 ^^^\n" +
+					"Illegal modifier for the constructor in type X; only public, protected & private are permitted\n" +
+					"----------\n" :
+					"----------\n" +
+					"1. WARNING in X.java (at line 3)\n" +
+					"	private strictfp X() {}\n" +
+					"	        ^^^^^^^^\n" +
+					"Floating-point expressions are always strictly evaluated from source level 17. Keyword \'strictfp\' is not required.\n" +
+					"----------\n" +
+					"2. ERROR in X.java (at line 3)\n" +
+					"	private strictfp X() {}\n" +
+					"	                 ^^^\n" +
+					"Illegal modifier for the constructor in type X; only public, protected & private are permitted\n" +
+					"----------\n";
 	this.runNegativeTest(
 		new String[] {
 			"X.java",
@@ -2475,12 +2494,7 @@ public void test079() throws Exception {
 			"	private strictfp X() {}\n" +
 			"}\n"
 		},
-		"----------\n" +
-		"1. ERROR in X.java (at line 3)\n" +
-		"	private strictfp X() {}\n" +
-		"	                 ^^^\n" +
-		"Illegal modifier for the constructor in type X; only public, protected & private are permitted\n" +
-		"----------\n"
+		op
 	);
 	this.runConformTest(
 		new String[] {
@@ -2493,10 +2507,17 @@ public void test079() throws Exception {
 		""
 	);
 
-	String[] expectedOutputs = new String[] {
-		"  private strictfp X(java.lang.String arg0, int arg1);\n",
-		"  public static strictfp X[] values();\n",
-		"  public static strictfp X valueOf(java.lang.String arg0);\n"
+	String[] expectedOutputs =
+			this.complianceLevel < ClassFileConstants.JDK17 ?
+					new String[] {
+							"  private strictfp X(java.lang.String arg0, int arg1);\n",
+							"  public static strictfp X[] values();\n",
+							"  public static strictfp X valueOf(java.lang.String arg0);\n"
+						} :
+			new String[] {
+		"  private X(java.lang.String arg0, int arg1);\n",
+		"  public static X[] values();\n",
+		"  public static X valueOf(java.lang.String arg0);\n"
 	};
 
 	ClassFileBytesDisassembler disassembler = ToolFactory.createDefaultClassFileBytesDisassembler();
@@ -2546,25 +2567,41 @@ public void test080() {
 
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=87818
 public void test081() {
-	this.runNegativeTest(
+	String expectedErrorMessage = this.complianceLevel < ClassFileConstants.JDK16 ?
+			"----------\n" +
+			"1. ERROR in X.java (at line 3)\n" +
+			"	enum E {}\n" +
+			"	     ^\n" +
+			"The member enum E can only be defined inside a top-level class or interface or in a static context\n" +
+			"----------\n" +
+			"2. ERROR in X.java (at line 4)\n" +
+			"	Zork();\n" +
+			"	^^^^\n" +
+			"The method Zork() is undefined for the type X\n" +
+			"----------\n"
+			:
+			"----------\n" +
+			"1. ERROR in X.java (at line 4)\n" +
+			"	Zork();\n" +
+			"	^^^^\n" +
+			"The method Zork() is undefined for the type X\n" +
+			"----------\n";
+		this.runNegativeTest(
 		new String[] {
 			"X.java",
 			"public class X {\n" +
 			"	void foo() {\n" +
 			"		enum E {}\n" +
+			"	    Zork();\n" +
 			"	}\n" +
 			"}"
 		},
-		"----------\n" +
-		"1. ERROR in X.java (at line 3)\n" +
-		"	enum E {}\n" +
-		"	     ^\n" +
-		"The member enum E can only be defined inside a top-level class or interface or in a static context\n" +
-		"----------\n");
+		expectedErrorMessage);
 }
 
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=88223
 public void test082() {
+	if ( this.complianceLevel < ClassFileConstants.JDK16) {
 	this.runNegativeTest(
 		new String[] {
 			"X.java",
@@ -2580,6 +2617,18 @@ public void test082() {
 		"	     ^\n" +
 		"The member enum E must be defined inside a static member type\n" +
 		"----------\n");
+	} else {
+		this.runConformTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"	class Y {\n" +
+					"		enum E {}\n" +
+					"	}\n" +
+					"}"
+				},
+				"");
+	}
 	this.runConformTest(
 		new String[] {
 			"X.java",
@@ -2590,23 +2639,38 @@ public void test082() {
 			"}"
 		},
 		"");
-	this.runNegativeTest(
-		new String[] {
-			"X.java",
-			"public class X {\n" +
-			"	void foo() {\n" +
-			"		class Local {\n" +
-			"			enum E {}\n" +
-			"		}\n" +
-			"	}\n" +
-			"}"
-		},
-		"----------\n" +
-		"1. ERROR in X.java (at line 4)\n" +
-		"	enum E {}\n" +
-		"	     ^\n" +
-		"The member enum E can only be defined inside a top-level class or interface or in a static context\n" +
-		"----------\n");
+	if ( this.complianceLevel < ClassFileConstants.JDK16) {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"	void foo() {\n" +
+					"		class Local {\n" +
+					"			enum E {}\n" +
+					"		}\n" +
+					"	}\n" +
+					"}"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 4)\n" +
+				"	enum E {}\n" +
+				"	     ^\n" +
+				"The member enum E can only be defined inside a top-level class or interface or in a static context\n" +
+				"----------\n");
+	} else {
+		this.runConformTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"	void foo() {\n" +
+					"		class Local {\n" +
+					"			enum E {}\n" +
+					"		}\n" +
+					"	}\n" +
+					"}"
+				},
+				"");
+	}
 }
 
 
@@ -3828,6 +3892,9 @@ public void test112() {
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=93789
 public void test113() {
+	if (this.complianceLevel >= ClassFileConstants.JDK16) {
+		return;
+	}
     this.runNegativeTest(
         new String[] {
             "X.java",
@@ -6625,6 +6692,10 @@ public void test180() {
 	);
 	Map options = getCompilerOptions();
 	options.put(CompilerOptions.OPTION_Process_Annotations, CompilerOptions.ENABLED);
+	JavacTestOptions.Excuse excuse = JavacTestOptions.Excuse.JavacHasErrorsEclipseHasNone;
+	if(this.complianceLevel >= ClassFileConstants.JDK16) {
+		excuse = null;
+	}
 	this.runConformTest(
 		false,
 		new String[] {
@@ -6641,7 +6712,7 @@ public void test180() {
 		"",
 		"class test180.Test",
 		"",
-		JavacTestOptions.Excuse.JavacHasErrorsEclipseHasNone);
+		excuse);
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=289892
 // in interaction with null annotations
@@ -6685,6 +6756,10 @@ public void test180a() {
 	);
 	options = getCompilerOptions();
 	options.put(CompilerOptions.OPTION_Process_Annotations, CompilerOptions.ENABLED);
+	JavacTestOptions.Excuse excuse = JavacTestOptions.Excuse.JavacHasErrorsEclipseHasNone;
+	if(this.complianceLevel >= ClassFileConstants.JDK16) {
+		excuse = null;
+	}
 	this.runConformTest(
 		false,
 		new String[] {
@@ -6701,7 +6776,7 @@ public void test180a() {
 		"",
 		"class test180.Test",
 		"",
-		JavacTestOptions.Excuse.JavacHasErrorsEclipseHasNone);
+		excuse);
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=300133
 public void test181() {
@@ -7169,5 +7244,57 @@ public void test476281a() {
 			"  }\n" +
 			"}"},
 			"Success");
+}
+public void testBug388314() throws Exception {
+	this.runConformTest(
+			new String[] {
+					"p/Nullable.java",
+					"package p;\n" +
+					"import static java.lang.annotation.ElementType.*;\n" +
+					"import java.lang.annotation.*;\n" +
+					"@Documented\n" +
+					"@Retention(RetentionPolicy.RUNTIME)\n" +
+					"@Target(value = { FIELD, LOCAL_VARIABLE, METHOD, PARAMETER })\n" +
+					"public @interface Nullable {\n" +
+					"	// Nothing to do.\n" +
+					"}",
+					"p/EnumWithNullable.java",
+					"package p;\n" +
+					"public enum EnumWithNullable {\n" +
+					"	A;\n" +
+					"\n" +
+					"	@Nullable\n" +
+					"	private final Object b;\n" +
+					"\n" +
+					"	private EnumWithNullable(@Nullable Object b) {\n" +
+					"		this.b = b;\n" +
+					"	}\n" +
+					"\n" +
+					"	private EnumWithNullable() {\n" +
+					"		this(null);\n" +
+					"	}\n" +
+					"}\n"
+			},
+			"");
+
+	String expectedOutput =
+		"  // Method descriptor #27 (Ljava/lang/String;ILjava/lang/Object;)V\n" +
+		"  // Stack: 3, Locals: 4\n" +
+		"  private EnumWithNullable(java.lang.String arg0,  int arg1, @p.Nullable java.lang.Object b);\n";
+
+	ClassFileBytesDisassembler disassembler = ToolFactory.createDefaultClassFileBytesDisassembler();
+	byte[] classFileBytes = org.eclipse.jdt.internal.compiler.util.Util.getFileByteContent(new File(OUTPUT_DIR + File.separator  +"p" + File.separator + "EnumWithNullable.class"));
+	String actualOutput =
+		disassembler.disassemble(
+			classFileBytes,
+			"\n",
+			ClassFileBytesDisassembler.DETAILED);
+	int index = actualOutput.indexOf(expectedOutput);
+	if (index == -1 || expectedOutput.length() == 0) {
+		System.out.println(Util.displayString(actualOutput, 3));
+	}
+	if (index == -1) {
+		assertEquals("Wrong contents", expectedOutput, actualOutput);
+	}
 }
 }

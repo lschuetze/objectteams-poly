@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -124,6 +124,7 @@ public class MethodBinding extends Binding implements IProtectable {
 	public TypeVariableBinding[] typeVariables = Binding.NO_TYPE_VARIABLES;
 	char[] signature;
 	public long tagBits;
+	public int extendedTagBits = 0; // See values in the interface ExtendedTagBits
 	// Used only for constructors
 	protected AnnotationBinding [] typeAnnotations = Binding.NO_ANNOTATIONS;
 
@@ -1037,7 +1038,7 @@ public char[] genericSignature() {
 public char[] genericSignature(boolean retrenchCallin) {
 // SH}
 	if ((this.modifiers & ExtraCompilerModifiers.AccGenericSignature) == 0) return null;
-	StringBuffer sig = new StringBuffer(10);
+	StringBuilder sig = new StringBuilder(10);
 	if (this.typeVariables != Binding.NO_TYPE_VARIABLES) {
 		sig.append('<');
 		for (int i = 0, length = this.typeVariables.length; i < length; i++) {
@@ -1256,6 +1257,18 @@ public final boolean isConstructor() {
 	return this.selector == TypeConstants.INIT;
 }
 
+/* Answer true if the method is a canonical constructor
+*/
+public final boolean isCanonicalConstructor() {
+	return (this.extendedTagBits & ExtendedTagBits.IsCanonicalConstructor) != 0;
+}
+
+/* Answer true if the receiver is a compact constructor
+*/
+public final boolean isCompactConstructor() {
+	return (this.modifiers &  ExtraCompilerModifiers.AccCompactConstructor) != 0;
+}
+
 /* Answer true if the receiver has default visibility
 */
 @Override
@@ -1293,6 +1306,14 @@ public final boolean isFinal() {
 public final boolean isImplementing() {
 	return (this.modifiers & ExtraCompilerModifiers.AccImplementing) != 0;
 }
+
+
+/* Answer true if the method is an implicit method - only for records
+*/
+public final boolean isImplicit() {
+	return (this.extendedTagBits & ExtendedTagBits.isImplicit) != 0;
+}
+
 
 /*
  * Answer true if the receiver is a "public static void main(String[])" method
@@ -1427,7 +1448,7 @@ public MethodBinding genericMethod() {
 
 @Override
 public char[] readableName() /* foo(int, Thread) */ {
-	StringBuffer buffer = new StringBuffer(this.parameters.length + 1 * 20);
+	StringBuilder buffer = new StringBuilder(this.parameters.length + 1 * 20);
 	if (isConstructor())
 		buffer.append(this.declaringClass.sourceName());
 //{ObjectTeams: hide creator method:
@@ -1502,7 +1523,7 @@ protected final void setSelector(char[] selector) {
  */
 @Override
 public char[] shortReadableName() {
-	StringBuffer buffer = new StringBuffer(this.parameters.length + 1 * 20);
+	StringBuilder buffer = new StringBuilder(this.parameters.length + 1 * 20);
 	if (isConstructor())
 		buffer.append(this.declaringClass.shortReadableName());
 //{ObjectTeams: hide creator method:
@@ -1583,7 +1604,7 @@ public final char[] signature(boolean retrenchRoleMethod) {
 	if (this.signature != null)
 		return this.signature;
 
-	StringBuffer buffer = new StringBuffer(this.parameters.length + 1 * 20);
+	StringBuilder buffer = new StringBuilder(this.parameters.length + 1 * 20);
 	buffer.append('(');
 
 //{ObjectTeams: respect callin-enhancement:
@@ -1620,7 +1641,7 @@ public final char[] signature(boolean retrenchRoleMethod) {
 			}
 		}
 
-		if (this instanceof SyntheticMethodBinding) {
+		if ((this instanceof SyntheticMethodBinding) && (!this.declaringClass.isRecord())) {
 			targetParameters = ((SyntheticMethodBinding)this).targetMethod.parameters;
 		}
 	}
@@ -1679,7 +1700,9 @@ public char[] signature(ClassFile classFile) {
 			// we need to record inner classes references
 			boolean isConstructor = isConstructor();
 			TypeBinding[] targetParameters = this.parameters;
-			boolean needSynthetics = isConstructor && this.declaringClass.isNestedType();
+			boolean needSynthetics = isConstructor
+						&& this.declaringClass.isNestedType()
+						&& !this.declaringClass.isStatic();
 //{ObjectTeams: also need synthetics for static role methods:
 			if (this.needsSyntheticEnclosingTeamInstance())
 				needSynthetics = true;
@@ -1729,7 +1752,7 @@ public char[] signature(ClassFile classFile) {
 		return this.signature;
 	}
 
-	StringBuffer buffer = new StringBuffer((this.parameters.length + 1) * 20);
+	StringBuilder buffer = new StringBuilder((this.parameters.length + 1) * 20);
 	buffer.append('(');
 
 	TypeBinding[] targetParameters = this.parameters;
@@ -1738,7 +1761,9 @@ public char[] signature(ClassFile classFile) {
 		buffer.append(ConstantPool.JavaLangStringSignature);
 		buffer.append(TypeBinding.INT.signature());
 	}
-	boolean needSynthetics = isConstructor && this.declaringClass.isNestedType();
+	boolean needSynthetics = isConstructor
+			&& this.declaringClass.isNestedType()
+			&& !this.declaringClass.isStatic();
 //{ObjectTeams: also need synthetics for static role methods:
 	if (this.needsSyntheticEnclosingTeamInstance()) {
 		needSynthetics = true;

@@ -40,7 +40,7 @@ public abstract class Attributes {
 	protected final static String ATTRIBUTE_OT_DYN_CALLIN_BINDINGS="OTDynCallinBindings";
 	protected final static String ATTRIBUTE_ROLE_BASE_BINDINGS = "CallinRoleBaseBindings";
 	protected final static String ATTRIBUTE_CALLIN_PRECEDENCE = "CallinPrecedence";
-	protected final static String ATTRIBUTE_OT_CLASS_FLAGS = "OTClassFlags";
+	public    final static String ATTRIBUTE_OT_CLASS_FLAGS = "OTClassFlags";
 	protected final static String ATTRIBUTE_OT_SPECIAL_ACCESS = "OTSpecialAccess";
 	public    final static String ATTRIBUTE_OT_COMPILER_VERSION = "OTCompilerVersion";
 	

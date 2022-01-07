@@ -282,11 +282,6 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
 
 	}
 
-	@Override
-	public void enterRecordComponent(RecordComponentInfo recordComponentInfo) {
-		// TODO Auto-generated method stub
-	}
-
 	public void enterType(TypeInfo typeInfo) {
 		// TODO Auto-generated method stub
 	}

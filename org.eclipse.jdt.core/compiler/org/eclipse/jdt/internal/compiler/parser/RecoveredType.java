@@ -411,6 +411,9 @@ public boolean bodyStartsAtHeaderEnd(){
 			return this.typeDeclaration.bodyStart == this.typeDeclaration.superclass.sourceEnd+1;
 		}
 	} else {
+		if (this.typeDeclaration.permittedTypes != null)
+			return this.typeDeclaration.bodyStart
+			== this.typeDeclaration.permittedTypes[this.typeDeclaration.permittedTypes.length-1].sourceEnd+1;
 		return this.typeDeclaration.bodyStart
 				== this.typeDeclaration.superInterfaces[this.typeDeclaration.superInterfaces.length-1].sourceEnd+1;
 	}
@@ -820,6 +823,7 @@ public void updateFromParserState(){
 				for (int i = 1, max = length + 1; i < max; i++) {
 					if(!(parser.astStack[astPtr + i ] instanceof TypeReference)) {
 						canConsume = false;
+						break;
 					}
 				}
 			}
@@ -842,6 +846,7 @@ public void updateFromParserState(){
 				for (int i = 0; i < length; i++) {
 					if(!(parser.genericsStack[genericsPtr - i] instanceof TypeParameter)) {
 						canConsume = false;
+						break;
 					}
 				}
 			}
@@ -897,6 +902,7 @@ public RecoveredElement updateOnOpeningBrace(int braceStart, int braceEnd){
 			case -1 :
 			case TokenNameextends :
 			case TokenNameimplements :
+			case TokenNameRestrictedIdentifierpermits:
 			case TokenNameGREATER :
 			case TokenNameRIGHT_SHIFT :
 			case TokenNameUNSIGNED_RIGHT_SHIFT :

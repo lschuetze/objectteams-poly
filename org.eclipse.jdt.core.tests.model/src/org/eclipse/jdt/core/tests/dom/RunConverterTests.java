@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -8,12 +8,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.dom;
 
-import java.lang.reflect.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -34,6 +34,7 @@ public static Class[] getAllTestClasses() {
 		ASTConverterBugsTest.class,
 		ASTConverterBugsTestJLS3.class,
 		ASTConverterJavadocTest.class,
+		ASTConverterJavadocTest_15.class,
 		ASTConverter15Test.class,
 		ASTConverter16Test.class,
 		ASTConverter17Test.class,
@@ -53,6 +54,9 @@ public static Class[] getAllTestClasses() {
 		ASTConverter18Test.class,
 		ASTConverter9Test.class,
 		ASTConverter14Test.class,
+		ASTConverter_15Test.class,
+		ASTConverter_16Test.class,
+		ASTConverter_PreviewTest.class,
 	};
 }
 public static Test suite() {

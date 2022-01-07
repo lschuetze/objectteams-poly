@@ -246,8 +246,12 @@ public String toString(int tab) {
 	StringBuffer result = new StringBuffer(tabString(tab));
 	result.append("Recovered method mapping:\n"); //$NON-NLS-1$
 	this.methodMappingDeclaration.print(tab + 1, result);
-	for (int i = 0; i < this.baseMethodCount; i++)
-		result.append(this.baseMethods[i].toString(tab + 1));
+	for (int i = 0; i < this.baseMethodCount; i++) {
+		if (this.baseMethods != null)
+			result.append(this.baseMethods[i].toString(tab + 1));
+		else
+			result.append("<no base method>"); //$NON-NLS-1$
+	}
 	return result.toString();
 }
 /*

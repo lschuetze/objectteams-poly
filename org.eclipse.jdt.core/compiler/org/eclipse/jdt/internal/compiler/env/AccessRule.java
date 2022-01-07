@@ -21,8 +21,10 @@ public class AccessRule {
 
 	public static final int IgnoreIfBetter = 0x02000000; // value must be greater than IProblem#ForbiddenReference and DiscouragedReference
 
-	public char[] pattern;
+	public final char[] pattern;
+//{ObjectTeams: needlessly final in jdt since https://bugs.eclipse.org/bugs/show_bug.cgi?id=571159
 	public int problemId;
+// SH}
 
 //{ObjectTeams: Field for data flow from PDEAdaptor to ...
 	public Object[] aspectBindingData;
@@ -64,7 +66,7 @@ public class AccessRule {
 
 	@Override
 	public String toString() {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		buffer.append("pattern="); //$NON-NLS-1$
 		buffer.append(this.pattern);
 		switch (getProblemId()) {

@@ -24,4 +24,4 @@ Export-Package: org.eclipse.objectteams.otdt.ui.tests.dom,
  org.eclipse.objectteams.otdt.ui.tests.dom.converter,
  org.eclipse.objectteams.otdt.ui.tests.dom.rewrite
 Bundle-ManifestVersion: 2
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8

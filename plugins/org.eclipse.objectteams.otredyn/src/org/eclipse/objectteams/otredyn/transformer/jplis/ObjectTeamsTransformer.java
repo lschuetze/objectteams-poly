@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.eclipse.objectteams.otredyn.bytecode.AbstractBoundClass;
 import org.eclipse.objectteams.otredyn.bytecode.ClassRepository;
+import org.eclipse.objectteams.otredyn.bytecode.asm.MarkAsStepOverAdapter;
 import org.eclipse.objectteams.otredyn.bytecode.asm.WeavableRegionReader;
 import org.eclipse.objectteams.otredyn.transformer.IWeavingContext;
 import org.eclipse.objectteams.runtime.IReweavingTask;
@@ -90,9 +91,20 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 		if (loader == null)
 			loader = ClassLoader.getSystemClassLoader();
 
+		String sourceClassName = className.replace('/','.');
+
+		if (sourceClassName.equals("org.eclipse.objectteams.otredyn.runtime.TeamManager")) {
+			// This special class needs to bypass our regular infra, because we have live code references to it,
+			// which would trigger unsound re-entrance.
+			// All we want is modifying some line numbers for better debugging experience.
+			return MarkAsStepOverAdapter.transformTeamManager(classfileBuffer, loader);
+		}
+		if (className.equals("org/objectteams/ITeamManager")) {
+			return null; // during loading of TeamManager avoid to trigger code below that needs TeamManager already
+		}
+		
 		ClassRepository classRepo = ClassRepository.getInstance();
 		AbstractBoundClass clazz = classRepo.peekBoundClass(classId);
-		String sourceClassName = className.replace('/','.');
 
 		if (!weavingContext.isWeavable(sourceClassName, true, true) || loader == null) {
 			if (clazz != null) {
@@ -168,6 +180,7 @@ if (PWR_DEBUG) System.out.println("\tweave3");
 			// skip, I saw a mysterious deadlock involving sun.misc.Cleaner
 			if (className.startsWith("sun/misc")
 				|| className.startsWith("sun/launcher")
+				|| className.startsWith("sun/nio/cs") // avoid weaving during calls like Charset.forName() during StandardCharset initialization
 				)
 				return false;
 			break;
@@ -177,7 +190,9 @@ if (PWR_DEBUG) System.out.println("\tweave3");
 				|| className.startsWith("java/lang")
 				|| className.startsWith("java/util")
 				|| className.startsWith("java/io")
+				|| className.equals("java/nio/charset/StandardCharsets") // avoid weaving during calls like Charset.forName() during StandardCharset initialization
 				|| className.startsWith("jdk/jfr")
+				|| className.contains("$Proxy") // starting with JDK-16, 7 of these tests would otherwise fail during reflection: Java5.testA117_copyinheritanceForAnnotation*()
 				) 
 				return false;
 			break;

@@ -23,12 +23,10 @@ package org.eclipse.jdt.internal.core;
 import static org.eclipse.jdt.internal.compiler.util.Util.UTF_8;
 import static org.eclipse.jdt.internal.compiler.util.Util.getInputStreamAsCharArray;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -73,9 +71,6 @@ import org.eclipse.jdt.internal.compiler.env.AccessRuleSet;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.util.ManifestAnalyzer;
-import org.eclipse.jdt.internal.core.nd.IReader;
-import org.eclipse.jdt.internal.core.nd.java.JavaIndex;
-import org.eclipse.jdt.internal.core.nd.java.NdResourceFile;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.w3c.dom.DOMException;
@@ -508,18 +503,12 @@ public class ClasspathEntry implements IClasspathEntry {
 	}
 
 	private static void decodeUnknownNode(Node node, StringBuffer buffer, IJavaProject project) {
-		ByteArrayOutputStream s = new ByteArrayOutputStream();
-		OutputStreamWriter writer;
-		try {
-			writer = new OutputStreamWriter(s, "UTF8"); //$NON-NLS-1$
-			XMLWriter xmlWriter = new XMLWriter(writer, project, false/*don't print XML version*/);
-			decodeUnknownNode(node, xmlWriter, true/*insert new line*/);
-			xmlWriter.flush();
-			xmlWriter.close();
-			buffer.append(s.toString("UTF8")); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
-			// ignore (UTF8 is always supported)
-		}
+		StringWriter writer = new StringWriter();
+		XMLWriter xmlWriter = new XMLWriter(writer, project, false/*don't print XML version*/);
+		decodeUnknownNode(node, xmlWriter, true/*insert new line*/);
+		xmlWriter.flush();
+		xmlWriter.close();
+		buffer.append(writer.toString());
 	}
 
 	private static void decodeUnknownNode(Node node, XMLWriter xmlWriter, boolean insertNewLine) {
@@ -1012,22 +1001,6 @@ public class ClasspathEntry implements IClasspathEntry {
 	}
 
 	private static char[] getManifestContents(IPath jarPath) throws CoreException, IOException {
-		// Try to read a cached manifest from the index
-		if (JavaIndex.isEnabled()) {
-			JavaIndex index = JavaIndex.getIndex();
-			String location = JavaModelManager.getLocalFile(jarPath).getAbsolutePath();
-			try (IReader reader = index.getNd().acquireReadLock()) {
-				NdResourceFile resourceFile = index.getResourceFile(location.toCharArray());
-				if (index.isUpToDate(resourceFile)) {
-					char[] manifestContent = resourceFile.getManifestContent().getChars();
-					if (manifestContent.length == 0) {
-						return null;
-					}
-					return manifestContent;
-				}
-			}
-		}
-
 		ZipFile zip = null;
 		InputStream inputStream = null;
 		JavaModelManager manager = JavaModelManager.getJavaModelManager();
@@ -1038,7 +1011,7 @@ public class ClasspathEntry implements IClasspathEntry {
 				return null;
 			}
 			inputStream = zip.getInputStream(manifest);
-			char[] chars = getInputStreamAsCharArray(inputStream, -1, UTF_8);
+			char[] chars = getInputStreamAsCharArray(inputStream, UTF_8);
 			return chars;
 		} finally {
 			if (inputStream != null) {
@@ -1563,7 +1536,7 @@ public class ClasspathEntry implements IClasspathEntry {
 	 */
 	@Override
 	public String toString() {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		Object target = JavaModel.getTarget(getPath(), true);
 		if (target instanceof File)
 			buffer.append(getPath().toOSString());

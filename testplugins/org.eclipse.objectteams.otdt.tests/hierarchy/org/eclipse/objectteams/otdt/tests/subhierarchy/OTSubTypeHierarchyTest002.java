@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2021 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -21,19 +21,19 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.tests.subhierarchy;
 
-import junit.framework.Test;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
-import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
+import org.eclipse.objectteams.otdt.tests.hierarchy.FileBasedHierarchyTest;
+
+import junit.framework.Test;
 
 /**
  * @author Michael Krueger (mkr)
  *
  */
-public class OTSubTypeHierarchyTest002 extends FileBasedModelTest {
+public class OTSubTypeHierarchyTest002 extends FileBasedHierarchyTest {
 
 	private TypeHierarchy _testObj;
 

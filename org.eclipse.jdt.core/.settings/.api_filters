@@ -9,137 +9,214 @@
         </filter>
     </resource>
     <resource path="compiler/org/eclipse/jdt/core/compiler/IProblem.java" type="org.eclipse.jdt.core.compiler.IProblem">
-        <filter comment="Needed for Java14" id="388194388">
+        <filter id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionaYieldSwitchLabeledBlockCompletesNormally"/>
-                <message_argument value="2098855"/>
+                <message_argument value="IllegalModifierForLocalEnumDeclaration"/>
+                <message_argument value="2098918"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionsYieldBreakNotAllowed"/>
-                <message_argument value="2098863"/>
+                <message_argument value="LocalStaticsIllegalVisibilityModifierForInterfaceLocalType"/>
+                <message_argument value="2098917"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter comment="Update the errors that are no longer preview" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionsYieldEmptySwitchBlock"/>
-                <message_argument value="2098853"/>
+                <message_argument value="SealedAnonymousClassCannotExtendSealedType"/>
+                <message_argument value="2099017"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter comment="Update the errors that are no longer preview" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionsYieldIllegalLastStatement"/>
-                <message_argument value="2098862"/>
+                <message_argument value="SealedDisAllowedNonSealedModifierInClass"/>
+                <message_argument value="2099003"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter comment="Update the errors that are no longer preview" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionsYieldIllegalStatement"/>
-                <message_argument value="2098868"/>
+                <message_argument value="SealedDisAllowedNonSealedModifierInInterface"/>
+                <message_argument value="2099014"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter comment="Update the errors that are no longer preview" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionsYieldIncompatibleResultExpressionTypes"/>
-                <message_argument value="2098852"/>
+                <message_argument value="SealedDuplicateTypeInPermits"/>
+                <message_argument value="2099008"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter comment="Update the errors that are no longer preview" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionsYieldLastStatementCompletesNormally"/>
-                <message_argument value="2098856"/>
+                <message_argument value="SealedInterfaceIsSealedAndNonSealed"/>
+                <message_argument value="2099013"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter comment="Update the errors that are no longer preview" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionsYieldMissingDefaultCase"/>
-                <message_argument value="2098859"/>
+                <message_argument value="SealedLocalDirectSuperTypeSealed"/>
+                <message_argument value="2099016"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter comment="Update the errors that are no longer preview" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionsYieldMissingEnumConstantCase"/>
-                <message_argument value="2098861"/>
+                <message_argument value="SealedMissingClassModifier"/>
+                <message_argument value="2099002"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter comment="Update the errors that are no longer preview" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionsYieldMissingValue"/>
-                <message_argument value="2098860"/>
+                <message_argument value="SealedMissingInterfaceModifier"/>
+                <message_argument value="2099007"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter comment="Update the errors that are no longer preview" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionsYieldNoResultExpression"/>
-                <message_argument value="2098854"/>
+                <message_argument value="SealedMissingSealedModifier"/>
+                <message_argument value="2099006"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter comment="Update the errors that are no longer preview" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionsYieldOutsideSwitchExpression"/>
-                <message_argument value="2098866"/>
+                <message_argument value="SealedNotDirectSuperClass"/>
+                <message_argument value="2099009"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter comment="Update the errors that are no longer preview" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionsYieldRestrictedGeneralWarning"/>
-                <message_argument value="2098867"/>
+                <message_argument value="SealedNotDirectSuperInterface"/>
+                <message_argument value="2099015"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter comment="Update the errors that are no longer preview" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionsYieldTrailingSwitchLabels"/>
-                <message_argument value="2098857"/>
+                <message_argument value="SealedPermittedTypeOutsideOfModule"/>
+                <message_argument value="2099010"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter comment="Update the errors that are no longer preview" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionsYieldTypeDeclarationError"/>
-                <message_argument value="2098870"/>
+                <message_argument value="SealedPermittedTypeOutsideOfPackage"/>
+                <message_argument value="2099011"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter comment="Update the errors that are no longer preview" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionsYieldTypeDeclarationWarning"/>
-                <message_argument value="2098869"/>
+                <message_argument value="SealedSealedTypeMissingPermits"/>
+                <message_argument value="2099012"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter comment="Update the errors that are no longer preview" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionsYieldUnqualifiedMethodError"/>
-                <message_argument value="2098865"/>
+                <message_argument value="SealedSuperClassDoesNotPermit"/>
+                <message_argument value="2099004"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter comment="Update the errors that are no longer preview" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchExpressionsYieldUnqualifiedMethodWarning"/>
-                <message_argument value="2098864"/>
+                <message_argument value="SealedSuperInterfaceDoesNotPermit"/>
+                <message_argument value="2099005"/>
             </message_arguments>
         </filter>
-        <filter comment="Needed for Java14" id="388194388">
+        <filter comment="Update the errors that are no longer preview" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="SwitchPreviewMixedCase"/>
-                <message_argument value="2098858"/>
+                <message_argument value="SealedSuperTypeDisallowed"/>
+                <message_argument value="2099019"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Update the errors that are no longer preview" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="SealedSuperTypeInDifferentPackage"/>
+                <message_argument value="2099018"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="compiler/org/eclipse/objectteams/otdt/core/compiler/IOTConstants.java" type="org.eclipse.objectteams.otdt.core.compiler.IOTConstants">
+        <filter comment="cleanup constants to avoid near-term conflict with JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="T_OrgObjectTeamsIBoundBase"/>
+                <message_argument value="102"/>
+            </message_arguments>
+        </filter>
+        <filter comment="cleanup constants to avoid near-term conflict with JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="T_OrgObjectTeamsIBoundBase2"/>
+                <message_argument value="104"/>
+            </message_arguments>
+        </filter>
+        <filter comment="cleanup constants to avoid near-term conflict with JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="T_OrgObjectTeamsITeam"/>
+                <message_argument value="100"/>
+            </message_arguments>
+        </filter>
+        <filter comment="cleanup constants to avoid near-term conflict with JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="T_OrgObjectTeamsInstantiation"/>
+                <message_argument value="103"/>
+            </message_arguments>
+        </filter>
+        <filter comment="cleanup constants to avoid near-term conflict with JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="T_OrgObjectTeamsTeam"/>
+                <message_argument value="101"/>
+            </message_arguments>
+        </filter>
+        <filter comment="constant name was corrected" id="405864542">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="TEAM_ICONFINED"/>
+            </message_arguments>
+        </filter>
+        <filter comment="name corrected" id="1211105284">
+            <message_arguments>
+                <message_argument value="ITEAM_ICONFINED"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="compiler/org/eclipse/objectteams/otdt/core/compiler/OTNameUtils.java" type="org.eclipse.objectteams.otdt.core.compiler.OTNameUtils">
+        <filter comment="method signature was improved" id="338792546">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.OTNameUtils"/>
+                <message_argument value="isPredefinedConfined(char[][])"/>
+            </message_arguments>
+        </filter>
+        <filter comment="method signature was improved" id="1143996420">
+            <message_arguments>
+                <message_argument value="isPredefinedConfined(ReferenceBinding)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="dom/org/eclipse/jdt/core/dom/AST.java" type="org.eclipse.jdt.core.dom.AST">
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.AST"/>
+                <message_argument value="JLS_Latest"/>
+                <message_argument value="16"/>
             </message_arguments>
         </filter>
     </resource>
@@ -148,62 +225,132 @@
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
                 <message_argument value="BASE_CALL_MESSAGE_SEND"/>
-                <message_argument value="110"/>
+                <message_argument value="111"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary reaction to added constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="BASE_CALL_MESSAGE_SEND"/>
+                <message_argument value="113"/>
             </message_arguments>
         </filter>
         <filter comment="necessary constant change after new constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
                 <message_argument value="BASE_CONSTRUCTOR_INVOCATION"/>
-                <message_argument value="108"/>
+                <message_argument value="109"/>
             </message_arguments>
         </filter>
-        <filter comment="necessary constant change after new constants in JDT" id="388194388">
+        <filter comment="necessary reaction to added constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="CALLIN_MAPPING_DECLARATION"/>
-                <message_argument value="104"/>
-            </message_arguments>
-        </filter>
-        <filter comment="necessary constant change after new constants in JDT" id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="CALLOUT_MAPPING_DECLARATION"/>
-                <message_argument value="105"/>
-            </message_arguments>
-        </filter>
-        <filter comment="necessary constant change after new constants in JDT" id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="FIELD_ACCESS_SPEC"/>
+                <message_argument value="BASE_CONSTRUCTOR_INVOCATION"/>
                 <message_argument value="111"/>
             </message_arguments>
         </filter>
         <filter comment="necessary constant change after new constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="CALLIN_MAPPING_DECLARATION"/>
+                <message_argument value="105"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary reaction to added constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="CALLIN_MAPPING_DECLARATION"/>
+                <message_argument value="107"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary constant change after new constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="CALLOUT_MAPPING_DECLARATION"/>
+                <message_argument value="106"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary reaction to added constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="CALLOUT_MAPPING_DECLARATION"/>
+                <message_argument value="108"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary constant change after new constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="FIELD_ACCESS_SPEC"/>
+                <message_argument value="112"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary reaction to added constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="FIELD_ACCESS_SPEC"/>
+                <message_argument value="114"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary constant change after new constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
                 <message_argument value="GUARD_PREDICATE_DECLARATION"/>
-                <message_argument value="117"/>
+                <message_argument value="118"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary reaction to added constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="GUARD_PREDICATE_DECLARATION"/>
+                <message_argument value="120"/>
             </message_arguments>
         </filter>
         <filter comment="necessary constant change after new constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
                 <message_argument value="LIFTING_TYPE"/>
-                <message_argument value="106"/>
+                <message_argument value="107"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary reaction to added constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="LIFTING_TYPE"/>
+                <message_argument value="109"/>
             </message_arguments>
         </filter>
         <filter comment="necessary constant change after new constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
                 <message_argument value="METHOD_BINDING_OPERATOR"/>
-                <message_argument value="118"/>
+                <message_argument value="119"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary reaction to added constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="METHOD_BINDING_OPERATOR"/>
+                <message_argument value="121"/>
             </message_arguments>
         </filter>
         <filter comment="necessary constant change after new constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
                 <message_argument value="METHOD_SPEC"/>
+                <message_argument value="104"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary reaction to added constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="METHOD_SPEC"/>
+                <message_argument value="106"/>
+            </message_arguments>
+        </filter>
+        <filter comment="To fix the mistake" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="MODULE_QUALIFIED_NAME"/>
                 <message_argument value="103"/>
             </message_arguments>
         </filter>
@@ -211,56 +358,106 @@
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
                 <message_argument value="PARAMETER_MAPPING"/>
-                <message_argument value="109"/>
+                <message_argument value="110"/>
             </message_arguments>
         </filter>
-        <filter comment="necessary constant change after new constants in JDT" id="388194388">
+        <filter comment="necessary reaction to added constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="PRECEDENCE_DECLARATION"/>
-                <message_argument value="116"/>
-            </message_arguments>
-        </filter>
-        <filter comment="necessary constant change after new constants in JDT" id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="ROLE_TYPE_DECLARATION"/>
+                <message_argument value="PARAMETER_MAPPING"/>
                 <message_argument value="112"/>
             </message_arguments>
         </filter>
         <filter comment="necessary constant change after new constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="TSUPER_CONSTRUCTOR_INVOCATION"/>
-                <message_argument value="114"/>
+                <message_argument value="PRECEDENCE_DECLARATION"/>
+                <message_argument value="117"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary reaction to added constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="PRECEDENCE_DECLARATION"/>
+                <message_argument value="119"/>
             </message_arguments>
         </filter>
         <filter comment="necessary constant change after new constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="TSUPER_MESSAGE_SEND"/>
+                <message_argument value="ROLE_TYPE_DECLARATION"/>
                 <message_argument value="113"/>
             </message_arguments>
         </filter>
-        <filter comment="necessary constant change after new constants in JDT" id="388194388">
+        <filter comment="necessary reaction to added constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
-                <message_argument value="TYPE_ANCHOR"/>
+                <message_argument value="ROLE_TYPE_DECLARATION"/>
                 <message_argument value="115"/>
             </message_arguments>
         </filter>
         <filter comment="necessary constant change after new constants in JDT" id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="TSUPER_CONSTRUCTOR_INVOCATION"/>
+                <message_argument value="115"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary reaction to added constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="TSUPER_CONSTRUCTOR_INVOCATION"/>
+                <message_argument value="117"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary constant change after new constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="TSUPER_MESSAGE_SEND"/>
+                <message_argument value="114"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary reaction to added constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="TSUPER_MESSAGE_SEND"/>
+                <message_argument value="116"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary constant change after new constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="TYPE_ANCHOR"/>
+                <message_argument value="116"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary reaction to added constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="TYPE_ANCHOR"/>
+                <message_argument value="118"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary constant change after new constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
                 <message_argument value="WITHIN_STATEMENT"/>
-                <message_argument value="107"/>
+                <message_argument value="108"/>
+            </message_arguments>
+        </filter>
+        <filter comment="necessary reaction to added constants in JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="WITHIN_STATEMENT"/>
+                <message_argument value="110"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="dom/org/eclipse/jdt/core/dom/BaseConstructorInvocation.java" type="org.eclipse.jdt.core.dom.BaseConstructorInvocation">
-        <filter comment="subclassing statement was wrong" id="338849923">
+    <resource path="dom/org/eclipse/jdt/core/dom/ASTParser.java" type="org.eclipse.jdt.core.dom.ASTParser">
+        <filter comment="Not updating to 4.0" id="336658481">
             <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.BaseConstructorInvocation"/>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTParser"/>
+                <message_argument value="K_RECORD_BODY_DECLARATIONS"/>
             </message_arguments>
         </filter>
     </resource>
@@ -277,6 +474,13 @@
             <message_arguments>
                 <message_argument value="ASTNode"/>
                 <message_argument value="AnonymousClassDeclaration"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="dom/org/eclipse/jdt/core/dom/BaseConstructorInvocation.java" type="org.eclipse.jdt.core.dom.BaseConstructorInvocation">
+        <filter comment="subclassing statement was wrong" id="338849923">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.BaseConstructorInvocation"/>
             </message_arguments>
         </filter>
     </resource>
@@ -320,19 +524,19 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="dom/org/eclipse/jdt/core/dom/GuardPredicateDeclaration.java" type="org.eclipse.jdt.core.dom.GuardPredicateDeclaration">
+        <filter comment="Extending ASTNode is OK inside this plugin" id="576778288">
+            <message_arguments>
+                <message_argument value="ASTNode"/>
+                <message_argument value="GuardPredicateDeclaration"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="dom/org/eclipse/jdt/core/dom/ImportDeclaration.java" type="org.eclipse.jdt.core.dom.ImportDeclaration">
         <filter id="576778288">
             <message_arguments>
                 <message_argument value="ASTNode"/>
                 <message_argument value="ImportDeclaration"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="dom/org/eclipse/jdt/core/dom/InstanceofExpression.java" type="org.eclipse.jdt.core.dom.InstanceofExpression">
-        <filter comment="For Java 14" id="336658481">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.InstanceofExpression"/>
-                <message_argument value="PATTERN_VARIABLE_PROPERTY"/>
             </message_arguments>
         </filter>
     </resource>
@@ -358,20 +562,11 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="dom/org/eclipse/jdt/core/dom/MethodDeclaration.java" type="org.eclipse.jdt.core.dom.MethodDeclaration">
-        <filter comment="Needed for Java 14" id="336658481">
+    <resource path="dom/org/eclipse/jdt/core/dom/MethodBindingOperator.java" type="org.eclipse.jdt.core.dom.MethodBindingOperator">
+        <filter comment="Extending ASTNode is OK inside this plugin" id="576778288">
             <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.MethodDeclaration"/>
-                <message_argument value="COMPACT_CONSTRUCTOR_PROPERTY"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="model/org/eclipse/jdt/core/Flags.java" type="org.eclipse.jdt.core.Flags">
-        <filter comment="Must yield to new AccRecord." id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.Flags"/>
-                <message_argument value="AccRole"/>
-                <message_argument value="16777216"/>
+                <message_argument value="ASTNode"/>
+                <message_argument value="MethodBindingOperator"/>
             </message_arguments>
         </filter>
     </resource>
@@ -398,10 +593,60 @@
         </filter>
     </resource>
     <resource path="dom/org/eclipse/jdt/core/dom/Modifier.java" type="org.eclipse.jdt.core.dom.Modifier">
+        <filter comment="resolve conflict with new keyword non-sealed" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.Modifier"/>
+                <message_argument value="OT_AFTER_CALLIN"/>
+                <message_argument value="131072"/>
+            </message_arguments>
+        </filter>
+        <filter comment="resolve conflict with new keyword non-sealed" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.Modifier"/>
+                <message_argument value="OT_BEFORE_CALLIN"/>
+                <message_argument value="16384"/>
+            </message_arguments>
+        </filter>
+        <filter comment="resolve conflict with new keyword non-sealed" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.Modifier"/>
+                <message_argument value="OT_GET_CALLOUT"/>
+                <message_argument value="262144"/>
+            </message_arguments>
+        </filter>
+        <filter comment="resolve conflict with new keyword non-sealed" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.Modifier"/>
+                <message_argument value="OT_MISSING_MODIFIER"/>
+                <message_argument value="8192"/>
+            </message_arguments>
+        </filter>
+        <filter comment="resolve conflict with new keyword non-sealed" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.Modifier"/>
+                <message_argument value="OT_REPLACE_CALLIN"/>
+                <message_argument value="4096"/>
+            </message_arguments>
+        </filter>
+        <filter comment="resolve conflict with new keyword non-sealed" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.Modifier"/>
+                <message_argument value="OT_SET_CALLOUT"/>
+                <message_argument value="524288"/>
+            </message_arguments>
+        </filter>
         <filter id="576725006">
             <message_arguments>
                 <message_argument value="IExtendedModifier"/>
                 <message_argument value="Modifier"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="dom/org/eclipse/jdt/core/dom/ModuleQualifiedName.java" type="org.eclipse.jdt.core.dom.ModuleQualifiedName">
+        <filter comment="Java 15 Merge" id="576778288">
+            <message_arguments>
+                <message_argument value="Name"/>
+                <message_argument value="ModuleQualifiedName"/>
             </message_arguments>
         </filter>
     </resource>
@@ -485,6 +730,31 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="model/org/eclipse/jdt/core/CompletionProposal.java" type="org.eclipse.jdt.core.CompletionProposal">
+        <filter comment="give way to new constant from JDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.CompletionProposal"/>
+                <message_argument value="OVERRIDE_ROLE_DECLARATION"/>
+                <message_argument value="30"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="model/org/eclipse/jdt/core/Flags.java" type="org.eclipse.jdt.core.Flags">
+        <filter comment="Must yield to new AccRecord." id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.Flags"/>
+                <message_argument value="AccRole"/>
+                <message_argument value="16777216"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Necessary adjustment to reconcile Java 15 with OT/J" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.Flags"/>
+                <message_argument value="AccTeam"/>
+                <message_argument value="67108864"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="model/org/eclipse/jdt/core/SourceRange.java" type="org.eclipse.jdt.core.SourceRange">
         <filter id="576725006">
             <message_arguments>
@@ -506,14 +776,6 @@
             <message_arguments>
                 <message_argument value="IBytecodeVisitor"/>
                 <message_argument value="ByteCodeVisitorAdapter"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="model/org/eclipse/jdt/core/util/IClassFileReader.java" type="org.eclipse.jdt.core.util.IClassFileReader">
-        <filter comment="For the Java 14 preview feature record" id="404000815">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.util.IClassFileReader"/>
-                <message_argument value="getRecordAttribute()"/>
             </message_arguments>
         </filter>
     </resource>

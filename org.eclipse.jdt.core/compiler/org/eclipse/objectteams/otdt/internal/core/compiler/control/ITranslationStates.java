@@ -46,24 +46,22 @@ public interface ITranslationStates {
 	public static final int STATE_LENV_DONE_FIELDS_AND_METHODS= 7;//LookupEnvironment & Deps.
 	public static final int STATE_ROLES_LINKED            =  8;//LookupEnvironment & RoleSplitter
 	public static final int STATE_METHODS_PARSED          =  9;//Compiler
-// removed state:
-//	public static final int STATE_ROLE_INIT_METHODS       = 10;//RoleInitializationMethod
-//
     public static final int STATE_ROLE_HIERARCHY_ANALYZED = 10;//Lifting
-    public static final int STATE_ROLE_FEATURES_COPIED    = 11;//Copy inheritance
-	public static final int STATE_FULL_LIFTING            = 12;//Lifting
-    public static final int STATE_FAULT_IN_TYPES          = 13;//Scope
-    public static final int STATE_METHODS_CREATED         = 14;//RoleTypeBinding, CopyInheritance, CalloutImplementor
-    public static final int STATE_TYPES_ADJUSTED          = 15;//RoleTypeBinding, CopyInheritance
-    public static final int STATE_STATEMENTS_TRANSFORMED  = 16;//TransformStatementsVisitor
-    public static final int STATE_CALLINS_TRANSFORMED     = 17;//CallinImplementor[Dyn]
-    public static final int STATE_LATE_ATTRIBUTES_EVALUATED= 18; // ModelElement, TypeModel
-    public static final int STATE_METHODS_VERIFIED        = 19;//Scope
-    public static final int STATE_RESOLVED                = 20;//AST
-    public static final int STATE_LATE_ELEMENTS_COPIED    = 21;//CopyInheritance
-    public static final int STATE_CODE_ANALYZED           = 22;//AST
-    public static final int STATE_BYTE_CODE_PREPARED      = 23;//Dependencies
-    public static final int STATE_BYTE_CODE_GENERATED     = 24;//AST
+	public static final int STATE_ROLE_INIT_METHODS       = 11;//RoleInitializationMethod
+    public static final int STATE_ROLE_FEATURES_COPIED    = 12;//Copy inheritance
+	public static final int STATE_FULL_LIFTING            = 13;//Lifting
+    public static final int STATE_FAULT_IN_TYPES          = 14;//Scope
+    public static final int STATE_METHODS_CREATED         = 15;//RoleTypeBinding, CopyInheritance, CalloutImplementor
+    public static final int STATE_TYPES_ADJUSTED          = 16;//RoleTypeBinding, CopyInheritance
+    public static final int STATE_STATEMENTS_TRANSFORMED  = 17;//TransformStatementsVisitor
+    public static final int STATE_CALLINS_TRANSFORMED     = 18;//CallinImplementor[Dyn]
+    public static final int STATE_LATE_ATTRIBUTES_EVALUATED= 19; // ModelElement, TypeModel
+    public static final int STATE_METHODS_VERIFIED        = 20;//Scope
+    public static final int STATE_RESOLVED                = 21;//AST
+    public static final int STATE_LATE_ELEMENTS_COPIED    = 22;//CopyInheritance
+    public static final int STATE_CODE_ANALYZED           = 23;//AST
+    public static final int STATE_BYTE_CODE_PREPARED      = 24;//Dependencies
+    public static final int STATE_BYTE_CODE_GENERATED     = 25;//AST
     /**
      * Note, that this state does not trigger intermediate steps, in fact never use it
      * with ensureState() but directly invoke Dependencies.cleanup!
@@ -83,7 +81,8 @@ public interface ITranslationStates {
 		"bindings: fields and methods [completed]",
 		"roles linked",
 		"method bodies parsed",
-        "role hierarchy analyzed",
+		"role hierarchy analyzed",
+		"role initialization method",
         "role features copied",
         "full lifting",
         "fault in types",

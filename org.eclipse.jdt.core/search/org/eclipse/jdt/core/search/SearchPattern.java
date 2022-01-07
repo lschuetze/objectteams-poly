@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Microsoft Corporation - contribution for bug 575562 - improve completion search performance
  *******************************************************************************/
 package org.eclipse.jdt.core.search;
 
@@ -19,8 +20,19 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.core.compiler.*;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModularClassFile;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.AccessRuleSet;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
@@ -34,7 +46,22 @@ import org.eclipse.jdt.internal.core.search.IndexQueryRequestor;
 import org.eclipse.jdt.internal.core.search.JavaSearchScope;
 import org.eclipse.jdt.internal.core.search.StringOperation;
 import org.eclipse.jdt.internal.core.search.indexing.IIndexConstants;
-import org.eclipse.jdt.internal.core.search.matching.*;
+import org.eclipse.jdt.internal.core.search.indexing.QualifierQuery;
+import org.eclipse.jdt.internal.core.search.matching.AndPattern;
+import org.eclipse.jdt.internal.core.search.matching.ConstructorPattern;
+import org.eclipse.jdt.internal.core.search.matching.FieldPattern;
+import org.eclipse.jdt.internal.core.search.matching.LocalVariablePattern;
+import org.eclipse.jdt.internal.core.search.matching.MatchLocator;
+import org.eclipse.jdt.internal.core.search.matching.MethodPattern;
+import org.eclipse.jdt.internal.core.search.matching.ModulePattern;
+import org.eclipse.jdt.internal.core.search.matching.OrPattern;
+import org.eclipse.jdt.internal.core.search.matching.PackageDeclarationPattern;
+import org.eclipse.jdt.internal.core.search.matching.PackageReferencePattern;
+import org.eclipse.jdt.internal.core.search.matching.QualifiedTypeDeclarationPattern;
+import org.eclipse.jdt.internal.core.search.matching.SuperTypeReferencePattern;
+import org.eclipse.jdt.internal.core.search.matching.TypeDeclarationPattern;
+import org.eclipse.jdt.internal.core.search.matching.TypeParameterPattern;
+import org.eclipse.jdt.internal.core.search.matching.TypeReferencePattern;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.internal.core.AbstractCalloutMapping;
 import org.eclipse.objectteams.otdt.internal.core.CalloutMapping;
@@ -257,7 +284,9 @@ public abstract class SearchPattern {
 		| R_PATTERN_MATCH
 		| R_REGEXP_MATCH
 		| R_CAMELCASE_MATCH
-		| R_CAMELCASE_SAME_PART_COUNT_MATCH;
+		| R_CAMELCASE_SAME_PART_COUNT_MATCH
+		| R_SUBSTRING_MATCH
+		| R_SUBWORD_MATCH;
 
 	private int matchRule;
 
@@ -266,6 +295,21 @@ public abstract class SearchPattern {
 	 * @noreference This field is not intended to be referenced by clients.
 	 */
 	public IJavaElement focus;
+
+	/**
+	 * The encoded index qualifier query which is used to narrow down number of indexes to search based on the qualifier.
+	 * This is optional. In absence all indexes provided by scope will be searched.
+	 * <br>
+	 * The encoded query format is as following
+	 * <pre>
+	 * CATEGORY1[,CATEGORY2]:SIMPLE_KEY:QUALIFIED_KEY
+	 * </pre>
+	 * if the category is not provided, then the index qualifier search will be done for all type of qualifiers.
+	 *
+	 * @noreference This field is not intended to be referenced by clients.
+	 * @see QualifierQuery#encodeQuery(org.eclipse.jdt.internal.core.search.indexing.QualifierQuery.QueryCategory[], char[], char[])
+	 */
+	public char[] indexQualifierQuery;
 
 	/**
 	 * @noreference This field is not intended to be referenced by clients.
@@ -324,6 +368,7 @@ public SearchPattern(int matchRule) {
 		this.matchRule &= ~R_PREFIX_MATCH;
 	}
 }
+
 /**
  * @noreference This method is not intended to be referenced by clients.
  * @nooverride This method is not intended to be re-implemented or extended by clients.
@@ -343,7 +388,7 @@ public void acceptMatch(String relativePath, String containerPath, char separato
 		// Note that requestor has to verify if needed whether the document violates the access restriction or not
 		AccessRuleSet access = javaSearchScope.getAccessRuleSet(relativePath, containerPath);
 		if (access != JavaSearchScope.NOT_ENCLOSED) { // scope encloses the document path
-			StringBuffer documentPath = new StringBuffer(containerPath.length() + 1 + relativePath.length());
+			StringBuilder documentPath = new StringBuilder(containerPath.length() + 1 + relativePath.length());
 			documentPath.append(containerPath);
 			documentPath.append(separator);
 			documentPath.append(relativePath);
@@ -351,7 +396,7 @@ public void acceptMatch(String relativePath, String containerPath, char separato
 				throw new OperationCanceledException();
 		}
 	} else {
-		StringBuffer buffer = new StringBuffer(containerPath.length() + 1 + relativePath.length());
+		StringBuilder buffer = new StringBuilder(containerPath.length() + 1 + relativePath.length());
 		buffer.append(containerPath);
 		buffer.append(separator);
 		buffer.append(relativePath);
@@ -1934,6 +1979,9 @@ public static SearchPattern createPattern(IJavaElement element, int limitTo) {
  *     			<tr>
  *         		<td>{@link IJavaSearchConstants#METHOD_REFERENCE_EXPRESSION METHOD_REFERENCE_EXPRESSION}
  *         		<td>Return only method reference expressions (e.g. <code>A :: foo</code>).
+ *         		<tr>
+ *         		<td>{@link IJavaSearchConstants#PERMITTYPE_TYPE_REFERENCE PERMITTYPE_TYPE_REFERENCE}
+ *         		<td>Return only type references used as a permit type.
  * 			</table>
  * 	</li>
  *	</ul>
@@ -2031,6 +2079,28 @@ public static SearchPattern createPattern(IJavaElement element, int limitTo, int
 					typeSignature,
 					limitTo,
 					matchRule);
+
+			//If field is record's component, create a OR pattern comprising of record's component and its accessor methods
+			IType declaringType = field.getDeclaringType();
+			try {
+				if( declaringType.isRecord()){
+					MethodPattern accessorMethodPattern = new MethodPattern(name,
+							declaringQualification,
+							declaringSimpleName,
+							typeQualification,
+							typeSimpleName,
+							null,
+							null,
+							field.getDeclaringType(),
+							limitTo,
+							matchRule);
+
+					searchPattern= new OrPattern(searchPattern,accessorMethodPattern);
+				}
+			} catch (JavaModelException e1) {
+			// continue with previous searchPattern
+			}
+
 			break;
 		case IJavaElement.IMPORT_DECLARATION :
 			String elementName = element.getElementName();
@@ -2455,6 +2525,30 @@ public void decodeIndexKey(char[] key) {
  * @nooverride This method is not intended to be re-implemented or extended by clients.
  */
 public void findIndexMatches(Index index, IndexQueryRequestor requestor, SearchParticipant participant, IJavaSearchScope scope, IProgressMonitor monitor) throws IOException {
+	findIndexMatches(index, requestor, participant, scope, true, monitor);
+}
+
+/**
+ * Query a given index for matching entries. Assumes the sender has
+ * opened the index and will close when finished.
+ *
+ * This API provides a flag to control whether to skip resolving
+ * document name for the matching entries. If a SearchPattern subclass
+ * has a different implementation of index matching, they have to
+ * override this API to support document name resolving feature.
+ *
+ * @param index the target index to query
+ * @param requestor the search requestor
+ * @param participant the search participant
+ * @param scope the search scope where the search results should be found
+ * @param resolveDocumentName whether to skip the document name resolving
+ *                            for the matching entries
+ * @param monitor a progress monitor
+ *
+ * @noreference This method is not intended to be referenced by clients.
+ * @nooverride This method is not intended to be re-implemented or extended by clients.
+ */
+public void findIndexMatches(Index index, IndexQueryRequestor requestor, SearchParticipant participant, IJavaSearchScope scope, boolean resolveDocumentName, IProgressMonitor monitor) throws IOException {
 	if (monitor != null && monitor.isCanceled()) throw new OperationCanceledException();
 	try {
 		index.startQuery();
@@ -2462,19 +2556,24 @@ public void findIndexMatches(Index index, IndexQueryRequestor requestor, SearchP
 		EntryResult[] entries = pattern.queryIn(index);
 		if (entries == null) return;
 
-		SearchPattern decodedResult = pattern.getBlankPattern();
 		String containerPath = index.containerPath;
 		char separator = index.separator;
 		for (int i = 0, l = entries.length; i < l; i++) {
 			if (monitor != null && monitor.isCanceled()) throw new OperationCanceledException();
 
 			EntryResult entry = entries[i];
+			SearchPattern decodedResult = pattern.getBlankPattern();
 			decodedResult.decodeIndexKey(entry.getWord());
 			if (pattern.matchesDecodedKey(decodedResult)) {
-				// TODO (kent) some clients may not need the document names
-				String[] names = entry.getDocumentNames(index);
-				for (int j = 0, n = names.length; j < n; j++)
-					acceptMatch(names[j], containerPath, separator, decodedResult, requestor, participant, scope, monitor);
+				// Since resolve document name is expensive, leave the decision to the search client
+				// to decide whether to do so.
+				if (resolveDocumentName) {
+					String[] names = entry.getDocumentNames(index);
+					for (int j = 0, n = names.length; j < n; j++)
+						acceptMatch(names[j], containerPath, separator, decodedResult, requestor, participant, scope, monitor);
+				} else {
+					acceptMatch("", containerPath, separator, decodedResult, requestor, participant, scope, monitor); //$NON-NLS-1$
+				}
 			}
 		}
 	} finally {
@@ -2575,6 +2674,18 @@ public boolean matchesName(char[] pattern, char[] name) {
 		boolean sameLength = pattern.length == name.length;
 		boolean canBePrefix = name.length >= pattern.length;
 		boolean matchFirstChar = !isCaseSensitive || emptyPattern || (name.length > 0 &&  pattern[0] == name[0]);
+
+		if ((matchMode & R_SUBSTRING_MATCH) != 0) {
+			if (CharOperation.substringMatch(pattern, name))
+				return true;
+			matchMode &= ~R_SUBSTRING_MATCH;
+		}
+		if ((matchMode & SearchPattern.R_SUBWORD_MATCH) != 0) {
+			if (CharOperation.subWordMatch(pattern, name))
+				return true;
+			matchMode &= ~SearchPattern.R_SUBWORD_MATCH;
+		}
+
 		switch (matchMode) {
 			case R_EXACT_MATCH :
 				if (sameLength && matchFirstChar) {
@@ -2768,5 +2879,13 @@ public EntryResult[] queryIn(Index index) throws IOException {
 @Override
 public String toString() {
 	return "SearchPattern"; //$NON-NLS-1$
+}
+
+/**
+ * @since 3.25
+ */
+@Override
+public SearchPattern clone() throws CloneNotSupportedException {
+	return (SearchPattern) super.clone();
 }
 }

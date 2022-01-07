@@ -532,7 +532,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 
 				if(this.parameterNames != null) {
 					int length = this.parameterNames.length;
-					StringBuffer completionBuffer = new StringBuffer(this.completion.length);
+					StringBuilder completionBuffer = new StringBuilder(this.completion.length);
 
 					int start = 0;
 					int end = CharOperation.indexOf('%', this.completion);
@@ -960,6 +960,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 					break;
 				case METHOD_REF:
 				case METHOD_REF_WITH_CASTED_RECEIVER:
+				case LAMBDA_EXPRESSION:
 					try {
 						this.parameterNames = findMethodParameterNames(
 								this.declarationPackageName,
@@ -1068,7 +1069,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 
 	@Override
 	public String toString() {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		buffer.append('[');
 		switch(this.completionKind) {
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION :
@@ -1163,6 +1164,9 @@ public class InternalCompletionProposal extends CompletionProposal {
 				break;
 			case CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION :
 				buffer.append("ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION"); //$NON-NLS-1$
+				break;
+			case CompletionProposal.LAMBDA_EXPRESSION :
+				buffer.append("LAMBDA_EXPRESSION"); //$NON-NLS-1$
 				break;
 			default :
 				buffer.append("PROPOSAL"); //$NON-NLS-1$

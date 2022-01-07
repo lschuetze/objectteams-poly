@@ -82,13 +82,7 @@ public class GenerateParserScript {
 			javasymText = javasymText.replace(",\n      ", ",\n\t\t\t\t\t\t\t");
 			javasymText = javasymText.replace("TokenName$eof", "TokenNameEOF");
 			javasymText = javasymText.replace("TokenName$error", "TokenNameERROR");
-//{ObjectTeams:
-			javasymText = javasymText.replace("}",
-					"\n" +
-					"	// This alias is statically inserted by GenerateParserScript.java:\n" + 
-					"	int TokenNameBINDOUT = TokenNameARROW;\n" + 
-					"}");
-// SH}
+			javasymText = javasymText.replace("TokenNamenon-sealed", "TokenNamenon_sealed");
 			Files.write(terminalTokensFile.toPath(), (terminalTokensProlog + "\tint " + javasymText).getBytes());
 		}
 

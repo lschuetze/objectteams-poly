@@ -7,8 +7,12 @@
 BASE=`pwd`
 
 # ABSOLUTE PATHS:
-export UPDATES_BASE=/home/data/httpd/download.eclipse.org/objectteams/updates
-export JAVA8=/shared/common/jdk1.8.0_x64-latest
+TARGET_HOST=genie.objectteams@projects-storage.eclipse.org
+TARGET_BASEDIR=/home/data/httpd/download.eclipse.org/objectteams/updates
+TARGET_HTTPS="https://download.eclipse.org/objectteams/updates"
+export UPDATES_BASE=${TARGET_HOST}:${TARGET_BASEDIR}
+export JAVA8=/opt/tools/java/oracle/jdk-8/latest/bin/java
+export JAVA11=/opt/tools/java/openjdk/jdk-11/latest/bin/java
 
 # RELATIVE PATHS:
 BUILD=${BASE}/releng/build-scripts/build
@@ -20,6 +24,8 @@ then
         MASTER="none"
         echo "Generating fresh new repository"
 else
+		echo "Using a previous repo is broken in this script"
+		exit 1
         MASTER=${UPDATES_BASE}/$1
         if [ -r ${MASTER}/features ]
         then
@@ -31,7 +37,7 @@ else
                 echo "Generating Repository based on ${MASTER}"
             else
                 echo "No such repository ${MASTER}"
-                echo "Usage: $0 updateMasterRelativePath [ -nosign ] [ statsRepoId statsVersionId ]"
+                echo "Usage: $0 updateMasterRelativePath [ statsRepoId statsVersionId ]"
                 exit 1
             fi
         fi
@@ -61,13 +67,14 @@ case ${JDTVERSIONB} in
                 JDTVERSIONC1=`echo ${JDTVERSIONA} | cut -d 'v' -f 1`
                 JDTVERSIONC2=`echo ${JDTVERSIONA} | cut -d 'v' -f 2`
                 JDTVERSIONC3=`expr $JDTVERSIONC2 + 1`
+                JDTVERSIONC3=`printf "%04d" ${JDTVERSIONC3}`
                 JDTVERSION=${JDTVERSIONC1}v${JDTVERSIONC2}
                 JDTVERSIONNEXT=${JDTVERSIONC1}v${JDTVERSIONC3}
                 ;;
 esac
 # hardcode when unable to compute
-#JDTVERSION=${JDTVERSIONA}
-#JDTVERSIONNEXT=3.8.0.v20110728
+#JDTVERSION=3.18.700.v20210224-1800
+#JDTVERSIONNEXT=3.18.700.v20210224-1801
 echo "JDT feature is ${JDTVERSION}"
 echo "Next           ${JDTVERSIONNEXT}"
 if [ ! -r ${BASE}/testrun/build-root/eclipse/features/org.eclipse.jdt_${JDTVERSION} ]
@@ -105,8 +112,9 @@ fi
 
 for dir in features plugins
 do
+		# add "-verbose" to the second line if needed:
         find ${BASE}/testrun/updateSite/${dir} -type f -name \*.jar -exec \
-                ${JAVA8}/bin/java -jar ${JARPROCESSOR} -verbose -processAll -repack -outputDir ${CONDITIONED}/${dir} {} \;
+                ${JAVA11} -jar ${JARPROCESSOR} -processAll -repack -outputDir ${CONDITIONED}/${dir} {} \;
 done
 # not conditioned, but must not be skipped!
 cp ${BASE}/testrun/updateSite/plugins/org.eclipse.jdt.core_* ${CONDITIONED}/plugins/
@@ -135,7 +143,7 @@ else
 		then
 			mkdir -p ${SIGNED}/${DIR}
 		fi
-		curl -o ${SIGNED}/${JAR} -F file=@${JAR} http://build.eclipse.org:31338/sign
+		curl -o ${SIGNED}/${JAR} -F file=@${JAR} https://cbi.eclipse.org/jarsigner/sign
 	done
 	if [ -f ${OTDTJAR} ]
 	then
@@ -174,13 +182,14 @@ cd ${LOCATION}
 echo "====Step 3: pack jars (again) ===="
 for dir in ${LOCATION}/features ${LOCATION}/plugins
 do
+		# add "-verbose" to the second line if needed:
         find ${dir} -type f -name \*.jar -exec \
-                ${JAVA8}/bin/java -jar ${JARPROCESSOR} -verbose -pack -outputDir ${dir} {} \;
+                ${JAVA11} -jar ${JARPROCESSOR} -pack -outputDir ${dir} {} \;
 done
 
 
 echo "====Step 4: generate metadata===="
-java -jar ${LAUNCHER_PATH} -consoleLog -application ${FABPUB} \
+${JAVA11} -jar ${LAUNCHER_PATH} -consoleLog -application ${FABPUB} \
     -source ${LOCATION} \
     -metadataRepository file:${LOCATION} \
     -artifactRepository file:${LOCATION} \
@@ -205,7 +214,7 @@ ls -ltr ${METADATA}/$OTDTVERSION/*.xml
 echo "====Step 7: generate category===="
 CATEGORYARGS="-categoryDefinition file:${BASE}/testrun/build-root/src/features/org.eclipse.objectteams.otdt/category.xml"
 echo "CATEGORYARGS  = ${CATEGORYARGS}"
-java -jar ${LAUNCHER_PATH} -consoleLog -application ${CATPUB} \
+${JAVA11} -jar ${LAUNCHER_PATH} -consoleLog -application ${CATPUB} \
     -source ${LOCATION} \
     -metadataRepository file:${LOCATION} \
     ${CATEGORYARGS}
@@ -232,28 +241,28 @@ find . -type l -exec /bin/rm {} \;
 
 if [ "${PROMOTE}" != "false" ]
 then
-	BUILDID=`echo $OTDTVERSION | cut -d '.' -f 4`
 	if [ "${PROMOTE}" != "" ]
 	then
-        DEST=${UPDATES_BASE}/${2}/${PROMOTE}
-        /bin/rm -rf ${DEST}
+        DEST_REL=${2}/${PROMOTE}
     else
-        DEST=${UPDATES_BASE}/${2}/${BUILDID}
-    fi
-	echo "====Step 11: promote to ${DEST}===="
-	if [ -d ${UPDATES_BASE}/${2} ]
-	then
-		mkdir ${DEST}
-		if [ "${MASTER}" != "none" ]
+		BUILDID=`echo $OTDTVERSION | cut -d '.' -f 4`
+		if [ "${BUILDID}" != "" ]
 		then
-			cp -pr ${MASTER}/* ${DEST}/
+	        DEST_REL=${2}/${BUILDID}
+	    else
+			echo "Unrecognized OT version: $OTDTVERSION"
+			exit 1
 		fi
-		cp -pr * ${DEST}/ && \
-			chmod -R g+w ${DEST} && \
-			find ${DEST} -type d -exec /bin/ls -ld {} \;
-		ls -latr ${UPDATES_BASE}/${2}
-	else
-		echo "${UPDATES_BASE}/${2} not found or not a directory"
-	fi
+    fi
+	echo "====Step 11: promote to ${TARGET_HOST}:${TARGET_BASEDIR}/${DEST_REL}===="
+	# FIXME mkdir ${DEST}
+	# if [ "${MASTER}" != "none" ]
+	# then
+	    # FIXME
+		# cp -pr ${MASTER}/* ${DEST}/
+	# fi
+	ssh ${TARGET_HOST} "/bin/rm -r ${TARGET_BASEDIR}/${DEST_REL} || true"
+	scp -r `pwd` ${TARGET_HOST}:${TARGET_BASEDIR}/${DEST_REL}
+	echo "Installed to ${TARGET_HTTPS}/${DEST_REL}"
 fi
 echo "====DONE===="

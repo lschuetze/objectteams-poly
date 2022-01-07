@@ -57,11 +57,13 @@ This software is based on Eclipse and the Java Development Tooling
          install-size="0"
          version="0.0.0"/>
 
+<!--
    <plugin
          id="org.eclipse.jdt.compiler.apt.tests"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
+-->
 
    <plugin
          id="org.eclipse.jdt.core.tests.model"
@@ -151,13 +153,19 @@ This software is based on Eclipse and the Java Development Tooling
          id="org.eclipse.jdt.annotation"
          download-size="0"
          install-size="0"
-         version="1.1.500.qualifier"/>
+         version="1.2.0.qualifier"/>
 
    <plugin
          id="org.eclipse.jdt.annotation"
          download-size="0"
          install-size="0"
          version="2.2.600.qualifier"/>
+
+   <plugin
+         id="org.eclipse.jdt.compiler.tool"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
    <plugin
          id="org.hamcrest.core"
@@ -167,6 +175,12 @@ This software is based on Eclipse and the Java Development Tooling
 
    <plugin
          id="org.hamcrest.library"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="OTEquinoxTests"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
@@ -235,10 +249,31 @@ This software is based on Eclipse and the Java Development Tooling
          unpack="false"/>
 
    <plugin
-         id="OTEquinoxTests"
+         id="Aspect571542_A"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="true"/>
+         unpack="false"/>
+
+   <plugin
+         id="Aspect571542_B"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="Base571542_A"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="Base571542_B"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>

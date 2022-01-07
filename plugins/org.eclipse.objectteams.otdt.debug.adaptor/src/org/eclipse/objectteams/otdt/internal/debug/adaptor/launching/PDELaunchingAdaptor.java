@@ -238,7 +238,7 @@ public team class PDELaunchingAdaptor {
 		}
 			
 		// install breakpoints and record launch mode (run/debug):
-		prepareLaunch <- before launch;
+		prepareLaunch <- before launch, showCommandLine;
 	}
 
 	/** Unfortunately JUnit launches are slightly different (and not related by inheritance) */
@@ -263,7 +263,7 @@ public team class PDELaunchingAdaptor {
 		}
 			
 		// install breakpoints and record launch mode (run/debug):
-		prepareLaunch <- before launch;		
+		prepareLaunch <- before launch, showCommandLine;
 	}
 	
 	protected class SetOTEquinoxStartlevel playedBy BundleLauncherHelper {

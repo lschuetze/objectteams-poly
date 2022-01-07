@@ -56,6 +56,7 @@ import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
 import org.eclipse.objectteams.otdt.core.compiler.Pair;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleClassLiteralAccess;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleInitializationMethod;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.DeclaredLifting;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting.InstantiationPolicy;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.LiftingEnvironment;
@@ -608,6 +609,11 @@ public class Dependencies implements ITranslationStates {
                 	success = establishFaultInTypes(model);
                 	done = NESTED_TEAMS;
                 	break;
+                case STATE_ROLE_INIT_METHODS:
+					if (teamBinding.isRole())
+						ensureRoleState(teamBinding.roleModel, nextState);
+					done = NONE;
+                	break;
                 case STATE_METHODS_CREATED:
                 	success = establishMethodsCreated(model);
                 	done = NONE;
@@ -765,6 +771,9 @@ public class Dependencies implements ITranslationStates {
 						success &= ensureUnitState(model, nextState);
 					}
 					break;
+				case STATE_ROLE_INIT_METHODS:
+					success &= establishRoleInitializationMethod(model);
+					break;
                 case STATE_ROLE_FEATURES_COPIED:
                     success &= establishRoleFeaturesCopied(model);
                     break;
@@ -916,6 +925,29 @@ public class Dependencies implements ITranslationStates {
 		return true;
 	}
 
+	private static boolean hasErrors(TypeDeclaration ast) {
+		if (ast.ignoreFurtherInvestigation)
+			return true;
+		if (ast.enclosingType != null && hasErrors(ast.enclosingType))
+			return true;
+		if (ast.scope != null && ast.scope.enclosingReferenceContext().hasErrors())
+			return true;
+		return false;
+	}
+
+	private static boolean isLocalType(TypeModel model) {
+		ReferenceBinding binding = model.getBinding();
+		if (binding != null)
+			return binding.isLocalType();
+		TypeDeclaration curType = model.getAst();
+		while (curType != null) {
+			if ((curType.bits & ASTNode.IsLocalType) != 0)
+				return true;
+			curType = curType.enclosingType;
+		}
+		return false;
+	}
+
 	private static boolean isLateRole(RoleModel model, int nextState) {
 		if (   model.getTeamModel().getState() >= nextState
 			&& model.getState() < nextState)
@@ -1016,6 +1048,7 @@ public class Dependencies implements ITranslationStates {
                 case STATE_NONE:
                 case STATE_ROLES_SPLIT:
                 case STATE_ROLES_LINKED:
+                case STATE_ROLE_INIT_METHODS:
                 case STATE_ROLE_FEATURES_COPIED:
                 case STATE_ROLE_HIERARCHY_ANALYZED:
                 case STATE_FULL_LIFTING:
@@ -1045,7 +1078,7 @@ public class Dependencies implements ITranslationStates {
                     if (nextState == STATE_METHODS_PARSED)
                     	model.setState(STATE_METHODS_PARSED);
                     // local types need to catch up:
-                    if (nextState <= STATE_RESOLVED && model.getBinding().isLocalType())
+                    if (nextState <= STATE_RESOLVED && isLocalType(model))
                     	model.setState(nextState);
                     break;
             }
@@ -1270,6 +1303,31 @@ public class Dependencies implements ITranslationStates {
 	 * **** STATE_METHODS_PARSED (JAVA) ****
 	 * => Parser.getMethodBodies()
 	 */
+
+	/* **** STATE_ROLE_INIT_METHODS (OT/J) ****
+	 * Create a method that holds all field initializations for a role.
+	 *
+	 * GENERATES:
+	 * - _OT$InitFields()
+	 */
+
+	/**
+     * BinaryTypes: nothing to do.
+     */
+	private static boolean establishRoleInitializationMethod(RoleModel role)
+	{
+		// must be done before role features copy
+		TypeDeclaration roleClassDeclaration = role.getAst();
+		if (   roleClassDeclaration != null
+			&& !roleClassDeclaration.isInterface()
+			&& needMethodBodies(roleClassDeclaration))
+		{
+			RoleInitializationMethod.setupRoleInitializationMethod(role);
+		}
+
+		role.setState(STATE_ROLE_INIT_METHODS);
+		return true;
+	}
 
 	/* **** STATE_ROLE_FEATURES_COPIED (OT/J) ****
      * Copy all direct features (methods/ctors/fields/) from tsuper roles.
@@ -1520,7 +1578,7 @@ public class Dependencies implements ITranslationStates {
 		if (clazz.getBinding() != null) {
 			ModelElement.evaluateLateAttributes(clazz.getBinding(), STATE_FAULT_IN_TYPES);
 		} else {
-			assert ast != null && ast.hasErrors();
+			assert ast != null && hasErrors(ast);
 		}
 
 		clazz.setState(STATE_FAULT_IN_TYPES);
@@ -1952,7 +2010,9 @@ public class Dependencies implements ITranslationStates {
         	} else if (clazz.isTeam()) {
         		if (type.memberTypes != null) {
         			for (int i = 0; i < type.memberTypes.length; i++) {
-						establishStatementsTransformed(type.memberTypes[i].getRoleModel());
+						TypeDeclaration typeDeclaration = type.memberTypes[i];
+						if (typeDeclaration.isRole()) // not for member enums etc
+							establishStatementsTransformed(typeDeclaration.getRoleModel());
 					}
         		}
         	}

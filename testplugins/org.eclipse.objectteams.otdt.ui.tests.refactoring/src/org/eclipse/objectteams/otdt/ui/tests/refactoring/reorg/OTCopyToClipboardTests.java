@@ -73,10 +73,11 @@ public class OTCopyToClipboardTests extends GenericRefactoringTest
 
 	public void genericbefore() throws Exception
     {
+		rts = setup;
         super.genericbefore();
         _clipboard = new MockClipboard(Display.getDefault());
 
-        _cuT1 = createCU(OTRefactoringTestSetup.getPackageP(), CU_T1_NAME + ".java",
+        _cuT1 = createCU(setup.getPackageP(), CU_T1_NAME + ".java",
                 "package p;" + "\n" +
                 "import java.util.List;" + "\n" +
                 "public team class T1" + "\n" +
@@ -225,7 +226,7 @@ public class OTCopyToClipboardTests extends GenericRefactoringTest
 	}
 
 	private static void sortByName(Object[] copied) {
-		Arrays.sort(copied, new Comparator(){
+		Arrays.sort(copied, new Comparator<Object>(){
 			public int compare(Object arg0, Object arg1) {
 				return getName(arg0).compareTo(getName(arg1));
 			}
@@ -233,7 +234,7 @@ public class OTCopyToClipboardTests extends GenericRefactoringTest
 	}
 
 	private void checkNames(IResource[] resourcesCopied, IJavaElement[] javaElementsCopied, String clipboardText){
-		List stringLines= Arrays.asList(Strings.convertIntoLines(clipboardText));
+		List<String> stringLines= Arrays.asList(Strings.convertIntoLines(clipboardText));
 		assertEquals("different number of names", resourcesCopied.length + javaElementsCopied.length, stringLines.size());
 		for (int i= 0; i < resourcesCopied.length; i++) {
 			String name= getName(resourcesCopied[i]);
@@ -275,7 +276,7 @@ public class OTCopyToClipboardTests extends GenericRefactoringTest
 	}
 
 	private static IJavaElement[] getCompilationUnits(IJavaElement[] javaElements) {
-		List cus= ReorgUtils.getElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT);
+		List<?> cus= ReorgUtils.getElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT);
 		return (ICompilationUnit[]) cus.toArray(new ICompilationUnit[cus.size()]);
 	}
 
@@ -333,7 +334,7 @@ public class OTCopyToClipboardTests extends GenericRefactoringTest
 
 	@Test
 	public void testDisabled3() throws Exception {
-		Object[] elements= {OTRefactoringTestSetup.getProject(), getPackageP()};
+		Object[] elements= {setup.getProject(), getPackageP()};
 		checkDisabled(elements);
 	}
 
@@ -377,7 +378,7 @@ public class OTCopyToClipboardTests extends GenericRefactoringTest
 	@Test
 	public void testDisabled21() throws Exception {
 		Object fieldF= _cuT1.getType("T1").getField("x");
-		Object[] elements= {fieldF, OTRefactoringTestSetup.getProject()};
+		Object[] elements= {fieldF, setup.getProject()};
 		checkDisabled(elements);
 	}
 
@@ -391,7 +392,7 @@ public class OTCopyToClipboardTests extends GenericRefactoringTest
 
 	@Test
 	public void testEnabled0() throws Exception {
-		Object[] elements= {OTRefactoringTestSetup.getProject()};
+		Object[] elements= {setup.getProject()};
 		checkEnabled(elements);
 	}
 
@@ -409,7 +410,7 @@ public class OTCopyToClipboardTests extends GenericRefactoringTest
 
 	@Test
 	public void testEnabled3() throws Exception {
-		Object[] elements= {OTRefactoringTestSetup.getDefaultSourceFolder()};
+		Object[] elements= {setup.getDefaultSourceFolder()};
 		checkEnabled(elements);
 	}
 

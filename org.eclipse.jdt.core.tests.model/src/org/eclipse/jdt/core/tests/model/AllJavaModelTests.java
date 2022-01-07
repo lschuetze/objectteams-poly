@@ -18,8 +18,9 @@ package org.eclipse.jdt.core.tests.model;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.eclipse.jdt.core.tests.compiler.CharDeduplicationTest;
+import org.eclipse.jdt.core.tests.compiler.map.CharArrayMapperTest;
 import org.eclipse.jdt.core.tests.junit.extension.TestCase;
-import org.eclipse.jdt.core.tests.nd.RunIndexTests;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -66,8 +67,11 @@ private static Class[] getAllTestClasses() {
 		// Java search tests
 		RunJavaSearchTests.class,
 
-		// Testss for the new index
-		RunIndexTests.class,
+		IndexManagerTests.class,
+
+		// Tests for the new index - disabled because the index is not used anymore
+		// See bug 572976 and bug 544898
+		// RunIndexTests.class,
 
 		// Working copy tests
 		WorkingCopyTests.class,
@@ -106,7 +110,7 @@ private static Class[] getAllTestClasses() {
 		ResolveTests18.class,
 		ResolveTests9.class,
 		ResolveTests10.class,
-		ResolveTests12.class,
+		ResolveTests12To15.class,
 		SelectionJavadocModelTests.class,
 
 		// Support for completion tests
@@ -224,6 +228,10 @@ private static Class[] getAllTestClasses() {
 		NullAnnotationModelTests9.class,
 
 		JavaModelManagerTests.class,
+
+		CharArrayMapperTest.class,
+
+		CharDeduplicationTest.class,
 	};
 
 	Class[] deprecatedClasses = getDeprecatedJDOMTestClasses();

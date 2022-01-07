@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Vector;
 
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
@@ -73,7 +72,7 @@ public class AbstractJavaSearchTests extends ModifyingResourceTests implements I
 	static protected final int SHOW_JAR_FILE			= 0x0400;
 
 	public static class ConstructorDeclarationsCollector implements IRestrictedAccessConstructorRequestor {
-		Vector results = new Vector();
+		List<String> results = new ArrayList<>();
 
 		public void acceptConstructor(
 				int modifiers,
@@ -87,7 +86,7 @@ public class AbstractJavaSearchTests extends ModifyingResourceTests implements I
 				int extraFlags,
 				String path,
 				AccessRestriction access) {
-			StringBuffer buffer = new StringBuffer();
+			StringBuilder buffer = new StringBuilder();
 
 			boolean isMemberType = (extraFlags & ExtraFlags.IsMemberType) != 0;
 
@@ -136,7 +135,7 @@ public class AbstractJavaSearchTests extends ModifyingResourceTests implements I
 				buffer.append('*');
 			}
 
-			this.results.addElement(buffer.toString());
+			this.results.add(buffer.toString());
 		}
 
 		@Override
@@ -145,7 +144,7 @@ public class AbstractJavaSearchTests extends ModifyingResourceTests implements I
 			String[] strings = new String[length];
 			this.results.toArray(strings);
 			org.eclipse.jdt.internal.core.util.Util.sort(strings);
-			StringBuffer buffer = new StringBuffer(100);
+			StringBuilder buffer = new StringBuilder(100);
 			for (int i = 0; i < length; i++){
 				buffer.append(strings[i]);
 				if (i != length-1) {
@@ -165,7 +164,7 @@ public class AbstractJavaSearchTests extends ModifyingResourceTests implements I
 		buffer.append(c);
 	}
 	public static class MethodDeclarationsCollector implements IRestrictedAccessMethodRequestor {
-		Vector results = new Vector();
+		List<String> results = new ArrayList<>();
 
 		@Override
 		public void acceptMethod(
@@ -225,7 +224,7 @@ public class AbstractJavaSearchTests extends ModifyingResourceTests implements I
 				if (parameterCount > 1 && i < parameterCount - 1) buffer.append(',');
 			}
 			buffer.append(')');
-			this.results.addElement(buffer.toString());
+			this.results.add(buffer.toString());
 		}
 		private char[] getTypeErasure(char[] typeName) {
 			int index;
@@ -262,7 +261,7 @@ public class AbstractJavaSearchTests extends ModifyingResourceTests implements I
 			String[] strings = new String[length];
 			this.results.toArray(strings);
 			org.eclipse.jdt.internal.core.util.Util.sort(strings);
-			StringBuffer buffer = new StringBuffer(100);
+			StringBuilder buffer = new StringBuilder(100);
 			for (int i = 0; i < length; i++){
 				buffer.append(strings[i]);
 				if (i != length-1) {
@@ -743,7 +742,7 @@ public class AbstractJavaSearchTests extends ModifyingResourceTests implements I
 			return contents;
 		}
 		public String toString() {
-	    	StringBuffer buffer = new StringBuffer();
+	    	StringBuilder buffer = new StringBuilder();
 	    	List displayedLines = new ArrayList(this.lines);
 	    	if (this.sorted) {
 	    		Collections.sort(displayedLines, new Comparator() {
@@ -791,7 +790,7 @@ public class AbstractJavaSearchTests extends ModifyingResourceTests implements I
 				}
 				int nParameterNames = parameterNames.length;
 
-				StringBuffer buf = new StringBuffer();
+				StringBuilder buf = new StringBuilder();
 				buf.append(path);
 				buf.append(' ');
 				try {
@@ -826,7 +825,7 @@ public class AbstractJavaSearchTests extends ModifyingResourceTests implements I
 				if (i < size - 1) buf.append('\n');
 				strings[i] = buf.toString();
 			}
-			StringBuffer buffer = new StringBuffer();
+			StringBuilder buffer = new StringBuilder();
 			for (int i=0; i<size; i++) {
 				buffer.append(strings[i]);
 			}
@@ -867,7 +866,7 @@ public class AbstractJavaSearchTests extends ModifyingResourceTests implements I
 				}
 			}
 			Arrays.sort(strings);
-			StringBuffer buffer = new StringBuffer();
+			StringBuilder buffer = new StringBuilder();
 			for (int i=0; i<size; i++) {
 				if (i>0) buffer.append('\n');
 				buffer.append(strings[i]);
@@ -1240,6 +1239,7 @@ protected JavaSearchResultCollector resultCollector;
 	}
 	@Override
 	protected void setUp () throws Exception {
+		this.indexDisabledForTest = false;
 		super.setUp();
 		this.resultCollector = new JavaSearchResultCollector();
 	}

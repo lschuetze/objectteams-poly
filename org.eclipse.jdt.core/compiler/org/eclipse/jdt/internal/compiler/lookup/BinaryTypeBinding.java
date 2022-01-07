@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -46,6 +46,8 @@
  *								Bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
  *    Sebastian Zarnekow - Contributions for
  *								bug 544921 - [performance] Poor performance with large source files
+ *    Alexander Lehmann - Contributions for
+ *								bug 566258 - Intermittent NPE in APT RoundDispatcher
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -74,6 +76,7 @@ import org.eclipse.jdt.internal.compiler.env.IBinaryMethod;
 import org.eclipse.jdt.internal.compiler.env.IBinaryNestedType;
 import org.eclipse.jdt.internal.compiler.env.IBinaryType;
 import org.eclipse.jdt.internal.compiler.env.IBinaryTypeAnnotation;
+import org.eclipse.jdt.internal.compiler.env.IRecordComponent;
 import org.eclipse.jdt.internal.compiler.env.ITypeAnnotationWalker;
 import org.eclipse.jdt.internal.compiler.impl.BooleanConstant;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
@@ -161,7 +164,9 @@ public class BinaryTypeBinding extends ReferenceBinding {
 	protected ReferenceBinding superclass;
 	protected ReferenceBinding enclosingType;
 	protected ReferenceBinding[] superInterfaces;
+	protected ReferenceBinding[] permittedSubtypes;
 	protected FieldBinding[] fields;
+	protected RecordComponentBinding[] components;
 	protected MethodBinding[] methods;
 	protected ReferenceBinding[] memberTypes;
 	protected TypeVariableBinding[] typeVariables;
@@ -381,6 +386,7 @@ public BinaryTypeBinding(BinaryTypeBinding prototype) {
 	this.superclass = prototype.superclass;
 	this.enclosingType = prototype.enclosingType;
 	this.superInterfaces = prototype.superInterfaces;
+	this.permittedSubtypes = prototype.permittedSubtypes;
 	this.fields = prototype.fields;
 	this.methods = prototype.methods;
 	this.memberTypes = prototype.memberTypes;
@@ -565,6 +571,7 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 		// and still want to use binaries passed that point (e.g. type hierarchy resolver, see bug 63748).
 		this.typeVariables = Binding.NO_TYPE_VARIABLES;
 		this.superInterfaces = Binding.NO_SUPERINTERFACES;
+		this.permittedSubtypes = Binding.NO_PERMITTEDTYPES;
 
 //{ObjectTeams: one more field to initialize to empty array:
 		this.callinCallouts = Binding.NO_CALLIN_CALLOUT_BINDINGS;
@@ -681,15 +688,15 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 			}
 		}
 		if (typeSignature == null)  {
+			char[] superclassName = binaryType.getSuperclassName();
 //{ObjectTeams: predefined confined types require special treatment
 		  // 1. add the synthetic flag which is missing from the class file:
-		  if (CharOperation.equals(this.compoundName, IOTConstants.ORG_OBJECTTEAMS_TEAM_CONFINED))
+		  if (this.id == IOTConstants.T_OrgObjectteamsTeamConfined)
 			this.modifiers |= ClassFileConstants.AccSynthetic;
 		  if (TypeAnalyzer.isTopConfined(this)) {
 			// 2. don't search a superclass, have none (ie., skip the else part)
 		  } else {
 // orig:
-			char[] superclassName = binaryType.getSuperclassName();
 			if (superclassName != null) {
 				// attempt to find the superclass if it exists in the cache (otherwise - resolve it when requested)
 				this.superclass = this.environment.getTypeFromConstantPoolName(superclassName, 0, -1, false, missingTypeNames, toplevelWalker.toSupertype((short) -1, superclassName));
@@ -745,6 +752,32 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 				types.toArray(this.superInterfaces);
 				this.tagBits |= TagBits.HasUnresolvedSuperinterfaces;
 			}
+
+			this.permittedSubtypes = Binding.NO_PERMITTEDTYPES;
+			if (!wrapper.atEnd()) {
+				// attempt to find each permitted type if it exists in the cache (otherwise - resolve it when requested)
+				java.util.ArrayList types = new java.util.ArrayList(2);
+				short rank = 0;
+				do {
+					types.add(this.environment.getTypeFromTypeSignature(wrapper, typeVars, this, missingTypeNames, toplevelWalker.toSupertype(rank++, wrapper.peekFullType())));
+				} while (!wrapper.atEnd());
+				this.permittedSubtypes = new ReferenceBinding[types.size()];
+				types.toArray(this.permittedSubtypes);
+				this.extendedTagBits |= ExtendedTagBits.HasUnresolvedPermittedSubtypes;
+			}
+
+		}
+		// fall back, in case we haven't got them from signature
+		char[][] permittedSubtypeNames = binaryType.getPermittedSubtypeNames();
+		if (this.permittedSubtypes == Binding.NO_PERMITTEDTYPES && permittedSubtypeNames != null) {
+			this.modifiers |= ExtraCompilerModifiers.AccSealed;
+			int size = permittedSubtypeNames.length;
+			if (size > 0) {
+				this.permittedSubtypes = new ReferenceBinding[size];
+				for (short i = 0; i < size; i++)
+					// attempt to find each superinterface if it exists in the cache (otherwise - resolve it when requested)
+					this.permittedSubtypes[i] = this.environment.getTypeFromConstantPoolName(permittedSubtypeNames[i], 0, -1, false, missingTypeNames, toplevelWalker.toSupertype(i, null));
+			}
 		}
 		boolean canUseNullTypeAnnotations = this.environment.globalOptions.isAnnotationBasedNullAnalysisEnabled && this.environment.globalOptions.sourceLevel >= ClassFileConstants.JDK1_8;
 		if (canUseNullTypeAnnotations && this.externalAnnotationStatus.isPotentiallyUnannotatedLib()) {
@@ -757,12 +790,27 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 						break;
 					}
 				}
+				for (TypeBinding permsub : this.permittedSubtypes) {
+					if (permsub.hasNullTypeAnnotations()) {
+						this.externalAnnotationStatus = ExternalAnnotationStatus.TYPE_IS_ANNOTATED;
+						break;
+					}
+				}
 			}
 		}
 
 		if (needFieldsAndMethods) {
+			IRecordComponent[] iComponents = null;
+			if (binaryType.isRecord()) {
+				iComponents = binaryType.getRecordComponents();
+				if (iComponents != null) {
+					VariableBinding[] createFields = createFields(iComponents, binaryType, sourceLevel, missingTypeNames, true);
+					this.components = (RecordComponentBinding[]) createFields;
+				}
+			}
 			IBinaryField[] iFields = binaryType.getFields();
-			createFields(iFields, binaryType, sourceLevel, missingTypeNames);
+			VariableBinding[] createdFields = createFields(iFields, binaryType, sourceLevel, missingTypeNames, false);
+			this.fields = (FieldBinding[]) createdFields;
 			IBinaryMethod[] iMethods = createMethods(binaryType.getMethods(), binaryType, sourceLevel, missingTypeNames);
 			boolean isViewedAsDeprecated = isViewedAsDeprecated();
 			if (isViewedAsDeprecated) {
@@ -780,6 +828,15 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 				}
 			}
 			if (this.environment.globalOptions.isAnnotationBasedNullAnalysisEnabled) {
+				if (iComponents != null) {
+					for (int i = 0; i < iComponents.length; i++) {
+						// below 1.8 we still might use an annotation walker to discover external annotations:
+						ITypeAnnotationWalker fieldWalker = ITypeAnnotationWalker.EMPTY_ANNOTATION_WALKER;
+						if (sourceLevel < ClassFileConstants.JDK1_8)
+							fieldWalker = binaryType.enrichWithExternalAnnotationsFor(walker, iFields[i], this.environment);
+						scanFieldForNullAnnotation(iComponents[i], this.components[i], this.isEnum(), fieldWalker);
+					}
+				}
 				if (iFields != null) {
 					for (int i = 0; i < iFields.length; i++) {
 						// below 1.8 we still might use an annotation walker to discover external annotations:
@@ -811,12 +868,25 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 			this.version = reader.getVersion();
 		}
 // SH}
+		IBinaryAnnotation[] declAnnotations = binaryType.getAnnotations();
+		if (declAnnotations != null) {
+			if (hasValueBasedTypeAnnotation(declAnnotations)) {
+				this.extendedTagBits |= ExtendedTagBits.AnnotationValueBased;
+			}
+			for (IBinaryAnnotation annotation : declAnnotations) {
+				char[] typeName = annotation.getTypeName();
+				if (isPreviewFeature(typeName)) {
+					this.tagBits |= TagBits.AnnotationPreviewFeature;
+					break;
+				}
+			}
+		}
 		if (this.environment.globalOptions.storeAnnotations) {
-			setAnnotations(createAnnotations(binaryType.getAnnotations(), this.environment, missingTypeNames), false);
+			setAnnotations(createAnnotations(declAnnotations, this.environment, missingTypeNames), false);
 		} else if (sourceLevel >= ClassFileConstants.JDK9 && isDeprecated() && binaryType.getAnnotations() != null) {
 			// prior to Java 9 all standard annotations were marker annotations, not needing to be stored,
 			// but since Java 9 we need more information from the @Deprecated annotation:
-			for (IBinaryAnnotation annotation : binaryType.getAnnotations()) {
+			for (IBinaryAnnotation annotation : declAnnotations) {
 				if (annotation.isDeprecatedAnnotation()) {
 					AnnotationBinding[] annotationBindings = createAnnotations(new IBinaryAnnotation[] { annotation }, this.environment, missingTypeNames);
 					setAnnotations(annotationBindings, true); // force storing
@@ -836,6 +906,8 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 			scanTypeForContainerAnnotation(binaryType, missingTypeNames);
 	} finally {
 		// protect against incorrect use of the needFieldsAndMethods flag, see 48459
+		if (this.components == null)
+			this.components = Binding.NO_COMPONENTS;
 		if (this.fields == null)
 			this.fields = Binding.NO_FIELDS;
 		if (this.methods == null)
@@ -879,6 +951,27 @@ private ITypeAnnotationWalker getTypeAnnotationWalker(IBinaryTypeAnnotation[] an
 	return new TypeAnnotationWalker(annotations);
 }
 
+private boolean hasValueBasedTypeAnnotation(IBinaryAnnotation[] declAnnotations) {
+	boolean hasValueBasedAnnotation = false;
+	if (declAnnotations != null && declAnnotations.length > 0) {
+		for (IBinaryAnnotation annot : declAnnotations) {
+			char[] typeName= annot.getTypeName();
+			if ( typeName == null || typeName.length < 25 || typeName[0] != 'L')
+				continue;
+			char[][] name = CharOperation.splitOn('/', typeName, 1, typeName.length-1);
+			try {
+				if (CharOperation.equals(name,TypeConstants.JDK_INTERNAL_VALUEBASED)) {
+					hasValueBasedAnnotation= true;
+					break;
+				}
+			} catch (Exception e) {
+				//do nothing
+			}
+		}
+	}
+	return hasValueBasedAnnotation;
+}
+
 private int getNullDefaultFrom(IBinaryAnnotation[] declAnnotations) {
 	int result = 0;
 	if (declAnnotations != null) {
@@ -891,23 +984,24 @@ private int getNullDefaultFrom(IBinaryAnnotation[] declAnnotations) {
 	return result;
 }
 
-private void createFields(IBinaryField[] iFields, IBinaryType binaryType, long sourceLevel, char[][][] missingTypeNames) {
+private VariableBinding[] createFields(IBinaryField[] iFields, IBinaryType binaryType, long sourceLevel, char[][][] missingTypeNames, boolean isComponent) {
 	if (!isPrototype()) throw new IllegalStateException();
 	boolean save = this.environment.mayTolerateMissingType;
 	this.environment.mayTolerateMissingType = true;
+	VariableBinding[] tFields = isComponent ? Binding.NO_COMPONENTS : Binding.NO_FIELDS;
 	try {
-		this.fields = Binding.NO_FIELDS;
 		if (iFields != null) {
 			int size = iFields.length;
 			if (size > 0) {
-				FieldBinding[] fields1 = new FieldBinding[size];
+				VariableBinding[] fields1 = isComponent ? new RecordComponentBinding[size] : new FieldBinding[size];
 				boolean use15specifics = sourceLevel >= ClassFileConstants.JDK1_5;
 				boolean hasRestrictedAccess = hasRestrictedAccess();
 				int firstAnnotatedFieldIndex = -1;
 				for (int i = 0; i < size; i++) {
 					IBinaryField binaryField = iFields[i];
 					char[] fieldSignature = use15specifics ? binaryField.getGenericSignature() : null;
-					ITypeAnnotationWalker walker = getTypeAnnotationWalker(binaryField.getTypeAnnotations(), getNullDefaultFrom(binaryField.getAnnotations()));
+					IBinaryAnnotation[] declAnnotations = binaryField.getAnnotations();
+					ITypeAnnotationWalker walker = getTypeAnnotationWalker(binaryField.getTypeAnnotations(), getNullDefaultFrom(declAnnotations));
 					if (sourceLevel >= ClassFileConstants.JDK1_8) { // below 1.8, external annotations will be attached later
 						walker = binaryType.enrichWithExternalAnnotationsFor(walker, iFields[i], this.environment);
 					}
@@ -915,13 +1009,28 @@ private void createFields(IBinaryField[] iFields, IBinaryType binaryType, long s
 					TypeBinding type = fieldSignature == null
 						? this.environment.getTypeFromSignature(binaryField.getTypeName(), 0, -1, false, this, missingTypeNames, walker)
 						: this.environment.getTypeFromTypeSignature(new SignatureWrapper(fieldSignature), Binding.NO_TYPE_VARIABLES, this, missingTypeNames, walker);
-					FieldBinding field =
-						new FieldBinding(
-							binaryField.getName(),
-							type,
-							binaryField.getModifiers() | ExtraCompilerModifiers.AccUnresolved,
-							this,
-							binaryField.getConstant());
+					VariableBinding field =
+							isComponent ?
+									new RecordComponentBinding(
+										binaryField.getName(),
+										type,
+										binaryField.getModifiers() | ExtraCompilerModifiers.AccUnresolved,
+										this) :
+									new FieldBinding(
+										binaryField.getName(),
+										type,
+										binaryField.getModifiers() | ExtraCompilerModifiers.AccUnresolved,
+										this,
+										binaryField.getConstant());
+					if (declAnnotations != null) {
+						for (IBinaryAnnotation annotation : declAnnotations) {
+							char[] typeName = annotation.getTypeName();
+							if (isPreviewFeature(typeName)) {
+								field.tagBits |= TagBits.AnnotationPreviewFeature;
+								break;
+							}
+						}
+					}
 					boolean forceStoreAnnotations = !this.environment.globalOptions.storeAnnotations
 							&& (this.environment.globalOptions.sourceLevel >= ClassFileConstants.JDK9
 							&& binaryField.getAnnotations() != null
@@ -929,11 +1038,11 @@ private void createFields(IBinaryField[] iFields, IBinaryType binaryType, long s
 					if (firstAnnotatedFieldIndex < 0
 //{ObjectTeams: read annotations within roles to enable copying:
 /* orig:
-						&& (this.environment.globalOptions.storeAnnotations || forceStoreAnnotations)
+							&& (this.environment.globalOptions.storeAnnotations || forceStoreAnnotations)
   :giro */
-						&& (   this.environment.globalOptions.storeAnnotations
-							|| forceStoreAnnotations
-							|| this.isRole())
+							&& (   this.environment.globalOptions.storeAnnotations
+								|| forceStoreAnnotations
+								|| this.isRole())
 // SH}
 							&& binaryField.getAnnotations() != null) {
 						firstAnnotatedFieldIndex = i;
@@ -950,19 +1059,21 @@ private void createFields(IBinaryField[] iFields, IBinaryType binaryType, long s
 					fields1[i] = field;
 //{ObjectTeams:
 					// field attributes:
-					if (binaryField instanceof FieldInfo)
-						((FieldInfo)binaryField).evaluateOTAttributes(field);
-					// field as value parameter?
-					if ((field.modifiers & ExtraCompilerModifiers.AccValueParam) != 0)
-						addValueParameter(field);
+					if (field instanceof FieldBinding) {
+						if (binaryField instanceof FieldInfo)
+								((FieldInfo)binaryField).evaluateOTAttributes((FieldBinding) field);
+						// field as value parameter?
+						if ((field.modifiers & ExtraCompilerModifiers.AccValueParam) != 0)
+							addValueParameter((FieldBinding) field);
+					}
 // SH}
 				}
-				this.fields = fields1;
+				tFields = fields1;
 				// second pass for reifying annotations, since may refer to fields being constructed (147875)
 				if (firstAnnotatedFieldIndex >= 0) {
 					for (int i = firstAnnotatedFieldIndex; i <size; i++) {
 						IBinaryField binaryField = iFields[i];
-						this.fields[i].setAnnotations(createAnnotations(binaryField.getAnnotations(), this.environment, missingTypeNames), false);
+						tFields[i].setAnnotations(createAnnotations(binaryField.getAnnotations(), this.environment, missingTypeNames), false);
 					}
 				}
 			}
@@ -970,6 +1081,7 @@ private void createFields(IBinaryField[] iFields, IBinaryType binaryType, long s
 	} finally {
 		this.environment.mayTolerateMissingType = save;
 	}
+	return tFields;
 }
 //{ObjectTeams: some fields are indeed value parameters:
 private SyntheticArgumentBinding[] valueParameters = NO_SYNTH_ARGUMENTS;
@@ -998,6 +1110,14 @@ private void addValueParameter(FieldBinding field) {
 }
 // SH}
 
+private boolean isPreviewFeature(char[] typeName) {
+	int index = CharOperation.lastIndexOf('/', typeName);
+	if (index != -1)
+		typeName = CharOperation.subarray(typeName, index, typeName.length);
+	index = CharOperation.indexOf(ConstantPool.PREVIEW_FEATURE, typeName, true);
+	return index == 0;
+}
+
 private MethodBinding createMethod(IBinaryMethod method, IBinaryType binaryType, long sourceLevel, char[][][] missingTypeNames) {
 //{ObjectTeams: be very careful (newly read attributes must be consumed):
   MethodBinding result = null;
@@ -1023,13 +1143,14 @@ private MethodBinding createMethod(IBinaryMethod method, IBinaryType binaryType,
 
 	char[][] argumentNames = method.getArgumentNames();
 
+	IBinaryAnnotation[] declAnnotations = method.getAnnotations();
 	final boolean use15specifics = sourceLevel >= ClassFileConstants.JDK1_5;
 	/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=324850, Since a 1.4 project can have a 1.5
 	   type as a super type and the 1.5 type could be generic, we must internalize usages of type
 	   variables properly in order to be able to apply substitutions and thus be able to detect
 	   overriding in the presence of generics. Seeing the erased form is not good enough.
 	 */
-	ITypeAnnotationWalker walker = getTypeAnnotationWalker(method.getTypeAnnotations(), getNullDefaultFrom(method.getAnnotations()));
+	ITypeAnnotationWalker walker = getTypeAnnotationWalker(method.getTypeAnnotations(), getNullDefaultFrom(declAnnotations));
 	char[] methodSignature = method.getGenericSignature(); // always use generic signature, even in 1.4
 	if (methodSignature == null) { // no generics
 		char[] methodDescriptor = method.getMethodDescriptor();   // of the form (I[Ljava/jang/String;)V
@@ -1200,6 +1321,15 @@ private MethodBinding createMethod(IBinaryMethod method, IBinaryType binaryType,
 		? new MethodBinding(methodModifiers, parameters, exceptions, this)
 		: new MethodBinding(methodModifiers, method.getSelector(), returnType, parameters, exceptions, this);
 
+	if (declAnnotations != null) {
+		for (IBinaryAnnotation annotation : declAnnotations) {
+			char[] typeName = annotation.getTypeName();
+			if (isPreviewFeature(typeName)) {
+				result.tagBits |= TagBits.AnnotationPreviewFeature;
+				break;
+			}
+		}
+	}
 	IBinaryAnnotation[] receiverAnnotations = walker.toReceiver().getAnnotationsAtCursor(this.id, false);
 	if (receiverAnnotations != null && receiverAnnotations.length > 0) {
 		result.receiver = this.environment.createAnnotatedType(this, createAnnotations(receiverAnnotations, this.environment, missingTypeNames));
@@ -1442,6 +1572,21 @@ public ReferenceBinding enclosingType() {  // should not delegate to prototype.
 	this.tagBits &= ~TagBits.HasUnresolvedEnclosingType;
 	return this.enclosingType;
 }
+@Override
+public RecordComponentBinding[] components() {
+	if (!isPrototype()) {
+		return this.components = this.prototype.components;
+	}
+	if ((this.extendedTagBits & ExtendedTagBits.AreRecordComponentsComplete) != 0)
+		return this.components;
+
+	// Should we sort?
+	for (int i = this.components.length; --i >= 0;) {
+		resolveTypeFor(this.components[i]);
+	}
+	this.tagBits |= ExtendedTagBits.AreRecordComponentsComplete;
+	return this.components;
+}
 // NOTE: the type of each field of a binary type is resolved when needed
 @Override
 public FieldBinding[] fields() {
@@ -1642,6 +1787,7 @@ public MethodBinding getExactMethod(char[] selector, TypeBinding[] argumentTypes
 				refScope.recordTypeReference(this.superclass);
 			return this.superclass.getExactMethod(selector, argumentTypes, refScope);
 		}
+		// NOTE: not adding permitted types here since the search is up the hierarchy while permitted ones are down.
 	}
 	return null;
 }
@@ -1966,10 +2112,9 @@ public ReferenceBinding[] memberTypes() {
 		 * is sorted, too.
 		 */
 		ReferenceBinding [] members = this.prototype.memberTypes();
-		int memberTypesLength = members == null ? 0 : members.length;
-		if (memberTypesLength > 0) {
-			this.memberTypes = new ReferenceBinding[memberTypesLength];
-			for (int i = 0; i < memberTypesLength; i++)
+		if (members != null) {
+			this.memberTypes = new ReferenceBinding[members.length];
+			for (int i = 0; i < members.length; i++)
 				this.memberTypes[i] = this.environment.createMemberType(members[i], this);
 		}
 		this.tagBits &= ~TagBits.HasUnresolvedMemberTypes;
@@ -2050,7 +2195,21 @@ public ReferenceBinding containerAnnotationType() {
 	}
 	return this.containerAnnotationType;
 }
+private RecordComponentBinding resolveTypeFor(RecordComponentBinding component) {
+	if (!isPrototype())
+		return this.prototype.resolveTypeFor(component);
 
+	if ((component.modifiers & ExtraCompilerModifiers.AccUnresolved) == 0)
+		return component;
+
+	TypeBinding resolvedType = resolveType(component.type, this.environment, true /* raw conversion */);
+	component.type = resolvedType;
+	if ((resolvedType.tagBits & TagBits.HasMissingType) != 0) {
+		component.tagBits |= TagBits.HasMissingType;
+	}
+	component.modifiers &= ~ExtraCompilerModifiers.AccUnresolved;
+	return component;
+}
 private FieldBinding resolveTypeFor(FieldBinding field) {
 
 	if (!isPrototype())
@@ -2176,7 +2335,7 @@ SimpleLookupTable storedAnnotations(boolean forceInitialize, boolean forceStore)
 }
 
 //pre: null annotation analysis is enabled
-private void scanFieldForNullAnnotation(IBinaryField field, FieldBinding fieldBinding, boolean isEnum, ITypeAnnotationWalker externalAnnotationWalker) {
+private void scanFieldForNullAnnotation(IBinaryField field, VariableBinding fieldBinding, boolean isEnum, ITypeAnnotationWalker externalAnnotationWalker) {
 	if (!isPrototype()) throw new IllegalStateException();
 
 	if (isEnum && (field.getModifiers() & ClassFileConstants.AccEnum) != 0) {
@@ -2678,6 +2837,18 @@ public ReferenceBinding[] superInterfaces() {
 	return this.superInterfaces;
 }
 @Override
+public ReferenceBinding[] permittedTypes() {
+
+	if (!isPrototype()) {
+		return this.permittedSubtypes = this.prototype.permittedTypes();
+	}
+	for (int i = this.permittedSubtypes.length; --i >= 0;)
+		this.permittedSubtypes[i] = (ReferenceBinding) resolveType(this.permittedSubtypes[i], this.environment, false);
+
+	// Note: unlike for superinterfaces() hierarchy check not required here since these are subtypes
+	return this.permittedSubtypes;
+}
+@Override
 public TypeVariableBinding[] typeVariables() {
 
 	if (!isPrototype()) {
@@ -2697,7 +2868,7 @@ public String toString() {
 	if (this.hasTypeAnnotations())
 		return annotatedDebugName();
 
-	StringBuffer buffer = new StringBuffer();
+	StringBuilder buffer = new StringBuilder();
 
 	if (isDeprecated()) buffer.append("deprecated "); //$NON-NLS-1$
 	if (isPublic()) buffer.append("public "); //$NON-NLS-1$
@@ -2754,6 +2925,19 @@ public String toString() {
         buffer.append(baseclass().debugName());
     }
 // SH}
+
+	if (this.permittedSubtypes != null) {
+		if (this.permittedSubtypes != Binding.NO_PERMITTEDTYPES) {
+			buffer.append("\n\tpermits : "); //$NON-NLS-1$
+			for (int i = 0, length = this.permittedSubtypes.length; i < length; i++) {
+				if (i  > 0)
+					buffer.append(", "); //$NON-NLS-1$
+				buffer.append((this.permittedSubtypes[i] != null) ? this.permittedSubtypes[i].debugName() : "NULL TYPE"); //$NON-NLS-1$
+			}
+		}
+	} else {
+		buffer.append("NULL PERMITTEDSUBTYPES"); //$NON-NLS-1$
+	}
 
 	if (this.enclosingType != null) {
 		buffer.append("\n\tenclosing type : "); //$NON-NLS-1$

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 IBM Corporation and others.
+ * Copyright (c) 2011, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -473,6 +473,13 @@ public void test013() {
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=384595, Reject illegal modifiers on lambda arguments.
 public void test014() {
+	String extra = this.complianceLevel < ClassFileConstants.JDK17 ? "" :
+		"----------\n" +
+		"2. WARNING in X.java (at line 5)\n" +
+		"	I i = (final @Marker int x, @Undefined static strictfp public Object o, static volatile int p) -> x;\n" +
+		"	                                              ^^^^^^^^\n" +
+		"Floating-point expressions are always strictly evaluated from source level 17. Keyword \'strictfp\' is not required.\n";
+	int offset = this.complianceLevel < ClassFileConstants.JDK17 ? 0 : 1;
 	this.runNegativeTest(
 			new String[] {
 					"X.java",
@@ -490,23 +497,24 @@ public void test014() {
 				"	I i = (final @Marker int x, @Undefined static strictfp public Object o, static volatile int p) -> x;\n" +
 				"	                             ^^^^^^^^^\n" +
 				"Undefined cannot be resolved to a type\n" +
+				extra +
 				"----------\n" +
-				"2. ERROR in X.java (at line 5)\n" +
+				(2 + offset) + ". ERROR in X.java (at line 5)\n" +
 				"	I i = (final @Marker int x, @Undefined static strictfp public Object o, static volatile int p) -> x;\n" +
 				"	                                                              ^^^^^^\n" +
 				"Lambda expression\'s parameter o is expected to be of type int\n" +
 				"----------\n" +
-				"3. ERROR in X.java (at line 5)\n" +
+				(3 + offset) + ". ERROR in X.java (at line 5)\n" +
 				"	I i = (final @Marker int x, @Undefined static strictfp public Object o, static volatile int p) -> x;\n" +
 				"	                                                                     ^\n" +
 				"Illegal modifier for parameter o; only final is permitted\n" +
 				"----------\n" +
-				"4. ERROR in X.java (at line 5)\n" +
+				(4 + offset) + ". ERROR in X.java (at line 5)\n" +
 				"	I i = (final @Marker int x, @Undefined static strictfp public Object o, static volatile int p) -> x;\n" +
 				"	                                                                                            ^\n" +
 				"Illegal modifier for parameter p; only final is permitted\n" +
 				"----------\n" +
-				"5. ERROR in X.java (at line 5)\n" +
+				(5 + offset) + ". ERROR in X.java (at line 5)\n" +
 				"	I i = (final @Marker int x, @Undefined static strictfp public Object o, static volatile int p) -> x;\n" +
 				"	                                                                                                  ^\n" +
 				"Void methods cannot return a value\n" +
@@ -7362,6 +7370,7 @@ public void testIntersectionCast() {
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=421711, [1.8][compiler] '_' as identifier for a lambda parameter should be rejected.
 public void testUnderScoreParameter() {
 		String level = this.complianceLevel >= ClassFileConstants.JDK9 ? "ERROR" : "WARNING";
+		String errorMessage = this.complianceLevel >= ClassFileConstants.JDK9 ? "\'_\' is a keyword from source level 9 onwards, cannot be used as identifier\n" : "\'_\' should not be used as an identifier, since it is a reserved keyword from source level 1.8 on\n";
 		this.runNegativeTest(
 			new String[] {
 					"X.java",
@@ -7380,17 +7389,17 @@ public void testUnderScoreParameter() {
 			"1. ERROR in X.java (at line 6)\n" +
 			"	F f = (int _) -> {\n" +
 			"	           ^\n" +
-			"\'_\' should not be used as an identifier, since it is a reserved keyword from source level 1.8 on\n" +
+			"\'_\' is a keyword from source level 9 onwards, cannot be used as identifier\n" +
 			"----------\n" +
 			"2. "+ level +" in X.java (at line 8)\n" +
 			"	F f2 = _ -> {};\n" +
 			"	       ^\n" +
-			"\'_\' should not be used as an identifier, since it is a reserved keyword from source level 1.8 on\n" +
+			errorMessage +
 			"----------\n" +
 			"3. ERROR in X.java (at line 8)\n" +
 			"	F f2 = _ -> {};\n" +
 			"	       ^\n" +
-			"\'_\' should not be used as an identifier, since it is a reserved keyword from source level 1.8 on\n" +
+			"\'_\' is a keyword from source level 9 onwards, cannot be used as identifier\n" +
 			"----------\n"
 		);
 }
@@ -8592,12 +8601,12 @@ public void test428177() {
 		"4. ERROR in X.java (at line 36)\n" +
 		"	if(\"1\" == \"\") { return stream.collect(Collectors.toList()).stream(); // ERROR\n" +
 		"	                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
-		"Type mismatch: cannot convert from Stream<capture#25-of ? extends String> to Stream<String>\n" +
+		"Type mismatch: cannot convert from Stream<capture#24-of ? extends String> to Stream<String>\n" +
 		"----------\n" +
 		"5. ERROR in X.java (at line 38)\n" +
 		"	return stream.collect(Collectors.toList()); // NO ERROR\n" +
 		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
-		"Type mismatch: cannot convert from List<capture#28-of ? extends String> to Stream<String>\n" +
+		"Type mismatch: cannot convert from List<capture#27-of ? extends String> to Stream<String>\n" +
 		"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=428795, - [1.8]Internal compiler error: java.lang.NullPointerException at org.eclipse.jdt.internal.compiler.ast.MessageSend.analyseCode

@@ -240,6 +240,9 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	// callback
 	protected IWeavingContext weavingContext;
 
+	@Nullable
+	protected Class<?> definedClass;
+
 	/**
 	 * No public constructor, beacause only the ClassRepository should create
 	 * AbstractBoundClasses
@@ -704,8 +707,10 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 *                                     unexpected RET instruction etc.
 	 */
 	public void handleTaskList(@Nullable Class<?> definedClass) throws IllegalClassFormatException {
-		if (isTransformationActive())
-			return;
+
+		if (this.definedClass == null && definedClass != null)
+			this.definedClass = definedClass;
+		if (isTransformationActive()) return;
 
 		if (this.isUnweavable)
 			new LinkageError("Class " + this.name + " is requested to be woven, but it is marked as unweavable.")

@@ -36,7 +36,7 @@ FETCH_CACHE_LOCATION=${HOME}/gitCache
 MAP_FILE_PATH=${BASEDIR}/releng/map/otdt.map
 
 # Base dir for finding previous platform build:
-DROPS4=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
+DROPS4=http://download.eclipse.org/eclipse/downloads/drops4
 
 # Configure ANT:
 ANT_HOME=/shared/common/apache-ant-1.10.5/
@@ -58,11 +58,11 @@ ARCH=`arch`
 
 # VERSIONS:
 # Eclipse SDK build identifier (used for substitution in otdt.map.in etc.):
-SDK_QUALIFIER=${SDK_QUALIFIER:="I20200604-0540"}
+SDK_QUALIFIER=${SDK_QUALIFIER:="I20211124-1800"}
 
 # used only locally (components of the ECLIPSE_SDK_TGZ path):
-EVERSION=${EVERSION:="4.16RC2"}
-DROP=${DROPS4}/${DROP:="S-4.16RC2-202006040540"}
+EVERSION=${EVERSION:="4.22RC2"}
+DROP=${DROPS4}/${DROP:="S-4.22RC2-202111241800"}
 
 # EXPORT: archive file of the base eclipse SDK build:
 ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz

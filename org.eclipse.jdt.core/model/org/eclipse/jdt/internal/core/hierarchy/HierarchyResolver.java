@@ -588,21 +588,18 @@ private void rememberAllTypes(CompilationUnitDeclaration parsedUnit, org.eclipse
 //mkr+SH}
 		}
 	}
-	if (!includeLocalTypes || (parsedUnit.localTypes == null && parsedUnit.functionalExpressions == null))
+	if (!includeLocalTypes || (parsedUnit.localTypes.isEmpty() && parsedUnit.functionalExpressions == null))
 		return;
 
 	HandleFactory factory = new HandleFactory();
-	HashSet existingElements = new HashSet(parsedUnit.localTypeCount + parsedUnit.functionalExpressionsCount);
-	HashMap knownScopes = new HashMap(parsedUnit.localTypeCount + parsedUnit.functionalExpressionsCount);
+	HashSet existingElements = new HashSet(parsedUnit.localTypes.size() + parsedUnit.functionalExpressionsCount);
+	HashMap knownScopes = new HashMap(parsedUnit.localTypes.size() + parsedUnit.functionalExpressionsCount);
 
-	if (parsedUnit.localTypes != null) {
-		for (int i = 0; i < parsedUnit.localTypeCount; i++) {
-			LocalTypeBinding localType = parsedUnit.localTypes[i];
-			ClassScope classScope = localType.scope;
-			TypeDeclaration typeDecl = classScope.referenceType();
-			IType typeHandle = (IType)factory.createElement(classScope, cu, existingElements, knownScopes);
-			rememberWithMemberTypes(typeDecl, typeHandle);
-		}
+	for (LocalTypeBinding localType : parsedUnit.localTypes.values()) {
+		ClassScope classScope = localType.scope;
+		TypeDeclaration typeDecl = classScope.referenceType();
+		IType typeHandle = (IType)factory.createElement(classScope, cu, existingElements, knownScopes);
+		rememberWithMemberTypes(typeDecl, typeHandle);
 	}
 	if (parsedUnit.functionalExpressions != null) {
 		for (int i = 0; i < parsedUnit.functionalExpressionsCount; i++) {
@@ -1176,6 +1173,7 @@ private boolean subTypeOfType(ReferenceBinding subType, ReferenceBinding typeBin
 	if (superInterfaces != null) {
 		for (int i = 0, length = superInterfaces.length; i < length; i++) {
 			ReferenceBinding superInterface = (ReferenceBinding) superInterfaces[i].erasure();
+			if (superInterface.isHierarchyInconsistent()) return false;
 			if (subTypeOfType(superInterface, typeBinding)) return true;
 		}
 	}

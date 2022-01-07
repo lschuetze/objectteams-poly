@@ -366,11 +366,6 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
     {
     }
 
-    @Override
-    public void enterRecordComponent(RecordComponentInfo recordComponentInfo) {
-    	// TODO Auto-generated method stub
-    }
-
     public void enterInitializer(int declarationStart, int modifiers)
     {
     }

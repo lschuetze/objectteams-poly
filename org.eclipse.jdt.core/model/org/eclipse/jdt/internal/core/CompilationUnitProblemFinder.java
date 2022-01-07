@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -146,7 +146,9 @@ public class CompilationUnitProblemFinder extends Compiler {
 			  {
 // orig:  Note(SH): this will redirect:
 				environment.buildTypeBindings(unit, accessRestriction);
+				CompilationUnitDeclaration previousUnitBeingCompleted = this.lookupEnvironment.unitBeingCompleted;
 				environment.completeTypeBindings(unit);
+				this.lookupEnvironment.unitBeingCompleted = previousUnitBeingCompleted;
 // :giro
 			  }
 // SH}
@@ -271,7 +273,7 @@ public class CompilationUnitProblemFinder extends Compiler {
 			IProgressMonitor monitor)
 		throws JavaModelException {
 
-		JavaProject project = (JavaProject) unitElement.getJavaProject();
+		JavaProject project = unitElement.getJavaProject();
 		CancelableNameEnvironment environment = null;
 		CancelableProblemFactory problemFactory = null;
 		CompilationUnitProblemFinder problemFinder = null;
@@ -340,7 +342,7 @@ public class CompilationUnitProblemFinder extends Compiler {
 		} catch(RuntimeException e) {
 			// avoid breaking other tools due to internal compiler failure (40334)
 			String lineDelimiter = unitElement.findRecommendedLineSeparator();
-			StringBuffer message = new StringBuffer("Exception occurred during problem detection:");  //$NON-NLS-1$
+			StringBuilder message = new StringBuilder("Exception occurred during problem detection:");  //$NON-NLS-1$
 			message.append(lineDelimiter);
 			message.append("----------------------------------- SOURCE BEGIN -------------------------------------"); //$NON-NLS-1$
 			message.append(lineDelimiter);

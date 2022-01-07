@@ -109,7 +109,7 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 //{ObjectTeams: some reasons why there might be nothing to analyze:
 			// still waiting for statements to be generated?
 			if (   this.isGenerated && this.statements == null
-				&& !this.scope.isOrgObjectteamsTeam(this.binding.declaringClass)) // o.o.T. methods are special
+				&& this.binding.declaringClass.id != IOTConstants.T_OrgObjectTeamsTeam) // o.o.T. methods are special
 				return;
 // SH}
 
@@ -353,7 +353,8 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 		// check @Override annotation
 		final CompilerOptions compilerOptions = this.scope.compilerOptions();
 		checkOverride: {
-			if (this.binding == null) break checkOverride;
+			// For a record component accessor method, don't bother with checking for override (JLS 15 9.6.4.4)
+			if (this.binding == null || recordComponent != null) break checkOverride;
 			long complianceLevel = compilerOptions.complianceLevel;
 			if (complianceLevel < ClassFileConstants.JDK1_5) break checkOverride;
 			int bindingModifiers = this.binding.modifiers;

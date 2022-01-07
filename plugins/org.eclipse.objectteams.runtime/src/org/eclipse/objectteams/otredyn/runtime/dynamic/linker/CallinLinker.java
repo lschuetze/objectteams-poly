@@ -78,8 +78,10 @@ public final class CallinLinker implements TypeBasedGuardingDynamicLinker {
 				team.getClass().getName().replace('.', '/') + "$" + binding.getRoleClassName() + ";";
 		final MethodType type = MethodType.fromMethodDescriptorString(
 				liftingDescriptor, team.getClass().getClassLoader());
-		final MethodHandles.Lookup teamLookup = team.__OT$getLookup();
-		final MethodHandle lift = OTTypeUtils.findVirtual(teamLookup, team.getClass(), liftingMethod, type);
+		// TODO Lars: Fix this
+//		final MethodHandles.Lookup teamLookup = team.__OT$getLookup();
+//		final MethodHandle lift = OTTypeUtils.findVirtual(teamLookup, team.getClass(), liftingMethod, type);
+		final MethodHandle lift = OTTypeUtils.findVirtual(lookup, team.getClass(), liftingMethod, type);
 
 		// Lifting works on interfaces; cast the return type to the implementation type
 		final MethodHandle adaptedLift = lift.asType(MethodType.methodType(

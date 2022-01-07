@@ -144,9 +144,9 @@ public class NullAnnotationTests9 extends AbstractNullAnnotationTest {
 	Map<String,String> file2module = new HashMap<>();
 
 	@Override
-	protected INameEnvironment getNameEnvironment(final String[] testFiles, String[] classPaths) {
+	protected INameEnvironment getNameEnvironment(final String[] testFiles, String[] classPaths, Map<String, String> options) {
 		this.classpaths = classPaths == null ? getDefaultClassPaths() : classPaths;
-		INameEnvironment[] classLibs = getClassLibs(classPaths == null);
+		INameEnvironment[] classLibs = getClassLibs(classPaths == null, options);
 		for (INameEnvironment nameEnvironment : classLibs) {
 			((FileSystem) nameEnvironment).scanForModules(createParser());
 		}
@@ -377,6 +377,7 @@ public class NullAnnotationTests9 extends AbstractNullAnnotationTest {
 			},
 			null,
 			"");
+		this.verifier.shutDown();
 	}
 	public void testBug536037b() {
 		// tests combination of declaration null-annotations & 'var':

@@ -19,7 +19,9 @@ package org.eclipse.objectteams.otredyn.bytecode.asm;
 
 import static org.eclipse.objectteams.otredyn.transformer.names.ClassNames.OBJECT_SLASH;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,18 +62,14 @@ public class LoaderAwareClassWriter extends ClassWriter {
 		ClassInformation ci2;
 		// need to load class bytes:
 		try {
-			try (InputStream s1 = this.loader.getResourceAsStream(type1+".class")) {
-				ci1 = this.analyzer.getClassInformation(s1, type1);
-				if (ci1 == null)
-					return OBJECT_SLASH;
-			}
-			try (InputStream s2 = this.loader.getResourceAsStream(type2+".class")) {
-				ci2 = this.analyzer.getClassInformation(s2, type2);
-				if (ci2 == null)
-					return OBJECT_SLASH;
-			}
+			ci1 = findClassInfo(type1);
+			if (ci1 == null)
+				return OBJECT_SLASH;
+			ci2 = findClassInfo(type2);
+			if (ci2 == null)
+				return OBJECT_SLASH;
 		} catch (Exception e) {
-		    throw new RuntimeException(e.toString());
+		    throw new RuntimeException(e);
 		}
 
         // do a breadth-first search: each iteration adds just one more level of super types,
@@ -114,6 +112,22 @@ public class LoaderAwareClassWriter extends ClassWriter {
         	newTypes1 = getDirectSupersLayer(newTypes1, false);
         	newTypes2 = getDirectSupersLayer(newTypes2, false);
         }
+	}
+
+	private ClassInformation findClassInfo(String type) throws MalformedURLException, IOException {
+		String className = type+".class";
+		try (InputStream stream = this.loader.getResourceAsStream(className)) {
+			if (stream != null)
+				return this.analyzer.getClassInformation(stream, type); 
+		}
+		/* FIXME: if we had a map package -> module, we could do like this: 
+		if (className.startsWith("com/sun/jdi")) {
+			try (InputStream stream2 = new URL("jrt:/jdk.jdi/"+className).openStream()) {
+				return this.analyzer.getClassInformation(stream2, type);
+			}
+		}
+		*/
+		return this.analyzer.getClassInformation(type, this.loader);
 	}
 
 	private List<String> getDirectSupersLayer(List<String> types, boolean classes) {

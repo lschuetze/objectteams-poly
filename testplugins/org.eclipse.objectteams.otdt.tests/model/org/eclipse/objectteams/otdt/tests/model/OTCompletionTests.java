@@ -65,8 +65,10 @@ public void testCompletionBaseclass1() throws JavaModelException {
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
+		"CompletionInvisibleBaseclass[TYPE_REF]{p.CompletionInvisibleBaseclass, p, Lp.CompletionInvisibleBaseclass;, null, null, "+
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_SUBWORD+R_NON_RESTRICTED)+"}\n" +
 		"CompletionBaseclass[TYPE_REF]{CompletionBaseclass, , LCompletionBaseclass;, null, null, "+
-		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
 
@@ -87,8 +89,10 @@ public void testCompletionBaseclass2() throws JavaModelException {
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
+		"CompletionInvisibleBaseclass[TYPE_REF]{p.CompletionInvisibleBaseclass, p, Lp.CompletionInvisibleBaseclass;, null, null, "+
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_SUBWORD+R_NON_RESTRICTED)+"}\n" +
 		"CompletionBaseclass[TYPE_REF]{CompletionBaseclass, , LCompletionBaseclass;, null, null, "+
-		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
 
@@ -229,7 +233,7 @@ public void testCompletionBaseGuard2() throws JavaModelException {
 
 	assertResults(
 		"check[METHOD_REF]{check(), LCompletionBaseclass;, ()Z, check, null, "+
-		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_NON_STATIC+R_NON_RESTRICTED)+"}",
+		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_NON_STATIC+R_NON_RESTRICTED+R_EXACT_EXPECTED_TYPE)+"}",
 		requestor.getResults());
 }
 
@@ -395,12 +399,16 @@ public void testCompletionTypeReference1() throws JavaModelException {
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
-		"CompletionTBase[TYPE_REF]{CompletionTBase, , LCompletionTBase;, null, null, " +
-		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n" +
+		"CompletionCalloutTeam[TYPE_REF]{CompletionCalloutTeam, , LCompletionCalloutTeam;, null, null, " +
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_SUBWORD+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n" +
+		"CompletionSuperTeam[TYPE_REF]{CompletionSuperTeam, , LCompletionSuperTeam;, null, null, " +
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_SUBWORD+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n" +
+		"CompletionTBase[TYPE_REF]{CompletionTBase, , LCompletionTBase;, null, null, "+
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n" +
 		"CompletionTeam2[TYPE_REF]{CompletionTeam2, , LCompletionTeam2;, null, null, "+
-		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n" +
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n" +
 		"CompletionTeam2.CompletionTRoleA[TYPE_REF]{CompletionTRoleA, , LCompletionTeam2$CompletionTRoleA;, null, null, "+
-		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
 
@@ -529,8 +537,10 @@ public void testCompletionMethodSpecLong5() throws JavaModelException {
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
+		"CompletionInvisibleBaseclass[TYPE_REF]{p.CompletionInvisibleBaseclass, p, Lp.CompletionInvisibleBaseclass;, null, null, "+
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_SUBWORD+R_NON_RESTRICTED)+"}\n" +
 		"CompletionBaseclass[TYPE_REF]{CompletionBaseclass, , LCompletionBaseclass;, null, null, "+
-		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
 /** A callin binding guard is completed. */
@@ -552,8 +562,10 @@ public void testCompletionBindingGuard() throws JavaModelException {
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
+		"CompletionInvisibleBaseclass[TYPE_REF]{p.CompletionInvisibleBaseclass, p, Lp.CompletionInvisibleBaseclass;, null, null, "+
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_SUBWORD+R_NON_RESTRICTED)+"}\n" +
 		"CompletionBaseclass[TYPE_REF]{CompletionBaseclass, , LCompletionBaseclass;, null, null, "+
-		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
 
@@ -1206,4 +1218,50 @@ public void testCompletionOnConfined() throws JavaModelException {
 		requestor.getResults());
 }
 
+public void testBug569502() throws JavaModelException {
+	this.wc = getWorkingCopy("/Completion/src/Main.java",
+		"import java.util.Collection;\n" +
+		"import java.util.List;\n" +
+		"import base p.Base569502;\n" +
+		"public team class Main {\n" +
+		"	protected class R playedBy Base569502 {\n" +
+		"		void filterNulls(Collection<String> proposals)\n" + 
+		"		<-  after void process(String ignore, Object ignore2, Collection<String> proposals)\n" + 
+		"			with { proposals <- proposals }\n" + 
+		"		can\n" +
+		"		void filterNulls(Collection<String> proposals) {\n" + 
+		"			if ((proposals instanceof List)) {\n" + 
+		"				List<String> list = (List<String>)proposals;\n" + 
+		"				for (int i=list.size()-1; i>=0; i--)\n" + 
+		"					if (list.get(i) == null)\n" + 
+		"						list.remove(i);\n" + 
+		"			}\n" + 
+		"		}\n" + 
+		"	}\n" +
+		"	protected class WithSwitchCase {\n" +
+		"		void m(int i) {\n" +
+		"			switch (i) {\n" +
+		"				case 0: System.out.println(i); break;\n" +
+		"				default: return;\n" +
+		"			}\n" +
+		"		}\n" +
+		"	}\n" +
+		"	protected class WithCallout playedBy Base569502 {\n" +
+		"		void bm(int i) -> void bm(int i);\n" + // this could no be parsed, wrongly seeing TokenNameBeginCaseExpr
+		"		void another() {\n" +
+		"			System.out.println(\"other\");\n" +
+		"		}\n" +
+		"	}\n" +
+		"\n");
+    CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+    String str = this.wc.getSource();
+    String completeBehind = "		can";
+    int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+    this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
+
+	assertResults(
+		"can[POTENTIAL_METHOD_DECLARATION]{can, LMain$R;, ()V, can, null, 39}\n" + 
+		"canHandle[CALLOUT_DECLARATION]{boolean canHandle() -> boolean canHandle();, Lp.Base569502;, ()Z, canHandle, null, 52}",
+		requestor.getResults());
+}
 }

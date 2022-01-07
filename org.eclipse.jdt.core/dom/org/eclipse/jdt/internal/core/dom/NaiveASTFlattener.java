@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,6 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -84,6 +83,14 @@ public class NaiveASTFlattener extends ASTVisitor {
 	 * @since 3.14
 	 */
 	private static final int JLS9 = AST.JLS9;
+
+	/**
+	 * Internal synonym for {@link AST#JLS14}. Use to alleviate
+	 * deprecation warnings.
+	 * @deprecated
+	 * @since 3.22
+	 */
+	private static final int JLS14 = AST.JLS14;
 
 	/**
 	 * The string buffer into which the serialized representation of the AST is
@@ -203,6 +210,12 @@ public class NaiveASTFlattener extends ASTVisitor {
 		}
 		if (Modifier.isTransient(modifiers)) {
 			this.buffer.append("transient ");//$NON-NLS-1$
+		}
+		if (Modifier.isSealed(modifiers)) {
+			this.buffer.append("sealed ");//$NON-NLS-1$
+		}
+		if (Modifier.isNonSealed(modifiers)) {
+			this.buffer.append("non-sealed ");//$NON-NLS-1$
 		}
 	}
 
@@ -462,6 +475,14 @@ public class NaiveASTFlattener extends ASTVisitor {
 			node.getLabel().accept(this);
 		}
 		this.buffer.append(";\n");//$NON-NLS-1$
+		return false;
+	}
+
+	@Override
+	public boolean visit(CaseDefaultExpression node) {
+		if (DOMASTUtil.isPatternSupported(node.getAST())) {
+			this.buffer.append("default");//$NON-NLS-1$
+		}
 		return false;
 	}
 
@@ -794,6 +815,16 @@ public class NaiveASTFlattener extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(GuardedPattern node) {
+		if (DOMASTUtil.isPatternSupported(node.getAST())) {
+			node.getPattern().accept(this);
+			this.buffer.append(" && ");//$NON-NLS-1$
+			node.getExpression().accept(this);
+		}
+		return false;
+	}
+
+	@Override
 	public boolean visit(IfStatement node) {
 		printIndent();
 		this.buffer.append("if (");//$NON-NLS-1$
@@ -869,11 +900,15 @@ public class NaiveASTFlattener extends ASTVisitor {
 	public boolean visit(InstanceofExpression node) {
 		node.getLeftOperand().accept(this);
 		this.buffer.append(" instanceof ");//$NON-NLS-1$
-		if (DOMASTUtil.isInstanceofExpressionPatternSupported(node.getAST()) && node.getPatternVariable()!= null) {
-			node.getPatternVariable().accept(this);
-		} else {
-			node.getRightOperand().accept(this);
-		}
+		node.getRightOperand().accept(this);
+		return false;
+	}
+
+	@Override
+	public boolean visit(PatternInstanceofExpression node) {
+		node.getLeftOperand().accept(this);
+		this.buffer.append(" instanceof ");//$NON-NLS-1$
+		node.getRightOperand().accept(this);
 		return false;
 	}
 
@@ -1213,6 +1248,14 @@ public class NaiveASTFlattener extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(NullPattern node) {
+		if (DOMASTUtil.isPatternSupported(node.getAST())) {
+			this.buffer.append("null");//$NON-NLS-1$
+		}
+		return false;
+	}
+
+	@Override
 	public boolean visit(NumberLiteral node) {
 		this.buffer.append(node.getToken());
 		return false;
@@ -1299,6 +1342,17 @@ public class NaiveASTFlattener extends ASTVisitor {
 		node.getName().accept(this);
 		printTypes(node.implementations(), "with"); //$NON-NLS-1$
 		this.buffer.append(";\n");//$NON-NLS-1$
+		return false;
+	}
+
+	@Override
+	public boolean visit(ModuleQualifiedName node) {
+		node.getModuleQualifier().accept(this);
+		this.buffer.append("/");//$NON-NLS-1$
+		ASTNode cNode = node.getName();
+		if (cNode != null) {
+			cNode.accept(this);
+		}
 		return false;
 	}
 
@@ -1564,8 +1618,8 @@ public class NaiveASTFlattener extends ASTVisitor {
 
 	@Override
 	public boolean visit(SwitchCase node) {
-		if ((node.getAST().apiLevel() >= AST.JLS14)) {
-			if (node.isDefault()) {
+		if ((node.getAST().apiLevel() >= JLS14)) {
+			if (node.isDefault() && !isCaseDefaultExpression(node)) {
 				this.buffer.append("default");//$NON-NLS-1$
 				this.buffer.append(node.isSwitchLabeledRule() ? " ->" : ":");//$NON-NLS-1$ //$NON-NLS-2$
 			} else {
@@ -1579,7 +1633,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 			}
 		}
 		else {
-			if (node.isDefault()) {
+			if (node.isDefault() && !isCaseDefaultExpression(node)) {
 				this.buffer.append("default :\n");//$NON-NLS-1$
 			} else {
 				this.buffer.append("case ");//$NON-NLS-1$
@@ -1588,6 +1642,13 @@ public class NaiveASTFlattener extends ASTVisitor {
 			}
 		}
 		this.indent++; //decremented in visit(SwitchStatement)
+		return false;
+	}
+
+	private boolean isCaseDefaultExpression(SwitchCase node) {
+		if (node.expressions() != null && node.expressions().size() == 1 && node.expressions().get(0) instanceof CaseDefaultExpression) {
+			return true;
+		}
 		return false;
 	}
 	/**
@@ -1814,6 +1875,19 @@ public class NaiveASTFlattener extends ASTVisitor {
 				this.buffer.append(" ");//$NON-NLS-1$
 			}
 		}
+		if (DOMASTUtil.isFeatureSupportedinAST(node.getAST(), Modifier.SEALED)) {
+			if (!node.permittedTypes().isEmpty()) {
+				this.buffer.append("permits ");//$NON-NLS-1$
+				for (Iterator it = node.permittedTypes().iterator(); it.hasNext(); ) {
+					Type t = (Type) it.next();
+					t.accept(this);
+					if (it.hasNext()) {
+						this.buffer.append(", ");//$NON-NLS-1$
+					}
+				}
+				this.buffer.append(" ");//$NON-NLS-1$
+			}
+		}
 		this.buffer.append("{\n");//$NON-NLS-1$
 		this.indent++;
 		for (Iterator it = node.bodyDeclarations().iterator(); it.hasNext(); ) {
@@ -1877,6 +1951,14 @@ public class NaiveASTFlattener extends ASTVisitor {
 					this.buffer.append(" & ");//$NON-NLS-1$
 				}
 			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean visit(TypePattern node) {
+		if (DOMASTUtil.isPatternSupported(node.getAST())) {
+			node.getPatternVariable().accept(this);
 		}
 		return false;
 	}
@@ -1994,7 +2076,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 
 	@Override
 	public boolean visit(YieldStatement node) {
-		if ((node.getAST().apiLevel() >= AST.JLS14) && node.isImplicit()  && node.getExpression() == null) {
+		if ((node.getAST().apiLevel() >= JLS14) && node.isImplicit()  && node.getExpression() == null) {
 			return false;
 		}
 		printIndent();

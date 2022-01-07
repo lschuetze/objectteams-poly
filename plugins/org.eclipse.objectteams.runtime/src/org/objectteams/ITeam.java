@@ -17,6 +17,8 @@
  **********************************************************************/
 package org.objectteams;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Public interface of all team classes.
  */
@@ -121,7 +123,7 @@ public interface ITeam {
 	 * @return
 	 * @throws IllegalArgumentException if <code>roleType</code> does not represent a member type of this team.
 	 */
-	public abstract <T> T getRole(Object aBase, Class<T> roleType) throws IllegalArgumentException;
+	public abstract <T> @Nullable T getRole(Object aBase, Class<T> roleType) throws IllegalArgumentException;
 
 	/**
 	 * Retrieve all bound roles registered in the current team.

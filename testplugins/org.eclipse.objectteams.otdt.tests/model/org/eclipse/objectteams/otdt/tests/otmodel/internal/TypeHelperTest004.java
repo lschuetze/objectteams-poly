@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2021 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -32,7 +32,6 @@ import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 
 /**
  * @author mkr
- * @version $Id: TypeHelperTest004.java 23494 2010-02-05 23:06:44Z stephan $
  */
 public class TypeHelperTest004 extends FileBasedModelTest
 {
@@ -116,8 +115,8 @@ public class TypeHelperTest004 extends FileBasedModelTest
         _t2r2m3 = _t2r2.getMethods()[0];
     }
 
-    protected void setUp() throws Exception
-    {
+    protected void setUp() throws Exception {
+    	this.indexDisabledForTest = false;
         super.setUp();
     }
 

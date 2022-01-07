@@ -384,15 +384,13 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 		if (!refMethodBinding.isConstructor())
 			return false;
 		// of class __OT__Confined?
-		if (!CharOperation.equals(refMethodBinding.declaringClass.compoundName, IOTConstants.ORG_OBJECTTEAMS_TEAM_OTCONFINED))
+		if (refMethodBinding.declaringClass.id != IOTConstants.T_OrgObjectteamsTeamOTConfined)
 			return false;
 		// is it the superclass of the current src class?
 		if (TypeBinding.equalsEquals(refMethodBinding.declaringClass, srcMethod.declaringClass.superclass()))
 			return true;
 		// current src class may have no super class which is OK if it is Team.__OT__Confined
-		return
-			   srcMethod.declaringClass.superclass() == null
-			&& CharOperation.equals(IOTConstants.ORG_OBJECTTEAMS_TEAM_OTCONFINED, refMethodBinding.declaringClass.compoundName);
+		return srcMethod.declaringClass.superclass() == null;
 	}
 
 	private static MethodBinding getConfinedSuperCtor(MethodBinding dstMethod) {
@@ -473,6 +471,13 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 			methods = role.getMethods(refMethod.selector);
 			assert(methods.length == 1);
 			return methods[0];
+		}
+		if (   role.isLocalType()
+			&& CharOperation.equals(refMethod.selector, IOTConstants.INIT_METHOD_NAME))
+		{
+			// have no overriding along implicit inheritance due to scoping of locals,
+			// so just retrieve the method by its name:
+			return role.getMethods(IOTConstants.INIT_METHOD_NAME)[0];
 		}
 		int bestRank = Integer.MAX_VALUE;
 		MethodBinding bestMethod = null;

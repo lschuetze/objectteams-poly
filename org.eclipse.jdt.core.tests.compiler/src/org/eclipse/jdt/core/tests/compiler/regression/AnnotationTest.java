@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -106,12 +106,12 @@ public class AnnotationTest extends AbstractComparableTest {
 		return options;
 	}
 	@Override
-	protected INameEnvironment getNameEnvironment(String[] testFiles, String[] classPaths) {
+	protected INameEnvironment getNameEnvironment(String[] testFiles, String[] classPaths, Map<String, String> options) {
 		if (this.javaClassLib != null) {
 			this.classpaths = classPaths == null ? getDefaultClassPaths() : classPaths;
 			return new InMemoryNameEnvironment(testFiles, new INameEnvironment[] {this.javaClassLib });
 		}
-		return super.getNameEnvironment(testFiles, classPaths);
+		return super.getNameEnvironment(testFiles, classPaths, options);
 	}
 
 	/* (non-Javadoc)
@@ -1077,6 +1077,13 @@ public class AnnotationTest extends AbstractComparableTest {
 	// check annotation member modifiers (validity unchanged despite grammar change from JSR 335 - default methods)
 	// and https://bugs.eclipse.org/bugs/show_bug.cgi?id=3383968
 	public void test039a() {
+		String extra = this.complianceLevel < ClassFileConstants.JDK17 ? "" :
+				"----------\n" +
+				"1. WARNING in X.java (at line 2)\n" +
+				"	strictfp double val() default 0.1;\n" +
+				"	^^^^^^^^\n" +
+				"Floating-point expressions are always strictly evaluated from source level 17. Keyword \'strictfp\' is not required.\n";
+		int offset = this.complianceLevel < ClassFileConstants.JDK17 ? 0 : 1;
 		this.runNegativeTest(
 			new String[] {
 				"X.java",
@@ -1085,13 +1092,14 @@ public class AnnotationTest extends AbstractComparableTest {
 				"	synchronized String id() default \"zero\";\n" +
 				"}"
 			},
+			extra +
 			"----------\n" +
-			"1. ERROR in X.java (at line 2)\n" +
+			(1 + offset) + ". ERROR in X.java (at line 2)\n" +
 			"	strictfp double val() default 0.1;\n" +
 			"	                ^^^^^\n" +
 			"Illegal modifier for the annotation attribute X.val; only public & abstract are permitted\n" +
 			"----------\n" +
-			"2. ERROR in X.java (at line 3)\n" +
+			(2 + offset) + ". ERROR in X.java (at line 3)\n" +
 			"	synchronized String id() default \"zero\";\n" +
 			"	                    ^^^^\n" +
 			"Illegal modifier for the annotation attribute X.id; only public & abstract are permitted\n" +
@@ -11154,42 +11162,74 @@ public void test384567_2() {
 // Bug 416107 - Incomplete error message for member interface and annotation
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=416107
 public void test416107a() {
-    this.runNegativeTest(
-        new String[] {
-            "X.java",
-			"public class X {\n" +
-			"	class Y {\n" +
-			"		 @interface Bar {\n" +
-			"			public String bar = \"BUG\";\n" +
-			"		}\n" +
-			"	}\n" +
-			"}",
-        },
-        "----------\n" +
-		"1. ERROR in X.java (at line 3)\n" +
-		"	@interface Bar {\n" +
-		"	           ^^^\n" +
-		"The member annotation Bar can only be defined inside a top-level class or interface or in a static context\n" +
-		"----------\n");
+	if (this.complianceLevel < ClassFileConstants.JDK16) {
+	    this.runNegativeTest(
+	            new String[] {
+	                "X.java",
+	    			"public class X {\n" +
+	    			"	class Y {\n" +
+	    			"		 @interface Bar {\n" +
+	    			"			public String bar = \"BUG\";\n" +
+	    			"		}\n" +
+	    			"	}\n" +
+	    			"}",
+	            },
+	            "----------\n" +
+	    		"1. ERROR in X.java (at line 3)\n" +
+	    		"	@interface Bar {\n" +
+	    		"	           ^^^\n" +
+	    		"The member annotation Bar can only be defined inside a top-level class or interface or in a static context\n" +
+	    		"----------\n");
+	}	else {
+	    	    this.runConformTest(
+	    	            new String[] {
+	    	                "X.java",
+	    	    			"public class X {\n" +
+	    	    			"	class Y {\n" +
+	    	    			"		 @interface Bar {\n" +
+	    	    			"			public String bar = \"BUG\";\n" +
+	    	    			"		}\n" +
+	    	    			"	}\n" +
+	    	    			"}",
+	    	            },
+	    	            "");
+
+	}
 }
 public void test416107b() {
-	runNegativeTest(
-		new String[] {
-			"X.java",
-			"public class X {\n" +
-			"	class Y {\n" +
-			"		interface Bar {\n" +
-			"			public String bar = \"BUG\";\n" +
-			"		}\n" +
-			"	}\n" +
-			"}",
-		},
-		"----------\n" +
-		"1. ERROR in X.java (at line 3)\n" +
-		"	interface Bar {\n" +
-		"	          ^^^\n" +
-		"The member interface Bar can only be defined inside a top-level class or interface or in a static context\n" +
-		"----------\n");
+	if (this.complianceLevel < ClassFileConstants.JDK16) {
+		runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"	class Y {\n" +
+					"		interface Bar {\n" +
+					"			public String bar = \"BUG\";\n" +
+					"		}\n" +
+					"	}\n" +
+					"}",
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 3)\n" +
+				"	interface Bar {\n" +
+				"	          ^^^\n" +
+				"The member interface Bar can only be defined inside a top-level class or interface or in a static context\n" +
+				"----------\n");
+	} else {
+		runConformTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"	class Y {\n" +
+					"		interface Bar {\n" +
+					"			public String bar = \"BUG\";\n" +
+					"		}\n" +
+					"	}\n" +
+					"}",
+				},
+				"");
+
+	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=427367
 public void test427367() throws Exception {

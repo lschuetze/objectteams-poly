@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -125,7 +125,7 @@ public final class AST {
      * </p>
      *
 	 * @since 3.0
-	 * @deprecated Clients should use the  {@link #JLS_Latest} AST API instead.
+	 * @deprecated Clients should use the  {@link #getJLSLatest()} AST API instead.
 	 */
 	public static final int JLS2 = 2;
 
@@ -149,7 +149,7 @@ public final class AST {
      * </p>
      *
 	 * @since 3.1
-	 * @deprecated Clients should use the {@link #JLS_Latest} AST API instead.
+	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 */
 	public static final int JLS3 = 3;
 
@@ -173,7 +173,7 @@ public final class AST {
 	 * </p>
 	 *
 	 * @since 3.7.1
-	 * @deprecated Clients should use the {@link #JLS_Latest} AST API instead.
+	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 */
 	public static final int JLS4 = 4;
 
@@ -197,7 +197,7 @@ public final class AST {
 	 * </p>
 	 *
 	 * @since 3.10
-	 * @deprecated Clients should use the {@link #JLS_Latest} AST API instead.
+	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 */
 	public static final int JLS8 = 8;
 
@@ -221,7 +221,7 @@ public final class AST {
 	 * </p>
 	 *
 	 * @since 3.14
-	 * @deprecated Clients should use the {@link #JLS_Latest} AST API instead.
+	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 */
 	public static final int JLS9 = 9;
 
@@ -245,7 +245,7 @@ public final class AST {
 	 * </p>
 	 *
 	 * @since 3.14
-	 * @deprecated Clients should use the {@link #JLS_Latest} AST API instead.
+	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 */
 	public static final int JLS10 = 10;
 
@@ -268,7 +268,7 @@ public final class AST {
 	 * up to and including Java SE 11 (aka JDK 11).
 	 * </p>
 	 *
-	 * @deprecated Clients should use the {@link #JLS_Latest} AST API instead.
+	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 * @since 3.16
 	 */
 	public static final int JLS11 = 11;
@@ -291,7 +291,7 @@ public final class AST {
 	 * programs written in all versions of the Java language
 	 * up to and including Java SE 12 (aka JDK 12).
 	 * </p>
-	 * @deprecated Clients should use the {@link #JLS_Latest} AST API instead.
+	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 * @since 3.18
 	 */
 	public static final int JLS12 = 12;
@@ -313,9 +313,9 @@ public final class AST {
 	 * programs written in all versions of the Java language
 	 * up to and including Java SE 13 (aka JDK 13).
 	 * </p>
-	 *
+	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 * @since 3.20
-	 * @deprecated Clients should use the {@link #JLS_Latest} AST API instead.
+	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 */
 	public static final int JLS13 = 13;
 
@@ -337,7 +337,7 @@ public final class AST {
 	 * programs written in all versions of the Java language
 	 * up to and including Java SE 14(aka JDK 14).
 	 * </p>
-	 *
+	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 * @since 3.22
 	 */
 	public static final int JLS14 = 14;
@@ -349,9 +349,80 @@ public final class AST {
 	 */
 	static final int JLS14_INTERNAL = JLS14;
 
-	@SuppressWarnings("unused")
-	/* Used for Java doc only*/
-	private static final int JLS_Latest = JLS14;
+	/**
+	 * Constant for indicating the AST API that handles JLS15.
+	 * <p>
+	 * This API is capable of handling all constructs in the
+	 * Java language as described in the Java Language
+	 * Specification, Java SE 15 Edition (JLS15).
+	 * JLS15 is a superset of all earlier versions of the
+	 * Java language, and the JLS15 API can be used to manipulate
+	 * programs written in all versions of the Java language
+	 * up to and including Java SE 15(aka JDK 15).
+	 * </p>
+	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
+	 * @since 3.24
+	 */
+	public static final int JLS15 = 15;
+	/**
+	 * Constant for indicating the AST API that handles JLS16.
+	 * <p>
+	 * This API is capable of handling all constructs in the
+	 * Java language as described in the Java Language
+	 * Specification, Java SE 16 Edition (JLS16).
+	 * JLS16 is a superset of all earlier versions of the
+	 * Java language, and the JLS16 API can be used to manipulate
+	 * programs written in all versions of the Java language
+	 * up to and including Java SE 16(aka JDK 16).
+	 * </p>
+	 * * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
+	 * @since 3.26
+	 */
+	public static final int JLS16 = 16;
+	/**
+	 * Constant for indicating the AST API that handles JLS17.
+	 * <p>
+	 * This API is capable of handling all constructs in the
+	 * Java language as described in the Java Language
+	 * Specification, Java SE 17 Edition (JLS17).
+	 * JLS17 is a superset of all earlier versions of the
+	 * Java language, and the JLS17 API can be used to manipulate
+	 * programs written in all versions of the Java language
+	 * up to and including Java SE 17(aka JDK 17).
+	 * </p>
+	 *
+	 * @since 3.28
+	 */
+	public static final int JLS17 = 17;
+
+	/**
+	 * Internal synonym for {@link #JLS15}. Use to alleviate
+	 * deprecation warnings once JLS15 is deprecated
+	 */
+	static final int JLS15_INTERNAL = JLS15;
+	/**
+	 * Internal synonym for {@link #JLS16}. Use to alleviate
+	 * deprecation warnings once JLS16 is deprecated
+	 */
+	static final int JLS16_INTERNAL = JLS16;
+	/**
+	 * Internal synonym for {@link #JLS17}. Use to alleviate
+	 * deprecation warnings once JLS17 is deprecated
+	 */
+	static final int JLS17_INTERNAL = JLS17;
+
+	/**
+	 * Internal property for latest supported JLS level
+	 * This provides the latest JLS level.
+	 */
+	private static final int JLS_INTERNAL_Latest = JLS17;
+
+	/**
+	 * @since 3.26
+	 * This provides the latest JLS level.
+	 * @deprecated use {@link #getJLSLatest()}
+	 */
+	public static final int JLS_Latest = JLS17;
 
 	/*
 	 * Must not collide with a value for ICompilationUnit constants
@@ -985,10 +1056,15 @@ public final class AST {
 						true/*taskCaseSensitive*/,
 						false/*isPreviewEnabled*/);
 				break;
-			case JLS11_INTERNAL :
+			default:
+				if (level < JLS2_INTERNAL && level > JLS_Latest) {
+					throw new IllegalArgumentException("Unsupported JLS level : " + level); //$NON-NLS-1$
+				}
 				this.apiLevel = level;
 				// initialize a scanner
-				long compliance = ClassFileConstants.getComplianceLevelForJavaVersion(ClassFileConstants.MAJOR_VERSION_11);
+				// As long as the AST levels and ClassFileConstants.MAJOR_VERSION grow simultaneously,
+				// we can use the offset of +44 to compute the Major version from the given AST Level
+				long compliance = ClassFileConstants.getComplianceLevelForJavaVersion(level + 44);
 				this.scanner = new Scanner(
 						true /*comment*/,
 						true /*whitespace*/,
@@ -1000,53 +1076,6 @@ public final class AST {
 						true/*taskCaseSensitive*/,
 						false/*isPreviewEnabled*/);
 				break;
-			case JLS12_INTERNAL :
-				this.apiLevel = level;
-				// initialize a scanner
-				compliance = ClassFileConstants.getComplianceLevelForJavaVersion(ClassFileConstants.MAJOR_VERSION_12);
-				this.scanner = new Scanner(
-						true /*comment*/,
-						true /*whitespace*/,
-						false /*nls*/,
-						compliance /*sourceLevel*/,
-						compliance /*complianceLevel*/,
-						null/*taskTag*/,
-						null/*taskPriorities*/,
-						true/*taskCaseSensitive*/,
-						previewEnabled);
-				break;
-			case JLS13_INTERNAL :
-				this.apiLevel = level;
-				// initialize a scanner
-				compliance = ClassFileConstants.getComplianceLevelForJavaVersion(ClassFileConstants.MAJOR_VERSION_13);
-				this.scanner = new Scanner(
-						true /*comment*/,
-						true /*whitespace*/,
-						false /*nls*/,
-						compliance /*sourceLevel*/,
-						compliance /*complianceLevel*/,
-						null/*taskTag*/,
-						null/*taskPriorities*/,
-						true/*taskCaseSensitive*/,
-						previewEnabled);
-				break;
-			case JLS14_INTERNAL :
-				this.apiLevel = level;
-				// initialize a scanner
-				compliance = ClassFileConstants.getComplianceLevelForJavaVersion(ClassFileConstants.MAJOR_VERSION_14);
-				this.scanner = new Scanner(
-						true /*comment*/,
-						true /*whitespace*/,
-						false /*nls*/,
-						compliance /*sourceLevel*/,
-						compliance /*complianceLevel*/,
-						null/*taskTag*/,
-						null/*taskPriorities*/,
-						true/*taskCaseSensitive*/,
-						previewEnabled);
-				break;
-			default:
-				throw new IllegalArgumentException("Unsupported JLS level"); //$NON-NLS-1$
 		}
 	}
 
@@ -1061,8 +1090,9 @@ public final class AST {
 	 *    	<code>"1.3"</code> means the source code is as per JDK 1.3 and api level {@link #JLS3}.</li>
 	 *    	<li><code>"1.4", "1.5", "1.6", "1.7" "1.8"</code> implies the respective source JDK levels 1.4, 1.5, 1.6, 1.7 and api level {@link #JLS4}.</li>
 	 *    	<li><code>"1.8"</code> implies the respective source JDK level 1.8 and api level {@link #JLS8}.</li>
-	 *    	<li><code>"9", "10", "11", "12" and "13"</code> implies the respective JDK levels 9, 10, 11, 12 and 13
-	 *     	and api levels {@link #JLS9}, {@link #JLS10}, {@link #JLS11}, {@link #JLS12} and {@link #JLS13}.</li>
+	 *    	<li><code>"9", "10", "11", "12", "13", "14", "15", "16" and "17"</code> implies the respective JDK levels 9, 10, 11, 12, 13, 14, 15, 16 and 17
+	 *     	and api levels {@link #JLS9}, {@link #JLS10}, {@link #JLS11}, {@link #JLS12}, {@link #JLS13}
+	 *     {@link #JLS14}, {@link #JLS15}, {@link #JLS16} and {@link #JLS17}.</li>
 	 *    	<li>Additional legal values may be added later.</li>
 	 *    </ul>
 	 * 	<li><code>"org.eclipse.jdt.core.compiler.problem.enablePreviewFeatures"</code> -
@@ -1124,6 +1154,9 @@ public final class AST {
         t.put(JavaCore.VERSION_12, ClassFileConstants.JDK12);
         t.put(JavaCore.VERSION_13, ClassFileConstants.JDK13);
         t.put(JavaCore.VERSION_14, ClassFileConstants.JDK14);
+        t.put(JavaCore.VERSION_15, ClassFileConstants.JDK15);
+        t.put(JavaCore.VERSION_16, ClassFileConstants.JDK16);
+        t.put(JavaCore.VERSION_17, ClassFileConstants.JDK17);
         return Collections.unmodifiableMap(t);
 	}
 	private static Map<String, Integer> getApiLevelMapTable() {
@@ -1142,6 +1175,9 @@ public final class AST {
         t.put(JavaCore.VERSION_12, JLS12_INTERNAL);
         t.put(JavaCore.VERSION_13, JLS13_INTERNAL);
         t.put(JavaCore.VERSION_14, JLS14_INTERNAL);
+        t.put(JavaCore.VERSION_15, JLS15_INTERNAL);
+        t.put(JavaCore.VERSION_16, JLS16_INTERNAL);
+        t.put(JavaCore.VERSION_17, JLS17_INTERNAL);
         return Collections.unmodifiableMap(t);
 	}
 	/**
@@ -1685,6 +1721,17 @@ public final class AST {
 	}
 
 	/**
+	 * Creates and returns a new unparented default case expression node.
+	 *
+	 * @return a new unparented default case expression node
+	 * @since 3.28
+	 */
+	public CaseDefaultExpression newCaseDefaultExpression() {
+		CaseDefaultExpression result = new CaseDefaultExpression(this);
+		return result;
+	}
+
+	/**
 	 * Creates and returns a new unparented cast expression node
 	 * owned by this AST. By default, the type and expression are unspecified
 	 * (but legal).
@@ -2033,6 +2080,18 @@ public final class AST {
 	 */
 	public ForStatement newForStatement() {
 		return new ForStatement(this);
+	}
+
+	/**
+	 * Creates and returns a new unparented guarded pattern node with an
+	 * unspecified pattern variable name and a null expression.
+	 *
+	 * @return a new unparented guarded pattern node
+	 * @since 3.28
+	 */
+	public GuardedPattern newGuardedPattern() {
+		GuardedPattern result = new GuardedPattern(this);
+		return result;
 	}
 
 	/**
@@ -2454,6 +2513,12 @@ public final class AST {
 			result.add(newModifier(Modifier.ModifierKeyword.CALLIN_KEYWORD));
 		}
 // SH}
+		if (Modifier.isSealed(flags)) {
+			result.add(newModifier(Modifier.ModifierKeyword.SEALED_KEYWORD));
+		}
+		if (Modifier.isNonSealed(flags)) {
+			result.add(newModifier(Modifier.ModifierKeyword.NON_SEALED_KEYWORD));
+		}
 		return result;
 	}
 
@@ -2607,6 +2672,17 @@ public final class AST {
 	}
 
 	/**
+	 * Creates and returns a new unparented null pattern node .
+	 *
+	 * @return a new unparented null pattern node
+	 * @since 3.28
+	 */
+	public NullPattern newNullPattern() {
+		NullPattern result = new NullPattern(this);
+		return result;
+	}
+
+	/**
 	 * Creates and returns a new unparented number literal node.
 	 * Initially the number literal token is <code>"0"</code>.
 	 *
@@ -2688,6 +2764,19 @@ public final class AST {
 	 */
 	public ParenthesizedExpression newParenthesizedExpression() {
 		ParenthesizedExpression result = new ParenthesizedExpression(this);
+		return result;
+	}
+
+	/**
+	 * Creates and returns a new unparented instanceof expression node
+	 * owned by this AST. By default, the operator and left and right
+	 * operand are unspecified (but legal).
+	 *
+	 * @return a new unparented instanceof expression node
+	 * @since 3.26
+	 */
+	public PatternInstanceofExpression newPatternInstanceofExpression() {
+		PatternInstanceofExpression result = new PatternInstanceofExpression(this);
 		return result;
 	}
 
@@ -2789,6 +2878,20 @@ public final class AST {
 		return result;
 	}
 
+	/**
+	 * Creates an unparented record declaration node owned by this AST.
+	 * The name of the class is an unspecified, but legal, name;
+	 * no modifiers; no doc comment; no superclass or superinterfaces;
+	 * and an empty record body.
+	 *
+	 * @return a new unparented type declaration node
+	 * @exception UnsupportedOperationException if this operation is used in an AST with level less than JLS16
+	 * @since 3.23
+	 */
+	public RecordDeclaration newRecordDeclaration() {
+		RecordDeclaration result = new RecordDeclaration(this);
+		return result;
+	}
 	/**
 	 * Creates and returns a new unparented requires directive
 	 * node for an unspecified, but legal, name;
@@ -3042,8 +3145,7 @@ public final class AST {
 	 * label/identifier/expression and is not implicit.
 	 *
 	 * @return a new unparented yield statement node
-	 * @since 3.20
-	 * @noreference This method is not intended to be referenced by clients.
+	 * @since 3.24
 	 */
 	public TextBlock newTextBlock() {
 		return new TextBlock(this);
@@ -3209,6 +3311,18 @@ public final class AST {
 	}
 
 	/**
+	 * Creates and returns a new unparented type pattern node with an
+	 * unspecified pattern variable.
+	 *
+	 * @return a new unparented type pattern node
+	 * @since 3.28
+	 */
+	public TypePattern newTypePattern() {
+		TypePattern result = new TypePattern(this);
+		return result;
+	}
+
+	/**
 	 * Creates a new unparented union type node owned by this AST.
 	 * By default, the union type has no types.
 	 *
@@ -3354,8 +3468,7 @@ public final class AST {
 	 * label/identifier/expression and is not implicit.
 	 *
 	 * @return a new unparented yield statement node
-	 * @since 3.20
-	 * @noreference This method is not intended to be referenced by clients.
+	 * @since 3.24
 	 */
 	public YieldStatement newYieldStatement() {
 		return new YieldStatement(this);
@@ -3922,9 +4035,19 @@ public final class AST {
 	 * @since 3.19
 	 */
 	public boolean isPreviewEnabled() {
-		if (this.apiLevel == AST.JLS_Latest && this.previewEnabled) {
+		if (this.apiLevel == AST.JLS_INTERNAL_Latest && this.previewEnabled) {
 				return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Returns latest supported JLS level
+	 *
+	 * @return the latest supported JLS level
+	 * @since 3.27
+	 */
+	public static int getJLSLatest() {
+		return JLS_INTERNAL_Latest;
 	}
 }

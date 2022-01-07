@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.util.IAttributeNamesConstants;
 import org.eclipse.jdt.core.util.IClassFileAttribute;
 import org.eclipse.jdt.core.util.IClassFileReader;
 import org.eclipse.jdt.core.util.IMethodInfo;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.core.util.BootstrapMethodsAttribute;
 
@@ -39,7 +40,7 @@ import junit.framework.Test;
 public class LambdaExpressionsTest extends AbstractRegressionTest {
 
 static {
-//	TESTS_NAMES = new String[] { "testBug540520"};
+//	TESTS_NAMES = new String[] { "test056"};
 //	TESTS_NUMBERS = new int[] { 50 };
 //	TESTS_RANGE = new int[] { 11, -1 };
 }
@@ -1045,7 +1046,10 @@ public void test039() {
 					"       try {\n" +
 					"		    X x = (X & I & J) o;\n" +
 					"       } catch (ClassCastException e) {\n" +
-					"           System.out.println(e.getMessage());\n" +
+					// Make assertion more robust by producing predictable output for Java 11+:
+					//   - Omit stack trace
+					//   - Cut off class loader name (e.g. 'java.net.URLClassLoader @f3f9f4b') for easier matching
+					"           System.out.println(e.getMessage().replaceFirst(\"(unnamed module of loader).*\", \"$1\"));\n" +
 					"       }\n" +
 					"	}\n" +
 					"}\n",
@@ -1605,6 +1609,7 @@ public void test055() {
 	    "");
 }
 public void test056() {
+	  String expected = isJRE15Plus ? "Cannot invoke \"Object.getClass()\" because \"x\" is null" : "null";
 	  this.runConformTest(
 	    new String[] {
 	      "X.java",
@@ -1626,7 +1631,7 @@ public void test056() {
 		  "	}\n" +
 		  "}\n"
 	    },
-	    "null");
+	    expected);
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=410114, [1.8] CCE when trying to parse method reference expression with inappropriate type arguments
 public void test057() {
@@ -1951,11 +1956,6 @@ public void testReferenceExpressionInference3b() {
 		},
 		"----------\n" +
 		"1. ERROR in X.java (at line 7)\n" +
-		"	I<X,String> x2s = compose(this::bar, this::i2s);\n" +
-		"	                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
-		"Type mismatch: cannot convert from I<Object,Object> to I<X,String>\n" +
-		"----------\n" +
-		"2. ERROR in X.java (at line 7)\n" +
 		"	I<X,String> x2s = compose(this::bar, this::i2s);\n" +
 		"	                                     ^^^^^^^^^\n" +
 		"The type X does not define i2s(Object) that is applicable here\n" +
@@ -7203,6 +7203,117 @@ public void testBug540631() {
 			"}\n"
 		};
 	runner.runConformTest();
+}
+public void testBug562324() {
+	if (this.complianceLevel < ClassFileConstants.JDK11)
+		return; // uses 'var'
+	runConformTest(
+		new String[] {
+			"X.java",
+			"\n" +
+			"import java.util.Arrays;\n" +
+			"import java.util.List;\n" +
+			"import java.util.Set;\n" +
+			"import java.util.function.Function;\n" +
+			"import java.util.stream.Collector;\n" +
+			"\n" +
+			"public class X  {\n" +
+			"\n" +
+			"	public static void main(String[] args) {\n" +
+			"		try {\n" +
+			"			List<String> taskNames = Arrays.asList(\"First\", \"Second\", \"Third\");\n" +
+			"			\n" +
+			"			// To avoid the ClassFormatError at run-time, declare this variable with type 'Set<Y>'\n" +
+			"			var services = taskNames.stream().collect(X.toSet(name -> new Y(){}));\n" +
+			"\n" +
+			"			String[] names = services.stream().map(e -> e).toArray(String[] :: new);\n" +
+			"		} catch (RuntimeException re) {\n" +
+			"			System.out.print(re.getMessage());\n" +
+			"		}\n" +
+			"	}\n" +
+			"    public static <T, U>\n" +
+			"    Collector<T, ?, Set<U>> toSet(Function<? super T, ? extends U> valueMapper) {\n" +
+			"    	throw new RuntimeException(\"it runs\");\n" +
+			"    }\n" +
+			"\n" +
+			"}\n" +
+			"\n" +
+			"abstract class Y{}\n"
+		},
+		"it runs");
+}
+public void testBug562324b() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"\n" +
+			"import java.util.Arrays;\n" +
+			"import java.util.List;\n" +
+			"import java.util.Set;\n" +
+			"import java.util.function.Function;\n" +
+			"import java.util.stream.Collector;\n" +
+			"\n" +
+			"public class X  {\n" +
+			"\n" +
+			"	public static void main(String[] args) {\n" +
+			"		try {\n" +
+			"			List<String> taskNames = Arrays.asList(\"First\", \"Second\", \"Third\");\n" +
+			"			\n" +
+			"			// To avoid the ClassFormatError at run-time, declare this variable with type 'Set<Y>'\n" +
+			"			;\n" +
+			"\n" +
+			"			String[] names = taskNames.stream().collect(X.toSet(name -> new Y(){}))\n" +
+			"								.stream().map(e -> e).toArray(String[] :: new);\n" +
+			"		} catch (RuntimeException re) {\n" +
+			"			System.out.print(re.getMessage());\n" +
+			"		}\n" +
+			"	}\n" +
+			"    public static <T, U>\n" +
+			"    Collector<T, ?, Set<U>> toSet(Function<? super T, ? extends U> valueMapper) {\n" +
+			"    	throw new RuntimeException(\"it runs\");\n" +
+			"    }\n" +
+			"\n" +
+			"}\n" +
+			"\n" +
+			"abstract class Y{}\n"
+		},
+		"it runs");
+}
+public void testBug576152() {
+	runConformTest(
+			new String[] {
+					"Example.java",
+					"\n"
+					+ "import java.util.function.Supplier;\n"
+					+ "\n"
+					+ "public class Example {\n"
+					+ "    Example() {\n"
+					+ "        inspect(this::singleMethod);\n"
+					+ "        inspect(this::overloadedMethod);\n"
+					+ "    }\n"
+					+ "    void inspect(Inspector... inspectors) { }\n"
+					+ "    void singleMethod(byte[] input, int offset, int len) { }\n"
+					+ "    void overloadedMethod() { }\n"
+					+ "    void overloadedMethod(byte[] input, int offset, int len) { }\n"
+					+ "\n"
+					+ "    public static void main(String[] args) {\n"
+					+ "    	String s1 = hoge1(String::new);\n"
+					+ "    	String s2 = hoge2(String::new);	// Error. See the attached file.\n"
+					+ "    }\n"
+					+ "    static <T> T hoge1(Supplier<T> sup) {\n"
+					+ "    	return null;\n"
+					+ "    }\n"
+					+ "    static <T> T hoge2(Supplier<T>... sup) {\n"
+					+ "    	return null;\n"
+					+ "    }\n"
+					+ "}\n"
+					+ "\n"
+					+ "@FunctionalInterface\n"
+					+ "interface Inspector {\n"
+					+ "    void update(byte[] input, int offset, int len);\n"
+					+ "}"
+			}
+			);
 }
 public static Class testClass() {
 	return LambdaExpressionsTest.class;

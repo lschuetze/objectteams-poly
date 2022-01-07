@@ -73,6 +73,7 @@ public class AbstractStringBasedTest extends ModifyingResourceTests
     public void tearDown() throws Exception
     {
         deleteProject(TEST_PROJECT);
+        super.tearDown();
     }
 
     public void setTestProject(IJavaProject prj)

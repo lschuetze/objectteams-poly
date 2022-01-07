@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -57,6 +57,7 @@ public abstract class Binding {
 	// Java 14 - Records - preview
 	public static final int RECORD_COMPONENT = ASTNode.Bit18;
 //	public static final int VARIABLE = FIELD | LOCAL | RECORD_COMPONENT;
+	public static final int PATTERN = ASTNode.Bit19;
 
 	// In the unlikely event you add a new type binding, remember to update TypeBindingVisitor and Scope.substitute methods.
 
@@ -76,6 +77,7 @@ public abstract class Binding {
 	public static final ReferenceBinding[] ANY_EXCEPTION = new ReferenceBinding[] { null }; // special handler for all exceptions
 	public static final FieldBinding[] NO_FIELDS = new FieldBinding[0];
 	public static final MethodBinding[] NO_METHODS = new MethodBinding[0];
+	public static final ReferenceBinding[] NO_PERMITTEDTYPES = new ReferenceBinding[0];
 	public static final ReferenceBinding[] NO_SUPERINTERFACES = new ReferenceBinding[0];
 	public static final ReferenceBinding[] NO_MEMBER_TYPES = new ReferenceBinding[0];
 	public static final TypeVariableBinding[] NO_TYPE_VARIABLES = new TypeVariableBinding[0];

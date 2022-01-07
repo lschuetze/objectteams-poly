@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
 
@@ -46,6 +47,19 @@ public class ASMByteCodeAnalyzer {
 			this.modifiers = classReader.getAccess();
 			this.superClassName = classReader.getSuperName();
 			this.superInterfaceNames = classReader.getInterfaces();
+		}
+
+		public ClassInformation(Class<?> clazz) {
+			this.modifiers = clazz.getModifiers();
+			Class<?> superclass = clazz.getSuperclass();
+			this.superClassName = superclass != null
+					? superclass.getName().replace('.', '/')
+					: ClassNames.OBJECT_SLASH;
+			Class<?>[] interfaces = clazz.getInterfaces();
+			this.superInterfaceNames = new String[interfaces.length];
+			for (int i = 0; i < interfaces.length; i++) {
+				this.superInterfaceNames[i] = interfaces[i].getName().replace('.', '/');
+			}
 		}
 
 		public boolean isInterface() {
@@ -102,5 +116,20 @@ public class ASMByteCodeAnalyzer {
 		classInformation = new ClassInformation(classReader);
 		classInformationMap.put(className, classInformation);
 		return classInformation;
+	}
+
+	public ClassInformation getClassInformation(String className, ClassLoader loader) {
+		ClassInformation classInformation = classInformationMap.get(className);
+		if (classInformation != null) {
+			return classInformation;
+		}
+		try {
+			Class<?> clazz = loader.loadClass(className.replace('/', '.'));
+			if (clazz != null)
+				return new ClassInformation(clazz);
+		} catch (ClassNotFoundException e) {
+			return null;
+		}
+		return null;
 	}
 }

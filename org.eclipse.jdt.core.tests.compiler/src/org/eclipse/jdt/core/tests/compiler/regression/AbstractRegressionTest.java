@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -140,7 +140,6 @@ public abstract class AbstractRegressionTest extends AbstractCompilerTest implem
 
 		ASTVisitor visitor;
 
-		@SuppressWarnings("synthetic-access")
 		protected void runConformTest() {
 			runTest(this.shouldFlushOutputDirectory,
 					this.testFiles,
@@ -166,7 +165,6 @@ public abstract class AbstractRegressionTest extends AbstractCompilerTest implem
 					this.skipJavac ? JavacTestOptions.SKIP : this.javacTestOptions);
 		}
 
-		@SuppressWarnings("synthetic-access")
 		protected void runNegativeTest() {
 			runTest(this.shouldFlushOutputDirectory,
 					this.testFiles,
@@ -192,7 +190,6 @@ public abstract class AbstractRegressionTest extends AbstractCompilerTest implem
 					this.skipJavac ? JavacTestOptions.SKIP : this.javacTestOptions);
 		}
 
-		@SuppressWarnings("synthetic-access")
 		protected void runWarningTest() {
 			runTest(this.shouldFlushOutputDirectory,
 					this.testFiles,
@@ -246,7 +243,7 @@ static class JavacCompiler {
 		this.compliance = CompilerOptions.versionToJdkLevel(this.version);
 		this.minor = minorFromRawVersion(this.version, rawVersion);
 		this.rawVersion = rawVersion;
-		StringBuffer classpathBuffer = new StringBuffer(" -classpath ");
+		StringBuilder classpathBuffer = new StringBuilder(" -classpath ");
 		this.classpath = classpathBuffer.toString();
 	}
 	/** Call this if " -classpath " should be replaced by some other option token. */
@@ -309,6 +306,12 @@ static class JavacCompiler {
 			return JavaCore.VERSION_13;
 		} else if(rawVersion.startsWith("14")) {
 			return JavaCore.VERSION_14;
+		} else if(rawVersion.startsWith("15")) {
+			return JavaCore.VERSION_15;
+		} else if(rawVersion.startsWith("16")) {
+			return JavaCore.VERSION_16;
+		} else if(rawVersion.startsWith("17")) {
+			return JavaCore.VERSION_17;
 		} else {
 			throw new RuntimeException("unknown javac version: " + rawVersion);
 		}
@@ -464,6 +467,48 @@ static class JavacCompiler {
 				return 0200;
 			}
 		}
+		if (version == JavaCore.VERSION_15) {
+			if ("15-ea".equals(rawVersion)) {
+				return 0000;
+			}
+			if ("15".equals(rawVersion)) {
+				return 0000;
+			}
+			if ("15.0.1".equals(rawVersion)) {
+				return 0100;
+			}
+			if ("15.0.2".equals(rawVersion)) {
+				return 0200;
+			}
+		}
+		if (version == JavaCore.VERSION_16) {
+			if ("16-ea".equals(rawVersion)) {
+				return 0000;
+			}
+			if ("16".equals(rawVersion)) {
+				return 0000;
+			}
+			if ("16.0.1".equals(rawVersion)) {
+				return 0100;
+			}
+			if ("16.0.2".equals(rawVersion)) {
+				return 0200;
+			}
+		}
+		if (version == JavaCore.VERSION_17) {
+			if ("17-ea".equals(rawVersion)) {
+				return 0000;
+			}
+			if ("17".equals(rawVersion)) {
+				return 0000;
+			}
+			if ("17.0.1".equals(rawVersion)) {
+				return 0100;
+			}
+			if ("17.0.2".equals(rawVersion)) {
+				return 0200;
+			}
+		}
 		throw new RuntimeException("unknown raw javac version: " + rawVersion);
 	}
 	// returns 0L if everything went fine; else the lower word contains the
@@ -479,7 +524,7 @@ static class JavacCompiler {
 			if (!directory.exists()) {
 				directory.mkdir();
 			}
-			StringBuffer cmdLine = new StringBuffer(this.javacPathName);
+			StringBuilder cmdLine = new StringBuilder(this.javacPathName);
 			cmdLine.append(this.classpath);
 			cmdLine.append(". ");
 			cmdLine.append(options);
@@ -555,7 +600,7 @@ static class JavaRuntime {
 	int execute(File directory, String options, String className, StringBuffer stdout, StringBuffer stderr) throws IOException, InterruptedException {
 		Process executionProcess = null;
 		try {
-			StringBuffer cmdLine = new StringBuffer(this.javaPathName);
+			StringBuilder cmdLine = new StringBuilder(this.javaPathName);
 			if (options.contains("-cp "))
 				cmdLine.append(' '); // i.e., -cp will be appended below, just ensure separation from javaPathname
 			else
@@ -1207,7 +1252,7 @@ protected static class JavacTestOptions {
 	public final static String MODULE_INFO_NAME = new String(TypeConstants.MODULE_INFO_NAME);
 
 	public static boolean SHIFT = false;
-	public static String PREVIEW_ALLOWED_LEVEL = JavaCore.VERSION_14;
+	public static String PREVIEW_ALLOWED_LEVEL = JavaCore.latestSupportedJavaVersion();
 
 	protected static final String SOURCE_DIRECTORY = Util.getOutputDirectory()  + File.separator + "source";
 
@@ -1220,7 +1265,7 @@ protected static class JavacTestOptions {
 		super(name);
 	}
 	protected boolean checkPreviewAllowed() {
-		return this.complianceLevel == ClassFileConstants.JDK14;
+		return this.complianceLevel == ClassFileConstants.getLatestJDKLevel();
 	}
 	protected void checkClassFile(String className, String source, String expectedOutput) throws ClassFormatException, IOException {
 		this.checkClassFile("", className, source, expectedOutput, ClassFileBytesDisassembler.SYSTEM);
@@ -1401,6 +1446,8 @@ protected static class JavacTestOptions {
 			int major = (int)(this.complianceLevel>>16);
 			buffer.append("\" -" + (major - ClassFileConstants.MAJOR_VERSION_0));
 		}
+		if (this.complianceLevel == ClassFileConstants.getLatestJDKLevel()  && this.enablePreview)
+			buffer.append(" --enable-preview ");
 		buffer
 			.append(" -preserveAllLocals -proceedOnError -nowarn -g -classpath \"")
 			.append(Util.getJavaClassLibsAsString())
@@ -1537,7 +1584,7 @@ protected static class JavacTestOptions {
 	 */
 	protected String findReferences(String classFilePath) {
 		// check that "new Z().init()" is bound to "AbstractB.init()"
-		final StringBuffer references = new StringBuffer(10);
+		final StringBuilder references = new StringBuilder(10);
 		final SearchParticipant participant = new JavaSearchParticipant() {
 			final SearchParticipant searchParticipant = this;
 			public SearchDocument getDocument(final String documentPath) {
@@ -1603,18 +1650,27 @@ protected static class JavacTestOptions {
 		return null;
 	}
 
-	protected INameEnvironment[] getClassLibs(boolean useDefaultClasspaths) {
+	protected INameEnvironment[] getClassLibs(boolean useDefaultClasspaths, Map<String, String> options) {
+		if (options == null)
+			options = getCompilerOptions();
 		String encoding = getCompilerOptions().get(CompilerOptions.OPTION_Encoding);
 		if ("".equals(encoding))
 			encoding = null;
+		String release = null;
+		if (CompilerOptions.ENABLED.equals(options.get(CompilerOptions.OPTION_Release))) {
+			release = getCompilerOptions().get(CompilerOptions.OPTION_Compliance);
+		}
 		if (useDefaultClasspaths && encoding == null)
-			return DefaultJavaRuntimeEnvironment.create(this.classpaths);
+			return DefaultJavaRuntimeEnvironment.create(this.classpaths, release);
 		// fall back to FileSystem
 		INameEnvironment[] classLibs = new INameEnvironment[1];
 		classLibs[0] = new FileSystem(this.classpaths, new String[]{}, // ignore initial file names
-				encoding // default encoding
+				encoding, release
 		);
 		return classLibs;
+	}
+	protected INameEnvironment[] getClassLibs(boolean useDefaultClasspaths) {
+		return getClassLibs(useDefaultClasspaths, null);
 	}
 	@Override
 	protected Map<String, String> getCompilerOptions() {
@@ -1697,9 +1753,12 @@ protected static class JavacTestOptions {
 	/*
 	 * Will consider first the source units passed as arguments, then investigate the classpath: jdklib + output dir
 	 */
-	protected INameEnvironment getNameEnvironment(final String[] testFiles, String[] classPaths) {
+	protected INameEnvironment getNameEnvironment(final String[] testFiles, String[] classPaths, Map<String, String> options) {
 		this.classpaths = classPaths == null ? getDefaultClassPaths() : classPaths;
-		return new InMemoryNameEnvironment(testFiles, getClassLibs(classPaths == null));
+		return new InMemoryNameEnvironment(testFiles, getClassLibs((classPaths == null), options));
+	}
+	protected INameEnvironment getNameEnvironment(final String[] testFiles, String[] classPaths) {
+		return getNameEnvironment(testFiles, classPaths, null);
 	}
 	protected IProblemFactory getProblemFactory() {
 		return new DefaultProblemFactory(Locale.getDefault());
@@ -2164,10 +2223,10 @@ protected static class JavacTestOptions {
 			writeFiles(testFiles);
 
 			// Prepare command line
-			StringBuffer cmdLine = new StringBuffer(javacCommandLineHeader);
+			StringBuilder cmdLine = new StringBuilder(javacCommandLineHeader);
 			// compute extra classpath
 			String[] classpath = Util.concatWithClassLibs(JAVAC_OUTPUT_DIR_NAME, false);
-			StringBuffer cp = new StringBuffer(" -classpath ");
+			StringBuilder cp = new StringBuilder(" -classpath ");
 			int length = classpath.length;
 			for (int i = 0; i < length; i++) {
 				if (i > 0)
@@ -2249,7 +2308,7 @@ protected static class JavacTestOptions {
 					if (expectedSuccessOutputString != null && !javacTestErrorFlag) {
 						// Neither Eclipse nor Javac found errors, and we have a runtime
 						// bench value
-						StringBuffer javaCmdLine = new StringBuffer(javaCommandLineHeader);
+						StringBuilder javaCmdLine = new StringBuilder(javaCommandLineHeader);
 						javaCmdLine.append(cp);
 						javaCmdLine.append(' ').append(testFiles[0].substring(0, testFiles[0].indexOf('.')));
 							// assume executable class is name of first test file - PREMATURE check if this is also the case in other test fwk classes
@@ -2330,7 +2389,7 @@ protected static class JavacTestOptions {
 		Process compileProcess = null;
 		try {
 			// Prepare command line
-			StringBuffer cmdLine = new StringBuffer(javacCommandLineHeader);
+			StringBuilder cmdLine = new StringBuilder(javacCommandLineHeader);
 			cmdLine.append(' ');
 			cmdLine.append(options);
 			// add source files
@@ -3162,7 +3221,7 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 			javacTestOptions,
 			Charset.defaultCharset());
 	}
-	private void runTest(
+	protected void runTest(
 			// test directory preparation
 			boolean shouldFlushOutputDirectory,
 			String[] testFiles,
@@ -3414,7 +3473,7 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 		CompilerOptions compilerOptions = new CompilerOptions(options);
 		compilerOptions.performMethodsFullRecovery = performStatementsRecovery;
 		compilerOptions.performStatementsRecovery = performStatementsRecovery;
-		INameEnvironment nameEnvironment = getNameEnvironment(dependantFiles, classLibraries);
+		INameEnvironment nameEnvironment = getNameEnvironment(dependantFiles, classLibraries, options);
 		Compiler batchCompiler =
 			new Compiler(
 				nameEnvironment,
@@ -3821,6 +3880,52 @@ protected void runNegativeTest(
 		// javac options
 		javacTestOptions /* javac test options */);
 }
+//runNegativeTest(
+//// test directory preparation
+//new String[] { /* test files */
+//},
+//null /* no test files */,
+//// compiler results
+//"----------\n" + /* expected compiler log */
+//// javac options
+//JavacTestOptions.SKIP /* skip javac tests */);
+//JavacTestOptions.DEFAULT /* default javac test options */);
+//javacTestOptions /* javac test options */);
+protected void runNegativeTest(
+// test directory preparation
+String[] testFiles,
+String[] dependentFiles,
+// compiler results
+String expectedCompilerLog,
+// javac options
+JavacTestOptions javacTestOptions) {
+	runTest(
+			// test directory preparation
+		true /* flush output directory */,
+		testFiles /* test files */,
+		dependentFiles,
+		// compiler options
+		null /* no class libraries */,
+		false,
+		null /* no custom options */,
+		false /* do not perform statements recovery */,
+		null /* no custom requestor */,
+		// compiler results
+		true /* expecting compiler errors */,
+		expectedCompilerLog /* expected compiler log */,
+		// runtime options
+		null,
+		false /* do not force execution */,
+		null /* no vm arguments */,
+		// runtime results
+		null /* do not check output string */,
+		null /* do not check error string */,
+		null,
+		null,
+		// javac options
+		javacTestOptions /* javac test options */,
+		Charset.defaultCharset());
+}
 //	runNegativeTest(
 //		// test directory preparation
 //		true /* flush output directory */,
@@ -3973,10 +4078,10 @@ protected void runNegativeTest(
 					else
 						jdkRootDirPath = new Path(jdkRootDirectory);
 
-					StringBuffer cmdLineHeader = new StringBuffer(jdkRootDirPath.
+					StringBuilder cmdLineHeader = new StringBuilder(jdkRootDirPath.
 							append("bin").append(JAVA_NAME).toString()); // PREMATURE replace JAVA_NAME and JAVAC_NAME with locals? depends on potential reuse
 					javaCommandLineHeader = cmdLineHeader.toString();
-					cmdLineHeader = new StringBuffer(jdkRootDirPath.
+					cmdLineHeader = new StringBuilder(jdkRootDirPath.
 							append("bin").append(JAVAC_NAME).toString());
 					cmdLineHeader.append(" -classpath . ");
 					  // start with the current directory which contains the source files
@@ -4068,9 +4173,9 @@ protected void runNegativeTest(
 	}
 	protected Map<String, String> setPresetPreviewOptions() {
 		Map<String, String> options = getCompilerOptions();
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_14);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_14);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_14);
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.latestSupportedJavaVersion());
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.latestSupportedJavaVersion());
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.latestSupportedJavaVersion());
 		options.put(CompilerOptions.OPTION_EnablePreviews, CompilerOptions.ENABLED);
 		options.put(CompilerOptions.OPTION_ReportPreviewFeatures, CompilerOptions.IGNORE);
 		return options;

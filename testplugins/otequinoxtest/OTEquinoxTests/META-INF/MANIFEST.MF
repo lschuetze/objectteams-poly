@@ -12,4 +12,5 @@ Require-Bundle: Aspect537350_B;bundle-version="1.0.0",
  org.junit;bundle-version="4.12.0",
  Aspect537533;bundle-version="1.0.0",
  Base537533;bundle-version="1.0.0",
- Middle537351;bundle-version="1.0.0"
+ Middle537351;bundle-version="1.0.0",
+ Aspect571542_B;bundle-version="1.0.0"

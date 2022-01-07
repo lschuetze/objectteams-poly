@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -126,6 +126,30 @@ private String className(byte[] classDefinition) {
 				case 12 : // NameAndTypeTag
 					constantPoolOffsets[i] = readOffset;
 					readOffset += 5; // ConstantNameAndType.fixedSize
+					break;
+				case 15 : // MethodHandleTag
+					constantPoolOffsets[i] = readOffset;
+					readOffset += 4; // MethodHandle.fixedSize
+					break;
+				case 16 : // MethodTypeTag
+					constantPoolOffsets[i] = readOffset;
+					readOffset += 3; // MethodType.fixedSize
+					break;
+				case 17 : // DynamicTag
+					constantPoolOffsets[i] = readOffset;
+					readOffset += 5; // Dynamic.fixedSize
+					break;
+				case 18 : // InvokeDynamicTag
+					constantPoolOffsets[i] = readOffset;
+					readOffset += 5; // InvokeDynamic.fixedSize
+					break;
+				case 19 : // ModuleTag
+					constantPoolOffsets[i] = readOffset;
+					readOffset += 3; // Module.fixedSize
+					break;
+				case 20 : // PackageTag
+					constantPoolOffsets[i] = readOffset;
+					readOffset += 3; // Package.fixedSize
 			}
 		}
 		// Skip access flags
@@ -148,12 +172,28 @@ private String className(byte[] classDefinition) {
 Object createCodeSnippet(Class snippetClass) {
 	Object object = null;
 	try {
-		object = snippetClass.newInstance();
+		object = snippetClass.getDeclaredConstructor().newInstance();
 	} catch (InstantiationException e) {
 		e.printStackTrace();
 		this.ide.sendResult(void.class, null);
 		return null;
 	} catch (IllegalAccessException e) {
+		e.printStackTrace();
+		this.ide.sendResult(void.class, null);
+		return null;
+	} catch (IllegalArgumentException e) {
+		e.printStackTrace();
+		this.ide.sendResult(void.class, null);
+		return null;
+	} catch (InvocationTargetException e) {
+		e.printStackTrace();
+		this.ide.sendResult(void.class, null);
+		return null;
+	} catch (NoSuchMethodException e) {
+		e.printStackTrace();
+		this.ide.sendResult(void.class, null);
+		return null;
+	} catch (SecurityException e) {
 		e.printStackTrace();
 		this.ide.sendResult(void.class, null);
 		return null;
@@ -278,7 +318,7 @@ void processClasses(boolean mustRun, byte[][] classDefinitions) {
 	}
 
 	// load the classes and collect code snippet classes
-	Vector codeSnippetClasses = new Vector();
+	List<Class> codeSnippetClasses = new ArrayList<>();
 	for (int i = 0; i < newClasses.length; i++) {
 		String className = newClasses[i];
 		Class clazz = null;
@@ -311,7 +351,7 @@ void processClasses(boolean mustRun, byte[][] classDefinitions) {
 		} else if (superclass.equals(this.codeSnippetClass)) {
 			// It may be a code snippet class with no global variable
 			if (methods.length == 1 && methods[0].getName().equals(RUN_METHOD_NAME)) {
-				codeSnippetClasses.addElement(clazz);
+				codeSnippetClasses.add(clazz);
 			}
 			// Evaluate global variables and send result back
 			Field[] fields = clazz.getDeclaredFields();
@@ -329,14 +369,14 @@ void processClasses(boolean mustRun, byte[][] classDefinitions) {
 			}
 		} else if (this.codeSnippetClass.equals(superclass.getSuperclass()) && methods.length == 1 && methods[0].getName().equals("run")) {
 			// It is a code snippet class with a global variable superclass
-			codeSnippetClasses.addElement(clazz);
+			codeSnippetClasses.add(clazz);
 		}
 	}
 
 	// run the code snippet classes
 	if (codeSnippetClasses.size() != 0 && mustRun) {
-		for (Enumeration e = codeSnippetClasses.elements(); e.hasMoreElements();) {
-			Object codeSnippet = createCodeSnippet((Class) e.nextElement());
+		for (Class class1 : codeSnippetClasses) {
+			Object codeSnippet = createCodeSnippet(class1);
 			if (codeSnippet != null) {
 				runCodeSnippet(codeSnippet);
 			}

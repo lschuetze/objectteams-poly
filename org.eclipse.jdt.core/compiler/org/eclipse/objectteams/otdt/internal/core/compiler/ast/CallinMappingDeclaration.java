@@ -22,8 +22,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.ast;
 
-import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNameBINDIN;
-import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNameBINDOUT;
 import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNameafter;
 import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNamebefore;
 import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNamereplace;
@@ -328,7 +326,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 						this.roleMethodSpec.parameters[j]= roleParam;
 						continue;
 					}
-					if (RoleTypeCreator.isCompatibleViaBaseAnchor(this.scope, baseLeaf, roleLeaf, TokenNameBINDIN))
+					if (RoleTypeCreator.isCompatibleViaBaseAnchor(this.scope, baseLeaf, roleLeaf, BindingDirectionIn))
 					{
 						this.roleMethodSpec.parameters[j]= roleParam;
 						compatibilityViaBaseAnchor= true;
@@ -398,7 +396,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 					if (!hasReportedError && baseLeaf.isCompatibleWith(roleLeaf)) {
 						if (isReplaceCallin() && !isTypeVariable) {
 							boolean twowayCompatible =  compatibilityViaBaseAnchor
-								? RoleTypeCreator.isCompatibleViaBaseAnchor(this.scope, baseLeaf, roleLeaf, TokenNameBINDOUT)
+								? RoleTypeCreator.isCompatibleViaBaseAnchor(this.scope, baseLeaf, roleLeaf, AbstractMethodMappingDeclaration.BindingDirectionOut)
 								: roleLeaf.isCompatibleWith(baseLeaf);
 							if (!twowayCompatible) {
 								// requires two-way compatibility (see additional paragraph in 4.5(d))

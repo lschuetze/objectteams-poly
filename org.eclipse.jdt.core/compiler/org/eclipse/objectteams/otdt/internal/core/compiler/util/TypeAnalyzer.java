@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.lookup.UnresolvedReferenceBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
@@ -775,15 +776,8 @@ public class TypeAnalyzer  {
 	 */
 
 	public static boolean isTopConfined(ReferenceBinding type) {
-		char[][] compoundName= type.compoundName;
-		if (    compoundName.length == 3
-			&& (   CharOperation.equals(compoundName, IOTConstants.ORG_OBJECTTEAMS_ICONFINED)
-				|| CharOperation.equals(compoundName, IOTConstants.ORG_OBJECTTEAMS_ITEAM_ICONFINED)
-				|| CharOperation.equals(compoundName, IOTConstants.ORG_OBJECTTEAMS_TEAM_CONFINED)
-				|| CharOperation.equals(compoundName, IOTConstants.ORG_OBJECTTEAMS_TEAM_OTCONFINED)))
-		{
+		if (OTNameUtils.isPredefinedConfined(type))
 			return true;
-		}
 		char[] name= type.internalName();
 		return type.isRole()
 		    && (   CharOperation.equals(name, IOTConstants.ICONFINED)

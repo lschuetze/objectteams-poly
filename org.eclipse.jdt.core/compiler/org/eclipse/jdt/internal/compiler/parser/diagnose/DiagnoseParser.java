@@ -94,7 +94,12 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 	int statePoolTop;
 	StateInfo[] statePool;
 
+//{ObjectTeams: make accessible:
+/* orig:
 	private Parser parser;
+  :giro */
+	public Parser parser;
+// SH}
 
 	private RecoveryScanner recoveryScanner;
 
@@ -460,9 +465,9 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 //{ObjectTeams: WATCHOUT: needs to be updated with each new grammar!!!!
 	private void setScannerState(int act) {
 		switch(act) {
-		case 243: this.lexStream.forceBaseIsIdentifier(); break; // ForceBaseIsIdentifier
-		case 244: this.lexStream.restoreBaseKeyword(); break;    // RestoreBaseKeyword
-		case 339: this.parser.scanner._insideParameterMapping = true; break; // NestedParamMappings
+		case 250: this.lexStream.forceBaseIsIdentifier(); break; // ForceBaseIsIdentifier
+		case 251: this.lexStream.restoreBaseKeyword(); break;    // RestoreBaseKeyword
+		case 346: this.parser.scanner._insideParameterMapping = true; break; // NestedParamMappings
 		}
 	}
 //SH}
@@ -2281,7 +2286,7 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 					name);
 				 break;
 			case SCOPE_CODE:
-				StringBuffer buf = new StringBuffer();
+				StringBuilder buf = new StringBuilder();
 
 				int[] addedTokens = null;
 	            int addedTokenCount = 0;
@@ -2468,7 +2473,7 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 				// error start is on the last token start
 				errorStart = this.lexStream.start(rightToken);
 
-	            StringBuffer buf = new StringBuffer();
+	            StringBuilder buf = new StringBuilder();
 
 	            int[] addedTokens = null;
 	            int addedTokenCount = 0;
@@ -2606,7 +2611,7 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 
 	@Override
 	public String toString() {
-		StringBuffer res = new StringBuffer();
+		StringBuilder res = new StringBuilder();
 
 		res.append(this.lexStream.toString());
 

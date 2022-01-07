@@ -44,7 +44,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testBug529685"};
+//		TESTS_NAMES = new String[] { "testB11_ch5b"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -1752,6 +1752,9 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // reported by mehner in sport course management example
     // B.1.1-otjld-sh-42
     public void testB11_sh42() {
+       if (isKnownFailure(this.getClass().getName()+".testB11_sh42"))
+      	   return;
+
        Map customOptions = getCompilerOptions();
 
        runConformTest(
@@ -2478,6 +2481,8 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // curiosities if bound base method is covariantly redefined, reported by hsudof, referencing sub team changed behavior
     // B.1.1-otjld-sh-53
     public void testB11_sh53() {
+       if (isKnownFailure(this.getClass().getName()+".testB11_sh53"))
+      	   return;
 
        runConformTest(
             new String[] {
@@ -4630,6 +4635,8 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // reported by Christine Hundt
     // B.1.1-otjld-ju-1
     public void testB11_ju1() {
+       if (isKnownFailure(this.getClass().getName()+".testB11_ju1"))
+      	   return;
 
        runConformTest(
             new String[] {
@@ -5184,22 +5191,34 @@ public class ReportedBugs extends AbstractOTJLDTest {
     // Problem with a static field in a role and inheritance - static initializer
     // B.1.1-otjld-ch-5b
     public void testB11_ch5b() {
-        runNegativeTestMatching(
-            new String[] {
-		"TeamB11ch5b.java",
-			    "\n" +
-			    "public team class TeamB11ch5b {\n" +
-			    "    public class RB11ch5b {\n" +
-			    "        private static final int MY_STATIC;\n" +
-			    "        static {\n" +
-			    "            MY_STATIC = gv();\n" +
-			    "        }\n" +
-			    "        private static int gv() { return 3; }\n" +
-			    "    }\n" +
-			    "}\n" +
-			    "    \n"
-            },
-            "static initializer");
+        String contents =
+    		"public team class TeamB11ch5b {\n" +
+			"    public class RB11ch5b {\n" +
+			"        private static final int MY_STATIC;\n" +
+			"        static {\n" +
+			"            MY_STATIC = gv();\n" +
+			"        }\n" +
+			"        private static int gv() { return 3; }\n" +
+			"        public static void main(String... args) {\n" +
+			"            System.out.print(MY_STATIC);\n" +
+			"        }\n" +
+			"    }\n" +
+			"	public static void main(String... args) {\n" +
+			"		new TeamB11ch5b().test();\n" +
+			"	}\n" +
+			"	void test() {\n" +
+			"		RB11ch5b.main(null);\n" +
+			"	}\n" +
+			"}\n";
+        if (this.complianceLevel >= ClassFileConstants.JDK16) {
+        	runConformTest(
+        			new String[] { "TeamB11ch5b.java", contents },
+        			"3");
+        } else {
+        	runNegativeTestMatching(
+        			new String[] { "TeamB11ch5b.java", contents },
+        			"Cannot define static initializer in inner type TeamB11ch5b.RB11ch5b");
+        }
     }
 
     // variant reported by Andreas Werner: public fields
@@ -5602,5 +5621,53 @@ public class ReportedBugs extends AbstractOTJLDTest {
     			"}\n"
     		},
     		"cirun");
+    }
+    public void testBug571542() throws Exception {
+    	runConformTest(
+    		new String[] {
+    			"Bug571542Main.java",
+    			"public class Bug571542Main {\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		new Team571542().activate();\n" +
+    			"		new Base571542_1().start();\n" +
+    			"		new Base571542_3().start();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"Base571542_0.java",
+    			"public class Base571542_0 {\n" +
+    			"	public void start() {\n" +
+    			"		System.out.print(\"C0\");\n" +
+    			"	}\n" +
+    			"}\n",
+    			"Base571542_1.java",
+    			"public class Base571542_1 extends Base571542_0 {\n" +
+    			"	@Override public void start() {\n" +
+    			"		System.out.print(\"C1\");\n" +
+    			"		super.start();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"Base571542_2.java",
+    			"public class Base571542_2 extends Base571542_0 {\n" +
+    			"	@Override public void start() {\n" +
+    			"		System.out.print(\"C2\");\n" +
+    			"		super.start();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"Base571542_3.java",
+    			"public class Base571542_3 extends Base571542_2 {\n" +
+    			"	@Override public void start() {\n" +
+    			"		System.out.print(\"C3\");\n" +
+    			"		super.start();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"Team571542.java",
+    			"public team class Team571542 {\n" +
+    			"	protected class R playedBy Base571542_1 {\n" +
+    			"		void print() { System.out.print(\"R\"); }\n" +
+    			"		print <- after start;\n" +
+    			"	}\n" +
+    			"}\n"
+    		},
+    		"C1C0RC3C2C0");
     }
 }

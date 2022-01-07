@@ -7,4 +7,4 @@ Bundle-Version: 1.0.0
 Require-Bundle: org.eclipse.ui
 Export-Package: trac132b.api,
  trac132b.actions;x-internal:=true
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11

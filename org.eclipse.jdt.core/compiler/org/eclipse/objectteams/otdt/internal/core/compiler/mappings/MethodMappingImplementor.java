@@ -39,7 +39,6 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
-import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
@@ -286,13 +285,13 @@ public abstract class MethodMappingImplementor {
 	        	pos     = (((long)argument.sourceStart) << 32) + argument.sourceEnd;
 	        	argModifiers = argument.modifiers;
 	        	// for callout prefer source-level args (from method spec) to avoid resolved/unresolved conflicts downstream
-	        	if (this.bindingDirection == TerminalTokens.TokenNameBINDOUT)
+	        	if (this.bindingDirection == AbstractMethodMappingDeclaration.BindingDirectionOut)
 	        		argTypeReference = AstClone.copyTypeReference(argument.type);
 			} else {
 				argName = (IOTConstants.OT_DOLLAR_ARG + idx).toCharArray();
 			}
 			TypeBinding argType = arguments[idx];
-			if (this.bindingDirection == TerminalTokens.TokenNameBINDIN) { // only relevant for callin
+			if (this.bindingDirection == AbstractMethodMappingDeclaration.BindingDirectionIn) { // only relevant for callin
 				argTypeReference = getAnchoredTypeReference(gen, baseSideAnchor, argType);
 			}
 			if (argTypeReference == null) {

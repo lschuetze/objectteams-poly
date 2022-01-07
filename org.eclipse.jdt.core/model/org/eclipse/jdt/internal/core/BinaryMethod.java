@@ -14,9 +14,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.core;
 
+import java.util.Arrays;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IAnnotation;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
@@ -64,6 +67,27 @@ protected BinaryMethod(JavaElement parent, String name, String[] paramTypes) {
 	if (paramTypes == null) {
 		this.parameterTypes= CharOperation.NO_STRINGS;
 	} else {
+//{ObjectTeams: retrench some signatures
+		IType type = (IType) parent.getAncestor(IJavaElement.TYPE);
+		try {
+			if (paramTypes.length >= 6 && Flags.isRole(type.getFlags())) {
+				if (paramTypes[0].equals("Lorg.objectteams.IBoundBase2;")) //$NON-NLS-1$
+					paramTypes = Arrays.copyOfRange(paramTypes, 6, paramTypes.length);
+			} else if (paramTypes.length >= 2 && paramTypes[0].equals("I")) { //$NON-NLS-1$
+				IType outerType = type.getDeclaringType();
+				if (outerType != null) {
+					if (paramTypes[1].charAt(0) == Signature.C_RESOLVED
+							? Signature.toString(paramTypes[1]).equals(outerType.getFullyQualifiedName('$'))
+							: Signature.toString(paramTypes[1]).equals(outerType.getElementName())) {
+						// we're taking a guess that this might be a static role method, but getFlags() should not be called here
+						paramTypes = Arrays.copyOfRange(paramTypes, 2, paramTypes.length);
+					}
+				}
+			}
+		} catch (JavaModelException e) {
+			// ignore
+		}
+// SH}
 		this.parameterTypes= paramTypes;
 	}
 }
@@ -207,7 +231,7 @@ public int getElementType() {
 public int getFlags() throws JavaModelException {
 	IBinaryMethod info = (IBinaryMethod) getElementInfo();
 	int modifiers = info.getModifiers();
-	if (((IType) this.parent).isInterface() && (modifiers & (ClassFileConstants.AccAbstract | ClassFileConstants.AccStatic)) == 0)
+	if (((IType) this.getParent()).isInterface() && (modifiers & (ClassFileConstants.AccAbstract | ClassFileConstants.AccStatic)) == 0)
 		modifiers |= ExtraCompilerModifiers.AccDefaultMethod;
 	return modifiers;
 }
@@ -216,7 +240,7 @@ public int getFlags() throws JavaModelException {
  */
 @Override
 protected void getHandleMemento(StringBuffer buff) {
-	((JavaElement) getParent()).getHandleMemento(buff);
+	getParent().getHandleMemento(buff);
 	char delimiter = getHandleMementoDelimiter();
 	buff.append(delimiter);
 	escapeMementoName(buff, getElementName());
@@ -622,7 +646,7 @@ public int hashCode() {
  */
 @Override
 public boolean isConstructor() throws JavaModelException {
-	if (!getElementName().equals(this.parent.getElementName())) {
+	if (!getElementName().equals(this.getParent().getElementName())) {
 		// faster than reaching the info
 		return false;
 	}
@@ -663,7 +687,7 @@ public boolean isSimilar(IMethod method) {
 @Override
 public String readableName() {
 
-	StringBuffer buffer = new StringBuffer(super.readableName());
+	StringBuilder buffer = new StringBuilder(super.readableName());
 	buffer.append("("); //$NON-NLS-1$
 	String[] paramTypes = this.parameterTypes;
 	int length;
@@ -680,7 +704,7 @@ public String readableName() {
 }
 @Override
 public JavaElement resolved(Binding binding) {
-	SourceRefElement resolvedHandle = new ResolvedBinaryMethod(this.parent, this.name, this.parameterTypes, new String(binding.computeUniqueKey()));
+	SourceRefElement resolvedHandle = new ResolvedBinaryMethod(this.getParent(), this.name, this.parameterTypes, new String(binding.computeUniqueKey()));
 	resolvedHandle.occurrenceCount = this.occurrenceCount;
 	return resolvedHandle;
 }/*

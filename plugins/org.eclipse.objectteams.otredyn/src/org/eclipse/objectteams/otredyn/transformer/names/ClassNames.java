@@ -23,7 +23,6 @@ import java.lang.invoke.MethodType;
 import java.util.HashSet;
 import java.util.List;
 
-import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.objectteams.IBoundBase2;
 import org.eclipse.objectteams.otredyn.runtime.dynamic.linker.*;
 import org.objectteams.ILiftingParticipant;
@@ -53,7 +52,7 @@ public abstract class ClassNames {
 	public final static String OBJECT_SLASH = Object.class.getName().replace('.', '/');
 	public final static String CLASS_SLASH = Class.class.getName().replace('.', '/');
 	public final static String I_BOUND_BASE_DOT = IBoundBase2.class.getName();
-	public final static String TEAM_MANAGER_SLASH = TeamManager.class.getName().replace('.', '/');
+	public final static String TEAM_MANAGER_SLASH = "org/eclipse/objectteams/otredyn/runtime/TeamManager"; // don't touch special class TeamManager, which is woven itself
 	public final static String ITEAM_SLASH = ITeam.class.getName().replace('.', '/');
 	public final static String TEAM_SLASH = Team.class.getName().replace('.', '/');
 	public final static String LIST_SLASH = List.class.getName().replace('.', '/');

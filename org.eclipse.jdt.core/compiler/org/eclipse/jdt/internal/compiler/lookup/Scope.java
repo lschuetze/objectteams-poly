@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -177,7 +177,10 @@ public abstract class Scope {
 	public static final int MORE_GENERIC = 1;
 
 	public int kind;
+//{ObjectTeams: removed final:
 	public Scope parent;
+// SH}
+	public final CompilationUnitScope compilationUnitScope;
 	private Map<String, Supplier<ReferenceBinding>> commonTypeBindings = null;
 
 	private static class NullDefaultRange {
@@ -217,6 +220,7 @@ public abstract class Scope {
 		this.kind = kind;
 		this.parent = parent;
 		this.commonTypeBindings = null;
+		this.compilationUnitScope = (CompilationUnitScope) (parent == null ? this : parent.compilationUnitScope());
 	}
 
 	/* Answer an int describing the relationship between the given types.
@@ -601,6 +605,7 @@ public abstract class Scope {
 	/** Bridge to non-static implementation in {@link Substitutor}, to make methods overridable. */
 	private static Substitutor defaultSubstitutor = new Substitutor();
 	public static class Substitutor {
+		protected ReferenceBinding staticContext;
 		/**
 		 * Returns an array of types, where original types got substituted given a substitution.
 		 * Only allocate an array if anything is different.
@@ -760,7 +765,9 @@ public abstract class Scope {
 					if (substitution.isRawSubstitution()) {
 						return substitution.environment().createRawType(originalReferenceType, substitutedEnclosing, originalType.getTypeAnnotations());
 					}
-				    // treat as if parameterized with its type variables (non generic type gets 'null' arguments)
+				    // potentially treat as if parameterized with its type variables (non generic type gets 'null' arguments)
+					if (TypeBinding.equalsEquals(this.staticContext, originalType))
+						return originalType; // substitution happens on a static member of the generic type, where its type variables are not available
 					originalArguments = originalReferenceType.typeVariables();
 					substitutedArguments = substitute(substitution, originalArguments);
 					return substitution.environment().createParameterizedType(originalReferenceType, substitutedArguments, substitutedEnclosing, originalType.getTypeAnnotations());
@@ -824,14 +831,9 @@ public abstract class Scope {
 	}
 
 	public final CompilationUnitScope compilationUnitScope() {
-		Scope lastScope = null;
-		Scope scope = this;
-		do {
-			lastScope = scope;
-			scope = scope.parent;
-		} while (scope != null);
-		return (CompilationUnitScope) lastScope;
+		return this.compilationUnitScope;
 	}
+
 	public ModuleBinding module() {
 		return environment().module;
 	}
@@ -1323,10 +1325,7 @@ public abstract class Scope {
 	}
 
 	public final LookupEnvironment environment() {
-		Scope scope, unitScope = this;
-		while ((scope = unitScope.parent) != null)
-			unitScope = scope;
-		return ((CompilationUnitScope) unitScope).environment;
+		return this.compilationUnitScope.environment;
 	}
 
 	/* Abstract method lookup (since maybe missing default abstract methods). "Default abstract methods" are methods that used to be emitted into
@@ -1796,7 +1795,7 @@ public abstract class Scope {
 		if (method != null && method.isValidBinding() && method.isVarargs()) {
 			TypeBinding elementType = method.parameters[method.parameters.length - 1].leafComponentType();
 			if (elementType instanceof ReferenceBinding) {
-				if (!((ReferenceBinding) elementType).canBeSeenBy(this)) {
+				if (!((ReferenceBinding) elementType).erasure().canBeSeenBy(this)) {
 					return new ProblemMethodBinding(method, method.selector, invocationSite.genericTypeArguments(), ProblemReasons.VarargsElementTypeNotVisible);
 				}
 			}
@@ -2227,8 +2226,7 @@ public abstract class Scope {
 		return typeBinding;
 	}
 
-	public LocalVariableBinding findVariable(char[] variable) {
-
+	public LocalVariableBinding findVariable(char[] variable, InvocationSite invocationSite) {
 		return null;
 	}
 
@@ -2286,7 +2284,7 @@ public abstract class Scope {
 
 							//$FALL-THROUGH$ could duplicate the code below to save a cast - questionable optimization
 						case BLOCK_SCOPE :
-							LocalVariableBinding variableBinding = scope.findVariable(name);
+							LocalVariableBinding variableBinding = scope.findVariable(name, invocationSite);
 							// looks in this scope only
 							if (variableBinding != null) {
 								if (foundField != null && foundField.isValidBinding())
@@ -2434,7 +2432,7 @@ public abstract class Scope {
 						for (int i = 0, length = imports.length; i < length; i++) {
 							ImportBinding importBinding = imports[i];
 							if (importBinding.isStatic() && !importBinding.onDemand) {
-								if (CharOperation.equals(importBinding.compoundName[importBinding.compoundName.length - 1], name)) {
+								if (CharOperation.equals(importBinding.getSimpleName(), name)) {
 									if (unitScope.resolveSingleImport(importBinding, Binding.TYPE | Binding.FIELD | Binding.METHOD) != null && importBinding.resolvedImport instanceof FieldBinding) {
 										foundField = (FieldBinding) importBinding.resolvedImport;
 										ImportReference importReference = importBinding.reference;
@@ -2529,7 +2527,7 @@ public abstract class Scope {
 	}
 // SH}
 
-	class MethodClashException extends RuntimeException {
+	static class MethodClashException extends RuntimeException {
 		private static final long serialVersionUID = -7996779527641476028L;
 	}
 
@@ -2738,10 +2736,7 @@ public abstract class Scope {
 	}
 
 	public final PackageBinding getCurrentPackage() {
-		Scope scope, unitScope = this;
-		while ((scope = unitScope.parent) != null)
-			unitScope = scope;
-		return ((CompilationUnitScope) unitScope).fPackage;
+		return this.compilationUnitScope.fPackage;
 	}
 
 	/**
@@ -3187,6 +3182,11 @@ public abstract class Scope {
 		CompilationUnitScope unitScope = compilationUnitScope();
 		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_RUNTIME_OBJECTMETHODS);
 		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_RUNTIME_OBJECTMETHODS, this);
+	}
+	public final ReferenceBinding getJavaLangRuntimeSwitchBootstraps() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_RUNTIME_SWITCHBOOTSTRAPS);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_RUNTIME_SWITCHBOOTSTRAPS, this);
 	}
 	public final ReferenceBinding getJavaLangInvokeLambdaMetafactory() {
 		CompilationUnitScope unitScope = compilationUnitScope();
@@ -3683,15 +3683,14 @@ public abstract class Scope {
 		MethodScope methodScope = null;
 		ReferenceBinding foundType = null;
 		boolean insideStaticContext = false;
+		boolean insideClassContext = false;
 		boolean insideTypeAnnotation = false;
 //{ObjectTeams: support non static team fields to be accessed from static role context:
 		boolean insideRoleType = false;
 // SH}
 
 		if ((mask & Binding.TYPE) == 0) {
-			Scope next = scope;
-			while ((next = scope.parent) != null)
-				scope = next;
+			scope = this.compilationUnitScope;
 		} else {
 			boolean inheritedHasPrecedence = compilerOptions().complianceLevel >= ClassFileConstants.JDK1_4;
 			done : while (true) { // done when a COMPILATION_UNIT_SCOPE is found
@@ -3702,8 +3701,12 @@ public abstract class Scope {
 						if (methodDecl != null) {
 							if (methodDecl.binding != null) {
 								TypeVariableBinding typeVariable = methodDecl.binding.getTypeVariable(name);
-								if (typeVariable != null)
+								if (typeVariable != null) {
+									if (insideStaticContext && insideClassContext) {
+										return new ProblemReferenceBinding(new char[][]{name}, typeVariable, ProblemReasons.NonStaticReferenceInStaticContext);
+									}
 									return typeVariable;
+								}
 							} else {
 								// use the methodDecl's typeParameters to handle problem cases when the method binding doesn't exist
 								TypeParameter[] params = methodDecl.typeParameters();
@@ -3788,6 +3791,7 @@ public abstract class Scope {
 							return typeVariable;
 						}
 						insideStaticContext |= sourceType.isStatic();
+						insideClassContext = !sourceType.isAnonymousType();
 						insideTypeAnnotation = false;
 						if (CharOperation.equals(sourceType.sourceName, name)) {
 							if (foundType != null && TypeBinding.notEquals(foundType, sourceType) && foundType.problemId() != ProblemReasons.NotVisible)
@@ -3839,7 +3843,7 @@ public abstract class Scope {
 				nextImport : for (int i = 0, length = imports.length; i < length; i++) {
 					ImportBinding importBinding = imports[i];
 					if (!importBinding.onDemand) {
-						if (CharOperation.equals(importBinding.compoundName[importBinding.compoundName.length - 1], name)) {
+						if (CharOperation.equals(importBinding.getSimpleName(), name)) {
 							Binding resolvedImport = unitScope.resolveSingleImport(importBinding, Binding.TYPE);
 							if (resolvedImport == null) continue nextImport;
 							if (resolvedImport instanceof TypeBinding) {
@@ -4213,13 +4217,8 @@ public abstract class Scope {
 		while ((type = enclosingType.enclosingType()) != null)
 			enclosingType = type;
 
-		// find the compilation unit scope
-		Scope scope, unitScope = this;
-		while ((scope = unitScope.parent) != null)
-			unitScope = scope;
-
 		// test that the enclosingType is not part of the compilation unit
-		SourceTypeBinding[] topLevelTypes = ((CompilationUnitScope) unitScope).topLevelTypes;
+		SourceTypeBinding[] topLevelTypes = this.compilationUnitScope.topLevelTypes;
 		for (int i = topLevelTypes.length; --i >= 0;)
 			if (TypeBinding.equalsEquals(topLevelTypes[i], enclosingType.original()))
 				return true;
@@ -5539,20 +5538,31 @@ public abstract class Scope {
 
 //{ObjectTeams: removed final:
 	public CompilationUnitDeclaration referenceCompilationUnit() {
-// SH}
+/* orig:
+		return this.compilationUnitScope.referenceContext;
+ */
+		CompilationUnitDeclaration cud = this.compilationUnitScope.referenceContext;
+		if (cud == null)
+			return cud;
+		searchTeam: if (cud.types != null) {
+			for (TypeDeclaration type : cud.types) {
+				if (type != null && type.isTeam())
+					break searchTeam;
+			}
+			return cud; // jdt strategy is good
+		}
+//OT: our impl respects overridden version from OTClassScope (for role files):
 		Scope scope, unitScope = this;
 		while ((scope = unitScope.parent) != null)
-//{ObjectTeams: respect overridden version from OTClassScope:
 		{
 			if (scope instanceof OTClassScope)
 				return scope.referenceCompilationUnit();
-  // orig:
 			unitScope = scope;
-  // :giro
 		}
-// SH}
 		return ((CompilationUnitScope) unitScope).referenceContext;
 	}
+// SH}
+
 //{ObjectTeams: convenience lookups and queries
     public TypeDeclaration referenceType() {
         Scope scope = this;

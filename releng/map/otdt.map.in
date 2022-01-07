@@ -1,106 +1,113 @@
 !***************  OTDT CONTRIBUTION  ******************************************************** 
 
 !-- Don't set version numbers for features, otherwise pdebuild would complain about a non-existent Basedir: -- 
-feature@org.eclipse.objectteams.otdt=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.feature
-feature@org.eclipse.objectteams.otdt.source.feature=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.source.feature
-feature@org.eclipse.objectteams.otdt.core.patch=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.core.patch
-feature@org.eclipse.objectteams.otequinox=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otequinox.feature
-feature@org.eclipse.objectteams.otequinox.otre=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otequinox.otre.feature,tag=builds/201809081701
-feature@org.eclipse.objectteams.otequinox.turbo=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otequinox.turbo.feature,tag=builds/201506091717
+feature@org.eclipse.objectteams.otdt=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.feature
+feature@org.eclipse.objectteams.otdt.source.feature=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.source.feature
+feature@org.eclipse.objectteams.otdt.core.patch=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.core.patch
+feature@org.eclipse.objectteams.otequinox=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otequinox.feature
+feature@org.eclipse.objectteams.otequinox.otre=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otequinox.otre.feature,tag=builds/201809081701
+feature@org.eclipse.objectteams.otequinox.turbo=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otequinox.turbo.feature,tag=builds/201506091717
 
 !-- Also don't use version numbers for those plugins that hold the various otre jars: --
-plugin@org.eclipse.jdt.core,3.22.0.OTDT_r281_qualifier=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=org.eclipse.jdt.core
+plugin@org.eclipse.jdt.core,3.28.0.OTDT_r282_qualifier=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=org.eclipse.jdt.core
 
 !next plug-in don't specify version so that org.eclipse.objectteams.runtime/customBuildCallbacks.xml will find the plug-in directory:
-plugin@org.eclipse.objectteams.otdt=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt
+plugin@org.eclipse.objectteams.otdt=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt
 
-plugin@org.eclipse.objectteams.otdt.debug=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug,tag=builds/201906101736
-plugin@org.eclipse.objectteams.otdt.debug.ui=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug.ui,tag=builds/201906101736
-plugin@org.eclipse.objectteams.otdt.ui=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.ui
-plugin@org.eclipse.objectteams.otdt.doc=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.doc,tag=builds/201606070956
-!plugin@org.eclipse.objectteams.otdt.metrics=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.metrics,tag=builds/201101290806
+plugin@org.eclipse.objectteams.otdt.debug=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug
+plugin@org.eclipse.objectteams.otdt.debug.ui=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug.ui,tag=builds/201906101736
+plugin@org.eclipse.objectteams.otdt.ui=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.ui
+plugin@org.eclipse.objectteams.otdt.doc=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.doc,tag=builds/201606070956
+!plugin@org.eclipse.objectteams.otdt.metrics=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.metrics,tag=builds/201101290806
 
-plugin@org.eclipse.objectteams.runtime=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.runtime
-plugin@org.eclipse.objectteams.otre=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otre,tag=builds/201806120901
-plugin@org.eclipse.objectteams.otredyn=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otredyn
+plugin@org.eclipse.objectteams.runtime=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.runtime
+plugin@org.eclipse.objectteams.otre=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otre,tag=builds/201806120901
+plugin@org.eclipse.objectteams.otredyn=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otredyn
 !the following is also referenced in otdt.doc/buildDoc.xml (plugin-name without version):
-plugin@org.eclipse.objectteams.otequinox=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox
-fragment@org.eclipse.objectteams.otequinox.turbo=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.turbo,tag=builds/201506091717
-plugin@org.eclipse.objectteams.eclipse.monitor=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.eclipse.monitor,tag=builds/201606070956
+plugin@org.eclipse.objectteams.otequinox=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox
+fragment@org.eclipse.objectteams.otequinox.turbo=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.turbo,tag=builds/201506091717
+plugin@org.eclipse.objectteams.eclipse.monitor=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.eclipse.monitor,tag=builds/201606070956
 
 !not currently maintained:
-!plugin@org.eclipse.objectteams.otdt.earlyui=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.earlyui
-!plugin@org.eclipse.objectteams.otdt.metrics.export=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.metrics.export
+!plugin@org.eclipse.objectteams.otdt.earlyui=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.earlyui
+!plugin@org.eclipse.objectteams.otdt.metrics.export=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.metrics.export
 
 !** OT/J Plugins **!
-plugin@org.eclipse.objectteams.otequinox.branding=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.branding,tag=builds/201706061121
-plugin@org.eclipse.objectteams.otequinox.branding.otre=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.branding.otre,tag=builds/201706061122
-plugin@org.eclipse.objectteams.otdt.jdt.ui=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.jdt.ui
-plugin@org.eclipse.objectteams.otdt.ui.help=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.ui.help,tag=builds/201606070956
-plugin@org.eclipse.objectteams.otdt.apt=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.apt,tag=builds/201706061122,tag=builds/202003100937
-plugin@org.eclipse.objectteams.otdt.compiler.adaptor=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.compiler.adaptor,tag=builds/201912111741
-plugin@org.eclipse.objectteams.otdt.debug.adaptor=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug.adaptor,tag=builds/201909081329
-plugin@org.eclipse.objectteams.otdt.refactoring=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.refactoring,tag=builds/201909081329
-plugin@org.eclipse.objectteams.otdt.pde.ui=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.pde.ui,tag=builds/202003100937
-plugin@org.eclipse.objectteams.otdt.samples=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.samples,tag=builds/201706061122
+plugin@org.eclipse.objectteams.otequinox.branding=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.branding,tag=builds/201706061121
+plugin@org.eclipse.objectteams.otequinox.branding.otre=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.branding.otre,tag=builds/201706061122
+plugin@org.eclipse.objectteams.otdt.jdt.ui=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.jdt.ui
+plugin@org.eclipse.objectteams.otdt.ui.help=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.ui.help,tag=builds/201606070956
+plugin@org.eclipse.objectteams.otdt.apt=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.apt,tag=builds/202003100937
+plugin@org.eclipse.objectteams.otdt.compiler.adaptor=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.compiler.adaptor
+plugin@org.eclipse.objectteams.otdt.debug.adaptor=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug.adaptor
+plugin@org.eclipse.objectteams.otdt.refactoring=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.refactoring
+plugin@org.eclipse.objectteams.otdt.pde.ui=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.pde.ui
+plugin@org.eclipse.objectteams.otdt.samples=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.samples
 
 !** Consume BCEL from Orbit: **!
-plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20200529191137/repository
+plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository
 !** ASM from Orbit: **!
-plugin@org.objectweb.asm,8.0.1=p2IU,id=org.objectweb.asm,version=8.0.1.v20200420-1007,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20200529191137/repository/
-plugin@org.objectweb.asm.tree,8.0.1=p2IU,id=org.objectweb.asm.tree,version=8.0.1.v20200420-1007,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20200529191137/repository/
-plugin@org.objectweb.asm.commons,8.0.1=p2IU,id=org.objectweb.asm.commons,version=8.0.1.v20200420-1007,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20200529191137/repository/
-plugin@org.objectweb.asm.util,8.0.1=p2IU,id=org.objectweb.asm.util,version=8.0.1.v20200420-1007,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20200529191137/repository/
-plugin@org.objectweb.asm.analysis,8.0.1=p2IU,id=org.objectweb.asm.analysis,version=8.0.1.v20200420-1007,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20200529191137/repository/
+plugin@org.objectweb.asm,9.2.0=p2IU,id=org.objectweb.asm,version=9.2.0.v20210813-1119,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
+plugin@org.objectweb.asm.tree,9.2.0=p2IU,id=org.objectweb.asm.tree,version=9.2.0.v20210813-1119,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
+plugin@org.objectweb.asm.commons,9.2.0=p2IU,id=org.objectweb.asm.commons,version=9.2.0.v20210813-1119,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
+plugin@org.objectweb.asm.util,9.2.0=p2IU,id=org.objectweb.asm.util,version=9.2.0.v20210813-1119,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
+plugin@org.objectweb.asm.analysis,9.2.0=p2IU,id=org.objectweb.asm.analysis,version=9.2.0.v20210813-1119,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
 
-plugin@org.mockito,1.9.5=p2IU,id=org.mockito,version=1.9.5.v201605172210,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20200529191137/repository/
-plugin@org.hamcrest.core,1.3.0=p2IU,id=org.hamcrest.core,version=1.3.0.v20180420-1519,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20200529191137/repository/
-plugin@org.hamcrest.library,1.3.0=p2IU,id=org.hamcrest.library,version=1.3.0.v20180524-2246,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20200529191137/repository/
+plugin@org.mockito,1.9.5=p2IU,id=org.mockito,version=1.9.5.v201605172210,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
+plugin@org.hamcrest.core,1.3.0=p2IU,id=org.hamcrest.core,version=1.3.0.v20180420-1519,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
+plugin@org.hamcrest.library,1.3.0=p2IU,id=org.hamcrest.library,version=1.3.0.v20180524-2246,repository=https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/
 
 !========== JDT/UI: ==========!
-plugin@org.eclipse.jdt.ui=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui
-plugin@org.eclipse.jdt.ui.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests
-plugin@org.eclipse.jdt.ui.tests.refactoring=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests.refactoring
+plugin@org.eclipse.jdt.ui=GIT,tag=@SDK_QUALIFIER@,repo=https://git.eclipse.org/r/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui
+plugin@org.eclipse.jdt.ui.tests=GIT,tag=@SDK_QUALIFIER@,repo=https://git.eclipse.org/r/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests
+plugin@org.eclipse.jdt.ui.tests.refactoring=GIT,tag=@SDK_QUALIFIER@,repo=https://git.eclipse.org/r/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests.refactoring
+
+!== temporarily fetch this fragment from sources to avoid module conflict on javax.lang.model et al.: ==
+plugin@org.eclipse.jdt.compiler.tool=GIT,tag=@SDK_QUALIFIER@,repo=https://git.eclipse.org/r/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.compiler.tool
 
 !***************  OTDT Test CONTRIBUTION  ******************************************************** 
 
 
-feature@org.eclipse.objectteams.otdt-tests=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.feature/unit-tests-feature
+feature@org.eclipse.objectteams.otdt-tests=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.feature/unit-tests-feature
 
-plugin@org.eclipse.jdt.core.tests.compiler=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=org.eclipse.jdt.core.tests.compiler
-plugin@org.eclipse.jdt.core.tests.model=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=org.eclipse.jdt.core.tests.model
-plugin@org.eclipse.objectteams.otdt.tests=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.tests
-plugin@org.eclipse.objectteams.otdt.ui.tests.dom=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.ui.tests.dom
-plugin@org.eclipse.objectteams.otdt.debug.tests=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.debug.tests
-plugin@org.eclipse.objectteams.otdt.ui.tests.refactoring=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.ui.tests.refactoring
+plugin@org.eclipse.jdt.core.tests.compiler=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=org.eclipse.jdt.core.tests.compiler
+plugin@org.eclipse.jdt.core.tests.model=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=org.eclipse.jdt.core.tests.model
+plugin@org.eclipse.objectteams.otdt.tests=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.tests
+plugin@org.eclipse.objectteams.otdt.ui.tests.dom=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.ui.tests.dom
+plugin@org.eclipse.objectteams.otdt.debug.tests=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.debug.tests
+plugin@org.eclipse.objectteams.otdt.ui.tests.refactoring=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.ui.tests.refactoring
 
 !** OT/J Test Plugins **!
-plugin@org.eclipse.objectteams.otdt.test.builder=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.test.builder
-plugin@org.eclipse.objectteams.otdt.ui.tests=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.ui.tests
+plugin@org.eclipse.objectteams.otdt.test.builder=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.test.builder
+plugin@org.eclipse.objectteams.otdt.ui.tests=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.ui.tests
 
 !** OT/Equinox Tests **!
-plugin@OTEquinoxTests=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/OTEquinoxTests
-plugin@Base537350_A=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Base537350_A
-plugin@Aspect537350_A=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Aspect537350_A
-plugin@Base537350_B=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Base537350_B
-plugin@Aspect537350_B=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Aspect537350_B
-plugin@Base537351=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Base537351
-plugin@Middle537351=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Middle537351
-plugin@Aspect537351=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Aspect537351
-plugin@Base537533=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Base537533
-plugin@Aspect537533=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Aspect537533
+plugin@OTEquinoxTests=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/OTEquinoxTests
+plugin@Base537350_A=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Base537350_A
+plugin@Aspect537350_A=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Aspect537350_A
+plugin@Base537350_B=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Base537350_B
+plugin@Aspect537350_B=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Aspect537350_B
+plugin@Base537351=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Base537351
+plugin@Middle537351=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Middle537351
+plugin@Aspect537351=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Aspect537351
+plugin@Base537533=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Base537533
+plugin@Aspect537533=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Aspect537533
+plugin@Base571542_A=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Base571542_A
+plugin@Base571542_B=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Base571542_B
+plugin@Aspect571542_A=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Aspect571542_A
+plugin@Aspect571542_B=GIT,repo=https://git.eclipse.org/r/objectteams/org.eclipse.objectteams.git,path=testplugins/otequinoxtest/Aspect571542_B
 
 
 !-- Tests fetched from original GIT (some are required indirectly by jdt.ui.tests): --
-plugin@org.eclipse.jdt.core.tests.builder=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.core.tests.builder
-plugin@org.eclipse.jdt.compiler.apt.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.compiler.apt.tests
-plugin@org.eclipse.jdt.debug.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.debug.git,path=org.eclipse.jdt.debug.tests
-plugin@org.eclipse.jdt.text.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.text.tests
-plugin@org.eclipse.jface.text.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.jface.text.tests
-plugin@org.eclipse.text.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.text.tests
-plugin@org.eclipse.core.filebuffers.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.core.filebuffers.tests
+plugin@org.eclipse.jdt.core.tests.builder=GIT,tag=@SDK_QUALIFIER@,repo=https://git.eclipse.org/r/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.core.tests.builder
+plugin@org.eclipse.jdt.compiler.apt.tests=GIT,tag=@SDK_QUALIFIER@,repo=https://git.eclipse.org/r/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.compiler.apt.tests
+plugin@org.eclipse.jdt.debug.tests=GIT,tag=@SDK_QUALIFIER@,repo=https://git.eclipse.org/r/jdt/eclipse.jdt.debug.git,path=org.eclipse.jdt.debug.tests
+plugin@org.eclipse.jdt.text.tests=GIT,tag=@SDK_QUALIFIER@,repo=https://git.eclipse.org/r/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.text.tests
+plugin@org.eclipse.jface.text.tests=GIT,tag=@SDK_QUALIFIER@,repo=https://git.eclipse.org/r/platform/eclipse.platform.text.git,path=org.eclipse.jface.text.tests
+plugin@org.eclipse.text.tests=GIT,tag=@SDK_QUALIFIER@,repo=https://git.eclipse.org/r/platform/eclipse.platform.text.git,path=org.eclipse.text.tests
+plugin@org.eclipse.core.filebuffers.tests=GIT,tag=@SDK_QUALIFIER@,repo=https://git.eclipse.org/r/platform/eclipse.platform.text.git,path=org.eclipse.core.filebuffers.tests
 
 !-- jdt.annotation: --!
-plugin@org.eclipse.jdt.annotation,2.2.600=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.annotation
-plugin@org.eclipse.jdt.annotation,1.1.500=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.annotation_v1
+plugin@org.eclipse.jdt.annotation,2.2.600=GIT,tag=@SDK_QUALIFIER@,repo=https://git.eclipse.org/r/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.annotation
+plugin@org.eclipse.jdt.annotation,1.2.0=GIT,tag=@SDK_QUALIFIER@,repo=https://git.eclipse.org/r/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.annotation_v1
 

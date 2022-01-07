@@ -125,7 +125,7 @@ public class CallinImplementor extends MethodMappingImplementor
 	{
 		super(role);
 		this._roleScope = role.getAst().scope; // we definitely have an AST here
-		this.bindingDirection = TerminalTokens.TokenNameBINDIN;
+		this.bindingDirection = AbstractMethodMappingDeclaration.BindingDirectionIn;
 	}
 	/**
 	 * Main entry from Dependencies.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.ICorrectionRequestor;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class CodeCorrectionTestsRequestor implements ICorrectionRequestor {
-	private class Suggestion {
+	private static class Suggestion {
 		public String text;
 		public int start;
 		public int end;
@@ -30,7 +30,7 @@ public class CodeCorrectionTestsRequestor implements ICorrectionRequestor {
 		}
 	}
 
-	class SuggestionComparator implements Comparator {
+	static class SuggestionComparator implements Comparator {
 		@Override
 		public int compare(Object o1,Object o2) {
 			Suggestion s1 = (Suggestion)o1;
@@ -48,36 +48,36 @@ public class CodeCorrectionTestsRequestor implements ICorrectionRequestor {
 	}
 
 
-	private Vector suggestions = new Vector(5);
+	private List<Suggestion> suggestions = new ArrayList<>(5);
 
 	public void acceptClass(char[] packageName,char[] className,char[] correctionName,int modifiers,int correctionStart,int correctionEnd){
-		this.suggestions.addElement(new Suggestion(correctionName, correctionStart, correctionEnd));
+		this.suggestions.add(new Suggestion(correctionName, correctionStart, correctionEnd));
 	}
 
 	public void acceptField(char[] declaringTypePackageName,char[] declaringTypeName,char[] name,char[] typePackageName,char[] typeName,char[] correctionName,int modifiers,int correctionStart,int correctionEnd){
-		this.suggestions.addElement(new Suggestion(correctionName, correctionStart, correctionEnd));
+		this.suggestions.add(new Suggestion(correctionName, correctionStart, correctionEnd));
 	}
 
 	public void acceptInterface(char[] packageName,char[] interfaceName,char[] correctionName,int modifiers,int correctionStart,int correctionEnd){
-		this.suggestions.addElement(new Suggestion(correctionName, correctionStart, correctionEnd));
+		this.suggestions.add(new Suggestion(correctionName, correctionStart, correctionEnd));
 	}
 
 	public void acceptLocalVariable(char[] name,char[] typePackageName,char[] typeName,int modifiers,int correctionStart,int correctionEnd){
-		this.suggestions.addElement(new Suggestion(name, correctionStart, correctionEnd));
+		this.suggestions.add(new Suggestion(name, correctionStart, correctionEnd));
 	}
 
 	public void acceptMethod(char[] declaringTypePackageName,char[] declaringTypeName,char[] selector,char[][] parameterPackageNames,char[][] parameterTypeNames,char[][] parameterNames,char[] returnTypePackageName,char[] returnTypeName,char[] correctionName,int modifiers,int correctionStart,int correctionEnd){
-		this.suggestions.addElement(new Suggestion(correctionName, correctionStart, correctionEnd));
+		this.suggestions.add(new Suggestion(correctionName, correctionStart, correctionEnd));
 	}
 
 	public void acceptPackage(char[] packageName,char[] correctionName,int correctionStart,int correctionEnd){
-		this.suggestions.addElement(new Suggestion(correctionName, correctionStart, correctionEnd));
+		this.suggestions.add(new Suggestion(correctionName, correctionStart, correctionEnd));
 	}
 
 	public String getSuggestions(){
 		Suggestion[] sortedSuggestions = getSortedSuggestions();
 
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		for (int i = 0; i < sortedSuggestions.length; i++) {
 			if(i != 0)
 				result.append('\n');
@@ -90,7 +90,7 @@ public class CodeCorrectionTestsRequestor implements ICorrectionRequestor {
 	public String getStarts(){
 		Suggestion[] sortedSuggestions = getSortedSuggestions();
 
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		for (int i = 0; i < sortedSuggestions.length; i++) {
 			if(i != 0)
 				result.append('\n');
@@ -103,7 +103,7 @@ public class CodeCorrectionTestsRequestor implements ICorrectionRequestor {
 	public String getEnds(){
 		Suggestion[] sortedSuggestions = getSortedSuggestions();
 
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		for (int i = 0; i < sortedSuggestions.length; i++) {
 			if(i != 0)
 				result.append('\n');

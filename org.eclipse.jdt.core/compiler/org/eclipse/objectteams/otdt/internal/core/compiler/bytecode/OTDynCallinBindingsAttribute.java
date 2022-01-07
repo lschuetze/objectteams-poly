@@ -1,7 +1,7 @@
 /**
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2009, 2019 Stephan Herrmann
+ * Copyright 2009, 2020 Stephan Herrmann
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -475,7 +475,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 					{
 						baseMethods[i] = methods[j];
 						if (recordLabels && mapping.callinName != null && mapping.callinName[0] != '<') {
-							teamBinding._teamModel.recordLabelledCallin(new String(mapping.callinName), methods[j], bm.callinID);
+							teamBinding._teamModel.recordLabelledCallin(new String(mapping.callinName), methods[j], bm.callinID, roleBinding);
 						}
 						continue mappingBaseMethods;
 					}

@@ -7,4 +7,4 @@ Bundle-Version: 1.0.0
 Require-Bundle: org.eclipse.ui
 Export-Package: aeb.api
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11

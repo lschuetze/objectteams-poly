@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 IBM Corporation and others.
+ * Copyright (c) 2011, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -4557,7 +4557,7 @@ public class ASTConverterTestAST4_2 extends ConverterTestSetup {
 		assertEquals("Wrong name", "BYTE_FIELD", variableBinding.getName());
 		constantValue = variableBinding.getConstantValue();
 		assertNotNull("No constant", constantValue);
-		assertEquals("Wrong value", new Byte((byte)1), constantValue);
+		assertEquals("Wrong value", Byte.valueOf((byte)1), constantValue);
 		initializer = fragment.getInitializer();
 		assertNotNull("No initializer", initializer);
 		checkSourceRange(initializer, "1", source);
@@ -4573,7 +4573,7 @@ public class ASTConverterTestAST4_2 extends ConverterTestSetup {
 		assertEquals("Wrong name", "CHAR_FIELD", variableBinding.getName());
 		constantValue = variableBinding.getConstantValue();
 		assertNotNull("No constant", constantValue);
-		assertEquals("Wrong value", new Character('{'), constantValue);
+		assertEquals("Wrong value", Character.valueOf('{'), constantValue);
 		initializer = fragment.getInitializer();
 		assertNotNull("No initializer", initializer);
 		checkSourceRange(initializer, "\'{\'", source);
@@ -4589,7 +4589,7 @@ public class ASTConverterTestAST4_2 extends ConverterTestSetup {
 		assertEquals("Wrong name", "DOUBLE_FIELD", variableBinding.getName());
 		constantValue = variableBinding.getConstantValue();
 		assertNotNull("No constant", constantValue);
-		assertEquals("Wrong value", new Double("3.1415"), constantValue);
+		assertEquals("Wrong value", Double.valueOf("3.1415"), constantValue);
 		initializer = fragment.getInitializer();
 		assertNotNull("No initializer", initializer);
 		checkSourceRange(initializer, "3.1415", source);
@@ -4605,7 +4605,7 @@ public class ASTConverterTestAST4_2 extends ConverterTestSetup {
 		assertEquals("Wrong name", "FLOAT_FIELD", variableBinding.getName());
 		constantValue = variableBinding.getConstantValue();
 		assertNotNull("No constant", constantValue);
-		assertEquals("Wrong value", new Float("3.14159f"), constantValue);
+		assertEquals("Wrong value", Float.valueOf("3.14159f"), constantValue);
 		initializer = fragment.getInitializer();
 		assertNotNull("No initializer", initializer);
 		checkSourceRange(initializer, "3.14159f", source);
@@ -4637,7 +4637,7 @@ public class ASTConverterTestAST4_2 extends ConverterTestSetup {
 		assertEquals("Wrong name", "LONG_FIELD", variableBinding.getName());
 		constantValue = variableBinding.getConstantValue();
 		assertNotNull("No constant", constantValue);
-		assertEquals("Wrong value", new Long("34"), constantValue);
+		assertEquals("Wrong value", Long.valueOf("34"), constantValue);
 		initializer = fragment.getInitializer();
 		assertNotNull("No initializer", initializer);
 		checkSourceRange(initializer, "34L", source);
@@ -4653,7 +4653,7 @@ public class ASTConverterTestAST4_2 extends ConverterTestSetup {
 		assertEquals("Wrong name", "SHORT_FIELD", variableBinding.getName());
 		constantValue = variableBinding.getConstantValue();
 		assertNotNull("No constant", constantValue);
-		assertEquals("Wrong value", new Short("130"), constantValue);
+		assertEquals("Wrong value", Short.valueOf("130"), constantValue);
 		initializer = fragment.getInitializer();
 		assertNotNull("No initializer", initializer);
 		checkSourceRange(initializer, "130", source);
@@ -7949,7 +7949,7 @@ public class ASTConverterTestAST4_2 extends ConverterTestSetup {
 	 * @bug 149126: IllegalArgumentException in ASTConverter
 	 * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=149126"
 	 */
-	public void _test0652() throws CoreException {
+	public void test0652() throws CoreException {
 		ASTResult result = this.buildMarkedAST(
 				"/Converter/src/TestCharset.java",
 				"import java.nio.ByteBuffer;\n" +
@@ -7984,8 +7984,10 @@ public class ASTConverterTestAST4_2 extends ConverterTestSetup {
 				"public class TestCharset extends Charset {\n" +
 				"  public CharsetDecoder newDecoder(){\n" +
 				"    return new CharsetDecoder(this,2.0,2.0){\n" +
+//{ObjectTeams: incidentally better recovery
 				"      void CharsetDecoder(){\n" +
 				"      }\n" +
+// orig:
 				"      protected CoderResult decodeLoop(      ByteBuffer in,      CharBuffer out){\n" +
 				"        return null;\n" +
 				"      }\n" +
@@ -8036,6 +8038,7 @@ public class ASTConverterTestAST4_2 extends ConverterTestSetup {
 				"	return new CharsetDecoder(this, 2.0, 2.0) {\n" +
 				"	           ^^^^^^^^^^^^^^\n" +
 				"CharsetDecoder cannot be resolved to a type\n" +
+// :giro
 				"10. ERROR in /Converter/src/TestCharset.java (at line 10)\n" +
 				"	CharsetDecoder(CharSet\n" +
 				"	^^^^^^^^^^^^^^^^^^^^^^\n" +
@@ -8057,6 +8060,7 @@ public class ASTConverterTestAST4_2 extends ConverterTestSetup {
 				"	^^^^^^^^^^\n" +
 				"CharBuffer cannot be resolved to a type\n" +
 				"15. ERROR in /Converter/src/TestCharset.java (at line 17)\n" +
+// SH}
 				"	public CharsetEncoder newEncoder() {\n" +
 				"	       ^^^^^^^^^^^^^^\n" +
 				"CharsetEncoder cannot be resolved to a type\n",
@@ -9433,12 +9437,12 @@ public class ASTConverterTestAST4_2 extends ConverterTestSetup {
 	/*
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=169745
 	 */
-	public void _test0679() throws JavaModelException {
+	public void test0679() throws JavaModelException {
 		ICompilationUnit workingCopy = null;
 		try {
 			String contents =
 				"public class X {\n" +
-				"	int i = 1 - 2 + 3 + 4 + 5;\n" +
+				"	int i = 1 - 2 + 3 + 4 * 5;\n" +
 				"}";
 			workingCopy = getWorkingCopy("/Converter/src/X.java", true/*resolve*/);
 			ASTNode node = buildAST(
@@ -9456,10 +9460,11 @@ public class ASTConverterTestAST4_2 extends ConverterTestSetup {
 			final Expression initializer = fragment.getInitializer();
 			assertEquals("Not an infix expression", ASTNode.INFIX_EXPRESSION, initializer.getNodeType());
 			InfixExpression infixExpression = (InfixExpression) initializer;
-			final Expression leftOperand = infixExpression.getLeftOperand();
-			assertEquals("Not a number literal", ASTNode.NUMBER_LITERAL, leftOperand.getNodeType());
-			NumberLiteral literal = (NumberLiteral) leftOperand;
-			assertEquals("Wrong value", "1", literal.getToken());
+			final Expression rightOperand = infixExpression.getRightOperand();
+			InfixExpression rightOperand2 = (InfixExpression) rightOperand;
+			assertEquals("Not a number literal", ASTNode.NUMBER_LITERAL, rightOperand2.getRightOperand().getNodeType());
+			NumberLiteral literal = (NumberLiteral) rightOperand2.getRightOperand();
+			assertEquals("Wrong value", "5", literal.getToken());
 		} finally {
 			if (workingCopy != null)
 				workingCopy.discardWorkingCopy();

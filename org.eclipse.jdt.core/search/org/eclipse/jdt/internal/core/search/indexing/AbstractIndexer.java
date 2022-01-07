@@ -20,7 +20,13 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.search.SearchDocument;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.core.JavaModelManager;
-import org.eclipse.jdt.internal.core.search.matching.*;
+import org.eclipse.jdt.internal.core.search.matching.ConstructorPattern;
+import org.eclipse.jdt.internal.core.search.matching.FieldPattern;
+import org.eclipse.jdt.internal.core.search.matching.MethodDeclarationPattern;
+import org.eclipse.jdt.internal.core.search.matching.MethodPattern;
+import org.eclipse.jdt.internal.core.search.matching.ModulePattern;
+import org.eclipse.jdt.internal.core.search.matching.SuperTypeReferencePattern;
+import org.eclipse.jdt.internal.core.search.matching.TypeDeclarationPattern;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.objectteams.otdt.internal.core.search.matching.ReferenceToTeamPackagePattern;
 
@@ -34,13 +40,16 @@ public abstract class AbstractIndexer implements IIndexConstants {
 	public void addAnnotationTypeDeclaration(int modifiers, char[] packageName, char[] name, char[][] enclosingTypeNames, boolean secondary) {
 		addTypeDeclaration(modifiers, packageName, name, enclosingTypeNames, secondary);
 
+		char[] annotationSuperClass = CharOperation.concatWith(TypeConstants.JAVA_LANG_ANNOTATION_ANNOTATION, '.');
 		addIndexEntry(
 			SUPER_REF,
 			SuperTypeReferencePattern.createIndexKey(
-				modifiers, packageName, name, enclosingTypeNames, null, ANNOTATION_TYPE_SUFFIX, CharOperation.concatWith(TypeConstants.JAVA_LANG_ANNOTATION_ANNOTATION, '.'), ANNOTATION_TYPE_SUFFIX));
+				modifiers, packageName, name, enclosingTypeNames, null, ANNOTATION_TYPE_SUFFIX, annotationSuperClass, ANNOTATION_TYPE_SUFFIX));
+		addIndexMetaQualification(annotationSuperClass, true);
 	}
 	public void addAnnotationTypeReference(char[] typeName) {
 		addIndexEntry(ANNOTATION_REF, CharOperation.lastSegment(typeName, '.'));
+		addIndexMetaQualification(typeName, false);
 	}
 	public void addClassDeclaration(
 			int modifiers,
@@ -83,7 +92,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 
 		if (superclass != null) {
 			superclass = erasure(superclass);
-			addTypeReference(superclass);
+			addTypeReference(superclass, true);
 		}
 		addIndexEntry(
 			SUPER_REF,
@@ -99,7 +108,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 		if (superinterfaces != null) {
 			for (int i = 0, max = superinterfaces.length; i < max; i++) {
 				char[] superinterface = erasure(superinterfaces[i]);
-				addTypeReference(superinterface);
+				addTypeReference(superinterface, true);
 				addIndexEntry(
 					SUPER_REF,
 					SuperTypeReferencePattern.createIndexKey(
@@ -147,7 +156,8 @@ public abstract class AbstractIndexer implements IIndexConstants {
 	}
 	public void addConstructorReference(char[] typeName, int argCount) {
 		char[] simpleTypeName = CharOperation.lastSegment(typeName,'.');
-		addTypeReference(simpleTypeName);
+		addTypeReference(typeName); // The implementation will add simple name to index.
+		addIndexMetaQualification(typeName, true); // second entry for super type
 		addIndexEntry(CONSTRUCTOR_REF, ConstructorPattern.createIndexKey(simpleTypeName, argCount));
 		char[] innermostTypeName = CharOperation.lastSegment(simpleTypeName,'$');
 		if (innermostTypeName != simpleTypeName)
@@ -167,10 +177,12 @@ public abstract class AbstractIndexer implements IIndexConstants {
 			SUPER_REF,
 			SuperTypeReferencePattern.createIndexKey(
 				modifiers, packageName, name, enclosingTypeNames, null, ENUM_SUFFIX, superclass, CLASS_SUFFIX));
+		addIndexMetaQualification(superclass, true);
+
 		if (superinterfaces != null) {
 			for (int i = 0, max = superinterfaces.length; i < max; i++) {
 				char[] superinterface = erasure(superinterfaces[i]);
-				addTypeReference(superinterface);
+				addTypeReference(superinterface, true);
 				addIndexEntry(
 					SUPER_REF,
 					SuperTypeReferencePattern.createIndexKey(
@@ -197,7 +209,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 		if (superinterfaces != null) {
 			for (int i = 0, max = superinterfaces.length; i < max; i++) {
 				char[] superinterface = erasure(superinterfaces[i]);
-				addTypeReference(superinterface);
+				addTypeReference(superinterface, true);
 				addIndexEntry(
 					SUPER_REF,
 					SuperTypeReferencePattern.createIndexKey(
@@ -280,9 +292,25 @@ public abstract class AbstractIndexer implements IIndexConstants {
 				packageName == null ? CharOperation.NO_CHAR : packageName);
 
 		addIndexEntry(TYPE_DECL, indexKey);
+		addIndexMetaQualification(
+				CharOperation.concat(packageName, '.', CharOperation.concatWith(enclosingTypeNames, '$'), '$', name),
+				false);
 	}
 	public void addTypeReference(char[] typeName) {
+		addTypeReference(typeName, false);
+	}
+
+	protected void addTypeReference(char[] typeName, boolean superType) {
 		addNameReference(CharOperation.lastSegment(typeName, '.'));
+		addIndexMetaQualification(typeName, superType);
+	}
+
+	protected void addIndexMetaQualification(char[] typeName, boolean superType) {
+		char[] category = superType ? META_INDEX_SIMPLE_SUPER_TYPE_QUALIFIER_REF : META_INDEX_SIMPLE_TYPE_QUALIFIER_REF;
+		if(CharOperation.contains('.', typeName)) {
+			category = superType ? META_INDEX_QUALIFIED_SUPER_TYPE_QUALIFIER_REF : META_INDEX_QUALIFIED_TYPE_QUALIFIER_REF;
+		}
+		addIndexEntry(category, typeName);
 	}
 
 //{OTDTUI:

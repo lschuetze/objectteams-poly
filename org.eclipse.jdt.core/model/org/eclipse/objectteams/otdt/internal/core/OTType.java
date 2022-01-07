@@ -818,4 +818,14 @@ public class OTType extends OTJavaElement implements IOTType
 	public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento, WorkingCopyOwner owner) {
 		return ((JavaElement) getCorrespondingJavaElement()).getHandleFromMemento(token, memento, owner);
 	}
+
+	@Override
+	public String[] getPermittedSubtypeNames() throws JavaModelException {
+		return getIType().getPermittedSubtypeNames();
+	}
+
+	@Override
+	public boolean isSealed() throws JavaModelException {
+		return getIType().isSealed();
+	}
 }

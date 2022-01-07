@@ -4,5 +4,5 @@ Bundle-SymbolicName: Bug484275;singleton:=true
 Automatic-Module-Name: Bug484275
 Bundle-Version: 1.0.0.qualifier
 Export-Package: teams
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy

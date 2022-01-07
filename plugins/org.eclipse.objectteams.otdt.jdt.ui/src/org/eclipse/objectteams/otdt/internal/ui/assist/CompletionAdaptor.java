@@ -82,6 +82,7 @@ import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.ui.ImageConstants;
 import org.eclipse.objectteams.otdt.ui.ImageManager;
 import org.eclipse.osgi.util.NLS;
@@ -221,10 +222,10 @@ public team class CompletionAdaptor
 			boolean isCallin= true;
 			boolean isOverride= false;
 			switch(bindingModifier) {
-			case TerminalTokens.TokenNameCALLOUT_OVERRIDE:
+			case AbstractMethodMappingDeclaration.BindingOutOverride:
 				isOverride= true;
 				//$FALL-THROUGH$
-			case TerminalTokens.TokenNameBINDOUT:
+			case AbstractMethodMappingDeclaration.BindingDirectionOut:
 				isCallin= false;
 				break;
 			// otherwise it's a callin with details in bindingModifier
@@ -281,7 +282,7 @@ public team class CompletionAdaptor
 			LabelProvider labelProvider= getLabelProvider();
   //{ObjectTeams: callout-to-field:
 			StyledString label= labelProvider.createFieldDescLabel(proposal);
-			Image image= getImage(labelProvider.createMappingImageDescriptor(TerminalTokens.TokenNameBINDOUT));
+			Image image= getImage(labelProvider.createMappingImageDescriptor(AbstractMethodMappingDeclaration.BindingDirectionOut));
   // SH}
 			int relevance= computeRelevance(proposal);
 
@@ -326,8 +327,8 @@ public team class CompletionAdaptor
 				return ImageManager.getSharedInstance().getDescriptor(ImageConstants.CALLINBINDING_REPLACE_IMG);
 			case TerminalTokens.TokenNameafter:
 				return ImageManager.getSharedInstance().getDescriptor(ImageConstants.CALLINBINDING_AFTER_IMG);
-			case TerminalTokens.TokenNameBINDOUT:
-			case TerminalTokens.TokenNameCALLOUT_OVERRIDE:
+			case AbstractMethodMappingDeclaration.BindingDirectionOut:
+			case AbstractMethodMappingDeclaration.BindingOutOverride:
 				return ImageManager.getSharedInstance().getDescriptor(ImageConstants.CALLOUTBINDING_IMG);
 			default: 
 				return null;
@@ -642,14 +643,14 @@ public team class CompletionAdaptor
 					if (isTSuperOf(methodToOverride.getDeclaringClass(), declaringType))
 						CompletionAdaptor.enableSuperCallAdjustor.set(Boolean.TRUE);
 // orig:
-					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);
+					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fCompilationUnit);
 					MethodDeclaration stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, context, methodToOverride, declaringType, settings, declaringType.isInterface(), astNode);
 					ListRewrite rewriter= rewrite.getListRewrite(node, descriptor);
 					rewriter.insertFirst(stub, null);
 
 					ITrackedNodePosition position= rewrite.track(stub);
 					try {
-						rewrite.rewriteAST(recoveredDocument, fJavaProject.getOptions(true)).apply(recoveredDocument);
+						rewrite.rewriteAST(recoveredDocument, fCompilationUnit.getOptions(true)).apply(recoveredDocument);
 
 						String generatedCode= recoveredDocument.get(position.getStartPosition(), position.getLength());
 						int generatedIndent= IndentManipulation.measureIndentUnits(getIndentAt(recoveredDocument, position.getStartPosition(), settings), settings.tabWidth, settings.indentWidth);

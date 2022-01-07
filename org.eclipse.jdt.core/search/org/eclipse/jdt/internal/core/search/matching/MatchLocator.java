@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@
  *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann - Contribution for
  *								Bug 377883 - NPE on open Call Hierarchy
+ *     Microsoft Corporation - Contribution for bug 575562 - improve completion search performance
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.search.matching;
 
@@ -96,6 +97,7 @@ import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.core.SourceTypeElementInfo;
 import org.eclipse.jdt.internal.core.index.Index;
 import org.eclipse.jdt.internal.core.search.*;
+import org.eclipse.jdt.internal.core.search.indexing.QualifierQuery;
 import org.eclipse.jdt.internal.core.util.ASTNodeFinder;
 import org.eclipse.jdt.internal.core.util.HandleFactory;
 import org.eclipse.jdt.internal.core.util.Util;
@@ -289,6 +291,14 @@ public static void setFocus(SearchPattern pattern, IJavaElement focus) {
 	pattern.focus = focus;
 }
 
+/**
+ * Sets the qualifier queries into pattern.
+ * @see QualifierQuery#encodeQuery(org.eclipse.jdt.internal.core.search.indexing.QualifierQuery.QueryCategory[], char[], char[])
+ */
+public static void setIndexQualifierQuery(SearchPattern pattern, char[] queries) {
+	pattern.indexQualifierQuery = queries;
+}
+
 /*
  * Returns the working copies that can see the given focus.
  */
@@ -350,6 +360,13 @@ public static IBinaryType classFileReader(IType type) {
  */
 public static void findIndexMatches(SearchPattern pattern, Index index, IndexQueryRequestor requestor, SearchParticipant participant, IJavaSearchScope scope, IProgressMonitor monitor) throws IOException {
 	pattern.findIndexMatches(index, requestor, participant, scope, monitor);
+}
+
+/**
+ * Query a given index for matching entries. Assumes the sender has opened the index and will close when finished.
+ */
+public static void findIndexMatches(SearchPattern pattern, Index index, IndexQueryRequestor requestor, SearchParticipant participant, IJavaSearchScope scope, boolean resolveDocumentName, IProgressMonitor monitor) throws IOException {
+	pattern.findIndexMatches(index, requestor, participant, scope, resolveDocumentName, monitor);
 }
 
 public static IJavaElement getProjectOrJar(IJavaElement element) {
@@ -1305,7 +1322,7 @@ public void initialize(JavaProject project, int possibleMatchSize) throws JavaMo
 	projects.add(project);
 	if (this.pattern.focus != null) {
 		IJavaProject focusProject = this.pattern.focus.getJavaProject();
-		if (focusProject != project) {
+		if (!project.equals(focusProject)) {
 			projects.add(focusProject);
 		}
 	}
@@ -1600,7 +1617,7 @@ public void locateMatches(SearchDocument[] searchDocuments) throws CoreException
 			// create new parser and lookup environment if this is a new project
 			IResource resource = null;
 			openable = getCloserOpenable(openable, pathString);
-			JavaProject javaProject = (JavaProject) openable.getJavaProject();
+			JavaProject javaProject = openable.getJavaProject();
 			resource = workingCopy != null ? workingCopy.getResource() : openable.getResource();
 			if (resource == null)
 				resource = javaProject.getProject(); // case of a file in an external jar or external folder
@@ -1672,7 +1689,7 @@ private IJavaSearchScope getSubScope(String optionString, long value, boolean re
 private Openable getCloserOpenable(Openable openable, String pathString) {
 	if (this.pattern instanceof TypeDeclarationPattern &&
 			((TypeDeclarationPattern) this.pattern).moduleNames != null) {
-		JavaProject javaProject = (JavaProject) openable.getJavaProject();
+		JavaProject javaProject = openable.getJavaProject();
 		PackageFragmentRoot root = openable.getPackageFragmentRoot();
 		if (root instanceof JarPackageFragmentRoot) {
 			JarPackageFragmentRoot jpkf = (JarPackageFragmentRoot) root;
@@ -1785,6 +1802,8 @@ protected IType lookupType(ReferenceBinding typeBinding) {
 		acceptFlag = NameLookup.ACCEPT_ENUMS;
 	} else if (typeBinding.isInterface()) {
 		acceptFlag = NameLookup.ACCEPT_INTERFACES;
+	} else if (typeBinding.isRecord()) {
+		acceptFlag = NameLookup.ACCEPT_RECORDS;
 	} else if (typeBinding.isClass()) {
 		acceptFlag = NameLookup.ACCEPT_CLASSES;
 	}
@@ -1941,9 +1960,8 @@ public MethodReferenceMatch newMethodReferenceMatch(
 	SearchParticipant participant = getParticipant();
 	IResource resource = this.currentPossibleMatch.resource;
 	boolean insideDocComment = (reference.bits & ASTNode.InsideJavadoc) != 0;
-	if (enclosingBinding != null) {
+	if (enclosingBinding != null)
 		enclosingElement = ((JavaElement) enclosingElement).resolved(enclosingBinding);
-	}
 	boolean isOverridden = (accuracy & PatternLocator.SUPER_INVOCATION_FLAVOR) != 0;
 	return new MethodReferenceMatch(enclosingElement, accuracy, offset, length, isConstructor, isSynthetic, isOverridden, insideDocComment, participant, resource);
 }
@@ -3377,7 +3395,7 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 	} else {
 		TypeReference superClass = type.superclass;
 		if (superClass != null) {
-			reportMatchingSuper(superClass, enclosingElement, type.binding, nodeSet, matchedClassContainer);
+			reportMatchingSuperOrPermit(superClass, enclosingElement, type.binding, nodeSet, matchedClassContainer);
 			for (int i = 0, length = superClass.annotations == null ? 0 : superClass.annotations.length; i < length; i++) {
 				Annotation[] annotations = superClass.annotations[i];
 				if (annotations == null) continue;
@@ -3387,7 +3405,7 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 		TypeReference[] superInterfaces = type.superInterfaces;
 		if (superInterfaces != null) {
 			for (int i = 0, l = superInterfaces.length; i < l; i++) {
-				reportMatchingSuper(superInterfaces[i], enclosingElement, type.binding, nodeSet, matchedClassContainer);
+				reportMatchingSuperOrPermit(superInterfaces[i], enclosingElement, type.binding, nodeSet, matchedClassContainer);
 				TypeReference typeReference  = type.superInterfaces[i];
 				Annotation[][] annotations = typeReference != null ? typeReference.annotations : null;
 				if (annotations != null) {
@@ -3398,6 +3416,21 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 				}
 			}
 		}
+		TypeReference[] permittedTypes = type.permittedTypes;
+		if (permittedTypes != null) {
+			for (int i = 0, l = permittedTypes.length; i < l; i++) {
+				reportMatchingSuperOrPermit(permittedTypes[i], enclosingElement, type.binding, nodeSet, matchedClassContainer);
+				TypeReference typeReference  = type.permittedTypes[i];
+				Annotation[][] annotations = typeReference != null ? typeReference.annotations : null;
+				if (annotations != null) {
+					for (int j = 0, length = annotations.length; j < length; j++) {
+						if (annotations[j] == null) continue;
+						reportMatching(annotations[j], enclosingElement, null, type.binding, nodeSet, matchedClassContainer, enclosesElement);
+					}
+				}
+			}
+		}
+
 	}
 
 //ObjectTeams: report base class reference, precedences:
@@ -3406,7 +3439,6 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 		Integer level = (Integer) nodeSet.matchingNodes.removeKey(baseClass);
 		if (level != null && matchedClassContainer)
 			this.patternLocator.matchReportPlayedByReference(baseClass, enclosingElement, type.binding, level.intValue(), this);
-
 	}
 	if (type.precedences != null) {
 		for(int i=0; i<type.precedences.length; i++) {
@@ -3829,7 +3861,7 @@ protected void reportMatching(TypeParameter[] typeParameters, IJavaElement enclo
 		}
 	}
 }
-protected void reportMatchingSuper(TypeReference superReference, IJavaElement enclosingElement, Binding elementBinding, MatchingNodeSet nodeSet, boolean matchedClassContainer) throws CoreException {
+protected void reportMatchingSuperOrPermit(TypeReference superReference, IJavaElement enclosingElement, Binding elementBinding, MatchingNodeSet nodeSet, boolean matchedClassContainer) throws CoreException {
 	ASTNode[] nodes = null;
 	if (superReference instanceof ParameterizedSingleTypeReference || superReference instanceof ParameterizedQualifiedTypeReference) {
 		long lastTypeArgumentInfo = findLastTypeArgumentInfo(superReference);

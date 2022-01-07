@@ -42,8 +42,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
-import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNameBINDOUT;
-import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNameCALLOUT_OVERRIDE;
 import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNameget;
 
 
@@ -72,9 +70,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	}
 
 	public void setCalloutKind(boolean isOverride) {
-		this.calloutKind = isOverride ?
-								TokenNameCALLOUT_OVERRIDE :
-								TokenNameBINDOUT;
+		this.calloutKind = isOverride ? BindingOutOverride : BindingDirectionOut;
 
 	}
 
@@ -126,7 +122,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 					}
 					TypeBinding baseParam = baseParams[j];
 					if (!roleParam.isCompatibleWith(baseParam)) {
-						if (!RoleTypeCreator.isCompatibleViaBaseAnchor(this.scope, baseParam, roleParam, TokenNameBINDOUT))
+						if (!RoleTypeCreator.isCompatibleViaBaseAnchor(this.scope, baseParam, roleParam, AbstractMethodMappingDeclaration.BindingDirectionOut))
 						{
 							// try auto(un)boxing:
 							if (this.scope.isBoxingCompatibleWith(roleParam, baseParam))
@@ -168,7 +164,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 				// build a receiver (_OT$base):
 				AstGenerator gen = new AstGenerator(methodSpec.sourceStart, methodSpec.sourceEnd);
 				SingleNameReference baseRef = gen.singleNameReference(IOTConstants._OT_BASE);
-				baseRef.binding = RoleTypeCreator.findResolvedVariable(this.scope.classScope(), IOTConstants._OT_BASE);
+				baseRef.binding = RoleTypeCreator.findResolvedVariable(this.scope.classScope(), IOTConstants._OT_BASE, methodSpec);
 				// maybe wrap return type relative to _OT$base
 				baseReturn = RoleTypeCreator.maybeWrapQualifiedRoleType(
 						this.scope,
@@ -390,7 +386,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
     {
     	printIndent(indent,output);
         this.roleMethodSpec.print(0,output);
-        if(this.calloutKind==TokenNameCALLOUT_OVERRIDE)
+        if(this.calloutKind==BindingOutOverride)
             output.append(" => "); //$NON-NLS-1$
         else
             output.append(" -> "); //$NON-NLS-1$
@@ -438,7 +434,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	@Override
 	public boolean isCalloutOverride()
 	{
-		return this.calloutKind==TokenNameCALLOUT_OVERRIDE;
+		return this.calloutKind==BindingOutOverride;
 	}
 
     public boolean isCalloutToField()

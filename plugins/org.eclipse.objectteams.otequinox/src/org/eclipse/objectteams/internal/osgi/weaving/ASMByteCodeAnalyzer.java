@@ -25,11 +25,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.objectteams.internal.osgi.weaving.OTWeavingHook.WeavingScheme;
+import org.eclipse.objectteams.otredyn.bytecode.Types;
 import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes;
-import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
 
 /**
@@ -40,25 +38,119 @@ import org.objectweb.asm.Opcodes;
  * @since 1.2.3
  */
 public class ASMByteCodeAnalyzer {
-	private static final int ACC_TEAM = 0x8000;
+
+	protected static class ClassAndAttributesReader extends ClassReader {
+		private static final int MAX_ATTR_NAME_LEN = 100;  // should use the private(!!!) field ClassReader#maxStringLength
+		
+		WeavingScheme weavingScheme;
+		int otClassFlags;
+		boolean attributesRead;
+		public ClassAndAttributesReader(byte[] classFile) {
+			super(classFile);
+		}
+		public ClassAndAttributesReader(InputStream classStream) throws IOException {
+			super(classStream);
+		}
+		void readOTAttributes() {
+			if (attributesRead)
+				return;
+			attributesRead = true;
+			char[] charBuffer = new char[MAX_ATTR_NAME_LEN];
+
+		    int currentAttributeOffset = myGetFirstAttributeOffset();
+		    int found = 0;
+		    for (int i = readUnsignedShort(currentAttributeOffset - 2); i > 0; --i) {
+		      // Read the attribute_info's attribute_name and attribute_length fields.
+		      String attributeName = myReadUTF8(currentAttributeOffset, charBuffer);
+		      int attributeLength = readInt(currentAttributeOffset + 2);
+		      currentAttributeOffset += 6;
+		      if (Attributes.ATTRIBUTE_OT_CLASS_FLAGS.equals(attributeName)) {
+		    	  otClassFlags = readUnsignedShort(currentAttributeOffset);
+		    	  found++;
+		      } else if (Attributes.ATTRIBUTE_OT_COMPILER_VERSION.equals(attributeName)) {
+		    	  int encodedVersion  = readUnsignedShort(currentAttributeOffset);
+		    	  weavingScheme = ((encodedVersion & Attributes.OTDRE_FLAG) != 0) ? WeavingScheme.OTDRE : WeavingScheme.OTRE;
+		    	  found++;
+		      }
+		      if (found == 2)
+		    	  break;
+		      currentAttributeOffset += attributeLength;
+		    }
+		}
+		String myReadUTF8(int offset, char[] charBuffer) {
+			try {
+				return readUTF8(offset, charBuffer);
+			} catch (ArrayIndexOutOfBoundsException aioobe) {
+				return "<name is too long>";
+			}
+		}
+		/* copy of inaccessible method: */
+		int myGetFirstAttributeOffset() {
+			int currentOffset = header + 8 + readUnsignedShort(header + 6) * 2;
+			int fieldsCount = readUnsignedShort(currentOffset);
+			currentOffset += 2;
+			while (fieldsCount-- > 0) {
+				int attributesCount = readUnsignedShort(currentOffset + 6);
+				currentOffset += 8;
+				while (attributesCount-- > 0) {
+					currentOffset += 6 + readInt(currentOffset + 2);
+				}
+			}
+			int methodsCount = readUnsignedShort(currentOffset);
+			currentOffset += 2;
+			while (methodsCount-- > 0) {
+				int attributesCount = readUnsignedShort(currentOffset + 6);
+				currentOffset += 8;
+				while (attributesCount-- > 0) {
+					currentOffset += 6 + readInt(currentOffset + 2);
+				}
+			}
+			return currentOffset + 2;
+		}
+	}
 
 	public static class ClassInformation {
 		private int modifiers;
 		private String name;
 		private String superClassName;
 		private String[] superInterfaceNames;
+		private ClassAndAttributesReader reader;
+		private Boolean isOTClass;
+		private @NonNull WeavingScheme weavingScheme = WeavingScheme.Unknown;
 
-		ClassInformation(ClassReader classReader) {
+		ClassInformation(ClassAndAttributesReader classReader) {
 			this.modifiers = classReader.getAccess();
 			this.name = classReader.getClassName();
 			this.superClassName = classReader.getSuperName();
 			this.superInterfaceNames = classReader.getInterfaces();
+			this.reader = classReader;
 		}
 
-		public boolean isTeam() {
-			return (modifiers & ACC_TEAM) != 0;
+		public boolean isOTClass() {
+			if (isOTClass == null) {
+				reader.readOTAttributes();
+				isOTClass = (reader.otClassFlags & (Types.ROLE_FLAG | Types.TEAM_FLAG)) != 0;
+			}
+			return isOTClass;
 		}
 
+		public @NonNull WeavingScheme getWeavingScheme() {
+			if (this.weavingScheme == WeavingScheme.Unknown) {
+				evaluateAttributes();
+			}
+			return this.weavingScheme;
+		}
+
+		private void evaluateAttributes() {
+			if (reader != null) {
+				reader.readOTAttributes();
+				WeavingScheme scheme = reader.weavingScheme;
+				if (scheme != null)
+					this.weavingScheme = scheme;
+				this.isOTClass = (reader.otClassFlags & (Types.ROLE_FLAG | Types.TEAM_FLAG)) != 0;
+				reader = null; // release the bytes etc.
+			}
+		}
 		public boolean isInterface() {
 			return (modifiers & Opcodes.ACC_INTERFACE) != 0;
 		}
@@ -110,57 +202,25 @@ public class ASMByteCodeAnalyzer {
 		if (classInformation != null) {
 			return classInformation;
 		}
-		ClassReader classReader = classBytes != null ? new ClassReader(classBytes) : new ClassReader(classStream);
+		ClassAndAttributesReader classReader = classBytes != null ? new ClassAndAttributesReader(classBytes) : new ClassAndAttributesReader(classStream);
 		classInformation = new ClassInformation(classReader);
 		classInformationMap.put(className, classInformation);
 		return classInformation;
 	}
 
-	public static WeavingScheme determineWeavingScheme(byte[] classBytes, String className) {
-		return determineWeavingScheme(classBytes, null, className);
-	}
-	public static @NonNull WeavingScheme determineWeavingScheme(InputStream classStream, String className) {
-		return determineWeavingScheme(null, classStream, className);
-	}
-	static @NonNull WeavingScheme determineWeavingScheme(byte[] classBytes, InputStream classStream, String className) {
-
-		class OTCompilerVersion extends Attribute {
-			WeavingScheme weavingScheme;
-			public OTCompilerVersion() {
-				super(Attributes.ATTRIBUTE_OT_COMPILER_VERSION);
-			}
-			@Override
-			protected Attribute read(ClassReader cr, int off, int len, char[] buf, int codeOff, Label[] labels) {
-				int encodedVersion  = cr.readUnsignedShort(off);
-				weavingScheme = ((encodedVersion & Attributes.OTDRE_FLAG) != 0) ? WeavingScheme.OTDRE : WeavingScheme.OTRE;
-				return this;
-			}
-		}
-		class MyClassVisitor extends ClassVisitor {
-			OTCompilerVersion compilerVersion;
-
-			private MyClassVisitor() {
-				super(org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass.ASM_API);
-			}
-
-			@Override
-			public void visitAttribute(Attribute attr) {
-				if (attr instanceof OTCompilerVersion)
-					compilerVersion = (OTCompilerVersion) attr;
-			}
-		}
-
+	public @NonNull WeavingScheme determineWeavingScheme(byte[] classBytes, String className) {
 		try {
-			ClassReader classReader = classBytes != null ? new ClassReader(classBytes) : new ClassReader(classStream);
-			// TODO: consider optimizing by copying reduced internals
-			MyClassVisitor classVisitor = new MyClassVisitor();
-			classReader.accept(classVisitor, new Attribute[] { new OTCompilerVersion() }, ClassReader.SKIP_CODE);
-			OTCompilerVersion version = classVisitor.compilerVersion;
-			if (version != null) {
-				WeavingScheme scheme = version.weavingScheme;
-				if (scheme != null)
-					return scheme;
-			}
+			ClassInformation classInformation = getClassInformation(classBytes, null, className);
+			return classInformation.getWeavingScheme();
+		} catch (IOException e) {
+			// ignore
+		}
+		return WeavingScheme.Unknown;
+	}
+	public @NonNull WeavingScheme determineWeavingScheme(InputStream classStream, String className) {
+		try {
+			ClassInformation classInformation = getClassInformation(null, classStream, className);
+			return classInformation.getWeavingScheme();
 		} catch (IOException e) {
 			// ignore
 		}

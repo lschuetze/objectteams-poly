@@ -371,7 +371,7 @@ public class TypeLevel {
 		if (   newExtends == null	 // no source-level "extends" -> investige implicit (binding-level) extends:
 			&& newSuperclass != null // either implicit super (j.l.Object or o.o.Team) or inherited from other tsuper
 			&& !refineToTeam	     // an implicit extends to org.objectteams.Team is NOT dropped if the tsuper was not a team
-			&& ((newSuperclass.id == TypeIds.T_JavaLangObject) || destScope.isOrgObjectteamsTeam(newSuperclass))) // otherwise it was copied from a tsuper role
+			&& ((newSuperclass.id == TypeIds.T_JavaLangObject) || newSuperclass.id == IOTConstants.T_OrgObjectTeamsTeam)) // otherwise it was copied from a tsuper role
 		{
 			newSuperclass = null; // drop default 'extends java.lang.Object' or o.o.Team
 		}

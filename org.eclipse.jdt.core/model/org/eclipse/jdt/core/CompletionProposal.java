@@ -875,6 +875,19 @@ public class CompletionProposal {
 	 */
 	public static final int MODULE_REF = 29;
 
+	/**
+	/**
+	 * Completion is a lambda expression.
+	 * This kind of completion might occur in a context like
+	 * <code>Consumer consumer = ^</code> and complete it to
+	 * <code>"Consumer consumer = c ->"</code> or in
+	 * <code> "to Consumer consumer = c -> {}"</code>
+	 *
+	 * @see #getKind()
+	 * @since 3.28
+	 */
+	public static final int LAMBDA_EXPRESSION = 30;
+
 //{ObjectTeams: new completion kinds
 	// when forming bitsets of completion kinds we need to fold multiple of our OT constants into the same slot.
 	// therefore we let them differ only by a offsets that are multiples of 32, which will be ignored during bitset operations
@@ -926,7 +939,7 @@ public class CompletionProposal {
 	/**
 	 * Generate a role type declaration overriding an implicitly inherited role from the super team.
 	 */
-	public static final int OVERRIDE_ROLE_DECLARATION= 30;
+	public static final int OVERRIDE_ROLE_DECLARATION= 31;
 // SH}
 
 	/**
@@ -943,7 +956,7 @@ public class CompletionProposal {
 	 */
 //{ObjectTeams: include OT completion kinds
 /* orig:
-	protected static final int LAST_KIND = MODULE_REF;
+	protected static final int LAST_KIND = LAMBDA_EXPRESSION;
   :giro */
 	protected static final int LAST_KIND = OVERRIDE_ROLE_DECLARATION;
 // SH}

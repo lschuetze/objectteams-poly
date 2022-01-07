@@ -27,6 +27,7 @@ import junit.framework.TestSuite;
 	test537351.TestBug537351.class,
 	test537533.TestBug537533.class,
 	test537350_a.TestBug537350_A.class,
-	base537350_b.TestBug537350_B.class
+	base537350_b.TestBug537350_B.class,
+	aspect571542.b.Test571542.class
 })
 public class AllOTEquinoxTests extends TestSuite { }

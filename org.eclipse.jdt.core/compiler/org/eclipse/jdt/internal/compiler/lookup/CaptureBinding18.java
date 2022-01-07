@@ -316,7 +316,7 @@ public class CaptureBinding18 extends CaptureBinding {
 				try {
 					this.prototype.recursionLevel ++;
 					if (this.upperBounds != null && this.upperBounds.length > 1) {
-						StringBuffer sb = new StringBuffer();
+						StringBuilder sb = new StringBuilder();
 						sb.append(this.upperBounds[0].readableName());
 						for (int i = 1; i < this.upperBounds.length; i++)
 							sb.append('&').append(this.upperBounds[i].readableName());
@@ -343,7 +343,7 @@ public class CaptureBinding18 extends CaptureBinding {
 				try {
 					this.prototype.recursionLevel++;
 					if (this.upperBounds != null && this.upperBounds.length > 1) {
-						StringBuffer sb = new StringBuffer();
+						StringBuilder sb = new StringBuilder();
 						sb.append(this.upperBounds[0].shortReadableName());
 						for (int i = 1; i < this.upperBounds.length; i++)
 							sb.append('&').append(this.upperBounds[i].shortReadableName());
@@ -369,7 +369,7 @@ public class CaptureBinding18 extends CaptureBinding {
 	}
 	@Override
 	public char[] computeUniqueKey(boolean isLeaf) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		buffer.append(TypeConstants.CAPTURE18);
 		buffer.append('{').append(this.end).append('#').append(this.captureID).append('}');
 		buffer.append(';');

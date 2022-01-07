@@ -33,6 +33,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -66,7 +67,7 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		@Override // make available locally:
 		protected IJavaProject setUpJavaProject(String projectName) throws CoreException, IOException
 		{
-			IJavaProject jProject = super.setUpJavaProject(projectName);
+			IJavaProject jProject = setUpOTJProject(projectName);
 
 			// and adjust a few options:
 
@@ -82,6 +83,17 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 
 			return jProject;
 		}
+		protected IJavaProject setUpOTJProject(final String projectName) throws CoreException, IOException {
+			// Eclipse / Equinox generally requires 11:
+			IJavaProject javaProject = super.setUpJavaProject(projectName, "11");
+
+	        // add OTJavaNature
+			IProjectDescription description = javaProject.getProject().getDescription();
+			description.setNatureIds(OTDTPlugin.createProjectNatures(description));
+			javaProject.getProject().setDescription(description, null);
+			return javaProject;
+		}
+
 		protected void replaceWorkspaceFile(String src, IJavaProject project, String dest)
 			throws IOException, CoreException
 		{

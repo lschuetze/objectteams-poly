@@ -37,7 +37,6 @@ package org.eclipse.jdt.internal.compiler.ast;
 
 import static org.eclipse.jdt.internal.compiler.ast.ExpressionContext.INVOCATION_CONTEXT;
 
-import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.*;
@@ -371,6 +370,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 //{ObjectTeams: hide marker arg:
 			int len = this.arguments.length;
 			if (   this.accessMode == ExplicitConstructorCall.Tsuper
+				&& len > 0
 			    && TSuperHelper.isMarkerArg(this.arguments[len-1]))
 				len--;
 /* orig:
@@ -395,10 +395,16 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 		MethodScope methodScope = scope.methodScope();
 		try {
 			AbstractMethodDeclaration methodDeclaration = methodScope.referenceMethod();
+			if (methodDeclaration != null && methodDeclaration.binding != null
+					&& methodDeclaration.binding.isCanonicalConstructor()) {
+				if (!checkAndFlagExplicitConstructorCallInCanonicalConstructor(methodDeclaration, scope))
+					return;
+			}
 			if (methodDeclaration == null
 					|| !methodDeclaration.isConstructor()
 					|| ((ConstructorDeclaration) methodDeclaration).constructorCall != this) {
-				scope.problemReporter().invalidExplicitConstructorCall(this);
+				if (!(methodDeclaration instanceof CompactConstructorDeclaration)) // already flagged for CCD
+						scope.problemReporter().invalidExplicitConstructorCall(this);
 				// fault-tolerance
 				if (this.qualification != null) {
 					this.qualification.resolveType(scope);
@@ -438,8 +444,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 			}
 //{ObjectTeams: compiling org.objectteams.Team$__OT__Confined ?
 			if (receiverType == null) {
-				if (CharOperation.equals(scope.enclosingSourceType().compoundName,
-							IOTConstants.ORG_OBJECTTEAMS_TEAM_OTCONFINED))
+				if (scope.enclosingSourceType().id == IOTConstants.T_OrgObjectteamsTeamOTConfined)
 					receiverType = scope.getJavaLangObject(); // use this supertype only this one time!
 				else // testharness for checking a hypothesis:
 					scope.problemReporter().missingImplementation(this, "Detected null receiverType"); //$NON-NLS-1$
@@ -655,9 +660,10 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 					&& tsuperMethod != this.binding
 					&& tsuperMethod != methodDeclaration.binding)
 				{
-					updateFromTSuper(scope.enclosingSourceType().superclass(),
+					if (tsuperArgs != null && tsuperArgs.length > 0)
+						updateFromTSuper(scope.enclosingSourceType().superclass(),
 									 tsuperArgs[tsuperArgs.length-1]);
-					this.binding       = tsuperMethod;
+					this.binding  = tsuperMethod;
 					argumentTypes = tsuperArgs;
 				}
 
@@ -856,6 +862,22 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 		this.accessMode = Tsuper; // is a tsuper call that was recognized late.
 	}
 // SH}
+
+	private boolean checkAndFlagExplicitConstructorCallInCanonicalConstructor(AbstractMethodDeclaration methodDecl, BlockScope scope) {
+
+		if (methodDecl.binding == null || methodDecl.binding.declaringClass == null
+				|| !methodDecl.binding.declaringClass.isRecord())
+			return true;
+		boolean isInsideCCD = methodDecl instanceof CompactConstructorDeclaration;
+		if (this.accessMode != ExplicitConstructorCall.ImplicitSuper) {
+			if (isInsideCCD)
+				scope.problemReporter().recordCompactConstructorHasExplicitConstructorCall(this);
+			else
+				scope.problemReporter().recordCanonicalConstructorHasExplicitConstructorCall(this);
+			return false;
+		}
+		return true;
+	}
 
 	@Override
 	public void setActualReceiverType(ReferenceBinding receiverType) {

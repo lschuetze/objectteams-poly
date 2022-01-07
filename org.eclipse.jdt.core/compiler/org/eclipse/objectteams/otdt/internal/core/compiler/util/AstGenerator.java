@@ -65,6 +65,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialLiftExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.QualifiedBaseReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ResultReference;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleInitializationMethod;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TsuperReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReference;
@@ -1130,7 +1131,7 @@ public class AstGenerator extends AstFactory {
 	}
 	public CaseStatement caseStatement(Expression constExpr) {
 		CaseStatement caseStatement = new CaseStatement(constExpr, this.sourceStart, this.sourceEnd);
-		caseStatement.constantExpressions = new Expression[] {constExpr};
+		caseStatement.constantExpressions = constExpr != null ? new Expression[] {constExpr} : null;
 		return caseStatement;
 	}
 	public BreakStatement breakStatement() {
@@ -1291,6 +1292,13 @@ public class AstGenerator extends AstFactory {
 		return lifter;
 	}
 
+	public RoleInitializationMethod roleInitializationMethod(CompilationResult compilationResult)
+	{
+	    RoleInitializationMethod roleInit = new RoleInitializationMethod(compilationResult);
+	    setMethodPositions(roleInit);
+	    return roleInit;
+	}
+
 	public ThisReference thisReference() {
 		return new ThisReference(this.sourceStart, this.sourceEnd);
 	}
@@ -1386,7 +1394,7 @@ public class AstGenerator extends AstFactory {
 	public MessageSend createBoxing(Expression resultExpr, BaseTypeBinding type)
 	{
 		char[][] boxedType = boxTypeName(type);
-		return messageSend(qualifiedTypeReference(boxedType), TypeConstants.VALUEOF, new Expression[]{resultExpr});
+		return messageSend(qualifiedNameReference(boxedType), TypeConstants.VALUEOF, new Expression[]{resultExpr});
 	}
 
 	public static char[][] boxTypeName(BaseTypeBinding type) {

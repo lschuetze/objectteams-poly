@@ -105,7 +105,7 @@ public team class CorrectionAdaptor {
 					ITypeBinding[] parameterTypes= getParameterTypes(arguments);
 					if (parameterTypes != null) {
 						String sig= org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getMethodSignature(methodName, parameterTypes, false);
-						boolean is18OrHigher= JavaModelUtil.is18OrHigher(targetCU.getJavaProject());
+						boolean is18OrHigher= JavaModelUtil.is1d8OrHigher(targetCU.getJavaProject());
 						boolean isSenderTypeAbstractClass = (senderDeclBinding.getModifiers() &  Modifier.ABSTRACT) > 0; 
 						boolean isSenderBindingInterface= senderDeclBinding.isInterface();
 						if (nodeParentType == senderDeclBinding) {

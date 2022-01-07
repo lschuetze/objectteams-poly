@@ -444,11 +444,11 @@ public class TeamMethodGenerator {
     			"_OT$lazyGlobalActiveFlag".toCharArray(),
     			gen.booleanLiteral(false));
 
-    	// private boolean _OT$isExecutingCallin = false;
+    	// private ThreadLocal<Boolean> _OT$isExecutingCallin = new ThreadLocal<Boolean>();
     	addPrivateField(teamDecl, gen,
-    			gen.baseTypeReference(TypeConstants.BOOLEAN),
+    			threadLocalOfBooleanReference(gen),
     			"_OT$isExecutingCallin".toCharArray(),
-    			gen.booleanLiteral(false));
+    			gen.allocation(threadLocalOfBooleanReference(gen), Expression.NO_EXPRESSIONS));
 
     	// private  int _OT$registrationState = _OT$UNREGISTERED;
     	addPrivateField(teamDecl, gen,
@@ -483,6 +483,14 @@ public class TeamMethodGenerator {
     			"_OT$implicitActivationsPerThread".toCharArray(),
     			gen.anonymousAllocation(threadLocalReference(gen), null/*arguments*/, anonThreadLocal));
     }
+
+	private QualifiedTypeReference threadLocalOfBooleanReference(AstGenerator gen) {
+		return gen.parameterizedQualifiedTypeReference(
+					JAVA_LANG_THREADLOCAL,
+					new TypeReference[] { gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_BOOLEAN) }
+				);
+	}
+
 	void addPrivateField(TypeDeclaration teamDecl, AstGenerator gen, TypeReference type, char[] name, Expression init) {
     	FieldDeclaration field = gen.field(AccPrivate, type, name, init);
     	boolean teamHasProblems = teamDecl.ignoreFurtherInvestigation;

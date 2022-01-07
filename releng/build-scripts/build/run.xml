@@ -76,15 +76,6 @@ path to map file (with substitutions):
 				<filter token="SDK_QUALIFIER" value="${eclipse.sdk.qualifier}"/>
 			</filterset>
 		</copy>
-        <!-- Insert SDK build qualifier into our configuration file: -->
-        <copy file="${OTScriptDir}/test.properties.in" tofile="${OTScriptDir}/test.properties" overwrite="true">
-                <filterset>
-                        <filter token="SDK_QUALIFIER" value="${eclipse.sdk.qualifier}"/>
-                </filterset>
-        </copy>
-
-        <!-- versions of test plugins: -->
-        <loadproperties srcfile="${OTScriptDir}/test.properties" />
 
 		<!-- ======== More Configuration Details: ======== -->
 		<!-- maybe obsolete: file prefix to distinguish output files. -->
@@ -205,22 +196,26 @@ path to map file (with substitutions):
 		<property name="ws" value="gtk" />
 	</target>
 
-	<target name="setupForCompile" depends="checkOS" unless="_hasCreatedOTDTEclipse">
+	<target name="setupForCompile" depends="checkOS,setupProperties" unless="_hasCreatedOTDTEclipse">
 		<antcall target="UnzipEclipse"/>
 		<antcall target="AddPluginsToEclipse"/>
 	</target>
 
 	<target name="UnzipEclipse">
 		<echo message="Extracting Boot Eclipse (${eclipse-app.tgz}) in ${build.root.dir}..."/>
+		<tempfile property="eclipse.app.tmp" prefix="eclipse-app"/>
+		<get src="${eclipse-app.tgz}" dest="${eclipse.app.tmp}"/>
+
 		<mkdir dir="${build.root.dir}"/>
-		<untar compression="gzip" src="${eclipse-app.tgz}" dest="${build.root.dir}"/>
-		<echo message="Extracting Base Eclipse (${eclipse-app.tgz}) in ${test.root.dir}..."/>
+		<untar compression="gzip" src="${eclipse.app.tmp}" dest="${build.root.dir}"/>
+		<echo message="Extracting Base Eclipse (${eclipse.app.tmp}) in ${test.root.dir}..."/>
 		<mkdir dir="${test.root.dir}"/>
-		<untar compression="gzip" src="${eclipse-app.tgz}" dest="${test.root.dir}"/>
-		<!-- avoid conflict with OTDT-variant when resolving source plug-ins against baseLocation: -->
+		<untar compression="gzip" src="${eclipse.app.tmp}" dest="${test.root.dir}"/>
 		<delete>
+			<!-- avoid conflict with OTDT-variant when resolving source plug-ins against baseLocation: -->
 		    <fileset dir="${baseLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
 		</delete>
+		<delete file="${eclipse.app.tmp}"></delete>
 	</target>
 	
 	<target name="AddPluginsToEclipse" description="Add git.pde.build plugins to the boot Eclipse">
@@ -290,7 +285,10 @@ path to map file (with substitutions):
         <!-- Make org.eclipse.test.performance available while compiling test projects: -->
         <echo message="Pre-installing Eclipse Test Framework into base Eclipse..."/>
         <mkdir dir="${testsUpdatesDirBase}/eclipse"/>
-        <unzip dest="${testsUpdatesDirBase}/eclipse" src="${eclipse.tests.zip}"/> 
+		<tempfile property="eclipse.tests.tmp" prefix="eclipse.tests"/>
+		<get src="${eclipse.tests.zip}" dest="${eclipse.tests.tmp}"/>
+        <unzip dest="${testsUpdatesDirBase}/eclipse" src="${eclipse.tests.tmp}"/> 
+		<delete file="${eclipse.tests.tmp}"/>
         <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${baseLocation}">
             <property name="feature" value="org.eclipse.test.feature.group"/>
             <property name="sourceUpdatesDir" value="${testsUpdatesDirBase}/eclipse"/>
@@ -354,7 +352,6 @@ path to map file (with substitutions):
 				<arg value="-Dmap.file.path=${map.file.path}"/>
 		    	<arg value="-DfetchCacheLocation=${fetchCacheLocation}"/>
 				<arg value="-Ddo.run.tests=${do.run.tests}"/>
-				<arg value="-Ddo.build.all=${do.build.all}"/>
 				<arg value="-Declipse-app.tgz=${eclipse-app.tgz}"/>
 				<arg value="-Declipse.tests.zip=${eclipse.tests.zip}"/>
 				<arg value="-Djdt.compiler.apt=${jdt.compiler.apt}"/>
@@ -372,7 +369,8 @@ path to map file (with substitutions):
 	</target>
 	
 	<!-- TESTING at STAGE 3: -->
-	<target name="setupTests" depends="createOTDTEclipse" description="Install the tests into an fresh OTDT">
+	<!-- assumed from previous invocation: depends="createOTDTEclipse" -->
+	<target name="setupTests" description="Install the tests into an fresh OTDT">
 		<available file="${buildDirectory}/label.properties" property="label.properties.exists" />
 		<ant antfile="${OTScriptDir}/test.xml" target="setupTests" dir="${build.root.dir}">
 			<property name="os" value="${os}" />

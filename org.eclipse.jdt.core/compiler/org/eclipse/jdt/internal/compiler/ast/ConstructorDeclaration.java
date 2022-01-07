@@ -53,6 +53,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.ProblemDetail;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.InsertTypeAdjustmentsVisitor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
@@ -226,7 +227,8 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 			// otherwise default super constructor exists, so go ahead and complain unused.
 		}
 		// complain unused
-		this.scope.problemReporter().unusedPrivateConstructor(this);
+		if ((this.bits & ASTNode.IsImplicit) == 0)
+			this.scope.problemReporter().unusedPrivateConstructor(this);
 	}
 
 	// check constructor recursion, once all constructor got resolved
@@ -337,34 +339,15 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 			&& (this.constructorCall.accessMode != ExplicitConstructorCall.This)) {
 			flowInfo = flowInfo.mergedWith(constructorContext.initsOnReturn);
 			FieldBinding[] fields = this.binding.declaringClass.fields();
-			for (int i = 0, count = fields.length; i < count; i++) {
-				FieldBinding field = fields[i];
-				checkAndGenerateFieldAssignment(initializerFlowContext, flowInfo, field);
-				if (!field.isStatic() && !flowInfo.isDefinitelyAssigned(field)) {
-					if (field.isFinal()) {
-						this.scope.problemReporter().uninitializedBlankFinalField(
-								field,
-								((this.bits & ASTNode.IsDefaultConstructor) != 0)
-									? (ASTNode) this.scope.referenceType().declarationOf(field.original())
-									: this);
-					} else if (field.isNonNull() || field.type.isFreeTypeVariable()) {
-						FieldDeclaration fieldDecl = this.scope.referenceType().declarationOf(field.original());
-						if (!isValueProvidedUsingAnnotation(fieldDecl))
-							this.scope.problemReporter().uninitializedNonNullField(
-								field,
-								((this.bits & ASTNode.IsDefaultConstructor) != 0)
-									? (ASTNode) fieldDecl
-									: this);
-					}
-				}
-			}
+			checkAndGenerateFieldAssignment(initializerFlowContext, flowInfo, fields);
+			doFieldReachAnalysis(flowInfo, fields);
 //{ObjectTeams: mandatory tsuper() call?
 			if (roleType.isRole()
 					&& !TSuperHelper.isTSuper(this.binding)
 					&& this.constructorCall.accessMode != ExplicitConstructorCall.Tsuper) {
 				for (ReferenceBinding tsuperRole : roleType.roleModel.getTSuperRoleBindings()) {
 					RoleModel tsuperModel = tsuperRole.roleModel;
-					if (tsuperModel != null && tsuperModel.hasFieldInit()) {
+					if (tsuperModel != null && tsuperModel.hasFinalFieldInit()) {
 						classScope.problemReporter().needToCallTSuper(this.constructorCall, tsuperRole);
 						break;
 					}
@@ -381,8 +364,30 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 		this.ignoreFurtherInvestigation = true;
 	}
 }
+protected void doFieldReachAnalysis(FlowInfo flowInfo, FieldBinding[] fields) {
+	for (int i = 0, count = fields.length; i < count; i++) {
+		FieldBinding field = fields[i];
+		if (!field.isStatic() && !flowInfo.isDefinitelyAssigned(field)) {
+			if (field.isFinal()) {
+				this.scope.problemReporter().uninitializedBlankFinalField(
+						field,
+						((this.bits & ASTNode.IsDefaultConstructor) != 0)
+							? (ASTNode) this.scope.referenceType().declarationOf(field.original())
+							: this);
+			} else if (field.isNonNull() || field.type.isFreeTypeVariable()) {
+				FieldDeclaration fieldDecl = this.scope.referenceType().declarationOf(field.original());
+				if (!isValueProvidedUsingAnnotation(fieldDecl))
+					this.scope.problemReporter().uninitializedNonNullField(
+						field,
+						((this.bits & ASTNode.IsDefaultConstructor) != 0)
+							? (ASTNode) fieldDecl
+							: this);
+			}
+		}
+	}
+}
 
-protected void checkAndGenerateFieldAssignment(FlowContext flowContext, FlowInfo flowInfo, FieldBinding field) {
+protected void checkAndGenerateFieldAssignment(FlowContext flowContext, FlowInfo flowInfo, FieldBinding[] fields) {
 	return;
 }
 boolean isValueProvidedUsingAnnotation(FieldDeclaration fieldDecl) {
@@ -438,7 +443,7 @@ public void generateCode(ClassScope classScope, ClassFile classFile) {
         }
         return;
     }
-    if (areStatementsMissing() && (this.bits & ASTNode.IsDefaultConstructor) == 0 ) {
+    if (areStatementsMissing() && (this.bits & (ASTNode.IsDefaultConstructor|ASTNode.IsCanonicalConstructor)) == 0 ) {
     	this.binding.bytecodeMissing = true;
     	return;
     }
@@ -619,7 +624,7 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 		initializerScope.computeLocalVariablePositions(argSlotSize, codeStream); // offset by the argument size (since not linked to method scope)
 
 		boolean needFieldInitializations = this.constructorCall == null || this.constructorCall.accessMode != ExplicitConstructorCall.This;
-//{ObjectTeams: some more constructors do not initialize fields:
+//{ObjectTeams: some deviations regarding field initialization:
 		// copied team constructors (due to arg lifting) do not initialize fields
 		if (   !needFieldInitializations
 			&& this.constructorCall != null
@@ -649,6 +654,9 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 			if (!preInitSyntheticFields){
 				generateSyntheticFieldInitializationsIfNecessary(this.scope, codeStream, declaringClass);
 			}
+//{ObjectTeams: if a role can make use of _OT$InitFields, that is where all fields are initialized (only if all are non-final):
+		  if (!isRoleUsingInitFields(declaringType, declaringClass)) {
+// orig:
 			// generate user field initialization
 			if (declaringType.fields != null) {
 				for (int i = 0, max = declaringType.fields.length; i < max; i++) {
@@ -658,6 +666,29 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 					}
 				}
 			}
+// :giro
+		  } else
+			callInit:
+		  {
+				// lifting ctor already contains the invoke statement
+				MethodBinding[] initMethods = declaringType.binding.getMethods(IOTConstants.INIT_METHOD_NAME);
+				if (initMethods.length >= 1)
+				{
+					int argCount = TSuperHelper.isTSuper(this.binding) ?  1 : 0;
+					for (int i = 0; i < initMethods.length; i++) {
+						if (initMethods[i].parameters.length == argCount) {
+							codeStream.aload_0(); // this
+							codeStream.invoke(Opcodes.OPC_invokevirtual, initMethods[i], declaringType.binding);
+							break callInit;
+						}
+					}
+				}
+				// no matching role init method should mean we had errors.
+				assert    TypeModel.isIgnoreFurtherInvestigation(classScope.referenceContext)
+				       || RoleModel.hasTagBit(declaringClass, RoleModel.BaseclassHasProblems)
+				       || declaringClass.isTeam(); // might be the "turning constructor" of a nested team (see 2.1.11-otjld-*-1f)
+		  }
+// SH}
 		}
 		// generate statements
 		if (this.statements != null) {
@@ -691,6 +722,28 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 		}
 	}
 	classFile.completeMethodInfo(this.binding, methodAttributeOffset, attributeNumber);
+}
+private boolean isRoleUsingInitFields(TypeDeclaration typeDecl, ReferenceBinding typeBinding) {
+	if (!typeDecl.isRole()
+		  || (   typeBinding.enclosingType() != null // also accept roles of o.o.Team
+			  && typeBinding.enclosingType().id == IOTConstants.T_OrgObjectTeamsTeam))
+		return false;
+	boolean hasInitialization = false;
+	if (typeDecl.fields != null) {
+		for (FieldDeclaration fieldDeclaration : typeDecl.fields) {
+			if (fieldDeclaration.initialization != null) {
+				if (fieldDeclaration.isFinal())
+					return false; // needs to be set inside a proper constructor!
+				hasInitialization = true;
+			}
+		}
+	}
+	for (ReferenceBinding tsuperRole : typeDecl.getRoleModel().getTSuperRoleBindings()) {
+		if (tsuperRole.fields() != Binding.NO_FIELDS && !tsuperRole.roleModel.hasFinalFieldInit()) {
+			hasInitialization = true; // conservative, would need another flag to test if tsuper has field init
+		}
+	}
+	return hasInitialization;
 }
 
 @Override
@@ -758,6 +811,11 @@ public void getAllAnnotationContexts(int targetType, List allAnnotationContexts)
 @Override
 public boolean isConstructor() {
 	return true;
+}
+
+@Override
+public boolean isCanonicalConstructor() {
+	return (this.bits & ASTNode.IsCanonicalConstructor) != 0;
 }
 
 @Override
@@ -914,7 +972,14 @@ public void resolveStatements() {
 				this.scope.problemReporter().cannotUseSuperInJavaLangObject(this.constructorCall);
 			}
 			this.constructorCall = null;
-		} else {
+		} else if (sourceType.isRecord() &&
+				!(this instanceof CompactConstructorDeclaration) && // compact constr should be marked as canonical?
+				(this.binding != null && !this.binding.isCanonicalConstructor()) &&
+				this.constructorCall.accessMode != ExplicitConstructorCall.This) {
+			this.scope.problemReporter().recordMissingExplicitConstructorCallInNonCanonicalConstructor(this);
+			this.constructorCall = null;
+		}
+		else {
 //{ObjectTeams: some transformations:
 		  // base() might replace existing constructorCall:
 		  if (   this.statements != null

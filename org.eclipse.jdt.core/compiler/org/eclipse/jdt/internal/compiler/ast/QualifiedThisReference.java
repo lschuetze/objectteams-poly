@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -21,6 +21,7 @@
 package org.eclipse.jdt.internal.compiler.ast;
 
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.*;
 import org.eclipse.jdt.internal.compiler.flow.*;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
@@ -153,7 +154,14 @@ public class QualifiedThisReference extends ThisReference {
 		if (depth == 0) {
 			checkAccess(scope, null);
 		} // if depth>0, path emulation will diagnose bad scenarii
-
+		else if (scope.compilerOptions().complianceLevel >= ClassFileConstants.JDK16) {
+			MethodScope ms = scope.methodScope();
+			if (ms.isStatic)
+//{ObjectTeams: roles do have access to the enclosing team instance:
+			  if (!scope.enclosingReceiverType().isRole())
+// SH}
+				ms.problemReporter().errorThisSuperInStatic(this);
+		}
 		MethodScope methodScope = scope.namedMethodScope();
 		if (methodScope != null) {
 			MethodBinding method = methodScope.referenceMethodBinding();

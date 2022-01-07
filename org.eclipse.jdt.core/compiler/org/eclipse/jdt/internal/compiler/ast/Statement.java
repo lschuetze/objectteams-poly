@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -43,6 +43,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
+import java.util.function.BooleanSupplier;
+
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.ast.NullAnnotationMatching.CheckMode;
@@ -50,7 +52,6 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.*;
 import org.eclipse.jdt.internal.compiler.flow.*;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
-import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
@@ -93,7 +94,6 @@ public abstract class Statement extends ASTNode {
 		return false;
 	}
 public abstract FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo);
-
 /** Lambda shape analysis: *Assuming* this is reachable, analyze if this completes normally i.e control flow can reach the textually next statement.
    For blocks, we don't perform intra-reachability analysis. We assume the lambda body is free of intrinsic control flow errors (if such errors
    exist they will not be flagged by this analysis, but are guaranteed to surface later on.)
@@ -132,6 +132,8 @@ public boolean continueCompletes() {
 	public static final int NOT_COMPLAINED = 0;
 	public static final int COMPLAINED_FAKE_REACHABLE = 1;
 	public static final int COMPLAINED_UNREACHABLE = 2;
+	LocalVariableBinding[] patternVarsWhenTrue;
+	LocalVariableBinding[] patternVarsWhenFalse;
 
 
 /** Analysing arguments of MessageSend, ExplicitConstructorCall, AllocationExpression. */
@@ -529,15 +531,63 @@ public StringBuffer print(int indent, StringBuffer output) {
 public abstract StringBuffer printStatement(int indent, StringBuffer output);
 
 public abstract void resolve(BlockScope scope);
-
-/**
- * Returns case constant associated to this statement (NotAConstant if none)
- * parameter statement has to be either a SwitchStatement or a SwitchExpression
- */
-public Constant[] resolveCase(BlockScope scope, TypeBinding testType, SwitchStatement switchStatement) {
-	// statement within a switch that are not case are treated as normal statement....
-	resolve(scope);
-	return new Constant[] {Constant.NotAConstant};
+public LocalVariableBinding[] getPatternVariablesWhenTrue() {
+	return this.patternVarsWhenTrue;
+}
+public LocalVariableBinding[] getPatternVariablesWhenFalse() {
+	return this.patternVarsWhenFalse;
+}
+public void addPatternVariablesWhenTrue(LocalVariableBinding[] vars) {
+	this.patternVarsWhenTrue = addPatternVariables(this.patternVarsWhenTrue, vars);
+}
+public void addPatternVariablesWhenFalse(LocalVariableBinding[] vars) {
+	this.patternVarsWhenFalse = addPatternVariables(this.patternVarsWhenFalse, vars);
+}
+private LocalVariableBinding[] addPatternVariables(LocalVariableBinding[] current, LocalVariableBinding[] add) {
+	if (add == null || add.length == 0)
+		return current;
+	if (current == null) {
+		current = add;
+	} else {
+		for (LocalVariableBinding local : add) {
+			current = addPatternVariables(current, local);
+		}
+	}
+	return current;
+}
+private LocalVariableBinding[] addPatternVariables(LocalVariableBinding[] current, LocalVariableBinding add) {
+	int oldSize = current.length;
+	// it's odd that we only look at the last element, but in most cases
+	// we will only have one in the array. In the unlikely case of having two
+	// distinct pattern variables, the cost is nothing but setting the same
+	// bit twice on the same object.
+	if (oldSize > 0 && current[oldSize - 1] == add) {
+		return current;
+	}
+	int newLength = current.length + 1;
+	System.arraycopy(current, 0, (current = new LocalVariableBinding[newLength]), 0, oldSize);
+	current[oldSize] = add;
+	return current;
+}
+public void promotePatternVariablesIfApplicable(LocalVariableBinding[] patternVariablesInScope, BooleanSupplier condition) {
+	if (patternVariablesInScope != null && condition.getAsBoolean()) {
+		for (LocalVariableBinding binding : patternVariablesInScope) {
+			binding.modifiers &= ~ExtraCompilerModifiers.AccPatternVariable;
+		}
+	}
+}
+public void resolveWithPatternVariablesInScope(LocalVariableBinding[] patternVariablesInScope, BlockScope scope) {
+	if (patternVariablesInScope != null) {
+		for (LocalVariableBinding binding : patternVariablesInScope) {
+			binding.modifiers &= ~ExtraCompilerModifiers.AccPatternVariable;
+		}
+		this.resolve(scope);
+		for (LocalVariableBinding binding : patternVariablesInScope) {
+			binding.modifiers |= ExtraCompilerModifiers.AccPatternVariable;
+		}
+	} else {
+		resolve(scope);
+	}
 }
 /**
  * Returns the resolved expression if any associated to this statement - used
@@ -545,6 +595,9 @@ public Constant[] resolveCase(BlockScope scope, TypeBinding testType, SwitchStat
  */
 public TypeBinding resolveExpressionType(BlockScope scope) {
 	return null;
+}
+public boolean containsPatternVariable() {
+	return false;
 }
 /**
  * Implementation of {@link org.eclipse.jdt.internal.compiler.lookup.InvocationSite#invocationTargetType}

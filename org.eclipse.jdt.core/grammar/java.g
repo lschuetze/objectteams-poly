@@ -45,7 +45,7 @@ $Terminals
 	abstract assert boolean break byte case catch char class 
 	continue const default do double else enum extends false final finally float
 	for goto if implements import instanceof int
-	interface long native new null package private
+	interface long native new non-sealed null package private
 	protected public return short static strictfp super switch
 	synchronized this throw throws transient true try void
 	volatile while module open requires transitive exports opens to uses provides with
@@ -128,12 +128,15 @@ $Terminals
 	BeginCaseExpr
 	RestrictedIdentifierYield
 	RestrictedIdentifierrecord
+	RestrictedIdentifiersealed
+	RestrictedIdentifierpermits
+	BeginCaseElement
 
 -- {ObjectTeams
 	ATOT
 	BINDIN
 	CALLOUT_OVERRIDE
-	SYNTHBINDOUT
+	BINDOUT
 -- Markus Witte}
 --    BodyMarker
 
@@ -226,6 +229,7 @@ Goal ::= '?' PackageDeclaration
 Goal ::= '+' TypeDeclaration
 Goal ::= '/' GenericMethodDeclaration
 Goal ::= '&' ClassBodyDeclarations
+Goal ::= '-' RecordBodyDeclarations
 -- code snippet
 Goal ::= '%' Expression
 Goal ::= '%' ArrayInitializer
@@ -242,8 +246,6 @@ Goal ::= '(' ParenthesizedCastNameAndBounds
 Goal ::= '<' ReferenceExpressionTypeArgumentsAndTrunk
 -- JSR 308 Reconnaissance mission.
 Goal ::= '@' TypeAnnotations
--- JSR 354 Reconnaissance mission.
-Goal ::= '->' YieldStatement
 --{ObjectTeams new goals:
 Goal ::= ':' CallinParameterMappings
 Goal ::= ';' CalloutParameterMappings
@@ -251,6 +253,14 @@ Goal ::= '^' ParameterMapping
 Goal ::= '<' MethodSpecShort
 Goal ::= '>' MethodSpecLong
 -- SH}
+-- JSR 354 Reconnaissance mission.
+Goal ::= '->' YieldStatement
+Goal ::= '->' SwitchLabelCaseLhs
+-- JSR 360 Restricted
+Goal ::= RestrictedIdentifiersealed Modifiersopt
+Goal ::= RestrictedIdentifierpermits PermittedSubclasses
+-- jsr 406 --
+Goal ::= BeginCaseElement Pattern
 /:$readableName Goal:/
 
 -- {ObjectTeams
@@ -749,6 +759,8 @@ Modifier -> 'static'
 Modifier -> 'abstract'
 Modifier -> 'final'
 Modifier -> 'native'
+Modifier -> 'non-sealed'
+Modifier -> RestrictedIdentifiersealed
 Modifier -> 'synchronized'
 Modifier -> 'transient'
 Modifier -> 'volatile'
@@ -766,6 +778,7 @@ Modifier -> 'callin'
 --      'abstract'
 --    | 'final'
 --    | 'public'
+--    | 'non-sealed'
 --18.8.1 Productions from 8.1: Class Declarations
 
 ClassDeclaration ::= ClassHeader ClassBody
@@ -773,8 +786,8 @@ ClassDeclaration ::= ClassHeader ClassBody
 /:$readableName ClassDeclaration:/
 
 --{ObjectTeams: playedBy & guard predicate support:
--- orig: ClassHeader ::= ClassHeaderName ClassHeaderExtendsopt ClassHeaderImplementsopt
-ClassHeader ::= ClassHeaderName ClassHeaderExtendsopt ClassHeaderImplementsopt ClassHeaderPlayedByopt Predicateopt
+-- orig: ClassHeader ::= ClassHeaderName ClassHeaderExtendsopt ClassHeaderImplementsopt ClassHeaderPermittedSubclassesopt
+ClassHeader ::= ClassHeaderName ClassHeaderExtendsopt ClassHeaderImplementsopt ClassHeaderPermittedSubclassesopt ClassHeaderPlayedByopt Predicateopt
 -- MW+SH}
 /.$putCase consumeClassHeader(); $break ./
 /:$readableName ClassHeader:/
@@ -1143,7 +1156,7 @@ CalloutBinding ::= Modifiersopt CalloutBindingLeftShort CalloutModifieropt Metho
 /.$putCase consumeCalloutParameterMappingsInvalid(); $break ./
 
 -- SYMBOLS:
-CalloutKind -> '->'
+CalloutKind -> BINDOUT
 CalloutKind -> '=>'
 /:$readableName CalloutKind:/
 
@@ -1185,7 +1198,7 @@ CalloutParameterMappingList ::= CalloutParameterMappingList ';' ParameterMapping
 /:$readableName CalloutParameterMappingList:/
 
 
-ParameterMapping ::= Expression SYNTHBINDOUT 'Identifier'
+ParameterMapping ::= Expression BINDOUT 'Identifier'
 /.$putCase consumeParameterMappingOut(); $break ./
 
 ParameterMapping ::= 'Identifier' '<-' ForceBaseIsIdentifier Expression RestoreBaseKeyword
@@ -1482,8 +1495,8 @@ InterfaceDeclaration ::= InterfaceHeader InterfaceBody
 /:$readableName InterfaceDeclaration:/
 
 -- {ObjectTeams
--- orig: InterfaceHeader ::= InterfaceHeaderName InterfaceHeaderExtendsopt 
-InterfaceHeader ::= InterfaceHeaderName InterfaceHeaderExtendsopt ClassHeaderPlayedByopt
+-- orig: InterfaceHeader ::= InterfaceHeaderName InterfaceHeaderExtendsopt InterfaceHeaderPermittedSubClassesAndSubInterfacesopt
+InterfaceHeader ::= InterfaceHeaderName InterfaceHeaderExtendsopt InterfaceHeaderPermittedSubClassesAndSubInterfacesopt ClassHeaderPlayedByopt
 -- SH}
 /.$putCase consumeInterfaceHeader(); $break ./
 /:$readableName InterfaceHeader:/
@@ -1672,29 +1685,55 @@ CompactConstructorHeaderName ::= Modifiersopt TypeParameters 'Identifier'
 -----------------------------------------------
 
 -----------------------------------------------
--- 14 preview feature : instanceof pattern matching
+-- 16 feature : instanceof pattern matching
 -----------------------------------------------
 
-
 InstanceofExpression -> RelationalExpression
-InstanceofExpression ::= InstanceofExpression 'instanceof' TypeOrPattern
+InstanceofExpression ::= InstanceofExpression InstanceofRHS
 /.$putCase consumeInstanceOfExpression(); $break ./
 /:$readableName Expression:/
 
-TypeOrPattern -> Type
-TypeOrPattern -> Pattern
-Pattern -> TypeTestPattern
-TypeTestPattern ::= Type Identifier
-/.$putCase consumeTypeTestPattern(); $break ./
-/:$readableName TypeTestPattern:/
+InstanceofRHS -> InstanceofClassic
+InstanceofRHS -> InstanceofPrimaryTypePattern
+InstanceofRHS -> InstanceofPrimaryParenPattern
+/.$putCase consumeInstanceOfRHS(); $break ./
+/:$readableName Expression:/
 
---InstanceofExpression ::= InstanceofExpression 'instanceof' Type Identifier
---/.$putCase consumeInstanceOfExpressionPattern(); $break ./
---/:$readableName Expression:/
---/:$compliance 14:/
+InstanceofClassic ::= 'instanceof' Modifiersopt Type
+/.$putCase consumeInstanceOfClassic(); $break ./
+/:$readableName InstanceofClassic:/
+
+InstanceofPrimaryTypePattern ::=  'instanceof' Modifiersopt Type 'Identifier'
+/.$putCase consumeInstanceofPrimaryTypePattern(); $break ./
+/:$readableName InstanceofPrimaryTypePattern:/
+
+InstanceofPrimaryParenPattern ::=  'instanceof'  ParenthesizedPattern 
+/.$putCase consumeInstanceofPrimaryParenPattern(); $break ./
+/:$readableName InstanceofPrimaryParenPattern:/
+
+Pattern -> PrimaryPattern
+Pattern -> GuardedPattern
+/:$readableName Pattern:/
+
+PrimaryPattern -> TypePattern
+PrimaryPattern -> ParenthesizedPattern
+/.$putCase consumePrimaryPattern(); $break ./
+/:$readableName PrimaryPattern:/
+
+ParenthesizedPattern ::= PushLPAREN Pattern PushRPAREN
+/.$putCase consumeParenthesizedPattern(); $break ./
+/:$readableName ParenthesizedPattern:/
+
+TypePattern ::= Modifiersopt Type 'Identifier'
+/.$putCase consumeTypePattern(); $break ./
+/:$readableName TypePattern:/
+
+GuardedPattern ::= PrimaryPattern '&&' ConditionalAndExpression
+/.$putCase consumeGuardedPattern(); $break ./
+/:$readableName GuardedPattern:/
 
 -----------------------------------------------
--- 14 preview feature : end of instanceof pattern matching
+-- 16 feature : end of instanceof pattern matching
 -----------------------------------------------
 
 ConstantDeclaration -> FieldDeclaration
@@ -1939,11 +1978,32 @@ SwitchLabelExpr ::= SwitchLabelCaseLhs BeginCaseExpr '->'
 /. $putCase consumeCaseLabelExpr(); $break ./
 /:$readableName SwitchLabelExpr:/
 
-SwitchLabelCaseLhs ::= 'case' ConstantExpressions
+SwitchLabelCaseLhs ::= 'case' CaseLabelElements
 /. $putCase consumeSwitchLabelCaseLhs(); $break ./
 /:$readableName SwitchLabelCaseLhs:/
 
 -- END SwitchExpression (JEP 325) --
+
+CaseLabelElements -> CaseLabelElement
+CaseLabelElements ::= CaseLabelElements ',' CaseLabelElement
+/.$putCase consumeCaseLabelElements(); $break ./
+/:$readableName CaseLabelElements:/
+
+-- Production name hardcoded in parser. Must be ::= and not -> (need to hook at cCLE)
+CaseLabelElement ::= ConstantExpression
+/.$putCase consumeCaseLabelElement(CaseLabelKind.CASE_EXPRESSION); $break ./
+/:$readableName CaseLabelElement:/
+
+ -- following 'null' in CASE_EXPRESSION - passes through existing grammar
+ -- CaseLabelElement ->  'null'
+  
+CaseLabelElement ::= 'default'
+/.$putCase consumeCaseLabelElement(CaseLabelKind.CASE_DEFAULT); $break ./
+/:$readableName CaseLabelElement:/
+
+CaseLabelElement ::= BeginCaseElement Pattern
+/.$putCase consumeCaseLabelElement(CaseLabelKind.CASE_PATTERN); $break ./
+/:$readableName CaseLabelElement:/
 
 YieldStatement ::= RestrictedIdentifierYield Expression ;
 /.$putCase consumeStatementYield() ; $break ./
@@ -2704,11 +2764,6 @@ Expressionopt ::= $empty
 Expressionopt -> Expression
 /:$readableName Expression:/
 
-ConstantExpressions -> Expression
-ConstantExpressions ::= ConstantExpressions ',' Expression
-/.$putCase consumeConstantExpressions(); $break ./
-/:$readableName ConstantExpressions:/
-
 ConstantExpression -> Expression
 /:$readableName ConstantExpression:/
 
@@ -2767,6 +2822,30 @@ FormalParameterListopt -> FormalParameterList
 ClassHeaderImplementsopt ::= $empty
 ClassHeaderImplementsopt -> ClassHeaderImplements
 /:$readableName ClassHeaderImplements:/
+
+ClassHeaderPermittedSubclassesopt ::= $empty
+ClassHeaderPermittedSubclassesopt -> ClassHeaderPermittedSubclasses
+/:$readableName ClassHeaderPermittedSubclasses:/
+/:$compliance 15:/
+
+-- Production name hardcoded in parser. Must be ::= and not -> 
+PermittedSubclasses ::= ClassTypeList
+/:$readableName PermittedSubclasses:/
+
+ClassHeaderPermittedSubclasses ::= RestrictedIdentifierpermits ClassTypeList
+/.$putCase consumeClassHeaderPermittedSubclasses(); $break ./
+/:$readableName ClassHeaderPermittedSubclasses:/
+/:$compliance 15:/
+
+InterfaceHeaderPermittedSubClassesAndSubInterfacesopt ::= $empty
+InterfaceHeaderPermittedSubClassesAndSubInterfacesopt -> InterfaceHeaderPermittedSubClassesAndSubInterfaces
+/:$readableName InterfaceHeaderPermittedSubClassesAndSubInterfaces:/
+/:$compliance 15:/
+
+InterfaceHeaderPermittedSubClassesAndSubInterfaces ::= RestrictedIdentifierpermits ClassTypeList
+/.$putCase consumeInterfaceHeaderPermittedSubClassesAndSubInterfaces(); $break ./
+/:$readableName InterfaceHeaderPermittedSubClassesAndSubInterfaces:/
+/:$compliance 15:/
 
 InterfaceMemberDeclarationsopt ::= $empty
 /. $putCase consumeEmptyInterfaceMemberDeclarationsopt(); $break ./
@@ -3378,9 +3457,9 @@ RelationalExpression_NotName ::= Name '>=' ShiftExpression
 /:$readableName Expression:/
 
 InstanceofExpression_NotName -> RelationalExpression_NotName
-InstanceofExpression_NotName ::= Name 'instanceof' TypeOrPattern
+InstanceofExpression_NotName ::= Name InstanceofRHS
 /.$putCase consumeInstanceOfExpressionWithName(); $break ./
-InstanceofExpression_NotName ::= InstanceofExpression_NotName 'instanceof' TypeOrPattern
+InstanceofExpression_NotName ::= InstanceofExpression_NotName InstanceofRHS
 /.$putCase consumeInstanceOfExpression(); $break ./
 /:$readableName Expression:/
 
@@ -3773,7 +3852,7 @@ COLON_COLON ::= '::'
 ATOT ::= '@'
 BINDIN ::= '<-'
 CALLOUT_OVERRIDE ::= '=>'
-SYNTHBINDOUT ::= '->'
+BINDOUT ::= '->'
 -- Markus Witte}
 
 $end

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Stephan Herrmann - Contributions for bug 215139 and bug 295894
+ *     Microsoft Corporation - Contribution for bug 575562 - improve completion search performance
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.search;
 
@@ -280,7 +281,7 @@ public class BasicSearchEngine {
 		if (matchRule == 0) {
 			return "R_EXACT_MATCH"; //$NON-NLS-1$
 		}
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		for (int i=1; i<=16; i++) {
 			int bit = matchRule & (1<<(i-1));
 			if (bit != 0 && buffer.length()>0) buffer.append(" | "); //$NON-NLS-1$
@@ -494,6 +495,12 @@ public class BasicSearchEngine {
 		boolean isCaseSensitive = (matchRuleType & SearchPattern.R_CASE_SENSITIVE) != 0;
 		if (patternTypeName != null) {
 			boolean isCamelCase = (matchRuleType & (SearchPattern.R_CAMELCASE_MATCH | SearchPattern.R_CAMELCASE_SAME_PART_COUNT_MATCH)) != 0;
+
+			if ((matchRuleType & SearchPattern.R_SUBSTRING_MATCH) != 0 && CharOperation.substringMatch(patternTypeName, typeName))
+				return true;
+			if ((matchRuleType & SearchPattern.R_SUBWORD_MATCH) != 0 && CharOperation.subWordMatch(patternTypeName, typeName))
+				return true;
+
 			int matchMode = matchRuleType & JavaSearchPattern.MATCH_MODE_MASK;
 			if (!isCaseSensitive && !isCamelCase) {
 				patternTypeName = CharOperation.toLowerCase(patternTypeName);
@@ -598,10 +605,37 @@ public class BasicSearchEngine {
 	}
 
 	public void searchAllConstructorDeclarations(
+			final char[] packageName,
+			final char[] typeName,
+			final int typeMatchRule,
+			IJavaSearchScope scope,
+			final IRestrictedAccessConstructorRequestor nameRequestor,
+			int waitingPolicy,
+			IProgressMonitor progressMonitor)  throws JavaModelException {
+		searchAllConstructorDeclarations(
+				packageName,
+				typeName,
+				typeMatchRule,
+				scope,
+				true,
+				nameRequestor,
+				waitingPolicy,
+				progressMonitor);
+	}
+
+	/**
+	 *
+	 * Searches for constructor declarations in the given scope.
+	 *
+	 * @param resolveDocumentName used to tell SearchEngine whether to resolve
+	 *                            the document name for each result entry.
+	 */
+	public void searchAllConstructorDeclarations(
 		final char[] packageName,
 		final char[] typeName,
 		final int typeMatchRule,
 		IJavaSearchScope scope,
+		final boolean resolveDocumentName,
 		final IRestrictedAccessConstructorRequestor nameRequestor,
 		int waitingPolicy,
 		IProgressMonitor progressMonitor)  throws JavaModelException {
@@ -724,6 +758,8 @@ public class BasicSearchEngine {
 					pattern,
 					getDefaultSearchParticipant(), // Java search only
 					scope,
+					resolveDocumentName,
+					true,
 					searchRequestor),
 				waitingPolicy,
 				subMonitor.split(Math.max(1000-copiesLength, 0)));
@@ -1587,7 +1623,7 @@ public class BasicSearchEngine {
 		try {
 			if (VERBOSE) {
 				Util.verbose("BasicSearchEngine.searchAllSecondaryTypeNames(IPackageFragmentRoot[], IRestrictedAccessTypeRequestor, boolean, IProgressMonitor)"); //$NON-NLS-1$
-				StringBuffer buffer = new StringBuffer("	- source folders: "); //$NON-NLS-1$
+				StringBuilder buffer = new StringBuilder("	- source folders: "); //$NON-NLS-1$
 				int length = sourceFolders.length;
 				for (int i=0; i<length; i++) {
 					if (i==0) {
@@ -1709,12 +1745,47 @@ public class BasicSearchEngine {
 	 * 	for detailed comment
 	 */
 	public void searchAllTypeNames(
+			final char[] packageName,
+			final int packageMatchRule,
+			final char[] typeName,
+			final int typeMatchRule,
+			int searchFor,
+			IJavaSearchScope scope,
+			final IRestrictedAccessTypeRequestor nameRequestor,
+			int waitingPolicy,
+			IProgressMonitor progressMonitor)  throws JavaModelException {
+		searchAllTypeNames(
+				packageName,
+				packageMatchRule,
+				typeName,
+				typeMatchRule,
+				searchFor,
+				scope,
+				true,
+				nameRequestor,
+				waitingPolicy,
+				progressMonitor);
+	}
+
+	/**
+	 * Searches for all top-level types and member types in the given scope.
+	 * The search can be selecting specific types (given a package or a type name
+	 * prefix and match modes).
+	 *
+	 * @param resolveDocumentName used to tell SearchEngine whether to resolve
+	 *                            the document name for each result entry.
+	 *
+	 * @see SearchEngine#searchAllTypeNames(char[], int, char[], int, int, IJavaSearchScope, TypeNameRequestor, int, IProgressMonitor)
+	 * 	for detailed comment
+	 */
+	public void searchAllTypeNames(
 		final char[] packageName,
 		final int packageMatchRule,
 		final char[] typeName,
 		final int typeMatchRule,
 		int searchFor,
 		IJavaSearchScope scope,
+		final boolean resolveDocumentName,
 		final IRestrictedAccessTypeRequestor nameRequestor,
 		int waitingPolicy,
 		IProgressMonitor progressMonitor)  throws JavaModelException {
@@ -1853,12 +1924,15 @@ public class BasicSearchEngine {
 			};
 
 			SubMonitor subMonitor = SubMonitor.convert(progressMonitor, Messages.engine_searching, 1000);
+
 			// add type names from indexes
 			indexManager.performConcurrentJob(
 				new PatternSearchJob(
 					pattern,
 					getDefaultSearchParticipant(), // Java search only
 					scope,
+					resolveDocumentName,
+					true,
 					searchRequestor),
 				waitingPolicy,
 				subMonitor.split(Math.max(1000-copiesLength, 0)));

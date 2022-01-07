@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -8,6 +8,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -38,6 +39,7 @@ import org.eclipse.jdt.internal.compiler.ast.JavadocAllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.JavadocFieldReference;
 import org.eclipse.jdt.internal.compiler.ast.JavadocImplicitTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.JavadocMessageSend;
+import org.eclipse.jdt.internal.compiler.ast.JavadocModuleReference;
 import org.eclipse.jdt.internal.compiler.ast.JavadocQualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.JavadocSingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.JavadocSingleTypeReference;
@@ -674,6 +676,9 @@ class DefaultBindingResolver extends BindingResolver {
 	@Override
 	Object resolveConstantExpressionValue(Expression expression) {
 		org.eclipse.jdt.internal.compiler.ast.ASTNode node = (org.eclipse.jdt.internal.compiler.ast.ASTNode) this.newAstToOldAst.get(expression);
+		if(node instanceof org.eclipse.jdt.internal.compiler.ast.FieldDeclaration) {
+				node = ((org.eclipse.jdt.internal.compiler.ast.FieldDeclaration) node).initialization;
+		}
 		if (node instanceof org.eclipse.jdt.internal.compiler.ast.Expression &&
 				((org.eclipse.jdt.internal.compiler.ast.Expression) node).isTrulyExpression()) {
 			org.eclipse.jdt.internal.compiler.ast.Expression compilerExpression = (org.eclipse.jdt.internal.compiler.ast.Expression) node;
@@ -684,8 +689,8 @@ class DefaultBindingResolver extends BindingResolver {
 					case TypeIds.T_byte : return Byte.valueOf(constant.byteValue());
 					case TypeIds.T_short : return Short.valueOf(constant.shortValue());
 					case TypeIds.T_char : return Character.valueOf(constant.charValue());
-					case TypeIds.T_float : return new Float(constant.floatValue());
-					case TypeIds.T_double : return new Double(constant.doubleValue());
+					case TypeIds.T_float : return Float.valueOf(constant.floatValue());
+					case TypeIds.T_double : return Double.valueOf(constant.doubleValue());
 					case TypeIds.T_boolean : return constant.booleanValue() ? Boolean.TRUE : Boolean.FALSE;
 					case TypeIds.T_long : return Long.valueOf(constant.longValue());
 					case TypeIds.T_JavaLangString : return constant.stringValue();
@@ -787,6 +792,8 @@ class DefaultBindingResolver extends BindingResolver {
 				case ASTNode.MARKER_ANNOTATION :
 				case ASTNode.NORMAL_ANNOTATION :
 				case ASTNode.SINGLE_MEMBER_ANNOTATION :
+				case ASTNode.GUARDED_PATTERN :
+				case ASTNode.TYPE_PATTERN :
 					org.eclipse.jdt.internal.compiler.ast.Expression compilerExpression = (org.eclipse.jdt.internal.compiler.ast.Expression) this.newAstToOldAst.get(expression);
 					if (compilerExpression != null) {
 						return this.getTypeBinding(compilerExpression.resolvedType);
@@ -798,6 +805,8 @@ class DefaultBindingResolver extends BindingResolver {
 						return this.getTypeBinding(this.scope.getJavaLangString());
 					}
 					break;
+				case ASTNode.NULL_PATTERN :
+					return null;
 				case ASTNode.BOOLEAN_LITERAL :
 				case ASTNode.NULL_LITERAL :
 				case ASTNode.CHARACTER_LITERAL :
@@ -1506,6 +1515,19 @@ class DefaultBindingResolver extends BindingResolver {
 					return null;
 				} else {
 					return this.getVariableBinding(qualifiedNameReference.otherBindings[index - indexOfFirstFieldBinding - 1]);
+				}
+			}
+		} else if (node instanceof JavadocModuleReference)  {
+			JavadocModuleReference modRef = (JavadocModuleReference) node;
+			if (modRef.typeReference == null) {
+				ModuleReference moduleReference = modRef.moduleReference;
+				IModuleBinding moduleBinding = getModuleBinding(moduleReference.binding);
+				if (moduleBinding != null) {
+					return moduleBinding;
+				}
+			} else {
+				if (name instanceof ModuleQualifiedName) {
+					return resolveName(((ModuleQualifiedName)name).getName());
 				}
 			}
 		} else if (node instanceof QualifiedTypeReference) {

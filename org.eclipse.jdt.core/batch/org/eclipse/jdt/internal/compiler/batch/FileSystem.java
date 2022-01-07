@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -188,15 +188,21 @@ public class FileSystem implements IModuleAwareNameEnvironment, SuffixConstants 
 	initialFileNames is a collection is Strings, the trailing '.java' will be removed if its not already.
 */
 public FileSystem(String[] classpathNames, String[] initialFileNames, String encoding) {
-	this(classpathNames, initialFileNames, encoding, null);
+	this(classpathNames, initialFileNames, encoding, null, null);
+}
+public FileSystem(String[] classpathNames, String[] initialFileNames, String encoding, String release) {
+	this(classpathNames, initialFileNames, encoding, null, release);
 }
 protected FileSystem(String[] classpathNames, String[] initialFileNames, String encoding, Collection<String> limitModules) {
+	this(classpathNames,initialFileNames, encoding, limitModules, null);
+}
+protected FileSystem(String[] classpathNames, String[] initialFileNames, String encoding, Collection<String> limitModules, String release) {
 	final int classpathSize = classpathNames.length;
 	this.classpaths = new Classpath[classpathSize];
 	int counter = 0;
 	this.hasLimitModules = limitModules != null && !limitModules.isEmpty();
 	for (int i = 0; i < classpathSize; i++) {
-		Classpath classpath = getClasspath(classpathNames[i], encoding, null, null, null);
+		Classpath classpath = getClasspath(classpathNames[i], encoding, null, null, release);
 		try {
 			classpath.initialize();
 			for (String moduleName : classpath.getModuleNames(limitModules))
@@ -356,10 +362,10 @@ private void initializeKnownFileNames(String[] initialFileNames) {
 		CharOperation.replace(fileName, '\\', '/');
 		boolean globalPathMatches = false;
 		// the most nested path should be the selected one
-		for (int j = 0, max = this.classpaths.length; j < max; j++) {
-			char[] matchCandidate = this.classpaths[j].normalizedPath();
+		for (Classpath classpath : this.classpaths) {
+			char[] matchCandidate = classpath.normalizedPath();
 			boolean currentPathMatch = false;
-			if (this.classpaths[j] instanceof ClasspathDirectory
+			if (classpath instanceof ClasspathDirectory
 					&& CharOperation.prefixEquals(matchCandidate, fileName)) {
 				currentPathMatch = true;
 				if (matchingPathName == null) {

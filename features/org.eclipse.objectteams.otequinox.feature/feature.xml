@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.objectteams.otequinox"
       label="%featureName"
-      version="2.8.1.qualifier"
+      version="2.8.2.qualifier"
       provider-name="%providerName"
       plugin="org.eclipse.objectteams.otequinox"
       colocation-affinity="org.eclipse.rcp">
@@ -57,35 +57,35 @@ Author: Stephan Herrmann.
          id="org.objectweb.asm"
          download-size="0"
          install-size="0"
-         version="8.0.1.v20200420-1007"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.tree"
          download-size="0"
          install-size="0"
-         version="8.0.1.v20200420-1007"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.commons"
          download-size="0"
          install-size="0"
-         version="8.0.1.v20200420-1007"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.util"
          download-size="0"
          install-size="0"
-         version="8.0.1.v20200420-1007"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.analysis"
          download-size="0"
          install-size="0"
-         version="8.0.1.v20200420-1007"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin

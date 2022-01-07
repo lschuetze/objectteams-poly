@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2019 IBM Corporation and others.
+ * Copyright (c) 2004, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -428,10 +428,10 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
 		int hi = 0;
 		for (int nodeType = 1; nodeType < 110; nodeType++) {
   :giro */
-		Set classes = new HashSet(123);
+		Set classes = new HashSet(133);
 		// make sure node types are contiguous starting at 0
 		int hi = 0;
-		for (int nodeType = 1; nodeType < 123; nodeType++) {
+		for (int nodeType = 1; nodeType < 133; nodeType++) {
 // SH}
 			try {
 				Class nodeClass = ASTNode.nodeClassForType(nodeType);
@@ -447,9 +447,9 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
 		}
 // {ObjectTeams: adapted for OT specific ASTNodes
 /* orig:
-		assertEquals("Wrong last known type", 103, hi); // last known one
+		assertEquals("Wrong last known type", 109, hi); // last known one
   :giro */
-		assertEquals("Wrong last known type", 119, hi); // last known one
+		assertEquals("Wrong last known type", 125, hi); // last known one
 // jwl}
 		assertEquals("Wrong number of distinct types",  hi, classes.size()); // all classes are distinct
 	}

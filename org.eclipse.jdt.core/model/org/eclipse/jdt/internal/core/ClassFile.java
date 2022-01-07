@@ -33,7 +33,24 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.CompletionRequestor;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICodeAssist;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModelStatusConstants;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
 import org.eclipse.jdt.internal.compiler.classfmt.ExternalAnnotationDecorator;
@@ -42,10 +59,8 @@ import org.eclipse.jdt.internal.compiler.env.IBinaryType;
 import org.eclipse.jdt.internal.compiler.env.IDependent;
 import org.eclipse.jdt.internal.compiler.env.IModule;
 import org.eclipse.jdt.internal.compiler.util.SuffixConstants;
-import org.eclipse.jdt.internal.core.nd.java.JavaNames;
 import org.eclipse.jdt.internal.core.nd.java.model.BinaryTypeDescriptor;
 import org.eclipse.jdt.internal.core.nd.java.model.BinaryTypeFactory;
-import org.eclipse.jdt.internal.core.nd.util.CharArrayUtils;
 import org.eclipse.jdt.internal.core.util.MementoTokenizer;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
@@ -264,8 +279,8 @@ private IBinaryType getJarBinaryTypeInfo() throws CoreException, IOException, Cl
 		if (entry != null) {
 			PackageFragment pkg = (PackageFragment) getParent();
 			String entryName = Util.concatWith(pkg.names, getElementName(), '/');
-			entryName = new String(CharArrayUtils.concat(
-					JavaNames.fieldDescriptorToBinaryName(descriptor.fieldDescriptor), SuffixConstants.SUFFIX_CLASS));
+			entryName = new String(Util.concat(
+					BinaryTypeFactory.fieldDescriptorToBinaryName(descriptor.fieldDescriptor), SuffixConstants.SUFFIX_CLASS));
 			IProject project = javaProject.getProject();
 			IPath externalAnnotationPath = ClasspathEntry.getExternalAnnotationPath(entry, project, false); // unresolved for use in ExternalAnnotationTracker
 			if (externalAnnotationPath != null) {
@@ -351,7 +366,7 @@ public void close() throws JavaModelException {
  * @see IMember
  */
 @Override
-public IClassFile getClassFile() {
+public ClassFile getClassFile() {
 	return this;
 }
 /**
@@ -437,7 +452,7 @@ IType getType(char[] enclosingTypeName) {
 					  // nop
 				  }
 			  }
-			  String binaryParentName = this.parent.getElementName().replace('.', '/');
+			  String binaryParentName = getParent().getElementName().replace('.', '/');
 			  enclosingTypeName = (binaryParentName+'/'+enclosingName).toCharArray();
 		  }
 	  }
@@ -506,6 +521,10 @@ public boolean isInterface() throws JavaModelException {
 protected IBuffer openBuffer(IProgressMonitor pm, Object info) throws JavaModelException {
 	// Check the cache for the top-level type first
 	IType outerMostEnclosingType = getOuterMostEnclosingType();
+//{ObjectTeams:
+	if (Flags.isRole(getType().getFlags()))
+		outerMostEnclosingType = getType(); // revert to direct type to account for role files
+// SH}
 	IBuffer buffer = getBufferManager().getBuffer(outerMostEnclosingType.getClassFile());
 	if (buffer == null) {
 		SourceMapper mapper = getSourceMapper();

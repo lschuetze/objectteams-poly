@@ -141,7 +141,7 @@ public class TypeDeclaration extends Statement implements ProblemSeverities, Ref
 	public int maxFieldCount;
 	public int declarationSourceStart;
 	public int declarationSourceEnd;
-	public int restrictedIdentifierStart; // used only for records
+	public int restrictedIdentifierStart = -1; // used only for record and permits restricted keywords.
 	public int bodyStart;
 	public int bodyEnd; // doesn't include the trailing comment if any.
 	public CompilationResult compilationResult;
@@ -160,8 +160,11 @@ public class TypeDeclaration extends Statement implements ProblemSeverities, Ref
 	// 14 Records preview support
 	public RecordComponent[] recordComponents;
 	public int nRecordComponents;
-	public boolean isLocalRecord;
 	public static Set<String> disallowedComponentNames;
+
+	// 15 Sealed Type preview support
+	public TypeReference[] permittedTypes;
+
 	static {
 		disallowedComponentNames = new HashSet<>(6);
 		disallowedComponentNames.add("clone"); //$NON-NLS-1$
@@ -180,6 +183,7 @@ public class TypeDeclaration extends Statement implements ProblemSeverities, Ref
 	public AbstractMethodMappingDeclaration[] callinCallouts;
 	public PrecedenceDeclaration[] precedences;
 	public TypeReference baseclass;
+	public int playedByStart;
 
 
 	// (stored by Parser.consumePredicate(), copied to methods from Parser.dispatchDeclarationInto())
@@ -354,10 +358,12 @@ public class TypeDeclaration extends Statement implements ProblemSeverities, Ref
 			for (int i = 0; i < this.memberTypes.length; i++) {
 				TypeDeclaration memberType = this.memberTypes[i];
 				memberType.modifiers |= ExtraCompilerModifiers.AccRole;
-				if (CharOperation.equals(memberType.name, IOTConstants.OTCONFINED))
+				if (CharOperation.equals(memberType.name, IOTConstants.OTCONFINED)) {
 					otconfined = memberType;
-				else if (CharOperation.equals(memberType.name, IOTConstants.CONFINED))
+				} else if (CharOperation.equals(memberType.name, IOTConstants.CONFINED)) {
 					confined = memberType;
+					confined.modifiers |= IOTConstants.AccSynthIfc; // synthetically mark as synthetic :)
+				}
 			}
 			if (confined != null && otconfined != null) {
 				// link roles that are split manually (without using RoleSplitter).
@@ -668,14 +674,6 @@ public void analyseCode(CompilationUnitScope unitScope) {
 	}
 }
 
-public static void checkAndFlagRecordNameErrors(char[] typeName, ASTNode node, Scope skope) {
-	if (CharOperation.equals(typeName, TypeConstants.RECORD_RESTRICTED_IDENTIFIER)) {
-		if (skope.compilerOptions().sourceLevel == ClassFileConstants.JDK14) {
-				skope.problemReporter().recordIsAReservedTypeName(node);
-		}
-	}
-}
-
 /**
  * Check for constructor vs. method with no return type.
  * Answers true if at least one constructor is defined
@@ -731,11 +729,17 @@ public ConstructorDeclaration createDefaultConstructorForRecord(boolean needExpl
 	ConstructorDeclaration constructor = new ConstructorDeclaration(this.compilationResult);
 	constructor.bits |= ASTNode.IsCanonicalConstructor | ASTNode.IsImplicit;
 	constructor.selector = this.name;
-//	constructor.modifiers = this.modifiers & ExtraCompilerModifiers.AccVisibilityMASK;
-	constructor.modifiers = this.modifiers & ClassFileConstants.AccPublic;
-	constructor.modifiers |= ClassFileConstants.AccPublic; // JLS 14 8.10.5
+	constructor.modifiers = this.modifiers & ExtraCompilerModifiers.AccVisibilityMASK;
+//	constructor.modifiers = this.modifiers & ClassFileConstants.AccPublic;
+//	constructor.modifiers |= ClassFileConstants.AccPublic; // JLS 14 8.10.5
 	constructor.arguments = getArgumentsFromComponents(this.recordComponents);
 
+	for (int i = 0, max = constructor.arguments.length; i < max; i++) {
+		if ((constructor.arguments[i].bits & ASTNode.HasTypeAnnotations) != 0) {
+			constructor.bits |= ASTNode.HasTypeAnnotations;
+			break;
+		}
+	}
 	constructor.declarationSourceStart = constructor.sourceStart =
 			constructor.bodyStart = this.sourceStart;
 	constructor.declarationSourceEnd =
@@ -794,7 +798,7 @@ private Argument[] getArgumentsFromComponents(RecordComponent[] comps) {
 	int count = 0;
 	for (RecordComponent comp : comps) {
 		Argument argument = new Argument(comp.name, ((long)comp.sourceStart) << 32 | comp.sourceEnd,
-				comp.type, comp.modifiers);
+				comp.type, 0); // no modifiers allowed for record components - enforce
 		args2[count++] = argument;
 	}
 	return args2;
@@ -998,7 +1002,7 @@ public AbstractMethodDeclaration declarationOf(MethodBinding methodBinding) {
  */
 public RecordComponent declarationOf(RecordComponentBinding recordComponentBinding) {
 	if (recordComponentBinding != null && this.recordComponents != null) {
-		for (int i = 0, max = this.fields.length; i < max; i++) {
+		for (int i = 0, max = this.recordComponents.length; i < max; i++) {
 			RecordComponent recordComponent;
 			if ((recordComponent = this.recordComponents[i]).binding == recordComponentBinding)
 				return recordComponent;
@@ -1054,8 +1058,13 @@ public CompilationUnitDeclaration getCompilationUnitDeclaration() {
 	return null;
 }
 
-/* only for records */
+/**
+ * This is applicable only for records - ideally get the canonical constructor, if not
+ * get a constructor and at the client side tentatively marked as canonical constructor
+ * which gets checked at the binding time. If there are no constructors, then null is returned.
+ **/
 public ConstructorDeclaration getConstructor(Parser parser) {
+	ConstructorDeclaration cd = null;
 	if (this.methods != null) {
 		for (int i = this.methods.length; --i >= 0;) {
 			AbstractMethodDeclaration am;
@@ -1077,17 +1086,19 @@ public ConstructorDeclaration getConstructor(Parser parser) {
 						return ccd;
 					}
 					// now we are looking at a "normal" constructor
-					if (this.recordComponents == null && am.arguments == null)
+					if ((this.recordComponents == null || this.recordComponents.length == 0)
+							&& am.arguments == null)
 						return (ConstructorDeclaration) am;
+					cd = (ConstructorDeclaration) am; // just return the last constructor
 				}
 			}
 		}
 	}
-	/* At this point we can only say that there is high possibility that there is a constructor
-	 * If it is a CCD, then definitely it is there (except for empty one); else we need to check
-	 * the bindings to say that there is a canonical constructor. To take care at binding resolution time.
-	 */
-	return null;
+//	/* At this point we can only say that there is high possibility that there is a constructor
+//	 * If it is a CCD, then definitely it is there (except for empty one); else we need to check
+//	 * the bindings to say that there is a canonical constructor. To take care at binding resolution time.
+//	 */
+	return cd; // the last constructor
 }
 
 /**
@@ -1161,6 +1172,12 @@ public void generateCode(ClassFile enclosingClassFile) {
 			enclosingClassFile.recordInnerClasses(this.binding);
 			classFile.recordInnerClasses(this.binding);
 		}
+		SourceTypeBinding nestHost = this.binding.getNestHost();
+		if (nestHost != null && !TypeBinding.equalsEquals(nestHost, this.binding)) {
+			ClassFile ocf = enclosingClassFile.outerMostEnclosingClassFile();
+			if (ocf != null)
+				ocf.recordNestMember(this.binding);
+		}
 		TypeVariableBinding[] typeVariables = this.binding.typeVariables();
 		for (int i = 0, max = typeVariables.length; i < max; i++) {
 			TypeVariableBinding typeVariableBinding = typeVariables[i];
@@ -1220,7 +1237,7 @@ public void generateCode(ClassFile enclosingClassFile) {
 			}
 		}
 		// generate all synthetic and abstract methods
-		classFile.addSpecialMethods();
+		classFile.addSpecialMethods(this);
 
 		if (this.ignoreFurtherInvestigation) { // trigger problem type generation for code gen errors
 			throw new AbortType(this.scope.referenceCompilationUnit().compilationResult, null);
@@ -1383,7 +1400,10 @@ public boolean hasErrors() {
  *	Common flow analysis for all types
  */
 private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
-	checkYieldUsage();
+	if (CharOperation.equals(this.name, TypeConstants.YIELD)) {
+		this.scope.problemReporter().validateRestrictedKeywords(this.name, this);
+	}
+
 //{ObjectTeams: postponed from resolve() to also catch import usage from late statement generators.
 	if (isRoleFile() && !this.binding.isSynthInterface())
 		if (!this.compilationResult.hasSyntaxError)
@@ -1552,7 +1572,7 @@ private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
 private boolean needToProcess(AbstractMethodDeclaration method) {
 	return    method.hasParsedStatements
 		   // different reasons, why it may be normal for a method to have no statements:
-	       || method.isDefaultConstructor() || method.isClinit() || method.isAbstract()
+	       || method.isDefaultConstructor() || method.isCanonicalConstructor() || method.isClinit() || method.isAbstract()
 	       || method.isCopied;
 }
 
@@ -1589,18 +1609,6 @@ private void mergePrecedences() {
 		PrecedenceBinding.checkDuplicates(this);
 }
 // SH}
-
-private void checkYieldUsage() {
-	long sourceLevel = this.scope.compilerOptions().sourceLevel;
-	if (sourceLevel < ClassFileConstants.JDK14 || this.name == null ||
-			!("yield".equals(new String(this.name)))) //$NON-NLS-1$
-		return;
-	if (sourceLevel >= ClassFileConstants.JDK14) {
-		this.scope.problemReporter().switchExpressionsYieldTypeDeclarationError(this);
-	} else {
-		this.scope.problemReporter().switchExpressionsYieldTypeDeclarationWarning(this);
-	}
-}
 
 private SimpleSetOfCharArray getJUnitMethodSourceValues() {
 	SimpleSetOfCharArray junitMethodSourceValues = new SimpleSetOfCharArray();
@@ -1958,6 +1966,13 @@ public StringBuffer printHeader(int indent, StringBuffer output) {
 		  this.baseclass.print(0,output);
 	}
 //}
+	if (this.permittedTypes != null && this.permittedTypes.length > 0) {
+		output.append(" permits "); //$NON-NLS-1$
+		for (int i = 0; i < this.permittedTypes.length; i++) {
+			if (i > 0) output.append( ", "); //$NON-NLS-1$
+			this.permittedTypes[i].print(0, output);
+		}
+	}
 	return output;
 }
 
@@ -1995,7 +2010,7 @@ public void resolve() {
 				this.scope.problemReporter().varIsReservedTypeName(this);
 			}
 		}
-		TypeDeclaration.checkAndFlagRecordNameErrors(this.name, this, this.scope);
+		this.scope.problemReporter().validateRestrictedKeywords(this.name, this);
 		// resolve annotations and check @Deprecated annotation
 		long annotationTagBits = sourceType.getAnnotationTagBits();
 		if ((annotationTagBits & TagBits.AnnotationDeprecated) == 0
@@ -2011,7 +2026,7 @@ public void resolve() {
 //{ObjectTeams: check @Override annotation:
 		boolean hasOverrideAnnotation = (this.binding.tagBits & TagBits.AnnotationOverride) != 0;
 		if (isSourceRole()) {
-			boolean hasTSuper =    (this.binding.modifiers & ExtraCompilerModifiers.AccOverriding) != 0
+			boolean hasTSuper =    (this.binding.modifiers & ExtraCompilerModifiers.AccOverridingRole) != 0
 								|| this.roleModel.getTSuperRoleBindings().length > 0;
 			if (hasOverrideAnnotation && !hasTSuper)
 				this.scope.problemReporter().roleMustOverride(this);
@@ -2026,6 +2041,7 @@ public void resolve() {
 		boolean needSerialVersion =
 						this.scope.compilerOptions().getSeverity(CompilerOptions.MissingSerialVersion) != ProblemSeverities.Ignore
 						&& sourceType.isClass()
+						&& !sourceType.isRecord()
 						&& sourceType.findSuperTypeOriginatingFrom(TypeIds.T_JavaIoExternalizable, false /*Externalizable is not a class*/) == null
 						&& sourceType.findSuperTypeOriginatingFrom(TypeIds.T_JavaIoSerializable, false /*Serializable is not a class*/) != null;
 
@@ -2120,7 +2136,7 @@ public void resolve() {
 //{ObjectTeams:	should we work at all?
 	    Config config = Config.getConfig();
 	    boolean fieldsAndMethods = config != null && config.verifyMethods;
-	    boolean hasFieldInit = false;
+	    boolean hasFinalFieldInit = false;
 	  if (fieldsAndMethods) {
 // SH}
 		if (this.recordComponents != null) {
@@ -2157,8 +2173,8 @@ public void resolve() {
 						localMaxFieldCount++;
 						lastVisibleFieldID = field.binding.id;
 //{ObjectTeams: has init?
-						if (field.initialization != null)
-							hasFieldInit = true;
+						if (field.initialization != null && field.isFinal())
+							hasFinalFieldInit = true;
 // SH}
 						break;
 
@@ -2172,8 +2188,8 @@ public void resolve() {
 //{ObjectTeams: also count type value parameters into maxFieldCount
 		if (this.typeParameters != null)
 			TypeValueParameter.updateMaxFieldCount(this);
-		if (hasFieldInit && isRole())
-	        WordValueAttribute.addClassFlags(getRoleModel(), IOTConstants.OT_CLASS_HAS_FIELD_INITS);
+		if (hasFinalFieldInit && isRole())
+	        WordValueAttribute.addClassFlags(getRoleModel(), IOTConstants.OT_CLASS_HAS_FINAL_FIELD_INITS);
 	  }
 // SH}
 		if (this.maxFieldCount < localMaxFieldCount) {
@@ -2287,7 +2303,7 @@ public void resolve() {
 				reporter.javadocMissing(this.sourceStart, this.sourceEnd, severity, javadocModifiers);
 			}
 		}
-		updateNestInfo();
+		updateNestHost();
 		FieldDeclaration[] fieldsDecls = this.fields;
 		if (fieldsDecls != null) {
 			for (FieldDeclaration fieldDeclaration : fieldsDecls)
@@ -2475,6 +2491,11 @@ public void traverse(ASTVisitor visitor, CompilationUnitScope unitScope) {
 				for (int i = 0; i < length; i++)
 					this.superInterfaces[i].traverse(visitor, this.scope);
 			}
+			if (this.permittedTypes != null) {
+				int length = this.permittedTypes.length;
+				for (int i = 0; i < length; i++)
+					this.permittedTypes[i].traverse(visitor, this.scope);
+			}
 			if (this.typeParameters != null) {
 				int length = this.typeParameters.length;
 				for (int i = 0; i < length; i++) {
@@ -2543,6 +2564,11 @@ public void traverse(ASTVisitor visitor, BlockScope blockScope) {
 				for (int i = 0; i < length; i++)
 					this.superInterfaces[i].traverse(visitor, this.scope);
 			}
+			if (this.permittedTypes != null) {
+				int length = this.permittedTypes.length;
+				for (int i = 0; i < length; i++)
+					this.permittedTypes[i].traverse(visitor, this.scope);
+			}
 			if (this.typeParameters != null) {
 				int length = this.typeParameters.length;
 				for (int i = 0; i < length; i++) {
@@ -2604,6 +2630,11 @@ public void traverse(ASTVisitor visitor, ClassScope classScope) {
 				int length = this.superInterfaces.length;
 				for (int i = 0; i < length; i++)
 					this.superInterfaces[i].traverse(visitor, this.scope);
+			}
+			if (this.permittedTypes != null) {
+				int length = this.permittedTypes.length;
+				for (int i = 0; i < length; i++)
+					this.permittedTypes[i].traverse(visitor, this.scope);
 			}
 			if (this.typeParameters != null) {
 				int length = this.typeParameters.length;
@@ -2677,13 +2708,12 @@ private SourceTypeBinding findNestHost() {
 	return classScope != null ? classScope.referenceContext.binding : null;
 }
 
-void updateNestInfo() {
+void updateNestHost() {
 	if (this.binding == null)
 		return;
 	SourceTypeBinding nestHost = findNestHost();
 	if (nestHost != null && !this.binding.equals(nestHost)) {// member
 		this.binding.setNestHost(nestHost);
-		nestHost.addNestMember(this.binding);
 	}
 }
 public boolean isPackageInfo() {

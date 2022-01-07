@@ -344,7 +344,7 @@ public team class BundleValidation
 				// from ITypeBinding descend into IMethodMappingBinding, then IMethodBinding (base):
 				for (IBinding binding : bindings) {
 					if (binding instanceof ITypeBinding) {
-						String teamName = ((ITypeBinding) binding).getDeclaringClass().getQualifiedName();
+						String teamName = ((ITypeBinding) binding).getDeclaringClass().getBinaryName();
 						Map<String,Set<String>> perTeamResult = superBasePackagesByTeam.get(teamName);
 						for (IMethodMappingBinding mappingBinding : ((ITypeBinding) binding).getResolvedMethodMappings()) {
 							if (mappingBinding == null) continue;
@@ -617,7 +617,7 @@ public team class BundleValidation
 		String packageName;
 		String export; // extended version with ot-aspect-host attribute
 		public ExportAspectPackageResolution(IMarker marker) {
-			super(marker, AbstractPDEMarkerResolution.CREATE_TYPE, marker.getAttribute("packages", null)); //$NON-NLS-1$
+			super(marker, AbstractPDEMarkerResolution.CREATE_TYPE);
 			this.packageName = marker.getAttribute("package", null); //$NON-NLS-1$
 			this.export = marker.getAttribute("packages", null); //$NON-NLS-1$
 		}

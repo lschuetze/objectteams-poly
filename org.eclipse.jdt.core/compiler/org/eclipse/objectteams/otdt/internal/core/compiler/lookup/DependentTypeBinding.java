@@ -439,7 +439,7 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
     }
 
     @Override
-	public boolean appendReadableValueParameterNames(StringBuffer buf) /*@anchor[,...]*/ {
+	public boolean appendReadableValueParameterNames(StringBuilder buf) /*@anchor[,...]*/ {
     	buf.append('@');
     	buf.append(anchorName());
     	return true;

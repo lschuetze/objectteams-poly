@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2021 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -38,7 +38,13 @@ public class FileBasedHierarchyTest extends FileBasedModelTest
         super(name);
     }
 
-    private ITypeHierarchy createTypeHierarchy(IType focusType, boolean computeSubtypes) throws JavaModelException
+	@Override
+	protected void setUp() throws Exception {
+		this.indexDisabledForTest = false;
+		super.setUp();
+	}
+
+	private ITypeHierarchy createTypeHierarchy(IType focusType, boolean computeSubtypes) throws JavaModelException
     {
     	ITypeHierarchy hierarchy = new TypeHierarchy(focusType, null, focusType.getJavaProject(), computeSubtypes);
 		hierarchy.refresh(new NullProgressMonitor());

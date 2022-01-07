@@ -40,4 +40,9 @@ public class FileBasedUITest extends FileBasedTest {
         return "org.eclipse.objectteams.otdt.ui.tests";
     }
 
+    @Override
+    protected void setUp() throws Exception {
+    	this.indexDisabledForTest = false; // RoFis need search
+    	super.setUp();
+    }
 }

@@ -289,7 +289,7 @@ public team class BaseImportRewriting
 			return base.internalAddImport(fullTypeName, context);
 		}
 		String internalAddImport(String fullTypeName, ImportRewriteContext context) 
-			<- replace String internalAddImport(String fullTypeName, ImportRewriteContext context);
+			<- replace String internalAddImport(String fullTypeName, ImportRewriteContext context, boolean isTypeInUnnamedPackage);
 		
 		callin void markForBaseImport() {
 			try {

@@ -31,7 +31,6 @@ import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 
 /**
  * NEW for OTDT:
@@ -52,7 +51,7 @@ public class ParameterMapping extends Expression {
 		this.direction=direction;
 		this.expression=expression;
 		this.ident=ident;
-		if (direction == TerminalTokens.TokenNameBINDIN) {
+		if (direction == AbstractMethodMappingDeclaration.BindingDirectionIn) {
 			this.sourceStart= ident.sourceStart;
 			this.sourceEnd=   expression.sourceEnd;
 		} else {
@@ -63,7 +62,7 @@ public class ParameterMapping extends Expression {
 
 	@Override
 	public StringBuffer printExpression(int indent, StringBuffer output) {
-		if((this.direction==TerminalTokens.TokenNameBINDIN))// == CharOperation.equals(ident, IOTConstants.RESULT))
+		if((this.direction==AbstractMethodMappingDeclaration.BindingDirectionIn))// == CharOperation.equals(ident, IOTConstants.RESULT))
 		{
 			output.append(this.ident.token);
 			output.append(" <- "); //$NON-NLS-1$

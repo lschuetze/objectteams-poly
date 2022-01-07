@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -83,7 +83,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	public final static int Bit4 = 0x8;					// return type (operator) | first assignment to local (name ref,local decl) | undocumented empty block (block, type and method decl)
 	public final static int Bit5 = 0x10;					// value for return (expression) | has all method bodies (unit) | supertype ref (type ref) | resolved (field decl)| name ref (yield result value)
 	public final static int Bit6 = 0x20;					// depth (name ref, msg) | ignore need cast check (cast expression) | error in signature (method declaration/ initializer) | is recovered (annotation reference)
-	public final static int Bit7 = 0x40;					// depth (name ref, msg) | need runtime checkcast (cast expression) | label used (labelStatement) | needFreeReturn (AbstractMethodDeclaration)
+	public final static int Bit7 = 0x40;					// depth (name ref, msg) | need runtime checkcast (cast expression) | label used (labelStatement) | needFreeReturn (AbstractMethodDeclaration) | Used in Pattern Guard expression (NameReference)
 	public final static int Bit8 = 0x80;					// depth (name ref, msg) | unsafe cast (cast expression) | is default constructor (constructor declaration) | isElseStatementUnreachable (if statement)
 	public final static int Bit9 = 0x100;				// depth (name ref, msg) | operator (operator) | is local type (type decl) | isThenStatementUnreachable (if statement) | can be static
 	public final static int Bit10= 0x200;				// depth (name ref, msg) | operator (operator) | is anonymous type (type decl) | is implicit constructor (constructor)
@@ -160,8 +160,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	public static final int GenerateCheckcast = Bit7;
 	public static final int UnsafeCast = Bit8;
 
-	// for name references (Java 14 addition - Records preview - Bit18)
-	public static final int RestrictiveFlagMASK = Bit1 | Bit2 | Bit3 | Bit18 ;
+	public static final int RestrictiveFlagMASK = Bit1 | Bit2 | Bit3 ;
 
 	// for local decls
 	public static final int IsTypeElided = Bit2;  // type elided lambda argument.
@@ -184,6 +183,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	public static final int DepthSHIFT = 5;	// Bit6 -> Bit13
 	public static final int DepthMASK = Bit6|Bit7|Bit8|Bit9|Bit10|Bit11|Bit12|Bit13; // 8 bits for actual depth value (max. 255)
 	public static final int IsCapturedOuterLocal = Bit20;
+	public static final int IsUsedInPatternGuard = Bit7;
 	public static final int IsSecretYieldValueUsage = Bit5;
 
 	// for statements
@@ -479,7 +479,14 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	public ASTNode concreteStatement() {
 		return this;
 	}
-
+	private void reportPreviewAPI(Scope scope, long modifiers) {
+		if (scope.compilerOptions().enablePreviewFeatures)
+			return;
+		if((modifiers & TagBits.AnnotationPreviewFeature) == TagBits.AnnotationPreviewFeature) {
+			scope.problemReporter().previewAPIUsed(this.sourceStart, this.sourceEnd,
+					(modifiers & TagBits.EssentialAPI) != 0);
+		}
+	}
 	public final boolean isFieldUseDeprecated(FieldBinding field, Scope scope, int filteredBits) {
 		if ((this.bits & ASTNode.InsideJavadoc) == 0			// ignore references inside Javadoc comments
 				&& (filteredBits & IsStrictlyAssigned) == 0 	// ignore write access
@@ -492,6 +499,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 			else
 				field.original().modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
 		}
+		reportPreviewAPI(scope, field.tagBits);
 
 		if ((field.modifiers & ExtraCompilerModifiers.AccRestrictedAccess) != 0) {
 			ModuleBinding module = field.declaringClass.module();
@@ -536,6 +544,9 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	*/
 	public final boolean isMethodUseDeprecated(MethodBinding method, Scope scope,
 			boolean isExplicitUse, InvocationSite invocation) {
+
+		reportPreviewAPI(scope, method.tagBits);
+
 		// ignore references insing Javadoc comments
 		if ((this.bits & ASTNode.InsideJavadoc) == 0 && method.isOrEnclosedByPrivateType() && !scope.isDefinedInMethod(method)) {
 			// ignore cases where method is used from inside itself (e.g. direct recursions)
@@ -623,7 +634,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 			// ignore cases where type is used from inside itself
 			((ReferenceBinding)refType.erasure()).modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
 		}
-
+		reportPreviewAPI(scope, type.extendedTagBits);
 		if (refType.hasRestrictedAccess()) {
 			ModuleBinding module = refType.module();
 			LookupEnvironment env = (module == null) ? scope.environment() : module.environment;
@@ -663,6 +674,16 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		return  ((Expression)this).getBaseclassDecapsulation().isAllowed();
 	}
 // SH}
+
+
+	/**
+	 * Returns whether this node represents a binding of type {@link Binding#TYPE}
+	 *
+	 * @return <code>true</code> if the node represents a {@link Binding#TYPE} binding type.
+	 */
+	public boolean isType() {
+		return false;
+	}
 
 	public abstract StringBuffer print(int indent, StringBuffer output);
 
@@ -716,6 +737,10 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		if ((modifiers & ExtraCompilerModifiers.AccCallin) != 0)
 			output.append("callin "); //$NON-NLS-1$
 // SH}
+		if ((modifiers & ExtraCompilerModifiers.AccNonSealed) != 0)
+			output.append("non-sealed "); //$NON-NLS-1$
+		if ((modifiers & ExtraCompilerModifiers.AccSealed) != 0)
+			output.append("sealed "); //$NON-NLS-1$
 		return output;
 	}
 
@@ -770,6 +795,9 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 					if (lambda.hasErrors() || lambda.hasDescripterProblem) {
 						continue;
 					}
+					// avoid that preliminary local type bindings escape beyond this point:
+					lambda.updateLocalTypesInMethod(candidateMethod);
+					parameterType = InferenceContext18.getParameter(parameters, i, variableArity); // refresh after update
 					if (!lambda.isCompatibleWith(parameterType, scope)) {
 						if (method.isValidBinding() && problemMethod == null) {
 							TypeBinding[] originalArguments = Arrays.copyOf(argumentTypes, argumentTypes.length);
@@ -781,8 +809,6 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 						}
 						continue;
 					}
-					// avoid that preliminary local type bindings escape beyond this point:
-					lambda.updateLocalTypesInMethod(candidateMethod);
 				} else {
 					updatedArgumentType = argument.resolveType(scope);
 				}
@@ -792,6 +818,9 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 						candidateMethod.parameters[i] = updatedArgumentType;
 				}
 			}
+		}
+		if (method.returnType instanceof ReferenceBinding) {
+			scope.referenceCompilationUnit().updateLocalTypesInMethod(method);
 		}
 		if (method instanceof ParameterizedGenericMethodBinding) {
 			InferenceContext18 ic18 = invocation.getInferenceContext((ParameterizedMethodBinding) method);
@@ -942,7 +971,8 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 						LocalVariableBinding local = (LocalVariableBinding) recipient;
 						// Note for JDK>=14, this could be LVB or RCB, hence typecasting to VB
 						long otherLocalTagBits = ((VariableBinding) annotationRecipient).tagBits;
-						local.tagBits = otherLocalTagBits;
+						// Make sure we retain the TagBits.IsArgument bit
+						local.tagBits = otherLocalTagBits | (local.tagBits & TagBits.IsArgument);
 						if ((otherLocalTagBits & TagBits.AnnotationSuppressWarnings) == 0) {
 							// None of the annotations is a SuppressWarnings annotation
 							// need to fill the instances array
@@ -1301,7 +1331,6 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		}
 		// TODO: Null Analysis Address via bug 562478?
 
-		recipientTargetMask |= TagBits.AnnotationForTypeUse;
 		List<AnnotationBinding> relevantAnnotations = new ArrayList<>();
 		Annotation[] filteredAnnotations = ASTNode.getRelevantAnnotations(annotations, recipientTargetMask, relevantAnnotations);
 		AnnotationBinding [] recipientAnnotations = relevantAnnotations.toArray(new AnnotationBinding[relevantAnnotations.size()]);

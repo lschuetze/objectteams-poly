@@ -14,12 +14,16 @@
 package org.eclipse.jdt.internal.core.index;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.search.*;
 import org.eclipse.jdt.internal.compiler.util.HashtableOfObject;
 import org.eclipse.jdt.internal.compiler.util.SimpleSet;
+import org.eclipse.jdt.internal.core.search.indexing.IIndexConstants;
 import org.eclipse.jdt.internal.core.search.indexing.ReadWriteMonitor;
 
 /**
@@ -32,7 +36,7 @@ import org.eclipse.jdt.internal.core.search.indexing.ReadWriteMonitor;
 public class Index {
 
 public String containerPath;
-public ReadWriteMonitor monitor;
+public volatile ReadWriteMonitor monitor;
 
 // Separator to use after the container path
 static final char DEFAULT_SEPARATOR = '/';
@@ -52,7 +56,9 @@ static final int MATCH_RULE_INDEX_MASK =
 	SearchPattern.R_REGEXP_MATCH |
 	SearchPattern.R_CASE_SENSITIVE |
 	SearchPattern.R_CAMELCASE_MATCH |
-	SearchPattern.R_CAMELCASE_SAME_PART_COUNT_MATCH;
+	SearchPattern.R_CAMELCASE_SAME_PART_COUNT_MATCH |
+	SearchPattern.R_SUBSTRING_MATCH |
+	SearchPattern.R_SUBWORD_MATCH;
 
 public static boolean isMatch(char[] pattern, char[] word, int matchRule) {
 	if (pattern == null) return true;
@@ -60,6 +66,17 @@ public static boolean isMatch(char[] pattern, char[] word, int matchRule) {
 	int wordLength = word.length;
 	if (patternLength == 0) return matchRule != SearchPattern.R_EXACT_MATCH;
 	if (wordLength == 0) return (matchRule & SearchPattern.R_PATTERN_MATCH) != 0 && patternLength == 1 && pattern[0] == '*';
+
+	if ((matchRule & SearchPattern.R_SUBSTRING_MATCH) != 0) {
+		if (CharOperation.substringMatch(pattern, word))
+			return true;
+		matchRule &= ~SearchPattern.R_SUBSTRING_MATCH;
+	}
+	if ((matchRule & SearchPattern.R_SUBWORD_MATCH) != 0) {
+		if (CharOperation.subWordMatch(pattern, word))
+			return true;
+		matchRule &= ~SearchPattern.R_SUBWORD_MATCH;
+	}
 
 	// need to mask some bits of pattern rule (bug 79790)
 	switch(matchRule & MATCH_RULE_INDEX_MASK) {
@@ -133,11 +150,16 @@ public boolean hasChanged() {
  * If the key is null then all entries in specified categories are returned.
  */
 public EntryResult[] query(char[][] categories, char[] key, int matchRule) throws IOException {
-	if (this.memoryIndex.shouldMerge() && this.monitor.exitReadEnterWrite()) {
+	ReadWriteMonitor readWriteMonitor = this.monitor;
+	if(readWriteMonitor == null) {
+		// index got deleted since acquired
+		return null;
+	}
+	if (this.memoryIndex.shouldMerge() && readWriteMonitor.exitReadEnterWrite()) {
 		try {
 			save();
 		} finally {
-			this.monitor.exitWriteEnterRead();
+			readWriteMonitor.exitWriteEnterRead();
 		}
 	}
 
@@ -218,5 +240,28 @@ public String toString() {
 public boolean isIndexForJar()
 {
 	return this.separator == JAR_SEPARATOR;
+}
+public List<IndexQualifier> getMetaIndexQualifications() throws IOException {
+	startQuery();
+	try {
+		ArrayList<IndexQualifier> qualifiers = new ArrayList<>();
+		for(char[] category : IIndexConstants.META_INDEX_CATEGORIES) {
+			if (this.monitor == null) {
+				// index got deleted since acquired
+				return Collections.emptyList();
+			}
+			EntryResult[] results = query(new char[][] {category}, null,
+					SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+			if(results != null) {
+				qualifiers.ensureCapacity(results.length); // minimize array resize
+				for (int i = 0; i < results.length; i++) {
+					qualifiers.add(IndexQualifier.qualifier(category, results[i].getWord()));
+				}
+			}
+		}
+		return qualifiers;
+	} finally {
+		stopQuery();
+	}
 }
 }

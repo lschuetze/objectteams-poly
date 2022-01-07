@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedGenericMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.SyntheticMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
@@ -76,6 +77,22 @@ class MethodBinding implements IMethodBinding {
 	@Override
 	public boolean isConstructor() {
 		return this.binding.isConstructor();
+	}
+
+	/**
+	 * @see IMethodBinding#isCompactConstructor()
+	 */
+	@Override
+	public boolean isCompactConstructor() {
+		return this.binding.isCompactConstructor();
+	}
+
+	/**
+	 * @see IMethodBinding#isCanonicalConstructor()
+	 */
+	@Override
+	public boolean isCanonicalConstructor() {
+		return this.binding.isCanonicalConstructor();
 	}
 
 	/**
@@ -210,7 +227,7 @@ class MethodBinding implements IMethodBinding {
 					paramTypes[i] = typeBinding;
 				} else {
 					// log error
-					StringBuffer message = new StringBuffer("Report method binding where a parameter is null:\n");  //$NON-NLS-1$
+					StringBuilder message = new StringBuilder("Report method binding where a parameter is null:\n");  //$NON-NLS-1$
 					message.append(toString());
 					Util.log(new IllegalArgumentException(), message.toString());
 					// report no binding since one or more parameter has no binding
@@ -534,10 +551,21 @@ class MethodBinding implements IMethodBinding {
 	public String toString() {
 		return this.binding.toString();
 	}
-//{ObjectTeams: new query:
+//{ObjectTeams: new queries:
 	@Override
 	public boolean isCopied() {
 		return this.binding.copyInheritanceSrc != null;
+	}
+	@Override
+	public IMethodBinding[] getImplicitlyOverridden() {
+		if (this.binding.overriddenTSupers != null) {
+			IMethodBinding[] result = new IMethodBinding[this.binding.overriddenTSupers.length];
+			for (int i = 0; i < result.length; i++) {
+				result[i] = this.resolver.getMethodBinding(this.binding.overriddenTSupers[i]);
+			}
+			return result;
+		}
+		return null;
 	}
 // SH}
 
@@ -625,5 +653,11 @@ class MethodBinding implements IMethodBinding {
 	@Override
 	public IVariableBinding[] getSyntheticOuterLocals() {
 		return NO_VARIABLE_BINDINGS;
+	}
+
+	@Override
+	public boolean isSyntheticRecordMethod() {
+		return ((getDeclaringClass().isRecord()) &&
+				(this.binding instanceof SyntheticMethodBinding));
 	}
 }

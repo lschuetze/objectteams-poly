@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -119,9 +119,11 @@ public FlowInfo analyseCode(MethodScope initializationScope, FlowContext flowCon
 			&& !this.binding.declaringClass.isRole()
 // SH}
 			&& !this.binding.declaringClass.isStatic()) {
-		initializationScope.problemReporter().unexpectedStaticModifierForField(
-			(SourceTypeBinding) this.binding.declaringClass,
-			this);
+		if (initializationScope.compilerOptions().sourceLevel < ClassFileConstants.JDK16) {
+			initializationScope.problemReporter().unexpectedStaticModifierForField(
+					(SourceTypeBinding) this.binding.declaringClass,
+					this);
+		}
 	}
 
 	if (this.initialization != null) {
@@ -176,20 +178,20 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 	}
 	// The fields escape CodeStream#exitUserScope(), and as a result end PC wouldn't be set.
 	// Set this explicitly (unlike a local declaration)
-	if (this.initialization != null && this.initialization.containsPatternVariable()) {
-		this.initialization.traverse(new ASTVisitor() {
-			@Override
-			public boolean visit(
-		    		InstanceOfExpression instanceOfExpression,
-		    		BlockScope scope) {
-				instanceOfExpression.elementVariable.binding.recordInitializationEndPC(codeStream.position);
-				return true;
-			}
-		}, currentScope);
-	}
+//	if (this.initialization != null && this.initialization.containsPatternVariable()) {
+//		this.initialization.traverse(new ASTVisitor() {
+//			@Override
+//			public boolean visit(
+//		    		InstanceOfExpression instanceOfExpression,
+//		    		BlockScope scope) {
+//				instanceOfExpression.elementVariable.binding.recordInitializationEndPC(codeStream.position);
+//				return true;
+//			}
+//		}, currentScope);
+//	}
 	codeStream.recordPositionsFrom(pc, this.sourceStart);
 }
-public void getAllAnnotationContexts(int targetType, List allAnnotationContexts) {
+public void getAllAnnotationContexts(int targetType, List<AnnotationContext> allAnnotationContexts) {
 	AnnotationCollector collector = new AnnotationCollector(this.type, targetType, allAnnotationContexts);
 	for (int i = 0, max = this.annotations.length; i < max; i++) {
 		Annotation annotation = this.annotations[i];

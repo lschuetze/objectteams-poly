@@ -22,6 +22,8 @@
  **********************************************************************/
 package org.eclipse.jdt.core.dom;
 
+import java.util.Arrays;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
@@ -127,10 +129,19 @@ class MethodMappingBinding implements IMethodMappingBinding
         {
         	MethodBinding[] methodBindings = this.binding._baseMethods;
 			if (methodBindings == null)
-        		return new IMethodBinding[0];
+        		return TypeBinding.NO_METHOD_BINDINGS;
         	this.baseMethods = new IMethodBinding[methodBindings.length];
-        	for (int i = 0; i < methodBindings.length; i++)
-				this.baseMethods[i] = this.resolver.getMethodBinding(methodBindings[i]);
+        	int count = 0;
+        	for (int i = 0; i < methodBindings.length; i++) {
+				IMethodBinding methodBinding = this.resolver.getMethodBinding(methodBindings[i]);
+				if (methodBinding != null)
+					this.baseMethods[count++] = methodBinding;
+			}
+        	if (count < this.baseMethods.length) {
+        		if (count == 0)
+        			this.baseMethods = TypeBinding.NO_METHOD_BINDINGS;
+				this.baseMethods = Arrays.copyOf(this.baseMethods, count);
+			}
         }
 
         return this.baseMethods;

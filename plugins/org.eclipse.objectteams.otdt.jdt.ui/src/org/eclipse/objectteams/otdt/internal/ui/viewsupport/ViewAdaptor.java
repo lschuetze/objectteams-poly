@@ -218,7 +218,7 @@ public team class ViewAdaptor extends JFaceDecapsulator
 		boolean isOverriding(IRoleType roleType) throws JavaModelException {
 			if (!decoratorMgr.getEnabled(OVERRIDING_ROLE_DECORATOR_ID))
 				return false;							 // disabled
-			if ((roleType.getFlags() & ExtraCompilerModifiers.AccOverriding) != 0)
+			if ((roleType.getFlags() & ExtraCompilerModifiers.AccOverridingRole) != 0)
 				return true;							 // stored flag
 			return roleType.getTSuperRoles().length > 0; // need to compute
 		}

@@ -14,10 +14,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.core;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.xml.parsers.DocumentBuilder;
@@ -101,8 +100,7 @@ public class UserLibrary {
 	}
 
 	public static String serialize(IClasspathEntry[] entries, boolean isSystemLibrary) throws IOException {
-		ByteArrayOutputStream s = new ByteArrayOutputStream();
-		OutputStreamWriter writer = new OutputStreamWriter(s, "UTF8"); //$NON-NLS-1$
+		StringWriter writer = new StringWriter();
 		XMLWriter xmlWriter = new XMLWriter(writer, null/*use the workspace line delimiter*/, true/*print XML version*/);
 
 		HashMap library = new HashMap();
@@ -144,7 +142,7 @@ public class UserLibrary {
 		xmlWriter.endTag(TAG_USERLIBRARY, true/*insert tab*/, true/*insert new line*/);
 		writer.flush();
 		writer.close();
-		return s.toString("UTF8");//$NON-NLS-1$
+		return writer.toString();
 	}
 
 	public static UserLibrary createFromString(Reader reader) throws IOException {
@@ -162,7 +160,7 @@ public class UserLibrary {
 			throw new IOException(Messages.file_badFormat);
 		}
 		String version= cpElement.getAttribute(TAG_VERSION);
-		boolean isSystem= Boolean.valueOf(cpElement.getAttribute(TAG_SYSTEMLIBRARY)).booleanValue();
+		boolean isSystem= Boolean.parseBoolean(cpElement.getAttribute(TAG_SYSTEMLIBRARY));
 
 		NodeList list= cpElement.getChildNodes();
 		int length = list.getLength();
@@ -212,7 +210,7 @@ public class UserLibrary {
 	public String toString() {
 		if (this.entries == null)
 			return "null"; //$NON-NLS-1$
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		int length = this.entries.length;
 		for (int i=0; i<length; i++) {
 			buffer.append(this.entries[i].toString()+'\n');

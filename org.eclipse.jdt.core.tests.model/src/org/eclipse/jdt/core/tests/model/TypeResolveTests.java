@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,8 +16,6 @@ package org.eclipse.jdt.core.tests.model;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import junit.framework.Test;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -46,6 +44,8 @@ import org.eclipse.jdt.internal.core.NameLookup;
 import org.eclipse.jdt.internal.core.NameLookup.Answer;
 import org.eclipse.jdt.internal.core.SourceType;
 
+import junit.framework.Test;
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TypeResolveTests extends ModifyingResourceTests {
 	ICompilationUnit cu;
@@ -72,7 +72,7 @@ private String[][] resolveType(String typeName, String sourceTypeName) throws Ja
 	return sourceType.resolveType(typeName);
 }
 protected void assertTypesEqual(String expected, String[][] types) {
-	StringBuffer buffer = new StringBuffer();
+	StringBuilder buffer = new StringBuilder();
 	if(types != null) {
 		for (int i = 0, length = types.length; i < length; i++) {
 			String[] qualifiedName = types[i];
@@ -127,7 +127,7 @@ public void setUpSuite() throws Exception {
 }
 	static {
 //		TESTS_NUMBERS = new int[] { 182, 183 };
-//		TESTS_NAMES = new String[] { "test528818a" };
+//		TESTS_NAMES = new String[] { "testBug575503" };
 	}
 	public static Test suite() {
 		return buildModelTestSuite(TypeResolveTests.class);
@@ -1595,6 +1595,104 @@ public void testBug536387() throws Exception {
 		IType type = (IType) elements[0];
 		String signature= Signature.createTypeSignature(type.getFullyQualifiedName(), true);
 		assertEquals("incorrect type", "Lp.X$NewType;", signature);
+	} finally {
+		deleteProject("P");
+	}
+}
+public void testBug570314() throws Exception{
+	try {
+		createJava16Project("P", new String[] {"src"});
+		String source =   "package p;\n\n" +
+				"public class X {\n" +
+
+				" 	public static void main(String[] args) {\n" +
+				"		enum Y1 {\n" +
+				"				\n" +
+				"				BLEU,\n" +
+				"				BLANC,\n" +
+				"				ROUGE;\n" +
+				"				\n" +
+				"				public static void printValues() {\r\n" +
+				"					for(Y1 y: Y1.values()) {\r\n" +
+				"						System.out.print(y);\r\n" +
+				"					}\r\n" +
+				"				}\r\n" +
+				"				\r\n" +
+				"		}\r\n" +
+				"		Y1.printValues();"	+
+				"	}\n" +
+				"\n" +
+				"}\n";
+		createFolder("/P/src/p");
+		createFile("/P/src/p/X.java", source);
+		waitForAutoBuild();
+
+		ICompilationUnit unit = getCompilationUnit("/P/src/p/X.java");
+		String select = "main";
+		IJavaElement[] elements = unit.codeSelect(source.indexOf(select), select.length());
+		assertEquals("should not be empty", 1, elements.length);
+		IMethod method= (IMethod) elements[0];
+		IJavaElement[] children = method.getChildren();
+		assertEquals("children should not be empty", 1, children.length);
+		IType type = (IType) children[0];
+		String signature= Signature.createTypeSignature(type.getFullyQualifiedName(), true);
+		assertEquals("incorrect type", "Lp.X$Y1;", signature);
+	} finally {
+		deleteProject("P");
+	}
+}
+public void testBug575503() throws Exception{
+	try {
+		createJava16Project("P", new String[] {"src"});
+		String source =   "package p;\n\n" +
+				"public class Ssss {\n" +
+				"	public static void main(String[] args) {\n" +
+				"		new Ssss.Entry(false, new int[0]);\n" +
+    			"	}\n" +
+    			"	record Entry(boolean isHidden, int... indexes) {\n" +
+    			"		Entry(int... indexes) {\n" +
+    			"			this(false, indexes);\n" +
+        		"		}\n" +
+    			"	}\n" +
+				"}\n";
+		createFolder("/P/src/p");
+		createFile("/P/src/p/Ssss.java", source);
+		waitForAutoBuild();
+
+		ICompilationUnit unit = getCompilationUnit("/P/src/p/Ssss.java");
+		String select = "Ssss.Entry";
+		IJavaElement[] elements = unit.codeSelect(source.indexOf(select), select.length());
+		assertEquals("should not be empty", 1, elements.length);
+		IType type = (IType) elements[0];
+		String signature= Signature.createTypeSignature(type.getFullyQualifiedName(), true);
+		assertEquals("incorrect type", "Lp.Ssss$Entry;", signature);
+	} finally {
+		deleteProject("P");
+	}
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=576778
+public void testBug576778() throws Exception {
+	try {
+		createJava11Project("P", new String[] {"src"});
+		String source =    "package p;\n\n"
+				+"public class X {\n"
+				+ "  public static void main(String[] args) {\n"
+				+ "   var runnable = new Runnable() {\n"
+				+ "     public void run() {}\n"
+				+ "   };\n"
+				+ "   runnable.run();\n"
+				+ "  }\n"
+				+ "}\n";
+		createFolder("/P/src/p");
+		createFile("/P/src/p/X.java", source);
+		waitForAutoBuild();
+		ICompilationUnit unit = getCompilationUnit("/P/src/p/X.java");
+		String select = "runnable";
+		IJavaElement[] elements = unit.codeSelect(source.indexOf(select), select.length());
+		assertEquals("should not be empty", 1, elements.length);
+		ILocalVariable variable = (ILocalVariable) elements[0];
+		String signature= variable.getTypeSignature();
+		assertEquals("incorrect type", "Qvar;", signature);
 	} finally {
 		deleteProject("P");
 	}

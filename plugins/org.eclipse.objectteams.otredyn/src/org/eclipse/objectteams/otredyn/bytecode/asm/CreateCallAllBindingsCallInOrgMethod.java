@@ -98,6 +98,8 @@ public class CreateCallAllBindingsCallInOrgMethod extends AbstractTransformableC
 				int startLine = peekFirstLineNumber(method.instructions);
 				if (startLine == -1)
 					startLine = 1;
+				else if (startLine > 1)
+					startLine--;
 				method.instructions.clear();
 				addLineNumber(newInstructions, startLine);
 				generateInvocation(method, args, null, newInstructions);

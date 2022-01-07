@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,10 +10,12 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - adapt to the new index match API
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.search.matching;
 
 import java.io.IOException;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.search.*;
@@ -21,7 +23,7 @@ import org.eclipse.jdt.internal.core.index.Index;
 import org.eclipse.jdt.internal.core.search.IndexQueryRequestor;
 import org.eclipse.jdt.internal.core.search.indexing.IIndexConstants;
 
-public class OrPattern extends SearchPattern implements IIndexConstants {
+public class OrPattern extends SearchPattern implements IIndexConstants, IParallelizable, Cloneable {
 
 	protected SearchPattern[] patterns;
 
@@ -63,6 +65,18 @@ public class OrPattern extends SearchPattern implements IIndexConstants {
 			index.startQuery();
 			for (int i = 0, length = this.patterns.length; i < length; i++)
 				this.patterns[i].findIndexMatches(index, requestor, participant, scope, progressMonitor);
+		} finally {
+			index.stopQuery();
+		}
+	}
+
+	@Override
+	public void findIndexMatches(Index index, IndexQueryRequestor requestor, SearchParticipant participant, IJavaSearchScope scope, boolean resolveDocumentName, IProgressMonitor progressMonitor) throws IOException {
+		// per construction, OR pattern can only be used with a PathCollector (which already gather results using a set)
+		try {
+			index.startQuery();
+			for (int i = 0, length = this.patterns.length; i < length; i++)
+				this.patterns[i].findIndexMatches(index, requestor, participant, scope, resolveDocumentName, progressMonitor);
 		} finally {
 			index.stopQuery();
 		}
@@ -111,12 +125,27 @@ public class OrPattern extends SearchPattern implements IIndexConstants {
 
 	@Override
 	public String toString() {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		buffer.append(this.patterns[0].toString());
 		for (int i = 1, length = this.patterns.length; i < length; i++) {
 			buffer.append("\n| "); //$NON-NLS-1$
 			buffer.append(this.patterns[i].toString());
 		}
 		return buffer.toString();
+	}
+
+	@Override
+	public boolean isParallelSearchSupported() {
+		return Stream.of(this.patterns).allMatch(IParallelizable::isParallelSearchSupported);
+	}
+
+	@Override
+	public SearchPattern clone() throws CloneNotSupportedException {
+		OrPattern pattern = (OrPattern) super.clone();
+		pattern.patterns = this.patterns.clone();
+		for (int i = 0; i < this.patterns.length; i++) {
+			 pattern.patterns[i] =  this.patterns[i].clone();
+		}
+		return pattern;
 	}
 }

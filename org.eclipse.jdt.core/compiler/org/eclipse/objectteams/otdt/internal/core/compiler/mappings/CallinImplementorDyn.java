@@ -143,7 +143,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	{
 		this._role = role;
 		this._roleScope = role.getAst().scope; // we definitely have an AST here
-		this.bindingDirection = TerminalTokens.TokenNameBINDIN;
+		this.bindingDirection = AbstractMethodMappingDeclaration.BindingDirectionIn;
 
 		AbstractMethodMappingDeclaration[] methodMappings =	this._role.getAst().callinCallouts;
 		if(methodMappings == null || methodMappings.length == 0)
@@ -757,7 +757,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				if (needSuperCall) {
 					if (!isReplace)
 						statements.add(gen.caseStatement(null)); // default label
-					char[]   selector;				char[][] argNames;
+					char[]   selector;
+					char[][] argNames;
 					if (isReplace) {
 						selector = OT_CALL_REPLACE;	argNames = REPLACE_ARG_NAMES;
 					} else if (isAfter) {
