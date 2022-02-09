@@ -130,6 +130,7 @@ import org.eclipse.jdt.internal.compiler.problem.ShouldNotImplement;
 import org.eclipse.jdt.internal.compiler.util.Messages;
 import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.ModelElement;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
@@ -214,7 +215,9 @@ public class ClassFile implements TypeConstants, TypeIds {
 	public static final String METAFACTORY_STRING = new String(ConstantPool.METAFACTORY);
 	public static final String BOOTSTRAP_STRING = new String(ConstantPool.BOOTSTRAP);
 	public static final String TYPESWITCH_STRING = new String(ConstantPool.TYPESWITCH);
-	public static final String[] BOOTSTRAP_METHODS = {ALTMETAFACTORY_STRING, METAFACTORY_STRING, BOOTSTRAP_STRING, TYPESWITCH_STRING};
+	public static final String CALLNEXT_STRING = new String(ConstantPool.CALL_NEXT);
+	public static final String[] BOOTSTRAP_METHODS = {ALTMETAFACTORY_STRING, METAFACTORY_STRING, BOOTSTRAP_STRING, TYPESWITCH_STRING,
+			CALLNEXT_STRING};
 
 	/**
 	 * INTERNAL USE-ONLY
@@ -3761,6 +3764,9 @@ public class ClassFile implements TypeConstants, TypeIds {
 				localContentsOffset = addBootStrapRecordEntry(localContentsOffset, (TypeDeclaration) o, fPtr);
 			} else if (o instanceof SwitchStatement) {
 				localContentsOffset = addBootStrapTypeSwitchEntry(localContentsOffset, (SwitchStatement) o, fPtr);
+			} else if (o instanceof CallNextInvokeDynamicExpression) {
+				// TODO Lars
+				localContentsOffset = addBootStrapCallNextEntry(localContentsOffset, (CallNextInvokeDynamicExpression) o, fPtr);
 			}
 		}
 
@@ -3990,6 +3996,66 @@ public class ClassFile implements TypeConstants, TypeIds {
 				this.contents[localContentsOffset++] = (byte) intValIdx;
 			}
 		}
+
+		return localContentsOffset;
+	}
+
+	private int addBootStrapCallNextEntry(int localContentsOffset, CallNextInvokeDynamicExpression callNext, Map<String, Integer> fPtr) {
+		final int contentsEntries = 10;
+		int indexForCallNext = fPtr.get(ClassFile.CALLNEXT_STRING);
+		if(contentsEntries + localContentsOffset >= this.contents.length) {
+			resizeContents(contentsEntries);
+		}
+
+		if(indexForCallNext == 0) {
+			ReferenceBinding objectTeamsCallNextBootstrap = this.referenceBinding.scope.getOrgObjectteamsCallinBoostrap();
+			indexForCallNext = this.constantPool.literalIndexForMethodHandle(ClassFileConstants.MethodHandleRefKindInvokeStatic,
+					objectTeamsCallNextBootstrap, ConstantPool.CALL_NEXT, ConstantPool.CALL_NEXT_BOOTSTRAP_SIGNATURE, false);
+			fPtr.put(ClassFile.CALLNEXT_STRING, indexForCallNext);
+		}
+
+		this.contents[localContentsOffset++] = (byte) (indexForCallNext >> 8);
+		this.contents[localContentsOffset++] = (byte) indexForCallNext;
+
+		// u2 num_bootstrap_arguments
+		this.contents[localContentsOffset++] = 0;
+		this.contents[localContentsOffset++] = (byte) 2;
+
+		// flags
+		int flagsIndex = this.constantPool.literalIndex(0b0); // CALL
+		this.contents[localContentsOffset++] = (byte) (flagsIndex >> 8);
+		this.contents[localContentsOffset++] = (byte) flagsIndex;
+
+		// joinpoint Descriptor
+		final ReferenceBinding declaringRoleClass = callNext.callinMethodBinding.declaringClass;
+		char[] baseClassSelector = null;
+		char[] baseClassSignature = null;
+		char[] returnTypeName = null;
+
+		// Find the callin that we want to generate code for
+		for(CallinCalloutBinding ccb : declaringRoleClass.callinCallouts) {
+			if(ccb._roleMethodBinding.equals(callNext.callinMethodBinding)) {
+				baseClassSelector = ccb._baseMethods[0].selector;
+				baseClassSignature = ccb._baseMethods[0].signature();
+				returnTypeName = ccb._baseMethods[0].returnType.signature();
+				break;
+			}
+		}
+		// TODO Lars: This is a hack; if there is a callin defined but no binding than it wants
+		// to generate the invokedynamic. In this case, the loop will return without a match
+		final String joinpointDesc;
+		if(baseClassSelector == null) {
+			joinpointDesc = "NEVER_EXECUTED"; //$NON-NLS-1$
+		} else {
+			final String baseClassSignatureExt = String.valueOf(baseClassSignature).substring(0, baseClassSignature.length - returnTypeName.length);
+			final String baseClassName = String.valueOf(declaringRoleClass.baseclass.signableName()).replace('.', '/');
+			joinpointDesc = baseClassName + "." + String.valueOf(baseClassSelector) + baseClassSignatureExt;
+			// benchmark/bank/Account.decrease(F)
+		}
+
+		int index = this.constantPool.literalIndex(joinpointDesc);
+		this.contents[localContentsOffset++] = (byte) (index >> 8);
+		this.contents[localContentsOffset++] = (byte) index;
 
 		return localContentsOffset;
 	}
@@ -6321,23 +6387,22 @@ public class ClassFile implements TypeConstants, TypeIds {
 		return this.bootstrapMethods.size() - 1;
 	}
 
-	public int recordBootstrapMethod(CallNextInvokeDynamicExpression reference) {
+	public int recordBootstrapMethod(CallNextInvokeDynamicExpression expression) {
 		if(this.bootstrapMethods == null) {
 			this.bootstrapMethods = new ArrayList<>();
 		}
 
 		for(int i = 0; i < this.bootstrapMethods.size(); i++) {
-			Object expression = this.bootstrapMethods.get(i);
-			if(expression instanceof CallNextInvokeDynamicExpression) {
-				CallNextInvokeDynamicExpression bref = (CallNextInvokeDynamicExpression) expression;
-				if(bref.equals(reference)) {
-					return i;
-				}
+			ASTNode node = this.bootstrapMethods.get(i);
+			if(node instanceof CallNextInvokeDynamicExpression) {
+				CallNextInvokeDynamicExpression bref = (CallNextInvokeDynamicExpression) node;
+				if(bref.equals(expression))
+					return expression.bootstrapMethodNumber = i;
 			}
 		}
 
-		this.bootstrapMethods.add(reference);
-		return this.bootstrapMethods.size() -1;
+		this.bootstrapMethods.add(expression);
+		return expression.bootstrapMethodNumber = this.bootstrapMethods.size() -1;
 	}
 
 	public void reset(/*@Nullable*/SourceTypeBinding typeBinding, CompilerOptions options) {

@@ -8,6 +8,7 @@ public class CallNextInvokeDynamicExpression extends Expression {
 	public BaseReference base;
 	public MethodBinding callinMethodBinding;
 	public MethodBinding codegenBinding;
+	public int bootstrapMethodNumber;
 
 	public CallNextInvokeDynamicExpression(BaseReference base, MethodBinding binding, MethodBinding codegenBinding) {
 		this.base = base;

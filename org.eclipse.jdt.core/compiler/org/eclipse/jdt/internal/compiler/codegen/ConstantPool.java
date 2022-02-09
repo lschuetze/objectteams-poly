@@ -315,6 +315,10 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 	public static final char[] TYPESWITCH = "typeSwitch".toCharArray(); //$NON-NLS-1$
 	public static final char[] JAVA_LANG_RUNTIME_SWITCHBOOTSTRAPS_TYPESWITCH_SIGNATURE = "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;".toCharArray(); //$NON-NLS-1$
 
+	//TODO Lars: Invokedynamic Call Next OTJ support
+	public static final char[] CALL_NEXT = "callNext".toCharArray(); //$NON-NLS-1$
+	public static final char[] CALL_NEXT_BOOTSTRAP_SIGNATURE = "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;ILjava/lang/String;)Ljava/lang/invoke/CallSite;".toCharArray(); //$NON-NLS-1$
+
 	/**
 	 * ConstantPool constructor comment.
 	 */
